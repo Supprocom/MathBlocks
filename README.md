@@ -4,9 +4,6 @@ MathBlocks is a deterministic, typed computation-graph runtime for parallel CPU
 and CUDA execution. It builds reusable formulas from versioned operations and
 typed values.
 
-Source repository:
-[Supprocom/MathBlocks](https://github.com/Supprocom/MathBlocks).
-
 ## Contract model
 
 Each block is pure and input-independent. A block receives typed values and
@@ -72,24 +69,15 @@ contracts and are not universal latency guarantees.
 Results depend on hardware, input shape, operating-system scheduling,
 percentile, and measurement method.
 
-## Scope
-
-MathBlocks is not a symbolic algebra system, automatic-differentiation
-framework, or universal BLAS replacement. It does not derive formulas, compute
-gradients, or replace all linear algebra libraries.
-
-Use MathBlocks when versioned typed graphs and exact CPU/CUDA parity are the
-required contract.
-
 ## Source-only repository
 
 This Git repository contains source text and project metadata only. It does not
 contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
 
-Get MathBlocks version `0.1.0` from NuGet.org with this command:
+Get MathBlocks version `0.1.1` from NuGet.org with this command:
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.1.0
+dotnet add package Supprocom.MathBlocks --version 0.1.1
 ```
 
 The package declares three external native-acquisition dependencies. This
