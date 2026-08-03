@@ -333,6 +333,225 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Resident_search_resolves_typed_overloads_for_CPU_and_GPU_objectives()
+    {
+        RequireCuda();
+        var scalar = MathBlockType.Scalar();
+        var length = MathBlockType.Scalar(MathBlockUnit.Basis0);
+        var operations = new[]
+        {
+            new MathBlockProgramPopulationOperation(
+                "scalar.multiply",
+                1,
+                [scalar, length],
+                length,
+                deterministicCost: 2),
+            new MathBlockProgramPopulationOperation(
+                "scalar.multiply",
+                1,
+                [length, scalar],
+                length,
+                deterministicCost: 11)
+        };
+        var terminals = new[]
+        {
+            new MathBlockProgramPopulationTerminal(
+                "coefficient",
+                scalar,
+                MathBlockValue.Scalar(2d)),
+            new MathBlockProgramPopulationTerminal(
+                "short-length",
+                length,
+                MathBlockValue.Scalar(3d, MathBlockUnit.Basis0)),
+            new MathBlockProgramPopulationTerminal(
+                "long-length",
+                length,
+                MathBlockValue.Scalar(4d, MathBlockUnit.Basis0))
+        };
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(operations, length),
+            terminals,
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 1)],
+            proposalsPerCycle: 2,
+            fingerprintCapacity: 32);
+        var terminalNodes = terminals
+            .Select((terminal, index) =>
+                MathBlockProgramCandidateNode.Terminal(index, terminal.Identifier, terminal.Type))
+            .ToArray();
+        var coefficientFirst = new MathBlockProgramStructure(
+            0,
+            null,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                .. terminalNodes,
+                MathBlockProgramCandidateNode.Operation("scalar.multiply", 1, length, 0, 1)
+            ]);
+        var lengthFirst = new MathBlockProgramStructure(
+            1,
+            null,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                .. terminalNodes,
+                MathBlockProgramCandidateNode.Operation("scalar.multiply", 1, length, 2, 0)
+            ]);
+        var objectiveBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = objectiveBuilder.Input("candidate", length);
+        var objectiveProgram = objectiveBuilder.Output("value", candidate).Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveProgram,
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [
+                new MathBlockProgramPopulationObjective(
+                    "value",
+                    "value",
+                    MathBlockProgramPopulationObjectiveDirection.Maximize),
+                MathBlockProgramPopulationObjective.Intrinsic(
+                    "cost",
+                    MathBlockProgramPopulationIntrinsicObjectiveIdentities.DeterministicExecutionCost,
+                    MathBlockProgramPopulationObjectiveDirection.Minimize)
+            ]);
+        var definition = new MathBlockProgramPopulationSearchDefinition(
+            population,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(1, 1, 0, 0, 0, 53),
+            new MathBlockProgramPopulationSelectionPolicy(4, 8),
+            new MathBlockProgramPopulationQualityDiversityPolicy(
+                "value",
+                [new MathBlockProgramPopulationQualityDiversityDimension("cost", 0, 20, 4)]),
+            new MathBlockProgramPopulationSearchEnvelope(64 * 1024 * 1024, 16 * 1024 * 1024),
+            new MathBlockProgramPopulationValidityPolicy([1]),
+            initialPrograms: [coefficientFirst, lengthFirst]);
+
+        Assert.Equal([6d, 2d], definition.EvaluateObjectives(coefficientFirst));
+        Assert.Equal([8d, 11d], definition.EvaluateObjectives(lengthFirst));
+
+        using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition);
+        var result = compiled.ExecuteCycle();
+        var selected = result.AcceptedState.SelectionEntries.ToDictionary(
+            entry => entry.StructuralFingerprint,
+            StringComparer.Ordinal);
+
+        Assert.Equal(2, selected.Count);
+        Assert.Equal([6d, 2d], selected[coefficientFirst.StructuralFingerprint].Objectives);
+        Assert.Equal([8d, 11d], selected[lengthFirst.StructuralFingerprint].Objectives);
+        Assert.Equal(1, compiled.ImmutableUploadCount);
+        Assert.Equal(1, compiled.GraphLaunchCount);
+        Assert.Equal(1, compiled.SynchronizationCount);
+        Assert.Equal(1, compiled.DownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+    }
+
+    [Fact]
+    public void Expanded_terminal_refresh_restores_structural_and_semantic_deduplication()
+    {
+        RequireCuda();
+        var scalar = MathBlockType.Scalar();
+        var operation = new MathBlockProgramPopulationOperation(
+            "scalar.absolute",
+            1,
+            [scalar],
+            scalar);
+        var initialPopulation = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar([operation], scalar),
+            [new MathBlockProgramPopulationTerminal("first", scalar, MathBlockValue.Scalar(-2d))],
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 1)],
+            proposalsPerCycle: 1,
+            fingerprintCapacity: 4);
+        var objectiveBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = objectiveBuilder.Input("candidate", scalar);
+        var objectiveProgram = objectiveBuilder.Output("value", candidate).Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveProgram,
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "value",
+                "value",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        var selection = new MathBlockProgramPopulationSelectionPolicy(4, 8);
+        var quality = new MathBlockProgramPopulationQualityDiversityPolicy(
+            "value",
+            [new MathBlockProgramPopulationQualityDiversityDimension("value", 0, 4, 4)]);
+        var envelope = new MathBlockProgramPopulationSearchEnvelope(
+            64 * 1024 * 1024,
+            16 * 1024 * 1024);
+        var validity = new MathBlockProgramPopulationValidityPolicy([1]);
+        var initialDefinition = new MathBlockProgramPopulationSearchDefinition(
+            initialPopulation,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(1, 1, 0, 0, 0, 61),
+            selection,
+            quality,
+            envelope,
+            validity);
+        using var initialCompiled = new MathBlocksGPUWorker().CompilePopulationSearch(initialDefinition);
+        var initial = initialCompiled.ExecuteCycle();
+
+        var expandedPopulation = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar([operation], scalar),
+            [
+                new MathBlockProgramPopulationTerminal("first", scalar, MathBlockValue.Scalar(-2d)),
+                new MathBlockProgramPopulationTerminal("second", scalar, MathBlockValue.Scalar(-2d))
+            ],
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 1)],
+            proposalsPerCycle: 3,
+            fingerprintCapacity: 8);
+        var expandedDefinition = new MathBlockProgramPopulationSearchDefinition(
+            expandedPopulation,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(3, 2, 0, 0, 1, 61),
+            selection,
+            quality,
+            envelope,
+            validity);
+        var transition = expandedDefinition.CreateTransitionState(
+            initialDefinition,
+            initial.AcceptedState);
+        var refreshedFingerprint = transition.RefreshPrograms.Single().StructuralFingerprint;
+        using var resumed = new MathBlocksGPUWorker().CompilePopulationSearch(
+            expandedDefinition.WithAcceptedState(transition));
+
+        var result = resumed.ExecuteCycle();
+
+        Assert.Equal(2, result.Trials.Count);
+        Assert.Contains(
+            result.Trials,
+            trial => trial.Status == MathBlockProgramPopulationTrialStatus.StructuralDuplicate);
+        Assert.Contains(
+            result.Trials,
+            trial => trial.Status == MathBlockProgramPopulationTrialStatus.SemanticDuplicate);
+        Assert.Equal(
+            initial.AcceptedState.StructuralDuplicateCount + 1,
+            result.AcceptedState.StructuralDuplicateCount);
+        Assert.Equal(
+            initial.AcceptedState.SemanticDuplicateCount + 1,
+            result.AcceptedState.SemanticDuplicateCount);
+        Assert.Equal(2, result.AcceptedState.StructuralFingerprints.Count);
+        Assert.Single(result.AcceptedState.SemanticFingerprints);
+        Assert.Contains(refreshedFingerprint, result.AcceptedState.StructuralFingerprints);
+        Assert.Single(result.AcceptedState.SelectionEntries);
+        Assert.Single(result.AcceptedState.QualityDiversityEntries);
+        Assert.Equal(
+            refreshedFingerprint,
+            result.AcceptedState.SelectionEntries.Single().StructuralFingerprint);
+        Assert.Equal(
+            refreshedFingerprint,
+            result.AcceptedState.QualityDiversityEntries.Single().StructuralFingerprint);
+        Assert.Equal(1, resumed.ImmutableUploadCount);
+        Assert.Equal(0, resumed.LaterImmutableUploadCount);
+        Assert.Equal(1, resumed.GraphLaunchCount);
+        Assert.Equal(1, resumed.SynchronizationCount);
+        Assert.Equal(1, resumed.DownloadCount);
+        Assert.Equal(0, resumed.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, resumed.CpuNodeDispatchCount);
+    }
+
+    [Fact]
     public void Resident_search_dovetails_into_an_expanded_graph_band()
     {
         RequireCuda();

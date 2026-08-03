@@ -524,7 +524,8 @@ public sealed class MathBlockProgramPopulationSearchDefinition
                 if (lookbacks[operand] > maximumLookback)
                     maximumLookback = lookbacks[operand];
             lookbacks[nodeIndex] = maximumLookback;
-            deterministicCost = checked(deterministicCost + FindOperation(node).DeterministicCost);
+            deterministicCost = checked(
+                deterministicCost + FindOperation(node, program.Nodes).DeterministicCost);
         }
         var output = Population.Evaluate(program);
         MathBlockValue? validityMask = null;
@@ -800,7 +801,9 @@ public sealed class MathBlockProgramPopulationSearchDefinition
     private static bool TypesAreCompatible(MathBlockType previous, MathBlockType current) =>
         current.Accepts(previous) || previous.Accepts(current);
 
-    private MathBlockProgramPopulationOperation FindOperation(MathBlockProgramCandidateNode node)
+    private MathBlockProgramPopulationOperation FindOperation(
+        MathBlockProgramCandidateNode node,
+        IReadOnlyList<MathBlockProgramCandidateNode> programNodes)
     {
         MathBlockProgramPopulationOperation? match = null;
         foreach (var operation in Population.Grammar.Operations)
@@ -812,6 +815,19 @@ public sealed class MathBlockProgramPopulationSearchDefinition
             {
                 continue;
             }
+            var inputTypesMatch = true;
+            for (var input = 0; input < operation.InputTypes.Count; input++)
+            {
+                if (operation.InputTypes[input] ==
+                    programNodes[node.OperandIndexes[input]].Type)
+                {
+                    continue;
+                }
+                inputTypesMatch = false;
+                break;
+            }
+            if (!inputTypesMatch)
+                continue;
             if (match is not null)
                 throw new InvalidOperationException("A program operation is ambiguous.");
             match = operation;

@@ -1696,6 +1696,30 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 MbpHash structural;
                 structural.first = mbp_read_ull(arena, refresh_entry + 48);
                 structural.second = mbp_read_ull(arena, refresh_entry + 56);
+                if (!mbp_contains_hash(
+                        arena,
+                        working_structural_offset,
+                        structural_count,
+                        structural))
+                {
+                    if (structural_count >= fingerprint_capacity)
+                    {
+                        mbp_fail(arena, compact_offset, 1);
+                        return;
+                    }
+                    mbp_write_hash(
+                        arena,
+                        working_structural_offset,
+                        structural_count,
+                        structural);
+                    mbp_write_hash(
+                        arena,
+                        compact_structural_offset,
+                        new_structural_count,
+                        structural);
+                    structural_count++;
+                    new_structural_count++;
+                }
                 mbp_prepare_entry(
                     arena,
                     candidate_entry,
@@ -1721,6 +1745,30 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                     maximum_lookback);
                 mbp_write_ull(arena, candidate_entry + 64, semantic.first);
                 mbp_write_ull(arena, candidate_entry + 72, semantic.second);
+                if (!mbp_contains_hash(
+                        arena,
+                        working_semantic_offset,
+                        semantic_count,
+                        semantic))
+                {
+                    if (semantic_count >= fingerprint_capacity)
+                    {
+                        mbp_fail(arena, compact_offset, 2);
+                        return;
+                    }
+                    mbp_write_hash(
+                        arena,
+                        working_semantic_offset,
+                        semantic_count,
+                        semantic);
+                    mbp_write_hash(
+                        arena,
+                        compact_semantic_offset,
+                        new_semantic_count,
+                        semantic);
+                    semantic_count++;
+                    new_semantic_count++;
+                }
                 if (!mbp_execute_objectives(
                         arena,
                         objective_node_offset,
