@@ -1,0 +1,127 @@
+# MathBlocks
+
+MathBlocks is a deterministic, typed computation-graph runtime for parallel CPU
+and CUDA execution. It builds reusable formulas from versioned operations and
+typed values.
+
+## Contract model
+
+Each block is pure and input-independent. A block receives typed values and
+does not depend on their domain meaning.
+
+Formula builders select each operation by identifier and version. Unknown
+versions fail before execution.
+
+Programs form directed acyclic graphs (DAGs). The CPU worker runs independent
+nodes in each graph level in parallel.
+
+CPU and GPU code stays in the single `Supprocom.MathBlocks` production
+assembly. `Supprocom.MathBlocks.Gpu` is only a namespace in that assembly.
+
+The exact parity policy requires each GPU block to match its CPU regression
+result. The comparison includes value data, shape, type, unit, and invalid
+state.
+
+Each block folder owns Definition, CPU, GPU, and Tests files. The catalog
+contains 337 block folders.
+
+## Resident CUDA execution
+
+CUDA compilation creates one resident CUDA graph for each compiled program.
+The CUDA path has a one-upload, one-resident-CUDA-graph, one-download execution
+contract.
+
+Callers can queue resident replays before one synchronization and output read.
+The compiled program serializes atomic state changes, which keeps concurrent
+calls safe.
+
+## Geometry example
+
+This program calculates the area of a rectangle with a versioned scalar block.
+
+```csharp
+using Supprocom.MathBlocks;
+
+var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+var width = builder.Input("width", MathBlockType.Scalar());
+var height = builder.Input("height", MathBlockType.Scalar());
+var area = builder.Apply("scalar.multiply", inputs: [width, height]);
+var program = builder.Output("area", area).Build();
+
+var output = program.Evaluate(new Dictionary<string, MathBlockValue>
+{
+    ["width"] = MathBlockValue.Scalar(6d),
+    ["height"] = MathBlockValue.Scalar(4d)
+});
+
+Console.WriteLine(output["area"].AsScalar());
+```
+
+## Performance contract
+
+Each block has a sub-millisecond contract target on its contract shape. The CPU
+gate measures warm p95 latency. The GPU block gate measures warm median resident
+latency.
+
+The resident formula gate measures warm p99 latency. These gates are test
+contracts and are not universal latency guarantees.
+
+Results depend on hardware, input shape, operating-system scheduling,
+percentile, and measurement method.
+
+## Scope
+
+MathBlocks is not a symbolic algebra system, automatic-differentiation
+framework, or universal BLAS replacement. It does not derive formulas, compute
+gradients, or replace all linear algebra libraries.
+
+Use MathBlocks when versioned typed graphs and exact CPU/CUDA parity are the
+required contract.
+
+## Source-only repository
+
+This Git repository contains source text and project metadata only. It does not
+contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
+
+The project files identify the required NuGet packages. `dotnet restore`
+downloads these packages from NuGet into the user's global package cache.
+MathBlocks does not copy these packages into Git.
+
+Install the .NET 10 SDK before you restore the projects. Install a compatible
+NVIDIA driver before you run CUDA code.
+
+On Windows, NuGet gets `libtorch-cuda-12.8-win-x64-part1` 2.10.0 and
+`libtorch-cuda-12.8-win-x64-part8` 2.10.0. On Linux, NuGet gets
+`TorchSharp-cuda-linux` 0.107.0 and its declared dependencies.
+
+Use this command to get the declared packages:
+
+```text
+dotnet restore Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj
+```
+
+NuGet keeps downloaded packages outside this repository. The build can copy
+runtime assets into ignored output directories. Do not commit or redistribute
+those output directories.
+
+Review and accept each third-party license before you use its package. See
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the recorded identities.
+
+## Build and test
+
+MathBlocks targets .NET 10. CUDA tests require a compatible NVIDIA GPU and
+driver.
+
+```text
+dotnet build Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj --configuration Release
+dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj --configuration Release
+```
+
+## License
+
+MathBlocks is licensed under GNU Affero General Public License version 3 only.
+The SPDX expression is `AGPL-3.0-only`.
+
+The AGPL does not change third-party licenses for CUDA, TorchSharp, LibTorch, or
+test packages. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the
+dependency audit.

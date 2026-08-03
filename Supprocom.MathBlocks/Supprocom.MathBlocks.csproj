@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Supprocom.MathBlocks</AssemblyName>
+    <RootNamespace>Supprocom.MathBlocks</RootNamespace>
+    <PackageId>Supprocom.MathBlocks</PackageId>
+    <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('win')) Or ($([MSBuild]::IsOSPlatform('Windows')) And '$(RuntimeIdentifier)' == '')">
+    <PackageReference Include="libtorch-cuda-12.8-win-x64-part1" Version="2.10.0" />
+    <PackageReference Include="libtorch-cuda-12.8-win-x64-part8" Version="2.10.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('linux')) Or ($([MSBuild]::IsOSPlatform('Linux')) And '$(RuntimeIdentifier)' == '')">
+    <PackageReference Include="TorchSharp-cuda-linux" Version="0.107.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Blocks\**\*.Tests.cs" />
+  </ItemGroup>
+
+</Project>
