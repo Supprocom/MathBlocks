@@ -268,6 +268,9 @@ internal static class MathBlocksCudaNative
     [DllImport("nvcuda.dll", EntryPoint = "cuMemFree_v2", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int cuMemFree(ulong devicePointer);
 
+    [DllImport("nvcuda.dll", EntryPoint = "cuMemcpyHtoD_v2", CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int cuMemcpyHtoD(ulong destination, IntPtr source, UIntPtr bytes);
+
     [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
     private static extern int cuMemHostAlloc(out IntPtr pointer, UIntPtr bytes, uint flags);
 

@@ -7,6 +7,8 @@ public sealed class MathBlocksGPUWorker
     public static bool IsAvailable => MathBlocksCudaNative.IsAvailable();
     public static IReadOnlyCollection<string> SupportedBlockIdentities =>
         MathBlocksGpuKernelModule.SupportedBlockIdentities;
+    public static IReadOnlyCollection<string> SupportedPopulationOperationIdentities =>
+        MathBlockProgramPopulationGpuOperations.SupportedIdentities;
 
     public MathBlocksGPUProgram Compile(
         MathBlockProgram program,
@@ -14,6 +16,13 @@ public sealed class MathBlocksGPUWorker
     {
         ArgumentNullException.ThrowIfNull(program);
         return MathBlocksGPUProgram.Create(program, prototypeInputs);
+    }
+
+    public MathBlocksGPUProgramPopulation CompilePopulation(
+        MathBlockProgramPopulationDefinition definition)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+        return MathBlocksGPUProgramPopulation.Create(definition);
     }
 }
 

@@ -35,6 +35,39 @@ Callers can queue resident replays before one synchronization and output read.
 The compiled program serializes atomic state changes, which keeps concurrent
 calls safe.
 
+## Resident typed program populations
+
+MathBlocks can compile an immutable typed grammar into one resident CUDA
+program population. The definition includes typed terminals, exact scalar
+constant bits, bounded resource bands, and an optional accepted state.
+
+Each candidate is a typed DAG. Its operation nodes contain an operation
+identifier, a version, and backward operand indexes.
+
+The first compile performs one initial upload. Each later cycle uses one graph
+launch, one synchronization, and one compact download.
+
+Each cycle performs deterministic enumeration, type validation, candidate
+execution, and exact-bit semantic fingerprinting on the GPU. Immutable terminal
+values remain resident between cycles.
+
+Typed vector terminals can contain caller-supplied numeric objective arrays.
+The runtime does not assign domain meaning to these arrays.
+
+The candidate and state formats do not depend on enumeration. Later resident
+strategies can use device-side mutation, typed crossover, and random immigrants
+without changing these formats.
+
+Accepted state records the exact next proposal cursor and both fingerprint
+sets. Exported state has a checksum and an exact definition identity.
+
+An incompatible state fails before CUDA execution. An unsuccessful cycle does
+not replace the last accepted state.
+
+Instrumentation reports graph instances, uploads, launches,
+synchronizations, downloads, resident bytes, duplicate counts, evaluated
+programs, and the accepted cursor.
+
 ## Geometry example
 
 This program calculates the area of a rectangle with a versioned scalar block.
@@ -74,10 +107,10 @@ percentile, and measurement method.
 This Git repository contains source text and project metadata only. It does not
 contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
 
-Get MathBlocks version `0.1.2` from NuGet.org with this command:
+Get MathBlocks version `0.1.3` from NuGet.org with this command:
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.1.2
+dotnet add package Supprocom.MathBlocks --version 0.1.3
 ```
 
 The package declares three external native-acquisition dependencies. This
