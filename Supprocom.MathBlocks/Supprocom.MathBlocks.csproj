@@ -4,24 +4,85 @@
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>Supprocom.MathBlocks</AssemblyName>
     <RootNamespace>Supprocom.MathBlocks</RootNamespace>
+    <IsPackable>true</IsPackable>
     <PackageId>Supprocom.MathBlocks</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Supprocom</Authors>
+    <Company>Supprocom</Company>
+    <Copyright>Copyright (C) 2026 mkn8rn</Copyright>
+    <Description>Deterministic typed computation graphs for parallel CPU and CUDA execution with versioned operations, exact parity, and resident graph replay.</Description>
+    <PackageDescription>Deterministic typed computation graphs for parallel CPU and CUDA execution with versioned operations, exact parity, and resident graph replay.</PackageDescription>
     <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Supprocom/MathBlocks</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Supprocom/MathBlocks</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>mathematics;computation-graph;dag;parallel;cpu;cuda;gpu;deterministic;numerics</PackageTags>
+    <PackageReleaseNotes>Initial release of the deterministic CPU and CUDA computation-graph runtime.</PackageReleaseNotes>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <DebugType>portable</DebugType>
+    <SourceRevisionId Condition="'$(RepositoryCommit)' != ''">$(RepositoryCommit)</SourceRevisionId>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <ItemGroup Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('win')) Or ($([MSBuild]::IsOSPlatform('Windows')) And '$(RuntimeIdentifier)' == '')">
-    <PackageReference Include="libtorch-cuda-12.8-win-x64-part1" Version="2.10.0" />
-    <PackageReference Include="libtorch-cuda-12.8-win-x64-part8" Version="2.10.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('linux')) Or ($([MSBuild]::IsOSPlatform('Linux')) And '$(RuntimeIdentifier)' == '')">
-    <PackageReference Include="TorchSharp-cuda-linux" Version="0.107.0" />
+  <ItemGroup>
+    <PackageReference Include="libtorch-cuda-12.8-win-x64-part1" Version="[2.10.0]" />
+    <PackageReference Include="libtorch-cuda-12.8-win-x64-part8" Version="[2.10.0]" />
+    <PackageReference Include="TorchSharp-cuda-linux" Version="[0.107.0]" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="Blocks\**\*.Tests.cs" />
+    <None Include="..\LICENSE.md" Pack="true" PackagePath="LICENSE.md" />
+    <None Include="..\THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="THIRD-PARTY-NOTICES.md" />
+    <AssemblyMetadata Include="RepositoryCommit" Value="$(RepositoryCommit)" Condition="'$(RepositoryCommit)' != ''" />
   </ItemGroup>
+
+  <UsingTask TaskName="GenerateExactCommitReadme"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <SourcePath ParameterType="System.String" Required="true" />
+      <DestinationPath ParameterType="System.String" Required="true" />
+      <SourceLink ParameterType="System.String" Required="true" />
+      <ExactLink ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Text" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        var text = File.ReadAllText(SourcePath);
+        if (text.IndexOf(SourceLink, StringComparison.Ordinal) < 0)
+        {
+            Log.LogError("The tracked README does not contain the repository link.");
+        }
+        else
+        {
+            var directory = Path.GetDirectoryName(DestinationPath);
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
+            var generated = text.Replace(SourceLink, ExactLink);
+            File.WriteAllText(DestinationPath, generated, new UTF8Encoding(false));
+        }
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="GeneratePackageReadme" BeforeTargets="_IntermediatePack">
+    <Error Condition="'$(RepositoryCommit)' == ''" Text="RepositoryCommit is required for package creation." />
+    <Error Condition="'$(RepositoryBranch)' == ''" Text="RepositoryBranch is required for package creation." />
+    <GenerateExactCommitReadme
+      SourcePath="$(MSBuildProjectDirectory)\..\README.md"
+      DestinationPath="$(IntermediateOutputPath)README.package.md"
+      SourceLink="[Supprocom/MathBlocks](https://github.com/Supprocom/MathBlocks)"
+      ExactLink="[Supprocom/MathBlocks](https://github.com/Supprocom/MathBlocks/tree/$(RepositoryCommit))" />
+    <ItemGroup>
+      <None Include="$(IntermediateOutputPath)README.package.md" Pack="true" PackagePath="README.md" />
+    </ItemGroup>
+  </Target>
 
 </Project>

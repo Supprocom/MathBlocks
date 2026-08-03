@@ -20,14 +20,19 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Empty(document.Descendants("ProjectReference"));
         Assert.Equal(
             [
-                "TorchSharp-cuda-linux@0.107.0",
-                "libtorch-cuda-12.8-win-x64-part1@2.10.0",
-                "libtorch-cuda-12.8-win-x64-part8@2.10.0"
+                "TorchSharp-cuda-linux@[0.107.0]",
+                "libtorch-cuda-12.8-win-x64-part1@[2.10.0]",
+                "libtorch-cuda-12.8-win-x64-part8@[2.10.0]"
             ],
             document.Descendants("PackageReference")
                 .Select(reference =>
                     $"{reference.Attribute("Include")!.Value}@{reference.Attribute("Version")!.Value}")
                 .OrderBy(value => value, StringComparer.Ordinal));
+        Assert.All(document.Descendants("PackageReference"), reference =>
+        {
+            Assert.Null(reference.Attribute("Condition"));
+            Assert.Null(reference.Parent!.Attribute("Condition"));
+        });
         Assert.All(typeof(MathBlockCatalog).Assembly.GetReferencedAssemblies(), reference =>
             Assert.StartsWith("System", reference.Name, StringComparison.Ordinal));
     }

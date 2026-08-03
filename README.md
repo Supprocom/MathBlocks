@@ -4,6 +4,9 @@ MathBlocks is a deterministic, typed computation-graph runtime for parallel CPU
 and CUDA execution. It builds reusable formulas from versioned operations and
 typed values.
 
+Source repository:
+[Supprocom/MathBlocks](https://github.com/Supprocom/MathBlocks).
+
 ## Contract model
 
 Each block is pure and input-independent. A block receives typed values and
@@ -83,16 +86,27 @@ required contract.
 This Git repository contains source text and project metadata only. It does not
 contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
 
-The project files identify the required NuGet packages. `dotnet restore`
-downloads these packages from NuGet into the user's global package cache.
-MathBlocks does not copy these packages into Git.
+Get MathBlocks version `0.1.0` from NuGet.org with this command:
+
+```text
+dotnet add package Supprocom.MathBlocks --version 0.1.0
+```
+
+The package declares three external native-acquisition dependencies. This
+dependency graph is the same on all pack hosts.
 
 Install the .NET 10 SDK before you restore the projects. Install a compatible
 NVIDIA driver before you run CUDA code.
 
-On Windows, NuGet gets `libtorch-cuda-12.8-win-x64-part1` 2.10.0 and
-`libtorch-cuda-12.8-win-x64-part8` 2.10.0. On Linux, NuGet gets
-`TorchSharp-cuda-linux` 0.107.0 and its declared dependencies.
+Windows CUDA execution requires x64 Windows and
+`libtorch-cuda-12.8-win-x64-part1` 2.10.0. It also requires
+`libtorch-cuda-12.8-win-x64-part8` 2.10.0.
+
+Linux CUDA execution requires x64 Linux and `TorchSharp-cuda-linux` 0.107.0.
+That package supplies its declared Linux dependencies.
+
+NuGet can download all three declared packages during restore. It stores them
+in the user's global package cache, outside this Git repository.
 
 Use this command to get the declared packages:
 
@@ -100,9 +114,8 @@ Use this command to get the declared packages:
 dotnet restore Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj
 ```
 
-NuGet keeps downloaded packages outside this repository. The build can copy
-runtime assets into ignored output directories. Do not commit or redistribute
-those output directories.
+The build can copy runtime assets into ignored output directories. Do not
+commit or redistribute those output directories.
 
 Review and accept each third-party license before you use its package. See
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the recorded identities.
