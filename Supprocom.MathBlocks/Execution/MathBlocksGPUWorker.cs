@@ -105,13 +105,11 @@ public sealed class MathBlocksGPUProgram : IDisposable
 
         var slotOffsets = new int[program.PlanNodes.Count];
         var payloadOffsets = CreateFilledIntArray(program.PlanNodes.Count, -1);
-        var payloadCapacities = new int[program.PlanNodes.Count];
+        var payloadCapacities = ResolvePayloadCapacities(program.PlanNodes, prototypeInputs);
         var inputPointerOffsets = CreateFilledIntArray(program.PlanNodes.Count, -1);
         var scratchOffsets = CreateFilledIntArray(program.PlanNodes.Count, -1);
         var graphNodes = new IntPtr[program.PlanNodes.Count];
         var arguments = new List<KernelArgumentStorage>();
-        foreach (var node in program.PlanNodes)
-            payloadCapacities[node.Index] = ResolvePayloadCapacity(node, program.PlanNodes, prototypeInputs);
 
         var outputNodeIndexes = new bool[program.PlanNodes.Count];
         foreach (var outputNodeIndex in program.OutputNodeIndexes.Values)
@@ -515,6 +513,42 @@ public sealed class MathBlocksGPUProgram : IDisposable
         return result;
     }
 
+    private static int[] ResolvePayloadCapacities(
+        IReadOnlyList<MathBlockProgramNode> nodes,
+        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs)
+    {
+        var capacities = new int[nodes.Count];
+        var published = new bool[nodes.Count];
+        foreach (var node in nodes)
+        {
+            if ((uint)node.Index >= (uint)nodes.Count || published[node.Index])
+                throw new InvalidOperationException($"GPU payload node index {node.Index} is invalid.");
+
+            var inputCapacities = new int[node.Inputs.Count];
+            for (var inputIndex = 0; inputIndex < node.Inputs.Count; inputIndex++)
+            {
+                var producerIndex = node.Inputs[inputIndex];
+                if ((uint)producerIndex >= (uint)nodes.Count || !published[producerIndex])
+                {
+                    throw new InvalidOperationException(
+                        $"GPU payload capacity for producer node {producerIndex} is unavailable for node {node.Index}.");
+                }
+                inputCapacities[inputIndex] = capacities[producerIndex];
+            }
+
+            var capacity = ResolvePayloadCapacity(node, nodes, inputCapacities, prototypeInputs);
+            if (capacity < 0)
+                throw new InvalidOperationException($"GPU payload capacity for node {node.Index} is negative.");
+            capacities[node.Index] = capacity;
+            published[node.Index] = true;
+        }
+
+        for (var nodeIndex = 0; nodeIndex < published.Length; nodeIndex++)
+            if (!published[nodeIndex])
+                throw new InvalidOperationException($"GPU payload capacity for node {nodeIndex} is unavailable.");
+        return capacities;
+    }
+
     private static IntPtr[] CreateKernelDependencies(
         IReadOnlyList<int> inputs,
         IReadOnlyList<IntPtr> graphNodes,
@@ -641,6 +675,7 @@ public sealed class MathBlocksGPUProgram : IDisposable
     private static int ResolvePayloadCapacity(
         MathBlockProgramNode node,
         IReadOnlyList<MathBlockProgramNode> nodes,
+        IReadOnlyList<int> inputCapacities,
         IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs)
     {
         if (node.Type.Kind is MathBlockValueKind.Scalar or MathBlockValueKind.Boolean)
@@ -672,12 +707,12 @@ public sealed class MathBlocksGPUProgram : IDisposable
             if (identity == "matrix.append-row@1")
             {
                 return checked(
-                    ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs) +
-                    ResolveDeclaredCapacity(nodes[node.Inputs[1]], prototypeInputs));
+                    inputCapacities[0] +
+                    inputCapacities[1]);
             }
             if (identity is "matrix.diagonal-from-vector@1")
             {
-                var size = ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs);
+                var size = inputCapacities[0];
                 return checked(size * size);
             }
             if (identity is "matrix.gram@1")
@@ -689,14 +724,14 @@ public sealed class MathBlocksGPUProgram : IDisposable
                 "matrix.outer-product@1" or "matrix.stack-rows@1")
             {
                 return checked(
-                    ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs) *
-                    ResolveDeclaredCapacity(nodes[node.Inputs[1]], prototypeInputs));
+                    inputCapacities[0] *
+                    inputCapacities[1]);
             }
             if (identity == "matrix.kronecker-product@1")
             {
                 return checked(
-                    ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs) *
-                    ResolveDeclaredCapacity(nodes[node.Inputs[1]], prototypeInputs));
+                    inputCapacities[0] *
+                    inputCapacities[1]);
             }
             if (identity is "matrix.multiply@1" or "matrix.commutator@1")
             {
@@ -705,7 +740,7 @@ public sealed class MathBlocksGPUProgram : IDisposable
                     ResolveShapeColumns(nodes[node.Inputs[1]], prototypeInputs));
             }
             if (identity == "matrix.reshape@1")
-                return ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs);
+                return inputCapacities[0];
             if (identity == "matrix.principal-minors@1")
             {
                 var rows = ResolveShapeRows(nodes[node.Inputs[0]], prototypeInputs);
@@ -726,15 +761,15 @@ public sealed class MathBlocksGPUProgram : IDisposable
             }
             if (identity == "combinatorics.nonempty-subset-sums@1")
             {
-                var count = ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs);
+                var count = inputCapacities[0];
                 if (count < 0 || count > 20)
                     throw new InvalidOperationException("GPU subset-sum shape is outside the operation domain.");
                 return checked((1 << count) - 1);
             }
             if (identity == "sequence.convolution@1")
             {
-                var left = ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs);
-                var right = ResolveDeclaredCapacity(nodes[node.Inputs[1]], prototypeInputs);
+                var left = inputCapacities[0];
+                var right = inputCapacities[1];
                 return left == 0 || right == 0 ? 0 : checked(left + right - 1);
             }
             if (identity is "sequence.difference@1" or
@@ -747,15 +782,15 @@ public sealed class MathBlocksGPUProgram : IDisposable
                 "sequence.rolling-sum@1" or
                 "sequence.rolling-variance@1")
             {
-                return ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs);
+                return inputCapacities[0];
             }
             if (identity == "path.lead-lag-transform@1")
             {
-                var count = ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs);
+                var count = inputCapacities[0];
                 return count == 0 ? 0 : checked((2 * count - 1) * 2);
             }
             if (identity == "path.run-length-encode@1")
-                return ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs);
+                return inputCapacities[0];
             if (identity == "path.signature-level-one@1")
                 return ResolveShapeColumns(nodes[node.Inputs[0]], prototypeInputs);
             if (identity == "path.signature-level-two@1")
@@ -779,34 +814,34 @@ public sealed class MathBlocksGPUProgram : IDisposable
                 return checked(columns * columns);
             }
             if (identity == "statistics.histogram@1")
-                return checked(ResolveDeclaredCapacity(nodes[node.Inputs[1]], prototypeInputs) + 1);
+                return checked(inputCapacities[1] + 1);
             if (identity == "geometry.barycentric-coordinates@1")
                 return 3;
             if (identity == "geometry.centroid@1")
                 return 1;
             if (identity == "geometry.convex-hull@1")
-                return ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs);
+                return inputCapacities[0];
             if (identity is "geometry.delaunay-graph@1" or "geometry.gabriel-graph@1")
             {
-                var count = ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs);
+                var count = inputCapacities[0];
                 return checked(count * (count - 1) / 2);
             }
             if (identity == "topology.zero-dimensional-persistence@1")
             {
-                var count = ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs);
+                var count = inputCapacities[0];
                 return count == 0 ? 0 : count - 1;
             }
             if (identity == "point-set.from-matrix@1")
                 return ResolveShapeRows(nodes[node.Inputs[0]], prototypeInputs);
             if (identity == "point-set.to-matrix@1")
-                return checked(ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs) * 2);
+                return checked(inputCapacities[0] * 2);
             if (identity == "graph.from-directed-adjacency@1")
             {
                 var rows = ResolveShapeRows(nodes[node.Inputs[0]], prototypeInputs);
                 return checked(rows * (rows - 1));
             }
             if (identity == "graph.minimum-spanning-forest@1")
-                return ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs);
+                return inputCapacities[0];
             if (identity is "graph.degree@1" or
                 "graph.hodge-potential@1" or
                 "graph.page-rank@1" or
@@ -824,7 +859,7 @@ public sealed class MathBlocksGPUProgram : IDisposable
             }
             if (identity == "cooperative.shapley-values@1")
             {
-                var count = ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs);
+                var count = inputCapacities[0];
                 if (count <= 0 || (count & (count - 1)) != 0)
                     throw new InvalidOperationException("GPU Shapley shape is outside the operation domain.");
                 var players = 0;
@@ -836,9 +871,9 @@ public sealed class MathBlocksGPUProgram : IDisposable
                 return players;
             }
             if (identity is "extension.mcshane@1" or "extension.whitney@1")
-                return ResolveDeclaredCapacity(nodes[node.Inputs[2]], prototypeInputs);
+                return inputCapacities[2];
             if (identity == "inequality.lorenz-curve@1")
-                return checked(ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs) + 1);
+                return checked(inputCapacities[0] + 1);
             if (identity == "markov.stationary-distribution@1")
                 return ResolveShapeRows(nodes[node.Inputs[0]], prototypeInputs);
             if (identity == "transport.minimum-assignment@1")
@@ -846,11 +881,11 @@ public sealed class MathBlocksGPUProgram : IDisposable
             if (identity == "transport.monotone-coupling@1")
             {
                 return checked(
-                    ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs) *
-                    ResolveDeclaredCapacity(nodes[node.Inputs[1]], prototypeInputs));
+                    inputCapacities[0] *
+                    inputCapacities[1]);
             }
             if (identity == "transport.sinkhorn-coupling@1")
-                return ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs);
+                return inputCapacities[0];
             if (identity is "tropical.max-plus-multiply@1" or "tropical.min-plus-multiply@1")
             {
                 return checked(
@@ -860,12 +895,12 @@ public sealed class MathBlocksGPUProgram : IDisposable
             if (identity == "vector.pair@1")
                 return 2;
             if (identity is "vector.append@1" or "vector.prepend@1")
-                return checked(ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs) + 1);
+                return checked(inputCapacities[0] + 1);
             if (identity == "vector.concatenate@1")
             {
                 return checked(
-                    ResolveDeclaredCapacity(nodes[node.Inputs[0]], prototypeInputs) +
-                    ResolveDeclaredCapacity(nodes[node.Inputs[1]], prototypeInputs));
+                    inputCapacities[0] +
+                    inputCapacities[1]);
             }
             if (identity == "vector.linspace@1")
                 return ResolvePrototypeCount(nodes[node.Inputs[2]], prototypeInputs);
@@ -874,13 +909,13 @@ public sealed class MathBlocksGPUProgram : IDisposable
             if (identity == "vector.slice@1")
                 return ResolvePrototypeCount(nodes[node.Inputs[2]], prototypeInputs);
             if (identity == "vector.gather@1")
-                return ResolveDeclaredCapacity(nodes[node.Inputs[1]], prototypeInputs);
+                return inputCapacities[1];
             if (node.Inputs.Count != 0)
             {
                 var maximum = 0;
                 for (var inputIndex = 0; inputIndex < node.Inputs.Count; inputIndex++)
                 {
-                    var capacity = ResolveDeclaredCapacity(nodes[node.Inputs[inputIndex]], prototypeInputs);
+                    var capacity = inputCapacities[inputIndex];
                     if (capacity > maximum)
                         maximum = capacity;
                 }
@@ -888,27 +923,6 @@ public sealed class MathBlocksGPUProgram : IDisposable
             }
         }
         throw new InvalidOperationException($"GPU payload capacity is unknown for node {node.Index}.");
-    }
-
-    private static int ResolveDeclaredCapacity(
-        MathBlockProgramNode node,
-        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs)
-    {
-        if (node.Kind == MathBlockProgramNodeKind.Constant)
-            return ValueElementCount(node.Value);
-        if (node.Kind == MathBlockProgramNodeKind.Input &&
-            prototypeInputs is not null &&
-            prototypeInputs.TryGetValue(node.Name!, out var prototype))
-        {
-            return ValueElementCount(prototype);
-        }
-        if (node.Type.Kind == MathBlockValueKind.Complex)
-            return 1;
-        if (node.Type.Kind is MathBlockValueKind.Matrix or MathBlockValueKind.ComplexMatrix &&
-            node.Type.Rows > 0 &&
-            node.Type.Columns > 0)
-            return checked(node.Type.Rows * node.Type.Columns);
-        return node.Type.Rows;
     }
 
     private static int ResolveShapeRows(

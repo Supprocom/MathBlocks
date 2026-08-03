@@ -281,8 +281,13 @@ internal static partial class VectorMathBlocks
 
     private static MathBlockType ConcatenateType(IReadOnlyList<MathBlockType> types)
     {
-        MathBlockTypeRules.SameBinary(types, MathBlockValueKind.Vector);
-        var length = types[0].Rows > 0 && types[1].Rows > 0 ? types[0].Rows + types[1].Rows : 0;
+        MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Vector);
+        MathBlockTypeRules.RequireKind(types[1], MathBlockValueKind.Vector);
+        if (types[0].Unit != types[1].Unit)
+            throw new InvalidOperationException("The input units must be equal.");
+        var length = types[0].Rows > 0 && types[1].Rows > 0
+            ? checked(types[0].Rows + types[1].Rows)
+            : 0;
         return MathBlockType.Vector(types[0].Unit, length);
     }
 

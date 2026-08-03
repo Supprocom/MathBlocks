@@ -248,6 +248,108 @@ public sealed class MathBlockGpuWorkerTests
     }
 
     [Fact]
+    public void GPU_dynamic_repeat_capacity_propagates_through_boolean_nodes()
+    {
+        Assert.True(MathBlocksGPUWorker.IsAvailable, "A CUDA device is required.");
+        var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
+        {
+            ["value"] = MathBlockValue.Scalar(2d),
+            ["count"] = MathBlockValue.Scalar(4d)
+        };
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var value = builder.Input("value", inputs["value"].Type);
+        var count = builder.Input("count", inputs["count"].Type);
+        var repeated = builder.Apply("vector.repeat", inputs: [value, count]);
+        var equal = builder.Apply("vector.equal", inputs: [repeated, repeated]);
+        var inverted = builder.Apply("boolean-vector.not", inputs: [equal]);
+        var mask = builder.Apply("boolean-vector.and", inputs: [equal, inverted]);
+        var trueCount = builder.Apply("boolean-vector.true-count", inputs: [mask]);
+        var program = builder
+            .Output("equal", equal)
+            .Output("mask", mask)
+            .Output("true-count", trueCount)
+            .Build();
+        var cpu = program.Evaluate(inputs);
+        using var compiled = new MathBlocksGPUWorker().Compile(program, inputs);
+        compiled.UploadInputs(inputs);
+
+        compiled.ExecuteResident();
+        var gpu = compiled.ReadOutputs();
+
+        AssertExact(MathBlockValue.BooleanVector([true, true, true, true]), cpu["equal"]);
+        AssertExact(MathBlockValue.BooleanVector([false, false, false, false]), cpu["mask"]);
+        AssertExact(MathBlockValue.Scalar(0d), cpu["true-count"]);
+        Assert.All(cpu.Values, output => Assert.True(output.IsValid));
+        Assert.All(gpu.Values, output => Assert.True(output.IsValid));
+        AssertExact(cpu["equal"], gpu["equal"]);
+        AssertExact(cpu["mask"], gpu["mask"]);
+        AssertExact(cpu["true-count"], gpu["true-count"]);
+        AssertResidentExecutionContract(compiled);
+    }
+
+    [Fact]
+    public void GPU_dynamic_slice_capacity_propagates_through_concatenate_and_reduction()
+    {
+        Assert.True(MathBlocksGPUWorker.IsAvailable, "A CUDA device is required.");
+        var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
+        {
+            ["values"] = MathBlockValue.Vector([1d, 2d, 3d, 4d, 5d, 6d]),
+            ["start"] = MathBlockValue.Scalar(1d),
+            ["length"] = MathBlockValue.Scalar(3d),
+            ["tail-value"] = MathBlockValue.Scalar(7d),
+            ["tail-count"] = MathBlockValue.Scalar(1d),
+            ["offset"] = MathBlockValue.Scalar(10d),
+            ["threshold"] = MathBlockValue.Vector([11d, 13d, 13d, 20d])
+        };
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var values = builder.Input("values", inputs["values"].Type);
+        var start = builder.Input("start", inputs["start"].Type);
+        var length = builder.Input("length", inputs["length"].Type);
+        var tailValue = builder.Input("tail-value", inputs["tail-value"].Type);
+        var tailCount = builder.Input("tail-count", inputs["tail-count"].Type);
+        var offset = builder.Input("offset", inputs["offset"].Type);
+        var threshold = builder.Input("threshold", inputs["threshold"].Type);
+        var sliced = builder.Apply("vector.slice", inputs: [values, start, length]);
+        var tail = builder.Apply("vector.repeat", inputs: [tailValue, tailCount]);
+        var concatenated = builder.Apply("vector.concatenate", inputs: [sliced, tail]);
+        var arithmetic = builder.Apply("vector.add-scalar", inputs: [concatenated, offset]);
+        var comparison = builder.Apply("vector.greater-than", inputs: [arithmetic, threshold]);
+        var indices = builder.Apply("boolean-vector.true-indices", inputs: [comparison]);
+        var gathered = builder.Apply("vector.gather", inputs: [arithmetic, indices]);
+        var sum = builder.Apply("vector.sum", inputs: [gathered]);
+        var program = builder
+            .Output("sliced", sliced)
+            .Output("tail", tail)
+            .Output("concatenated", concatenated)
+            .Output("arithmetic", arithmetic)
+            .Output("comparison", comparison)
+            .Output("indices", indices)
+            .Output("gathered", gathered)
+            .Output("sum", sum)
+            .Build();
+        var cpu = program.Evaluate(inputs);
+        using var compiled = new MathBlocksGPUWorker().Compile(program, inputs);
+        compiled.UploadInputs(inputs);
+
+        compiled.ExecuteResident();
+        var gpu = compiled.ReadOutputs();
+
+        AssertExact(MathBlockValue.Vector([2d, 3d, 4d]), cpu["sliced"]);
+        AssertExact(MathBlockValue.Vector([7d]), cpu["tail"]);
+        AssertExact(MathBlockValue.Vector([2d, 3d, 4d, 7d]), cpu["concatenated"]);
+        AssertExact(MathBlockValue.Vector([12d, 13d, 14d, 17d]), cpu["arithmetic"]);
+        AssertExact(MathBlockValue.BooleanVector([true, false, true, false]), cpu["comparison"]);
+        AssertExact(MathBlockValue.Vector([0d, 2d]), cpu["indices"]);
+        AssertExact(MathBlockValue.Vector([12d, 14d]), cpu["gathered"]);
+        AssertExact(MathBlockValue.Scalar(26d), cpu["sum"]);
+        Assert.All(cpu.Values, output => Assert.True(output.IsValid));
+        Assert.All(gpu.Values, output => Assert.True(output.IsValid));
+        foreach (var output in cpu)
+            AssertExact(output.Value, gpu[output.Key]);
+        AssertResidentExecutionContract(compiled);
+    }
+
+    [Fact]
     public void GPU_program_is_safe_for_concurrent_atomic_executions()
     {
         Assert.True(MathBlocksGPUWorker.IsAvailable, "A CUDA device is required.");
@@ -421,6 +523,16 @@ public sealed class MathBlockGpuWorkerTests
             .Input("first", MathBlockType.Scalar())
             .Output("result", "quotient")
             .Build();
+
+    private static void AssertResidentExecutionContract(MathBlocksGPUProgram compiled)
+    {
+        Assert.Equal(1, compiled.GraphInstantiationCount);
+        Assert.Equal(1, compiled.GraphLaunchCount);
+        Assert.Equal(1, compiled.SynchronizationCount);
+        Assert.Equal(1, compiled.HostToDeviceTransferCount);
+        Assert.Equal(1, compiled.DeviceToHostTransferCount);
+        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+    }
 
     private static IEnumerable<MathBlockRegressionCase> CreateParityCases(MathBlockOperation operation)
     {
