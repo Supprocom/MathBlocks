@@ -12,20 +12,22 @@ public sealed class MathBlockProgramPopulationOperation
         string identifier,
         int version,
         IEnumerable<MathBlockType> inputTypes,
-        MathBlockType outputType)
+        MathBlockType outputType,
+        long deterministicCost = 1)
     {
         Identifier = MathBlockProgramPopulationValidation.RequireIdentifier(identifier, nameof(identifier));
         if (version <= 0)
             throw new ArgumentOutOfRangeException(nameof(version));
         ArgumentNullException.ThrowIfNull(inputTypes);
         InputTypes = Array.AsReadOnly(MathBlockCollectionPrimitives.CopyEnumerable(inputTypes));
-        if (InputTypes.Count > MathBlockProgramPopulationLimits.MaximumArity)
-            throw new ArgumentOutOfRangeException(nameof(inputTypes));
         foreach (var type in InputTypes)
             MathBlockProgramPopulationValidation.RequireType(type, nameof(inputTypes));
         MathBlockProgramPopulationValidation.RequireType(outputType, nameof(outputType));
+        if (deterministicCost <= 0)
+            throw new ArgumentOutOfRangeException(nameof(deterministicCost));
         Version = version;
         OutputType = outputType;
+        DeterministicCost = deterministicCost;
     }
 
     public string Identifier { get; }
@@ -33,6 +35,7 @@ public sealed class MathBlockProgramPopulationOperation
     public string Identity => $"{Identifier}@{Version}";
     public IReadOnlyList<MathBlockType> InputTypes { get; }
     public MathBlockType OutputType { get; }
+    public long DeterministicCost { get; }
 }
 
 public sealed class MathBlockProgramPopulationGrammar
@@ -45,8 +48,6 @@ public sealed class MathBlockProgramPopulationGrammar
         var copied = MathBlockCollectionPrimitives.CopyEnumerable(operations);
         if (copied.Length == 0)
             throw new ArgumentException("A population grammar requires an operation.", nameof(operations));
-        if (copied.Length > MathBlockProgramPopulationLimits.MaximumGrammarOperationCount)
-            throw new ArgumentOutOfRangeException(nameof(operations));
         var signatures = new HashSet<string>(StringComparer.Ordinal);
         foreach (var operation in copied)
         {
@@ -66,7 +67,11 @@ public sealed class MathBlockProgramPopulationGrammar
 
 public sealed class MathBlockProgramPopulationTerminal
 {
-    public MathBlockProgramPopulationTerminal(string identifier, MathBlockType type, MathBlockValue value)
+    public MathBlockProgramPopulationTerminal(
+        string identifier,
+        MathBlockType type,
+        MathBlockValue value,
+        int lookback = 0)
     {
         Identifier = MathBlockProgramPopulationValidation.RequireName(identifier, nameof(identifier));
         MathBlockProgramPopulationValidation.RequireType(type, nameof(type));
@@ -75,13 +80,17 @@ public sealed class MathBlockProgramPopulationTerminal
         if (!type.Accepts(value.Type))
             throw new ArgumentException("A population terminal value does not match its declared type.", nameof(value));
         MathBlockProgramPopulationValidation.RequireFiniteValue(value, nameof(value));
+        if (lookback < 0)
+            throw new ArgumentOutOfRangeException(nameof(lookback));
         Type = type;
         Value = value;
+        Lookback = lookback;
     }
 
     public string Identifier { get; }
     public MathBlockType Type { get; }
     public MathBlockValue Value { get; }
+    public int Lookback { get; }
 }
 
 public readonly record struct MathBlockProgramPopulationConstant
@@ -104,13 +113,10 @@ public readonly record struct MathBlockProgramPopulationResourceBand
 {
     public MathBlockProgramPopulationResourceBand(int operationCount, int maximumOutputElements)
     {
-        if (operationCount <= 0 || operationCount > MathBlockProgramPopulationLimits.MaximumOperationCount)
+        if (operationCount <= 0)
             throw new ArgumentOutOfRangeException(nameof(operationCount));
-        if (maximumOutputElements <= 0 ||
-            maximumOutputElements > MathBlockProgramPopulationLimits.MaximumOutputElements)
-        {
+        if (maximumOutputElements <= 0)
             throw new ArgumentOutOfRangeException(nameof(maximumOutputElements));
-        }
         OperationCount = operationCount;
         MaximumOutputElements = maximumOutputElements;
     }
@@ -119,7 +125,7 @@ public readonly record struct MathBlockProgramPopulationResourceBand
     public int MaximumOutputElements { get; }
 }
 
-public sealed class MathBlockProgramPopulationDefinition
+public sealed partial class MathBlockProgramPopulationDefinition
 {
     private readonly MathBlockProgramPopulationTerminal[] allTerminals;
 
@@ -149,21 +155,17 @@ public sealed class MathBlockProgramPopulationDefinition
         var totalTerminalCount = checked(terminalCopy.Length + constantCopy.Length);
         if (totalTerminalCount == 0)
             throw new ArgumentException("A population definition requires a terminal or scalar constant.", nameof(terminals));
-        if (totalTerminalCount > MathBlockProgramPopulationLimits.MaximumTerminalCount)
-            throw new ArgumentOutOfRangeException(nameof(terminals));
 
         var bandCopy = MathBlockCollectionPrimitives.CopyEnumerable(activeResourceBands);
         if (bandCopy.Length == 0)
             throw new ArgumentException("A population definition requires an active resource band.", nameof(activeResourceBands));
-        if (bandCopy.Length > MathBlockProgramPopulationLimits.MaximumResourceBands)
-            throw new ArgumentOutOfRangeException(nameof(activeResourceBands));
         var operationCounts = new HashSet<int>();
         foreach (var band in bandCopy)
             if (!operationCounts.Add(band.OperationCount))
                 throw new ArgumentException("An active resource-band operation count is duplicated.", nameof(activeResourceBands));
-        if (proposalsPerCycle <= 0 || proposalsPerCycle > MathBlockProgramPopulationLimits.MaximumProposalsPerCycle)
+        if (proposalsPerCycle <= 0)
             throw new ArgumentOutOfRangeException(nameof(proposalsPerCycle));
-        if (fingerprintCapacity <= 0 || fingerprintCapacity > MathBlockProgramPopulationLimits.MaximumFingerprintCapacity)
+        if (fingerprintCapacity <= 0)
             throw new ArgumentOutOfRangeException(nameof(fingerprintCapacity));
 
         Terminals = Array.AsReadOnly(terminalCopy);
@@ -358,8 +360,6 @@ public sealed class MathBlockProgramCandidateNode
         if (version <= 0)
             throw new ArgumentOutOfRangeException(nameof(version));
         ArgumentNullException.ThrowIfNull(operandIndexes);
-        if (operandIndexes.Length > MathBlockProgramPopulationLimits.MaximumArity)
-            throw new ArgumentOutOfRangeException(nameof(operandIndexes));
         return new MathBlockProgramCandidateNode(
             MathBlockProgramCandidateNodeKind.Operation,
             type,
@@ -518,7 +518,7 @@ public sealed class MathBlockProgramPopulationState
     private static string[] ReadFingerprints(BinaryReader reader)
     {
         var count = reader.ReadInt32();
-        if (count < 0 || count > MathBlockProgramPopulationLimits.MaximumFingerprintCapacity)
+        if (count < 0 || count > reader.BaseStream.Length)
             throw new InvalidDataException("The population fingerprint count is invalid.");
         var values = new string[count];
         for (var index = 0; index < count; index++)
@@ -558,18 +558,6 @@ public sealed class MathBlockProgramPopulationCycleResult
     public MathBlockProgramPopulationState AcceptedState { get; }
     public MathBlockProgramPopulationInstrumentation Instrumentation { get; }
     public bool IsComplete { get; }
-}
-
-internal static class MathBlockProgramPopulationLimits
-{
-    public const int MaximumArity = 4;
-    public const int MaximumGrammarOperationCount = 256;
-    public const int MaximumTerminalCount = 256;
-    public const int MaximumOperationCount = 8;
-    public const int MaximumOutputElements = 4096;
-    public const int MaximumResourceBands = 8;
-    public const int MaximumProposalsPerCycle = 1024;
-    public const int MaximumFingerprintCapacity = 1_000_000;
 }
 
 internal static class MathBlockProgramPopulationFingerprint
@@ -627,6 +615,58 @@ internal static class MathBlockProgramPopulationFingerprint
         return state.ToString();
     }
 
+    public static string CreateSemantic(
+        MathBlockValue value,
+        IReadOnlyList<bool> validityMask,
+        int maximumLookback)
+    {
+        ArgumentNullException.ThrowIfNull(validityMask);
+        if (maximumLookback < 0)
+            throw new ArgumentOutOfRangeException(nameof(maximumLookback));
+        var rowCount = value.Type.Kind switch
+        {
+            MathBlockValueKind.Scalar or MathBlockValueKind.Boolean or MathBlockValueKind.Complex => 1,
+            MathBlockValueKind.Vector => value.AsVector().Count,
+            MathBlockValueKind.BooleanVector => value.AsBooleanVector().Count,
+            MathBlockValueKind.Matrix => value.AsMatrix().Rows,
+            MathBlockValueKind.ComplexVector => value.AsComplexVector().Count,
+            MathBlockValueKind.ComplexMatrix => value.AsComplexMatrix().Rows,
+            MathBlockValueKind.PointSet => value.AsPointSet().Count,
+            MathBlockValueKind.Graph => value.AsGraph().VertexCount,
+            MathBlockValueKind.RunSet => value.AsRunSet().Count,
+            _ => throw new NotSupportedException("The population fingerprint does not support this value kind.")
+        };
+        if (validityMask.Count != rowCount)
+            throw new ArgumentException("The semantic validity mask has an incompatible row count.", nameof(validityMask));
+
+        var state = new FingerprintState();
+        state.Add(unchecked((ulong)(int)value.Type.Kind));
+        var actualRows = value.Type.Kind switch
+        {
+            MathBlockValueKind.Matrix => value.AsMatrix().Rows,
+            MathBlockValueKind.ComplexMatrix => value.AsComplexMatrix().Rows,
+            MathBlockValueKind.Graph => value.AsGraph().VertexCount,
+            _ => value.Type.Rows
+        };
+        state.Add(unchecked((ulong)actualRows));
+        var columns = value.Type.Kind switch
+        {
+            MathBlockValueKind.Matrix => value.AsMatrix().Columns,
+            MathBlockValueKind.ComplexMatrix => value.AsComplexMatrix().Columns,
+            _ => value.Type.Columns
+        };
+        state.Add(unchecked((ulong)columns));
+        AddUnit(ref state, value.Type.Unit);
+        state.Add(unchecked((ulong)maximumLookback));
+        var validRows = 0;
+        for (var row = 0; row < validityMask.Count; row++)
+            if (validityMask[row])
+                validRows++;
+        state.Add(unchecked((ulong)validRows));
+        AddMaskedValue(ref state, value, validityMask);
+        return state.ToString();
+    }
+
     public static (ulong First, ulong Second) CreateOperationKey(string identity)
     {
         var state = new FingerprintState();
@@ -654,6 +694,135 @@ internal static class MathBlockProgramPopulationFingerprint
         AddRational(ref state, type.Unit.Dimension1);
         AddRational(ref state, type.Unit.Dimension2);
         AddRational(ref state, type.Unit.Dimension3);
+    }
+
+    private static void AddUnit(ref FingerprintState state, MathBlockUnit unit)
+    {
+        AddRational(ref state, unit.Dimension0);
+        AddRational(ref state, unit.Dimension1);
+        AddRational(ref state, unit.Dimension2);
+        AddRational(ref state, unit.Dimension3);
+    }
+
+    private static void AddMaskedValue(
+        ref FingerprintState state,
+        MathBlockValue value,
+        IReadOnlyList<bool> mask)
+    {
+        switch (value.Type.Kind)
+        {
+            case MathBlockValueKind.Scalar:
+                if (mask[0])
+                    state.Add(Math.ToBits(value.AsScalar()));
+                return;
+            case MathBlockValueKind.Boolean:
+                if (mask[0])
+                    state.Add(value.AsBoolean() ? 1ul : 0ul);
+                return;
+            case MathBlockValueKind.Complex:
+                if (mask[0])
+                {
+                    state.Add(Math.ToBits(value.AsComplex().Real));
+                    state.Add(Math.ToBits(value.AsComplex().Imaginary));
+                }
+                return;
+            case MathBlockValueKind.Vector:
+                for (var row = 0; row < mask.Count; row++)
+                {
+                    if (!mask[row])
+                        continue;
+                    state.Add(unchecked((ulong)row));
+                    state.Add(Math.ToBits(value.AsVector()[row]));
+                }
+                return;
+            case MathBlockValueKind.BooleanVector:
+                for (var row = 0; row < mask.Count; row++)
+                {
+                    if (!mask[row])
+                        continue;
+                    state.Add(unchecked((ulong)row));
+                    state.Add(value.AsBooleanVector()[row] ? 1ul : 0ul);
+                }
+                return;
+            case MathBlockValueKind.ComplexVector:
+                for (var row = 0; row < mask.Count; row++)
+                {
+                    if (!mask[row])
+                        continue;
+                    var item = value.AsComplexVector()[row];
+                    state.Add(unchecked((ulong)row));
+                    state.Add(Math.ToBits(item.Real));
+                    state.Add(Math.ToBits(item.Imaginary));
+                }
+                return;
+            case MathBlockValueKind.PointSet:
+                for (var row = 0; row < mask.Count; row++)
+                {
+                    if (!mask[row])
+                        continue;
+                    var item = value.AsPointSet()[row];
+                    state.Add(unchecked((ulong)row));
+                    state.Add(Math.ToBits(item.X));
+                    state.Add(Math.ToBits(item.Y));
+                }
+                return;
+            case MathBlockValueKind.Matrix:
+                var matrix = value.AsMatrix();
+                for (var row = 0; row < mask.Count; row++)
+                {
+                    if (!mask[row])
+                        continue;
+                    state.Add(unchecked((ulong)row));
+                    for (var column = 0; column < matrix.Columns; column++)
+                        state.Add(Math.ToBits(matrix[row, column]));
+                }
+                return;
+            case MathBlockValueKind.ComplexMatrix:
+                var complexMatrix = value.AsComplexMatrix();
+                for (var row = 0; row < mask.Count; row++)
+                {
+                    if (!mask[row])
+                        continue;
+                    state.Add(unchecked((ulong)row));
+                    for (var column = 0; column < complexMatrix.Columns; column++)
+                    {
+                        var item = complexMatrix[row, column];
+                        state.Add(Math.ToBits(item.Real));
+                        state.Add(Math.ToBits(item.Imaginary));
+                    }
+                }
+                return;
+            case MathBlockValueKind.Graph:
+                if (HasValidRow(mask))
+                {
+                    foreach (var edge in value.AsGraph())
+                    {
+                        state.Add(unchecked((uint)edge.From) | (unchecked((ulong)(uint)edge.To) << 32));
+                        state.Add(Math.ToBits(edge.Weight));
+                    }
+                }
+                return;
+            case MathBlockValueKind.RunSet:
+                if (HasValidRow(mask))
+                {
+                    foreach (var run in value.AsRunSet())
+                    {
+                        state.Add(unchecked((uint)run.Start) | (unchecked((ulong)(uint)run.Length) << 32));
+                        state.Add(Math.ToBits(run.Value));
+                    }
+                }
+                return;
+            default:
+                throw new NotSupportedException("The population fingerprint does not support this value kind.");
+        }
+    }
+
+    private static bool HasValidRow(IReadOnlyList<bool> mask)
+    {
+        for (var index = 0; index < mask.Count; index++)
+            if (mask[index])
+                return true;
+        return false;
     }
 
     private static void AddRational(ref FingerprintState state, MathRational value)
@@ -775,6 +944,7 @@ internal static class MathBlockProgramPopulationValidation
         {
             writer.Write(operation.Identifier);
             writer.Write(operation.Version);
+            writer.Write(operation.DeterministicCost);
             writer.Write(operation.InputTypes.Count);
             foreach (var type in operation.InputTypes)
                 WriteType(writer, type);
@@ -784,6 +954,7 @@ internal static class MathBlockProgramPopulationValidation
         foreach (var terminal in terminals)
         {
             writer.Write(terminal.Identifier);
+            writer.Write(terminal.Lookback);
             WriteType(writer, terminal.Type);
             WriteValue(writer, terminal.Value);
         }
@@ -820,9 +991,57 @@ internal static class MathBlockProgramPopulationValidation
                     if (!Math.IsFinite(item))
                         throw new ArgumentOutOfRangeException(parameterName, "A population value must be finite.");
                 return;
+            case MathBlockValueKind.Matrix:
+                var matrix = value.AsMatrix();
+                for (var row = 0; row < matrix.Rows; row++)
+                for (var column = 0; column < matrix.Columns; column++)
+                    RequireFinite(matrix[row, column], parameterName);
+                return;
+            case MathBlockValueKind.Complex:
+                RequireFinite(value.AsComplex().Real, parameterName);
+                RequireFinite(value.AsComplex().Imaginary, parameterName);
+                return;
+            case MathBlockValueKind.ComplexVector:
+                foreach (var item in value.AsComplexVector())
+                {
+                    RequireFinite(item.Real, parameterName);
+                    RequireFinite(item.Imaginary, parameterName);
+                }
+                return;
+            case MathBlockValueKind.ComplexMatrix:
+                var complexMatrix = value.AsComplexMatrix();
+                for (var row = 0; row < complexMatrix.Rows; row++)
+                for (var column = 0; column < complexMatrix.Columns; column++)
+                {
+                    var item = complexMatrix[row, column];
+                    RequireFinite(item.Real, parameterName);
+                    RequireFinite(item.Imaginary, parameterName);
+                }
+                return;
+            case MathBlockValueKind.PointSet:
+                foreach (var item in value.AsPointSet())
+                {
+                    RequireFinite(item.X, parameterName);
+                    RequireFinite(item.Y, parameterName);
+                }
+                return;
+            case MathBlockValueKind.Graph:
+                foreach (var item in value.AsGraph())
+                    RequireFinite(item.Weight, parameterName);
+                return;
+            case MathBlockValueKind.RunSet:
+                foreach (var item in value.AsRunSet())
+                    RequireFinite(item.Value, parameterName);
+                return;
             default:
                 throw new NotSupportedException("A population terminal has an unsupported value kind.");
         }
+    }
+
+    private static void RequireFinite(double value, string parameterName)
+    {
+        if (!Math.IsFinite(value))
+            throw new ArgumentOutOfRangeException(parameterName, "A population value must be finite.");
     }
 
     private static ulong Pow(ulong value, int exponent)
@@ -879,6 +1098,65 @@ internal static class MathBlockProgramPopulationValidation
                 foreach (var item in value.AsBooleanVector())
                     writer.Write(item);
                 break;
+            case MathBlockValueKind.Matrix:
+                var matrix = value.AsMatrix();
+                writer.Write(matrix.Rows);
+                writer.Write(matrix.Columns);
+                for (var row = 0; row < matrix.Rows; row++)
+                for (var column = 0; column < matrix.Columns; column++)
+                    writer.Write(unchecked((long)Math.ToBits(matrix[row, column])));
+                break;
+            case MathBlockValueKind.Complex:
+                WriteComplex(writer, value.AsComplex());
+                break;
+            case MathBlockValueKind.ComplexVector:
+                writer.Write(value.AsComplexVector().Count);
+                foreach (var item in value.AsComplexVector())
+                    WriteComplex(writer, item);
+                break;
+            case MathBlockValueKind.ComplexMatrix:
+                var complexMatrix = value.AsComplexMatrix();
+                writer.Write(complexMatrix.Rows);
+                writer.Write(complexMatrix.Columns);
+                for (var row = 0; row < complexMatrix.Rows; row++)
+                for (var column = 0; column < complexMatrix.Columns; column++)
+                    WriteComplex(writer, complexMatrix[row, column]);
+                break;
+            case MathBlockValueKind.PointSet:
+                writer.Write(value.AsPointSet().Count);
+                foreach (var item in value.AsPointSet())
+                {
+                    writer.Write(unchecked((long)Math.ToBits(item.X)));
+                    writer.Write(unchecked((long)Math.ToBits(item.Y)));
+                }
+                break;
+            case MathBlockValueKind.Graph:
+                writer.Write(value.AsGraph().VertexCount);
+                writer.Write(value.AsGraph().Count);
+                foreach (var item in value.AsGraph())
+                {
+                    writer.Write(item.From);
+                    writer.Write(item.To);
+                    writer.Write(unchecked((long)Math.ToBits(item.Weight)));
+                }
+                break;
+            case MathBlockValueKind.RunSet:
+                writer.Write(value.AsRunSet().Count);
+                foreach (var item in value.AsRunSet())
+                {
+                    writer.Write(item.Start);
+                    writer.Write(item.Length);
+                    writer.Write(unchecked((long)Math.ToBits(item.Value)));
+                }
+                break;
+            default:
+                throw new NotSupportedException("A population value kind is unsupported.");
         }
+    }
+
+    private static void WriteComplex(BinaryWriter writer, Complex value)
+    {
+        writer.Write(unchecked((long)Math.ToBits(value.Real)));
+        writer.Write(unchecked((long)Math.ToBits(value.Imaginary)));
     }
 }

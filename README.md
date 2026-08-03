@@ -35,38 +35,56 @@ Callers can queue resident replays before one synchronization and output read.
 The compiled program serializes atomic state changes, which keeps concurrent
 calls safe.
 
-## Resident typed program populations
+## Resident typed program search
 
-MathBlocks can compile an immutable typed grammar into one resident CUDA
-program population. The definition includes typed terminals, exact scalar
-constant bits, bounded resource bands, and an optional accepted state.
+MathBlocks compiles an immutable typed grammar and typed terminals into one
+resident CUDA search cycle. The definition preserves exact scalar bits,
+caller resource envelopes, validity history, objective bindings, and accepted
+state.
 
-Each candidate is a typed DAG. Its operation nodes contain an operation
+Each program is a typed DAG. Its operation nodes contain an operation
 identifier, a version, and backward operand indexes.
 
-The first compile performs one initial upload. Each later cycle uses one graph
-launch, one synchronization, and one compact download.
+The first compile performs one immutable-data upload. Each cycle uses one graph
+launch, one synchronization, and one compact download. Later cycles do not
+upload immutable data again.
 
-Each cycle performs deterministic enumeration, type validation, candidate
-execution, and exact-bit semantic fingerprinting on the GPU. Immutable terminal
-values remain resident between cycles.
+The resident cycle enumerates and evolves programs on the GPU. It supports
+typed mutation, typed crossover, random immigrants, and deterministic random
+state.
 
-Typed vector terminals can contain caller-supplied numeric objective arrays.
-The runtime does not assign domain meaning to these arrays.
+A caller can bind a typed objective DAG and resident numeric inputs. Program
+outputs and objective inputs remain on the device. Only requested compact
+results, fingerprints, counters, and accepted state return to the host.
 
-The candidate and state formats do not depend on enumeration. Later resident
-strategies can use device-side mutation, typed crossover, and random immigrants
-without changing these formats.
+Generic intrinsic objective sources expose expanded operation count, maximum
+lookback, deterministic execution cost, and age. Each source has an exact
+identity and a caller-selected direction.
 
-Accepted state records the exact next proposal cursor and both fingerprint
-sets. Exported state has a checksum and an exact definition identity.
+Declared history counts and program lookback create a valid-row mask. Objective
+evaluation and semantic fingerprinting use only declared valid rows.
 
-An incompatible state fails before CUDA execution. An unsuccessful cycle does
-not replace the last accepted state.
+Selection maintains Pareto, quality-diversity, and age state on the device.
+Accepted checkpoints include the exact proposal cursor and deterministic random
+state.
+
+An incompatible checkpoint fails before CUDA execution. An unsuccessful cycle
+does not replace the last accepted state.
+
+The compiler measures the current program, objective, archive, payload, and
+scratch capacities. A larger caller envelope can compile a larger resident
+cycle without a permanent search-space limit.
+
+The transition API preserves accepted trial identity across larger graph,
+terminal, objective, and archive bands. It refreshes accepted programs under
+the new resident definition before new proposals.
+
+Every supplied grammar operation uses the same CUDA implementation as the GPU
+worker. Compilation fails if an operation has no supported CUDA identity.
 
 Instrumentation reports graph instances, uploads, launches,
-synchronizations, downloads, resident bytes, duplicate counts, evaluated
-programs, and the accepted cursor.
+synchronizations, downloads, resident bytes, compact bytes, duplicate counts,
+evaluated programs, and the accepted cursor.
 
 ## Geometry example
 
@@ -107,10 +125,10 @@ percentile, and measurement method.
 This Git repository contains source text and project metadata only. It does not
 contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
 
-Get MathBlocks version `0.1.3` from NuGet.org with this command:
+Get MathBlocks version `0.1.4` from NuGet.org with this command:
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.1.3
+dotnet add package Supprocom.MathBlocks --version 0.1.4
 ```
 
 The package declares three external native-acquisition dependencies. This

@@ -309,6 +309,8 @@ internal sealed class PopulationCycleParseResult
 
 internal sealed class PopulationLayout
 {
+    private const int LegacyMaximumArity = 4;
+    private const int LegacyMaximumOperationCount = 8;
     private const int HeaderSize = 128;
     private const int TypeSize = 48;
     private const int OperationSize = 64;
@@ -404,6 +406,12 @@ internal sealed class PopulationLayout
 
     public static PopulationLayout Create(MathBlockProgramPopulationDefinition definition)
     {
+        foreach (var operation in definition.Grammar.Operations)
+            if (operation.InputTypes.Count > LegacyMaximumArity)
+                throw new NotSupportedException("The enumeration primitive supports an arity of four in this build.");
+        foreach (var band in definition.ActiveResourceBands)
+            if (band.OperationCount > LegacyMaximumOperationCount)
+                throw new NotSupportedException("The enumeration primitive supports eight operation nodes in this build.");
         ValidateOperations(definition);
         var types = new List<MathBlockType>();
         int AddType(MathBlockType type)
@@ -551,7 +559,7 @@ internal sealed class PopulationLayout
             WriteInt32(bytes, offset, operationOpcodes[index]);
             WriteInt32(bytes, offset + 4, operationInputTypeIds[index].Length);
             WriteInt32(bytes, offset + 8, operationOutputTypeIds[index]);
-            for (var inputIndex = 0; inputIndex < MathBlockProgramPopulationLimits.MaximumArity; inputIndex++)
+            for (var inputIndex = 0; inputIndex < LegacyMaximumArity; inputIndex++)
             {
                 WriteInt32(
                     bytes,

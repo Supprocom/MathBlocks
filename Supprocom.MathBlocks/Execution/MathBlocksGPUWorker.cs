@@ -9,6 +9,8 @@ public sealed class MathBlocksGPUWorker
         MathBlocksGpuKernelModule.SupportedBlockIdentities;
     public static IReadOnlyCollection<string> SupportedPopulationOperationIdentities =>
         MathBlockProgramPopulationGpuOperations.SupportedIdentities;
+    public static IReadOnlyCollection<string> SupportedPopulationSearchOperationIdentities =>
+        MathBlockGpuFeatureIndex.SupportedIdentities;
 
     public MathBlocksGPUProgram Compile(
         MathBlockProgram program,
@@ -23,6 +25,13 @@ public sealed class MathBlocksGPUWorker
     {
         ArgumentNullException.ThrowIfNull(definition);
         return MathBlocksGPUProgramPopulation.Create(definition);
+    }
+
+    public MathBlocksGPUProgramPopulationSearch CompilePopulationSearch(
+        MathBlockProgramPopulationSearchDefinition definition)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+        return MathBlocksGPUProgramPopulationSearch.Create(definition);
     }
 }
 
