@@ -1338,11 +1338,11 @@ internal sealed class PopulationSearchLayout
         var payloadCapacities = payloadLayout.Capacities;
         for (var index = 0; index < payloadCapacities.Length; index++)
             maximumValueElements = Math.Max(maximumValueElements, payloadCapacities[index]);
+        var objectivePayloadLayout = CreateObjectivePayloadLayout(binding, payloadCapacities);
         var nodes = new ObjectiveNodeDescriptor[plan.Count];
         var inputs = new List<int>();
         var candidateCount = 0;
         var maskCount = 0;
-        var payloadBytes = 0;
         var maximumScratchBytes = 0;
         for (var index = 0; index < plan.Count; index++)
         {
@@ -1409,16 +1409,6 @@ internal sealed class PopulationSearchLayout
             foreach (var input in node.Inputs)
                 inputs.Add(input);
             maximumArity = Math.Max(maximumArity, node.Inputs.Count);
-            var nodePayloadOffset = payloadBytes;
-            var nodePayloadBytes = MeasurePayloadBytes(
-                node.Type.Kind,
-                payloadCapacities[index],
-                $"objective node {index} payload");
-            payloadBytes = AdvanceLayout(
-                payloadBytes,
-                1,
-                nodePayloadBytes,
-                $"objective node {index} payload");
             var nodeScratchBytes = MathBlocksGPUProgram.ResolveScratchBytes(node, plan, payloadLayout);
             maximumScratchBytes = Math.Max(maximumScratchBytes, nodeScratchBytes);
             nodes[index] = new ObjectiveNodeDescriptor(
@@ -1430,7 +1420,7 @@ internal sealed class PopulationSearchLayout
                 inputBase,
                 -1,
                 payloadCapacities[index],
-                nodePayloadOffset,
+                objectivePayloadLayout.Offsets[index],
                 nodeScratchBytes);
         }
         if (candidateCount != 1)
@@ -1470,8 +1460,158 @@ internal sealed class PopulationSearchLayout
             inputs.ToArray(),
             sources,
             dimensions,
-            payloadBytes,
+            objectivePayloadLayout.PayloadBytes,
             maximumScratchBytes);
+    }
+
+    private static ObjectivePayloadLayout CreateObjectivePayloadLayout(
+        MathBlockProgramPopulationObjectiveBinding binding,
+        IReadOnlyList<int> payloadCapacities)
+    {
+        var plan = binding.Program.PlanNodes;
+        if (payloadCapacities.Count != plan.Count)
+            throw new InvalidOperationException("The objective payload-capacity count is inconsistent.");
+
+        var lastUses = new int[plan.Count];
+        for (var nodeIndex = 0; nodeIndex < plan.Count; nodeIndex++)
+        {
+            lastUses[nodeIndex] = nodeIndex;
+            foreach (var inputIndex in plan[nodeIndex].Inputs)
+            {
+                if (inputIndex < 0 || inputIndex >= nodeIndex)
+                    throw new ArgumentException("An objective input must reference an earlier node.", "definition");
+                lastUses[inputIndex] = Math.Max(lastUses[inputIndex], nodeIndex);
+            }
+        }
+        foreach (var objective in binding.Objectives)
+        {
+            if (objective.SourceKind != MathBlockProgramPopulationObjectiveSourceKind.ProgramOutput)
+                continue;
+            if (!binding.Program.OutputNodeIndexes.TryGetValue(objective.ProgramOutput!, out var sourceIndex))
+                throw new ArgumentException("An objective output source is absent.", "definition");
+            lastUses[sourceIndex] = plan.Count;
+        }
+
+        var offsets = new int[plan.Count];
+        for (var nodeIndex = 0; nodeIndex < offsets.Length; nodeIndex++)
+            offsets[nodeIndex] = -1;
+        var releases = new List<ObjectivePayloadRange>?[plan.Count];
+        var freeRanges = new List<ObjectivePayloadRange>();
+        var highWater = 0;
+        var peakBytes = 0;
+        for (var nodeIndex = 0; nodeIndex < plan.Count; nodeIndex++)
+        {
+            if (releases[nodeIndex] is { } releasedRanges)
+            {
+                foreach (var range in releasedRanges)
+                    ReleaseObjectivePayloadRange(freeRanges, range, ref highWater);
+            }
+
+            var node = plan[nodeIndex];
+            if (node.Kind != MathBlockProgramNodeKind.Operation)
+                continue;
+            var payloadBytes = MeasurePayloadBytes(
+                node.Type.Kind,
+                payloadCapacities[nodeIndex],
+                $"objective node {nodeIndex} payload");
+            if (payloadBytes == 0)
+            {
+                offsets[nodeIndex] = 0;
+                continue;
+            }
+
+            var offset = AllocateObjectivePayloadRange(
+                freeRanges,
+                payloadBytes,
+                nodeIndex,
+                ref highWater,
+                ref peakBytes);
+            offsets[nodeIndex] = offset;
+            var releaseIndex = checked(lastUses[nodeIndex] + 1);
+            if (releaseIndex < plan.Count)
+            {
+                releases[releaseIndex] ??= [];
+                releases[releaseIndex]!.Add(new ObjectivePayloadRange(offset, payloadBytes));
+            }
+        }
+        return new ObjectivePayloadLayout(offsets, peakBytes);
+    }
+
+    private static int AllocateObjectivePayloadRange(
+        List<ObjectivePayloadRange> freeRanges,
+        int payloadBytes,
+        int nodeIndex,
+        ref int highWater,
+        ref int peakBytes)
+    {
+        for (var rangeIndex = 0; rangeIndex < freeRanges.Count; rangeIndex++)
+        {
+            var range = freeRanges[rangeIndex];
+            if (range.Bytes < payloadBytes)
+                continue;
+            if (range.Bytes == payloadBytes)
+                freeRanges.RemoveAt(rangeIndex);
+            else
+                freeRanges[rangeIndex] = new ObjectivePayloadRange(
+                    checked(range.Offset + payloadBytes),
+                    checked(range.Bytes - payloadBytes));
+            return range.Offset;
+        }
+
+        var offset = highWater;
+        highWater = AdvanceLayout(
+            highWater,
+            1,
+            payloadBytes,
+            $"objective node {nodeIndex} payload");
+        peakBytes = Math.Max(peakBytes, highWater);
+        return offset;
+    }
+
+    private static void ReleaseObjectivePayloadRange(
+        List<ObjectivePayloadRange> freeRanges,
+        ObjectivePayloadRange released,
+        ref int highWater)
+    {
+        var insertIndex = 0;
+        while (insertIndex < freeRanges.Count && freeRanges[insertIndex].Offset < released.Offset)
+            insertIndex++;
+
+        var start = released.Offset;
+        var end = checked(released.Offset + released.Bytes);
+        if (insertIndex > 0)
+        {
+            var previous = freeRanges[insertIndex - 1];
+            var previousEnd = checked(previous.Offset + previous.Bytes);
+            if (previousEnd > start)
+                throw new InvalidOperationException("Objective payload lifetimes overlap in the free pool.");
+            if (previousEnd == start)
+            {
+                start = previous.Offset;
+                freeRanges.RemoveAt(--insertIndex);
+            }
+        }
+        if (insertIndex < freeRanges.Count)
+        {
+            var next = freeRanges[insertIndex];
+            if (next.Offset < end)
+                throw new InvalidOperationException("Objective payload lifetimes overlap in the free pool.");
+            if (next.Offset == end)
+            {
+                end = checked(next.Offset + next.Bytes);
+                freeRanges.RemoveAt(insertIndex);
+            }
+        }
+        freeRanges.Insert(insertIndex, new ObjectivePayloadRange(start, checked(end - start)));
+
+        while (freeRanges.Count > 0)
+        {
+            var last = freeRanges[^1];
+            if (checked(last.Offset + last.Bytes) != highWater)
+                break;
+            highWater = last.Offset;
+            freeRanges.RemoveAt(freeRanges.Count - 1);
+        }
     }
 
     private static MathBlockGpuShapeAuthority ResolveMatrixCandidateShapeAuthority(
@@ -1903,6 +2043,10 @@ internal sealed class PopulationSearchLayout
         int ScratchBytes);
 
     private readonly record struct ObjectiveSourceDescriptor(int SourceKind, int ProgramNodeIndex, int Direction);
+
+    private readonly record struct ObjectivePayloadRange(int Offset, int Bytes);
+
+    private sealed record ObjectivePayloadLayout(int[] Offsets, int PayloadBytes);
 
     private readonly record struct QualityDimensionDescriptor(
         int ObjectiveIndex,

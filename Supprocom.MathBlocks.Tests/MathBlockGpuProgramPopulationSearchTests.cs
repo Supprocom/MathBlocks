@@ -300,6 +300,7 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         var expectedSemantic = definition.CreateSemanticFingerprint(expectedProgram);
         Assert.All(expectedObjectives, value => Assert.True(double.IsFinite(value)));
         using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition);
+        AssertObjectivePayloadLifetimes(compiled, definition);
         Assert.Equal(33, compiled.Capacity.MaximumValueElements);
 
         var result = compiled.ExecuteCycle();
@@ -1624,8 +1625,40 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         long residentBytes;
         using (var uninterrupted = new MathBlocksGPUWorker().CompilePopulationSearch(definition))
         {
+            Assert.Equal(23, definition.Population.Terminals.Count);
+            Assert.Empty(definition.Population.ScalarConstants);
+            Assert.Equal(8, definition.Population.Grammar.Operations.Count);
+            Assert.Equal(4_232ul, definition.Population.TotalProposalCount);
+            Assert.Equal(8_071, definition.ObjectiveBinding.Program.PlanNodes.Count);
+            var layout = ReadLayout(uninterrupted);
+            var nodes = (Array)layout.GetType()
+                .GetField("objectiveNodes", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(layout)!;
+            var types = (MathBlockType[])layout.GetType()
+                .GetField("types", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(layout)!;
+            var pooledPayloadBytes = (int)layout.GetType()
+                .GetProperty("ObjectivePayloadBytes", BindingFlags.Instance | BindingFlags.Public)!
+                .GetValue(layout)!;
+            long unpooledPayloadBytes = 0;
+            foreach (var descriptor in nodes)
+            {
+                var descriptorType = descriptor!.GetType();
+                if ((int)descriptorType.GetProperty("Kind")!.GetValue(descriptor)! != 3)
+                    continue;
+                var typeId = (int)descriptorType.GetProperty("TypeId")!.GetValue(descriptor)!;
+                var capacity = (int)descriptorType.GetProperty("PayloadCapacity")!.GetValue(descriptor)!;
+                unpooledPayloadBytes = checked(
+                    unpooledPayloadBytes + PayloadBytes(types[typeId].Kind, capacity));
+            }
+            Assert.True(unpooledPayloadBytes > int.MaxValue);
+            Assert.InRange(pooledPayloadBytes, 1, int.MaxValue);
+            Assert.True(pooledPayloadBytes < unpooledPayloadBytes);
             residentBytes = uninterrupted.ResidentBytes;
-            Console.WriteLine($"The measured resident size is {residentBytes} bytes.");
+            Console.WriteLine(
+                $"The measured resident size is {residentBytes} bytes. " +
+                $"The objective payload pool is {pooledPayloadBytes} bytes. " +
+                $"The unpooled objective payload is {unpooledPayloadBytes} bytes.");
             var first = uninterrupted.ExecuteCycle();
             checkpoint = MathBlockProgramPopulationSearchState.Import(first.AcceptedState.Export());
             var evaluatedTrials = first.Trials.Where(trial => trial.Objectives.Count != 0).ToArray();
@@ -1844,7 +1877,7 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     }
 
     [Fact]
-    public void Resident_objective_layout_covers_every_public_GPU_operation_identity_without_overlap()
+    public void Resident_objective_layout_covers_every_public_GPU_identity_with_safe_lifetime_reuse()
     {
         RequireCuda();
         var definition = CreateAllIdentityObjectiveLayoutSearch();
@@ -1862,10 +1895,24 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         var scratchBytes = (int)layout.GetType()
             .GetProperty("ScratchBytesPerNode", BindingFlags.Instance | BindingFlags.Public)!
             .GetValue(layout)!;
-        var payloadRanges = new List<(int Start, int End)>();
-        var operationNodeCount = 0;
-        foreach (var descriptor in nodes)
+        var plan = definition.ObjectiveBinding.Program.PlanNodes;
+        var lastUses = Enumerable.Range(0, plan.Count).ToArray();
+        for (var nodeIndex = 0; nodeIndex < plan.Count; nodeIndex++)
         {
+            foreach (var inputIndex in plan[nodeIndex].Inputs)
+                lastUses[inputIndex] = Math.Max(lastUses[inputIndex], nodeIndex);
+        }
+        foreach (var objective in definition.ObjectiveBinding.Objectives)
+        {
+            if (objective.SourceKind != MathBlockProgramPopulationObjectiveSourceKind.ProgramOutput)
+                continue;
+            lastUses[definition.ObjectiveBinding.Program.OutputNodeIndexes[objective.ProgramOutput!]] = plan.Count;
+        }
+        var payloadRanges = new List<(int Node, int LastUse, int Start, int End)>();
+        var operationNodeCount = 0;
+        for (var nodeIndex = 0; nodeIndex < nodes.Length; nodeIndex++)
+        {
+            var descriptor = nodes.GetValue(nodeIndex)!;
             var descriptorType = descriptor!.GetType();
             if ((int)descriptorType.GetProperty("Kind")!.GetValue(descriptor)! != 3)
                 continue;
@@ -1879,13 +1926,22 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
             Assert.InRange(offset, 0, objectivePayloadBytes);
             Assert.InRange(checked(offset + requiredPayload), 0, objectivePayloadBytes);
             if (requiredPayload > 0)
-                payloadRanges.Add((offset, checked(offset + requiredPayload)));
+                payloadRanges.Add((nodeIndex, lastUses[nodeIndex], offset, checked(offset + requiredPayload)));
         }
         Assert.Equal(337, MathBlocksGPUWorker.SupportedBlockIdentities.Count);
         Assert.Equal(MathBlocksGPUWorker.SupportedBlockIdentities.Count, operationNodeCount);
-        var ordered = payloadRanges.OrderBy(range => range.Start).ToArray();
-        for (var index = 1; index < ordered.Length; index++)
-            Assert.True(ordered[index - 1].End <= ordered[index].Start);
+        for (var leftIndex = 0; leftIndex < payloadRanges.Count; leftIndex++)
+        {
+            var left = payloadRanges[leftIndex];
+            for (var rightIndex = leftIndex + 1; rightIndex < payloadRanges.Count; rightIndex++)
+            {
+                var right = payloadRanges[rightIndex];
+                if (left.LastUse < right.Node)
+                    continue;
+                Assert.True(left.End <= right.Start || right.End <= left.Start);
+            }
+        }
+        Assert.True(payloadRanges.Select(range => range.Start).Distinct().Count() < payloadRanges.Count);
 
         var overflow = CreateUnrepresentableLayoutSearch();
         var exception = Assert.Throws<ArgumentOutOfRangeException>(
@@ -1901,51 +1957,84 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         const int bootstrapSamples = 257;
         const int bootstrapBlockEras = 2;
         var eraCount = checked((rowCount + framesPerEra - 1) / framesPerEra);
-        var vectorType = MathBlockType.Vector(length: rowCount);
         var candidateType = MathBlockType.BooleanVector(rowCount);
-        var terminals = Enumerable.Range(0, 14)
-            .Select(terminal => new MathBlockProgramPopulationTerminal(
-                $"telemetry-{terminal:D2}",
-                vectorType,
-                MathBlockValue.Vector(Enumerable.Range(0, rowCount).Select(row =>
-                    (double)((row * (terminal + 3) + terminal * 11) % 101))),
-                lookback: 1))
-            .ToArray();
-        var population = new MathBlockProgramPopulationDefinition(
-            new MathBlockProgramPopulationGrammar(
-                [
-                    new MathBlockProgramPopulationOperation(
-                        "vector.greater-than",
-                        1,
-                        [vectorType, vectorType],
-                        candidateType),
-                    new MathBlockProgramPopulationOperation(
-                        "vector.less-than",
-                        1,
-                        [vectorType, vectorType],
-                        candidateType)
-                ],
+        var units = new[]
+        {
+            MathBlockUnit.Basis0,
+            MathBlockUnit.Basis1,
+            MathBlockUnit.Basis2,
+            MathBlockUnit.Basis3
+        };
+        var terminalCounts = new[] { 6, 6, 6, 5 };
+        var vectorTypes = units.Select(unit => MathBlockType.Vector(unit, rowCount)).ToArray();
+        var operations = units.SelectMany((unit, unitIndex) => new[]
+        {
+            new MathBlockProgramPopulationOperation(
+                "vector.greater-than",
+                1,
+                [vectorTypes[unitIndex], vectorTypes[unitIndex]],
                 candidateType),
+            new MathBlockProgramPopulationOperation(
+                "vector.less-than",
+                1,
+                [vectorTypes[unitIndex], vectorTypes[unitIndex]],
+                candidateType)
+        }).ToArray();
+        var terminals = new List<MathBlockProgramPopulationTerminal>();
+        for (var unitIndex = 0; unitIndex < units.Length; unitIndex++)
+        {
+            for (var terminalIndex = 0; terminalIndex < terminalCounts[unitIndex]; terminalIndex++)
+            {
+                var valueOffset = checked(unitIndex * 10 + terminalIndex);
+                terminals.Add(new MathBlockProgramPopulationTerminal(
+                    $"telemetry-{unitIndex:D2}-{terminalIndex:D2}",
+                    vectorTypes[unitIndex],
+                    MathBlockValue.Vector(
+                        Enumerable.Range(0, rowCount).Select(row =>
+                            (double)((row * (valueOffset + 3) + valueOffset * 11) % 101)),
+                        units[unitIndex]),
+                    lookback: 1));
+            }
+        }
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(operations, candidateType),
             terminals,
             [],
             [new MathBlockProgramPopulationResourceBand(1, rowCount)],
-            proposalsPerCycle: 1,
-            fingerprintCapacity: 512);
+            proposalsPerCycle: 64,
+            fingerprintCapacity: 8192);
+        Assert.Equal(4_232ul, population.TotalProposalCount);
 
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
-        var candidate = builder.Input("candidate", MathBlockType.BooleanVector());
-        var candidateValidity = builder.Input("candidate-validity", MathBlockType.BooleanVector());
-        var eligibility = builder.Input("eligibility", candidateType);
-        var positive = builder.Input("positive", candidateType);
+        var nodeCount = 0;
+        int Input(string name, MathBlockType type)
+        {
+            nodeCount++;
+            return builder.Input(name, type);
+        }
+        int Constant(MathBlockValue value)
+        {
+            nodeCount++;
+            return builder.Constant(value);
+        }
+        int Apply(string identity, params int[] inputs)
+        {
+            nodeCount++;
+            return builder.Apply(identity, inputs: inputs);
+        }
+        int Scalar(double value) => Constant(MathBlockValue.Scalar(value));
+
+        var candidate = Input("candidate", MathBlockType.BooleanVector());
+        var candidateValidity = Input("candidate-validity", MathBlockType.BooleanVector());
+        var eligibility = Input("eligibility", candidateType);
+        var positive = Input("positive", candidateType);
         var eraInputs = Enumerable.Range(0, eraCount)
-            .Select(era => builder.Input($"era-{era:D3}", candidateType))
+            .Select(era => Input($"era-{era:D3}", candidateType))
             .ToArray();
         var eraScoreInputs = Enumerable.Range(0, eraCount)
-            .Select(era => builder.Input($"era-score-{era:D3}", MathBlockType.Scalar()))
+            .Select(era => Input($"era-score-{era:D3}", MathBlockType.Scalar()))
             .ToArray();
 
-        int Scalar(double value) => builder.Constant(MathBlockValue.Scalar(value));
-        int Apply(string identity, params int[] inputs) => builder.Apply(identity, inputs: inputs);
         int And(int left, int right) => Apply("boolean-vector.and", left, right);
         int Not(int value) => Apply("boolean-vector.not", value);
         int Count(int value) => Apply("boolean-vector.true-count", value);
@@ -2042,12 +2131,24 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
             var gathered = Apply(
                 "vector.gather",
                 eraVector,
-                builder.Constant(MathBlockValue.Vector(indexes)));
+                Constant(MathBlockValue.Vector(indexes)));
             sampleMedians[sample] = Apply("vector.median", gathered);
         }
         var sampleMedianVector = VectorFromScalars(sampleMedians);
         var lowerConfidence = Apply("vector.quantile", sampleMedianVector, Scalar(0.05d));
         var lowerEra = Apply("vector.quantile", eraVector, Scalar(0.25d));
+
+        var payloadProbe = Input("payload-probe", vectorTypes[0]);
+        var compactPayloadProbe = Apply("vector.unique", payloadProbe);
+        for (var probe = 0; probe < 878; probe++)
+            Apply("vector.absolute", compactPayloadProbe);
+        var filler = Scalar(-1d);
+        while (nodeCount < 8_070)
+            Apply("scalar.absolute", filler);
+        Assert.Equal(8_070, nodeCount);
+        Apply("vector.absolute", compactPayloadProbe);
+        Assert.Equal(8_071, nodeCount);
+
         var objectiveProgram = builder
             .Output("lower-confidence", lowerConfidence)
             .Output("aggregate", aggregateScore)
@@ -2058,7 +2159,10 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         {
             ["eligibility"] = MathBlockValue.BooleanVector(Enumerable.Repeat(true, rowCount)),
             ["positive"] = MathBlockValue.BooleanVector(
-                Enumerable.Range(0, rowCount).Select(row => row % 3 == 0 || row % 11 == 0))
+                Enumerable.Range(0, rowCount).Select(row => row % 3 == 0 || row % 11 == 0)),
+            ["payload-probe"] = MathBlockValue.Vector(
+                Enumerable.Repeat(1d, rowCount),
+                units[0])
         };
         for (var era = 0; era < eraCount; era++)
         {
@@ -2092,7 +2196,7 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         return new MathBlockProgramPopulationSearchDefinition(
             population,
             binding,
-            new MathBlockProgramPopulationEvolutionPolicy(4, 4, 0, 0, 0, 1701),
+            new MathBlockProgramPopulationEvolutionPolicy(512, 256, 1, 1, 1, 1701),
             new MathBlockProgramPopulationSelectionPolicy(128, 128),
             new MathBlockProgramPopulationQualityDiversityPolicy(
                 "lower-confidence",
@@ -2203,6 +2307,65 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         typeof(MathBlocksGPUProgramPopulationSearch)
             .GetField("layout", BindingFlags.Instance | BindingFlags.NonPublic)!
             .GetValue(compiled)!;
+
+    private static void AssertObjectivePayloadLifetimes(
+        MathBlocksGPUProgramPopulationSearch compiled,
+        MathBlockProgramPopulationSearchDefinition definition)
+    {
+        var layout = ReadLayout(compiled);
+        var nodes = (Array)layout.GetType()
+            .GetField("objectiveNodes", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(layout)!;
+        var types = (MathBlockType[])layout.GetType()
+            .GetField("types", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(layout)!;
+        var payloadBytes = (int)layout.GetType()
+            .GetProperty("ObjectivePayloadBytes", BindingFlags.Instance | BindingFlags.Public)!
+            .GetValue(layout)!;
+        var plan = definition.ObjectiveBinding.Program.PlanNodes;
+        var lastUses = Enumerable.Range(0, plan.Count).ToArray();
+        for (var nodeIndex = 0; nodeIndex < plan.Count; nodeIndex++)
+        {
+            foreach (var inputIndex in plan[nodeIndex].Inputs)
+                lastUses[inputIndex] = Math.Max(lastUses[inputIndex], nodeIndex);
+        }
+        foreach (var objective in definition.ObjectiveBinding.Objectives)
+        {
+            if (objective.SourceKind != MathBlockProgramPopulationObjectiveSourceKind.ProgramOutput)
+                continue;
+            lastUses[definition.ObjectiveBinding.Program.OutputNodeIndexes[objective.ProgramOutput!]] = plan.Count;
+        }
+
+        var ranges = new List<(int Node, int LastUse, int Start, int End)>();
+        for (var nodeIndex = 0; nodeIndex < nodes.Length; nodeIndex++)
+        {
+            var descriptor = nodes.GetValue(nodeIndex)!;
+            var descriptorType = descriptor.GetType();
+            if ((int)descriptorType.GetProperty("Kind")!.GetValue(descriptor)! != 3)
+                continue;
+            var typeId = (int)descriptorType.GetProperty("TypeId")!.GetValue(descriptor)!;
+            var capacity = (int)descriptorType.GetProperty("PayloadCapacity")!.GetValue(descriptor)!;
+            var offset = (int)descriptorType.GetProperty("PayloadOffset")!.GetValue(descriptor)!;
+            var requiredBytes = PayloadBytes(types[typeId].Kind, capacity);
+            Assert.InRange(offset, 0, payloadBytes);
+            Assert.InRange(checked(offset + requiredBytes), 0, payloadBytes);
+            if (requiredBytes > 0)
+                ranges.Add((nodeIndex, lastUses[nodeIndex], offset, checked(offset + requiredBytes)));
+        }
+        for (var leftIndex = 0; leftIndex < ranges.Count; leftIndex++)
+        {
+            var left = ranges[leftIndex];
+            for (var rightIndex = leftIndex + 1; rightIndex < ranges.Count; rightIndex++)
+            {
+                var right = ranges[rightIndex];
+                if (left.LastUse < right.Node)
+                    continue;
+                Assert.True(
+                    left.End <= right.Start || right.End <= left.Start,
+                    $"Objective nodes {left.Node} and {right.Node} have overlapping live payloads.");
+            }
+        }
+    }
 
     private static int PayloadBytes(MathBlockValueKind kind, int capacity) => kind switch
     {

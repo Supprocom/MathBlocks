@@ -303,7 +303,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int rows = mbp_read_int(arena, type + 4);
             int columns = mbp_read_int(arena, type + 8);
             slot->scalar_value = 0.0;
-            slot->data_pointer = data_pointer;
+            slot->data_pointer = kind == 1 || kind == 2 ? 0ull : data_pointer;
             slot->scratch_pointer = scratch_pointer;
             slot->boolean_value = 0;
             slot->valid = 1;
