@@ -750,7 +750,8 @@ public sealed class MathBlocksGPUProgram : IDisposable
             node.Type.Rows > 0 &&
             node.Type.Columns > 0)
             return checked(node.Type.Rows * node.Type.Columns);
-        if (node.Type.Kind is not (MathBlockValueKind.Matrix or MathBlockValueKind.ComplexMatrix) &&
+        if (node.Type.Kind is not (
+                MathBlockValueKind.Matrix or MathBlockValueKind.ComplexMatrix or MathBlockValueKind.Graph) &&
             node.Type.Rows > 0)
             return node.Type.Rows;
         if (node.Kind == MathBlockProgramNodeKind.Operation)

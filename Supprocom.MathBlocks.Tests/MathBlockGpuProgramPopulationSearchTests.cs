@@ -500,6 +500,101 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Resident_search_resolves_graph_edge_capacity_separately_from_vertices()
+    {
+        RequireCuda();
+        var matrixType = MathBlockType.Matrix(rows: 4, columns: 4);
+        var adjacency = MathBlockValue.Matrix(new MathBlockMatrix(
+            4,
+            4,
+            [
+                0d, 1d, 1d, 1d,
+                1d, 0d, 1d, 1d,
+                1d, 1d, 0d, 1d,
+                1d, 1d, 1d, 0d
+            ]));
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation(
+                    "matrix.transpose",
+                    1,
+                    [matrixType],
+                    matrixType)],
+                matrixType),
+            [new MathBlockProgramPopulationTerminal(
+                "directed-adjacency",
+                matrixType,
+                adjacency)],
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 16)],
+            proposalsPerCycle: 1,
+            fingerprintCapacity: 4);
+        var objectiveBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = objectiveBuilder.Input("candidate", matrixType);
+        var graph = objectiveBuilder.Apply("graph.from-directed-adjacency", inputs: [candidate]);
+        var triangles = objectiveBuilder.Apply("graph.triangle-count", inputs: [graph]);
+        var objectiveProgram = objectiveBuilder.Output("triangle-count", triangles).Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveProgram,
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "triangle-count",
+                "triangle-count",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        var definition = CreateDefinition(
+            population,
+            binding,
+            maximumTrials: 1,
+            enumerationTrials: 1,
+            validity: new MathBlockProgramPopulationValidityPolicy([0, 1, 2, 3]));
+        var expectedProgram = new MathBlockProgramStructure(
+            0,
+            0,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                MathBlockProgramCandidateNode.Terminal(0, "directed-adjacency", matrixType),
+                MathBlockProgramCandidateNode.Operation(
+                    "matrix.transpose",
+                    1,
+                    matrixType,
+                    0)
+            ]);
+        var candidateOutput = population.Evaluate(expectedProgram);
+        var expectedGraph = MathBlockCatalog.Standard
+            .Get("graph.from-directed-adjacency", 1)
+            .Evaluate(candidateOutput);
+        Assert.Equal(12, expectedGraph.AsGraph().Count);
+        var expectedObjectives = definition.EvaluateObjectives(expectedProgram);
+        var expectedSemantic = definition.CreateSemanticFingerprint(expectedProgram);
+        using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition);
+
+        var result = compiled.ExecuteCycle();
+
+        Assert.Single(result.Trials);
+        var accepted = Assert.Single(
+            result.Trials,
+            trial => trial.Status == MathBlockProgramPopulationTrialStatus.Accepted);
+        Assert.Equal(expectedProgram.StructuralFingerprint, accepted.StructuralFingerprint);
+        Assert.Equal(
+            expectedObjectives.Select(BitConverter.DoubleToInt64Bits),
+            accepted.Objectives.Select(BitConverter.DoubleToInt64Bits));
+        Assert.Equal(expectedSemantic, accepted.SemanticFingerprint);
+        Assert.Equal(1ul, result.AcceptedState.EvaluatedProgramCount);
+        Assert.Equal(1ul, result.AcceptedState.AcceptedProgramCount);
+        Assert.Equal(1, compiled.GraphInstanceCount);
+        Assert.Equal(1, compiled.ImmutableUploadCount);
+        Assert.Equal(0, compiled.LaterImmutableUploadCount);
+        Assert.Equal(1, compiled.GraphLaunchCount);
+        Assert.Equal(1, compiled.SynchronizationCount);
+        Assert.Equal(1, compiled.DownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputBytes);
+        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        Assert.Equal((long)compiled.CompactDownloadBytesPerCycle, compiled.DownloadedBytes);
+    }
+
+    [Fact]
     public void Resident_search_accepts_more_than_eight_objectives_and_intrinsic_sources()
     {
         RequireCuda();
