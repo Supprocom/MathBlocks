@@ -1443,7 +1443,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0 || threadIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 5)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 6)
                 return;
 
             int grammar_operation_count = mbp_read_int(arena, 8);
@@ -1546,11 +1546,15 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             mbp_ull envelope_generation = mbp_read_ull(arena, accepted_state_offset + 88);
             int refresh_cursor = mbp_read_int(arena, accepted_state_offset + 96);
             int accepted_refresh_count = mbp_read_int(arena, accepted_state_offset + 100);
+            mbp_ull enumeration_trial_count = mbp_read_ull(arena, accepted_state_offset + 104);
             if (structural_count < 0 || structural_count > fingerprint_capacity ||
                 semantic_count < 0 || semantic_count > fingerprint_capacity ||
                 pareto_count < 0 || pareto_count > pareto_capacity ||
                 quality_count < 0 || quality_count > quality_capacity ||
-                enumeration_cursor > enumeration_limit || trial_cursor > maximum_trials ||
+                enumeration_cursor > total_proposals ||
+                enumeration_trial_count > enumeration_limit ||
+                enumeration_trial_count > enumeration_cursor ||
+                enumeration_trial_count > trial_cursor || trial_cursor > maximum_trials ||
                 random_first == 0ull && random_second == 0ull ||
                 refresh_cursor < 0 || refresh_cursor > refresh_count ||
                 accepted_refresh_count != refresh_count)
@@ -1833,26 +1837,61 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 mbp_ull proposal_cursor = ~0ull;
                 int candidate_operation_count = 0;
                 int band_maximum = maximum_band_elements;
+                int maximum_lookback = 0;
+                mbp_ull deterministic_cost = 0ull;
                 bool generated = false;
-                if (enumeration_cursor < enumeration_limit)
+                bool enumeration_typed = false;
+                if (enumeration_trial_count < enumeration_limit && enumeration_cursor < total_proposals)
                 {
                     source = 0;
-                    proposal_cursor = enumeration_cursor++;
-                    generated = mbp_decode_enumeration(
-                        arena,
-                        proposal_cursor,
-                        grammar_operation_count,
-                        terminal_count,
-                        band_count,
-                        maximum_arity,
-                        operation_offset,
-                        band_offset,
-                        selected_operations,
-                        selected_operands,
-                        &candidate_operation_count,
-                        &band_maximum);
+                    while (enumeration_cursor < total_proposals)
+                    {
+                        proposal_cursor = enumeration_cursor++;
+                        generated = mbp_decode_enumeration(
+                            arena,
+                            proposal_cursor,
+                            grammar_operation_count,
+                            terminal_count,
+                            band_count,
+                            maximum_arity,
+                            operation_offset,
+                            band_offset,
+                            selected_operations,
+                            selected_operands,
+                            &candidate_operation_count,
+                            &band_maximum);
+                        if (!generated)
+                        {
+                            mbp_fail(arena, compact_offset, 4);
+                            return;
+                        }
+                        enumeration_typed = mbp_type_program(
+                            arena,
+                            operation_offset,
+                            operation_input_type_offset,
+                            terminal_offset,
+                            type_offset,
+                            terminal_count,
+                            candidate_operation_count,
+                            maximum_arity,
+                            output_type,
+                            selected_operations,
+                            selected_operands,
+                            selected_types,
+                            selected_lookbacks,
+                            &maximum_lookback,
+                            &deterministic_cost);
+                        if (enumeration_typed)
+                        {
+                            enumeration_trial_count++;
+                            break;
+                        }
+                        generated = false;
+                    }
                 }
-                else if (evolution_pattern > 0)
+                if (!generated &&
+                    (enumeration_trial_count >= enumeration_limit || enumeration_cursor >= total_proposals) &&
+                    evolution_pattern > 0)
                 {
                     int position = (int)(trial_cursor % (mbp_ull)evolution_pattern);
                     if (position < mutation_trials)
@@ -1928,6 +1967,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                             band_maximum = mbp_read_int(arena, band_offset + band_index * 24 + 4);
                     }
                 }
+                if (!generated)
+                    break;
                 mbp_ull current_trial = trial_cursor++;
                 processed++;
                 int candidate_entry = compact_trial_offset + trial_result_count * entry_size;
@@ -1957,9 +1998,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 int flags = 0;
                 int cell = -1;
                 bool keep_result = include_rejected != 0;
-                int maximum_lookback = 0;
-                mbp_ull deterministic_cost = 0ull;
-                bool typed = generated && mbp_type_program(
+                bool typed = enumeration_typed || generated && mbp_type_program(
                     arena,
                     operation_offset,
                     operation_input_type_offset,
@@ -2189,6 +2228,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             mbp_write_ull(arena, working_state_offset + 88, envelope_generation);
             mbp_write_int(arena, working_state_offset + 96, refresh_cursor);
             mbp_write_int(arena, working_state_offset + 100, refresh_count);
+            mbp_write_ull(arena, working_state_offset + 104, enumeration_trial_count);
 
             mbp_copy(arena + accepted_state_offset, arena + working_state_offset, 128);
             mbp_copy(
@@ -2228,6 +2268,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             mbp_write_ull(arena, compact_offset + 104, envelope_generation);
             mbp_write_int(arena, compact_offset + 112, refresh_cursor);
             mbp_write_int(arena, compact_offset + 116, refresh_count);
+            mbp_write_ull(arena, compact_offset + 120, enumeration_trial_count);
             mbp_copy(
                 arena + compact_pareto_offset,
                 arena + working_pareto_offset,

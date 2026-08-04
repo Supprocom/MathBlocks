@@ -305,10 +305,10 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
 
         var result = compiled.ExecuteCycle();
 
-        Assert.Equal(14, result.Trials.Count);
-        Assert.Equal(
-            13,
-            result.Trials.Count(trial => trial.Status == MathBlockProgramPopulationTrialStatus.InvalidType));
+        Assert.Single(result.Trials);
+        Assert.DoesNotContain(
+            result.Trials,
+            trial => trial.Status == MathBlockProgramPopulationTrialStatus.InvalidType);
         var accepted = Assert.Single(
             result.Trials,
             trial => trial.Status == MathBlockProgramPopulationTrialStatus.Accepted);
@@ -320,6 +320,9 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         Assert.Equal(expectedSemantic, accepted.SemanticFingerprint);
         Assert.Equal((ulong)1, result.AcceptedState.EvaluatedProgramCount);
         Assert.Equal((ulong)1, result.AcceptedState.AcceptedProgramCount);
+        Assert.Equal(14ul, result.AcceptedState.EnumerationCursor);
+        Assert.Equal(1ul, result.AcceptedState.EnumerationTrialCount);
+        Assert.Equal(13ul, result.AcceptedState.InvalidEnumerationProposalCount);
         Assert.Equal(1, compiled.GraphInstanceCount);
         Assert.Equal(1, compiled.ImmutableUploadCount);
         Assert.Equal(0, compiled.LaterImmutableUploadCount);
@@ -1050,13 +1053,13 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     }
 
     [Fact]
-    public void Resident_search_types_overload_proposals_before_structural_deduplication()
+    public void Resident_search_skips_invalid_overload_proposals_before_trial_budget()
     {
         RequireCuda();
         var definition = CreateVectorOverloadSearch(
-            proposalsPerCycle: 787,
-            maximumTrials: 787,
-            enumerationTrials: 784,
+            proposalsPerCycle: 55,
+            maximumTrials: 55,
+            enumerationTrials: 55,
             mutationTrials: 1,
             crossoverTrials: 1,
             immigrantTrials: 1);
@@ -1074,9 +1077,10 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
 
         Assert.Equal(784ul, definition.Population.TotalProposalCount);
         Assert.Equal(52, reference.Count);
-        Assert.Equal(784, enumeration.Length);
-        Assert.Equal(732, enumeration.Count(
-            trial => trial.Status == MathBlockProgramPopulationTrialStatus.InvalidType));
+        Assert.Equal(reference.Count, enumeration.Length);
+        Assert.DoesNotContain(
+            enumeration,
+            trial => trial.Status == MathBlockProgramPopulationTrialStatus.InvalidType);
         Assert.DoesNotContain(
             enumeration,
             trial => trial.Status == MathBlockProgramPopulationTrialStatus.StructuralDuplicate);
@@ -1103,9 +1107,53 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
                 MathBlockProgramPopulationTrialStatus.InvalidType or
                 MathBlockProgramPopulationTrialStatus.InsufficientParents));
         Assert.Equal((ulong)reference.Count, result.AcceptedState.EvaluatedProgramCount);
+        Assert.Equal(784ul, result.AcceptedState.EnumerationCursor);
+        Assert.Equal((ulong)reference.Count, result.AcceptedState.EnumerationTrialCount);
+        Assert.Equal(732ul, result.AcceptedState.InvalidEnumerationProposalCount);
+        Assert.True(result.IsEnumerationComplete);
         Assert.Equal(
             reference.Keys.Order(StringComparer.Ordinal),
             result.AcceptedState.StructuralFingerprints.Order(StringComparer.Ordinal));
+        Assert.Equal(1, compiled.GraphInstanceCount);
+        Assert.Equal(1, compiled.ImmutableUploadCount);
+        Assert.Equal(0, compiled.LaterImmutableUploadCount);
+        Assert.Equal(1, compiled.GraphLaunchCount);
+        Assert.Equal(1, compiled.SynchronizationCount);
+        Assert.Equal(1, compiled.DownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputBytes);
+        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+    }
+
+    [Fact]
+    public void Resident_typed_enumeration_bootstraps_below_the_raw_cartesian_budget()
+    {
+        RequireCuda();
+        var definition = CreateMixedUnitComparisonBootstrapSearch();
+        using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition);
+
+        var result = compiled.ExecuteCycle();
+        var enumeration = result.Trials
+            .Where(trial => trial.Program.Source == MathBlockProgramPopulationTrialSource.Enumeration)
+            .ToArray();
+        var mutation = Assert.Single(
+            result.Trials,
+            trial => trial.Program.Source == MathBlockProgramPopulationTrialSource.Mutation);
+
+        Assert.Equal(64ul, definition.Population.TotalProposalCount);
+        Assert.Equal(4, enumeration.Length);
+        Assert.DoesNotContain(
+            enumeration,
+            trial => trial.Status == MathBlockProgramPopulationTrialStatus.InvalidType);
+        Assert.All(enumeration, trial => Assert.Equal(
+            definition.EvaluateObjectives(trial.Program).Select(BitConverter.DoubleToInt64Bits),
+            trial.Objectives.Select(BitConverter.DoubleToInt64Bits)));
+        Assert.NotEmpty(result.AcceptedState.SelectionEntries);
+        Assert.NotEqual(MathBlockProgramPopulationTrialStatus.InsufficientParents, mutation.Status);
+        Assert.Equal(16ul, result.AcceptedState.EnumerationCursor);
+        Assert.Equal(4ul, result.AcceptedState.EnumerationTrialCount);
+        Assert.Equal(12ul, result.AcceptedState.InvalidEnumerationProposalCount);
+        Assert.True(result.IsEnumerationComplete);
         Assert.Equal(1, compiled.GraphInstanceCount);
         Assert.Equal(1, compiled.ImmutableUploadCount);
         Assert.Equal(0, compiled.LaterImmutableUploadCount);
@@ -1122,9 +1170,9 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     {
         RequireCuda();
         var definition = CreateVectorOverloadSearch(
-            proposalsPerCycle: 392,
-            maximumTrials: 784,
-            enumerationTrials: 784);
+            proposalsPerCycle: 26,
+            maximumTrials: 52,
+            enumerationTrials: 52);
         var reference = CreateVectorOverloadCpuReference(definition);
         using var uninterrupted = new MathBlocksGPUWorker().CompilePopulationSearch(definition);
         var first = uninterrupted.ExecuteCycle();
@@ -1138,6 +1186,9 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         Assert.Equal(expected.AcceptedState.Export(), actual.AcceptedState.Export());
         Assert.Equal(expected.Trials.Select(TrialIdentity), actual.Trials.Select(TrialIdentity));
         Assert.Equal((ulong)reference.Count, actual.AcceptedState.EvaluatedProgramCount);
+        Assert.Equal(784ul, actual.AcceptedState.EnumerationCursor);
+        Assert.Equal(52ul, actual.AcceptedState.EnumerationTrialCount);
+        Assert.Equal(732ul, actual.AcceptedState.InvalidEnumerationProposalCount);
         Assert.Equal(
             reference.Keys.Order(StringComparer.Ordinal),
             actual.AcceptedState.StructuralFingerprints.Order(StringComparer.Ordinal));
@@ -2752,6 +2803,63 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
                 "true-count",
                 [new MathBlockProgramPopulationQualityDiversityDimension("true-count", 0, 4, 4)]),
             new MathBlockProgramPopulationSearchEnvelope(256L * 1024 * 1024, 64 * 1024 * 1024),
+            new MathBlockProgramPopulationValidityPolicy([1, 1, 1]));
+    }
+
+    private static MathBlockProgramPopulationSearchDefinition CreateMixedUnitComparisonBootstrapSearch()
+    {
+        var firstUnit = MathBlockUnit.Basis0;
+        var secondUnit = MathBlockUnit.Basis1;
+        var firstType = MathBlockType.Vector(firstUnit, 3);
+        var secondType = MathBlockType.Vector(secondUnit, 3);
+        var outputType = MathBlockType.BooleanVector(3);
+        var operations = new[]
+        {
+            new MathBlockProgramPopulationOperation(
+                "vector.greater-than", 1, [secondType, secondType], outputType),
+            new MathBlockProgramPopulationOperation(
+                "vector.less-than", 1, [secondType, secondType], outputType),
+            new MathBlockProgramPopulationOperation(
+                "vector.greater-than", 1, [firstType, firstType], outputType),
+            new MathBlockProgramPopulationOperation(
+                "vector.less-than", 1, [firstType, firstType], outputType)
+        };
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(operations, outputType),
+            [
+                new MathBlockProgramPopulationTerminal(
+                    "first-a", firstType, MathBlockValue.Vector([4d, 1d, 3d], firstUnit)),
+                new MathBlockProgramPopulationTerminal(
+                    "first-b", firstType, MathBlockValue.Vector([2d, 5d, 0d], firstUnit)),
+                new MathBlockProgramPopulationTerminal(
+                    "second-a", secondType, MathBlockValue.Vector([7d, 2d, 6d], secondUnit)),
+                new MathBlockProgramPopulationTerminal(
+                    "second-b", secondType, MathBlockValue.Vector([1d, 8d, 3d], secondUnit))
+            ],
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 3)],
+            proposalsPerCycle: 6,
+            fingerprintCapacity: 64);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = builder.Input("candidate", outputType);
+        var trueCount = builder.Apply("boolean-vector.true-count", inputs: [candidate]);
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            builder.Output("true-count", trueCount).Build(),
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "true-count",
+                "true-count",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        return new MathBlockProgramPopulationSearchDefinition(
+            population,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(6, 4, 1, 0, 1, 8675309),
+            new MathBlockProgramPopulationSelectionPolicy(8, 8),
+            new MathBlockProgramPopulationQualityDiversityPolicy(
+                "true-count",
+                [new MathBlockProgramPopulationQualityDiversityDimension("true-count", 0, 4, 4)]),
+            new MathBlockProgramPopulationSearchEnvelope(128L * 1024 * 1024, 32 * 1024 * 1024),
             new MathBlockProgramPopulationValidityPolicy([1, 1, 1]));
     }
 

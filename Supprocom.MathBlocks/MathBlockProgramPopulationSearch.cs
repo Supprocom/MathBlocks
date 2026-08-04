@@ -603,6 +603,7 @@ public sealed class MathBlockProgramPopulationSearchDefinition
         return new MathBlockProgramPopulationSearchState(
             Identity,
             preserveEnumerationCursor ? previousState.EnumerationCursor : 0,
+            preserveEnumerationCursor ? previousState.EnumerationTrialCount : 0,
             previousState.TrialCursor,
             previousState.CycleCount,
             checked(previousState.EnvelopeGeneration + 1),
@@ -840,7 +841,10 @@ public sealed class MathBlockProgramPopulationSearchDefinition
         if (!string.Equals(state.Identity, Identity, StringComparison.Ordinal))
             throw new InvalidOperationException("The accepted search state has an incompatible identity.");
         if (state.TrialCursor > Evolution.MaximumTrialCount ||
-            state.EnumerationCursor > Evolution.EnumerationProposalCount)
+            state.EnumerationCursor > Population.TotalProposalCount ||
+            state.EnumerationTrialCount > Evolution.EnumerationProposalCount ||
+            state.EnumerationTrialCount > state.TrialCursor ||
+            state.EnumerationTrialCount > state.EnumerationCursor)
         {
             throw new InvalidOperationException("The accepted search cursor is outside its range.");
         }
@@ -1019,6 +1023,7 @@ public sealed class MathBlockProgramPopulationSearchState
     internal MathBlockProgramPopulationSearchState(
         string identity,
         ulong enumerationCursor,
+        ulong enumerationTrialCount,
         ulong trialCursor,
         ulong cycleCount,
         ulong envelopeGeneration,
@@ -1067,7 +1072,10 @@ public sealed class MathBlockProgramPopulationSearchState
             ArgumentNullException.ThrowIfNull(quality[index]);
         for (var index = 0; index < refresh.Length; index++)
             ArgumentNullException.ThrowIfNull(refresh[index]);
+        if (enumerationTrialCount > enumerationCursor)
+            throw new ArgumentOutOfRangeException(nameof(enumerationTrialCount));
         EnumerationCursor = enumerationCursor;
+        EnumerationTrialCount = enumerationTrialCount;
         TrialCursor = trialCursor;
         CycleCount = cycleCount;
         EnvelopeGeneration = envelopeGeneration;
@@ -1086,6 +1094,8 @@ public sealed class MathBlockProgramPopulationSearchState
 
     public string Identity { get; }
     public ulong EnumerationCursor { get; }
+    public ulong EnumerationTrialCount { get; }
+    public ulong InvalidEnumerationProposalCount => EnumerationCursor - EnumerationTrialCount;
     public ulong TrialCursor { get; }
     public ulong CycleCount { get; }
     public ulong EnvelopeGeneration { get; }
@@ -1125,6 +1135,8 @@ public readonly record struct MathBlockProgramPopulationSearchInstrumentation(
     ulong EvaluatedProgramCount,
     ulong AcceptedProgramCount,
     ulong EnumerationCursor,
+    ulong EnumerationTrialCount,
+    ulong InvalidEnumerationProposalCount,
     ulong TrialCursor,
     ulong CycleCount,
     int SelectionCount,
@@ -1157,13 +1169,13 @@ public sealed class MathBlockProgramPopulationSearchCycleResult
 
 internal static class MathBlockProgramPopulationSearchSerialization
 {
-    private const string StateSchema = "mathblocks-population-search-state-v3";
+    private const string StateSchema = "mathblocks-population-search-state-v4";
 
     public static string CreateIdentity(MathBlockProgramPopulationSearchDefinition definition)
     {
         using var stream = new MemoryStream();
         using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
-        writer.Write("mathblocks-population-search-v2");
+        writer.Write("mathblocks-population-search-v3");
         writer.Write(definition.Population.Identity);
         var binding = definition.ObjectiveBinding;
         writer.Write(binding.Program.Fingerprint);
@@ -1255,6 +1267,7 @@ internal static class MathBlockProgramPopulationSearchSerialization
             writer.Write(StateSchema);
             writer.Write(state.Identity);
             writer.Write(state.EnumerationCursor);
+            writer.Write(state.EnumerationTrialCount);
             writer.Write(state.TrialCursor);
             writer.Write(state.CycleCount);
             writer.Write(state.EnvelopeGeneration);
@@ -1296,6 +1309,7 @@ internal static class MathBlockProgramPopulationSearchSerialization
             throw new InvalidDataException("The population search state schema is unsupported.");
         var identity = reader.ReadString();
         var enumerationCursor = reader.ReadUInt64();
+        var enumerationTrialCount = reader.ReadUInt64();
         var trialCursor = reader.ReadUInt64();
         var cycleCount = reader.ReadUInt64();
         var envelopeGeneration = reader.ReadUInt64();
@@ -1320,6 +1334,7 @@ internal static class MathBlockProgramPopulationSearchSerialization
         return new MathBlockProgramPopulationSearchState(
             identity,
             enumerationCursor,
+            enumerationTrialCount,
             trialCursor,
             cycleCount,
             envelopeGeneration,

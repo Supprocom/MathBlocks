@@ -56,6 +56,8 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
     public long FullCandidateOutputBytes => 0;
     public int CpuNodeDispatchCount => 0;
     public ulong EnumerationCursor => acceptedState.EnumerationCursor;
+    public ulong EnumerationTrialCount => acceptedState.EnumerationTrialCount;
+    public ulong InvalidEnumerationProposalCount => acceptedState.InvalidEnumerationProposalCount;
     public ulong TrialCursor => acceptedState.TrialCursor;
     public MathBlockProgramPopulationSearchState AcceptedState => acceptedState;
 
@@ -66,6 +68,7 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
         var layout = PopulationSearchLayout.Create(definition);
         var initialState = definition.AcceptedState ?? new MathBlockProgramPopulationSearchState(
             definition.Identity,
+            0,
             0,
             0,
             0,
@@ -239,17 +242,25 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
                 acceptedState.EvaluatedProgramCount,
                 acceptedState.AcceptedProgramCount,
                 acceptedState.EnumerationCursor,
+                acceptedState.EnumerationTrialCount,
+                acceptedState.InvalidEnumerationProposalCount,
                 acceptedState.TrialCursor,
                 acceptedState.CycleCount,
                 acceptedState.SelectionEntries.Count,
                 acceptedState.QualityDiversityEntries.Count,
                 acceptedState.RandomState);
+            var enumerationComplete =
+                acceptedState.EnumerationTrialCount == definition.Evolution.EnumerationProposalCount ||
+                acceptedState.EnumerationCursor == definition.Population.TotalProposalCount;
+            var searchComplete =
+                acceptedState.TrialCursor == definition.Evolution.MaximumTrialCount ||
+                enumerationComplete && definition.Evolution.EvolutionPatternLength == 0;
             return new MathBlockProgramPopulationSearchCycleResult(
                 parsed.Trials,
                 acceptedState,
                 instrumentation,
-                acceptedState.EnumerationCursor == definition.Evolution.EnumerationProposalCount,
-                acceptedState.TrialCursor == definition.Evolution.MaximumTrialCount);
+                enumerationComplete,
+                searchComplete);
         }
     }
 
@@ -841,6 +852,7 @@ internal sealed class PopulationSearchLayout
         var generation = ReadUInt64(downloaded, 104);
         var refreshCursor = ReadInt32(downloaded, 112);
         var refreshCount = ReadInt32(downloaded, 116);
+        var enumerationTrialCount = ReadUInt64(downloaded, 120);
         if (trialCount < 0 || trialCount > definition.Population.ProposalsPerCycle ||
             newStructuralCount < 0 || newStructuralCount > definition.Population.ProposalsPerCycle ||
             newSemanticCount < 0 || newSemanticCount > definition.Population.ProposalsPerCycle ||
@@ -850,7 +862,15 @@ internal sealed class PopulationSearchLayout
             totalSemanticCount != checked(previous.SemanticFingerprints.Count + newSemanticCount) ||
             totalStructuralCount > definition.Population.FingerprintCapacity ||
             totalSemanticCount > definition.Population.FingerprintCapacity ||
-            enumerationCursor > definition.Evolution.EnumerationProposalCount ||
+            enumerationCursor > definition.Population.TotalProposalCount ||
+            enumerationTrialCount > definition.Evolution.EnumerationProposalCount ||
+            enumerationTrialCount > enumerationCursor ||
+            enumerationTrialCount > trialCursor ||
+            enumerationCursor < previous.EnumerationCursor ||
+            enumerationTrialCount < previous.EnumerationTrialCount ||
+            trialCursor < previous.TrialCursor ||
+            enumerationTrialCount - previous.EnumerationTrialCount >
+                trialCursor - previous.TrialCursor ||
             trialCursor > definition.Evolution.MaximumTrialCount ||
             cycleCount != checked(previous.CycleCount + 1) ||
             generation != previous.EnvelopeGeneration ||
@@ -904,6 +924,7 @@ internal sealed class PopulationSearchLayout
         var state = new MathBlockProgramPopulationSearchState(
             definition.Identity,
             enumerationCursor,
+            enumerationTrialCount,
             trialCursor,
             cycleCount,
             generation,
@@ -924,7 +945,7 @@ internal sealed class PopulationSearchLayout
     private void WriteHeader(Span<byte> bytes, MathBlockProgramPopulationSearchDefinition definition)
     {
         WriteInt32(bytes, 0, unchecked((int)0x4d425334));
-        WriteInt32(bytes, 4, 5);
+        WriteInt32(bytes, 4, 6);
         WriteInt32(bytes, 8, operations.Length);
         WriteInt32(bytes, 12, terminals.Length);
         WriteInt32(bytes, 16, types.Length);
@@ -997,6 +1018,7 @@ internal sealed class PopulationSearchLayout
         WriteUInt64(bytes, AcceptedStateOffset + 88, state.EnvelopeGeneration);
         WriteInt32(bytes, AcceptedStateOffset + 96, state.RefreshCursor);
         WriteInt32(bytes, AcceptedStateOffset + 100, state.RefreshPrograms.Count);
+        WriteUInt64(bytes, AcceptedStateOffset + 104, state.EnumerationTrialCount);
         WriteFingerprints(bytes, AcceptedStructuralOffset, state.StructuralFingerprints);
         WriteFingerprints(bytes, AcceptedSemanticOffset, state.SemanticFingerprints);
         for (var index = 0; index < state.SelectionEntries.Count; index++)
