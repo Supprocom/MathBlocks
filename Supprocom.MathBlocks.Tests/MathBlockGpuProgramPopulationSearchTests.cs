@@ -703,6 +703,125 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Resident_parallel_wave_measures_package_owned_workload_matrix()
+    {
+        RequireCuda();
+        const int rowCount = 32_768;
+        var cases = new[]
+        {
+            (
+                Name: "reduction-heavy",
+                Definition: CreateReductionHeavyPerformanceSearch(rowCount),
+                ExpectedSemanticDuplicates: 0ul),
+            (
+                Name: "duplicate-heavy",
+                Definition: CreateDuplicateHeavyPerformanceSearch(rowCount),
+                ExpectedSemanticDuplicates: 3ul),
+            (
+                Name: "dynamic-shape",
+                Definition: CreateDynamicShapePerformanceSearch(rowCount),
+                ExpectedSemanticDuplicates: 0ul),
+            (
+                Name: "chronological",
+                Definition: CreateChronologicalPerformanceSearch(rowCount),
+                ExpectedSemanticDuplicates: 0ul)
+        };
+        var worker = new MathBlocksGPUWorker();
+
+        foreach (var performanceCase in cases)
+        {
+            using var serial = worker.CompilePopulationSearch(
+                performanceCase.Definition,
+                MathBlockProgramPopulationExecutionOptions.SerialResident);
+            using var singleLane = worker.CompilePopulationSearch(
+                performanceCase.Definition,
+                new MathBlockProgramPopulationExecutionOptions(
+                    MathBlockProgramPopulationExecutionMode.ParallelResident,
+                    1));
+            using var fourLane = worker.CompilePopulationSearch(
+                performanceCase.Definition,
+                new MathBlockProgramPopulationExecutionOptions(
+                    MathBlockProgramPopulationExecutionMode.ParallelResident,
+                    4));
+
+            var (serialResult, serialElapsed) = ExecuteMeasuredCycle(serial);
+            var (singleLaneResult, singleLaneElapsed) = ExecuteMeasuredCycle(singleLane);
+            var (fourLaneResult, fourLaneElapsed) = ExecuteMeasuredCycle(fourLane);
+
+            Console.WriteLine(FormattableString.Invariant(
+                $"The {performanceCase.Name} serial cycle took {serialElapsed.TotalSeconds:R} seconds."));
+            Console.WriteLine(FormattableString.Invariant(
+                $"The {performanceCase.Name} one-lane cycle took {singleLaneElapsed.TotalSeconds:R} seconds."));
+            Console.WriteLine(FormattableString.Invariant(
+                $"The {performanceCase.Name} four-lane cycle took {fourLaneElapsed.TotalSeconds:R} seconds."));
+            Console.WriteLine(FormattableString.Invariant(
+                $"The {performanceCase.Name} four-lane runtime used {fourLane.ResidentBytes} resident bytes and {fourLane.CompactDownloadBytesPerCycle} compact bytes."));
+
+            Assert.Equal(
+                serialResult.AcceptedState.Export(),
+                singleLaneResult.AcceptedState.Export());
+            Assert.Equal(
+                serialResult.AcceptedState.Export(),
+                fourLaneResult.AcceptedState.Export());
+            Assert.Equal(
+                serialResult.Trials.Select(TrialIdentity),
+                singleLaneResult.Trials.Select(TrialIdentity));
+            Assert.Equal(
+                serialResult.Trials.Select(TrialIdentity),
+                fourLaneResult.Trials.Select(TrialIdentity));
+            Assert.Equal(4ul, serialResult.AcceptedState.EvaluatedProgramCount);
+            Assert.Equal(4ul, singleLaneResult.AcceptedState.EvaluatedProgramCount);
+            Assert.Equal(4ul, fourLaneResult.AcceptedState.EvaluatedProgramCount);
+            Assert.Equal(
+                performanceCase.ExpectedSemanticDuplicates,
+                fourLaneResult.AcceptedState.SemanticDuplicateCount);
+            var evaluatedTrials = fourLaneResult.Trials
+                .Where(trial => trial.Objectives.Count != 0)
+                .ToArray();
+            Assert.Equal(4, evaluatedTrials.Length);
+            Assert.All(evaluatedTrials, trial =>
+            {
+                Assert.Equal(
+                    performanceCase.Definition.EvaluateObjectives(trial.Program)
+                        .Select(BitConverter.DoubleToInt64Bits),
+                    trial.Objectives.Select(BitConverter.DoubleToInt64Bits));
+                Assert.Equal(
+                    performanceCase.Definition.CreateSemanticFingerprint(trial.Program),
+                    trial.SemanticFingerprint);
+            });
+            if (performanceCase.Name == "reduction-heavy")
+                Assert.All(evaluatedTrials, trial => Assert.Equal(4, trial.Objectives.Count));
+            if (performanceCase.Name == "dynamic-shape")
+            {
+                Assert.Equal(0, performanceCase.Definition.Population.Grammar.OutputType.Rows);
+                Assert.Contains(
+                    evaluatedTrials,
+                    trial => trial.Objectives[0] >= rowCount / 4d);
+            }
+            if (performanceCase.Name == "chronological")
+            {
+                Assert.All(evaluatedTrials, trial => Assert.Equal(
+                    "vector.cumulative-sum@1",
+                    trial.Program.Nodes[^1].OperationIdentity));
+            }
+
+            Assert.Equal(4, serialResult.Instrumentation.CandidateChunkCount);
+            Assert.Equal(4, singleLaneResult.Instrumentation.CandidateChunkCount);
+            Assert.Equal(1, fourLaneResult.Instrumentation.CandidateChunkCount);
+            Assert.Equal(1, serialResult.Instrumentation.MaximumConcurrentCandidates);
+            Assert.Equal(1, singleLaneResult.Instrumentation.MaximumConcurrentCandidates);
+            Assert.Equal(4, fourLaneResult.Instrumentation.MaximumConcurrentCandidates);
+            Assert.Equal(4, serialResult.Instrumentation.SerialCandidateExecutionCount);
+            Assert.Equal(4, singleLaneResult.Instrumentation.ParallelCandidateExecutionCount);
+            Assert.Equal(4, fourLaneResult.Instrumentation.ParallelCandidateExecutionCount);
+            Assert.True(fourLane.ResidentBytes > singleLane.ResidentBytes);
+            AssertResidentCycleContract(serial);
+            AssertResidentCycleContract(singleLane);
+            AssertResidentCycleContract(fourLane);
+        }
+    }
+
+    [Fact]
     public async Task Resident_search_serializes_concurrent_cycles()
     {
         RequireCuda();
@@ -3824,6 +3943,234 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
             }
         }
         return result;
+    }
+
+    private static MathBlockProgramPopulationSearchDefinition CreateReductionHeavyPerformanceSearch(
+        int rowCount)
+    {
+        var vector = MathBlockType.Vector(length: rowCount);
+        var terminals = Enumerable.Range(0, 4)
+            .Select(index => new MathBlockProgramPopulationTerminal(
+                $"reduction-series-{index}",
+                vector,
+                CreatePerformanceVector(rowCount, index)))
+            .ToArray();
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation("vector.absolute", 1, [vector], vector)],
+                vector),
+            terminals,
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, rowCount)],
+            proposalsPerCycle: 4,
+            fingerprintCapacity: 8);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = builder.Input("candidate", vector);
+        var sum = builder.Apply("vector.sum", inputs: [candidate]);
+        var mean = builder.Apply("vector.mean", inputs: [candidate]);
+        var norm = builder.Apply("vector.l2-norm", inputs: [candidate]);
+        var maximum = builder.Apply("vector.maximum", inputs: [candidate]);
+        var program = builder
+            .Output("sum", sum)
+            .Output("mean", mean)
+            .Output("norm", norm)
+            .Output("maximum", maximum)
+            .Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            program,
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [
+                new MathBlockProgramPopulationObjective(
+                    "sum",
+                    "sum",
+                    MathBlockProgramPopulationObjectiveDirection.Maximize),
+                new MathBlockProgramPopulationObjective(
+                    "mean",
+                    "mean",
+                    MathBlockProgramPopulationObjectiveDirection.Maximize),
+                new MathBlockProgramPopulationObjective(
+                    "norm",
+                    "norm",
+                    MathBlockProgramPopulationObjectiveDirection.Minimize),
+                new MathBlockProgramPopulationObjective(
+                    "maximum",
+                    "maximum",
+                    MathBlockProgramPopulationObjectiveDirection.Minimize)
+            ]);
+        return CreatePerformanceWaveDefinition(population, binding, rowCount);
+    }
+
+    private static MathBlockProgramPopulationSearchDefinition CreateDuplicateHeavyPerformanceSearch(
+        int rowCount)
+    {
+        var vector = MathBlockType.Vector(length: rowCount);
+        var value = CreatePerformanceVector(rowCount, 17);
+        var terminals = Enumerable.Range(0, 4)
+            .Select(index => new MathBlockProgramPopulationTerminal(
+                $"duplicate-series-{index}",
+                vector,
+                value))
+            .ToArray();
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation("vector.absolute", 1, [vector], vector)],
+                vector),
+            terminals,
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, rowCount)],
+            proposalsPerCycle: 4,
+            fingerprintCapacity: 8);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = builder.Input("candidate", vector);
+        var sum = builder.Apply("vector.sum", inputs: [candidate]);
+        var program = builder.Output("sum", sum).Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            program,
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "sum",
+                "sum",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        return CreatePerformanceWaveDefinition(population, binding, rowCount);
+    }
+
+    private static MathBlockProgramPopulationSearchDefinition CreateDynamicShapePerformanceSearch(
+        int rowCount)
+    {
+        var scalar = MathBlockType.Scalar();
+        var dynamicVector = MathBlockType.Vector();
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation(
+                    "vector.repeat",
+                    1,
+                    [scalar, scalar],
+                    dynamicVector)],
+                dynamicVector),
+            [
+                new MathBlockProgramPopulationTerminal("one", scalar, MathBlockValue.Scalar(1d)),
+                new MathBlockProgramPopulationTerminal("two", scalar, MathBlockValue.Scalar(2d)),
+                new MathBlockProgramPopulationTerminal(
+                    "short-count",
+                    scalar,
+                    MathBlockValue.Scalar(rowCount / 4d)),
+                new MathBlockProgramPopulationTerminal(
+                    "long-count",
+                    scalar,
+                    MathBlockValue.Scalar(rowCount / 2d))
+            ],
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, rowCount)],
+            proposalsPerCycle: 4,
+            fingerprintCapacity: 32);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = builder.Input("candidate", dynamicVector);
+        var sum = builder.Apply("vector.sum", inputs: [candidate]);
+        var program = builder.Output("sum", sum).Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            program,
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "sum",
+                "sum",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        return CreatePerformanceWaveDefinition(population, binding, rowCount);
+    }
+
+    private static MathBlockProgramPopulationSearchDefinition CreateChronologicalPerformanceSearch(
+        int rowCount)
+    {
+        var vector = MathBlockType.Vector(length: rowCount);
+        var terminals = Enumerable.Range(0, 4)
+            .Select(index => new MathBlockProgramPopulationTerminal(
+                $"chronological-series-{index}",
+                vector,
+                CreatePerformanceVector(rowCount, index + 29)))
+            .ToArray();
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation(
+                    "vector.cumulative-sum",
+                    1,
+                    [vector],
+                    vector)],
+                vector),
+            terminals,
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, rowCount)],
+            proposalsPerCycle: 4,
+            fingerprintCapacity: 8);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = builder.Input("candidate", vector);
+        var sum = builder.Apply("vector.sum", inputs: [candidate]);
+        var program = builder.Output("sum", sum).Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            program,
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "sum",
+                "sum",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        return CreatePerformanceWaveDefinition(population, binding, rowCount);
+    }
+
+    private static MathBlockProgramPopulationSearchDefinition CreatePerformanceWaveDefinition(
+        MathBlockProgramPopulationDefinition population,
+        MathBlockProgramPopulationObjectiveBinding binding,
+        int rowCount)
+    {
+        var baseline = CreateDefinition(
+            population,
+            binding,
+            maximumTrials: 4,
+            enumerationTrials: 4,
+            validity: new MathBlockProgramPopulationValidityPolicy(
+                Enumerable.Repeat(int.MaxValue, rowCount)));
+        return new MathBlockProgramPopulationSearchDefinition(
+            baseline.Population,
+            baseline.ObjectiveBinding,
+            baseline.Evolution,
+            baseline.Selection,
+            baseline.QualityDiversity,
+            baseline.Envelope,
+            baseline.Validity,
+            baseline.CompactResults,
+            baseline.InitialPrograms,
+            wavePolicy: new MathBlockProgramPopulationWavePolicy(4, 1));
+    }
+
+    private static MathBlockValue CreatePerformanceVector(int rowCount, int seed) =>
+        MathBlockValue.Vector(Enumerable.Range(0, rowCount).Select(index =>
+        {
+            var magnitude = (double)(((index * 17 + seed * 43) % 251) + 1);
+            return ((index + seed) & 1) == 0 ? magnitude : -magnitude;
+        }));
+
+    private static (MathBlockProgramPopulationSearchCycleResult Result, TimeSpan Elapsed)
+        ExecuteMeasuredCycle(MathBlocksGPUProgramPopulationSearch compiled)
+    {
+        var timer = Stopwatch.StartNew();
+        var result = compiled.ExecuteCycle();
+        timer.Stop();
+        return (result, timer.Elapsed);
+    }
+
+    private static void AssertResidentCycleContract(MathBlocksGPUProgramPopulationSearch compiled)
+    {
+        Assert.Equal(1, compiled.GraphInstanceCount);
+        Assert.Equal(1, compiled.ImmutableUploadCount);
+        Assert.Equal(0, compiled.LaterImmutableUploadCount);
+        Assert.Equal(1, compiled.GraphLaunchCount);
+        Assert.Equal(1, compiled.SynchronizationCount);
+        Assert.Equal(1, compiled.DownloadCount);
+        Assert.Equal((long)compiled.CompactDownloadBytesPerCycle, compiled.DownloadedBytes);
+        Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputBytes);
+        Assert.Equal(0, compiled.CpuNodeDispatchCount);
     }
 
     private static MathBlockProgramPopulationDefinition CreateScalarPopulation(int proposalsPerCycle)
