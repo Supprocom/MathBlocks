@@ -750,7 +750,8 @@ public sealed class MathBlocksGPUProgram : IDisposable
             node.Type.Rows > 0 &&
             node.Type.Columns > 0)
             return checked(node.Type.Rows * node.Type.Columns);
-        if (node.Type.Rows > 0)
+        if (node.Type.Kind is not (MathBlockValueKind.Matrix or MathBlockValueKind.ComplexMatrix) &&
+            node.Type.Rows > 0)
             return node.Type.Rows;
         if (node.Kind == MathBlockProgramNodeKind.Operation)
         {
@@ -777,12 +778,14 @@ public sealed class MathBlocksGPUProgram : IDisposable
                 return checked(columns * columns);
             }
             if (identity is "matrix.hankel@1" or "matrix.toeplitz@1" or
-                "matrix.outer-product@1" or "matrix.stack-rows@1")
+                "matrix.outer-product@1")
             {
                 return checked(
                     inputCapacities[0] *
                     inputCapacities[1]);
             }
+            if (identity == "matrix.stack-rows@1")
+                return checked(inputCapacities[0] + inputCapacities[1]);
             if (identity == "matrix.kronecker-product@1")
             {
                 return checked(
