@@ -6,7 +6,7 @@
     <RootNamespace>Supprocom.MathBlocks</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>Supprocom.MathBlocks</PackageId>
-    <Version>0.1.6</Version>
+    <Version>0.1.7</Version>
     <Authors>Supprocom</Authors>
     <Company>Supprocom</Company>
     <Copyright>Copyright (C) 2026 mkn8rn</Copyright>
@@ -18,7 +18,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>mathematics;computation-graph;dag;parallel;cpu;cuda;gpu;deterministic;numerics</PackageTags>
-    <PackageReleaseNotes>Sizes resident population-search scratch memory from the active candidate and objective operations.</PackageReleaseNotes>
+    <PackageReleaseNotes>Uses exact objective payload layouts and reuses measured scratch across serial resident nodes.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType>portable</DebugType>

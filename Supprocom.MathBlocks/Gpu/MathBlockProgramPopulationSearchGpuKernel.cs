@@ -873,7 +873,6 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int scratch_offset,
             int input_pointer_offset,
             int payload_stride,
-            int scratch_stride,
             int terminal_count,
             int operation_count,
             int maximum_operation_count,
@@ -905,7 +904,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                     selected_types[output_index],
                     output,
                     (mbp_ull)(arena + candidate_payload_offset + node * payload_stride),
-                    (mbp_ull)(arena + scratch_offset + node * scratch_stride),
+                    (mbp_ull)(arena + scratch_offset),
                     band_maximum);
                 mb_population_dispatch(
                     mbp_read_int(arena, operation),
@@ -973,9 +972,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int objective_payload_offset,
             int scratch_offset,
             int input_pointer_offset,
-            int payload_stride,
-            int scratch_stride,
-            int maximum_operation_count,
+            int scratch_bytes,
             int objective_node_count,
             int objective_count,
             const MathBlockSlot* candidate_output,
@@ -1017,6 +1014,9 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 }
                 if (kind != 3)
                     return false;
+                int required_scratch_bytes = mbp_read_int(arena, descriptor + 36);
+                if (required_scratch_bytes < 0 || required_scratch_bytes > scratch_bytes)
+                    return false;
                 int arity = mbp_read_int(arena, descriptor + 16);
                 int input_base = mbp_read_int(arena, descriptor + 20);
                 for (int input = 0; input < arity; input++)
@@ -1031,9 +1031,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                     type_offset,
                     mbp_read_int(arena, descriptor + 4),
                     &slots[node],
-                    (mbp_ull)(arena + objective_payload_offset + node * payload_stride),
-                    (mbp_ull)(arena + scratch_offset +
-                        (maximum_operation_count + node) * scratch_stride),
+                    (mbp_ull)(arena + objective_payload_offset + mbp_read_int(arena, descriptor + 32)),
+                    (mbp_ull)(arena + scratch_offset),
                     mbp_read_int(arena, descriptor + 28));
                 mb_population_dispatch(
                     mbp_read_int(arena, descriptor + 8),
@@ -1444,7 +1443,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0 || threadIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 4)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 5)
                 return;
 
             int grammar_operation_count = mbp_read_int(arena, 8);
@@ -1469,7 +1468,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int evolution_pattern = mbp_read_int(arena, 88);
             int quality_objective = mbp_read_int(arena, 92);
             int maximum_arity = mbp_read_int(arena, 96);
-            int scratch_stride = mbp_read_int(arena, 100);
+            int scratch_bytes = mbp_read_int(arena, 100);
             int payload_stride = mbp_read_int(arena, 104);
             int program_operation_size = mbp_read_int(arena, 108);
             int entry_size = mbp_read_int(arena, 112);
@@ -1669,7 +1668,6 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                     scratch_offset,
                     input_pointer_offset,
                     payload_stride,
-                    scratch_stride,
                     terminal_count,
                     candidate_operation_count,
                     maximum_operation_count,
@@ -1786,9 +1784,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                         objective_payload_offset,
                         scratch_offset,
                         input_pointer_offset,
-                        payload_stride,
-                        scratch_stride,
-                        maximum_operation_count,
+                        scratch_bytes,
                         objective_node_count,
                         objective_count,
                         &candidate_slots[final_node],
@@ -2018,7 +2014,6 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                         scratch_offset,
                         input_pointer_offset,
                         payload_stride,
-                        scratch_stride,
                         terminal_count,
                         candidate_operation_count,
                         maximum_operation_count,
@@ -2097,9 +2092,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                                     objective_payload_offset,
                                     scratch_offset,
                                     input_pointer_offset,
-                                    payload_stride,
-                                    scratch_stride,
-                                    maximum_operation_count,
+                                    scratch_bytes,
                                     objective_node_count,
                                     objective_count,
                                     &candidate_slots[final_node],

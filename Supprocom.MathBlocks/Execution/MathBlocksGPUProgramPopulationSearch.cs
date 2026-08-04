@@ -386,6 +386,7 @@ internal sealed class PopulationSearchLayout
     public int MaximumArity { get; private set; }
     public int ScratchBytesPerNode { get; private set; }
     public int PayloadStride { get; private set; }
+    public int ObjectivePayloadBytes { get; private set; }
     public int ProgramOperationSize { get; private set; }
     public int ArchiveEntrySize { get; private set; }
     public int TrialEntrySize { get; private set; }
@@ -526,10 +527,16 @@ internal sealed class PopulationSearchLayout
         for (var index = 0; index < immutableValues.Count; index++)
         {
             payloadOffsets[index] = immutablePayloadBytes;
-            immutablePayloadBytes = Align(checked(
-                immutablePayloadBytes + MathBlockGpuValueLayout.GetPayloadBytes(immutableValues[index])));
+            immutablePayloadBytes = AdvanceLayout(
+                immutablePayloadBytes,
+                1,
+                MathBlockGpuValueLayout.GetPayloadBytes(immutableValues[index]),
+                "immutable payload");
         }
 
+        var candidateScratchStride = CalculateCandidateScratchBytes(
+            definition,
+            maximumCandidateValueElements);
         var layout = new PopulationSearchLayout(
             typeList.ToArray(),
             operations,
@@ -548,12 +555,15 @@ internal sealed class PopulationSearchLayout
             MaximumBandElements = maximumBandElements,
             MaximumValueElements = maximumValueElements,
             MaximumArity = maximumArity,
-            PayloadStride = Align(checked(maximumValueElements * 16)),
-            ScratchBytesPerNode = CalculateScratchBytes(
-                definition,
-                maximumCandidateValueElements,
-                compiledObjective.ScratchBytes),
-            ProgramOperationSize = Align(checked(8 + maximumArity * sizeof(int)))
+            PayloadStride = CalculateCandidatePayloadStride(definition, maximumCandidateValueElements),
+            ScratchBytesPerNode = Math.Max(
+                candidateScratchStride,
+                compiledObjective.MaximumScratchBytes),
+            ObjectivePayloadBytes = compiledObjective.PayloadBytes,
+            ProgramOperationSize = MeasureLayout(
+                "program operation",
+                (1, 8),
+                (maximumArity, sizeof(int)))
         };
         layout.CalculateOffsets(definition, immutablePayloadBytes);
         return layout;
@@ -564,66 +574,123 @@ internal sealed class PopulationSearchLayout
         int immutablePayloadBytes)
     {
         var population = definition.Population;
-        checked
-        {
-            OperationOffset = HeaderSize;
-            OperationInputTypeOffset = Align(OperationOffset + operations.Length * OperationSize);
-            TerminalOffset = Align(OperationInputTypeOffset + operationInputTypes.Length * sizeof(int));
-            TypeOffset = Align(TerminalOffset + terminals.Length * TerminalSize);
-            BandOffset = Align(TypeOffset + types.Length * TypeSize);
-            ImmutableSlotOffset = Align(BandOffset + bandStarts.Length * BandSize);
-            ImmutablePayloadOffset = Align(ImmutableSlotOffset + immutableValues.Length * SlotSize);
-            ObjectiveNodeOffset = Align(ImmutablePayloadOffset + immutablePayloadBytes);
-            ObjectiveInputOffset = Align(ObjectiveNodeOffset + objectiveNodes.Length * ObjectiveNodeSize);
-            ObjectiveSourceOffset = Align(ObjectiveInputOffset + objectiveInputs.Length * sizeof(int));
-            QualityDimensionOffset = Align(ObjectiveSourceOffset + objectiveSources.Length * ObjectiveSourceSize);
-            HistoryOffset = Align(QualityDimensionOffset + qualityDimensions.Length * QualityDimensionSize);
-            CandidateSlotOffset = Align(HistoryOffset + definition.Validity.HistoryCounts.Count * sizeof(int));
-            ObjectiveSlotOffset = Align(CandidateSlotOffset +
-                (terminals.Length + MaximumOperationCount) * SlotSize);
-            MaskSlotOffset = Align(ObjectiveSlotOffset + objectiveNodes.Length * SlotSize);
-            CandidatePayloadOffset = Align(MaskSlotOffset + SlotSize);
-            ObjectivePayloadOffset = Align(CandidatePayloadOffset + MaximumOperationCount * PayloadStride);
-            MaskPayloadOffset = Align(ObjectivePayloadOffset + objectiveNodes.Length * PayloadStride);
-            ScratchOffset = Align(MaskPayloadOffset + definition.Validity.HistoryCounts.Count * sizeof(int));
-            var scratchNodeCount = MaximumOperationCount + objectiveNodes.Length;
-            InputPointerOffset = Align(ScratchOffset + scratchNodeCount * ScratchBytesPerNode);
-            SelectedOperationOffset = Align(InputPointerOffset + MaximumArity * sizeof(ulong));
-            SelectedOperandOffset = Align(SelectedOperationOffset + MaximumOperationCount * sizeof(int));
-            SelectedLookbackOffset = Align(SelectedOperandOffset +
-                MaximumOperationCount * MaximumArity * sizeof(int));
-            AcceptedStateOffset = Align(SelectedLookbackOffset +
-                (terminals.Length + MaximumOperationCount) * 2 * sizeof(int));
-            AcceptedStructuralOffset = Align(AcceptedStateOffset + StateHeaderSize);
-            AcceptedSemanticOffset = Align(AcceptedStructuralOffset + population.FingerprintCapacity * 16);
-            var objectiveBytes = objectiveSources.Length * sizeof(ulong);
-            ArchiveEntrySize = Align(EntryHeaderSize + objectiveBytes +
-                MaximumOperationCount * ProgramOperationSize);
-            TrialEntrySize = ArchiveEntrySize;
-            AcceptedParetoOffset = Align(AcceptedSemanticOffset + population.FingerprintCapacity * 16);
-            AcceptedQualityOffset = Align(AcceptedParetoOffset +
-                definition.Selection.ParetoCapacity * ArchiveEntrySize);
-            WorkingStateOffset = Align(AcceptedQualityOffset +
-                definition.QualityDiversity.CellCount * ArchiveEntrySize);
-            WorkingStructuralOffset = Align(WorkingStateOffset + StateHeaderSize);
-            WorkingSemanticOffset = Align(WorkingStructuralOffset + population.FingerprintCapacity * 16);
-            WorkingParetoOffset = Align(WorkingSemanticOffset + population.FingerprintCapacity * 16);
-            WorkingQualityOffset = Align(WorkingParetoOffset +
-                definition.Selection.ParetoCapacity * ArchiveEntrySize);
-            RefreshOffset = Align(WorkingQualityOffset +
-                definition.QualityDiversity.CellCount * ArchiveEntrySize);
-            var refreshCapacity = definition.AcceptedState?.RefreshPrograms.Count ?? definition.InitialPrograms.Count;
-            CompactOffset = Align(RefreshOffset + refreshCapacity * ArchiveEntrySize);
-            CompactStructuralOffset = Align(CompactOffset + CompactHeaderSize);
-            CompactSemanticOffset = Align(CompactStructuralOffset + population.ProposalsPerCycle * 16);
-            CompactParetoOffset = Align(CompactSemanticOffset + population.ProposalsPerCycle * 16);
-            CompactQualityOffset = Align(CompactParetoOffset +
-                definition.Selection.ParetoCapacity * ArchiveEntrySize);
-            CompactTrialOffset = Align(CompactQualityOffset +
-                definition.QualityDiversity.CellCount * ArchiveEntrySize);
-            ArenaSize = Align(CompactTrialOffset + population.ProposalsPerCycle * TrialEntrySize);
-            CompactSize = ArenaSize - CompactOffset;
-        }
+        OperationOffset = HeaderSize;
+        OperationInputTypeOffset = AdvanceLayout(
+            OperationOffset, operations.Length, OperationSize, "operation descriptors");
+        TerminalOffset = AdvanceLayout(
+            OperationInputTypeOffset, operationInputTypes.Length, sizeof(int), "operation input types");
+        TypeOffset = AdvanceLayout(TerminalOffset, terminals.Length, TerminalSize, "terminal descriptors");
+        BandOffset = AdvanceLayout(TypeOffset, types.Length, TypeSize, "type descriptors");
+        ImmutableSlotOffset = AdvanceLayout(BandOffset, bandStarts.Length, BandSize, "resource bands");
+        ImmutablePayloadOffset = AdvanceLayout(
+            ImmutableSlotOffset, immutableValues.Length, SlotSize, "immutable slots");
+        ObjectiveNodeOffset = AdvanceLayout(
+            ImmutablePayloadOffset, 1, immutablePayloadBytes, "immutable payload");
+        ObjectiveInputOffset = AdvanceLayout(
+            ObjectiveNodeOffset, objectiveNodes.Length, ObjectiveNodeSize, "objective nodes");
+        ObjectiveSourceOffset = AdvanceLayout(
+            ObjectiveInputOffset, objectiveInputs.Length, sizeof(int), "objective inputs");
+        QualityDimensionOffset = AdvanceLayout(
+            ObjectiveSourceOffset, objectiveSources.Length, ObjectiveSourceSize, "objective sources");
+        HistoryOffset = AdvanceLayout(
+            QualityDimensionOffset, qualityDimensions.Length, QualityDimensionSize, "quality dimensions");
+        CandidateSlotOffset = AdvanceLayout(
+            HistoryOffset, definition.Validity.HistoryCounts.Count, sizeof(int), "history counts");
+        ObjectiveSlotOffset = AdvanceLayout(
+            CandidateSlotOffset,
+            checked(terminals.Length + MaximumOperationCount),
+            SlotSize,
+            "candidate slots");
+        MaskSlotOffset = AdvanceLayout(
+            ObjectiveSlotOffset, objectiveNodes.Length, SlotSize, "objective slots");
+        CandidatePayloadOffset = AdvanceLayout(MaskSlotOffset, 1, SlotSize, "validity-mask slot");
+        ObjectivePayloadOffset = AdvanceLayout(
+            CandidatePayloadOffset,
+            MaximumOperationCount,
+            PayloadStride,
+            "candidate payload");
+        MaskPayloadOffset = AdvanceLayout(
+            ObjectivePayloadOffset, 1, ObjectivePayloadBytes, "objective payload");
+        ScratchOffset = AdvanceLayout(
+            MaskPayloadOffset,
+            definition.Validity.HistoryCounts.Count,
+            sizeof(int),
+            "validity-mask payload");
+        InputPointerOffset = AdvanceLayout(
+            ScratchOffset,
+            1,
+            ScratchBytesPerNode,
+            "resident scratch");
+        SelectedOperationOffset = AdvanceLayout(
+            InputPointerOffset, MaximumArity, sizeof(ulong), "input pointers");
+        SelectedOperandOffset = AdvanceLayout(
+            SelectedOperationOffset, MaximumOperationCount, sizeof(int), "selected operations");
+        SelectedLookbackOffset = AdvanceLayout(
+            SelectedOperandOffset,
+            checked(MaximumOperationCount * MaximumArity),
+            sizeof(int),
+            "selected operands");
+        AcceptedStateOffset = AdvanceLayout(
+            SelectedLookbackOffset,
+            checked((terminals.Length + MaximumOperationCount) * 2),
+            sizeof(int),
+            "selected types and lookbacks");
+        AcceptedStructuralOffset = AdvanceLayout(AcceptedStateOffset, 1, StateHeaderSize, "accepted state");
+        AcceptedSemanticOffset = AdvanceLayout(
+            AcceptedStructuralOffset, population.FingerprintCapacity, 16, "accepted structural fingerprints");
+        ArchiveEntrySize = MeasureLayout(
+            "archive entry",
+            (1, EntryHeaderSize),
+            (objectiveSources.Length, sizeof(ulong)),
+            (MaximumOperationCount, ProgramOperationSize));
+        TrialEntrySize = ArchiveEntrySize;
+        AcceptedParetoOffset = AdvanceLayout(
+            AcceptedSemanticOffset, population.FingerprintCapacity, 16, "accepted semantic fingerprints");
+        AcceptedQualityOffset = AdvanceLayout(
+            AcceptedParetoOffset,
+            definition.Selection.ParetoCapacity,
+            ArchiveEntrySize,
+            "accepted Pareto entries");
+        WorkingStateOffset = AdvanceLayout(
+            AcceptedQualityOffset,
+            definition.QualityDiversity.CellCount,
+            ArchiveEntrySize,
+            "accepted quality-diversity entries");
+        WorkingStructuralOffset = AdvanceLayout(WorkingStateOffset, 1, StateHeaderSize, "working state");
+        WorkingSemanticOffset = AdvanceLayout(
+            WorkingStructuralOffset, population.FingerprintCapacity, 16, "working structural fingerprints");
+        WorkingParetoOffset = AdvanceLayout(
+            WorkingSemanticOffset, population.FingerprintCapacity, 16, "working semantic fingerprints");
+        WorkingQualityOffset = AdvanceLayout(
+            WorkingParetoOffset,
+            definition.Selection.ParetoCapacity,
+            ArchiveEntrySize,
+            "working Pareto entries");
+        RefreshOffset = AdvanceLayout(
+            WorkingQualityOffset,
+            definition.QualityDiversity.CellCount,
+            ArchiveEntrySize,
+            "working quality-diversity entries");
+        var refreshCapacity = definition.AcceptedState?.RefreshPrograms.Count ?? definition.InitialPrograms.Count;
+        CompactOffset = AdvanceLayout(RefreshOffset, refreshCapacity, ArchiveEntrySize, "refresh entries");
+        CompactStructuralOffset = AdvanceLayout(CompactOffset, 1, CompactHeaderSize, "compact header");
+        CompactSemanticOffset = AdvanceLayout(
+            CompactStructuralOffset, population.ProposalsPerCycle, 16, "compact structural fingerprints");
+        CompactParetoOffset = AdvanceLayout(
+            CompactSemanticOffset, population.ProposalsPerCycle, 16, "compact semantic fingerprints");
+        CompactQualityOffset = AdvanceLayout(
+            CompactParetoOffset,
+            definition.Selection.ParetoCapacity,
+            ArchiveEntrySize,
+            "compact Pareto entries");
+        CompactTrialOffset = AdvanceLayout(
+            CompactQualityOffset,
+            definition.QualityDiversity.CellCount,
+            ArchiveEntrySize,
+            "compact quality-diversity entries");
+        ArenaSize = AdvanceLayout(
+            CompactTrialOffset, population.ProposalsPerCycle, TrialEntrySize, "compact trial entries");
+        CompactSize = checked(ArenaSize - CompactOffset);
         if (ArenaSize > definition.Envelope.MaximumResidentBytes)
         {
             throw new ArgumentOutOfRangeException(
@@ -713,6 +780,8 @@ internal sealed class PopulationSearchLayout
             WriteInt32(bytes, offset + 20, node.InputBase);
             WriteInt32(bytes, offset + 24, node.ImmutableSlotIndex);
             WriteInt32(bytes, offset + 28, node.PayloadCapacity);
+            WriteInt32(bytes, offset + 32, node.PayloadOffset);
+            WriteInt32(bytes, offset + 36, node.ScratchBytes);
         }
         for (var index = 0; index < objectiveInputs.Length; index++)
             WriteInt32(bytes, ObjectiveInputOffset + index * sizeof(int), objectiveInputs[index]);
@@ -855,7 +924,7 @@ internal sealed class PopulationSearchLayout
     private void WriteHeader(Span<byte> bytes, MathBlockProgramPopulationSearchDefinition definition)
     {
         WriteInt32(bytes, 0, unchecked((int)0x4d425334));
-        WriteInt32(bytes, 4, 4);
+        WriteInt32(bytes, 4, 5);
         WriteInt32(bytes, 8, operations.Length);
         WriteInt32(bytes, 12, terminals.Length);
         WriteInt32(bytes, 16, types.Length);
@@ -1273,7 +1342,8 @@ internal sealed class PopulationSearchLayout
         var inputs = new List<int>();
         var candidateCount = 0;
         var maskCount = 0;
-        var scratchBytes = 0;
+        var payloadBytes = 0;
+        var maximumScratchBytes = 0;
         for (var index = 0; index < plan.Count; index++)
         {
             var node = plan[index];
@@ -1288,7 +1358,9 @@ internal sealed class PopulationSearchLayout
                     0,
                     inputs.Count,
                     -1,
-                    payloadCapacities[index]);
+                    payloadCapacities[index],
+                    -1,
+                    -1);
                 candidateCount++;
                 continue;
             }
@@ -1303,7 +1375,9 @@ internal sealed class PopulationSearchLayout
                     0,
                     inputs.Count,
                     -1,
-                    payloadCapacities[index]);
+                    payloadCapacities[index],
+                    -1,
+                    -1);
                 maskCount++;
                 continue;
             }
@@ -1323,7 +1397,9 @@ internal sealed class PopulationSearchLayout
                     0,
                     inputs.Count,
                     immutableIndex,
-                    payloadCapacities[index]);
+                    payloadCapacities[index],
+                    -1,
+                    -1);
                 continue;
             }
             if (node.Kind != MathBlockProgramNodeKind.Operation)
@@ -1333,6 +1409,18 @@ internal sealed class PopulationSearchLayout
             foreach (var input in node.Inputs)
                 inputs.Add(input);
             maximumArity = Math.Max(maximumArity, node.Inputs.Count);
+            var nodePayloadOffset = payloadBytes;
+            var nodePayloadBytes = MeasurePayloadBytes(
+                node.Type.Kind,
+                payloadCapacities[index],
+                $"objective node {index} payload");
+            payloadBytes = AdvanceLayout(
+                payloadBytes,
+                1,
+                nodePayloadBytes,
+                $"objective node {index} payload");
+            var nodeScratchBytes = MathBlocksGPUProgram.ResolveScratchBytes(node, plan, payloadLayout);
+            maximumScratchBytes = Math.Max(maximumScratchBytes, nodeScratchBytes);
             nodes[index] = new ObjectiveNodeDescriptor(
                 3,
                 addType(node.Type),
@@ -1341,10 +1429,9 @@ internal sealed class PopulationSearchLayout
                 node.Inputs.Count,
                 inputBase,
                 -1,
-                payloadCapacities[index]);
-            scratchBytes = Math.Max(
-                scratchBytes,
-                MathBlocksGPUProgram.ResolveScratchBytes(node, plan, payloadLayout));
+                payloadCapacities[index],
+                nodePayloadOffset,
+                nodeScratchBytes);
         }
         if (candidateCount != 1)
             throw new ArgumentException("The objective program requires one candidate input.", nameof(definition));
@@ -1378,7 +1465,13 @@ internal sealed class PopulationSearchLayout
         }
         if (multiplier != definition.QualityDiversity.CellCount)
             throw new InvalidOperationException("The quality-diversity cell count is inconsistent.");
-        return new CompiledObjective(nodes, inputs.ToArray(), sources, dimensions, scratchBytes);
+        return new CompiledObjective(
+            nodes,
+            inputs.ToArray(),
+            sources,
+            dimensions,
+            payloadBytes,
+            maximumScratchBytes);
     }
 
     private static MathBlockGpuShapeAuthority ResolveMatrixCandidateShapeAuthority(
@@ -1481,12 +1574,33 @@ internal sealed class PopulationSearchLayout
         _ = MathBlockGpuFeatureIndex.Resolve(descriptor.Identity);
     }
 
-    private static int CalculateScratchBytes(
+    private static int CalculateCandidatePayloadStride(
         MathBlockProgramPopulationSearchDefinition definition,
-        int maximumElements,
-        int objectiveScratchBytes)
+        int maximumElements)
     {
-        var result = objectiveScratchBytes;
+        var result = 0;
+        foreach (var operation in definition.Population.Grammar.Operations)
+        {
+            result = Math.Max(
+                result,
+                MeasurePayloadBytes(
+                    operation.OutputType.Kind,
+                    operation.OutputType.Kind switch
+                    {
+                        MathBlockValueKind.Scalar or MathBlockValueKind.Boolean => 0,
+                        MathBlockValueKind.Complex => 1,
+                        _ => maximumElements
+                    },
+                    $"candidate payload for '{operation.Identity}'"));
+        }
+        return result;
+    }
+
+    private static int CalculateCandidateScratchBytes(
+        MathBlockProgramPopulationSearchDefinition definition,
+        int maximumElements)
+    {
+        var result = 0;
         foreach (var operation in definition.Population.Grammar.Operations)
             result = Math.Max(
                 result,
@@ -1686,7 +1800,75 @@ internal sealed class PopulationSearchLayout
         WriteInt32(bytes, offset + 4, value.Denominator);
     }
 
-    private static int Align(int value) => checked((value + 7) & ~7);
+    private static int MeasurePayloadBytes(MathBlockValueKind kind, int capacity, string region)
+    {
+        var elementBytes = kind switch
+        {
+            MathBlockValueKind.Scalar or MathBlockValueKind.Boolean => 0,
+            MathBlockValueKind.Vector or MathBlockValueKind.Matrix => sizeof(double),
+            MathBlockValueKind.BooleanVector => sizeof(int),
+            MathBlockValueKind.Complex or MathBlockValueKind.ComplexVector or
+                MathBlockValueKind.ComplexMatrix or MathBlockValueKind.PointSet or
+                MathBlockValueKind.Graph or MathBlockValueKind.RunSet => 16,
+            _ => throw new NotSupportedException($"The GPU value ABI does not support '{kind}'.")
+        };
+        return MeasureLayout(region, (capacity, elementBytes));
+    }
+
+    private static int MeasureLayout(string region, params (int Count, int Size)[] parts)
+    {
+        long result = 0;
+        try
+        {
+            checked
+            {
+                foreach (var part in parts)
+                {
+                    if (part.Count < 0 || part.Size < 0)
+                        throw new ArgumentOutOfRangeException(nameof(parts));
+                    result += (long)part.Count * part.Size;
+                }
+            }
+        }
+        catch (OverflowException)
+        {
+            throw new ArgumentOutOfRangeException(
+                "definition",
+                $"The {region} layout exceeds the supported GPU arena range.");
+        }
+        return AlignLayout(result, region);
+    }
+
+    private static int AdvanceLayout(int offset, int count, int size, string region)
+    {
+        if (offset < 0 || count < 0 || size < 0)
+            throw new ArgumentOutOfRangeException("definition", $"The {region} layout contains a negative size.");
+        long result;
+        try
+        {
+            result = checked((long)offset + checked((long)count * size));
+        }
+        catch (OverflowException)
+        {
+            throw new ArgumentOutOfRangeException(
+                "definition",
+                $"The {region} layout exceeds the supported GPU arena range.");
+        }
+        return AlignLayout(result, region);
+    }
+
+    private static int AlignLayout(long value, string region)
+    {
+        if (value < 0 || value > int.MaxValue - 7L)
+        {
+            throw new ArgumentOutOfRangeException(
+                "definition",
+                $"The {region} layout requires {value} bytes and exceeds the supported GPU arena range.");
+        }
+        return checked(((int)value + 7) & ~7);
+    }
+
+    private static int Align(int value) => AlignLayout(value, "resident");
     private static int ReadInt32(ReadOnlySpan<byte> bytes, int offset) =>
         BinaryPrimitives.ReadInt32LittleEndian(bytes[offset..]);
     private static ulong ReadUInt64(ReadOnlySpan<byte> bytes, int offset) =>
@@ -1716,7 +1898,9 @@ internal sealed class PopulationSearchLayout
         int Arity,
         int InputBase,
         int ImmutableSlotIndex,
-        int PayloadCapacity);
+        int PayloadCapacity,
+        int PayloadOffset,
+        int ScratchBytes);
 
     private readonly record struct ObjectiveSourceDescriptor(int SourceKind, int ProgramNodeIndex, int Direction);
 
@@ -1732,7 +1916,8 @@ internal sealed class PopulationSearchLayout
         int[] Inputs,
         ObjectiveSourceDescriptor[] Sources,
         QualityDimensionDescriptor[] QualityDimensions,
-        int ScratchBytes);
+        int PayloadBytes,
+        int MaximumScratchBytes);
 }
 
 internal static class MathBlockGpuValueLayout

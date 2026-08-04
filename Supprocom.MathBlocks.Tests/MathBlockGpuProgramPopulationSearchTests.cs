@@ -1615,6 +1615,74 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Resident_search_executes_production_scale_binary_event_objectives_with_exact_node_layout()
+    {
+        RequireCuda();
+        var definition = CreateProductionScaleBinaryEventSearch();
+        MathBlockProgramPopulationSearchState checkpoint;
+        MathBlockProgramPopulationSearchCycleResult expectedNext;
+        long residentBytes;
+        using (var uninterrupted = new MathBlocksGPUWorker().CompilePopulationSearch(definition))
+        {
+            residentBytes = uninterrupted.ResidentBytes;
+            Console.WriteLine($"The measured resident size is {residentBytes} bytes.");
+            var first = uninterrupted.ExecuteCycle();
+            checkpoint = MathBlockProgramPopulationSearchState.Import(first.AcceptedState.Export());
+            var evaluatedTrials = first.Trials.Where(trial => trial.Objectives.Count != 0).ToArray();
+            Assert.NotEmpty(evaluatedTrials);
+            var evaluated = evaluatedTrials[0];
+
+            Assert.Equal(
+                definition.EvaluateObjectives(evaluated.Program).Select(BitConverter.DoubleToInt64Bits),
+                evaluated.Objectives.Select(BitConverter.DoubleToInt64Bits));
+            Assert.Equal(definition.CreateSemanticFingerprint(evaluated.Program), evaluated.SemanticFingerprint);
+            Assert.Equal(1, uninterrupted.GraphInstanceCount);
+            Assert.Equal(1, uninterrupted.ImmutableUploadCount);
+            Assert.Equal(0, uninterrupted.LaterImmutableUploadCount);
+            Assert.Equal(1, uninterrupted.GraphLaunchCount);
+            Assert.Equal(1, uninterrupted.SynchronizationCount);
+            Assert.Equal(1, uninterrupted.DownloadCount);
+            Assert.Equal(0, uninterrupted.FullCandidateOutputDownloadCount);
+            Assert.Equal(0, uninterrupted.FullCandidateOutputBytes);
+            Assert.Equal(0, uninterrupted.CpuNodeDispatchCount);
+            Assert.Equal((long)uninterrupted.CompactDownloadBytesPerCycle, uninterrupted.DownloadedBytes);
+
+            var constrained = new MathBlockProgramPopulationSearchDefinition(
+                definition.Population,
+                definition.ObjectiveBinding,
+                definition.Evolution,
+                definition.Selection,
+                definition.QualityDiversity,
+                new MathBlockProgramPopulationSearchEnvelope(
+                    residentBytes - 1,
+                    definition.Envelope.MaximumCompactDownloadBytes),
+                definition.Validity,
+                definition.CompactResults,
+                definition.InitialPrograms);
+            var exception = Assert.Throws<ArgumentOutOfRangeException>(
+                () => new MathBlocksGPUWorker().CompilePopulationSearch(constrained));
+            Assert.Contains($"requires {residentBytes} bytes", exception.Message, StringComparison.Ordinal);
+
+            expectedNext = uninterrupted.ExecuteCycle();
+        }
+
+        using var resumed = new MathBlocksGPUWorker().CompilePopulationSearch(definition.WithAcceptedState(checkpoint));
+        var actualNext = resumed.ExecuteCycle();
+
+        Assert.Equal(expectedNext.AcceptedState.Export(), actualNext.AcceptedState.Export());
+        Assert.Equal(expectedNext.Trials.Select(TrialIdentity), actualNext.Trials.Select(TrialIdentity));
+        Assert.Equal(residentBytes, resumed.ResidentBytes);
+        Assert.Equal(1, resumed.ImmutableUploadCount);
+        Assert.Equal(0, resumed.LaterImmutableUploadCount);
+        Assert.Equal(1, resumed.GraphLaunchCount);
+        Assert.Equal(1, resumed.SynchronizationCount);
+        Assert.Equal(1, resumed.DownloadCount);
+        Assert.Equal(0, resumed.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, resumed.FullCandidateOutputBytes);
+        Assert.Equal(0, resumed.CpuNodeDispatchCount);
+    }
+
+    [Fact]
     public void Resident_search_reserves_exact_quadratic_scratch_and_enforces_the_resident_envelope()
     {
         RequireCuda();
@@ -1774,6 +1842,378 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
             Assert.Equal(0, compiled.CpuNodeDispatchCount);
         }
     }
+
+    [Fact]
+    public void Resident_objective_layout_covers_every_public_GPU_operation_identity_without_overlap()
+    {
+        RequireCuda();
+        var definition = CreateAllIdentityObjectiveLayoutSearch();
+        using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition);
+        var layout = ReadLayout(compiled);
+        var nodes = (Array)layout.GetType()
+            .GetField("objectiveNodes", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(layout)!;
+        var types = (MathBlockType[])layout.GetType()
+            .GetField("types", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(layout)!;
+        var objectivePayloadBytes = (int)layout.GetType()
+            .GetProperty("ObjectivePayloadBytes", BindingFlags.Instance | BindingFlags.Public)!
+            .GetValue(layout)!;
+        var scratchBytes = (int)layout.GetType()
+            .GetProperty("ScratchBytesPerNode", BindingFlags.Instance | BindingFlags.Public)!
+            .GetValue(layout)!;
+        var payloadRanges = new List<(int Start, int End)>();
+        var operationNodeCount = 0;
+        foreach (var descriptor in nodes)
+        {
+            var descriptorType = descriptor!.GetType();
+            if ((int)descriptorType.GetProperty("Kind")!.GetValue(descriptor)! != 3)
+                continue;
+            operationNodeCount++;
+            var typeId = (int)descriptorType.GetProperty("TypeId")!.GetValue(descriptor)!;
+            var capacity = (int)descriptorType.GetProperty("PayloadCapacity")!.GetValue(descriptor)!;
+            var offset = (int)descriptorType.GetProperty("PayloadOffset")!.GetValue(descriptor)!;
+            var requiredScratch = (int)descriptorType.GetProperty("ScratchBytes")!.GetValue(descriptor)!;
+            var requiredPayload = PayloadBytes(types[typeId].Kind, capacity);
+            Assert.InRange(requiredScratch, 0, scratchBytes);
+            Assert.InRange(offset, 0, objectivePayloadBytes);
+            Assert.InRange(checked(offset + requiredPayload), 0, objectivePayloadBytes);
+            if (requiredPayload > 0)
+                payloadRanges.Add((offset, checked(offset + requiredPayload)));
+        }
+        Assert.Equal(337, MathBlocksGPUWorker.SupportedBlockIdentities.Count);
+        Assert.Equal(MathBlocksGPUWorker.SupportedBlockIdentities.Count, operationNodeCount);
+        var ordered = payloadRanges.OrderBy(range => range.Start).ToArray();
+        for (var index = 1; index < ordered.Length; index++)
+            Assert.True(ordered[index - 1].End <= ordered[index].Start);
+
+        var overflow = CreateUnrepresentableLayoutSearch();
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(
+            () => new MathBlocksGPUWorker().CompilePopulationSearch(overflow));
+        Assert.Contains("candidate payload for 'vector.absolute@1'", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("exceeds the supported GPU arena range", exception.Message, StringComparison.Ordinal);
+    }
+
+    private static MathBlockProgramPopulationSearchDefinition CreateProductionScaleBinaryEventSearch()
+    {
+        const int rowCount = 305_581;
+        const int framesPerEra = 30 * 24 * 4;
+        const int bootstrapSamples = 257;
+        const int bootstrapBlockEras = 2;
+        var eraCount = checked((rowCount + framesPerEra - 1) / framesPerEra);
+        var vectorType = MathBlockType.Vector(length: rowCount);
+        var candidateType = MathBlockType.BooleanVector(rowCount);
+        var terminals = Enumerable.Range(0, 14)
+            .Select(terminal => new MathBlockProgramPopulationTerminal(
+                $"telemetry-{terminal:D2}",
+                vectorType,
+                MathBlockValue.Vector(Enumerable.Range(0, rowCount).Select(row =>
+                    (double)((row * (terminal + 3) + terminal * 11) % 101))),
+                lookback: 1))
+            .ToArray();
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [
+                    new MathBlockProgramPopulationOperation(
+                        "vector.greater-than",
+                        1,
+                        [vectorType, vectorType],
+                        candidateType),
+                    new MathBlockProgramPopulationOperation(
+                        "vector.less-than",
+                        1,
+                        [vectorType, vectorType],
+                        candidateType)
+                ],
+                candidateType),
+            terminals,
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, rowCount)],
+            proposalsPerCycle: 1,
+            fingerprintCapacity: 512);
+
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = builder.Input("candidate", MathBlockType.BooleanVector());
+        var candidateValidity = builder.Input("candidate-validity", MathBlockType.BooleanVector());
+        var eligibility = builder.Input("eligibility", candidateType);
+        var positive = builder.Input("positive", candidateType);
+        var eraInputs = Enumerable.Range(0, eraCount)
+            .Select(era => builder.Input($"era-{era:D3}", candidateType))
+            .ToArray();
+        var eraScoreInputs = Enumerable.Range(0, eraCount)
+            .Select(era => builder.Input($"era-score-{era:D3}", MathBlockType.Scalar()))
+            .ToArray();
+
+        int Scalar(double value) => builder.Constant(MathBlockValue.Scalar(value));
+        int Apply(string identity, params int[] inputs) => builder.Apply(identity, inputs: inputs);
+        int And(int left, int right) => Apply("boolean-vector.and", left, right);
+        int Not(int value) => Apply("boolean-vector.not", value);
+        int Count(int value) => Apply("boolean-vector.true-count", value);
+        int Add(int left, int right) => Apply("scalar.add", left, right);
+        int Subtract(int left, int right) => Apply("scalar.subtract", left, right);
+        int Multiply(int left, int right) => Apply("scalar.multiply", left, right);
+        int Divide(int left, int right) => Apply("scalar.divide", left, right);
+        int Maximum(int left, int right) => Apply("scalar.maximum", left, right);
+        int Square(int value) => Multiply(value, value);
+        int RepeatOne(int value) => Apply("vector.repeat", value, Scalar(1d));
+        int VectorFromScalars(IReadOnlyList<int> values)
+        {
+            var vectors = values.Select(RepeatOne).ToArray();
+            while (vectors.Length > 1)
+            {
+                var combined = new List<int>((vectors.Length + 1) / 2);
+                for (var index = 0; index < vectors.Length; index += 2)
+                {
+                    combined.Add(index + 1 < vectors.Length
+                        ? Apply("vector.concatenate", vectors[index], vectors[index + 1])
+                        : vectors[index]);
+                }
+                vectors = combined.ToArray();
+            }
+            return vectors[0];
+        }
+
+        var notCandidate = Not(candidate);
+        var validEvidence = And(eligibility, candidateValidity);
+        (int Eligible, int Active, int Inactive, int ActivePositive, int InactivePositive) Counts(int mask)
+        {
+            var activeMask = And(mask, candidate);
+            var inactiveMask = And(mask, notCandidate);
+            var activePositiveMask = And(activeMask, positive);
+            var inactivePositiveMask = And(inactiveMask, positive);
+            var active = Count(activeMask);
+            var inactive = Count(inactiveMask);
+            return (
+                Add(active, inactive),
+                active,
+                inactive,
+                Count(activePositiveMask),
+                Count(inactivePositiveMask));
+        }
+
+        var aggregateCounts = Counts(validEvidence);
+        var one = Scalar(1d);
+        var aggregatePositive = Add(aggregateCounts.ActivePositive, aggregateCounts.InactivePositive);
+        var baselineProbability = Divide(aggregatePositive, Maximum(aggregateCounts.Eligible, one));
+        var activeProbability = Divide(
+            aggregateCounts.ActivePositive,
+            Maximum(aggregateCounts.Active, one));
+        var inactiveProbability = Divide(
+            aggregateCounts.InactivePositive,
+            Maximum(aggregateCounts.Inactive, one));
+        int BrierScore((int Eligible, int Active, int Inactive, int ActivePositive, int InactivePositive) counts)
+        {
+            var activeNegative = Subtract(counts.Active, counts.ActivePositive);
+            var inactiveNegative = Subtract(counts.Inactive, counts.InactivePositive);
+            var positiveCount = Add(counts.ActivePositive, counts.InactivePositive);
+            var negativeCount = Subtract(counts.Eligible, positiveCount);
+            var candidateError = Add(
+                Add(
+                    Multiply(counts.ActivePositive, Square(Subtract(activeProbability, one))),
+                    Multiply(activeNegative, Square(activeProbability))),
+                Add(
+                    Multiply(counts.InactivePositive, Square(Subtract(inactiveProbability, one))),
+                    Multiply(inactiveNegative, Square(inactiveProbability))));
+            var baselineError = Add(
+                Multiply(positiveCount, Square(Subtract(baselineProbability, one))),
+                Multiply(negativeCount, Square(baselineProbability)));
+            return Subtract(
+                one,
+                Divide(candidateError, Maximum(baselineError, Scalar(double.Epsilon))));
+        }
+
+        var aggregateScore = BrierScore(aggregateCounts);
+        for (var era = 0; era < eraInputs.Length; era++)
+            builder.Output($"era-mask-{era:D3}", eraInputs[era]);
+        var eraVector = VectorFromScalars(eraScoreInputs);
+        var sampleMedians = new int[bootstrapSamples];
+        for (var sample = 0; sample < sampleMedians.Length; sample++)
+        {
+            var indexes = new double[eraCount];
+            var position = 0;
+            var block = 0;
+            while (position < indexes.Length)
+            {
+                var start = (sample * 17 + block * 29) % eraCount;
+                for (var offset = 0; offset < bootstrapBlockEras && position < indexes.Length; offset++)
+                    indexes[position++] = (start + offset) % eraCount;
+                block++;
+            }
+            var gathered = Apply(
+                "vector.gather",
+                eraVector,
+                builder.Constant(MathBlockValue.Vector(indexes)));
+            sampleMedians[sample] = Apply("vector.median", gathered);
+        }
+        var sampleMedianVector = VectorFromScalars(sampleMedians);
+        var lowerConfidence = Apply("vector.quantile", sampleMedianVector, Scalar(0.05d));
+        var lowerEra = Apply("vector.quantile", eraVector, Scalar(0.25d));
+        var objectiveProgram = builder
+            .Output("lower-confidence", lowerConfidence)
+            .Output("aggregate", aggregateScore)
+            .Output("lower-era", lowerEra)
+            .Build();
+
+        var residentInputs = new Dictionary<string, MathBlockValue>
+        {
+            ["eligibility"] = MathBlockValue.BooleanVector(Enumerable.Repeat(true, rowCount)),
+            ["positive"] = MathBlockValue.BooleanVector(
+                Enumerable.Range(0, rowCount).Select(row => row % 3 == 0 || row % 11 == 0))
+        };
+        for (var era = 0; era < eraCount; era++)
+        {
+            var start = checked(era * framesPerEra);
+            var end = Math.Min(rowCount, checked(start + framesPerEra));
+            residentInputs.Add(
+                $"era-{era:D3}",
+                MathBlockValue.BooleanVector(
+                    Enumerable.Range(0, rowCount).Select(row => row >= start && row < end)));
+            residentInputs.Add($"era-score-{era:D3}", MathBlockValue.Scalar(0d));
+        }
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveProgram,
+            "candidate",
+            residentInputs,
+            [
+                new MathBlockProgramPopulationObjective(
+                    "lower-confidence",
+                    "lower-confidence",
+                    MathBlockProgramPopulationObjectiveDirection.Maximize),
+                new MathBlockProgramPopulationObjective(
+                    "aggregate",
+                    "aggregate",
+                    MathBlockProgramPopulationObjectiveDirection.Maximize),
+                new MathBlockProgramPopulationObjective(
+                    "lower-era",
+                    "lower-era",
+                    MathBlockProgramPopulationObjectiveDirection.Maximize)
+            ],
+            "candidate-validity");
+        return new MathBlockProgramPopulationSearchDefinition(
+            population,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(4, 4, 0, 0, 0, 1701),
+            new MathBlockProgramPopulationSelectionPolicy(128, 128),
+            new MathBlockProgramPopulationQualityDiversityPolicy(
+                "lower-confidence",
+                [new MathBlockProgramPopulationQualityDiversityDimension("aggregate", -2d, 2d, 16)]),
+            new MathBlockProgramPopulationSearchEnvelope(6L * 1024 * 1024 * 1024, 64 * 1024 * 1024),
+            new MathBlockProgramPopulationValidityPolicy(Enumerable.Repeat(int.MaxValue, rowCount)));
+    }
+
+    private static MathBlockProgramPopulationSearchDefinition CreateAllIdentityObjectiveLayoutSearch()
+    {
+        var scalarType = MathBlockType.Scalar();
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation(
+                    "scalar.absolute",
+                    1,
+                    [scalarType],
+                    scalarType)],
+                scalarType),
+            [new MathBlockProgramPopulationTerminal("seed", scalarType, MathBlockValue.Scalar(-1d))],
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 1)],
+            proposalsPerCycle: 1,
+            fingerprintCapacity: 4);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = builder.Input("candidate", scalarType);
+        var residentInputs = new Dictionary<string, MathBlockValue>();
+        var operationIndex = 0;
+        foreach (var identity in MathBlocksGPUWorker.SupportedBlockIdentities.OrderBy(value => value))
+        {
+            var operation = MathBlockCatalog.Standard.Operations.Single(value => value.Identity == identity);
+            var regression = operation.RegressionCases[0];
+            var inputs = new int[regression.Inputs.Count];
+            for (var input = 0; input < inputs.Length; input++)
+            {
+                var name = $"operation-{operationIndex:D3}-input-{input:D2}";
+                inputs[input] = builder.Input(name, regression.Inputs[input].Type);
+                residentInputs.Add(name, regression.Inputs[input]);
+            }
+            var output = builder.Apply(operation.Identifier, operation.Version, inputs);
+            builder.Output($"operation-{operationIndex:D3}", output);
+            operationIndex++;
+        }
+        var program = builder.Output("candidate", candidate).Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            program,
+            "candidate",
+            residentInputs,
+            [new MathBlockProgramPopulationObjective(
+                "candidate",
+                "candidate",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        return new MathBlockProgramPopulationSearchDefinition(
+            population,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(1, 1, 0, 0, 0, 1703),
+            new MathBlockProgramPopulationSelectionPolicy(2, 2),
+            new MathBlockProgramPopulationQualityDiversityPolicy(
+                "candidate",
+                [new MathBlockProgramPopulationQualityDiversityDimension("candidate", -2d, 2d, 2)]),
+            new MathBlockProgramPopulationSearchEnvelope(512L * 1024 * 1024, 64 * 1024 * 1024),
+            new MathBlockProgramPopulationValidityPolicy([int.MaxValue]));
+    }
+
+    private static MathBlockProgramPopulationSearchDefinition CreateUnrepresentableLayoutSearch()
+    {
+        var dynamicVector = MathBlockType.Vector();
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation(
+                    "vector.absolute",
+                    1,
+                    [dynamicVector],
+                    dynamicVector)],
+                dynamicVector),
+            [new MathBlockProgramPopulationTerminal(
+                "seed",
+                MathBlockType.Vector(length: 1),
+                MathBlockValue.Vector([1d]))],
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, int.MaxValue)],
+            proposalsPerCycle: 1,
+            fingerprintCapacity: 2);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = builder.Input("candidate", dynamicVector);
+        var program = builder.Output("candidate", candidate).Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            program,
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [MathBlockProgramPopulationObjective.Intrinsic(
+                "complexity",
+                MathBlockProgramPopulationIntrinsicObjectiveIdentities.ExpandedOperationCount,
+                MathBlockProgramPopulationObjectiveDirection.Minimize)]);
+        return new MathBlockProgramPopulationSearchDefinition(
+            population,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(1, 1, 0, 0, 0, 1709),
+            new MathBlockProgramPopulationSelectionPolicy(1, 1),
+            new MathBlockProgramPopulationQualityDiversityPolicy(
+                "complexity",
+                [new MathBlockProgramPopulationQualityDiversityDimension("complexity", 0d, 2d, 2)]),
+            new MathBlockProgramPopulationSearchEnvelope(long.MaxValue, 64 * 1024 * 1024),
+            new MathBlockProgramPopulationValidityPolicy([int.MaxValue]));
+    }
+
+    private static object ReadLayout(MathBlocksGPUProgramPopulationSearch compiled) =>
+        typeof(MathBlocksGPUProgramPopulationSearch)
+            .GetField("layout", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(compiled)!;
+
+    private static int PayloadBytes(MathBlockValueKind kind, int capacity) => kind switch
+    {
+        MathBlockValueKind.Scalar or MathBlockValueKind.Boolean => 0,
+        MathBlockValueKind.Vector or MathBlockValueKind.Matrix => checked(capacity * sizeof(double)),
+        MathBlockValueKind.BooleanVector => checked(capacity * sizeof(int)),
+        MathBlockValueKind.Complex or MathBlockValueKind.ComplexVector or
+            MathBlockValueKind.ComplexMatrix or MathBlockValueKind.PointSet or
+            MathBlockValueKind.Graph or MathBlockValueKind.RunSet => checked(capacity * 16),
+        _ => throw new NotSupportedException()
+    };
 
     private static MathBlockProgramPopulationSearchDefinition CreateScalarSearch(
         int proposalsPerCycle,
