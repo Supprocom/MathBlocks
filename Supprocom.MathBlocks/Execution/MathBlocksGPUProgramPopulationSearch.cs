@@ -507,6 +507,8 @@ internal sealed class PopulationSearchLayout
     public int SelectedOperationOffset { get; private set; }
     public int SelectedOperandOffset { get; private set; }
     public int SelectedLookbackOffset { get; private set; }
+    public int ProposalWaveSlotOffset { get; private set; }
+    public int ProposalWaveSlotBytes { get; private set; }
     public int AcceptedStateOffset { get; private set; }
     public int AcceptedStructuralOffset { get; private set; }
     public int AcceptedSemanticOffset { get; private set; }
@@ -673,6 +675,12 @@ internal sealed class PopulationSearchLayout
     {
         var population = definition.Population;
         var compactTrialCapacity = definition.WavePolicy.MaximumTrialResultsPerCycle;
+        ArchiveEntrySize = MeasureLayout(
+            "archive entry",
+            (1, EntryHeaderSize),
+            (objectiveSources.Length, sizeof(ulong)),
+            (MaximumOperationCount, ProgramOperationSize));
+        TrialEntrySize = ArchiveEntrySize;
         OperationOffset = HeaderSize;
         OperationInputTypeOffset = AdvanceLayout(
             OperationOffset, operations.Length, OperationSize, "operation descriptors");
@@ -735,18 +743,18 @@ internal sealed class PopulationSearchLayout
             sizeof(int),
             "selected types and lookbacks");
         LaneStrideBytes = checked(laneEnd - CandidateSlotOffset);
-        AcceptedStateOffset = AlignLayout(
+        ProposalWaveSlotOffset = AlignLayout(
             checked((long)CandidateSlotOffset + (long)LaneStrideBytes * CandidateLaneCount),
             "candidate lanes");
+        AcceptedStateOffset = AdvanceLayout(
+            ProposalWaveSlotOffset,
+            definition.WavePolicy.ProposalWaveSize,
+            TrialEntrySize,
+            "proposal-wave slots");
+        ProposalWaveSlotBytes = checked(AcceptedStateOffset - ProposalWaveSlotOffset);
         AcceptedStructuralOffset = AdvanceLayout(AcceptedStateOffset, 1, StateHeaderSize, "accepted state");
         AcceptedSemanticOffset = AdvanceLayout(
             AcceptedStructuralOffset, population.FingerprintCapacity, 16, "accepted structural fingerprints");
-        ArchiveEntrySize = MeasureLayout(
-            "archive entry",
-            (1, EntryHeaderSize),
-            (objectiveSources.Length, sizeof(ulong)),
-            (MaximumOperationCount, ProgramOperationSize));
-        TrialEntrySize = ArchiveEntrySize;
         AcceptedParetoOffset = AdvanceLayout(
             AcceptedSemanticOffset, population.FingerprintCapacity, 16, "accepted semantic fingerprints");
         AcceptedQualityOffset = AdvanceLayout(
@@ -820,6 +828,8 @@ internal sealed class PopulationSearchLayout
             LaneStrideBytes,
             CandidateLaneCount,
             checked((long)LaneStrideBytes * CandidateLaneCount),
+            definition.WavePolicy.ProposalWaveSize,
+            ProposalWaveSlotBytes,
             ArenaSize,
             ArenaSize,
             CompactSize);
@@ -1049,7 +1059,7 @@ internal sealed class PopulationSearchLayout
     private void WriteHeader(Span<byte> bytes, MathBlockProgramPopulationSearchDefinition definition)
     {
         WriteInt32(bytes, 0, unchecked((int)0x4d425334));
-        WriteInt32(bytes, 4, 7);
+        WriteInt32(bytes, 4, 8);
         WriteInt32(bytes, 8, operations.Length);
         WriteInt32(bytes, 12, terminals.Length);
         WriteInt32(bytes, 16, types.Length);
@@ -1102,6 +1112,8 @@ internal sealed class PopulationSearchLayout
         WriteInt32(bytes, 320, definition.WavePolicy.MaximumTrialResultsPerCycle);
         WriteInt32(bytes, 324, definition.WavePolicy.ProposalWaveSize);
         WriteInt32(bytes, 328, definition.WavePolicy.WavesPerCycle);
+        WriteInt32(bytes, 332, ProposalWaveSlotOffset);
+        WriteInt32(bytes, 336, ProposalWaveSlotBytes);
     }
 
     private void WriteAcceptedState(

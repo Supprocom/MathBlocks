@@ -470,6 +470,8 @@ public readonly record struct MathBlockProgramPopulationSearchCapacity(
     int LaneStrideBytes,
     int CandidateLaneCount,
     long WorkingResidentBytes,
+    int ProposalWaveSlotCount,
+    long ProposalWaveSlotBytes,
     long PeakResidentBytes,
     long ResidentBytes,
     int CompactDownloadBytes);

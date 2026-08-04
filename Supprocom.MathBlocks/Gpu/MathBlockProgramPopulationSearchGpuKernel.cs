@@ -1548,7 +1548,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 7)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 8)
                 return;
 
             int fingerprint_capacity = mbp_read_int(arena, 40);
@@ -1592,7 +1592,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             if (blockIdx.x != 0)
                 return;
             __shared__ int cooperative_status;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 7)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 8)
                 return;
 
             int grammar_operation_count = mbp_read_int(arena, 8);
@@ -1603,6 +1603,9 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int maximum_value_elements = mbp_read_int(arena, 32);
             int proposals_per_cycle = mbp_read_int(arena, 36);
             int cycle_work_limit = mbp_read_int(arena, 320);
+            int proposal_wave_size = mbp_read_int(arena, 324);
+            int proposal_wave_slot_offset = mbp_read_int(arena, 332);
+            int proposal_wave_slot_bytes = mbp_read_int(arena, 336);
             int fingerprint_capacity = mbp_read_int(arena, 40);
             int output_type = mbp_read_int(arena, 44);
             int objective_node_count = mbp_read_int(arena, 48);
@@ -1672,7 +1675,10 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             if (grammar_operation_count <= 0 || terminal_count <= 0 || band_count <= 0 ||
                 maximum_operation_count <= 0 || maximum_band_elements <= 0 ||
                 maximum_value_elements <= 0 || proposals_per_cycle <= 0 ||
-                cycle_work_limit <= 0 || fingerprint_capacity <= 0 ||
+                cycle_work_limit <= 0 || proposal_wave_size <= 0 ||
+                proposal_wave_slot_offset <= 0 ||
+                proposal_wave_slot_bytes / proposal_wave_size < entry_size ||
+                fingerprint_capacity <= 0 ||
                 objective_node_count <= 0 || objective_count <= 0 || pareto_capacity <= 0 ||
                 quality_capacity <= 0 || maximum_arity < 0 || history_count <= 0 ||
                 compact_size < 144 || enumeration_limit > total_proposals)
@@ -2117,7 +2123,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 mbp_ull current_trial = trial_cursor++;
                 wave_cursor++;
                 processed++;
-                int candidate_entry = compact_trial_offset + trial_result_count * entry_size;
+                int candidate_entry = proposal_wave_slot_offset;
                 MbpHash structural = mbp_structural_hash(
                     arena,
                     operation_offset,
@@ -2353,7 +2359,13 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 mbp_write_int(arena, candidate_entry + 16, cell);
                 mbp_write_int(arena, candidate_entry + 24, flags);
                 if (keep_result)
+                {
+                    mbp_copy(
+                        arena + compact_trial_offset + trial_result_count * entry_size,
+                        arena + candidate_entry,
+                        entry_size);
                     trial_result_count++;
+                }
             }
 
             quality_count = 0;
@@ -2416,7 +2428,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 7)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 8)
                 return;
 
             int compact_offset = mbp_header_offset(arena, 34);

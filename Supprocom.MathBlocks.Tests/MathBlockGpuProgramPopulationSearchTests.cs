@@ -40,6 +40,8 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
 
         Assert.Equal(1, singleLane.CandidateLaneCount);
         Assert.Equal(4, fourLanes.CandidateLaneCount);
+        Assert.Equal(1, singleLane.ProposalWaveSlotCount);
+        Assert.True(singleLane.ProposalWaveSlotBytes > 0);
         Assert.Equal(singleLane.SharedResidentBytes, fourLanes.SharedResidentBytes);
         Assert.Equal(singleLane.LaneStrideBytes, fourLanes.LaneStrideBytes);
         Assert.Equal(
@@ -81,6 +83,8 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
             widerCycle,
             MathBlockProgramPopulationExecutionOptions.SerialResident);
         Assert.Equal(singleLane.LaneStrideBytes, widerCapacity.LaneStrideBytes);
+        Assert.Equal(1, widerCapacity.ProposalWaveSlotCount);
+        Assert.Equal(singleLane.ProposalWaveSlotBytes, widerCapacity.ProposalWaveSlotBytes);
         Assert.True(widerCapacity.CompactDownloadBytes > singleLane.CompactDownloadBytes);
         Assert.True(widerCapacity.SharedResidentBytes > singleLane.SharedResidentBytes);
         Assert.Throws<ArgumentOutOfRangeException>(
