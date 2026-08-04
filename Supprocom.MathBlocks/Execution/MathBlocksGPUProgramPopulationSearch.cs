@@ -9,7 +9,7 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
     private readonly MathBlockProgramPopulationSearchDefinition definition;
     private readonly MathBlockProgramPopulationExecutionOptions executionOptions;
     private readonly PopulationSearchLayout layout;
-    private readonly SearchKernelArguments kernelArguments;
+    private readonly SearchKernelArgumentSet kernelArguments;
     private ulong deviceArena;
     private IntPtr downloadArena;
     private IntPtr stream;
@@ -26,7 +26,7 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
         MathBlockProgramPopulationSearchDefinition definition,
         MathBlockProgramPopulationExecutionOptions executionOptions,
         PopulationSearchLayout layout,
-        SearchKernelArguments kernelArguments,
+        SearchKernelArgumentSet kernelArguments,
         ulong deviceArena,
         IntPtr downloadArena,
         IntPtr stream,
@@ -91,12 +91,6 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
                 nameof(executionOptions),
                 "Serial resident execution requires one candidate lane.");
         }
-        if (executionOptions.Mode == MathBlockProgramPopulationExecutionMode.ParallelResident &&
-            definition.WavePolicy.ProposalWaveSize != 1)
-        {
-            throw new NotSupportedException(
-                "Parallel resident execution currently supports proposal waves of size one.");
-        }
         var layout = PopulationSearchLayout.Create(
             definition,
             executionOptions.CandidateLaneCount,
@@ -127,7 +121,7 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
         var stream = IntPtr.Zero;
         var graph = IntPtr.Zero;
         var executable = IntPtr.Zero;
-        SearchKernelArguments? arguments = null;
+        SearchKernelArgumentSet? arguments = null;
         try
         {
             MathBlocksCudaNative.ThrowIfFailed(
@@ -161,49 +155,103 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
                 MathBlocksCudaNative.cuGraphCreate(out graph, 0),
                 "cuGraphCreate(mathblocks population search)");
 
-            arguments = new SearchKernelArguments(deviceArena);
+            arguments = new SearchKernelArgumentSet();
+            var arenaArguments = arguments.Add(deviceArena);
             var blockSize = executionOptions.Mode == MathBlockProgramPopulationExecutionMode.ParallelResident
                 ? VectorGpuBlockCatalog.BlockSize
                 : 1;
-            var beginParameters = new MathBlocksCudaNative.KernelNodeParameters
+
+            IntPtr AddKernelNode(
+                IntPtr function,
+                SearchKernelArguments nodeArguments,
+                IReadOnlyList<IntPtr> dependencies,
+                string stage)
             {
-                Function = MathBlockProgramPopulationSearchGpuKernel.BeginFunction,
-                GridX = 1,
-                GridY = 1,
-                GridZ = 1,
-                BlockX = blockSize,
-                BlockY = 1,
-                BlockZ = 1,
-                KernelParameters = arguments.PointerArray
-            };
-            MathBlocksCudaNative.ThrowIfFailed(
-                MathBlocksCudaNative.cuGraphAddKernelNode(
-                    out var beginNode,
-                    graph,
-                    null,
-                    UIntPtr.Zero,
-                    ref beginParameters),
-                "cuGraphAddKernelNode(mathblocks population search begin)");
-            var executeParameters = beginParameters;
-            executeParameters.Function = MathBlockProgramPopulationSearchGpuKernel.ExecuteFunction;
-            MathBlocksCudaNative.ThrowIfFailed(
-                MathBlocksCudaNative.cuGraphAddKernelNode(
-                    out var executeNode,
-                    graph,
-                    [beginNode],
-                    new UIntPtr(1),
-                    ref executeParameters),
-                "cuGraphAddKernelNode(mathblocks population search execute)");
-            var publishParameters = beginParameters;
-            publishParameters.Function = MathBlockProgramPopulationSearchGpuKernel.PublishFunction;
-            MathBlocksCudaNative.ThrowIfFailed(
-                MathBlocksCudaNative.cuGraphAddKernelNode(
-                    out var publishNode,
-                    graph,
-                    [executeNode],
-                    new UIntPtr(1),
-                    ref publishParameters),
-                "cuGraphAddKernelNode(mathblocks population search publish)");
+                var parameters = new MathBlocksCudaNative.KernelNodeParameters
+                {
+                    Function = function,
+                    GridX = 1,
+                    GridY = 1,
+                    GridZ = 1,
+                    BlockX = blockSize,
+                    BlockY = 1,
+                    BlockZ = 1,
+                    KernelParameters = nodeArguments.PointerArray
+                };
+                IntPtr[]? dependencyArray = null;
+                if (dependencies.Count != 0)
+                {
+                    dependencyArray = new IntPtr[dependencies.Count];
+                    for (var index = 0; index < dependencyArray.Length; index++)
+                        dependencyArray[index] = dependencies[index];
+                }
+                MathBlocksCudaNative.ThrowIfFailed(
+                    MathBlocksCudaNative.cuGraphAddKernelNode(
+                        out var node,
+                        graph,
+                        dependencyArray,
+                        new UIntPtr(checked((uint)dependencies.Count)),
+                        ref parameters),
+                    $"cuGraphAddKernelNode(mathblocks population search {stage})");
+                return node;
+            }
+
+            var beginNode = AddKernelNode(
+                MathBlockProgramPopulationSearchGpuKernel.BeginFunction,
+                arenaArguments,
+                [],
+                "begin");
+            var predecessor = AddKernelNode(
+                MathBlockProgramPopulationSearchGpuKernel.SetupFunction,
+                arenaArguments,
+                [beginNode],
+                "setup");
+            for (var wave = 0; wave < definition.WavePolicy.WavesPerCycle; wave++)
+            {
+                var prepareNode = AddKernelNode(
+                    MathBlockProgramPopulationSearchGpuKernel.PrepareFunction,
+                    arenaArguments,
+                    [predecessor],
+                    "prepare");
+                var evaluationNodes = new IntPtr[definition.WavePolicy.ProposalWaveSize];
+                IReadOnlyList<IntPtr> priorChunk = [prepareNode];
+                for (var chunkStart = 0;
+                    chunkStart < evaluationNodes.Length;
+                    chunkStart += executionOptions.CandidateLaneCount)
+                {
+                    var chunkEnd = Math.Min(
+                        evaluationNodes.Length,
+                        chunkStart + executionOptions.CandidateLaneCount);
+                    var currentChunk = new IntPtr[chunkEnd - chunkStart];
+                    for (var slot = chunkStart; slot < chunkEnd; slot++)
+                    {
+                        var lane = slot - chunkStart;
+                        var evaluationArguments = arguments.Add(deviceArena, slot, lane);
+                        evaluationNodes[slot] = AddKernelNode(
+                            MathBlockProgramPopulationSearchGpuKernel.EvaluateFunction,
+                            evaluationArguments,
+                            priorChunk,
+                            "evaluate");
+                        currentChunk[slot - chunkStart] = evaluationNodes[slot];
+                    }
+                    priorChunk = currentChunk;
+                }
+                predecessor = AddKernelNode(
+                    MathBlockProgramPopulationSearchGpuKernel.CommitFunction,
+                    arenaArguments,
+                    priorChunk,
+                    "commit");
+            }
+            var finalizeNode = AddKernelNode(
+                MathBlockProgramPopulationSearchGpuKernel.FinalizeFunction,
+                arenaArguments,
+                [predecessor],
+                "finalize");
+            var publishNode = AddKernelNode(
+                MathBlockProgramPopulationSearchGpuKernel.PublishFunction,
+                arenaArguments,
+                [finalizeNode],
+                "publish");
             var copy = MathBlocksCudaNative.MemoryCopy3D.DeviceToHost(
                 checked(deviceArena + (ulong)layout.CompactOffset),
                 downloadArena,
@@ -288,9 +336,10 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
             acceptedState = parsed.State!;
             var evaluatedDelta = checked((long)(
                 acceptedState.EvaluatedProgramCount - previousEvaluatedProgramCount));
-            candidateChunkCount = checked(candidateChunkCount + evaluatedDelta);
-            if (evaluatedDelta != 0)
-                maximumConcurrentCandidates = 1;
+            candidateChunkCount = checked(candidateChunkCount + parsed.CandidateChunkCount);
+            maximumConcurrentCandidates = Math.Max(
+                maximumConcurrentCandidates,
+                parsed.MaximumConcurrentCandidates);
             if (executionOptions.Mode == MathBlockProgramPopulationExecutionMode.SerialResident)
                 serialCandidateExecutionCount = checked(serialCandidateExecutionCount + evaluatedDelta);
             else
@@ -372,16 +421,43 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
 
     private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(disposed, this);
 
+    private sealed class SearchKernelArgumentSet : IDisposable
+    {
+        private readonly List<SearchKernelArguments> arguments = [];
+
+        public SearchKernelArguments Add(ulong arena, params int[] values)
+        {
+            var result = new SearchKernelArguments(arena, values);
+            arguments.Add(result);
+            return result;
+        }
+
+        public void Dispose()
+        {
+            foreach (var item in arguments)
+                item.Dispose();
+            arguments.Clear();
+        }
+    }
+
     private sealed class SearchKernelArguments : IDisposable
     {
-        private IntPtr arenaArgument;
+        private readonly List<IntPtr> valueArguments = [];
 
-        public SearchKernelArguments(ulong arena)
+        public SearchKernelArguments(ulong arena, IReadOnlyList<int> values)
         {
-            arenaArgument = Marshal.AllocHGlobal(sizeof(long));
-            PointerArray = Marshal.AllocHGlobal(IntPtr.Size);
+            var arenaArgument = Marshal.AllocHGlobal(sizeof(long));
+            valueArguments.Add(arenaArgument);
             Marshal.WriteInt64(arenaArgument, unchecked((long)arena));
-            Marshal.WriteIntPtr(PointerArray, arenaArgument);
+            foreach (var value in values)
+            {
+                var argument = Marshal.AllocHGlobal(sizeof(int));
+                valueArguments.Add(argument);
+                Marshal.WriteInt32(argument, value);
+            }
+            PointerArray = Marshal.AllocHGlobal(checked(IntPtr.Size * valueArguments.Count));
+            for (var index = 0; index < valueArguments.Count; index++)
+                Marshal.WriteIntPtr(PointerArray, index * IntPtr.Size, valueArguments[index]);
         }
 
         public IntPtr PointerArray { get; private set; }
@@ -390,10 +466,10 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
         {
             if (PointerArray != IntPtr.Zero)
                 Marshal.FreeHGlobal(PointerArray);
-            if (arenaArgument != IntPtr.Zero)
-                Marshal.FreeHGlobal(arenaArgument);
+            foreach (var argument in valueArguments)
+                Marshal.FreeHGlobal(argument);
+            valueArguments.Clear();
             PointerArray = IntPtr.Zero;
-            arenaArgument = IntPtr.Zero;
         }
     }
 }
@@ -411,11 +487,14 @@ internal enum PopulationSearchCycleStatus
 internal sealed record PopulationSearchCycleParseResult(
     PopulationSearchCycleStatus Status,
     MathBlockProgramPopulationSearchState? State,
-    IReadOnlyList<MathBlockProgramPopulationTrialResult> Trials);
+    IReadOnlyList<MathBlockProgramPopulationTrialResult> Trials,
+    int CandidateChunkCount,
+    int MaximumConcurrentCandidates);
 
 internal sealed class PopulationSearchLayout
 {
     private const int HeaderSize = 384;
+    private const int ProposalWaveControlSize = 32;
     private const int TypeSize = 48;
     private const int OperationSize = 48;
     private const int TerminalSize = 32;
@@ -512,6 +591,7 @@ internal sealed class PopulationSearchLayout
     public int ProposalWaveSlotBytes { get; private set; }
     public int ProposalWaveSnapshotParetoOffset { get; private set; }
     public int ProposalWaveSnapshotQualityOffset { get; private set; }
+    public int ProposalWaveControlOffset { get; private set; }
     public int AcceptedStateOffset { get; private set; }
     public int AcceptedStructuralOffset { get; private set; }
     public int AcceptedSemanticOffset { get; private set; }
@@ -760,11 +840,16 @@ internal sealed class PopulationSearchLayout
             definition.Selection.ParetoCapacity,
             ArchiveEntrySize,
             "proposal-wave Pareto snapshot");
-        AcceptedStateOffset = AdvanceLayout(
+        ProposalWaveControlOffset = AdvanceLayout(
             ProposalWaveSnapshotQualityOffset,
             definition.QualityDiversity.CellCount,
             ArchiveEntrySize,
             "proposal-wave quality-diversity snapshot");
+        AcceptedStateOffset = AdvanceLayout(
+            ProposalWaveControlOffset,
+            1,
+            ProposalWaveControlSize,
+            "proposal-wave control");
         AcceptedStructuralOffset = AdvanceLayout(AcceptedStateOffset, 1, StateHeaderSize, "accepted state");
         AcceptedSemanticOffset = AdvanceLayout(
             AcceptedStructuralOffset, population.FingerprintCapacity, 16, "accepted structural fingerprints");
@@ -951,7 +1036,7 @@ internal sealed class PopulationSearchLayout
         if (!Enum.IsDefined(status))
             throw new InvalidDataException("The resident search status is invalid.");
         if (status != PopulationSearchCycleStatus.Success)
-            return new PopulationSearchCycleParseResult(status, null, []);
+            return new PopulationSearchCycleParseResult(status, null, [], 0, 0);
         var trialCount = ReadInt32(downloaded, 4);
         var newStructuralCount = ReadInt32(downloaded, 8);
         var newSemanticCount = ReadInt32(downloaded, 12);
@@ -974,12 +1059,18 @@ internal sealed class PopulationSearchLayout
         var refreshCount = ReadInt32(downloaded, 116);
         var enumerationTrialCount = ReadUInt64(downloaded, 120);
         var waveCursor = ReadUInt64(downloaded, 128);
+        var candidateChunkCount = ReadInt32(downloaded, 136);
+        var maximumConcurrentCandidates = ReadInt32(downloaded, 140);
         var trialDelta = trialCursor >= previous.TrialCursor
             ? trialCursor - previous.TrialCursor
             : ulong.MaxValue;
         var proposalWaveSize = checked((ulong)definition.WavePolicy.ProposalWaveSize);
         var expectedWaveDelta = trialDelta / proposalWaveSize +
             (trialDelta % proposalWaveSize == 0 ? 0ul : 1ul);
+        var maximumCandidateChunks = checked(
+            definition.WavePolicy.WavesPerCycle *
+            ((definition.WavePolicy.ProposalWaveSize + CandidateLaneCount - 1) /
+                CandidateLaneCount));
         if (trialCount < 0 || trialCount > definition.WavePolicy.MaximumTrialResultsPerCycle ||
             newStructuralCount < 0 ||
             newStructuralCount > definition.WavePolicy.MaximumTrialResultsPerCycle ||
@@ -1008,7 +1099,13 @@ internal sealed class PopulationSearchLayout
             generation != previous.EnvelopeGeneration ||
             refreshCount != previous.RefreshPrograms.Count ||
             refreshCursor < previous.RefreshCursor ||
-            refreshCursor > refreshCount)
+            refreshCursor > refreshCount ||
+            candidateChunkCount < 0 || candidateChunkCount > maximumCandidateChunks ||
+            maximumConcurrentCandidates < 0 ||
+            maximumConcurrentCandidates > Math.Min(
+                CandidateLaneCount,
+                definition.WavePolicy.ProposalWaveSize) ||
+            (candidateChunkCount == 0) != (maximumConcurrentCandidates == 0))
         {
             throw new InvalidDataException("The resident search state is invalid.");
         }
@@ -1072,13 +1169,18 @@ internal sealed class PopulationSearchLayout
             selection,
             quality,
             previous.RefreshPrograms);
-        return new PopulationSearchCycleParseResult(status, state, trials);
+        return new PopulationSearchCycleParseResult(
+            status,
+            state,
+            trials,
+            candidateChunkCount,
+            maximumConcurrentCandidates);
     }
 
     private void WriteHeader(Span<byte> bytes, MathBlockProgramPopulationSearchDefinition definition)
     {
         WriteInt32(bytes, 0, unchecked((int)0x4d425334));
-        WriteInt32(bytes, 4, 9);
+        WriteInt32(bytes, 4, 10);
         WriteInt32(bytes, 8, operations.Length);
         WriteInt32(bytes, 12, terminals.Length);
         WriteInt32(bytes, 16, types.Length);
@@ -1135,6 +1237,9 @@ internal sealed class PopulationSearchLayout
         WriteInt32(bytes, 336, ProposalWaveSlotBytes);
         WriteInt32(bytes, 340, ProposalWaveSnapshotParetoOffset);
         WriteInt32(bytes, 344, ProposalWaveSnapshotQualityOffset);
+        WriteInt32(bytes, 348, ProposalWaveControlOffset);
+        WriteInt32(bytes, 352, CandidateLaneCount);
+        WriteInt32(bytes, 356, LaneStrideBytes);
     }
 
     private void WriteAcceptedState(

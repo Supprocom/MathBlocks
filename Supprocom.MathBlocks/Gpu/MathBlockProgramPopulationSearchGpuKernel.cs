@@ -7,7 +7,11 @@ internal static class MathBlockProgramPopulationSearchGpuKernel
     private static readonly Lazy<KernelState> state = new(Load, LazyThreadSafetyMode.ExecutionAndPublication);
 
     public static IntPtr BeginFunction => state.Value.BeginFunction;
-    public static IntPtr ExecuteFunction => state.Value.ExecuteFunction;
+    public static IntPtr SetupFunction => state.Value.SetupFunction;
+    public static IntPtr PrepareFunction => state.Value.PrepareFunction;
+    public static IntPtr EvaluateFunction => state.Value.EvaluateFunction;
+    public static IntPtr CommitFunction => state.Value.CommitFunction;
+    public static IntPtr FinalizeFunction => state.Value.FinalizeFunction;
     public static IntPtr PublishFunction => state.Value.PublishFunction;
 
     internal static string CreateSource(string residentKernelSource)
@@ -55,23 +59,59 @@ internal static class MathBlockProgramPopulationSearchGpuKernel
             "cuModuleGetFunction(mathblocks_program_population_search_begin)");
         MathBlocksCudaNative.ThrowIfFailed(
             MathBlocksCudaNative.cuModuleGetFunction(
-                out var executeFunction,
+                out var setupFunction,
                 module,
-                "mathblocks_program_population_search_execute"),
-            "cuModuleGetFunction(mathblocks_program_population_search_execute)");
+                "mathblocks_program_population_search_setup"),
+            "cuModuleGetFunction(mathblocks_program_population_search_setup)");
+        MathBlocksCudaNative.ThrowIfFailed(
+            MathBlocksCudaNative.cuModuleGetFunction(
+                out var prepareFunction,
+                module,
+                "mathblocks_program_population_search_prepare"),
+            "cuModuleGetFunction(mathblocks_program_population_search_prepare)");
+        MathBlocksCudaNative.ThrowIfFailed(
+            MathBlocksCudaNative.cuModuleGetFunction(
+                out var evaluateFunction,
+                module,
+                "mathblocks_program_population_search_evaluate"),
+            "cuModuleGetFunction(mathblocks_program_population_search_evaluate)");
+        MathBlocksCudaNative.ThrowIfFailed(
+            MathBlocksCudaNative.cuModuleGetFunction(
+                out var commitFunction,
+                module,
+                "mathblocks_program_population_search_commit"),
+            "cuModuleGetFunction(mathblocks_program_population_search_commit)");
+        MathBlocksCudaNative.ThrowIfFailed(
+            MathBlocksCudaNative.cuModuleGetFunction(
+                out var finalizeFunction,
+                module,
+                "mathblocks_program_population_search_finalize"),
+            "cuModuleGetFunction(mathblocks_program_population_search_finalize)");
         MathBlocksCudaNative.ThrowIfFailed(
             MathBlocksCudaNative.cuModuleGetFunction(
                 out var publishFunction,
                 module,
                 "mathblocks_program_population_search_publish"),
             "cuModuleGetFunction(mathblocks_program_population_search_publish)");
-        return new KernelState(module, beginFunction, executeFunction, publishFunction);
+        return new KernelState(
+            module,
+            beginFunction,
+            setupFunction,
+            prepareFunction,
+            evaluateFunction,
+            commitFunction,
+            finalizeFunction,
+            publishFunction);
     }
 
     private sealed record KernelState(
         IntPtr Module,
         IntPtr BeginFunction,
-        IntPtr ExecuteFunction,
+        IntPtr SetupFunction,
+        IntPtr PrepareFunction,
+        IntPtr EvaluateFunction,
+        IntPtr CommitFunction,
+        IntPtr FinalizeFunction,
         IntPtr PublishFunction);
 
     private const string ResidentDispatchSource = """
@@ -1570,7 +1610,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 9)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 10)
                 return;
 
             int fingerprint_capacity = mbp_read_int(arena, 40);
@@ -1609,12 +1649,12 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             mbp_clear(arena + compact_offset, 144);
         }
 
-        extern "C" __global__ void mathblocks_program_population_search_execute(unsigned char* arena)
+        extern "C" __global__ void mathblocks_program_population_search_setup(unsigned char* arena)
         {
             if (blockIdx.x != 0)
                 return;
             __shared__ int cooperative_status;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 9)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 10)
                 return;
 
             int grammar_operation_count = mbp_read_int(arena, 8);
@@ -2003,496 +2043,11 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 processed++;
             }
 
-            bool continue_proposals = true;
-            while (processed < cycle_work_limit && trial_cursor < maximum_trials && continue_proposals)
-            {
-                mbp_copy(
-                    arena + proposal_wave_snapshot_pareto_offset,
-                    arena + working_pareto_offset,
-                    pareto_capacity * entry_size);
-                mbp_copy(
-                    arena + proposal_wave_snapshot_quality_offset,
-                    arena + working_quality_offset,
-                    quality_capacity * entry_size);
-                int wave_result_count = 0;
-
-                while (wave_result_count < proposal_wave_size &&
-                    processed < cycle_work_limit &&
-                    trial_cursor < maximum_trials)
-                {
-                    int source = 0;
-                    mbp_ull proposal_cursor = ~0ull;
-                    int candidate_operation_count = 0;
-                    int band_maximum = maximum_band_elements;
-                    int maximum_lookback = 0;
-                    mbp_ull deterministic_cost = 0ull;
-                    bool generated = false;
-                    bool enumeration_typed = false;
-                    if (enumeration_trial_count < enumeration_limit &&
-                        enumeration_cursor < total_proposals &&
-                        enumeration_scan_count < proposals_per_cycle)
-                    {
-                        source = 0;
-                        while (enumeration_cursor < total_proposals &&
-                            enumeration_scan_count < proposals_per_cycle)
-                        {
-                            proposal_cursor = enumeration_cursor++;
-                            enumeration_scan_count++;
-                            generated = mbp_decode_enumeration(
-                                arena,
-                                proposal_cursor,
-                                grammar_operation_count,
-                                terminal_count,
-                                band_count,
-                                maximum_arity,
-                                operation_offset,
-                                band_offset,
-                                selected_operations,
-                                selected_operands,
-                                &candidate_operation_count,
-                                &band_maximum);
-                            if (!generated)
-                            {
-                                mbp_fail(arena, compact_offset, 4);
-                                return;
-                            }
-                            enumeration_typed = mbp_type_program(
-                                arena,
-                                operation_offset,
-                                operation_input_type_offset,
-                                terminal_offset,
-                                type_offset,
-                                terminal_count,
-                                candidate_operation_count,
-                                maximum_arity,
-                                output_type,
-                                selected_operations,
-                                selected_operands,
-                                selected_types,
-                                selected_lookbacks,
-                                &maximum_lookback,
-                                &deterministic_cost);
-                            if (enumeration_typed)
-                            {
-                                enumeration_trial_count++;
-                                break;
-                            }
-                            generated = false;
-                        }
-                    }
-                    if (!generated &&
-                        (enumeration_trial_count >= enumeration_limit ||
-                            enumeration_cursor >= total_proposals) &&
-                        evolution_pattern > 0)
-                    {
-                        proposal_cursor = ~0ull;
-                        int position = (int)(trial_cursor % (mbp_ull)evolution_pattern);
-                        if (position < mutation_trials)
-                        {
-                            source = 1;
-                            generated = mbp_generate_mutation(
-                                arena,
-                                grammar_operation_count,
-                                terminal_count,
-                                maximum_operation_count,
-                                maximum_arity,
-                                operation_offset,
-                                objective_count,
-                                program_operation_size,
-                                proposal_wave_snapshot_pareto_offset,
-                                pareto_capacity,
-                                proposal_wave_snapshot_quality_offset,
-                                quality_capacity,
-                                entry_size,
-                                &random_first,
-                                &random_second,
-                                selected_operations,
-                                selected_operands,
-                                &candidate_operation_count);
-                        }
-                        else if (position < mutation_trials + crossover_trials)
-                        {
-                            source = 2;
-                            generated = mbp_generate_crossover(
-                                arena,
-                                terminal_count,
-                                maximum_operation_count,
-                                maximum_arity,
-                                operation_offset,
-                                objective_count,
-                                program_operation_size,
-                                proposal_wave_snapshot_pareto_offset,
-                                pareto_capacity,
-                                proposal_wave_snapshot_quality_offset,
-                                quality_capacity,
-                                entry_size,
-                                &random_first,
-                                &random_second,
-                                selected_operations,
-                                selected_operands,
-                                &candidate_operation_count);
-                        }
-                        else
-                        {
-                            source = 3;
-                            generated = mbp_generate_immigrant(
-                                arena,
-                                grammar_operation_count,
-                                terminal_count,
-                                band_count,
-                                maximum_arity,
-                                operation_offset,
-                                band_offset,
-                                &random_first,
-                                &random_second,
-                                selected_operations,
-                                selected_operands,
-                                &candidate_operation_count,
-                                &band_maximum);
-                        }
-                        if (generated && source != 3)
-                        {
-                            int band_index = mbp_band_for_operation_count(
-                                arena, band_offset, band_count, candidate_operation_count);
-                            if (band_index < 0)
-                                generated = false;
-                            else
-                                band_maximum = mbp_read_int(arena, band_offset + band_index * 24 + 4);
-                        }
-                    }
-                    if (!generated)
-                    {
-                        continue_proposals = false;
-                        break;
-                    }
-
-                    mbp_ull current_trial = trial_cursor++;
-                    processed++;
-                    int candidate_entry =
-                        proposal_wave_slot_offset + wave_result_count * entry_size;
-                    MbpHash structural = mbp_structural_hash(
-                        arena,
-                        operation_offset,
-                        candidate_operation_count,
-                        maximum_arity,
-                        selected_operations,
-                        selected_operands);
-                    mbp_prepare_entry(
-                        arena,
-                        candidate_entry,
-                        entry_size,
-                        source,
-                        candidate_operation_count,
-                        current_trial,
-                        proposal_cursor,
-                        structural,
-                        objective_count,
-                        program_operation_size,
-                        maximum_arity,
-                        operation_offset,
-                        selected_operations,
-                        selected_operands);
-                    int status = 6;
-                    int flags = 0;
-                    int cell = -1;
-                    bool typed = enumeration_typed || generated && mbp_type_program(
-                        arena,
-                        operation_offset,
-                        operation_input_type_offset,
-                        terminal_offset,
-                        type_offset,
-                        terminal_count,
-                        candidate_operation_count,
-                        maximum_arity,
-                        output_type,
-                        selected_operations,
-                        selected_operands,
-                        selected_types,
-                        selected_lookbacks,
-                        &maximum_lookback,
-                        &deterministic_cost);
-                    if (!typed)
-                    {
-                        status = 4;
-                    }
-                    else if (mbp_contains_hash(
-                            arena,
-                            working_structural_offset,
-                            structural_count,
-                            structural) ||
-                        mbp_wave_owns_structural(
-                            arena,
-                            proposal_wave_slot_offset,
-                            wave_result_count,
-                            entry_size,
-                            structural))
-                    {
-                        status = 2;
-                    }
-                    else
-                    {
-                        int outcome = mbp_execute_program(
-                            arena,
-                            operation_offset,
-                            terminal_offset,
-                            type_offset,
-                            immutable_slot_offset,
-                            candidate_slot_offset,
-                            candidate_payload_offset,
-                            scratch_offset,
-                            input_pointer_offset,
-                            payload_stride,
-                            terminal_count,
-                            candidate_operation_count,
-                            maximum_operation_count,
-                            maximum_arity,
-                            band_maximum,
-                            selected_operations,
-                            selected_operands,
-                            selected_types,
-                            &cooperative_status);
-                        if (outcome < 0)
-                        {
-                            mbp_fail(arena, compact_offset, 3);
-                            return;
-                        }
-                        if (outcome == 0)
-                        {
-                            status = 5;
-                        }
-                        else
-                        {
-                            int final_node = terminal_count + candidate_operation_count - 1;
-                            if (!mbp_create_mask(
-                                    arena,
-                                    type_offset,
-                                    selected_types[final_node],
-                                    &candidate_slots[final_node],
-                                    history_offset,
-                                    history_count,
-                                    maximum_lookback,
-                                    mask_slot,
-                                    mask_values,
-                                    &cooperative_status))
-                            {
-                                mbp_fail(arena, compact_offset, 3);
-                                return;
-                            }
-                            evaluated++;
-                            MbpHash semantic = mbp_semantic_hash(
-                                arena,
-                                type_offset,
-                                selected_types[final_node],
-                                &candidate_slots[final_node],
-                                mask_values,
-                                mask_slot->count,
-                                maximum_lookback);
-                            mbp_write_ull(arena, candidate_entry + 64, semantic.first);
-                            mbp_write_ull(arena, candidate_entry + 72, semantic.second);
-                            flags |= 8;
-                            if (!mbp_execute_objectives(
-                                    arena,
-                                    objective_node_offset,
-                                    objective_input_offset,
-                                    objective_source_offset,
-                                    type_offset,
-                                    immutable_slot_offset,
-                                    objective_slot_offset,
-                                    objective_payload_offset,
-                                    scratch_offset,
-                                    input_pointer_offset,
-                                    scratch_bytes,
-                                    objective_node_count,
-                                    objective_count,
-                                    &candidate_slots[final_node],
-                                    mask_slot,
-                                    candidate_operation_count,
-                                    maximum_lookback,
-                                    deterministic_cost,
-                                    0,
-                                    arena + candidate_entry + 80,
-                                    &cooperative_status))
-                            {
-                                status = 5;
-                            }
-                            else
-                            {
-                                flags |= 4;
-                                cell = mbp_quality_cell(
-                                    arena,
-                                    quality_dimension_offset,
-                                    quality_dimension_count,
-                                    arena + candidate_entry + 80);
-                                status = 1;
-                            }
-                        }
-                    }
-                    mbp_write_int(arena, candidate_entry, status);
-                    mbp_write_int(arena, candidate_entry + 16, cell);
-                    mbp_write_int(arena, candidate_entry + 24, flags);
-                    __syncthreads();
-                    wave_result_count++;
-                }
-
-                if (wave_result_count == 0)
-                    break;
-
-                for (int ordinal = 0; ordinal < wave_result_count; ordinal++)
-                {
-                    int candidate_entry = proposal_wave_slot_offset + ordinal * entry_size;
-                    int status = mbp_read_int(arena, candidate_entry);
-                    int cell = mbp_read_int(arena, candidate_entry + 16);
-                    int flags = mbp_read_int(arena, candidate_entry + 24);
-                    bool keep_result = include_rejected != 0;
-
-                    if (status == 2)
-                    {
-                        structural_duplicates++;
-                    }
-                    else if (status != 4 && status != 6)
-                    {
-                        MbpHash structural;
-                        structural.first = mbp_read_ull(arena, candidate_entry + 48);
-                        structural.second = mbp_read_ull(arena, candidate_entry + 56);
-                        if (mbp_contains_hash(
-                                arena,
-                                working_structural_offset,
-                                structural_count,
-                                structural))
-                        {
-                            structural_duplicates++;
-                            status = 2;
-                            cell = -1;
-                            flags = 0;
-                        }
-                        else
-                        {
-                            if (structural_count >= fingerprint_capacity)
-                            {
-                                mbp_fail(arena, compact_offset, 1);
-                                return;
-                            }
-                            mbp_write_hash(
-                                arena,
-                                working_structural_offset,
-                                structural_count,
-                                structural);
-                            mbp_write_hash(
-                                arena,
-                                compact_structural_offset,
-                                new_structural_count,
-                                structural);
-                            structural_count++;
-                            new_structural_count++;
-
-                            if ((flags & 8) != 0)
-                            {
-                                MbpHash semantic;
-                                semantic.first = mbp_read_ull(arena, candidate_entry + 64);
-                                semantic.second = mbp_read_ull(arena, candidate_entry + 72);
-                                bool semantic_duplicate = mbp_contains_hash(
-                                    arena,
-                                    working_semantic_offset,
-                                    semantic_count,
-                                    semantic);
-                                if (semantic_duplicate)
-                                {
-                                    semantic_duplicates++;
-                                }
-                                else
-                                {
-                                    if (semantic_count >= fingerprint_capacity)
-                                    {
-                                        mbp_fail(arena, compact_offset, 2);
-                                        return;
-                                    }
-                                    mbp_write_hash(
-                                        arena,
-                                        working_semantic_offset,
-                                        semantic_count,
-                                        semantic);
-                                    mbp_write_hash(
-                                        arena,
-                                        compact_semantic_offset,
-                                        new_semantic_count,
-                                        semantic);
-                                    semantic_count++;
-                                    new_semantic_count++;
-                                }
-
-                                if ((flags & 4) != 0)
-                                {
-                                    bool equivalent_semantic = semantic_duplicate &&
-                                        mbp_has_equivalent_semantic_entry(
-                                            arena,
-                                            candidate_entry,
-                                            working_pareto_offset,
-                                            pareto_count,
-                                            working_quality_offset,
-                                            quality_capacity,
-                                            entry_size,
-                                            objective_count);
-                                    bool accepted_pareto = false;
-                                    bool accepted_quality = false;
-                                    if (!equivalent_semantic)
-                                    {
-                                        accepted_pareto = mbp_insert_pareto(
-                                            arena,
-                                            candidate_entry,
-                                            working_pareto_offset,
-                                            pareto_capacity,
-                                            entry_size,
-                                            objective_source_offset,
-                                            objective_count,
-                                            &pareto_count);
-                                        accepted_quality = mbp_insert_quality(
-                                            arena,
-                                            candidate_entry,
-                                            working_quality_offset,
-                                            quality_capacity,
-                                            entry_size,
-                                            quality_objective,
-                                            objective_source_offset,
-                                            cell);
-                                    }
-                                    if (accepted_pareto)
-                                        flags |= 1;
-                                    if (accepted_quality)
-                                        flags |= 2;
-                                    if (accepted_pareto || accepted_quality)
-                                    {
-                                        status = 0;
-                                        accepted++;
-                                        keep_result = true;
-                                    }
-                                    else
-                                    {
-                                        status = semantic_duplicate || equivalent_semantic ? 3 : 1;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    mbp_write_int(arena, candidate_entry, status);
-                    mbp_write_int(arena, candidate_entry + 16, cell);
-                    mbp_write_int(arena, candidate_entry + 24, flags);
-                    if (keep_result)
-                    {
-                        mbp_copy(
-                            arena + compact_trial_offset + trial_result_count * entry_size,
-                            arena + candidate_entry,
-                            entry_size);
-                        trial_result_count++;
-                    }
-                }
-                wave_cursor++;
-            }
             quality_count = 0;
             for (int cell = 0; cell < quality_capacity; cell++)
                 if (mbp_read_int(arena, working_quality_offset + cell * entry_size) == 1)
                     quality_count++;
-            cycle_count++;
+
             mbp_write_int(arena, working_state_offset, structural_count);
             mbp_write_int(arena, working_state_offset + 4, semantic_count);
             mbp_write_int(arena, working_state_offset + 8, pareto_count);
@@ -2512,10 +2067,881 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             mbp_write_ull(arena, working_state_offset + 104, enumeration_trial_count);
             mbp_write_ull(arena, working_state_offset + 112, wave_cursor);
 
-            mbp_write_int(arena, compact_offset, 0);
+            int control_offset = mbp_read_int(arena, 348);
+            if (control_offset <= 0)
+            {
+                mbp_fail(arena, compact_offset, 4);
+                return;
+            }
+            mbp_clear(arena + control_offset, 32);
+            mbp_write_int(arena, control_offset, processed);
+            mbp_write_int(arena, control_offset + 4, 0);
+            mbp_write_int(
+                arena,
+                control_offset + 8,
+                refresh_cursor == refresh_count &&
+                    processed < cycle_work_limit &&
+                    trial_cursor < maximum_trials
+                    ? 1
+                    : 0);
+            mbp_write_int(arena, control_offset + 12, 0);
+            mbp_write_int(arena, compact_offset + 4, 0);
+            mbp_write_int(arena, compact_offset + 8, new_structural_count);
+            mbp_write_int(arena, compact_offset + 12, new_semantic_count);
+        }
+
+
+        extern "C" __global__ void mathblocks_program_population_search_prepare(unsigned char* arena)
+        {
+            if (blockIdx.x != 0)
+                return;
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 10)
+                return;
+
+            int compact_offset = mbp_header_offset(arena, 34);
+            if (mbp_read_int(arena, compact_offset) != 0)
+                return;
+
+            int grammar_operation_count = mbp_read_int(arena, 8);
+            int terminal_count = mbp_read_int(arena, 12);
+            int band_count = mbp_read_int(arena, 20);
+            int maximum_operation_count = mbp_read_int(arena, 24);
+            int maximum_band_elements = mbp_read_int(arena, 28);
+            int proposals_per_cycle = mbp_read_int(arena, 36);
+            int fingerprint_capacity = mbp_read_int(arena, 40);
+            int output_type = mbp_read_int(arena, 44);
+            int objective_count = mbp_read_int(arena, 52);
+            int pareto_capacity = mbp_read_int(arena, 56);
+            int quality_capacity = mbp_read_int(arena, 60);
+            int mutation_trials = mbp_read_int(arena, 76);
+            int crossover_trials = mbp_read_int(arena, 80);
+            int evolution_pattern = mbp_read_int(arena, 88);
+            int maximum_arity = mbp_read_int(arena, 96);
+            int program_operation_size = mbp_read_int(arena, 108);
+            int entry_size = mbp_read_int(arena, 112);
+            int cycle_work_limit = mbp_read_int(arena, 320);
+            int proposal_wave_size = mbp_read_int(arena, 324);
+            int proposal_wave_slot_offset = mbp_read_int(arena, 332);
+            int proposal_wave_snapshot_pareto_offset = mbp_read_int(arena, 340);
+            int proposal_wave_snapshot_quality_offset = mbp_read_int(arena, 344);
+            int control_offset = mbp_read_int(arena, 348);
+            int candidate_lane_count = mbp_read_int(arena, 352);
+
+            int operation_offset = mbp_header_offset(arena, 0);
+            int operation_input_type_offset = mbp_header_offset(arena, 1);
+            int terminal_offset = mbp_header_offset(arena, 2);
+            int type_offset = mbp_header_offset(arena, 3);
+            int band_offset = mbp_header_offset(arena, 4);
+            int objective_source_offset = mbp_header_offset(arena, 9);
+            int selected_operation_offset = mbp_header_offset(arena, 20);
+            int selected_operand_offset = mbp_header_offset(arena, 21);
+            int selected_type_offset = mbp_header_offset(arena, 22);
+            int working_state_offset = mbp_header_offset(arena, 28);
+            int working_structural_offset = mbp_header_offset(arena, 29);
+            int working_pareto_offset = mbp_header_offset(arena, 31);
+            int working_quality_offset = mbp_header_offset(arena, 32);
+
+            mbp_ull total_proposals = mbp_read_ull(arena, 296);
+            mbp_ull enumeration_limit = mbp_read_ull(arena, 304);
+            mbp_ull maximum_trials = mbp_read_ull(arena, 312);
+            if (control_offset <= 0 || candidate_lane_count <= 0 ||
+                proposal_wave_size <= 0 || proposal_wave_size > cycle_work_limit)
+            {
+                mbp_fail(arena, compact_offset, 4);
+                return;
+            }
+
+            int processed = mbp_read_int(arena, control_offset);
+            int enumeration_scan_count = mbp_read_int(arena, control_offset + 4);
+            bool continue_proposals = mbp_read_int(arena, control_offset + 8) != 0;
+            mbp_ull enumeration_cursor = mbp_read_ull(arena, working_state_offset + 16);
+            mbp_ull trial_cursor = mbp_read_ull(arena, working_state_offset + 24);
+            mbp_ull random_first = mbp_read_ull(arena, working_state_offset + 40);
+            mbp_ull random_second = mbp_read_ull(arena, working_state_offset + 48);
+            mbp_ull enumeration_trial_count = mbp_read_ull(arena, working_state_offset + 104);
+            int structural_count = mbp_read_int(arena, working_state_offset);
+
+            if (!continue_proposals ||
+                processed >= cycle_work_limit ||
+                trial_cursor >= maximum_trials)
+            {
+                mbp_write_int(arena, control_offset + 12, 0);
+                return;
+            }
+
+            mbp_copy(
+                arena + proposal_wave_snapshot_pareto_offset,
+                arena + working_pareto_offset,
+                pareto_capacity * entry_size);
+            mbp_copy(
+                arena + proposal_wave_snapshot_quality_offset,
+                arena + working_quality_offset,
+                quality_capacity * entry_size);
+
+            int* selected_operations = (int*)(arena + selected_operation_offset);
+            int* selected_operands = (int*)(arena + selected_operand_offset);
+            int total_candidate_nodes = terminal_count + maximum_operation_count;
+            int* selected_types = (int*)(arena + selected_type_offset);
+            int* selected_lookbacks = selected_types + total_candidate_nodes;
+            int wave_result_count = 0;
+
+            while (wave_result_count < proposal_wave_size &&
+                processed < cycle_work_limit &&
+                trial_cursor < maximum_trials)
+            {
+                int source = 0;
+                mbp_ull proposal_cursor = ~0ull;
+                int candidate_operation_count = 0;
+                int band_maximum = maximum_band_elements;
+                int maximum_lookback = 0;
+                mbp_ull deterministic_cost = 0ull;
+                bool generated = false;
+                bool enumeration_typed = false;
+                if (enumeration_trial_count < enumeration_limit &&
+                    enumeration_cursor < total_proposals &&
+                    enumeration_scan_count < proposals_per_cycle)
+                {
+                    source = 0;
+                    while (enumeration_cursor < total_proposals &&
+                        enumeration_scan_count < proposals_per_cycle)
+                    {
+                        proposal_cursor = enumeration_cursor++;
+                        enumeration_scan_count++;
+                        generated = mbp_decode_enumeration(
+                            arena,
+                            proposal_cursor,
+                            grammar_operation_count,
+                            terminal_count,
+                            band_count,
+                            maximum_arity,
+                            operation_offset,
+                            band_offset,
+                            selected_operations,
+                            selected_operands,
+                            &candidate_operation_count,
+                            &band_maximum);
+                        if (!generated)
+                        {
+                            mbp_fail(arena, compact_offset, 4);
+                            return;
+                        }
+                        enumeration_typed = mbp_type_program(
+                            arena,
+                            operation_offset,
+                            operation_input_type_offset,
+                            terminal_offset,
+                            type_offset,
+                            terminal_count,
+                            candidate_operation_count,
+                            maximum_arity,
+                            output_type,
+                            selected_operations,
+                            selected_operands,
+                            selected_types,
+                            selected_lookbacks,
+                            &maximum_lookback,
+                            &deterministic_cost);
+                        if (enumeration_typed)
+                        {
+                            enumeration_trial_count++;
+                            break;
+                        }
+                        generated = false;
+                    }
+                }
+                if (!generated &&
+                    (enumeration_trial_count >= enumeration_limit ||
+                        enumeration_cursor >= total_proposals) &&
+                    evolution_pattern > 0)
+                {
+                    proposal_cursor = ~0ull;
+                    int position = (int)(trial_cursor % (mbp_ull)evolution_pattern);
+                    if (position < mutation_trials)
+                    {
+                        source = 1;
+                        generated = mbp_generate_mutation(
+                            arena,
+                            grammar_operation_count,
+                            terminal_count,
+                            maximum_operation_count,
+                            maximum_arity,
+                            operation_offset,
+                            objective_count,
+                            program_operation_size,
+                            proposal_wave_snapshot_pareto_offset,
+                            pareto_capacity,
+                            proposal_wave_snapshot_quality_offset,
+                            quality_capacity,
+                            entry_size,
+                            &random_first,
+                            &random_second,
+                            selected_operations,
+                            selected_operands,
+                            &candidate_operation_count);
+                    }
+                    else if (position < mutation_trials + crossover_trials)
+                    {
+                        source = 2;
+                        generated = mbp_generate_crossover(
+                            arena,
+                            terminal_count,
+                            maximum_operation_count,
+                            maximum_arity,
+                            operation_offset,
+                            objective_count,
+                            program_operation_size,
+                            proposal_wave_snapshot_pareto_offset,
+                            pareto_capacity,
+                            proposal_wave_snapshot_quality_offset,
+                            quality_capacity,
+                            entry_size,
+                            &random_first,
+                            &random_second,
+                            selected_operations,
+                            selected_operands,
+                            &candidate_operation_count);
+                    }
+                    else
+                    {
+                        source = 3;
+                        generated = mbp_generate_immigrant(
+                            arena,
+                            grammar_operation_count,
+                            terminal_count,
+                            band_count,
+                            maximum_arity,
+                            operation_offset,
+                            band_offset,
+                            &random_first,
+                            &random_second,
+                            selected_operations,
+                            selected_operands,
+                            &candidate_operation_count,
+                            &band_maximum);
+                    }
+                    if (generated && source != 3)
+                    {
+                        int band_index = mbp_band_for_operation_count(
+                            arena,
+                            band_offset,
+                            band_count,
+                            candidate_operation_count);
+                        if (band_index < 0)
+                            generated = false;
+                        else
+                            band_maximum = mbp_read_int(arena, band_offset + band_index * 24 + 4);
+                    }
+                }
+                if (!generated)
+                {
+                    continue_proposals = false;
+                    break;
+                }
+
+                mbp_ull current_trial = trial_cursor++;
+                processed++;
+                int candidate_entry =
+                    proposal_wave_slot_offset + wave_result_count * entry_size;
+                MbpHash structural = mbp_structural_hash(
+                    arena,
+                    operation_offset,
+                    candidate_operation_count,
+                    maximum_arity,
+                    selected_operations,
+                    selected_operands);
+                mbp_prepare_entry(
+                    arena,
+                    candidate_entry,
+                    entry_size,
+                    source,
+                    candidate_operation_count,
+                    current_trial,
+                    proposal_cursor,
+                    structural,
+                    objective_count,
+                    program_operation_size,
+                    maximum_arity,
+                    operation_offset,
+                    selected_operations,
+                    selected_operands);
+                mbp_write_int(arena, candidate_entry + 20, band_maximum);
+
+                int status = 1;
+                bool typed = enumeration_typed || generated && mbp_type_program(
+                    arena,
+                    operation_offset,
+                    operation_input_type_offset,
+                    terminal_offset,
+                    type_offset,
+                    terminal_count,
+                    candidate_operation_count,
+                    maximum_arity,
+                    output_type,
+                    selected_operations,
+                    selected_operands,
+                    selected_types,
+                    selected_lookbacks,
+                    &maximum_lookback,
+                    &deterministic_cost);
+                if (!typed)
+                {
+                    status = 4;
+                }
+                else if (mbp_contains_hash(
+                        arena,
+                        working_structural_offset,
+                        structural_count,
+                        structural) ||
+                    mbp_wave_owns_structural(
+                        arena,
+                        proposal_wave_slot_offset,
+                        wave_result_count,
+                        entry_size,
+                        structural))
+                {
+                    status = 2;
+                }
+                mbp_write_int(arena, candidate_entry, status);
+                mbp_write_int(arena, candidate_entry + 16, -1);
+                mbp_write_int(arena, candidate_entry + 24, 0);
+                __syncthreads();
+                wave_result_count++;
+            }
+
+            mbp_write_int(arena, control_offset, processed);
+            mbp_write_int(arena, control_offset + 4, enumeration_scan_count);
+            mbp_write_int(arena, control_offset + 8, continue_proposals ? 1 : 0);
+            mbp_write_int(arena, control_offset + 12, wave_result_count);
+            mbp_write_ull(arena, working_state_offset + 16, enumeration_cursor);
+            mbp_write_ull(arena, working_state_offset + 24, trial_cursor);
+            mbp_write_ull(arena, working_state_offset + 40, random_first);
+            mbp_write_ull(arena, working_state_offset + 48, random_second);
+            mbp_write_ull(arena, working_state_offset + 104, enumeration_trial_count);
+        }
+
+        extern "C" __global__ void mathblocks_program_population_search_evaluate(
+            unsigned char* arena,
+            int slot_index,
+            int lane_index)
+        {
+            if (blockIdx.x != 0)
+                return;
+            __shared__ int cooperative_status;
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 10)
+                return;
+
+            int compact_offset = mbp_header_offset(arena, 34);
+            if (mbp_read_int(arena, compact_offset) != 0)
+                return;
+
+            int control_offset = mbp_read_int(arena, 348);
+            int wave_result_count = mbp_read_int(arena, control_offset + 12);
+            int candidate_lane_count = mbp_read_int(arena, 352);
+            int lane_stride_bytes = mbp_read_int(arena, 356);
+            if (slot_index < 0 || slot_index >= wave_result_count ||
+                lane_index < 0 || lane_index >= candidate_lane_count ||
+                lane_stride_bytes <= 0)
+            {
+                return;
+            }
+
+            int terminal_count = mbp_read_int(arena, 12);
+            int band_count = mbp_read_int(arena, 20);
+            int maximum_operation_count = mbp_read_int(arena, 24);
+            int output_type = mbp_read_int(arena, 44);
+            int objective_node_count = mbp_read_int(arena, 48);
+            int objective_count = mbp_read_int(arena, 52);
+            int quality_dimension_count = mbp_read_int(arena, 64);
+            int maximum_arity = mbp_read_int(arena, 96);
+            int scratch_bytes = mbp_read_int(arena, 100);
+            int payload_stride = mbp_read_int(arena, 104);
+            int program_operation_size = mbp_read_int(arena, 108);
+            int entry_size = mbp_read_int(arena, 112);
+            int history_count = mbp_read_int(arena, 120);
+            int proposal_wave_slot_offset = mbp_read_int(arena, 332);
+
+            int operation_offset = mbp_header_offset(arena, 0);
+            int operation_input_type_offset = mbp_header_offset(arena, 1);
+            int terminal_offset = mbp_header_offset(arena, 2);
+            int type_offset = mbp_header_offset(arena, 3);
+            int band_offset = mbp_header_offset(arena, 4);
+            int immutable_slot_offset = mbp_header_offset(arena, 5);
+            int objective_node_offset = mbp_header_offset(arena, 7);
+            int objective_input_offset = mbp_header_offset(arena, 8);
+            int objective_source_offset = mbp_header_offset(arena, 9);
+            int quality_dimension_offset = mbp_header_offset(arena, 10);
+            int history_offset = mbp_header_offset(arena, 11);
+            int lane_delta = lane_index * lane_stride_bytes;
+            int candidate_slot_offset = mbp_header_offset(arena, 12) + lane_delta;
+            int objective_slot_offset = mbp_header_offset(arena, 13) + lane_delta;
+            int mask_slot_offset = mbp_header_offset(arena, 14) + lane_delta;
+            int candidate_payload_offset = mbp_header_offset(arena, 15) + lane_delta;
+            int objective_payload_offset = mbp_header_offset(arena, 16) + lane_delta;
+            int mask_payload_offset = mbp_header_offset(arena, 17) + lane_delta;
+            int scratch_offset = mbp_header_offset(arena, 18) + lane_delta;
+            int input_pointer_offset = mbp_header_offset(arena, 19) + lane_delta;
+            int selected_operation_offset = mbp_header_offset(arena, 20) + lane_delta;
+            int selected_operand_offset = mbp_header_offset(arena, 21) + lane_delta;
+            int selected_type_offset = mbp_header_offset(arena, 22) + lane_delta;
+            int working_state_offset = mbp_header_offset(arena, 28);
+
+            int candidate_entry = proposal_wave_slot_offset + slot_index * entry_size;
+            if (mbp_read_int(arena, candidate_entry) != 1)
+                return;
+
+            int* selected_operations = (int*)(arena + selected_operation_offset);
+            int* selected_operands = (int*)(arena + selected_operand_offset);
+            int total_candidate_nodes = terminal_count + maximum_operation_count;
+            int* selected_types = (int*)(arena + selected_type_offset);
+            int* selected_lookbacks = selected_types + total_candidate_nodes;
+            MathBlockSlot* candidate_slots = (MathBlockSlot*)(arena + candidate_slot_offset);
+            MathBlockSlot* mask_slot = (MathBlockSlot*)(arena + mask_slot_offset);
+            int* mask_values = (int*)(arena + mask_payload_offset);
+            int candidate_operation_count = 0;
+            mbp_load_entry_program(
+                arena,
+                candidate_entry,
+                objective_count,
+                program_operation_size,
+                maximum_arity,
+                selected_operations,
+                selected_operands,
+                &candidate_operation_count);
+            __syncthreads();
+
+            int band_index = mbp_band_for_operation_count(
+                arena,
+                band_offset,
+                band_count,
+                candidate_operation_count);
+            int band_maximum = mbp_read_int(arena, candidate_entry + 20);
+            int maximum_lookback = 0;
+            mbp_ull deterministic_cost = 0ull;
+            bool typed = band_index >= 0 && band_maximum > 0 && mbp_type_program(
+                arena,
+                operation_offset,
+                operation_input_type_offset,
+                terminal_offset,
+                type_offset,
+                terminal_count,
+                candidate_operation_count,
+                maximum_arity,
+                output_type,
+                selected_operations,
+                selected_operands,
+                selected_types,
+                selected_lookbacks,
+                &maximum_lookback,
+                &deterministic_cost);
+            if (!typed)
+            {
+                mbp_write_int(arena, candidate_entry, -4);
+                return;
+            }
+
+            int outcome = mbp_execute_program(
+                arena,
+                operation_offset,
+                terminal_offset,
+                type_offset,
+                immutable_slot_offset,
+                candidate_slot_offset,
+                candidate_payload_offset,
+                scratch_offset,
+                input_pointer_offset,
+                payload_stride,
+                terminal_count,
+                candidate_operation_count,
+                maximum_operation_count,
+                maximum_arity,
+                band_maximum,
+                selected_operations,
+                selected_operands,
+                selected_types,
+                &cooperative_status);
+            if (outcome < 0)
+            {
+                mbp_write_int(arena, candidate_entry, -3);
+                return;
+            }
+            if (outcome == 0)
+            {
+                mbp_write_int(arena, candidate_entry, 5);
+                return;
+            }
+
+            int final_node = terminal_count + candidate_operation_count - 1;
+            if (!mbp_create_mask(
+                    arena,
+                    type_offset,
+                    selected_types[final_node],
+                    &candidate_slots[final_node],
+                    history_offset,
+                    history_count,
+                    maximum_lookback,
+                    mask_slot,
+                    mask_values,
+                    &cooperative_status))
+            {
+                mbp_write_int(arena, candidate_entry, -3);
+                return;
+            }
+
+            if (threadIdx.x == 0)
+                atomicAdd((unsigned long long*)(arena + working_state_offset + 72), 1ull);
+            __syncthreads();
+
+            MbpHash semantic = mbp_semantic_hash(
+                arena,
+                type_offset,
+                selected_types[final_node],
+                &candidate_slots[final_node],
+                mask_values,
+                mask_slot->count,
+                maximum_lookback);
+            mbp_write_ull(arena, candidate_entry + 64, semantic.first);
+            mbp_write_ull(arena, candidate_entry + 72, semantic.second);
+            int flags = 8;
+            int status = 5;
+            int cell = -1;
+            if (mbp_execute_objectives(
+                    arena,
+                    objective_node_offset,
+                    objective_input_offset,
+                    objective_source_offset,
+                    type_offset,
+                    immutable_slot_offset,
+                    objective_slot_offset,
+                    objective_payload_offset,
+                    scratch_offset,
+                    input_pointer_offset,
+                    scratch_bytes,
+                    objective_node_count,
+                    objective_count,
+                    &candidate_slots[final_node],
+                    mask_slot,
+                    candidate_operation_count,
+                    maximum_lookback,
+                    deterministic_cost,
+                    0,
+                    arena + candidate_entry + 80,
+                    &cooperative_status))
+            {
+                flags |= 4;
+                cell = mbp_quality_cell(
+                    arena,
+                    quality_dimension_offset,
+                    quality_dimension_count,
+                    arena + candidate_entry + 80);
+                status = 1;
+            }
+            mbp_write_int(arena, candidate_entry, status);
+            mbp_write_int(arena, candidate_entry + 16, cell);
+            mbp_write_int(arena, candidate_entry + 24, flags);
+        }
+
+        extern "C" __global__ void mathblocks_program_population_search_commit(unsigned char* arena)
+        {
+            if (blockIdx.x != 0)
+                return;
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 10)
+                return;
+
+            int compact_offset = mbp_header_offset(arena, 34);
+            if (mbp_read_int(arena, compact_offset) != 0)
+                return;
+
+            int control_offset = mbp_read_int(arena, 348);
+            int wave_result_count = mbp_read_int(arena, control_offset + 12);
+            if (wave_result_count <= 0)
+                return;
+
+            int fingerprint_capacity = mbp_read_int(arena, 40);
+            int objective_count = mbp_read_int(arena, 52);
+            int pareto_capacity = mbp_read_int(arena, 56);
+            int quality_capacity = mbp_read_int(arena, 60);
+            int quality_objective = mbp_read_int(arena, 92);
+            int entry_size = mbp_read_int(arena, 112);
+            int include_rejected = mbp_read_int(arena, 72);
+            int proposal_wave_slot_offset = mbp_read_int(arena, 332);
+            int candidate_lane_count = mbp_read_int(arena, 352);
+
+            int objective_source_offset = mbp_header_offset(arena, 9);
+            int working_state_offset = mbp_header_offset(arena, 28);
+            int working_structural_offset = mbp_header_offset(arena, 29);
+            int working_semantic_offset = mbp_header_offset(arena, 30);
+            int working_pareto_offset = mbp_header_offset(arena, 31);
+            int working_quality_offset = mbp_header_offset(arena, 32);
+            int compact_structural_offset = mbp_header_offset(arena, 36);
+            int compact_semantic_offset = mbp_header_offset(arena, 37);
+            int compact_trial_offset = mbp_header_offset(arena, 40);
+
+            int structural_count = mbp_read_int(arena, working_state_offset);
+            int semantic_count = mbp_read_int(arena, working_state_offset + 4);
+            int pareto_count = mbp_read_int(arena, working_state_offset + 8);
+            mbp_ull structural_duplicates = mbp_read_ull(arena, working_state_offset + 56);
+            mbp_ull semantic_duplicates = mbp_read_ull(arena, working_state_offset + 64);
+            mbp_ull accepted = mbp_read_ull(arena, working_state_offset + 80);
+            mbp_ull wave_cursor = mbp_read_ull(arena, working_state_offset + 112);
+            int trial_result_count = mbp_read_int(arena, compact_offset + 4);
+            int new_structural_count = mbp_read_int(arena, compact_offset + 8);
+            int new_semantic_count = mbp_read_int(arena, compact_offset + 12);
+
+            for (int ordinal = 0; ordinal < wave_result_count; ordinal++)
+            {
+                int candidate_entry = proposal_wave_slot_offset + ordinal * entry_size;
+                int status = mbp_read_int(arena, candidate_entry);
+                if (status < 0)
+                {
+                    mbp_fail(arena, compact_offset, -status);
+                    return;
+                }
+
+                int cell = mbp_read_int(arena, candidate_entry + 16);
+                int flags = mbp_read_int(arena, candidate_entry + 24);
+                bool keep_result = include_rejected != 0;
+
+                if (status == 2)
+                {
+                    structural_duplicates++;
+                }
+                else if (status != 4 && status != 6)
+                {
+                    MbpHash structural;
+                    structural.first = mbp_read_ull(arena, candidate_entry + 48);
+                    structural.second = mbp_read_ull(arena, candidate_entry + 56);
+                    if (mbp_contains_hash(
+                            arena,
+                            working_structural_offset,
+                            structural_count,
+                            structural))
+                    {
+                        structural_duplicates++;
+                        status = 2;
+                        cell = -1;
+                        flags = 0;
+                    }
+                    else
+                    {
+                        if (structural_count >= fingerprint_capacity)
+                        {
+                            mbp_fail(arena, compact_offset, 1);
+                            return;
+                        }
+                        mbp_write_hash(
+                            arena,
+                            working_structural_offset,
+                            structural_count,
+                            structural);
+                        mbp_write_hash(
+                            arena,
+                            compact_structural_offset,
+                            new_structural_count,
+                            structural);
+                        structural_count++;
+                        new_structural_count++;
+
+                        if ((flags & 8) != 0)
+                        {
+                            MbpHash semantic;
+                            semantic.first = mbp_read_ull(arena, candidate_entry + 64);
+                            semantic.second = mbp_read_ull(arena, candidate_entry + 72);
+                            bool semantic_duplicate = mbp_contains_hash(
+                                arena,
+                                working_semantic_offset,
+                                semantic_count,
+                                semantic);
+                            if (semantic_duplicate)
+                            {
+                                semantic_duplicates++;
+                            }
+                            else
+                            {
+                                if (semantic_count >= fingerprint_capacity)
+                                {
+                                    mbp_fail(arena, compact_offset, 2);
+                                    return;
+                                }
+                                mbp_write_hash(
+                                    arena,
+                                    working_semantic_offset,
+                                    semantic_count,
+                                    semantic);
+                                mbp_write_hash(
+                                    arena,
+                                    compact_semantic_offset,
+                                    new_semantic_count,
+                                    semantic);
+                                semantic_count++;
+                                new_semantic_count++;
+                            }
+
+                            if ((flags & 4) != 0)
+                            {
+                                bool equivalent_semantic = semantic_duplicate &&
+                                    mbp_has_equivalent_semantic_entry(
+                                        arena,
+                                        candidate_entry,
+                                        working_pareto_offset,
+                                        pareto_count,
+                                        working_quality_offset,
+                                        quality_capacity,
+                                        entry_size,
+                                        objective_count);
+                                bool accepted_pareto = false;
+                                bool accepted_quality = false;
+                                if (!equivalent_semantic)
+                                {
+                                    accepted_pareto = mbp_insert_pareto(
+                                        arena,
+                                        candidate_entry,
+                                        working_pareto_offset,
+                                        pareto_capacity,
+                                        entry_size,
+                                        objective_source_offset,
+                                        objective_count,
+                                        &pareto_count);
+                                    accepted_quality = mbp_insert_quality(
+                                        arena,
+                                        candidate_entry,
+                                        working_quality_offset,
+                                        quality_capacity,
+                                        entry_size,
+                                        quality_objective,
+                                        objective_source_offset,
+                                        cell);
+                                }
+                                if (accepted_pareto)
+                                    flags |= 1;
+                                if (accepted_quality)
+                                    flags |= 2;
+                                if (accepted_pareto || accepted_quality)
+                                {
+                                    status = 0;
+                                    accepted++;
+                                    keep_result = true;
+                                }
+                                else
+                                {
+                                    status = semantic_duplicate || equivalent_semantic ? 3 : 1;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mbp_write_int(arena, candidate_entry, status);
+                mbp_write_int(arena, candidate_entry + 16, cell);
+                mbp_write_int(arena, candidate_entry + 24, flags);
+                if (keep_result)
+                {
+                    mbp_copy(
+                        arena + compact_trial_offset + trial_result_count * entry_size,
+                        arena + candidate_entry,
+                        entry_size);
+                    trial_result_count++;
+                }
+            }
+
+            int candidate_chunk_count = 0;
+            int maximum_concurrent_candidates = 0;
+            for (int chunk = 0; chunk < wave_result_count; chunk += candidate_lane_count)
+            {
+                int concurrent = 0;
+                int chunk_end = chunk + candidate_lane_count;
+                if (chunk_end > wave_result_count)
+                    chunk_end = wave_result_count;
+                for (int ordinal = chunk; ordinal < chunk_end; ordinal++)
+                {
+                    int entry = proposal_wave_slot_offset + ordinal * entry_size;
+                    if ((mbp_read_int(arena, entry + 24) & 8) != 0)
+                        concurrent++;
+                }
+                if (concurrent > 0)
+                    candidate_chunk_count++;
+                if (concurrent > maximum_concurrent_candidates)
+                    maximum_concurrent_candidates = concurrent;
+            }
+            int prior_candidate_chunk_count = mbp_read_int(arena, control_offset + 16);
+            int prior_maximum_concurrent = mbp_read_int(arena, control_offset + 20);
+            mbp_write_int(
+                arena,
+                control_offset + 16,
+                prior_candidate_chunk_count + candidate_chunk_count);
+            mbp_write_int(
+                arena,
+                control_offset + 20,
+                prior_maximum_concurrent > maximum_concurrent_candidates
+                    ? prior_maximum_concurrent
+                    : maximum_concurrent_candidates);
+
+            int quality_count = 0;
+            for (int cell = 0; cell < quality_capacity; cell++)
+                if (mbp_read_int(arena, working_quality_offset + cell * entry_size) == 1)
+                    quality_count++;
+            wave_cursor++;
+            mbp_write_int(arena, working_state_offset, structural_count);
+            mbp_write_int(arena, working_state_offset + 4, semantic_count);
+            mbp_write_int(arena, working_state_offset + 8, pareto_count);
+            mbp_write_int(arena, working_state_offset + 12, quality_count);
+            mbp_write_ull(arena, working_state_offset + 56, structural_duplicates);
+            mbp_write_ull(arena, working_state_offset + 64, semantic_duplicates);
+            mbp_write_ull(arena, working_state_offset + 80, accepted);
+            mbp_write_ull(arena, working_state_offset + 112, wave_cursor);
             mbp_write_int(arena, compact_offset + 4, trial_result_count);
             mbp_write_int(arena, compact_offset + 8, new_structural_count);
             mbp_write_int(arena, compact_offset + 12, new_semantic_count);
+            mbp_write_int(arena, control_offset + 12, 0);
+        }
+
+        extern "C" __global__ void mathblocks_program_population_search_finalize(unsigned char* arena)
+        {
+            if (blockIdx.x != 0)
+                return;
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 10)
+                return;
+
+            int compact_offset = mbp_header_offset(arena, 34);
+            if (mbp_read_int(arena, compact_offset) != 0)
+                return;
+
+            int pareto_capacity = mbp_read_int(arena, 56);
+            int quality_capacity = mbp_read_int(arena, 60);
+            int entry_size = mbp_read_int(arena, 112);
+            int working_state_offset = mbp_header_offset(arena, 28);
+            int working_pareto_offset = mbp_header_offset(arena, 31);
+            int working_quality_offset = mbp_header_offset(arena, 32);
+            int compact_pareto_offset = mbp_header_offset(arena, 38);
+            int compact_quality_offset = mbp_header_offset(arena, 39);
+            int control_offset = mbp_read_int(arena, 348);
+
+            int structural_count = mbp_read_int(arena, working_state_offset);
+            int semantic_count = mbp_read_int(arena, working_state_offset + 4);
+            int pareto_count = mbp_read_int(arena, working_state_offset + 8);
+            int quality_count = 0;
+            for (int cell = 0; cell < quality_capacity; cell++)
+                if (mbp_read_int(arena, working_quality_offset + cell * entry_size) == 1)
+                    quality_count++;
+
+            mbp_ull enumeration_cursor = mbp_read_ull(arena, working_state_offset + 16);
+            mbp_ull trial_cursor = mbp_read_ull(arena, working_state_offset + 24);
+            mbp_ull cycle_count = mbp_read_ull(arena, working_state_offset + 32) + 1ull;
+            mbp_ull random_first = mbp_read_ull(arena, working_state_offset + 40);
+            mbp_ull random_second = mbp_read_ull(arena, working_state_offset + 48);
+            mbp_ull structural_duplicates = mbp_read_ull(arena, working_state_offset + 56);
+            mbp_ull semantic_duplicates = mbp_read_ull(arena, working_state_offset + 64);
+            mbp_ull evaluated = mbp_read_ull(arena, working_state_offset + 72);
+            mbp_ull accepted = mbp_read_ull(arena, working_state_offset + 80);
+            mbp_ull envelope_generation = mbp_read_ull(arena, working_state_offset + 88);
+            int refresh_cursor = mbp_read_int(arena, working_state_offset + 96);
+            int refresh_count = mbp_read_int(arena, working_state_offset + 100);
+            mbp_ull enumeration_trial_count = mbp_read_ull(arena, working_state_offset + 104);
+            mbp_ull wave_cursor = mbp_read_ull(arena, working_state_offset + 112);
+
+            mbp_write_int(arena, working_state_offset + 12, quality_count);
+            mbp_write_ull(arena, working_state_offset + 32, cycle_count);
+
+            mbp_write_int(arena, compact_offset, 0);
             mbp_write_int(arena, compact_offset + 16, pareto_count);
             mbp_write_int(arena, compact_offset + 20, quality_count);
             mbp_write_ull(arena, compact_offset + 24, enumeration_cursor);
@@ -2534,6 +2960,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             mbp_write_int(arena, compact_offset + 116, refresh_count);
             mbp_write_ull(arena, compact_offset + 120, enumeration_trial_count);
             mbp_write_ull(arena, compact_offset + 128, wave_cursor);
+            mbp_write_int(arena, compact_offset + 136, mbp_read_int(arena, control_offset + 16));
+            mbp_write_int(arena, compact_offset + 140, mbp_read_int(arena, control_offset + 20));
             mbp_copy(
                 arena + compact_pareto_offset,
                 arena + working_pareto_offset,
@@ -2544,11 +2972,12 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 quality_capacity * entry_size);
         }
 
+
         extern "C" __global__ void mathblocks_program_population_search_publish(unsigned char* arena)
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 9)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 10)
                 return;
 
             int compact_offset = mbp_header_offset(arena, 34);
