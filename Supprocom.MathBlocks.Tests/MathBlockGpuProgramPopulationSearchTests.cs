@@ -94,7 +94,11 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
                     MathBlockProgramPopulationExecutionMode.ParallelResident,
                     int.MaxValue)));
         Assert.Throws<ArgumentOutOfRangeException>(
-            () => worker.CompilePopulationSearch(definition, options));
+            () => worker.CompilePopulationSearch(
+                definition,
+                new MathBlockProgramPopulationExecutionOptions(
+                    MathBlockProgramPopulationExecutionMode.SerialResident,
+                    4)));
     }
 
     [Fact]
@@ -142,7 +146,7 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         var definition = CreateScalarSearch(proposalsPerCycle: 2);
         var parallelOptions = new MathBlockProgramPopulationExecutionOptions(
             MathBlockProgramPopulationExecutionMode.ParallelResident,
-            1);
+            4);
         var serialOptions = new MathBlockProgramPopulationExecutionOptions(
             MathBlockProgramPopulationExecutionMode.SerialResident,
             1);
@@ -150,6 +154,14 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
             definition,
             parallelOptions);
         var first = uninterrupted.ExecuteCycle();
+        Assert.Equal(4, uninterrupted.RequestedCandidateLaneCount);
+        Assert.Equal(1, uninterrupted.ActiveCandidateLaneCount);
+        Assert.Equal(4, uninterrupted.Capacity.CandidateLaneCount);
+        Assert.Equal(
+            checked((long)uninterrupted.Capacity.LaneStrideBytes * 4),
+            uninterrupted.Capacity.WorkingResidentBytes);
+        Assert.Equal(4, first.Instrumentation.RequestedCandidateLaneCount);
+        Assert.Equal(1, first.Instrumentation.ActiveCandidateLaneCount);
         var checkpoint = MathBlockProgramPopulationSearchState.Import(first.AcceptedState.Export());
 
         var expected = uninterrupted.ExecuteCycle();

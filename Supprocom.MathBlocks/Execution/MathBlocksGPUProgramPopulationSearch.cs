@@ -51,7 +51,9 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
     public string SearchIdentity => definition.Identity;
     public MathBlockProgramPopulationExecutionMode ExecutionMode => executionOptions.Mode;
     public int RequestedCandidateLaneCount => executionOptions.CandidateLaneCount;
-    public int ActiveCandidateLaneCount => 1;
+    public int ActiveCandidateLaneCount => Math.Min(
+        executionOptions.CandidateLaneCount,
+        definition.WavePolicy.ProposalWaveSize);
     public MathBlockProgramPopulationSearchCapacity Capacity => layout.Capacity;
     public int GraphInstanceCount { get; }
     public int ImmutableUploadCount { get; }
@@ -82,11 +84,12 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
     {
         ArgumentNullException.ThrowIfNull(definition);
         ArgumentNullException.ThrowIfNull(executionOptions);
-        if (executionOptions.CandidateLaneCount != 1)
+        if (executionOptions.Mode == MathBlockProgramPopulationExecutionMode.SerialResident &&
+            executionOptions.CandidateLaneCount != 1)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(executionOptions),
-                "The current resident layout supports one candidate lane.");
+                "Serial resident execution requires one candidate lane.");
         }
         if (definition.WavePolicy.ProposalWaveSize != 1)
         {
