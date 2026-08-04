@@ -582,6 +582,126 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Resident_parallel_wave_measures_wide_long_vector_candidate_throughput()
+    {
+        RequireCuda();
+        const int rowCount = 305_581;
+        var staticVector = MathBlockType.Vector(length: rowCount);
+        var dynamicVector = MathBlockType.Vector();
+        var terminals = Enumerable.Range(0, 4)
+            .Select(terminal => new MathBlockProgramPopulationTerminal(
+                $"series-{terminal}",
+                staticVector,
+                MathBlockValue.Vector(Enumerable.Range(0, rowCount).Select(
+                    row => -(double)(((row + terminal * 31) % 257) + 1)))))
+            .ToArray();
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation(
+                    "vector.absolute",
+                    1,
+                    [staticVector],
+                    staticVector)],
+                dynamicVector),
+            terminals,
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, rowCount)],
+            proposalsPerCycle: 4,
+            fingerprintCapacity: 8);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = builder.Input("candidate", dynamicVector);
+        var sum = builder.Apply("vector.sum", inputs: [candidate]);
+        var objectiveProgram = builder.Output("sum", sum).Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveProgram,
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "sum",
+                "sum",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        var baseline = CreateDefinition(
+            population,
+            binding,
+            maximumTrials: 4,
+            enumerationTrials: 4,
+            validity: new MathBlockProgramPopulationValidityPolicy(
+                Enumerable.Repeat(int.MaxValue, rowCount)));
+        var definition = new MathBlockProgramPopulationSearchDefinition(
+            baseline.Population,
+            baseline.ObjectiveBinding,
+            baseline.Evolution,
+            baseline.Selection,
+            baseline.QualityDiversity,
+            baseline.Envelope,
+            baseline.Validity,
+            baseline.CompactResults,
+            baseline.InitialPrograms,
+            wavePolicy: new MathBlockProgramPopulationWavePolicy(4, 1));
+        var worker = new MathBlocksGPUWorker();
+        var singleLaneOptions = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.ParallelResident,
+            1);
+        var fourLaneOptions = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.ParallelResident,
+            4);
+
+        using var serial = worker.CompilePopulationSearch(
+            definition,
+            MathBlockProgramPopulationExecutionOptions.SerialResident);
+        using var singleLane = worker.CompilePopulationSearch(definition, singleLaneOptions);
+        using var fourLane = worker.CompilePopulationSearch(definition, fourLaneOptions);
+
+        var serialTimer = Stopwatch.StartNew();
+        var serialResult = serial.ExecuteCycle();
+        serialTimer.Stop();
+        var singleLaneTimer = Stopwatch.StartNew();
+        var singleLaneResult = singleLane.ExecuteCycle();
+        singleLaneTimer.Stop();
+        var fourLaneTimer = Stopwatch.StartNew();
+        var fourLaneResult = fourLane.ExecuteCycle();
+        fourLaneTimer.Stop();
+
+        Console.WriteLine(
+            $"The serial wide-vector cycle took {serialTimer.Elapsed.TotalSeconds:R} seconds.");
+        Console.WriteLine(
+            $"The one-lane cooperative cycle took {singleLaneTimer.Elapsed.TotalSeconds:R} seconds.");
+        Console.WriteLine(
+            $"The four-lane cooperative cycle took {fourLaneTimer.Elapsed.TotalSeconds:R} seconds.");
+
+        Assert.Equal(serialResult.AcceptedState.Export(), singleLaneResult.AcceptedState.Export());
+        Assert.Equal(serialResult.AcceptedState.Export(), fourLaneResult.AcceptedState.Export());
+        Assert.Equal(
+            serialResult.Trials.Select(TrialIdentity),
+            singleLaneResult.Trials.Select(TrialIdentity));
+        Assert.Equal(
+            serialResult.Trials.Select(TrialIdentity),
+            fourLaneResult.Trials.Select(TrialIdentity));
+        Assert.Equal(4, serialResult.Instrumentation.CandidateChunkCount);
+        Assert.Equal(4, singleLaneResult.Instrumentation.CandidateChunkCount);
+        Assert.Equal(1, fourLaneResult.Instrumentation.CandidateChunkCount);
+        Assert.Equal(1, serialResult.Instrumentation.MaximumConcurrentCandidates);
+        Assert.Equal(1, singleLaneResult.Instrumentation.MaximumConcurrentCandidates);
+        Assert.Equal(4, fourLaneResult.Instrumentation.MaximumConcurrentCandidates);
+        Assert.Equal(4, serialResult.Instrumentation.SerialCandidateExecutionCount);
+        Assert.Equal(4, singleLaneResult.Instrumentation.ParallelCandidateExecutionCount);
+        Assert.Equal(4, fourLaneResult.Instrumentation.ParallelCandidateExecutionCount);
+        Assert.True(fourLane.ResidentBytes > singleLane.ResidentBytes);
+        Assert.All(new[] { serial, singleLane, fourLane }, compiled =>
+        {
+            Assert.Equal(1, compiled.GraphInstanceCount);
+            Assert.Equal(1, compiled.ImmutableUploadCount);
+            Assert.Equal(0, compiled.LaterImmutableUploadCount);
+            Assert.Equal(1, compiled.GraphLaunchCount);
+            Assert.Equal(1, compiled.SynchronizationCount);
+            Assert.Equal(1, compiled.DownloadCount);
+            Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
+            Assert.Equal(0, compiled.FullCandidateOutputBytes);
+            Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        });
+    }
+
+    [Fact]
     public async Task Resident_search_serializes_concurrent_cycles()
     {
         RequireCuda();
