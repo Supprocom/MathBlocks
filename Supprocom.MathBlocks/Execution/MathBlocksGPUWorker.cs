@@ -1358,8 +1358,7 @@ public sealed class MathBlocksGPUProgram : IDisposable
                 "polynomial.elementary-symmetric@1" => checked(firstCount + 1),
                 "information.jensen-shannon@1" => firstCount,
                 "information.mutual-information@1" => checked(rows + columns),
-                "information.conditional-mutual-information@1" =>
-                    ResolveConditionalInformationScratch(inputCapacities),
+                "information.conditional-mutual-information@1" => checked(firstCount * 3),
                 "sequence.rolling-maximum@1" or
                     "sequence.rolling-median@1" or
                     "sequence.rolling-minimum@1" or
@@ -1457,14 +1456,6 @@ public sealed class MathBlocksGPUProgram : IDisposable
         for (var index = 1; index <= selected; index++)
             result = checked(result * (count - selected + index) / index);
         return checked((int)result);
-    }
-
-    private static int ResolveConditionalInformationScratch(IReadOnlyList<int> inputCapacities)
-    {
-        var first = inputCapacities[1];
-        var second = inputCapacities[2];
-        var condition = inputCapacities[3];
-        return checked(first * condition + second * condition + condition);
     }
 
     private static int ResolveAssignmentScratch(int size)

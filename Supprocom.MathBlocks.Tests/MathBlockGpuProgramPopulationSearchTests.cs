@@ -1416,6 +1416,104 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Resident_search_bounds_conditional_mutual_information_scratch_from_the_joint_capacity()
+    {
+        RequireCuda();
+        var scalarType = MathBlockType.Scalar();
+        var jointType = MathBlockType.Vector(length: 4);
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation(
+                    "scalar.absolute",
+                    1,
+                    [scalarType],
+                    scalarType)],
+                scalarType),
+            [new MathBlockProgramPopulationTerminal("negative-one", scalarType, MathBlockValue.Scalar(-1d))],
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 1)],
+            proposalsPerCycle: 1,
+            fingerprintCapacity: 2);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = builder.Input("candidate", scalarType);
+        var joint = builder.Input("joint", jointType);
+        var firstCount = builder.Input("first-count", scalarType);
+        var secondCount = builder.Input("second-count", scalarType);
+        var conditionCount = builder.Input("condition-count", scalarType);
+        var information = builder.Apply(
+            "information.conditional-mutual-information",
+            inputs: [joint, firstCount, secondCount, conditionCount]);
+        var objectiveProgram = builder
+            .Output("information", information)
+            .Output("candidate", candidate)
+            .Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveProgram,
+            "candidate",
+            new Dictionary<string, MathBlockValue>
+            {
+                ["joint"] = MathBlockValue.Vector([0.5d, 0d, 0d, 0.5d]),
+                ["first-count"] = MathBlockValue.Scalar(2d),
+                ["second-count"] = MathBlockValue.Scalar(2d),
+                ["condition-count"] = MathBlockValue.Scalar(1d)
+            },
+            [
+                new MathBlockProgramPopulationObjective(
+                    "information",
+                    "information",
+                    MathBlockProgramPopulationObjectiveDirection.Maximize),
+                new MathBlockProgramPopulationObjective(
+                    "candidate",
+                    "candidate",
+                    MathBlockProgramPopulationObjectiveDirection.Maximize)
+            ]);
+        var definition = new MathBlockProgramPopulationSearchDefinition(
+            population,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(1, 1, 0, 0, 0, 397),
+            new MathBlockProgramPopulationSelectionPolicy(2, 2),
+            new MathBlockProgramPopulationQualityDiversityPolicy(
+                "information",
+                [new MathBlockProgramPopulationQualityDiversityDimension("information", 0, 2, 2)]),
+            new MathBlockProgramPopulationSearchEnvelope(64L * 1024 * 1024, 16 * 1024 * 1024),
+            new MathBlockProgramPopulationValidityPolicy([int.MaxValue]));
+        using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition);
+
+        var result = compiled.ExecuteCycle();
+
+        Assert.Equal(3 * 4 * sizeof(double), ReadScratchBytesPerNode(compiled));
+        var trial = Assert.Single(result.Trials);
+        Assert.Equal(
+            definition.EvaluateObjectives(trial.Program).Select(BitConverter.DoubleToInt64Bits),
+            trial.Objectives.Select(BitConverter.DoubleToInt64Bits));
+        Assert.True(trial.Objectives[0] > 0d);
+        Assert.Equal(definition.CreateSemanticFingerprint(trial.Program), trial.SemanticFingerprint);
+        Assert.Equal(1, compiled.GraphInstanceCount);
+        Assert.Equal(1, compiled.ImmutableUploadCount);
+        Assert.Equal(0, compiled.LaterImmutableUploadCount);
+        Assert.Equal(1, compiled.GraphLaunchCount);
+        Assert.Equal(1, compiled.SynchronizationCount);
+        Assert.Equal(1, compiled.DownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputBytes);
+        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        var constrained = new MathBlockProgramPopulationSearchDefinition(
+            definition.Population,
+            definition.ObjectiveBinding,
+            definition.Evolution,
+            definition.Selection,
+            definition.QualityDiversity,
+            new MathBlockProgramPopulationSearchEnvelope(
+                compiled.ResidentBytes - 1,
+                definition.Envelope.MaximumCompactDownloadBytes),
+            definition.Validity,
+            definition.CompactResults,
+            definition.InitialPrograms);
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => new MathBlocksGPUWorker().CompilePopulationSearch(constrained));
+    }
+
+    [Fact]
     public void Resident_search_executes_large_pointwise_vectors_without_quadratic_scratch()
     {
         RequireCuda();

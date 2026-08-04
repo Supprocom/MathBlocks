@@ -248,6 +248,44 @@ public sealed class MathBlockGpuWorkerTests
     }
 
     [Fact]
+    public void GPU_conditional_mutual_information_scratch_preserves_the_following_output_slot()
+    {
+        Assert.True(MathBlocksGPUWorker.IsAvailable, "A CUDA device is required.");
+        var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
+        {
+            ["guard"] = MathBlockValue.Scalar(123_456.75d),
+            ["joint"] = MathBlockValue.Vector([0.5d, 0d, 0d, 0.5d]),
+            ["first-count"] = MathBlockValue.Scalar(2d),
+            ["second-count"] = MathBlockValue.Scalar(2d),
+            ["condition-count"] = MathBlockValue.Scalar(1d)
+        };
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var guard = builder.Input("guard", inputs["guard"].Type);
+        var joint = builder.Input("joint", inputs["joint"].Type);
+        var firstCount = builder.Input("first-count", inputs["first-count"].Type);
+        var secondCount = builder.Input("second-count", inputs["second-count"].Type);
+        var conditionCount = builder.Input("condition-count", inputs["condition-count"].Type);
+        var information = builder.Apply(
+            "information.conditional-mutual-information",
+            inputs: [joint, firstCount, secondCount, conditionCount]);
+        var program = builder
+            .Output("guard", guard)
+            .Output("information", information)
+            .Build();
+        var cpu = program.Evaluate(inputs);
+        using var compiled = new MathBlocksGPUWorker().Compile(program, inputs);
+        compiled.UploadInputs(inputs);
+
+        compiled.ExecuteResident();
+        var gpu = compiled.ReadOutputs();
+
+        Assert.True(cpu["information"].AsScalar() > 0d);
+        AssertExact(cpu["guard"], gpu["guard"]);
+        AssertExact(cpu["information"], gpu["information"]);
+        AssertResidentExecutionContract(compiled);
+    }
+
+    [Fact]
     public void GPU_dynamic_repeat_capacity_propagates_through_boolean_nodes()
     {
         Assert.True(MathBlocksGPUWorker.IsAvailable, "A CUDA device is required.");
