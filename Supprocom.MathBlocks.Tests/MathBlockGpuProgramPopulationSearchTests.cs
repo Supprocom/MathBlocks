@@ -349,6 +349,66 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Resident_serial_wave_commit_matches_size_one_ordinal_results()
+    {
+        RequireCuda();
+        var referenceDefinition = CreateScalarSearch(proposalsPerCycle: 4);
+        var waveDefinition = new MathBlockProgramPopulationSearchDefinition(
+            referenceDefinition.Population,
+            referenceDefinition.ObjectiveBinding,
+            referenceDefinition.Evolution,
+            referenceDefinition.Selection,
+            referenceDefinition.QualityDiversity,
+            referenceDefinition.Envelope,
+            referenceDefinition.Validity,
+            referenceDefinition.CompactResults,
+            referenceDefinition.InitialPrograms,
+            wavePolicy: new MathBlockProgramPopulationWavePolicy(4, 1));
+        var worker = new MathBlocksGPUWorker();
+
+        using var reference = worker.CompilePopulationSearch(referenceDefinition);
+        using var wave = worker.CompilePopulationSearch(waveDefinition);
+        var expected = reference.ExecuteCycle();
+        var actual = wave.ExecuteCycle();
+
+        Assert.Equal(expected.Trials.Select(TrialIdentity), actual.Trials.Select(TrialIdentity));
+        Assert.Equal(
+            MathBlockProgramPopulationTrialStatus.SemanticDuplicate,
+            actual.Trials.Single(trial => trial.Program.ProposalCursor == 2).Status);
+        Assert.Equal(expected.AcceptedState.EnumerationCursor, actual.AcceptedState.EnumerationCursor);
+        Assert.Equal(expected.AcceptedState.EnumerationTrialCount, actual.AcceptedState.EnumerationTrialCount);
+        Assert.Equal(expected.AcceptedState.TrialCursor, actual.AcceptedState.TrialCursor);
+        Assert.Equal(expected.AcceptedState.CycleCount, actual.AcceptedState.CycleCount);
+        Assert.Equal(4ul, expected.AcceptedState.WaveCursor);
+        Assert.Equal(1ul, actual.AcceptedState.WaveCursor);
+        Assert.Equal(expected.AcceptedState.RandomState, actual.AcceptedState.RandomState);
+        Assert.Equal(
+            expected.AcceptedState.StructuralDuplicateCount,
+            actual.AcceptedState.StructuralDuplicateCount);
+        Assert.Equal(
+            expected.AcceptedState.SemanticDuplicateCount,
+            actual.AcceptedState.SemanticDuplicateCount);
+        Assert.Equal(expected.AcceptedState.EvaluatedProgramCount, actual.AcceptedState.EvaluatedProgramCount);
+        Assert.Equal(expected.AcceptedState.AcceptedProgramCount, actual.AcceptedState.AcceptedProgramCount);
+        Assert.Equal(
+            expected.AcceptedState.StructuralFingerprints,
+            actual.AcceptedState.StructuralFingerprints);
+        Assert.Equal(expected.AcceptedState.SemanticFingerprints, actual.AcceptedState.SemanticFingerprints);
+        Assert.Equal(
+            expected.AcceptedState.SelectionEntries.Select(ArchiveIdentity),
+            actual.AcceptedState.SelectionEntries.Select(ArchiveIdentity));
+        Assert.Equal(
+            expected.AcceptedState.QualityDiversityEntries.Select(ArchiveIdentity),
+            actual.AcceptedState.QualityDiversityEntries.Select(ArchiveIdentity));
+        Assert.Equal(1, actual.Instrumentation.ProposalWaveCount);
+        Assert.Equal(1, wave.GraphLaunchCount);
+        Assert.Equal(1, wave.SynchronizationCount);
+        Assert.Equal(1, wave.DownloadCount);
+        Assert.Equal(0, wave.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, wave.CpuNodeDispatchCount);
+    }
+
+    [Fact]
     public async Task Resident_search_serializes_concurrent_cycles()
     {
         RequireCuda();
@@ -3417,6 +3477,11 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     private static string TrialIdentity(MathBlockProgramPopulationTrialResult trial) =>
         $"{trial.Program.TrialCursor}|{trial.Program.ProposalCursor}|{trial.Program.Source}|{trial.Status}|" +
         $"{trial.StructuralFingerprint}|{trial.SemanticFingerprint}|{string.Join(',', trial.Objectives)}";
+
+    private static string ArchiveIdentity(MathBlockProgramPopulationArchiveEntry entry) =>
+        $"{entry.Program.TrialCursor}|{entry.Program.ProposalCursor}|{entry.Program.Source}|{entry.Age}|" +
+        $"{entry.StructuralFingerprint}|{entry.SemanticFingerprint}|{entry.QualityDiversityCell}|" +
+        string.Join(',', entry.Objectives.Select(BitConverter.DoubleToInt64Bits));
 
     private static int ValueElementCount(MathBlockValue value) => value.Type.Kind switch
     {
