@@ -595,6 +595,189 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Resident_search_resolves_complex_matrix_pick_capacity_from_dynamic_vectors()
+    {
+        RequireCuda();
+        var staticVector = MathBlockType.Vector(length: 2);
+        var staticComplexVector = MathBlockType.ComplexVector(length: 2);
+        var dynamicComplexVector = MathBlockType.ComplexVector();
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation(
+                    "transform.discrete-fourier",
+                    1,
+                    [staticVector],
+                    staticComplexVector)],
+                dynamicComplexVector),
+            [new MathBlockProgramPopulationTerminal(
+                "spectral-source",
+                staticVector,
+                MathBlockValue.Vector([0.25d, 0.25d]))],
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 2)],
+            proposalsPerCycle: 1,
+            fingerprintCapacity: 4);
+        var objectiveBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = objectiveBuilder.Input("candidate", dynamicComplexVector);
+        _ = objectiveBuilder.Apply("complex-matrix.pick", inputs: [candidate, candidate]);
+        var magnitudes = objectiveBuilder.Apply("complex-vector.magnitude", inputs: [candidate]);
+        var sum = objectiveBuilder.Apply("vector.sum", inputs: [magnitudes]);
+        var objectiveProgram = objectiveBuilder.Output("magnitude-sum", sum).Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveProgram,
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "magnitude-sum",
+                "magnitude-sum",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        var definition = CreateDefinition(
+            population,
+            binding,
+            maximumTrials: 1,
+            enumerationTrials: 1,
+            validity: new MathBlockProgramPopulationValidityPolicy([0, 1]));
+        var expectedProgram = new MathBlockProgramStructure(
+            0,
+            0,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                MathBlockProgramCandidateNode.Terminal(0, "spectral-source", staticVector),
+                MathBlockProgramCandidateNode.Operation(
+                    "transform.discrete-fourier",
+                    1,
+                    staticComplexVector,
+                    0)
+            ]);
+        var candidateOutput = population.Evaluate(expectedProgram);
+        var expectedPick = MathBlockCatalog.Standard
+            .Get("complex-matrix.pick", 1)
+            .Evaluate(candidateOutput, candidateOutput);
+        Assert.Equal(4, expectedPick.AsComplexMatrix().ToArray().Length);
+        var expectedObjectives = definition.EvaluateObjectives(expectedProgram);
+        var expectedSemantic = definition.CreateSemanticFingerprint(expectedProgram);
+        using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition);
+
+        var result = compiled.ExecuteCycle();
+
+        Assert.Equal(4, compiled.Capacity.MaximumValueElements);
+        Assert.Single(result.Trials);
+        var accepted = Assert.Single(
+            result.Trials,
+            trial => trial.Status == MathBlockProgramPopulationTrialStatus.Accepted);
+        Assert.Equal(expectedProgram.StructuralFingerprint, accepted.StructuralFingerprint);
+        Assert.Equal(
+            expectedObjectives.Select(BitConverter.DoubleToInt64Bits),
+            accepted.Objectives.Select(BitConverter.DoubleToInt64Bits));
+        Assert.Equal(expectedSemantic, accepted.SemanticFingerprint);
+        Assert.Equal(1ul, result.AcceptedState.EvaluatedProgramCount);
+        Assert.Equal(1ul, result.AcceptedState.AcceptedProgramCount);
+        Assert.Equal(1, compiled.GraphInstanceCount);
+        Assert.Equal(1, compiled.ImmutableUploadCount);
+        Assert.Equal(0, compiled.LaterImmutableUploadCount);
+        Assert.Equal(1, compiled.GraphLaunchCount);
+        Assert.Equal(1, compiled.SynchronizationCount);
+        Assert.Equal(1, compiled.DownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputBytes);
+        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        Assert.Equal((long)compiled.CompactDownloadBytesPerCycle, compiled.DownloadedBytes);
+    }
+
+    [Fact]
+    public void Resident_search_resolves_dynamic_graph_candidate_vertex_authority()
+    {
+        RequireCuda();
+        var staticGraph = MathBlockType.Graph(vertexCount: 4);
+        var dynamicGraph = MathBlockType.Graph();
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation(
+                    "graph.minimum-spanning-forest",
+                    1,
+                    [staticGraph],
+                    staticGraph)],
+                dynamicGraph),
+            [new MathBlockProgramPopulationTerminal(
+                "weighted-network",
+                staticGraph,
+                MathBlockValue.Graph(new MathBlockGraph(
+                    4,
+                    [
+                        new(0, 1, 1d),
+                        new(1, 2, 1d),
+                        new(2, 3, 1d),
+                        new(0, 2, 4d),
+                        new(0, 3, 5d)
+                    ])))],
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 5)],
+            proposalsPerCycle: 1,
+            fingerprintCapacity: 4);
+        var objectiveBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = objectiveBuilder.Input("candidate", dynamicGraph);
+        var degree = objectiveBuilder.Apply("graph.degree", inputs: [candidate]);
+        var degreeSum = objectiveBuilder.Apply("vector.sum", inputs: [degree]);
+        var objectiveProgram = objectiveBuilder.Output("degree-sum", degreeSum).Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveProgram,
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "degree-sum",
+                "degree-sum",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        var definition = CreateDefinition(
+            population,
+            binding,
+            maximumTrials: 1,
+            enumerationTrials: 1,
+            validity: new MathBlockProgramPopulationValidityPolicy([0, 1, 2, 3]));
+        var expectedProgram = new MathBlockProgramStructure(
+            0,
+            0,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                MathBlockProgramCandidateNode.Terminal(0, "weighted-network", staticGraph),
+                MathBlockProgramCandidateNode.Operation(
+                    "graph.minimum-spanning-forest",
+                    1,
+                    staticGraph,
+                    0)
+            ]);
+        var candidateOutput = population.Evaluate(expectedProgram);
+        Assert.Equal(4, candidateOutput.AsGraph().VertexCount);
+        Assert.Equal(3, candidateOutput.AsGraph().Count);
+        var expectedObjectives = definition.EvaluateObjectives(expectedProgram);
+        var expectedSemantic = definition.CreateSemanticFingerprint(expectedProgram);
+        using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition);
+
+        var result = compiled.ExecuteCycle();
+
+        Assert.Single(result.Trials);
+        var accepted = Assert.Single(
+            result.Trials,
+            trial => trial.Status == MathBlockProgramPopulationTrialStatus.Accepted);
+        Assert.Equal(expectedProgram.StructuralFingerprint, accepted.StructuralFingerprint);
+        Assert.Equal(
+            expectedObjectives.Select(BitConverter.DoubleToInt64Bits),
+            accepted.Objectives.Select(BitConverter.DoubleToInt64Bits));
+        Assert.Equal(expectedSemantic, accepted.SemanticFingerprint);
+        Assert.Equal(1ul, result.AcceptedState.EvaluatedProgramCount);
+        Assert.Equal(1ul, result.AcceptedState.AcceptedProgramCount);
+        Assert.Equal(1, compiled.GraphInstanceCount);
+        Assert.Equal(1, compiled.ImmutableUploadCount);
+        Assert.Equal(0, compiled.LaterImmutableUploadCount);
+        Assert.Equal(1, compiled.GraphLaunchCount);
+        Assert.Equal(1, compiled.SynchronizationCount);
+        Assert.Equal(1, compiled.DownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputBytes);
+        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        Assert.Equal((long)compiled.CompactDownloadBytesPerCycle, compiled.DownloadedBytes);
+    }
+
+    [Fact]
     public void Resident_search_accepts_more_than_eight_objectives_and_intrinsic_sources()
     {
         RequireCuda();

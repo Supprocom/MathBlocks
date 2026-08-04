@@ -787,6 +787,8 @@ public sealed class MathBlocksGPUProgram : IDisposable
             }
             if (identity == "matrix.stack-rows@1")
                 return checked(inputCapacities[0] + inputCapacities[1]);
+            if (identity == "complex-matrix.pick@1")
+                return checked(inputCapacities[0] * inputCapacities[1]);
             if (identity == "matrix.kronecker-product@1")
             {
                 return checked(
@@ -1073,6 +1075,11 @@ public sealed class MathBlocksGPUProgram : IDisposable
             return new MathBlockGpuShapeAuthority(inputCapacities[0], inputCapacities[1]);
         if (identity == "matrix.stack-rows@1")
             return new MathBlockGpuShapeAuthority(2, Math.Max(inputCapacities[0], inputCapacities[1]));
+        if (identity == "complex-matrix.pick@1")
+        {
+            var dimension = Math.Min(inputCapacities[0], inputCapacities[1]);
+            return new MathBlockGpuShapeAuthority(dimension, dimension);
+        }
         if (identity == "matrix.kronecker-product@1")
         {
             return new MathBlockGpuShapeAuthority(

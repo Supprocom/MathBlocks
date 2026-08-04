@@ -1246,7 +1246,16 @@ internal sealed class PopulationSearchLayout
         {
             shapeOverrides.Add(
                 binding.CandidateInput,
-                ResolveCandidateShapeAuthority(definition.Population, candidateType, maximumCandidateElements));
+                ResolveMatrixCandidateShapeAuthority(
+                    definition.Population,
+                    candidateType,
+                    maximumCandidateElements));
+        }
+        else if (candidateType.Kind == MathBlockValueKind.Graph)
+        {
+            var graphShape = ResolveGraphCandidateShapeAuthority(definition.Population, candidateType);
+            if (graphShape.Rows > 0)
+                shapeOverrides.Add(binding.CandidateInput, graphShape);
         }
         var payloadCapacities = MathBlocksGPUProgram.ResolvePayloadCapacities(
             plan,
@@ -1363,7 +1372,7 @@ internal sealed class PopulationSearchLayout
         return new CompiledObjective(nodes, inputs.ToArray(), sources, dimensions);
     }
 
-    private static MathBlockGpuShapeAuthority ResolveCandidateShapeAuthority(
+    private static MathBlockGpuShapeAuthority ResolveMatrixCandidateShapeAuthority(
         MathBlockProgramPopulationDefinition population,
         MathBlockType candidateType,
         int maximumCandidateElements)
@@ -1388,6 +1397,23 @@ internal sealed class PopulationSearchLayout
         if (maximumRows <= 0 || maximumColumns <= 0)
             throw new InvalidOperationException("The candidate matrix shape authority is unavailable.");
         return new MathBlockGpuShapeAuthority(maximumRows, maximumColumns);
+    }
+
+    private static MathBlockGpuShapeAuthority ResolveGraphCandidateShapeAuthority(
+        MathBlockProgramPopulationDefinition population,
+        MathBlockType candidateType)
+    {
+        var maximumVertices = 0;
+        foreach (var operation in population.Grammar.Operations)
+        {
+            var outputType = operation.OutputType;
+            if (!candidateType.Accepts(outputType) || !population.Grammar.OutputType.Accepts(outputType))
+                continue;
+            maximumVertices = Math.Max(maximumVertices, outputType.Rows);
+        }
+        if (maximumVertices == 0 && candidateType.Accepts(population.Grammar.OutputType))
+            maximumVertices = population.Grammar.OutputType.Rows;
+        return new MathBlockGpuShapeAuthority(maximumVertices, 0);
     }
 
     private static MathBlockGpuShapeAuthority ResolveMatrixShapeAuthority(
