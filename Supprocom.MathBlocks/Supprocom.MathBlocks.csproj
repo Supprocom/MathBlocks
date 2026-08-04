@@ -6,7 +6,7 @@
     <RootNamespace>Supprocom.MathBlocks</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>Supprocom.MathBlocks</PackageId>
-    <Version>0.1.4</Version>
+    <Version>0.1.5</Version>
     <Authors>Supprocom</Authors>
     <Company>Supprocom</Company>
     <Copyright>Copyright (C) 2026 mkn8rn</Copyright>
@@ -18,7 +18,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>mathematics;computation-graph;dag;parallel;cpu;cuda;gpu;deterministic;numerics</PackageTags>
-    <PackageReleaseNotes>Adds a complete GPU-resident typed program search cycle with device-side objectives, evolution, archives, exact resume, and dynamic resource envelopes.</PackageReleaseNotes>
+    <PackageReleaseNotes>Prevents invalid typed-overload proposals from claiming structural fingerprints before type validation.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType>portable</DebugType>

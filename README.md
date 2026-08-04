@@ -125,10 +125,10 @@ percentile, and measurement method.
 This Git repository contains source text and project metadata only. It does not
 contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
 
-Get MathBlocks version `0.1.4` from NuGet.org with this command:
+Get MathBlocks version `0.1.5` from NuGet.org with this command:
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.1.4
+dotnet add package Supprocom.MathBlocks --version 0.1.5
 ```
 
 The package declares three external native-acquisition dependencies. This

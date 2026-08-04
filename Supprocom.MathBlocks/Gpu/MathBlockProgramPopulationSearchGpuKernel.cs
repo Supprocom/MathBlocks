@@ -1956,9 +1956,31 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 int flags = 0;
                 int cell = -1;
                 bool keep_result = include_rejected != 0;
+                int maximum_lookback = 0;
+                mbp_ull deterministic_cost = 0ull;
+                bool typed = generated && mbp_type_program(
+                    arena,
+                    operation_offset,
+                    operation_input_type_offset,
+                    terminal_offset,
+                    type_offset,
+                    terminal_count,
+                    candidate_operation_count,
+                    maximum_arity,
+                    output_type,
+                    selected_operations,
+                    selected_operands,
+                    selected_types,
+                    selected_lookbacks,
+                    &maximum_lookback,
+                    &deterministic_cost);
                 if (!generated)
                 {
                     status = 6;
+                }
+                else if (!typed)
+                {
+                    status = 4;
                 }
                 else if (mbp_contains_hash(
                         arena,
@@ -1980,77 +2002,54 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                     mbp_write_hash(arena, compact_structural_offset, new_structural_count, structural);
                     structural_count++;
                     new_structural_count++;
-                    int maximum_lookback = 0;
-                    mbp_ull deterministic_cost = 0ull;
-                    if (!mbp_type_program(
-                            arena,
-                            operation_offset,
-                            operation_input_type_offset,
-                            terminal_offset,
-                            type_offset,
-                            terminal_count,
-                            candidate_operation_count,
-                            maximum_arity,
-                            output_type,
-                            selected_operations,
-                            selected_operands,
-                            selected_types,
-                            selected_lookbacks,
-                            &maximum_lookback,
-                            &deterministic_cost))
+                    int outcome = mbp_execute_program(
+                        arena,
+                        operation_offset,
+                        terminal_offset,
+                        type_offset,
+                        immutable_slot_offset,
+                        candidate_slot_offset,
+                        candidate_payload_offset,
+                        scratch_offset,
+                        input_pointer_offset,
+                        payload_stride,
+                        scratch_stride,
+                        terminal_count,
+                        candidate_operation_count,
+                        maximum_operation_count,
+                        maximum_arity,
+                        band_maximum,
+                        selected_operations,
+                        selected_operands,
+                        selected_types);
+                    if (outcome < 0)
                     {
-                        status = 4;
+                        mbp_fail(arena, compact_offset, 3);
+                        return;
+                    }
+                    if (outcome == 0)
+                    {
+                        status = 5;
                     }
                     else
                     {
-                        int outcome = mbp_execute_program(
-                            arena,
-                            operation_offset,
-                            terminal_offset,
-                            type_offset,
-                            immutable_slot_offset,
-                            candidate_slot_offset,
-                            candidate_payload_offset,
-                            scratch_offset,
-                            input_pointer_offset,
-                            payload_stride,
-                            scratch_stride,
-                            terminal_count,
-                            candidate_operation_count,
-                            maximum_operation_count,
-                            maximum_arity,
-                            band_maximum,
-                            selected_operations,
-                            selected_operands,
-                            selected_types);
-                        if (outcome < 0)
+                        int final_node = terminal_count + candidate_operation_count - 1;
+                        if (!mbp_create_mask(
+                                arena,
+                                type_offset,
+                                selected_types[final_node],
+                                &candidate_slots[final_node],
+                                history_offset,
+                                history_count,
+                                maximum_lookback,
+                                mask_slot,
+                                mask_values))
                         {
                             mbp_fail(arena, compact_offset, 3);
                             return;
                         }
-                        if (outcome == 0)
-                        {
-                            status = 5;
-                        }
-                        else
-                        {
-                            int final_node = terminal_count + candidate_operation_count - 1;
-                            if (!mbp_create_mask(
-                                    arena,
-                                    type_offset,
-                                    selected_types[final_node],
-                                    &candidate_slots[final_node],
-                                    history_offset,
-                                    history_count,
-                                    maximum_lookback,
-                                    mask_slot,
-                                    mask_values))
-                            {
-                                mbp_fail(arena, compact_offset, 3);
-                                return;
-                            }
-                            evaluated++;
-                            MbpHash semantic = mbp_semantic_hash(
+                        evaluated++;
+                        MbpHash semantic = mbp_semantic_hash(
                                 arena,
                                 type_offset,
                                 selected_types[final_node],
@@ -2165,7 +2164,6 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                             }
                         }
                     }
-                }
                 mbp_write_int(arena, candidate_entry, status);
                 mbp_write_int(arena, candidate_entry + 16, cell);
                 mbp_write_int(arena, candidate_entry + 24, flags);
