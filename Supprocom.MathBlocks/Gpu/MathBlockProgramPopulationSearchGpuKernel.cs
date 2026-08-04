@@ -1548,7 +1548,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 8)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 9)
                 return;
 
             int fingerprint_capacity = mbp_read_int(arena, 40);
@@ -1592,7 +1592,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             if (blockIdx.x != 0)
                 return;
             __shared__ int cooperative_status;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 8)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 9)
                 return;
 
             int grammar_operation_count = mbp_read_int(arena, 8);
@@ -1606,6 +1606,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int proposal_wave_size = mbp_read_int(arena, 324);
             int proposal_wave_slot_offset = mbp_read_int(arena, 332);
             int proposal_wave_slot_bytes = mbp_read_int(arena, 336);
+            int proposal_wave_snapshot_pareto_offset = mbp_read_int(arena, 340);
+            int proposal_wave_snapshot_quality_offset = mbp_read_int(arena, 344);
             int fingerprint_capacity = mbp_read_int(arena, 40);
             int output_type = mbp_read_int(arena, 44);
             int objective_node_count = mbp_read_int(arena, 48);
@@ -1678,6 +1680,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 cycle_work_limit <= 0 || proposal_wave_size <= 0 ||
                 proposal_wave_slot_offset <= 0 ||
                 proposal_wave_slot_bytes / proposal_wave_size < entry_size ||
+                proposal_wave_snapshot_pareto_offset <= 0 ||
+                proposal_wave_snapshot_quality_offset <= 0 ||
                 fingerprint_capacity <= 0 ||
                 objective_node_count <= 0 || objective_count <= 0 || pareto_capacity <= 0 ||
                 quality_capacity <= 0 || maximum_arity < 0 || history_count <= 0 ||
@@ -1760,6 +1764,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int trial_result_count = 0;
             int processed = 0;
             int enumeration_scan_count = 0;
+            int wave_position = 0;
 
             while (processed < cycle_work_limit && refresh_cursor < refresh_count)
             {
@@ -1979,6 +1984,17 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
 
             while (processed < cycle_work_limit && trial_cursor < maximum_trials)
             {
+                if (wave_position == 0)
+                {
+                    mbp_copy(
+                        arena + proposal_wave_snapshot_pareto_offset,
+                        arena + working_pareto_offset,
+                        pareto_capacity * entry_size);
+                    mbp_copy(
+                        arena + proposal_wave_snapshot_quality_offset,
+                        arena + working_quality_offset,
+                        quality_capacity * entry_size);
+                }
                 int source = 0;
                 mbp_ull proposal_cursor = ~0ull;
                 int candidate_operation_count = 0;
@@ -2057,9 +2073,9 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                             operation_offset,
                             objective_count,
                             program_operation_size,
-                            working_pareto_offset,
+                            proposal_wave_snapshot_pareto_offset,
                             pareto_capacity,
-                            working_quality_offset,
+                            proposal_wave_snapshot_quality_offset,
                             quality_capacity,
                             entry_size,
                             &random_first,
@@ -2079,9 +2095,9 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                             operation_offset,
                             objective_count,
                             program_operation_size,
-                            working_pareto_offset,
+                            proposal_wave_snapshot_pareto_offset,
                             pareto_capacity,
-                            working_quality_offset,
+                            proposal_wave_snapshot_quality_offset,
                             quality_capacity,
                             entry_size,
                             &random_first,
@@ -2121,9 +2137,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 if (!generated)
                     break;
                 mbp_ull current_trial = trial_cursor++;
-                wave_cursor++;
                 processed++;
-                int candidate_entry = proposal_wave_slot_offset;
+                int candidate_entry = proposal_wave_slot_offset + wave_position * entry_size;
                 MbpHash structural = mbp_structural_hash(
                     arena,
                     operation_offset,
@@ -2366,8 +2381,16 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                         entry_size);
                     trial_result_count++;
                 }
+                wave_position++;
+                if (wave_position == proposal_wave_size)
+                {
+                    wave_cursor++;
+                    wave_position = 0;
+                }
             }
 
+            if (wave_position != 0)
+                wave_cursor++;
             quality_count = 0;
             for (int cell = 0; cell < quality_capacity; cell++)
                 if (mbp_read_int(arena, working_quality_offset + cell * entry_size) == 1)
@@ -2428,7 +2451,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 8)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 9)
                 return;
 
             int compact_offset = mbp_header_offset(arena, 34);

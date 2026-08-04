@@ -87,6 +87,17 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         Assert.Equal(singleLane.ProposalWaveSlotBytes, widerCapacity.ProposalWaveSlotBytes);
         Assert.True(widerCapacity.CompactDownloadBytes > singleLane.CompactDownloadBytes);
         Assert.True(widerCapacity.SharedResidentBytes > singleLane.SharedResidentBytes);
+        var widerWave = new MathBlockProgramPopulationSearchDefinition(
+            definition.Population,
+            definition.ObjectiveBinding,
+            definition.Evolution,
+            definition.Selection,
+            definition.QualityDiversity,
+            definition.Envelope,
+            definition.Validity,
+            definition.CompactResults,
+            definition.InitialPrograms,
+            wavePolicy: new MathBlockProgramPopulationWavePolicy(2, 2));
         Assert.Throws<ArgumentOutOfRangeException>(
             () => worker.CompilePopulationSearch(
                 constrained,
@@ -103,6 +114,12 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
                 new MathBlockProgramPopulationExecutionOptions(
                     MathBlockProgramPopulationExecutionMode.SerialResident,
                     4)));
+        Assert.Throws<NotSupportedException>(
+            () => worker.CompilePopulationSearch(
+                widerWave,
+                new MathBlockProgramPopulationExecutionOptions(
+                    MathBlockProgramPopulationExecutionMode.ParallelResident,
+                    1)));
     }
 
     [Fact]
@@ -263,6 +280,72 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         Assert.Equal(2, actualNext.Instrumentation.ProposalWaveCount);
         Assert.Equal(expectedNext.AcceptedState.Export(), actualNext.AcceptedState.Export());
         Assert.Equal(expectedNext.Trials.Select(TrialIdentity), actualNext.Trials.Select(TrialIdentity));
+    }
+
+    [Fact]
+    public void Resident_serial_search_commits_fixed_wider_proposal_waves()
+    {
+        RequireCuda();
+        var baseline = CreateScalarSearch(proposalsPerCycle: 4);
+        var definition = new MathBlockProgramPopulationSearchDefinition(
+            baseline.Population,
+            baseline.ObjectiveBinding,
+            baseline.Evolution,
+            baseline.Selection,
+            baseline.QualityDiversity,
+            baseline.Envelope,
+            baseline.Validity,
+            baseline.CompactResults,
+            baseline.InitialPrograms,
+            wavePolicy: new MathBlockProgramPopulationWavePolicy(2, 2));
+        var worker = new MathBlocksGPUWorker();
+        var baselineCapacity = worker.MeasurePopulationSearchCapacity(
+            baseline,
+            MathBlockProgramPopulationExecutionOptions.SerialResident);
+        var capacity = worker.MeasurePopulationSearchCapacity(
+            definition,
+            MathBlockProgramPopulationExecutionOptions.SerialResident);
+        Assert.Equal(2, capacity.ProposalWaveSlotCount);
+        Assert.Equal(
+            checked(baselineCapacity.ProposalWaveSlotBytes * 2),
+            capacity.ProposalWaveSlotBytes);
+
+        MathBlockProgramPopulationSearchState checkpoint;
+        MathBlockProgramPopulationSearchCycleResult expectedNext;
+        using (var uninterrupted = worker.CompilePopulationSearch(definition))
+        {
+            var first = uninterrupted.ExecuteCycle();
+            Assert.Equal(4, first.Trials.Count);
+            Assert.Equal([0ul, 1ul, 2ul, 3ul],
+                first.Trials.Select(trial => trial.Program.ProposalCursor!.Value));
+            Assert.Equal(4ul, first.AcceptedState.TrialCursor);
+            Assert.Equal(2ul, first.AcceptedState.WaveCursor);
+            Assert.Equal(2, first.Instrumentation.ProposalWaveCount);
+            Assert.Equal(1, first.Instrumentation.ActiveCandidateLaneCount);
+            Assert.All(first.Trials.Where(trial => trial.Objectives.Count != 0), trial =>
+            {
+                Assert.Equal(definition.EvaluateObjectives(trial.Program), trial.Objectives);
+                Assert.Equal(definition.CreateSemanticFingerprint(trial.Program), trial.SemanticFingerprint);
+            });
+            checkpoint = MathBlockProgramPopulationSearchState.Import(first.AcceptedState.Export());
+            expectedNext = uninterrupted.ExecuteCycle();
+        }
+
+        using var resumed = worker.CompilePopulationSearch(definition.WithAcceptedState(checkpoint));
+        var actualNext = resumed.ExecuteCycle();
+        Assert.Equal(expectedNext.AcceptedState.Export(), actualNext.AcceptedState.Export());
+        Assert.Equal(expectedNext.Trials.Select(TrialIdentity), actualNext.Trials.Select(TrialIdentity));
+        Assert.Equal(2ul, actualNext.AcceptedState.WaveCursor);
+        Assert.Equal(1, resumed.GraphInstanceCount);
+        Assert.Equal(1, resumed.ImmutableUploadCount);
+        Assert.Equal(0, resumed.LaterImmutableUploadCount);
+        Assert.Equal(1, resumed.GraphLaunchCount);
+        Assert.Equal(1, resumed.SynchronizationCount);
+        Assert.Equal(1, resumed.DownloadCount);
+        Assert.Equal(0, resumed.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, resumed.FullCandidateOutputBytes);
+        Assert.Equal(0, resumed.CpuNodeDispatchCount);
+        Assert.Equal((long)resumed.CompactDownloadBytesPerCycle, resumed.DownloadedBytes);
     }
 
     [Fact]

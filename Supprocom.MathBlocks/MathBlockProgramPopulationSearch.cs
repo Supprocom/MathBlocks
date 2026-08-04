@@ -901,8 +901,12 @@ public sealed class MathBlockProgramPopulationSearchDefinition
     {
         if (!string.Equals(state.Identity, Identity, StringComparison.Ordinal))
             throw new InvalidOperationException("The accepted search state has an incompatible identity.");
+        var proposalWaveSize = checked((ulong)WavePolicy.ProposalWaveSize);
+        var minimumWaveCursor = state.TrialCursor / proposalWaveSize +
+            (state.TrialCursor % proposalWaveSize == 0 ? 0ul : 1ul);
         if (state.TrialCursor > Evolution.MaximumTrialCount ||
             state.WaveCursor > state.TrialCursor ||
+            state.WaveCursor < minimumWaveCursor ||
             state.EnumerationCursor > Population.TotalProposalCount ||
             state.EnumerationTrialCount > Evolution.EnumerationProposalCount ||
             state.EnumerationTrialCount > state.TrialCursor ||

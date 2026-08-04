@@ -91,10 +91,11 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
                 nameof(executionOptions),
                 "Serial resident execution requires one candidate lane.");
         }
-        if (definition.WavePolicy.ProposalWaveSize != 1)
+        if (executionOptions.Mode == MathBlockProgramPopulationExecutionMode.ParallelResident &&
+            definition.WavePolicy.ProposalWaveSize != 1)
         {
             throw new NotSupportedException(
-                "The current resident kernel supports proposal waves of size one.");
+                "Parallel resident execution currently supports proposal waves of size one.");
         }
         var layout = PopulationSearchLayout.Create(
             definition,
@@ -509,6 +510,8 @@ internal sealed class PopulationSearchLayout
     public int SelectedLookbackOffset { get; private set; }
     public int ProposalWaveSlotOffset { get; private set; }
     public int ProposalWaveSlotBytes { get; private set; }
+    public int ProposalWaveSnapshotParetoOffset { get; private set; }
+    public int ProposalWaveSnapshotQualityOffset { get; private set; }
     public int AcceptedStateOffset { get; private set; }
     public int AcceptedStructuralOffset { get; private set; }
     public int AcceptedSemanticOffset { get; private set; }
@@ -746,12 +749,22 @@ internal sealed class PopulationSearchLayout
         ProposalWaveSlotOffset = AlignLayout(
             checked((long)CandidateSlotOffset + (long)LaneStrideBytes * CandidateLaneCount),
             "candidate lanes");
-        AcceptedStateOffset = AdvanceLayout(
+        ProposalWaveSnapshotParetoOffset = AdvanceLayout(
             ProposalWaveSlotOffset,
             definition.WavePolicy.ProposalWaveSize,
             TrialEntrySize,
             "proposal-wave slots");
-        ProposalWaveSlotBytes = checked(AcceptedStateOffset - ProposalWaveSlotOffset);
+        ProposalWaveSlotBytes = checked(ProposalWaveSnapshotParetoOffset - ProposalWaveSlotOffset);
+        ProposalWaveSnapshotQualityOffset = AdvanceLayout(
+            ProposalWaveSnapshotParetoOffset,
+            definition.Selection.ParetoCapacity,
+            ArchiveEntrySize,
+            "proposal-wave Pareto snapshot");
+        AcceptedStateOffset = AdvanceLayout(
+            ProposalWaveSnapshotQualityOffset,
+            definition.QualityDiversity.CellCount,
+            ArchiveEntrySize,
+            "proposal-wave quality-diversity snapshot");
         AcceptedStructuralOffset = AdvanceLayout(AcceptedStateOffset, 1, StateHeaderSize, "accepted state");
         AcceptedSemanticOffset = AdvanceLayout(
             AcceptedStructuralOffset, population.FingerprintCapacity, 16, "accepted structural fingerprints");
@@ -961,6 +974,12 @@ internal sealed class PopulationSearchLayout
         var refreshCount = ReadInt32(downloaded, 116);
         var enumerationTrialCount = ReadUInt64(downloaded, 120);
         var waveCursor = ReadUInt64(downloaded, 128);
+        var trialDelta = trialCursor >= previous.TrialCursor
+            ? trialCursor - previous.TrialCursor
+            : ulong.MaxValue;
+        var proposalWaveSize = checked((ulong)definition.WavePolicy.ProposalWaveSize);
+        var expectedWaveDelta = trialDelta / proposalWaveSize +
+            (trialDelta % proposalWaveSize == 0 ? 0ul : 1ul);
         if (trialCount < 0 || trialCount > definition.WavePolicy.MaximumTrialResultsPerCycle ||
             newStructuralCount < 0 ||
             newStructuralCount > definition.WavePolicy.MaximumTrialResultsPerCycle ||
@@ -980,7 +999,7 @@ internal sealed class PopulationSearchLayout
             enumerationTrialCount < previous.EnumerationTrialCount ||
             trialCursor < previous.TrialCursor ||
             waveCursor < previous.WaveCursor ||
-            waveCursor - previous.WaveCursor != trialCursor - previous.TrialCursor ||
+            waveCursor - previous.WaveCursor != expectedWaveDelta ||
             waveCursor > trialCursor ||
             enumerationTrialCount - previous.EnumerationTrialCount >
                 trialCursor - previous.TrialCursor ||
@@ -1059,7 +1078,7 @@ internal sealed class PopulationSearchLayout
     private void WriteHeader(Span<byte> bytes, MathBlockProgramPopulationSearchDefinition definition)
     {
         WriteInt32(bytes, 0, unchecked((int)0x4d425334));
-        WriteInt32(bytes, 4, 8);
+        WriteInt32(bytes, 4, 9);
         WriteInt32(bytes, 8, operations.Length);
         WriteInt32(bytes, 12, terminals.Length);
         WriteInt32(bytes, 16, types.Length);
@@ -1114,6 +1133,8 @@ internal sealed class PopulationSearchLayout
         WriteInt32(bytes, 328, definition.WavePolicy.WavesPerCycle);
         WriteInt32(bytes, 332, ProposalWaveSlotOffset);
         WriteInt32(bytes, 336, ProposalWaveSlotBytes);
+        WriteInt32(bytes, 340, ProposalWaveSnapshotParetoOffset);
+        WriteInt32(bytes, 344, ProposalWaveSnapshotQualityOffset);
     }
 
     private void WriteAcceptedState(
