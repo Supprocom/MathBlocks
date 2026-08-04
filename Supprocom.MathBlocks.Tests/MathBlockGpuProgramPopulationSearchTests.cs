@@ -1,10 +1,31 @@
 using Supprocom.MathBlocks.Gpu;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace Supprocom.MathBlocks.Tests;
 
 public sealed class MathBlockGpuProgramPopulationSearchTests
 {
+    [Fact]
+    public void Resident_search_execution_options_require_a_valid_mode_and_lane_count()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => new MathBlockProgramPopulationExecutionOptions(
+                (MathBlockProgramPopulationExecutionMode)int.MaxValue,
+                1));
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => new MathBlockProgramPopulationExecutionOptions(
+                MathBlockProgramPopulationExecutionMode.ParallelResident,
+                0));
+
+        var options = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.ParallelResident,
+            4);
+
+        Assert.Equal(MathBlockProgramPopulationExecutionMode.ParallelResident, options.Mode);
+        Assert.Equal(4, options.CandidateLaneCount);
+    }
+
     [Fact]
     public void Resident_search_enumerates_a_known_grammar_without_output_materialization()
     {
@@ -48,15 +69,31 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     {
         RequireCuda();
         var definition = CreateScalarSearch(proposalsPerCycle: 2);
-        using var uninterrupted = new MathBlocksGPUWorker().CompilePopulationSearch(definition);
+        var parallelOptions = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.ParallelResident,
+            1);
+        var serialOptions = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.SerialResident,
+            1);
+        using var uninterrupted = new MathBlocksGPUWorker().CompilePopulationSearch(
+            definition,
+            parallelOptions);
         var first = uninterrupted.ExecuteCycle();
         var checkpoint = MathBlockProgramPopulationSearchState.Import(first.AcceptedState.Export());
 
         var expected = uninterrupted.ExecuteCycle();
         var resumedDefinition = definition.WithAcceptedState(checkpoint);
-        using var resumed = new MathBlocksGPUWorker().CompilePopulationSearch(resumedDefinition);
+        using var resumed = new MathBlocksGPUWorker().CompilePopulationSearch(
+            resumedDefinition,
+            serialOptions);
         var actual = resumed.ExecuteCycle();
 
+        Assert.Equal(uninterrupted.SearchIdentity, resumed.SearchIdentity);
+        Assert.Equal(MathBlockProgramPopulationExecutionMode.ParallelResident, uninterrupted.ExecutionMode);
+        Assert.Equal(MathBlockProgramPopulationExecutionMode.SerialResident, resumed.ExecutionMode);
+        Assert.Equal(MathBlockProgramPopulationExecutionMode.SerialResident, actual.Instrumentation.ExecutionMode);
+        Assert.Equal(1, actual.Instrumentation.RequestedCandidateLaneCount);
+        Assert.Equal(1, actual.Instrumentation.ActiveCandidateLaneCount);
         Assert.Equal(expected.AcceptedState.Export(), actual.AcceptedState.Export());
         Assert.Equal(
             expected.Trials.Select(TrialIdentity),
@@ -75,7 +112,10 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     {
         RequireCuda();
         var definition = CreateScalarSearch(proposalsPerCycle: 2);
-        using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition);
+        var parallelOptions = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.ParallelResident,
+            1);
+        using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition, parallelOptions);
 
         var results = await Task.WhenAll(
             Task.Run(compiled.ExecuteCycle),
@@ -88,6 +128,7 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         Assert.Equal(1, compiled.ImmutableUploadCount);
         Assert.Equal(0, compiled.LaterImmutableUploadCount);
         Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        Assert.Equal(MathBlockProgramPopulationExecutionMode.ParallelResident, compiled.ExecutionMode);
         Assert.Equal(
             [0ul, 1ul, 2ul, 3ul],
             results.SelectMany(result => result.Trials)
@@ -1712,9 +1753,34 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
                     4)]),
             new MathBlockProgramPopulationSearchEnvelope(512L * 1024 * 1024, 64 * 1024 * 1024),
             new MathBlockProgramPopulationValidityPolicy(Enumerable.Repeat(int.MaxValue, rowCount)));
-        using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition);
-
+        var serialOptions = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.SerialResident,
+            1);
+        var parallelOptions = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.ParallelResident,
+            1);
+        MathBlockProgramPopulationSearchCycleResult serialResult;
+        TimeSpan serialElapsed;
+        using (var serial = new MathBlocksGPUWorker().CompilePopulationSearch(definition, serialOptions))
+        {
+            var serialTimer = Stopwatch.StartNew();
+            serialResult = serial.ExecuteCycle();
+            serialTimer.Stop();
+            serialElapsed = serialTimer.Elapsed;
+        }
+        using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition, parallelOptions);
+        var parallelTimer = Stopwatch.StartNew();
         var result = compiled.ExecuteCycle();
+        parallelTimer.Stop();
+
+        Console.WriteLine($"The serial pointwise cycle took {serialElapsed.TotalSeconds:R} seconds.");
+        Console.WriteLine($"The parallel pointwise cycle took {parallelTimer.Elapsed.TotalSeconds:R} seconds.");
+        Assert.Equal(serialResult.AcceptedState.Export(), result.AcceptedState.Export());
+        Assert.Equal(serialResult.Trials.Select(TrialIdentity), result.Trials.Select(TrialIdentity));
+        Assert.True(
+            parallelTimer.Elapsed.TotalSeconds < serialElapsed.TotalSeconds * 0.8d,
+            $"The parallel cycle took {parallelTimer.Elapsed.TotalSeconds:R} seconds. " +
+            $"The serial cycle took {serialElapsed.TotalSeconds:R} seconds.");
 
         Assert.Equal(checked(rowCount * sizeof(double)), ReadScratchBytesPerNode(compiled));
         Assert.Contains(result.Trials, trial => trial.Objectives.Count != 0);
@@ -1734,6 +1800,22 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
         Assert.Equal(0, compiled.FullCandidateOutputBytes);
         Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        Assert.Equal(MathBlockProgramPopulationExecutionMode.ParallelResident, compiled.ExecutionMode);
+        Assert.Equal(1, compiled.RequestedCandidateLaneCount);
+        Assert.Equal(1, compiled.ActiveCandidateLaneCount);
+        Assert.Equal(
+            checked((long)result.AcceptedState.TrialCursor),
+            result.Instrumentation.ProposalWaveCount);
+        Assert.Equal(
+            checked((long)result.AcceptedState.EvaluatedProgramCount),
+            result.Instrumentation.CandidateChunkCount);
+        Assert.Equal(1, result.Instrumentation.MaximumConcurrentCandidates);
+        Assert.Equal(0, result.Instrumentation.SerialCandidateExecutionCount);
+        Assert.Equal(
+            checked((long)result.AcceptedState.EvaluatedProgramCount),
+            result.Instrumentation.ParallelCandidateExecutionCount);
+        Assert.True(serialResult.Instrumentation.SerialCandidateExecutionCount > 0);
+        Assert.Equal(0, serialResult.Instrumentation.ParallelCandidateExecutionCount);
     }
 
     [Fact]
@@ -1741,10 +1823,13 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     {
         RequireCuda();
         var definition = CreateProductionScaleBinaryEventSearch();
+        var parallelOptions = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.ParallelResident,
+            1);
         MathBlockProgramPopulationSearchState checkpoint;
         MathBlockProgramPopulationSearchCycleResult expectedNext;
         long residentBytes;
-        using (var uninterrupted = new MathBlocksGPUWorker().CompilePopulationSearch(definition))
+        using (var uninterrupted = new MathBlocksGPUWorker().CompilePopulationSearch(definition, parallelOptions))
         {
             Assert.Equal(23, definition.Population.Terminals.Count);
             Assert.Empty(definition.Population.ScalarConstants);
@@ -1780,9 +1865,13 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
                 $"The measured resident size is {residentBytes} bytes. " +
                 $"The objective payload pool is {pooledPayloadBytes} bytes. " +
                 $"The unpooled objective payload is {unpooledPayloadBytes} bytes.");
+            var firstTimer = Stopwatch.StartNew();
             var first = uninterrupted.ExecuteCycle();
+            firstTimer.Stop();
+            Console.WriteLine($"The first production-scale cycle took {firstTimer.Elapsed.TotalSeconds:R} seconds.");
             checkpoint = MathBlockProgramPopulationSearchState.Import(first.AcceptedState.Export());
             var evaluatedTrials = first.Trials.Where(trial => trial.Objectives.Count != 0).ToArray();
+            Console.WriteLine($"The first production-scale cycle evaluated {evaluatedTrials.Length} programs.");
             Assert.NotEmpty(evaluatedTrials);
             var evaluated = evaluatedTrials[0];
 
@@ -1800,6 +1889,12 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
             Assert.Equal(0, uninterrupted.FullCandidateOutputBytes);
             Assert.Equal(0, uninterrupted.CpuNodeDispatchCount);
             Assert.Equal((long)uninterrupted.CompactDownloadBytesPerCycle, uninterrupted.DownloadedBytes);
+            Assert.Equal(MathBlockProgramPopulationExecutionMode.ParallelResident, uninterrupted.ExecutionMode);
+            Assert.Equal(1, uninterrupted.RequestedCandidateLaneCount);
+            Assert.Equal(1, uninterrupted.ActiveCandidateLaneCount);
+            Assert.Equal(1, first.Instrumentation.MaximumConcurrentCandidates);
+            Assert.True(first.Instrumentation.ParallelCandidateExecutionCount > 0);
+            Assert.Equal(0, first.Instrumentation.SerialCandidateExecutionCount);
 
             var constrained = new MathBlockProgramPopulationSearchDefinition(
                 definition.Population,
@@ -1820,7 +1915,9 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
             expectedNext = uninterrupted.ExecuteCycle();
         }
 
-        using var resumed = new MathBlocksGPUWorker().CompilePopulationSearch(definition.WithAcceptedState(checkpoint));
+        using var resumed = new MathBlocksGPUWorker().CompilePopulationSearch(
+            definition.WithAcceptedState(checkpoint),
+            parallelOptions);
         var actualNext = resumed.ExecuteCycle();
 
         Assert.Equal(expectedNext.AcceptedState.Export(), actualNext.AcceptedState.Export());
@@ -1909,6 +2006,12 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         Assert.Equal(
             MathBlocksGPUWorker.SupportedBlockIdentities.OrderBy(identity => identity),
             MathBlocksGPUWorker.SupportedPopulationSearchOperationIdentities.OrderBy(identity => identity));
+        var serialOptions = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.SerialResident,
+            1);
+        var parallelOptions = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.ParallelResident,
+            1);
 
         foreach (var identity in MathBlocksGPUWorker.SupportedPopulationSearchOperationIdentities)
         {
@@ -1980,9 +2083,13 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
                 new MathBlockProgramPopulationValidityPolicy(Enumerable.Repeat(int.MaxValue, validityRows)),
                 initialPrograms: [program]);
 
-            using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition);
+            using var serial = new MathBlocksGPUWorker().CompilePopulationSearch(definition, serialOptions);
+            var serialResult = serial.ExecuteCycle();
+            using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition, parallelOptions);
             Assert.InRange(ReadScratchBytesPerNode(compiled), 0, int.MaxValue);
             var result = compiled.ExecuteCycle();
+            Assert.Equal(serialResult.AcceptedState.Export(), result.AcceptedState.Export());
+            Assert.Equal(serialResult.Trials.Select(TrialIdentity), result.Trials.Select(TrialIdentity));
             var archived = result.AcceptedState.SelectionEntries
                 .Concat(result.AcceptedState.QualityDiversityEntries)
                 .FirstOrDefault(entry => entry.StructuralFingerprint == program.StructuralFingerprint);
@@ -2152,10 +2259,6 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         var eraInputs = Enumerable.Range(0, eraCount)
             .Select(era => Input($"era-{era:D3}", candidateType))
             .ToArray();
-        var eraScoreInputs = Enumerable.Range(0, eraCount)
-            .Select(era => Input($"era-score-{era:D3}", MathBlockType.Scalar()))
-            .ToArray();
-
         int And(int left, int right) => Apply("boolean-vector.and", left, right);
         int Not(int value) => Apply("boolean-vector.not", value);
         int Count(int value) => Apply("boolean-vector.true-count", value);
@@ -2193,6 +2296,9 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
             var inactivePositiveMask = And(inactiveMask, positive);
             var active = Count(activeMask);
             var inactive = Count(inactiveMask);
+            _ = Count(mask);
+            for (var evidence = 0; evidence < 7; evidence++)
+                _ = Count(And(mask, positive));
             return (
                 Add(active, inactive),
                 active,
@@ -2233,9 +2339,10 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         }
 
         var aggregateScore = BrierScore(aggregateCounts);
-        for (var era = 0; era < eraInputs.Length; era++)
-            builder.Output($"era-mask-{era:D3}", eraInputs[era]);
-        var eraVector = VectorFromScalars(eraScoreInputs);
+        var eraScores = eraInputs
+            .Select(era => BrierScore(Counts(And(And(era, eligibility), candidateValidity))))
+            .ToArray();
+        var eraVector = VectorFromScalars(eraScores);
         var sampleMedians = new int[bootstrapSamples];
         for (var sample = 0; sample < sampleMedians.Length; sample++)
         {
@@ -2261,7 +2368,7 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
 
         var payloadProbe = Input("payload-probe", vectorTypes[0]);
         var compactPayloadProbe = Apply("vector.unique", payloadProbe);
-        for (var probe = 0; probe < 878; probe++)
+        for (var probe = 0; probe < 359; probe++)
             Apply("vector.absolute", compactPayloadProbe);
         var filler = Scalar(-1d);
         while (nodeCount < 8_070)
@@ -2293,7 +2400,6 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
                 $"era-{era:D3}",
                 MathBlockValue.BooleanVector(
                     Enumerable.Range(0, rowCount).Select(row => row >= start && row < end)));
-            residentInputs.Add($"era-score-{era:D3}", MathBlockValue.Scalar(0d));
         }
         var binding = new MathBlockProgramPopulationObjectiveBinding(
             objectiveProgram,

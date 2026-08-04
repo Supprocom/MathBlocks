@@ -37,8 +37,18 @@ public sealed class MathBlocksGPUWorker
     public MathBlocksGPUProgramPopulationSearch CompilePopulationSearch(
         MathBlockProgramPopulationSearchDefinition definition)
     {
+        return CompilePopulationSearch(
+            definition,
+            MathBlockProgramPopulationExecutionOptions.SerialResident);
+    }
+
+    public MathBlocksGPUProgramPopulationSearch CompilePopulationSearch(
+        MathBlockProgramPopulationSearchDefinition definition,
+        MathBlockProgramPopulationExecutionOptions executionOptions)
+    {
         ArgumentNullException.ThrowIfNull(definition);
-        return MathBlocksGPUProgramPopulationSearch.Create(definition);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        return MathBlocksGPUProgramPopulationSearch.Create(definition, executionOptions);
     }
 }
 

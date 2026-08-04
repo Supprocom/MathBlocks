@@ -617,21 +617,37 @@ internal static class VectorGpuBlockCatalog
                 case 50:
                 case 52:
                 case 55:
+                {
                     if (thread == 0)
                     {
-                        int count = 0;
-                        bool aggregate = opcode == 50;
-                        for (int index = 0; index < first->count; index++)
-                        {
-                            bool value = boolean_a[index] != 0;
-                            if (value) count++;
-                            if (opcode == 50) aggregate = aggregate && value;
-                            if (opcode == 52) aggregate = aggregate || value;
-                        }
-                        if (opcode == 55) output->scalar_value = (double)count;
-                        else output->boolean_value = aggregate;
+                        output->boolean_value = opcode == 50 ? 1 : 0;
+                        output->scalar_value = 0.0;
+                    }
+                    __syncthreads();
+                    int local_count = 0;
+                    bool local_all = true;
+                    bool local_any = false;
+                    for (int index = thread; index < first->count; index += blockDim.x)
+                    {
+                        bool value = boolean_a[index] != 0;
+                        if (value) local_count++;
+                        local_all = local_all && value;
+                        local_any = local_any || value;
+                    }
+                    if (opcode == 55 && local_count != 0)
+                        atomicAdd(&output->boolean_value, local_count);
+                    else if (opcode == 50 && !local_all)
+                        atomicExch(&output->boolean_value, 0);
+                    else if (opcode == 52 && local_any)
+                        atomicExch(&output->boolean_value, 1);
+                    __syncthreads();
+                    if (thread == 0 && opcode == 55)
+                    {
+                        output->scalar_value = (double)output->boolean_value;
+                        output->boolean_value = 0;
                     }
                     break;
+                }
                 case 51:
                 case 54:
                 case 57:

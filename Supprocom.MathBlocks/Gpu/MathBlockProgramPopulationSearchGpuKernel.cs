@@ -77,7 +77,10 @@ internal static class MathBlockProgramPopulationSearchGpuKernel
                 case 8: mathblocks_statistics_resident(opcode, inputs, input_count, output); break;
                 case 9: mathblocks_transport_resident(opcode, inputs, input_count, output); break;
                 case 10: mathblocks_vector_resident(opcode, inputs, input_count, output); break;
-                default: output->valid = 0; break;
+                default:
+                    if (threadIdx.x == 0) output->valid = 0;
+                    __syncthreads();
+                    break;
             }
         }
         """;
@@ -106,12 +109,12 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
 
         __device__ void mbp_write_int(unsigned char* arena, int offset, int value)
         {
-            *((int*)(arena + offset)) = value;
+            atomicExch((int*)(arena + offset), value);
         }
 
         __device__ void mbp_write_ull(unsigned char* arena, int offset, mbp_ull value)
         {
-            *((mbp_ull*)(arena + offset)) = value;
+            atomicExch((unsigned long long*)(arena + offset), value);
         }
 
         __device__ int mbp_align(int value)
@@ -126,14 +129,16 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
 
         __device__ void mbp_copy(unsigned char* destination, const unsigned char* source, int count)
         {
-            for (int index = 0; index < count; index++)
+            for (int index = (int)threadIdx.x; index < count; index += (int)blockDim.x)
                 destination[index] = source[index];
+            __syncthreads();
         }
 
         __device__ void mbp_clear(unsigned char* destination, int count)
         {
-            for (int index = 0; index < count; index++)
+            for (int index = (int)threadIdx.x; index < count; index += (int)blockDim.x)
                 destination[index] = 0;
+            __syncthreads();
         }
 
         __device__ mbp_ull mbp_power(mbp_ull value, int exponent)
@@ -525,12 +530,14 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                     if (choice < span)
                     {
                         selected = operation_index;
-                        selected_operations[node] = operation_index;
+                        atomicExch(&selected_operations[node], operation_index);
                         for (int input = 0; input < maximum_arity; input++)
-                            selected_operands[node * maximum_arity + input] = -1;
+                            atomicExch(&selected_operands[node * maximum_arity + input], -1);
                         for (int input = 0; input < arity; input++)
                         {
-                            selected_operands[node * maximum_arity + input] = (int)(choice % available);
+                            atomicExch(
+                                &selected_operands[node * maximum_arity + input],
+                                (int)(choice % available));
                             choice /= available;
                         }
                         break;
@@ -563,11 +570,12 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             for (int node = 0; node < *operation_count; node++)
             {
                 int source = program + node * program_operation_size;
-                selected_operations[node] = mbp_read_int(arena, source);
+                atomicExch(&selected_operations[node], mbp_read_int(arena, source));
                 int arity = mbp_read_int(arena, source + 4);
                 for (int input = 0; input < maximum_arity; input++)
-                    selected_operands[node * maximum_arity + input] =
-                        input < arity ? mbp_read_int(arena, source + 8 + input * 4) : -1;
+                    atomicExch(
+                        &selected_operands[node * maximum_arity + input],
+                        input < arity ? mbp_read_int(arena, source + 8 + input * 4) : -1);
             }
         }
 
@@ -670,12 +678,14 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             if ((mbp_random_next(random_first, random_second) & 1ull) == 0ull)
             {
                 int selected = (int)(mbp_random_next(random_first, random_second) % (mbp_ull)operation_count);
-                selected_operations[node] = selected;
+                atomicExch(&selected_operations[node], selected);
                 int arity = mbp_read_int(arena, operation_offset + selected * 48 + 8);
                 for (int input = 0; input < maximum_arity; input++)
-                    selected_operands[node * maximum_arity + input] = input < arity
-                        ? (int)(mbp_random_next(random_first, random_second) % (mbp_ull)available)
-                        : -1;
+                    atomicExch(
+                        &selected_operands[node * maximum_arity + input],
+                        input < arity
+                            ? (int)(mbp_random_next(random_first, random_second) % (mbp_ull)available)
+                            : -1);
             }
             else
             {
@@ -684,8 +694,9 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 if (arity == 0)
                     return true;
                 int input = (int)(mbp_random_next(random_first, random_second) % (mbp_ull)arity);
-                selected_operands[node * maximum_arity + input] =
-                    (int)(mbp_random_next(random_first, random_second) % (mbp_ull)available);
+                atomicExch(
+                    &selected_operands[node * maximum_arity + input],
+                    (int)(mbp_random_next(random_first, random_second) % (mbp_ull)available));
             }
             return true;
         }
@@ -748,7 +759,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                         : second_program;
                 int source = selected_parent + node * program_operation_size;
                 int selected = mbp_read_int(arena, source);
-                selected_operations[node] = selected;
+                atomicExch(&selected_operations[node], selected);
                 int arity = mbp_read_int(arena, operation_offset + selected * 48 + 8);
                 int stored_arity = mbp_read_int(arena, source + 4);
                 int available = terminal_count + node;
@@ -756,13 +767,13 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 {
                     if (input >= arity)
                     {
-                        selected_operands[node * maximum_arity + input] = -1;
+                        atomicExch(&selected_operands[node * maximum_arity + input], -1);
                         continue;
                     }
                     int operand = input < stored_arity ? mbp_read_int(arena, source + 8 + input * 4) : -1;
                     if (operand < 0 || operand >= available)
                         operand = (int)(mbp_random_next(random_first, random_second) % (mbp_ull)available);
-                    selected_operands[node * maximum_arity + input] = operand;
+                    atomicExch(&selected_operands[node * maximum_arity + input], operand);
                 }
             }
             *candidate_operation_count = count;
@@ -793,13 +804,15 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             for (int node = 0; node < *candidate_operation_count; node++)
             {
                 int selected = (int)(mbp_random_next(random_first, random_second) % (mbp_ull)operation_count);
-                selected_operations[node] = selected;
+                atomicExch(&selected_operations[node], selected);
                 int arity = mbp_read_int(arena, operation_offset + selected * 48 + 8);
                 int available = terminal_count + node;
                 for (int input = 0; input < maximum_arity; input++)
-                    selected_operands[node * maximum_arity + input] = input < arity
-                        ? (int)(mbp_random_next(random_first, random_second) % (mbp_ull)available)
-                        : -1;
+                    atomicExch(
+                        &selected_operands[node * maximum_arity + input],
+                        input < arity
+                            ? (int)(mbp_random_next(random_first, random_second) % (mbp_ull)available)
+                            : -1);
             }
             return true;
         }
@@ -824,8 +837,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             for (int terminal = 0; terminal < terminal_count; terminal++)
             {
                 int descriptor = terminal_offset + terminal * 32;
-                selected_types[terminal] = mbp_read_int(arena, descriptor);
-                selected_lookbacks[terminal] = mbp_read_int(arena, descriptor + 8);
+                atomicExch(&selected_types[terminal], mbp_read_int(arena, descriptor));
+                atomicExch(&selected_lookbacks[terminal], mbp_read_int(arena, descriptor + 8));
             }
             *maximum_lookback = 0;
             *deterministic_cost = 0ull;
@@ -848,8 +861,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                         lookback = selected_lookbacks[operand];
                 }
                 int output_node = terminal_count + node;
-                selected_types[output_node] = mbp_read_int(arena, operation + 12);
-                selected_lookbacks[output_node] = lookback;
+                atomicExch(&selected_types[output_node], mbp_read_int(arena, operation + 12));
+                atomicExch(&selected_lookbacks[output_node], lookback);
                 *deterministic_cost += mbp_read_ull(arena, operation + 24);
             }
             int final_node = terminal_count + operation_count - 1;
@@ -880,56 +893,81 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int band_maximum,
             const int* selected_operations,
             const int* selected_operands,
-            const int* selected_types)
+            const int* selected_types,
+            int* cooperative_status)
         {
             MathBlockSlot* slots = (MathBlockSlot*)(arena + candidate_slot_offset);
             const MathBlockSlot** input_pointers = (const MathBlockSlot**)(arena + input_pointer_offset);
-            for (int terminal = 0; terminal < terminal_count; terminal++)
+            if (threadIdx.x == 0)
             {
-                int immutable_index = mbp_read_int(arena, terminal_offset + terminal * 32 + 4);
-                slots[terminal] = *((const MathBlockSlot*)(arena + immutable_slot_offset + immutable_index * 48));
+                *cooperative_status = 1;
+                for (int terminal = 0; terminal < terminal_count; terminal++)
+                {
+                    int immutable_index = mbp_read_int(arena, terminal_offset + terminal * 32 + 4);
+                    slots[terminal] = *((const MathBlockSlot*)(arena + immutable_slot_offset + immutable_index * 48));
+                }
             }
+            __syncthreads();
             for (int node = 0; node < operation_count; node++)
             {
                 int selected = selected_operations[node];
                 int operation = operation_offset + selected * 48;
                 int arity = mbp_read_int(arena, operation + 8);
-                for (int input = 0; input < arity; input++)
-                    input_pointers[input] = &slots[selected_operands[node * maximum_arity + input]];
                 int output_index = terminal_count + node;
                 MathBlockSlot* output = &slots[output_index];
-                mbp_initialize_slot(
-                    arena,
-                    type_offset,
-                    selected_types[output_index],
-                    output,
-                    (mbp_ull)(arena + candidate_payload_offset + node * payload_stride),
-                    (mbp_ull)(arena + scratch_offset),
-                    band_maximum);
+                if (threadIdx.x == 0)
+                {
+                    for (int input = 0; input < arity; input++)
+                        input_pointers[input] = &slots[selected_operands[node * maximum_arity + input]];
+                    mbp_initialize_slot(
+                        arena,
+                        type_offset,
+                        selected_types[output_index],
+                        output,
+                        (mbp_ull)(arena + candidate_payload_offset + node * payload_stride),
+                        (mbp_ull)(arena + scratch_offset),
+                        band_maximum);
+                }
+                __syncthreads();
                 mb_population_dispatch(
                     mbp_read_int(arena, operation),
                     mbp_read_int(arena, operation + 4),
                     input_pointers,
                     arity,
                     output);
-                if (output->count > band_maximum || output->count > output->capacity)
-                    return -1;
-                if (!output->valid)
+                __syncthreads();
+                if (threadIdx.x == 0)
                 {
-                    int output_type = type_offset + selected_types[output_index] * 48;
-                    int output_kind = mbp_read_int(arena, output_type);
-                    int output_rows = mbp_read_int(arena, output_type + 4);
-                    if (output_rows == 0 && output_kind >= 4)
-                        return -1;
-                    return 0;
+                    if (output->count > band_maximum || output->count > output->capacity)
+                    {
+                        *cooperative_status = -1;
+                    }
+                    else if (!output->valid)
+                    {
+                        int output_type = type_offset + selected_types[output_index] * 48;
+                        int output_kind = mbp_read_int(arena, output_type);
+                        int output_rows = mbp_read_int(arena, output_type + 4);
+                        *cooperative_status = output_rows == 0 && output_kind >= 4 ? -1 : 0;
+                    }
+                    else if (!mbp_slot_matches_type(
+                            arena,
+                            type_offset,
+                            selected_types[output_index],
+                            output) ||
+                        !mbp_slot_is_finite(
+                            arena,
+                            type_offset,
+                            selected_types[output_index],
+                            output))
+                    {
+                        *cooperative_status = 0;
+                    }
                 }
-                if (!mbp_slot_matches_type(arena, type_offset, selected_types[output_index], output) ||
-                    !mbp_slot_is_finite(arena, type_offset, selected_types[output_index], output))
-                {
-                    return 0;
-                }
+                __syncthreads();
+                if (*cooperative_status != 1)
+                    return *cooperative_status;
             }
-            return 1;
+            return *cooperative_status;
         }
 
         __device__ bool mbp_create_mask(
@@ -941,23 +979,33 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int history_count,
             int maximum_lookback,
             MathBlockSlot* mask_slot,
-            int* mask_values)
+            int* mask_values,
+            int* cooperative_status)
         {
-            int kind = mbp_read_int(arena, type_offset + output_type * 48);
-            int row_count = mbp_validity_rows(kind, output);
-            if (row_count < 0 || row_count > history_count)
+            if (threadIdx.x == 0)
+            {
+                int kind = mbp_read_int(arena, type_offset + output_type * 48);
+                int row_count = mbp_validity_rows(kind, output);
+                *cooperative_status = row_count >= 0 && row_count <= history_count ? 1 : 0;
+                if (*cooperative_status != 0)
+                {
+                    mask_slot->scalar_value = 0.0;
+                    mask_slot->data_pointer = (mbp_ull)mask_values;
+                    mask_slot->scratch_pointer = 0ull;
+                    mask_slot->boolean_value = 0;
+                    mask_slot->valid = 1;
+                    mask_slot->rows = row_count;
+                    mask_slot->columns = 0;
+                    mask_slot->count = row_count;
+                    mask_slot->capacity = history_count;
+                }
+            }
+            __syncthreads();
+            if (*cooperative_status == 0)
                 return false;
-            mask_slot->scalar_value = 0.0;
-            mask_slot->data_pointer = (mbp_ull)mask_values;
-            mask_slot->scratch_pointer = 0ull;
-            mask_slot->boolean_value = 0;
-            mask_slot->valid = 1;
-            mask_slot->rows = row_count;
-            mask_slot->columns = 0;
-            mask_slot->count = row_count;
-            mask_slot->capacity = history_count;
-            for (int row = 0; row < row_count; row++)
+            for (int row = (int)threadIdx.x; row < mask_slot->count; row += (int)blockDim.x)
                 mask_values[row] = mbp_read_int(arena, history_offset + row * 4) >= maximum_lookback ? 1 : 0;
+            __syncthreads();
             return true;
         }
 
@@ -981,102 +1029,137 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int maximum_lookback,
             mbp_ull deterministic_cost,
             int age,
-            unsigned char* objective_destination)
+            unsigned char* objective_destination,
+            int* cooperative_status)
         {
             MathBlockSlot* slots = (MathBlockSlot*)(arena + objective_slot_offset);
             const MathBlockSlot** input_pointers = (const MathBlockSlot**)(arena + input_pointer_offset);
+            if (threadIdx.x == 0)
+                *cooperative_status = 1;
+            __syncthreads();
             for (int node = 0; node < objective_node_count; node++)
             {
                 int descriptor = objective_node_offset + node * 40;
                 int kind = mbp_read_int(arena, descriptor);
-                if (kind == 0)
-                {
-                    slots[node] = *candidate_output;
-                }
-                else if (kind == 1)
-                {
-                    slots[node] = *validity_mask;
-                }
-                else if (kind == 2)
-                {
-                    int immutable_index = mbp_read_int(arena, descriptor + 24);
-                    slots[node] = *((const MathBlockSlot*)(arena + immutable_slot_offset + immutable_index * 48));
-                }
                 if (kind >= 0 && kind <= 2)
                 {
-                    int type_id = mbp_read_int(arena, descriptor + 4);
-                    if (!mbp_slot_matches_type(arena, type_offset, type_id, &slots[node]) ||
-                        !mbp_slot_is_finite(arena, type_offset, type_id, &slots[node]))
+                    if (threadIdx.x == 0)
                     {
-                        return false;
+                        if (kind == 0)
+                            slots[node] = *candidate_output;
+                        else if (kind == 1)
+                            slots[node] = *validity_mask;
+                        else
+                        {
+                            int immutable_index = mbp_read_int(arena, descriptor + 24);
+                            slots[node] = *((const MathBlockSlot*)(
+                                arena + immutable_slot_offset + immutable_index * 48));
+                        }
+                        int type_id = mbp_read_int(arena, descriptor + 4);
+                        *cooperative_status = mbp_slot_matches_type(
+                                arena,
+                                type_offset,
+                                type_id,
+                                &slots[node]) &&
+                            mbp_slot_is_finite(arena, type_offset, type_id, &slots[node]);
                     }
+                    __syncthreads();
+                    if (*cooperative_status == 0)
+                        return false;
                     continue;
                 }
-                if (kind != 3)
-                    return false;
                 int required_scratch_bytes = mbp_read_int(arena, descriptor + 36);
-                if (required_scratch_bytes < 0 || required_scratch_bytes > scratch_bytes)
-                    return false;
                 int arity = mbp_read_int(arena, descriptor + 16);
                 int input_base = mbp_read_int(arena, descriptor + 20);
-                for (int input = 0; input < arity; input++)
+                if (threadIdx.x == 0)
                 {
-                    int source = mbp_read_int(arena, objective_input_offset + (input_base + input) * 4);
-                    if (source < 0 || source >= node)
-                        return false;
-                    input_pointers[input] = &slots[source];
+                    *cooperative_status = kind == 3 && required_scratch_bytes >= 0 &&
+                        required_scratch_bytes <= scratch_bytes;
+                    for (int input = 0; *cooperative_status != 0 && input < arity; input++)
+                    {
+                        int source = mbp_read_int(arena, objective_input_offset + (input_base + input) * 4);
+                        if (source < 0 || source >= node)
+                            *cooperative_status = 0;
+                        else
+                            input_pointers[input] = &slots[source];
+                    }
+                    if (*cooperative_status != 0)
+                    {
+                        mbp_initialize_slot(
+                            arena,
+                            type_offset,
+                            mbp_read_int(arena, descriptor + 4),
+                            &slots[node],
+                            (mbp_ull)(arena + objective_payload_offset + mbp_read_int(arena, descriptor + 32)),
+                            (mbp_ull)(arena + scratch_offset),
+                            mbp_read_int(arena, descriptor + 28));
+                    }
                 }
-                mbp_initialize_slot(
-                    arena,
-                    type_offset,
-                    mbp_read_int(arena, descriptor + 4),
-                    &slots[node],
-                    (mbp_ull)(arena + objective_payload_offset + mbp_read_int(arena, descriptor + 32)),
-                    (mbp_ull)(arena + scratch_offset),
-                    mbp_read_int(arena, descriptor + 28));
+                __syncthreads();
+                if (*cooperative_status == 0)
+                    return false;
                 mb_population_dispatch(
                     mbp_read_int(arena, descriptor + 8),
                     mbp_read_int(arena, descriptor + 12),
                     input_pointers,
                     arity,
                     &slots[node]);
-                int type_id = mbp_read_int(arena, descriptor + 4);
-                if (!mbp_slot_matches_type(arena, type_offset, type_id, &slots[node]) ||
-                    !mbp_slot_is_finite(arena, type_offset, type_id, &slots[node]))
+                __syncthreads();
+                if (threadIdx.x == 0)
                 {
-                    return false;
+                    int type_id = mbp_read_int(arena, descriptor + 4);
+                    *cooperative_status = mbp_slot_matches_type(
+                            arena,
+                            type_offset,
+                            type_id,
+                            &slots[node]) &&
+                        mbp_slot_is_finite(arena, type_offset, type_id, &slots[node]);
                 }
+                __syncthreads();
+                if (*cooperative_status == 0)
+                    return false;
             }
-            for (int objective = 0; objective < objective_count; objective++)
+            if (threadIdx.x == 0)
             {
-                int descriptor = objective_source_offset + objective * 16;
-                int source_kind = mbp_read_int(arena, descriptor);
-                double value;
-                if (source_kind == 0)
+                for (int objective = 0; objective < objective_count; objective++)
                 {
-                    int source_node = mbp_read_int(arena, descriptor + 4);
-                    if (source_node < 0 || source_node >= objective_node_count ||
-                        !slots[source_node].valid)
+                    int descriptor = objective_source_offset + objective * 16;
+                    int source_kind = mbp_read_int(arena, descriptor);
+                    double value = 0.0;
+                    if (source_kind == 0)
                     {
-                        return false;
+                        int source_node = mbp_read_int(arena, descriptor + 4);
+                        if (source_node < 0 || source_node >= objective_node_count ||
+                            !slots[source_node].valid)
+                        {
+                            *cooperative_status = 0;
+                            break;
+                        }
+                        value = slots[source_node].scalar_value;
                     }
-                    value = slots[source_node].scalar_value;
+                    else if (source_kind == 1)
+                        value = (double)operation_count;
+                    else if (source_kind == 2)
+                        value = (double)maximum_lookback;
+                    else if (source_kind == 3)
+                        value = (double)deterministic_cost;
+                    else if (source_kind == 4)
+                        value = (double)age;
+                    else
+                    {
+                        *cooperative_status = 0;
+                        break;
+                    }
+                    if (!isfinite(value))
+                    {
+                        *cooperative_status = 0;
+                        break;
+                    }
+                    *((double*)(objective_destination + objective * 8)) = value;
                 }
-                else if (source_kind == 1)
-                    value = (double)operation_count;
-                else if (source_kind == 2)
-                    value = (double)maximum_lookback;
-                else if (source_kind == 3)
-                    value = (double)deterministic_cost;
-                else if (source_kind == 4)
-                    value = (double)age;
-                else
-                    return false;
-                if (!isfinite(value))
-                    return false;
-                *((double*)(objective_destination + objective * 8)) = value;
             }
-            return true;
+            __syncthreads();
+            return *cooperative_status != 0;
         }
 
         __device__ int mbp_quality_cell(
@@ -1349,24 +1432,28 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int objective_count,
             int maximum_age)
         {
-            for (int index = 0; index < archive_capacity; index++)
+            if (threadIdx.x == 0)
             {
-                int entry = archive_offset + index * entry_size;
-                if (mbp_read_int(arena, entry) != 1)
-                    continue;
-                int age = mbp_read_int(arena, entry + 8) + 1;
-                if (age > maximum_age)
+                for (int index = 0; index < archive_capacity; index++)
                 {
-                    mbp_write_int(arena, entry, 0);
-                    continue;
-                }
-                mbp_write_int(arena, entry + 8, age);
-                for (int objective = 0; objective < objective_count; objective++)
-                {
-                    if (mbp_read_int(arena, objective_source_offset + objective * 16) == 4)
-                        *((double*)(arena + entry + 80 + objective * 8)) = (double)age;
+                    int entry = archive_offset + index * entry_size;
+                    if (mbp_read_int(arena, entry) != 1)
+                        continue;
+                    int age = mbp_read_int(arena, entry + 8) + 1;
+                    if (age > maximum_age)
+                    {
+                        mbp_write_int(arena, entry, 0);
+                        continue;
+                    }
+                    mbp_write_int(arena, entry + 8, age);
+                    for (int objective = 0; objective < objective_count; objective++)
+                    {
+                        if (mbp_read_int(arena, objective_source_offset + objective * 16) == 4)
+                            *((double*)(arena + entry + 80 + objective * 8)) = (double)age;
+                    }
                 }
             }
+            __syncthreads();
         }
 
         __device__ void mbp_write_program(
@@ -1441,8 +1528,9 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
 
         extern "C" __global__ void mathblocks_program_population_search(unsigned char* arena)
         {
-            if (blockIdx.x != 0 || threadIdx.x != 0)
+            if (blockIdx.x != 0)
                 return;
+            __shared__ int cooperative_status;
             if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 6)
                 return;
 
@@ -1680,7 +1768,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                     band_maximum,
                     selected_operations,
                     selected_operands,
-                    selected_types);
+                    selected_types,
+                    &cooperative_status);
                 if (outcome != 1)
                 {
                     mbp_fail(arena, compact_offset, outcome < 0 ? 3 : 4);
@@ -1696,7 +1785,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                         history_count,
                         maximum_lookback,
                         mask_slot,
-                        mask_values))
+                        mask_values,
+                        &cooperative_status))
                 {
                     mbp_fail(arena, compact_offset, 3);
                     return;
@@ -1798,7 +1888,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                         maximum_lookback,
                         deterministic_cost,
                         0,
-                        arena + candidate_entry + 80))
+                        arena + candidate_entry + 80,
+                        &cooperative_status))
                 {
                     mbp_fail(arena, compact_offset, 4);
                     return;
@@ -2066,7 +2157,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                         band_maximum,
                         selected_operations,
                         selected_operands,
-                        selected_types);
+                        selected_types,
+                        &cooperative_status);
                     if (outcome < 0)
                     {
                         mbp_fail(arena, compact_offset, 3);
@@ -2088,7 +2180,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                                 history_count,
                                 maximum_lookback,
                                 mask_slot,
-                                mask_values))
+                                mask_values,
+                                &cooperative_status))
                         {
                             mbp_fail(arena, compact_offset, 3);
                             return;
@@ -2146,7 +2239,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                                     maximum_lookback,
                                     deterministic_cost,
                                     0,
-                                    arena + candidate_entry + 80))
+                                    arena + candidate_entry + 80,
+                                    &cooperative_status))
                             {
                                 status = 5;
                             }

@@ -7,6 +7,7 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
 {
     private readonly object stateLock = new();
     private readonly MathBlockProgramPopulationSearchDefinition definition;
+    private readonly MathBlockProgramPopulationExecutionOptions executionOptions;
     private readonly PopulationSearchLayout layout;
     private readonly SearchKernelArguments kernelArguments;
     private ulong deviceArena;
@@ -15,10 +16,16 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
     private IntPtr graph;
     private IntPtr executable;
     private MathBlockProgramPopulationSearchState acceptedState;
+    private long proposalWaveCount;
+    private long candidateChunkCount;
+    private long serialCandidateExecutionCount;
+    private long parallelCandidateExecutionCount;
+    private int maximumConcurrentCandidates;
     private bool disposed;
 
     private MathBlocksGPUProgramPopulationSearch(
         MathBlockProgramPopulationSearchDefinition definition,
+        MathBlockProgramPopulationExecutionOptions executionOptions,
         PopulationSearchLayout layout,
         SearchKernelArguments kernelArguments,
         ulong deviceArena,
@@ -29,6 +36,7 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
         MathBlockProgramPopulationSearchState acceptedState)
     {
         this.definition = definition;
+        this.executionOptions = executionOptions;
         this.layout = layout;
         this.kernelArguments = kernelArguments;
         this.deviceArena = deviceArena;
@@ -42,6 +50,9 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
     }
 
     public string SearchIdentity => definition.Identity;
+    public MathBlockProgramPopulationExecutionMode ExecutionMode => executionOptions.Mode;
+    public int RequestedCandidateLaneCount => executionOptions.CandidateLaneCount;
+    public int ActiveCandidateLaneCount => 1;
     public MathBlockProgramPopulationSearchCapacity Capacity => layout.Capacity;
     public int GraphInstanceCount { get; }
     public int ImmutableUploadCount { get; }
@@ -55,6 +66,11 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
     public long FullCandidateOutputDownloadCount => 0;
     public long FullCandidateOutputBytes => 0;
     public int CpuNodeDispatchCount => 0;
+    public long ProposalWaveCount => proposalWaveCount;
+    public long CandidateChunkCount => candidateChunkCount;
+    public int MaximumConcurrentCandidates => maximumConcurrentCandidates;
+    public long SerialCandidateExecutionCount => serialCandidateExecutionCount;
+    public long ParallelCandidateExecutionCount => parallelCandidateExecutionCount;
     public ulong EnumerationCursor => acceptedState.EnumerationCursor;
     public ulong EnumerationTrialCount => acceptedState.EnumerationTrialCount;
     public ulong InvalidEnumerationProposalCount => acceptedState.InvalidEnumerationProposalCount;
@@ -62,8 +78,17 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
     public MathBlockProgramPopulationSearchState AcceptedState => acceptedState;
 
     internal static MathBlocksGPUProgramPopulationSearch Create(
-        MathBlockProgramPopulationSearchDefinition definition)
+        MathBlockProgramPopulationSearchDefinition definition,
+        MathBlockProgramPopulationExecutionOptions executionOptions)
     {
+        ArgumentNullException.ThrowIfNull(definition);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        if (executionOptions.CandidateLaneCount != 1)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(executionOptions),
+                "The current resident layout supports one candidate lane.");
+        }
         MathBlocksCudaNative.EnsureContext();
         var layout = PopulationSearchLayout.Create(definition);
         var initialState = definition.AcceptedState ?? new MathBlockProgramPopulationSearchState(
@@ -131,7 +156,9 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
                 GridX = 1,
                 GridY = 1,
                 GridZ = 1,
-                BlockX = 1,
+                BlockX = executionOptions.Mode == MathBlockProgramPopulationExecutionMode.ParallelResident
+                    ? VectorGpuBlockCatalog.BlockSize
+                    : 1,
                 BlockY = 1,
                 BlockZ = 1,
                 KernelParameters = arguments.PointerArray
@@ -162,6 +189,7 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
                 "cuGraphInstantiate(mathblocks population search)");
             return new MathBlocksGPUProgramPopulationSearch(
                 definition,
+                executionOptions,
                 layout,
                 arguments,
                 deviceArena,
@@ -196,6 +224,8 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
         {
             ThrowIfDisposed();
             MathBlocksCudaNative.EnsureContext();
+            var previousTrialCursor = acceptedState.TrialCursor;
+            var previousEvaluatedProgramCount = acceptedState.EvaluatedProgramCount;
             MathBlocksCudaNative.ThrowIfFailed(
                 MathBlocksCudaNative.cuGraphLaunch(executable, stream),
                 "cuGraphLaunch(mathblocks population search)");
@@ -224,6 +254,17 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
                 });
             }
             acceptedState = parsed.State!;
+            var trialDelta = checked((long)(acceptedState.TrialCursor - previousTrialCursor));
+            var evaluatedDelta = checked((long)(
+                acceptedState.EvaluatedProgramCount - previousEvaluatedProgramCount));
+            proposalWaveCount = checked(proposalWaveCount + trialDelta);
+            candidateChunkCount = checked(candidateChunkCount + evaluatedDelta);
+            if (evaluatedDelta != 0)
+                maximumConcurrentCandidates = 1;
+            if (executionOptions.Mode == MathBlockProgramPopulationExecutionMode.SerialResident)
+                serialCandidateExecutionCount = checked(serialCandidateExecutionCount + evaluatedDelta);
+            else
+                parallelCandidateExecutionCount = checked(parallelCandidateExecutionCount + evaluatedDelta);
             var instrumentation = new MathBlockProgramPopulationSearchInstrumentation(
                 GraphInstanceCount,
                 ImmutableUploadCount,
@@ -248,7 +289,15 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
                 acceptedState.CycleCount,
                 acceptedState.SelectionEntries.Count,
                 acceptedState.QualityDiversityEntries.Count,
-                acceptedState.RandomState);
+                acceptedState.RandomState,
+                ExecutionMode,
+                RequestedCandidateLaneCount,
+                ActiveCandidateLaneCount,
+                ProposalWaveCount,
+                CandidateChunkCount,
+                MaximumConcurrentCandidates,
+                SerialCandidateExecutionCount,
+                ParallelCandidateExecutionCount);
             var enumerationComplete =
                 acceptedState.EnumerationTrialCount == definition.Evolution.EnumerationProposalCount ||
                 acceptedState.EnumerationCursor == definition.Population.TotalProposalCount;

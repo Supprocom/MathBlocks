@@ -47,6 +47,33 @@ public enum MathBlockProgramPopulationTrialStatus
     InsufficientParents
 }
 
+public enum MathBlockProgramPopulationExecutionMode
+{
+    SerialResident,
+    ParallelResident
+}
+
+public sealed record MathBlockProgramPopulationExecutionOptions
+{
+    public MathBlockProgramPopulationExecutionOptions(
+        MathBlockProgramPopulationExecutionMode mode,
+        int candidateLaneCount)
+    {
+        if (!Enum.IsDefined(mode))
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        if (candidateLaneCount <= 0)
+            throw new ArgumentOutOfRangeException(nameof(candidateLaneCount));
+        Mode = mode;
+        CandidateLaneCount = candidateLaneCount;
+    }
+
+    public MathBlockProgramPopulationExecutionMode Mode { get; }
+    public int CandidateLaneCount { get; }
+
+    public static MathBlockProgramPopulationExecutionOptions SerialResident { get; } =
+        new(MathBlockProgramPopulationExecutionMode.SerialResident, 1);
+}
+
 public readonly record struct MathBlockProgramPopulationObjective
 {
     public MathBlockProgramPopulationObjective(
@@ -1141,7 +1168,15 @@ public readonly record struct MathBlockProgramPopulationSearchInstrumentation(
     ulong CycleCount,
     int SelectionCount,
     int QualityDiversityCount,
-    MathBlockProgramPopulationRandomState RandomState);
+    MathBlockProgramPopulationRandomState RandomState,
+    MathBlockProgramPopulationExecutionMode ExecutionMode,
+    int RequestedCandidateLaneCount,
+    int ActiveCandidateLaneCount,
+    long ProposalWaveCount,
+    long CandidateChunkCount,
+    int MaximumConcurrentCandidates,
+    long SerialCandidateExecutionCount,
+    long ParallelCandidateExecutionCount);
 
 public sealed class MathBlockProgramPopulationSearchCycleResult
 {
