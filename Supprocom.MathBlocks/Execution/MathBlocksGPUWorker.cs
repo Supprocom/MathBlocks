@@ -531,9 +531,10 @@ public sealed class MathBlocksGPUProgram : IDisposable
         return result;
     }
 
-    private static int[] ResolvePayloadCapacities(
+    internal static int[] ResolvePayloadCapacities(
         IReadOnlyList<MathBlockProgramNode> nodes,
-        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs)
+        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
+        IReadOnlyDictionary<string, int>? inputCapacityOverrides = null)
     {
         var capacities = new int[nodes.Count];
         var published = new bool[nodes.Count];
@@ -554,7 +555,12 @@ public sealed class MathBlocksGPUProgram : IDisposable
                 inputCapacities[inputIndex] = capacities[producerIndex];
             }
 
-            var capacity = ResolvePayloadCapacity(node, nodes, inputCapacities, prototypeInputs);
+            var capacity = ResolvePayloadCapacity(
+                node,
+                nodes,
+                inputCapacities,
+                prototypeInputs,
+                inputCapacityOverrides);
             if (capacity < 0)
                 throw new InvalidOperationException($"GPU payload capacity for node {node.Index} is negative.");
             capacities[node.Index] = capacity;
@@ -694,7 +700,8 @@ public sealed class MathBlocksGPUProgram : IDisposable
         MathBlockProgramNode node,
         IReadOnlyList<MathBlockProgramNode> nodes,
         IReadOnlyList<int> inputCapacities,
-        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs)
+        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
+        IReadOnlyDictionary<string, int>? inputCapacityOverrides)
     {
         if (node.Type.Kind is MathBlockValueKind.Scalar or MathBlockValueKind.Boolean)
             return 0;
@@ -702,6 +709,14 @@ public sealed class MathBlocksGPUProgram : IDisposable
             return 1;
         if (node.Kind == MathBlockProgramNodeKind.Constant)
             return ValueElementCount(node.Value);
+        if (node.Kind == MathBlockProgramNodeKind.Input &&
+            inputCapacityOverrides is not null &&
+            inputCapacityOverrides.TryGetValue(node.Name!, out var overrideCapacity))
+        {
+            if (overrideCapacity < 0)
+                throw new InvalidOperationException($"GPU payload capacity override for node {node.Index} is negative.");
+            return overrideCapacity;
+        }
         if (node.Kind == MathBlockProgramNodeKind.Input &&
             prototypeInputs is not null &&
             prototypeInputs.TryGetValue(node.Name!, out var prototype))

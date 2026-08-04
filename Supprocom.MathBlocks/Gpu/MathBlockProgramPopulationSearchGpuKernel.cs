@@ -976,7 +976,6 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int payload_stride,
             int scratch_stride,
             int maximum_operation_count,
-            int maximum_value_elements,
             int objective_node_count,
             int objective_count,
             const MathBlockSlot* candidate_output,
@@ -996,17 +995,24 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 if (kind == 0)
                 {
                     slots[node] = *candidate_output;
-                    continue;
                 }
-                if (kind == 1)
+                else if (kind == 1)
                 {
                     slots[node] = *validity_mask;
-                    continue;
                 }
-                if (kind == 2)
+                else if (kind == 2)
                 {
                     int immutable_index = mbp_read_int(arena, descriptor + 24);
                     slots[node] = *((const MathBlockSlot*)(arena + immutable_slot_offset + immutable_index * 48));
+                }
+                if (kind >= 0 && kind <= 2)
+                {
+                    int type_id = mbp_read_int(arena, descriptor + 4);
+                    if (!mbp_slot_matches_type(arena, type_offset, type_id, &slots[node]) ||
+                        !mbp_slot_is_finite(arena, type_offset, type_id, &slots[node]))
+                    {
+                        return false;
+                    }
                     continue;
                 }
                 if (kind != 3)
@@ -1028,7 +1034,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                     (mbp_ull)(arena + objective_payload_offset + node * payload_stride),
                     (mbp_ull)(arena + scratch_offset +
                         (maximum_operation_count + node) * scratch_stride),
-                    maximum_value_elements);
+                    mbp_read_int(arena, descriptor + 28));
                 mb_population_dispatch(
                     mbp_read_int(arena, descriptor + 8),
                     mbp_read_int(arena, descriptor + 12),
@@ -1783,7 +1789,6 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                         payload_stride,
                         scratch_stride,
                         maximum_operation_count,
-                        maximum_value_elements,
                         objective_node_count,
                         objective_count,
                         &candidate_slots[final_node],
@@ -2095,7 +2100,6 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                                     payload_stride,
                                     scratch_stride,
                                     maximum_operation_count,
-                                    maximum_value_elements,
                                     objective_node_count,
                                     objective_count,
                                     &candidate_slots[final_node],

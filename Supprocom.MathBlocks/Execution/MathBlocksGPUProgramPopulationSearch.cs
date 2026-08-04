@@ -486,13 +486,6 @@ internal sealed class PopulationSearchLayout
                 terminal.Lookback);
         }
 
-        var compiledObjective = CompileObjective(
-            definition,
-            AddType,
-            immutableValues,
-            ref maximumArity,
-            ref maximumValueElements);
-
         var maximumOperationCount = 0;
         var maximumBandElements = 0;
         foreach (var band in population.ActiveResourceBands)
@@ -503,6 +496,14 @@ internal sealed class PopulationSearchLayout
         maximumValueElements = Math.Max(maximumValueElements, maximumBandElements);
         if (maximumOperationCount <= 0 || maximumBandElements <= 0 || maximumValueElements <= 0)
             throw new InvalidOperationException("The population search resource envelope is empty.");
+
+        var compiledObjective = CompileObjective(
+            definition,
+            AddType,
+            immutableValues,
+            maximumBandElements,
+            ref maximumArity,
+            ref maximumValueElements);
 
         var bandStarts = new ulong[population.ActiveResourceBands.Count];
         var bandCounts = new ulong[population.ActiveResourceBands.Count];
@@ -707,6 +708,7 @@ internal sealed class PopulationSearchLayout
             WriteInt32(bytes, offset + 16, node.Arity);
             WriteInt32(bytes, offset + 20, node.InputBase);
             WriteInt32(bytes, offset + 24, node.ImmutableSlotIndex);
+            WriteInt32(bytes, offset + 28, node.PayloadCapacity);
         }
         for (var index = 0; index < objectiveInputs.Length; index++)
             WriteInt32(bytes, ObjectiveInputOffset + index * sizeof(int), objectiveInputs[index]);
@@ -1222,11 +1224,28 @@ internal sealed class PopulationSearchLayout
         MathBlockProgramPopulationSearchDefinition definition,
         Func<MathBlockType, int> addType,
         List<MathBlockValue> immutableValues,
+        int maximumCandidateElements,
         ref int maximumArity,
         ref int maximumValueElements)
     {
         var binding = definition.ObjectiveBinding;
         var plan = binding.Program.PlanNodes;
+        var capacityOverrides = new Dictionary<string, int>(StringComparer.Ordinal)
+        {
+            [binding.CandidateInput] = maximumCandidateElements
+        };
+        if (binding.CandidateValidityMaskInput is not null)
+        {
+            capacityOverrides.Add(
+                binding.CandidateValidityMaskInput,
+                definition.Validity.HistoryCounts.Count);
+        }
+        var payloadCapacities = MathBlocksGPUProgram.ResolvePayloadCapacities(
+            plan,
+            binding.ResidentInputs,
+            capacityOverrides);
+        for (var index = 0; index < payloadCapacities.Length; index++)
+            maximumValueElements = Math.Max(maximumValueElements, payloadCapacities[index]);
         var nodes = new ObjectiveNodeDescriptor[plan.Count];
         var inputs = new List<int>();
         var candidateCount = 0;
@@ -1237,14 +1256,30 @@ internal sealed class PopulationSearchLayout
             if (node.Kind == MathBlockProgramNodeKind.Input &&
                 string.Equals(node.Name, binding.CandidateInput, StringComparison.Ordinal))
             {
-                nodes[index] = new ObjectiveNodeDescriptor(0, addType(node.Type), -1, -1, 0, inputs.Count, -1);
+                nodes[index] = new ObjectiveNodeDescriptor(
+                    0,
+                    addType(node.Type),
+                    -1,
+                    -1,
+                    0,
+                    inputs.Count,
+                    -1,
+                    payloadCapacities[index]);
                 candidateCount++;
                 continue;
             }
             if (node.Kind == MathBlockProgramNodeKind.Input &&
                 string.Equals(node.Name, binding.CandidateValidityMaskInput, StringComparison.Ordinal))
             {
-                nodes[index] = new ObjectiveNodeDescriptor(1, addType(node.Type), -1, -1, 0, inputs.Count, -1);
+                nodes[index] = new ObjectiveNodeDescriptor(
+                    1,
+                    addType(node.Type),
+                    -1,
+                    -1,
+                    0,
+                    inputs.Count,
+                    -1,
+                    payloadCapacities[index]);
                 maskCount++;
                 continue;
             }
@@ -1263,7 +1298,8 @@ internal sealed class PopulationSearchLayout
                     -1,
                     0,
                     inputs.Count,
-                    immutableIndex);
+                    immutableIndex,
+                    payloadCapacities[index]);
                 continue;
             }
             if (node.Kind != MathBlockProgramNodeKind.Operation)
@@ -1280,7 +1316,8 @@ internal sealed class PopulationSearchLayout
                 feature.Opcode,
                 node.Inputs.Count,
                 inputBase,
-                -1);
+                -1,
+                payloadCapacities[index]);
         }
         if (candidateCount != 1)
             throw new ArgumentException("The objective program requires one candidate input.", nameof(definition));
@@ -1504,7 +1541,8 @@ internal sealed class PopulationSearchLayout
         int Opcode,
         int Arity,
         int InputBase,
-        int ImmutableSlotIndex);
+        int ImmutableSlotIndex,
+        int PayloadCapacity);
 
     private readonly record struct ObjectiveSourceDescriptor(int SourceKind, int ProgramNodeIndex, int Direction);
 

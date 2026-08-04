@@ -270,6 +270,65 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Resident_search_binds_candidate_and_validity_mask_through_rank_objectives()
+    {
+        RequireCuda();
+        var definition = CreateRankObjectiveSearch();
+        var terminalNodes = definition.Population.Terminals
+            .Select((terminal, index) => MathBlockProgramCandidateNode.Terminal(
+                index,
+                terminal.Identifier,
+                terminal.Type))
+            .ToList();
+        terminalNodes.AddRange(definition.Population.ScalarConstants.Select((constant, index) =>
+            MathBlockProgramCandidateNode.Terminal(
+                definition.Population.Terminals.Count + index,
+                $"constant-{index}",
+                MathBlockType.Scalar(constant.Unit))));
+        terminalNodes.Add(MathBlockProgramCandidateNode.Operation(
+            "vector.absolute",
+            1,
+            definition.Population.Grammar.Operations.Single().OutputType,
+            0));
+        var expectedProgram = new MathBlockProgramStructure(
+            0,
+            0,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            terminalNodes);
+        var expectedObjectives = definition.EvaluateObjectives(expectedProgram);
+        var expectedSemantic = definition.CreateSemanticFingerprint(expectedProgram);
+        Assert.All(expectedObjectives, value => Assert.True(double.IsFinite(value)));
+        using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition);
+        Assert.Equal(33, compiled.Capacity.MaximumValueElements);
+
+        var result = compiled.ExecuteCycle();
+
+        Assert.Equal(14, result.Trials.Count);
+        Assert.Equal(
+            13,
+            result.Trials.Count(trial => trial.Status == MathBlockProgramPopulationTrialStatus.InvalidType));
+        var accepted = Assert.Single(
+            result.Trials,
+            trial => trial.Status == MathBlockProgramPopulationTrialStatus.Accepted);
+        Assert.Equal(expectedProgram.StructuralFingerprint, accepted.StructuralFingerprint);
+        Assert.Equal(
+            expectedObjectives.Select(BitConverter.DoubleToInt64Bits),
+            accepted.Objectives.Select(BitConverter.DoubleToInt64Bits));
+        Assert.All(accepted.Objectives, value => Assert.True(double.IsFinite(value)));
+        Assert.Equal(expectedSemantic, accepted.SemanticFingerprint);
+        Assert.Equal((ulong)1, result.AcceptedState.EvaluatedProgramCount);
+        Assert.Equal((ulong)1, result.AcceptedState.AcceptedProgramCount);
+        Assert.Equal(1, compiled.GraphInstanceCount);
+        Assert.Equal(1, compiled.ImmutableUploadCount);
+        Assert.Equal(0, compiled.LaterImmutableUploadCount);
+        Assert.Equal(1, compiled.GraphLaunchCount);
+        Assert.Equal(1, compiled.SynchronizationCount);
+        Assert.Equal(1, compiled.DownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+    }
+
+    [Fact]
     public void Resident_search_accepts_more_than_eight_objectives_and_intrinsic_sources()
     {
         RequireCuda();
@@ -935,6 +994,273 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
             mutationTrials: mutationTrials,
             crossoverTrials: crossoverTrials,
             immigrantTrials: immigrantTrials);
+    }
+
+    private static MathBlockProgramPopulationSearchDefinition CreateRankObjectiveSearch()
+    {
+        const int rowCount = 18;
+        var staticVector = MathBlockType.Vector(length: rowCount);
+        var dynamicVector = MathBlockType.Vector();
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation(
+                    "vector.absolute",
+                    1,
+                    [staticVector],
+                    staticVector)],
+                dynamicVector),
+            [new MathBlockProgramPopulationTerminal(
+                "telemetry-count",
+                staticVector,
+                MathBlockValue.Vector(Enumerable.Range(1, rowCount).Select(value => -(double)value)))],
+            Enumerable.Range(0, 13).Select(value => new MathBlockProgramPopulationConstant(
+                BitConverter.DoubleToInt64Bits(value + 0.25))),
+            [new MathBlockProgramPopulationResourceBand(1, rowCount)],
+            proposalsPerCycle: 14,
+            fingerprintCapacity: 14);
+
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = builder.Input("candidate", dynamicVector);
+        var candidateValidity = builder.Input("candidate-validity", MathBlockType.BooleanVector());
+        var baseline = builder.Input("baseline", staticVector);
+        var upper = builder.Input("upper", staticVector);
+        var lower = builder.Input("lower", staticVector);
+        var eligibility = builder.Input("eligibility", MathBlockType.BooleanVector(rowCount));
+        var firstSegment = builder.Input("first-segment", MathBlockType.BooleanVector(rowCount));
+        var secondSegment = builder.Input("second-segment", MathBlockType.BooleanVector(rowCount));
+
+        int Scalar(double value) => builder.Constant(MathBlockValue.Scalar(value));
+        int Apply(string identity, params int[] inputs) => builder.Apply(identity, inputs: inputs);
+        int And(int left, int right) => Apply("boolean-vector.and", left, right);
+        int Or(int left, int right) => Apply("boolean-vector.or", left, right);
+        int Not(int value) => Apply("boolean-vector.not", value);
+        int VectorSelect(int mask, int whenTrue, int whenFalse) =>
+            Apply("vector.select", mask, whenTrue, whenFalse);
+        int ScalarSelect(int condition, int whenTrue, int whenFalse) =>
+            Apply("scalar.select", condition, whenTrue, whenFalse);
+        int RepeatNode(int value, int count) => Apply("vector.repeat", value, Scalar(count));
+        int RepeatValue(double value, int count) => RepeatNode(Scalar(value), count);
+        int AtLeast(int value, int minimum) =>
+            Apply("scalar.greater-than", value, Scalar(minimum - 1d));
+        int BooleanAsScalar(int value) => ScalarSelect(value, Scalar(1d), Scalar(0d));
+        int VectorFromScalars(params int[] values)
+        {
+            var vectors = values.Select(value => RepeatNode(value, 1)).ToArray();
+            while (vectors.Length > 1)
+            {
+                var combined = new List<int>((vectors.Length + 1) / 2);
+                for (var index = 0; index < vectors.Length; index += 2)
+                {
+                    combined.Add(index + 1 < vectors.Length
+                        ? Apply("vector.concatenate", vectors[index], vectors[index + 1])
+                        : vectors[index]);
+                }
+                vectors = combined.ToArray();
+            }
+            return vectors[0];
+        }
+
+        var zeroVector = RepeatValue(0d, rowCount);
+        var trueVector = Apply("vector.equal", zeroVector, zeroVector);
+        var falseVector = Not(trueVector);
+        int ShiftForward(int source)
+        {
+            var head = Apply("vector.slice", source, Scalar(1d), Scalar(rowCount - 1d));
+            return Apply("vector.concatenate", head, RepeatValue(0d, 1));
+        }
+        int Movement(int source, double scale)
+        {
+            var ratio = Apply("vector.divide", ShiftForward(source), baseline);
+            var change = Apply("vector.add-scalar", ratio, Scalar(-1d));
+            return Apply("vector.positive-part", Apply("vector.scale", change, Scalar(scale)));
+        }
+
+        var favorable = Movement(upper, 10_000d);
+        var adverse = Movement(lower, -10_000d);
+        var adverseThreshold = RepeatValue(20d, rowCount);
+        var adverseReached = And(
+            eligibility,
+            Or(
+                Apply("vector.greater-than", adverse, adverseThreshold),
+                Apply("vector.equal", adverse, adverseThreshold)));
+        var improves = Apply("vector.greater-than", favorable, zeroVector);
+        var ambiguous = Or(falseVector, And(adverseReached, improves));
+        var continues = And(eligibility, Not(adverseReached));
+        var reachable = VectorSelect(
+            continues,
+            VectorSelect(improves, favorable, zeroVector),
+            zeroVector);
+        var targetValidity = And(eligibility, Not(ambiguous));
+
+        (int Raw, int Feasible) SafeSpearman(int segment, int minimumRows)
+        {
+            var eligible = And(And(segment, targetValidity), candidateValidity);
+            var count = Apply("boolean-vector.true-count", eligible);
+            var enoughForCorrelation = AtLeast(count, 2);
+            var selector = Apply(
+                "vector.greater-than",
+                RepeatNode(BooleanAsScalar(enoughForCorrelation), rowCount),
+                zeroVector);
+            var fallback = builder.Constant(MathBlockValue.BooleanVector(
+                Enumerable.Range(0, rowCount).Select(index => index < 2)));
+            var safeMask = Or(And(eligible, selector), And(fallback, Not(selector)));
+            var indexes = Apply("boolean-vector.true-indices", safeMask);
+            var selectedCandidate = Apply("vector.gather", candidate, indexes);
+            var selectedTarget = Apply("vector.gather", reachable, indexes);
+            var candidateMinimum = Apply("vector.minimum", selectedCandidate);
+            var candidateMaximum = Apply("vector.maximum", selectedCandidate);
+            var targetMinimum = Apply("vector.minimum", selectedTarget);
+            var targetMaximum = Apply("vector.maximum", selectedTarget);
+            var candidateVariable = Apply("scalar.not-equal", candidateMinimum, candidateMaximum);
+            var targetVariable = Apply("scalar.not-equal", targetMinimum, targetMaximum);
+            int RepairConstant(int values, int variable)
+            {
+                var useOriginal = ScalarSelect(variable, Scalar(1d), Scalar(0d));
+                var useIndexes = ScalarSelect(variable, Scalar(0d), Scalar(1d));
+                return Apply(
+                    "vector.add",
+                    Apply("vector.scale", values, useOriginal),
+                    Apply("vector.scale", indexes, useIndexes));
+            }
+            var raw = Apply(
+                "statistics.spearman-correlation",
+                RepairConstant(selectedCandidate, candidateVariable),
+                RepairConstant(selectedTarget, targetVariable));
+            var feasible = Apply(
+                "boolean.and",
+                AtLeast(count, minimumRows),
+                Apply("boolean.and", candidateVariable, targetVariable));
+            return (raw, feasible);
+        }
+
+        var aggregate = SafeSpearman(eligibility, 2);
+        var orientation = Apply("scalar.sign", aggregate.Raw);
+        var orientationFeasible = Apply("scalar.not-equal", orientation, Scalar(0d));
+        var aggregateFeasible = Apply("boolean.and", aggregate.Feasible, orientationFeasible);
+        var orientedAggregate = Apply("scalar.multiply", aggregate.Raw, orientation);
+        var first = SafeSpearman(firstSegment, 2);
+        var second = SafeSpearman(secondSegment, 2);
+        var firstFeasible = Apply("boolean.and", first.Feasible, orientationFeasible);
+        var secondFeasible = Apply("boolean.and", second.Feasible, orientationFeasible);
+        var firstScore = ScalarSelect(
+            firstFeasible,
+            Apply("scalar.multiply", first.Raw, orientation),
+            Scalar(-2d));
+        var secondScore = ScalarSelect(
+            secondFeasible,
+            Apply("scalar.multiply", second.Raw, orientation),
+            Scalar(-2d));
+        var segmentVector = VectorFromScalars(firstScore, secondScore);
+        builder.Output("bootstrap-median", Apply("vector.median", segmentVector));
+        builder.Output("bootstrap-lower-segment", Apply("vector.quantile", segmentVector, Scalar(0.25d)));
+        var sampleMedianNodes = Enumerable.Range(0, 33)
+            .Select(sample => Apply(
+                "vector.median",
+                Apply(
+                    "vector.gather",
+                    segmentVector,
+                    builder.Constant(MathBlockValue.Vector(
+                        [sample % 2, (sample / 2) % 2])))))
+            .ToArray();
+        var sampleMedians = VectorFromScalars(sampleMedianNodes);
+        builder.Output("bootstrap-ci-lower", Apply("vector.quantile", sampleMedians, Scalar(0.05d)));
+        builder.Output("bootstrap-ci-upper", Apply("vector.quantile", sampleMedians, Scalar(0.95d)));
+        var lowerConfidence = Apply("vector.quantile", sampleMedians, Scalar(0.10d));
+        builder.Output("bootstrap-lower-confidence", lowerConfidence);
+        var finiteSegmentCount = Apply(
+            "scalar.add",
+            BooleanAsScalar(firstFeasible),
+            BooleanAsScalar(secondFeasible));
+        var enoughSegments = AtLeast(finiteSegmentCount, 2);
+        var feasible = Apply("boolean.and", aggregateFeasible, enoughSegments);
+        var resilient = ScalarSelect(feasible, lowerConfidence, Scalar(-2d));
+        var aggregateScore = ScalarSelect(feasible, orientedAggregate, Scalar(-2d));
+        var lowerSegment = ScalarSelect(
+            feasible,
+            Apply("vector.quantile", segmentVector, Scalar(0.25d)),
+            Scalar(-2d));
+        var feasibleScalar = BooleanAsScalar(feasible);
+        var gate = Apply("scalar.divide", feasibleScalar, feasibleScalar);
+        var objectiveProgram = builder
+            .Output("resilient", resilient)
+            .Output("aggregate", aggregateScore)
+            .Output("lower-segment", lowerSegment)
+            .Output("best-resilient", resilient)
+            .Output("feasibility-gate", gate)
+            .Build();
+        var residentInputs = new Dictionary<string, MathBlockValue>
+        {
+            ["baseline"] = MathBlockValue.Vector(Enumerable.Repeat(100d, rowCount)),
+            ["upper"] = MathBlockValue.Vector(Enumerable.Range(0, rowCount).Select(index =>
+                index % 6 == 0 ? 100d : 100d + (index % 6) * 0.1d)),
+            ["lower"] = MathBlockValue.Vector(Enumerable.Range(0, rowCount).Select(index =>
+                index % 6 == 3 ? 99.7d : 100d)),
+            ["eligibility"] = MathBlockValue.BooleanVector(
+                Enumerable.Range(0, rowCount).Select(index => index < rowCount - 1)),
+            ["first-segment"] = MathBlockValue.BooleanVector(
+                Enumerable.Range(0, rowCount).Select(index => index < 3)),
+            ["second-segment"] = MathBlockValue.BooleanVector(
+                Enumerable.Range(0, rowCount).Select(index => index >= 3 && index < 6))
+        };
+        var objectives = new[]
+        {
+            new MathBlockProgramPopulationObjective(
+                "resilient",
+                "resilient",
+                MathBlockProgramPopulationObjectiveDirection.Maximize),
+            new MathBlockProgramPopulationObjective(
+                "aggregate",
+                "aggregate",
+                MathBlockProgramPopulationObjectiveDirection.Maximize),
+            new MathBlockProgramPopulationObjective(
+                "lower-segment",
+                "lower-segment",
+                MathBlockProgramPopulationObjectiveDirection.Maximize),
+            new MathBlockProgramPopulationObjective(
+                "best-resilient",
+                "best-resilient",
+                MathBlockProgramPopulationObjectiveDirection.Maximize),
+            new MathBlockProgramPopulationObjective(
+                "feasibility-gate",
+                "feasibility-gate",
+                MathBlockProgramPopulationObjectiveDirection.Maximize),
+            MathBlockProgramPopulationObjective.Intrinsic(
+                "expanded-operations",
+                MathBlockProgramPopulationIntrinsicObjectiveIdentities.ExpandedOperationCount,
+                MathBlockProgramPopulationObjectiveDirection.Minimize),
+            MathBlockProgramPopulationObjective.Intrinsic(
+                "maximum-lookback",
+                MathBlockProgramPopulationIntrinsicObjectiveIdentities.MaximumLookback,
+                MathBlockProgramPopulationObjectiveDirection.Minimize),
+            MathBlockProgramPopulationObjective.Intrinsic(
+                "execution-cost",
+                MathBlockProgramPopulationIntrinsicObjectiveIdentities.DeterministicExecutionCost,
+                MathBlockProgramPopulationObjectiveDirection.Minimize),
+            MathBlockProgramPopulationObjective.Intrinsic(
+                "age",
+                MathBlockProgramPopulationIntrinsicObjectiveIdentities.Age,
+                MathBlockProgramPopulationObjectiveDirection.Minimize)
+        };
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveProgram,
+            "candidate",
+            residentInputs,
+            objectives,
+            "candidate-validity");
+        return new MathBlockProgramPopulationSearchDefinition(
+            population,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(14, 14, 0, 0, 0, 1234, 0),
+            new MathBlockProgramPopulationSelectionPolicy(16, 8),
+            new MathBlockProgramPopulationQualityDiversityPolicy(
+                "best-resilient",
+                [new MathBlockProgramPopulationQualityDiversityDimension(
+                    "expanded-operations",
+                    0d,
+                    2d,
+                    2)]),
+            new MathBlockProgramPopulationSearchEnvelope(256L * 1024 * 1024, 32 * 1024 * 1024),
+            new MathBlockProgramPopulationValidityPolicy(Enumerable.Range(0, rowCount)));
     }
 
     private static MathBlockProgramPopulationSearchDefinition CreateVectorOverloadSearch(
