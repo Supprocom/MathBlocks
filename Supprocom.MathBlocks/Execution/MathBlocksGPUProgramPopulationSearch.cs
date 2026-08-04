@@ -1240,10 +1240,19 @@ internal sealed class PopulationSearchLayout
                 binding.CandidateValidityMaskInput,
                 definition.Validity.HistoryCounts.Count);
         }
+        var shapeOverrides = new Dictionary<string, MathBlockGpuShapeAuthority>(StringComparer.Ordinal);
+        var candidateType = binding.Program.Inputs[binding.CandidateInput];
+        if (candidateType.Kind is MathBlockValueKind.Matrix or MathBlockValueKind.ComplexMatrix)
+        {
+            shapeOverrides.Add(
+                binding.CandidateInput,
+                ResolveCandidateShapeAuthority(definition.Population, candidateType, maximumCandidateElements));
+        }
         var payloadCapacities = MathBlocksGPUProgram.ResolvePayloadCapacities(
             plan,
             binding.ResidentInputs,
-            capacityOverrides);
+            capacityOverrides,
+            shapeOverrides);
         for (var index = 0; index < payloadCapacities.Length; index++)
             maximumValueElements = Math.Max(maximumValueElements, payloadCapacities[index]);
         var nodes = new ObjectiveNodeDescriptor[plan.Count];
@@ -1352,6 +1361,60 @@ internal sealed class PopulationSearchLayout
         if (multiplier != definition.QualityDiversity.CellCount)
             throw new InvalidOperationException("The quality-diversity cell count is inconsistent.");
         return new CompiledObjective(nodes, inputs.ToArray(), sources, dimensions);
+    }
+
+    private static MathBlockGpuShapeAuthority ResolveCandidateShapeAuthority(
+        MathBlockProgramPopulationDefinition population,
+        MathBlockType candidateType,
+        int maximumCandidateElements)
+    {
+        var maximumRows = 0;
+        var maximumColumns = 0;
+        foreach (var operation in population.Grammar.Operations)
+        {
+            var outputType = operation.OutputType;
+            if (!candidateType.Accepts(outputType) || !population.Grammar.OutputType.Accepts(outputType))
+                continue;
+            var shape = ResolveMatrixShapeAuthority(outputType, maximumCandidateElements);
+            maximumRows = Math.Max(maximumRows, shape.Rows);
+            maximumColumns = Math.Max(maximumColumns, shape.Columns);
+        }
+        if (maximumRows == 0 || maximumColumns == 0)
+        {
+            var shape = ResolveMatrixShapeAuthority(candidateType, maximumCandidateElements);
+            maximumRows = Math.Max(maximumRows, shape.Rows);
+            maximumColumns = Math.Max(maximumColumns, shape.Columns);
+        }
+        if (maximumRows <= 0 || maximumColumns <= 0)
+            throw new InvalidOperationException("The candidate matrix shape authority is unavailable.");
+        return new MathBlockGpuShapeAuthority(maximumRows, maximumColumns);
+    }
+
+    private static MathBlockGpuShapeAuthority ResolveMatrixShapeAuthority(
+        MathBlockType type,
+        int maximumElements)
+    {
+        if (type.Kind is not (MathBlockValueKind.Matrix or MathBlockValueKind.ComplexMatrix))
+            return default;
+        if (type.Rows > 0 && type.Columns > 0)
+        {
+            return checked(type.Rows * type.Columns) <= maximumElements
+                ? new MathBlockGpuShapeAuthority(type.Rows, type.Columns)
+                : default;
+        }
+        if (type.Rows > 0)
+        {
+            return type.Rows <= maximumElements
+                ? new MathBlockGpuShapeAuthority(type.Rows, maximumElements / type.Rows)
+                : default;
+        }
+        if (type.Columns > 0)
+        {
+            return type.Columns <= maximumElements
+                ? new MathBlockGpuShapeAuthority(maximumElements / type.Columns, type.Columns)
+                : default;
+        }
+        return new MathBlockGpuShapeAuthority(maximumElements, maximumElements);
     }
 
     private static void ValidateOperation(MathBlockProgramPopulationOperation descriptor)

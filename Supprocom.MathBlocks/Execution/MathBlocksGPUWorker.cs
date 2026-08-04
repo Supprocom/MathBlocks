@@ -2,6 +2,8 @@ using System.Runtime.InteropServices;
 
 namespace Supprocom.MathBlocks.Gpu;
 
+internal readonly record struct MathBlockGpuShapeAuthority(int Rows, int Columns);
+
 public sealed class MathBlocksGPUWorker
 {
     public static bool IsAvailable => MathBlocksCudaNative.IsAvailable();
@@ -534,9 +536,12 @@ public sealed class MathBlocksGPUProgram : IDisposable
     internal static int[] ResolvePayloadCapacities(
         IReadOnlyList<MathBlockProgramNode> nodes,
         IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
-        IReadOnlyDictionary<string, int>? inputCapacityOverrides = null)
+        IReadOnlyDictionary<string, int>? inputCapacityOverrides = null,
+        IReadOnlyDictionary<string, MathBlockGpuShapeAuthority>? inputShapeOverrides = null)
     {
         var capacities = new int[nodes.Count];
+        var shapeRows = new int[nodes.Count];
+        var shapeColumns = new int[nodes.Count];
         var published = new bool[nodes.Count];
         foreach (var node in nodes)
         {
@@ -544,6 +549,8 @@ public sealed class MathBlocksGPUProgram : IDisposable
                 throw new InvalidOperationException($"GPU payload node index {node.Index} is invalid.");
 
             var inputCapacities = new int[node.Inputs.Count];
+            var inputShapeRows = new int[node.Inputs.Count];
+            var inputShapeColumns = new int[node.Inputs.Count];
             for (var inputIndex = 0; inputIndex < node.Inputs.Count; inputIndex++)
             {
                 var producerIndex = node.Inputs[inputIndex];
@@ -553,17 +560,31 @@ public sealed class MathBlocksGPUProgram : IDisposable
                         $"GPU payload capacity for producer node {producerIndex} is unavailable for node {node.Index}.");
                 }
                 inputCapacities[inputIndex] = capacities[producerIndex];
+                inputShapeRows[inputIndex] = shapeRows[producerIndex];
+                inputShapeColumns[inputIndex] = shapeColumns[producerIndex];
             }
 
             var capacity = ResolvePayloadCapacity(
                 node,
                 nodes,
                 inputCapacities,
+                inputShapeRows,
+                inputShapeColumns,
                 prototypeInputs,
                 inputCapacityOverrides);
             if (capacity < 0)
                 throw new InvalidOperationException($"GPU payload capacity for node {node.Index} is negative.");
+            var shape = ResolveShapeAuthority(
+                node,
+                capacity,
+                inputCapacities,
+                inputShapeRows,
+                inputShapeColumns,
+                prototypeInputs,
+                inputShapeOverrides);
             capacities[node.Index] = capacity;
+            shapeRows[node.Index] = shape.Rows;
+            shapeColumns[node.Index] = shape.Columns;
             published[node.Index] = true;
         }
 
@@ -700,6 +721,8 @@ public sealed class MathBlocksGPUProgram : IDisposable
         MathBlockProgramNode node,
         IReadOnlyList<MathBlockProgramNode> nodes,
         IReadOnlyList<int> inputCapacities,
+        IReadOnlyList<int> inputShapeRows,
+        IReadOnlyList<int> inputShapeColumns,
         IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
         IReadOnlyDictionary<string, int>? inputCapacityOverrides)
     {
@@ -750,7 +773,7 @@ public sealed class MathBlocksGPUProgram : IDisposable
             }
             if (identity is "matrix.gram@1")
             {
-                var columns = ResolveShapeColumns(nodes[node.Inputs[0]], prototypeInputs);
+                var columns = RequireInputShapeColumns(node, 0, inputShapeColumns);
                 return checked(columns * columns);
             }
             if (identity is "matrix.hankel@1" or "matrix.toeplitz@1" or
@@ -769,23 +792,23 @@ public sealed class MathBlocksGPUProgram : IDisposable
             if (identity is "matrix.multiply@1" or "matrix.commutator@1")
             {
                 return checked(
-                    ResolveShapeRows(nodes[node.Inputs[0]], prototypeInputs) *
-                    ResolveShapeColumns(nodes[node.Inputs[1]], prototypeInputs));
+                    RequireInputShapeRows(node, 0, inputShapeRows) *
+                    RequireInputShapeColumns(node, 1, inputShapeColumns));
             }
             if (identity == "matrix.reshape@1")
                 return inputCapacities[0];
             if (identity == "matrix.principal-minors@1")
             {
-                var rows = ResolveShapeRows(nodes[node.Inputs[0]], prototypeInputs);
+                var rows = RequireInputShapeRows(node, 0, inputShapeRows);
                 if (rows < 0 || rows > 20)
                     throw new InvalidOperationException("GPU principal-minor shape is outside the operation domain.");
                 return checked((1 << rows) - 1);
             }
             if (identity == "matrix.maximal-minors@1")
             {
-                var rows = ResolveShapeRows(nodes[node.Inputs[0]], prototypeInputs);
-                var columns = ResolveShapeColumns(nodes[node.Inputs[0]], prototypeInputs);
-                return BinomialCoefficient(columns, rows);
+                var rows = RequireInputShapeRows(node, 0, inputShapeRows);
+                var columns = RequireInputShapeColumns(node, 0, inputShapeColumns);
+                return BinomialCoefficient(columns, Math.Min(rows, columns / 2));
             }
             if (identity == "matrix.schur-complement@1")
             {
@@ -825,15 +848,15 @@ public sealed class MathBlocksGPUProgram : IDisposable
             if (identity == "path.run-length-encode@1")
                 return inputCapacities[0];
             if (identity == "path.signature-level-one@1")
-                return ResolveShapeColumns(nodes[node.Inputs[0]], prototypeInputs);
+                return RequireInputShapeColumns(node, 0, inputShapeColumns);
             if (identity == "path.signature-level-two@1")
             {
-                var dimension = ResolveShapeColumns(nodes[node.Inputs[0]], prototypeInputs);
+                var dimension = RequireInputShapeColumns(node, 0, inputShapeColumns);
                 return checked(dimension * dimension);
             }
             if (identity == "path.signature-level-three@1")
             {
-                var dimension = ResolveShapeColumns(nodes[node.Inputs[0]], prototypeInputs);
+                var dimension = RequireInputShapeColumns(node, 0, inputShapeColumns);
                 return checked(dimension * dimension * dimension);
             }
             if (identity == "state.transition-counts@1")
@@ -843,7 +866,7 @@ public sealed class MathBlocksGPUProgram : IDisposable
             }
             if (identity == "statistics.covariance-matrix@1")
             {
-                var columns = ResolveShapeColumns(nodes[node.Inputs[0]], prototypeInputs);
+                var columns = RequireInputShapeColumns(node, 0, inputShapeColumns);
                 return checked(columns * columns);
             }
             if (identity == "statistics.histogram@1")
@@ -865,12 +888,12 @@ public sealed class MathBlocksGPUProgram : IDisposable
                 return count == 0 ? 0 : count - 1;
             }
             if (identity == "point-set.from-matrix@1")
-                return ResolveShapeRows(nodes[node.Inputs[0]], prototypeInputs);
+                return RequireInputShapeRows(node, 0, inputShapeRows);
             if (identity == "point-set.to-matrix@1")
                 return checked(inputCapacities[0] * 2);
             if (identity == "graph.from-directed-adjacency@1")
             {
-                var rows = ResolveShapeRows(nodes[node.Inputs[0]], prototypeInputs);
+                var rows = RequireInputShapeRows(node, 0, inputShapeRows);
                 return checked(rows * (rows - 1));
             }
             if (identity == "graph.minimum-spanning-forest@1")
@@ -881,13 +904,13 @@ public sealed class MathBlocksGPUProgram : IDisposable
                 "graph.undirected-shortest-paths@1" or
                 "graph.weighted-degree@1")
             {
-                return ResolveShapeRows(nodes[node.Inputs[0]], prototypeInputs);
+                return RequireInputShapeRows(node, 0, inputShapeRows);
             }
             if (identity is "graph.to-directed-adjacency@1" or
                 "graph.undirected-adjacency-matrix@1" or
                 "graph.undirected-laplacian@1")
             {
-                var rows = ResolveShapeRows(nodes[node.Inputs[0]], prototypeInputs);
+                var rows = RequireInputShapeRows(node, 0, inputShapeRows);
                 return checked(rows * rows);
             }
             if (identity == "cooperative.shapley-values@1")
@@ -908,9 +931,9 @@ public sealed class MathBlocksGPUProgram : IDisposable
             if (identity == "inequality.lorenz-curve@1")
                 return checked(inputCapacities[0] + 1);
             if (identity == "markov.stationary-distribution@1")
-                return ResolveShapeRows(nodes[node.Inputs[0]], prototypeInputs);
+                return RequireInputShapeRows(node, 0, inputShapeRows);
             if (identity == "transport.minimum-assignment@1")
-                return ResolveShapeRows(nodes[node.Inputs[0]], prototypeInputs);
+                return RequireInputShapeRows(node, 0, inputShapeRows);
             if (identity == "transport.monotone-coupling@1")
             {
                 return checked(
@@ -922,8 +945,8 @@ public sealed class MathBlocksGPUProgram : IDisposable
             if (identity is "tropical.max-plus-multiply@1" or "tropical.min-plus-multiply@1")
             {
                 return checked(
-                    ResolveShapeRows(nodes[node.Inputs[0]], prototypeInputs) *
-                    ResolveShapeColumns(nodes[node.Inputs[1]], prototypeInputs));
+                    RequireInputShapeRows(node, 0, inputShapeRows) *
+                    RequireInputShapeColumns(node, 1, inputShapeColumns));
             }
             if (identity == "vector.pair@1")
                 return 2;
@@ -956,6 +979,187 @@ public sealed class MathBlocksGPUProgram : IDisposable
             }
         }
         throw new InvalidOperationException($"GPU payload capacity is unknown for node {node.Index}.");
+    }
+
+    private static MathBlockGpuShapeAuthority ResolveShapeAuthority(
+        MathBlockProgramNode node,
+        int capacity,
+        IReadOnlyList<int> inputCapacities,
+        IReadOnlyList<int> inputShapeRows,
+        IReadOnlyList<int> inputShapeColumns,
+        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
+        IReadOnlyDictionary<string, MathBlockGpuShapeAuthority>? inputShapeOverrides)
+    {
+        if (node.Kind == MathBlockProgramNodeKind.Constant)
+        {
+            return CompleteShapeAuthority(
+                node,
+                capacity,
+                ValueShapeRows(node.Value),
+                ValueShapeColumns(node.Value));
+        }
+        if (node.Kind == MathBlockProgramNodeKind.Input &&
+            inputShapeOverrides is not null &&
+            inputShapeOverrides.TryGetValue(node.Name!, out var inputShape))
+        {
+            return CompleteShapeAuthority(node, capacity, inputShape.Rows, inputShape.Columns);
+        }
+        if (node.Kind == MathBlockProgramNodeKind.Input &&
+            prototypeInputs is not null &&
+            prototypeInputs.TryGetValue(node.Name!, out var prototype))
+        {
+            return CompleteShapeAuthority(
+                node,
+                capacity,
+                ValueShapeRows(prototype),
+                ValueShapeColumns(prototype));
+        }
+
+        var rows = node.Type.Rows;
+        var columns = node.Type.Columns;
+        if (node.Kind == MathBlockProgramNodeKind.Operation && (rows == 0 || columns == 0))
+        {
+            var inferred = ResolveOperationShapeAuthority(
+                node,
+                inputCapacities,
+                inputShapeRows,
+                inputShapeColumns);
+            if (rows == 0)
+                rows = inferred.Rows;
+            if (columns == 0)
+                columns = inferred.Columns;
+        }
+        return CompleteShapeAuthority(node, capacity, rows, columns);
+    }
+
+    private static MathBlockGpuShapeAuthority ResolveOperationShapeAuthority(
+        MathBlockProgramNode node,
+        IReadOnlyList<int> inputCapacities,
+        IReadOnlyList<int> inputShapeRows,
+        IReadOnlyList<int> inputShapeColumns)
+    {
+        var identity = node.OperationIdentity!;
+        if (identity is "matrix.gram@1" or "statistics.covariance-matrix@1")
+        {
+            var columns = RequireInputShapeColumns(node, 0, inputShapeColumns);
+            return new MathBlockGpuShapeAuthority(columns, columns);
+        }
+        if (identity == "matrix.transpose@1")
+        {
+            return new MathBlockGpuShapeAuthority(
+                RequireInputShapeColumns(node, 0, inputShapeColumns),
+                RequireInputShapeRows(node, 0, inputShapeRows));
+        }
+        if (identity is "matrix.multiply@1" or "matrix.commutator@1" or
+            "tropical.max-plus-multiply@1" or "tropical.min-plus-multiply@1")
+        {
+            return new MathBlockGpuShapeAuthority(
+                RequireInputShapeRows(node, 0, inputShapeRows),
+                RequireInputShapeColumns(node, 1, inputShapeColumns));
+        }
+        if (identity == "matrix.append-row@1")
+        {
+            return new MathBlockGpuShapeAuthority(
+                checked(RequireInputShapeRows(node, 0, inputShapeRows) + 1),
+                RequireInputShapeColumns(node, 0, inputShapeColumns));
+        }
+        if (identity == "matrix.diagonal-from-vector@1")
+            return new MathBlockGpuShapeAuthority(inputCapacities[0], inputCapacities[0]);
+        if (identity is "matrix.hankel@1" or "matrix.toeplitz@1" or "matrix.outer-product@1")
+            return new MathBlockGpuShapeAuthority(inputCapacities[0], inputCapacities[1]);
+        if (identity == "matrix.stack-rows@1")
+            return new MathBlockGpuShapeAuthority(2, Math.Max(inputCapacities[0], inputCapacities[1]));
+        if (identity == "matrix.kronecker-product@1")
+        {
+            return new MathBlockGpuShapeAuthority(
+                checked(
+                    RequireInputShapeRows(node, 0, inputShapeRows) *
+                    RequireInputShapeRows(node, 1, inputShapeRows)),
+                checked(
+                    RequireInputShapeColumns(node, 0, inputShapeColumns) *
+                    RequireInputShapeColumns(node, 1, inputShapeColumns)));
+        }
+        if (identity == "path.lead-lag-transform@1")
+        {
+            var count = inputCapacities[0];
+            return new MathBlockGpuShapeAuthority(count == 0 ? 0 : checked(2 * count - 1), 2);
+        }
+        if (identity == "point-set.to-matrix@1")
+            return new MathBlockGpuShapeAuthority(inputCapacities[0], 2);
+        if (identity is "graph.to-directed-adjacency@1" or
+            "graph.undirected-adjacency-matrix@1" or "graph.undirected-laplacian@1")
+        {
+            var rows = RequireInputShapeRows(node, 0, inputShapeRows);
+            return new MathBlockGpuShapeAuthority(rows, rows);
+        }
+        return default;
+    }
+
+    private static MathBlockGpuShapeAuthority CompleteShapeAuthority(
+        MathBlockProgramNode node,
+        int capacity,
+        int rows,
+        int columns)
+    {
+        if (rows < 0 || columns < 0)
+            throw new InvalidOperationException($"GPU shape authority for node {node.Index} is negative.");
+        switch (node.Type.Kind)
+        {
+            case MathBlockValueKind.Vector:
+            case MathBlockValueKind.ComplexVector:
+            case MathBlockValueKind.BooleanVector:
+            case MathBlockValueKind.PointSet:
+            case MathBlockValueKind.RunSet:
+                return new MathBlockGpuShapeAuthority(rows == 0 ? capacity : rows, columns);
+            case MathBlockValueKind.Matrix:
+            case MathBlockValueKind.ComplexMatrix:
+                if (rows == 0 && columns == 0)
+                    return new MathBlockGpuShapeAuthority(capacity, capacity);
+                if (rows == 0)
+                    rows = DivideRoundUp(capacity, columns);
+                if (columns == 0)
+                    columns = DivideRoundUp(capacity, rows);
+                return new MathBlockGpuShapeAuthority(rows, columns);
+            default:
+                return new MathBlockGpuShapeAuthority(rows, columns);
+        }
+    }
+
+    private static int DivideRoundUp(int value, int divisor)
+    {
+        if (value == 0)
+            return 0;
+        if (divisor <= 0)
+            throw new InvalidOperationException("GPU shape authority is unavailable.");
+        return checked(1 + (value - 1) / divisor);
+    }
+
+    private static int RequireInputShapeRows(
+        MathBlockProgramNode node,
+        int inputIndex,
+        IReadOnlyList<int> inputShapeRows)
+    {
+        var rows = inputShapeRows[inputIndex];
+        if (rows <= 0)
+        {
+            throw new InvalidOperationException(
+                $"GPU row authority for input {inputIndex} of node {node.Index} is unavailable.");
+        }
+        return rows;
+    }
+
+    private static int RequireInputShapeColumns(
+        MathBlockProgramNode node,
+        int inputIndex,
+        IReadOnlyList<int> inputShapeColumns)
+    {
+        var columns = inputShapeColumns[inputIndex];
+        if (columns <= 0)
+        {
+            throw new InvalidOperationException(
+                $"GPU column authority for input {inputIndex} of node {node.Index} is unavailable.");
+        }
+        return columns;
     }
 
     private static int ResolveShapeRows(

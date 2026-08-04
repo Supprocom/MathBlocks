@@ -329,6 +329,93 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Resident_search_resolves_dynamic_matrix_candidate_shape_for_objectives()
+    {
+        RequireCuda();
+        var sourceType = MathBlockType.Matrix(rows: 3, columns: 2);
+        var candidateType = MathBlockType.Matrix(rows: 2, columns: 3);
+        var dynamicMatrix = MathBlockType.Matrix();
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation(
+                    "matrix.transpose",
+                    1,
+                    [sourceType],
+                    candidateType)],
+                dynamicMatrix),
+            [new MathBlockProgramPopulationTerminal(
+                "telemetry-grid",
+                sourceType,
+                MathBlockValue.Matrix(new MathBlockMatrix(
+                    3,
+                    2,
+                    [1d, 2d, 3d, 4d, 5d, 6d])))],
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 6)],
+            proposalsPerCycle: 1,
+            fingerprintCapacity: 4);
+        var objectiveBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = objectiveBuilder.Input("candidate", dynamicMatrix);
+        var gram = objectiveBuilder.Apply("matrix.gram", inputs: [candidate]);
+        var norm = objectiveBuilder.Apply("matrix.frobenius-norm", inputs: [gram]);
+        var objectiveProgram = objectiveBuilder.Output("gram-norm", norm).Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveProgram,
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "gram-norm",
+                "gram-norm",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        var definition = CreateDefinition(
+            population,
+            binding,
+            maximumTrials: 1,
+            enumerationTrials: 1,
+            validity: new MathBlockProgramPopulationValidityPolicy([0, 1]));
+        var expectedProgram = new MathBlockProgramStructure(
+            0,
+            0,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                MathBlockProgramCandidateNode.Terminal(0, "telemetry-grid", sourceType),
+                MathBlockProgramCandidateNode.Operation(
+                    "matrix.transpose",
+                    1,
+                    candidateType,
+                    0)
+            ]);
+        var expectedObjectives = definition.EvaluateObjectives(expectedProgram);
+        var expectedSemantic = definition.CreateSemanticFingerprint(expectedProgram);
+        using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(definition);
+
+        var result = compiled.ExecuteCycle();
+
+        Assert.Equal(9, compiled.Capacity.MaximumValueElements);
+        Assert.Single(result.Trials);
+        var accepted = Assert.Single(
+            result.Trials,
+            trial => trial.Status == MathBlockProgramPopulationTrialStatus.Accepted);
+        Assert.Equal(expectedProgram.StructuralFingerprint, accepted.StructuralFingerprint);
+        Assert.Equal(
+            expectedObjectives.Select(BitConverter.DoubleToInt64Bits),
+            accepted.Objectives.Select(BitConverter.DoubleToInt64Bits));
+        Assert.Equal(expectedSemantic, accepted.SemanticFingerprint);
+        Assert.Equal(1ul, result.AcceptedState.EvaluatedProgramCount);
+        Assert.Equal(1ul, result.AcceptedState.AcceptedProgramCount);
+        Assert.Equal(1, compiled.GraphInstanceCount);
+        Assert.Equal(1, compiled.ImmutableUploadCount);
+        Assert.Equal(0, compiled.LaterImmutableUploadCount);
+        Assert.Equal(1, compiled.GraphLaunchCount);
+        Assert.Equal(1, compiled.SynchronizationCount);
+        Assert.Equal(1, compiled.DownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputBytes);
+        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        Assert.Equal((long)compiled.CompactDownloadBytesPerCycle, compiled.DownloadedBytes);
+    }
+
+    [Fact]
     public void Resident_search_accepts_more_than_eight_objectives_and_intrinsic_sources()
     {
         RequireCuda();
