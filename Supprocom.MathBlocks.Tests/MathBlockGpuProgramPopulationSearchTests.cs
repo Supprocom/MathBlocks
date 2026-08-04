@@ -37,8 +37,10 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         var singleLane = worker.MeasurePopulationSearchCapacity(
             definition,
             MathBlockProgramPopulationExecutionOptions.SerialResident);
+        var defaultCapacity = worker.MeasurePopulationSearchCapacity(definition);
         var fourLanes = worker.MeasurePopulationSearchCapacity(definition, options);
 
+        Assert.Equal(singleLane, defaultCapacity);
         Assert.Equal(1, singleLane.CandidateLaneCount);
         Assert.Equal(4, fourLanes.CandidateLaneCount);
         Assert.Equal(1, singleLane.ProposalWaveSlotCount);
@@ -111,6 +113,12 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
                     int.MaxValue)));
         Assert.Throws<ArgumentOutOfRangeException>(
             () => worker.CompilePopulationSearch(
+                definition,
+                new MathBlockProgramPopulationExecutionOptions(
+                    MathBlockProgramPopulationExecutionMode.SerialResident,
+                    4)));
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => worker.MeasurePopulationSearchCapacity(
                 definition,
                 new MathBlockProgramPopulationExecutionOptions(
                     MathBlockProgramPopulationExecutionMode.SerialResident,
@@ -1200,6 +1208,64 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
                 exception.Message);
             Assert.Equal(acceptedBefore, compiled.AcceptedState.Export());
             Assert.Equal(0ul, compiled.AcceptedState.TrialCursor);
+            Assert.Empty(compiled.AcceptedState.StructuralFingerprints);
+            Assert.Empty(compiled.AcceptedState.SemanticFingerprints);
+            Assert.Empty(compiled.AcceptedState.SelectionEntries);
+            Assert.Empty(compiled.AcceptedState.QualityDiversityEntries);
+        }
+
+        Assert.Equal(1, compiled.GraphInstanceCount);
+        Assert.Equal(1, compiled.ImmutableUploadCount);
+        Assert.Equal(0, compiled.LaterImmutableUploadCount);
+        Assert.Equal(2, compiled.GraphLaunchCount);
+        Assert.Equal(2, compiled.SynchronizationCount);
+        Assert.Equal(2, compiled.DownloadCount);
+        Assert.Equal(
+            checked(2L * compiled.CompactDownloadBytesPerCycle),
+            compiled.DownloadedBytes);
+        Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputBytes);
+        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        Assert.Equal(0, compiled.CandidateChunkCount);
+        Assert.Equal(0, compiled.ParallelCandidateExecutionCount);
+    }
+
+    [Fact]
+    public void Failed_parallel_prepare_preserves_the_checkpoint_before_evaluation_and_retry()
+    {
+        RequireCuda();
+        var baseline = CreateScalarSearch(
+            proposalsPerCycle: 2,
+            maximumTrials: 2,
+            enumerationTrials: 2);
+        var definition = new MathBlockProgramPopulationSearchDefinition(
+            baseline.Population,
+            baseline.ObjectiveBinding,
+            baseline.Evolution,
+            baseline.Selection,
+            baseline.QualityDiversity,
+            baseline.Envelope,
+            baseline.Validity,
+            baseline.CompactResults,
+            baseline.InitialPrograms,
+            wavePolicy: new MathBlockProgramPopulationWavePolicy(2, 1));
+        using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(
+            definition,
+            new MathBlockProgramPopulationExecutionOptions(
+                MathBlockProgramPopulationExecutionMode.ParallelResident,
+                2));
+        SetDeviceCandidateLaneCountForFailureTest(compiled, 0);
+        var acceptedBefore = compiled.AcceptedState.Export();
+
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            var exception = Assert.Throws<InvalidOperationException>(compiled.ExecuteCycle);
+            Assert.Equal("The resident population search cycle failed closed.", exception.Message);
+            Assert.Equal(acceptedBefore, compiled.AcceptedState.Export());
+            Assert.Equal(0ul, compiled.AcceptedState.EnumerationCursor);
+            Assert.Equal(0ul, compiled.AcceptedState.TrialCursor);
+            Assert.Equal(0ul, compiled.AcceptedState.CycleCount);
+            Assert.Equal(0ul, compiled.AcceptedState.WaveCursor);
             Assert.Empty(compiled.AcceptedState.StructuralFingerprints);
             Assert.Empty(compiled.AcceptedState.SemanticFingerprints);
             Assert.Empty(compiled.AcceptedState.SelectionEntries);
@@ -4532,9 +4598,19 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
 
     private static void SetDeviceFingerprintCapacityForFailureTest(
         MathBlocksGPUProgramPopulationSearch compiled,
-        int capacity)
+        int capacity) =>
+        SetDeviceArenaInt32ForFailureTest(compiled, 40, capacity);
+
+    private static void SetDeviceCandidateLaneCountForFailureTest(
+        MathBlocksGPUProgramPopulationSearch compiled,
+        int candidateLaneCount) =>
+        SetDeviceArenaInt32ForFailureTest(compiled, 352, candidateLaneCount);
+
+    private static void SetDeviceArenaInt32ForFailureTest(
+        MathBlocksGPUProgramPopulationSearch compiled,
+        int offset,
+        int value)
     {
-        const int FingerprintCapacityHeaderOffset = 40;
         var deviceArena = (ulong)typeof(MathBlocksGPUProgramPopulationSearch)
             .GetField("deviceArena", BindingFlags.Instance | BindingFlags.NonPublic)!
             .GetValue(compiled)!;
@@ -4547,11 +4623,11 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         var source = Marshal.AllocHGlobal(sizeof(int));
         try
         {
-            Marshal.WriteInt32(source, capacity);
+            Marshal.WriteInt32(source, value);
             var result = (int)copyMethod.Invoke(
                 null,
                 [
-                    checked(deviceArena + (ulong)FingerprintCapacityHeaderOffset),
+                    checked(deviceArena + (ulong)offset),
                     source,
                     new UIntPtr(sizeof(int))
                 ])!;

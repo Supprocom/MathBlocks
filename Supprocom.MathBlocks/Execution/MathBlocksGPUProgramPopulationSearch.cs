@@ -84,13 +84,7 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
     {
         ArgumentNullException.ThrowIfNull(definition);
         ArgumentNullException.ThrowIfNull(executionOptions);
-        if (executionOptions.Mode == MathBlockProgramPopulationExecutionMode.SerialResident &&
-            executionOptions.CandidateLaneCount != 1)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(executionOptions),
-                "Serial resident execution requires one candidate lane.");
-        }
+        executionOptions.ValidateResidentExecution(nameof(executionOptions));
         var layout = PopulationSearchLayout.Create(
             definition,
             executionOptions.CandidateLaneCount,

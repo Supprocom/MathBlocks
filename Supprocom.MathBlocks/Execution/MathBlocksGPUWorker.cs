@@ -52,11 +52,20 @@ public sealed class MathBlocksGPUWorker
     }
 
     public MathBlockProgramPopulationSearchCapacity MeasurePopulationSearchCapacity(
+        MathBlockProgramPopulationSearchDefinition definition)
+    {
+        return MeasurePopulationSearchCapacity(
+            definition,
+            MathBlockProgramPopulationExecutionOptions.SerialResident);
+    }
+
+    public MathBlockProgramPopulationSearchCapacity MeasurePopulationSearchCapacity(
         MathBlockProgramPopulationSearchDefinition definition,
         MathBlockProgramPopulationExecutionOptions executionOptions)
     {
         ArgumentNullException.ThrowIfNull(definition);
         ArgumentNullException.ThrowIfNull(executionOptions);
+        executionOptions.ValidateResidentExecution(nameof(executionOptions));
         return PopulationSearchLayout.Create(
             definition,
             executionOptions.CandidateLaneCount,

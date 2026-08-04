@@ -72,6 +72,16 @@ public sealed record MathBlockProgramPopulationExecutionOptions
 
     public static MathBlockProgramPopulationExecutionOptions SerialResident { get; } =
         new(MathBlockProgramPopulationExecutionMode.SerialResident, 1);
+
+    internal void ValidateResidentExecution(string parameterName)
+    {
+        if (Mode == MathBlockProgramPopulationExecutionMode.SerialResident && CandidateLaneCount != 1)
+        {
+            throw new ArgumentOutOfRangeException(
+                parameterName,
+                "Serial resident execution requires one candidate lane.");
+        }
+    }
 }
 
 public sealed record MathBlockProgramPopulationWavePolicy

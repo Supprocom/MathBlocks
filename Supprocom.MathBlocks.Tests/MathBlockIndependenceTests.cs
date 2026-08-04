@@ -38,6 +38,29 @@ public sealed partial class MathBlockIndependenceTests
     }
 
     [Fact]
+    public void Public_release_metadata_declares_the_parallel_resident_0_2_0_contract()
+    {
+        var root = FindRepositoryRoot();
+        var projectPath = Path.Combine(root, "Supprocom.MathBlocks", "Supprocom.MathBlocks.csproj");
+        var document = XDocument.Load(projectPath);
+        var readme = File.ReadAllText(Path.Combine(root, "README.md"));
+
+        Assert.Equal("0.2.0", document.Descendants("Version").Single().Value);
+        Assert.Equal("AGPL-3.0-only", document.Descendants("PackageLicenseExpression").Single().Value);
+        Assert.Contains(
+            "explicit serial and parallel resident search modes",
+            document.Descendants("PackageReleaseNotes").Single().Value,
+            StringComparison.Ordinal);
+        Assert.Equal(new Version(0, 2, 0, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
+        Assert.Contains("## Parallel proposal waves", readme, StringComparison.Ordinal);
+        Assert.Contains(
+            "dotnet add package Supprocom.MathBlocks --version 0.2.0",
+            readme,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain("--version 0.1.", readme, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Production_source_contains_no_input_or_factor_semantics()
     {
         var root = FindRepositoryRoot();

@@ -86,6 +86,50 @@ Instrumentation reports graph instances, uploads, launches,
 synchronizations, downloads, resident bytes, compact bytes, duplicate counts,
 evaluated programs, and the accepted cursor.
 
+## Parallel proposal waves
+
+The search definition owns a `MathBlockProgramPopulationWavePolicy`.
+`ProposalWaveSize` changes search semantics and checkpoint identity.
+
+Every proposal in a wave reads one frozen accepted-state snapshot. Ordered
+commit applies trial results after all candidates in that wave finish.
+
+`SerialResident` evaluates each wave with one candidate lane.
+`ParallelResident` assigns independent candidate slots to the requested lanes.
+
+Fixed candidate chunks handle waves that are wider than the lane count. Chunk
+boundaries do not change trial identities, objective bits, or accepted state.
+
+Execution mode and requested lane count do not enter search identity. Thus, a
+complete accepted checkpoint can resume across modes and lane counts.
+
+Call `MeasurePopulationSearchCapacity` before compilation. The result reports
+shared bytes, lane stride, working bytes, wave slots, peak bytes, and compact
+bytes.
+
+Compilation rejects an insufficient resident or compact envelope. The runtime
+reserves the requested lane count and reports requested and active lanes
+separately.
+
+Given a completed search definition, compile four resident lanes as follows.
+
+```csharp
+using Supprocom.MathBlocks;
+using Supprocom.MathBlocks.Gpu;
+
+var worker = new MathBlocksGPUWorker();
+var options = new MathBlockProgramPopulationExecutionOptions(
+    MathBlockProgramPopulationExecutionMode.ParallelResident,
+    candidateLaneCount: 4);
+
+var capacity = worker.MeasurePopulationSearchCapacity(definition, options);
+using var search = worker.CompilePopulationSearch(definition, options);
+var cycle = search.ExecuteCycle();
+
+Console.WriteLine(capacity.PeakResidentBytes);
+Console.WriteLine(cycle.Instrumentation.MaximumConcurrentCandidates);
+```
+
 ## Geometry example
 
 This program calculates the area of a rectangle with a versioned scalar block.
@@ -120,15 +164,18 @@ contracts and are not universal latency guarantees.
 Results depend on hardware, input shape, operating-system scheduling,
 percentile, and measurement method.
 
+Parallel resident mode can be slower for small workloads. Package tests report
+serial and parallel samples without claiming an advantage for every workload.
+
 ## Source-only repository
 
 This Git repository contains source text and project metadata only. It does not
 contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
 
-Get MathBlocks version `0.1.6` from NuGet.org with this command:
+Get MathBlocks version `0.2.0` from NuGet.org with this command:
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.1.6
+dotnet add package Supprocom.MathBlocks --version 0.2.0
 ```
 
 The package declares three external native-acquisition dependencies. This
