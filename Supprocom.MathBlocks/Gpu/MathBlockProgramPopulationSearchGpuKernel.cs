@@ -1522,7 +1522,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
 
         __device__ void mbp_fail(unsigned char* arena, int compact_offset, int status)
         {
-            mbp_clear(arena + compact_offset, 128);
+            mbp_clear(arena + compact_offset, 144);
             mbp_write_int(arena, compact_offset, status);
         }
 
@@ -1531,7 +1531,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             if (blockIdx.x != 0)
                 return;
             __shared__ int cooperative_status;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 6)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 7)
                 return;
 
             int grammar_operation_count = mbp_read_int(arena, 8);
@@ -1541,6 +1541,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int maximum_band_elements = mbp_read_int(arena, 28);
             int maximum_value_elements = mbp_read_int(arena, 32);
             int proposals_per_cycle = mbp_read_int(arena, 36);
+            int cycle_work_limit = mbp_read_int(arena, 320);
             int fingerprint_capacity = mbp_read_int(arena, 40);
             int output_type = mbp_read_int(arena, 44);
             int objective_node_count = mbp_read_int(arena, 48);
@@ -1609,10 +1610,11 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
 
             if (grammar_operation_count <= 0 || terminal_count <= 0 || band_count <= 0 ||
                 maximum_operation_count <= 0 || maximum_band_elements <= 0 ||
-                maximum_value_elements <= 0 || proposals_per_cycle <= 0 || fingerprint_capacity <= 0 ||
+                maximum_value_elements <= 0 || proposals_per_cycle <= 0 ||
+                cycle_work_limit <= 0 || fingerprint_capacity <= 0 ||
                 objective_node_count <= 0 || objective_count <= 0 || pareto_capacity <= 0 ||
                 quality_capacity <= 0 || maximum_arity < 0 || history_count <= 0 ||
-                compact_size < 128 || enumeration_limit > total_proposals)
+                compact_size < 144 || enumeration_limit > total_proposals)
             {
                 mbp_fail(arena, compact_offset, 4);
                 return;
@@ -1635,6 +1637,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int refresh_cursor = mbp_read_int(arena, accepted_state_offset + 96);
             int accepted_refresh_count = mbp_read_int(arena, accepted_state_offset + 100);
             mbp_ull enumeration_trial_count = mbp_read_ull(arena, accepted_state_offset + 104);
+            mbp_ull wave_cursor = mbp_read_ull(arena, accepted_state_offset + 112);
             if (structural_count < 0 || structural_count > fingerprint_capacity ||
                 semantic_count < 0 || semantic_count > fingerprint_capacity ||
                 pareto_count < 0 || pareto_count > pareto_capacity ||
@@ -1642,6 +1645,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 enumeration_cursor > total_proposals ||
                 enumeration_trial_count > enumeration_limit ||
                 enumeration_trial_count > enumeration_cursor ||
+                wave_cursor > trial_cursor ||
                 enumeration_trial_count > trial_cursor || trial_cursor > maximum_trials ||
                 random_first == 0ull && random_second == 0ull ||
                 refresh_cursor < 0 || refresh_cursor > refresh_count ||
@@ -1651,7 +1655,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 return;
             }
 
-            mbp_copy(arena + working_state_offset, arena + accepted_state_offset, 128);
+            mbp_copy(arena + working_state_offset, arena + accepted_state_offset, 144);
             mbp_copy(
                 arena + working_structural_offset,
                 arena + accepted_structural_offset,
@@ -1707,7 +1711,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int processed = 0;
             int enumeration_scan_count = 0;
 
-            while (processed < proposals_per_cycle && refresh_cursor < refresh_count)
+            while (processed < cycle_work_limit && refresh_cursor < refresh_count)
             {
                 int refresh_entry = refresh_offset + refresh_cursor * entry_size;
                 int candidate_operation_count = 0;
@@ -1923,7 +1927,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 processed++;
             }
 
-            while (processed < proposals_per_cycle && trial_cursor < maximum_trials)
+            while (processed < cycle_work_limit && trial_cursor < maximum_trials)
             {
                 int source = 0;
                 mbp_ull proposal_cursor = ~0ull;
@@ -2067,6 +2071,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 if (!generated)
                     break;
                 mbp_ull current_trial = trial_cursor++;
+                wave_cursor++;
                 processed++;
                 int candidate_entry = compact_trial_offset + trial_result_count * entry_size;
                 MbpHash structural = mbp_structural_hash(
@@ -2329,8 +2334,9 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             mbp_write_int(arena, working_state_offset + 96, refresh_cursor);
             mbp_write_int(arena, working_state_offset + 100, refresh_count);
             mbp_write_ull(arena, working_state_offset + 104, enumeration_trial_count);
+            mbp_write_ull(arena, working_state_offset + 112, wave_cursor);
 
-            mbp_copy(arena + accepted_state_offset, arena + working_state_offset, 128);
+            mbp_copy(arena + accepted_state_offset, arena + working_state_offset, 144);
             mbp_copy(
                 arena + accepted_structural_offset,
                 arena + working_structural_offset,
@@ -2369,6 +2375,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             mbp_write_int(arena, compact_offset + 112, refresh_cursor);
             mbp_write_int(arena, compact_offset + 116, refresh_count);
             mbp_write_ull(arena, compact_offset + 120, enumeration_trial_count);
+            mbp_write_ull(arena, compact_offset + 128, wave_cursor);
             mbp_copy(
                 arena + compact_pareto_offset,
                 arena + working_pareto_offset,

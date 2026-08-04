@@ -74,6 +74,24 @@ public sealed record MathBlockProgramPopulationExecutionOptions
         new(MathBlockProgramPopulationExecutionMode.SerialResident, 1);
 }
 
+public sealed record MathBlockProgramPopulationWavePolicy
+{
+    public MathBlockProgramPopulationWavePolicy(int proposalWaveSize, int wavesPerCycle)
+    {
+        if (proposalWaveSize <= 0)
+            throw new ArgumentOutOfRangeException(nameof(proposalWaveSize));
+        if (wavesPerCycle <= 0)
+            throw new ArgumentOutOfRangeException(nameof(wavesPerCycle));
+        ProposalWaveSize = proposalWaveSize;
+        WavesPerCycle = wavesPerCycle;
+        MaximumTrialResultsPerCycle = checked(proposalWaveSize * wavesPerCycle);
+    }
+
+    public int ProposalWaveSize { get; }
+    public int WavesPerCycle { get; }
+    public int MaximumTrialResultsPerCycle { get; }
+}
+
 public readonly record struct MathBlockProgramPopulationObjective
 {
     public MathBlockProgramPopulationObjective(
@@ -448,6 +466,11 @@ public readonly record struct MathBlockProgramPopulationSearchCapacity(
     int ObjectiveProgramNodeCount,
     int ParetoCapacity,
     int QualityDiversityCellCount,
+    long SharedResidentBytes,
+    int LaneStrideBytes,
+    int CandidateLaneCount,
+    long WorkingResidentBytes,
+    long PeakResidentBytes,
     long ResidentBytes,
     int CompactDownloadBytes);
 
@@ -463,7 +486,8 @@ public sealed class MathBlockProgramPopulationSearchDefinition
         MathBlockProgramPopulationValidityPolicy validity,
         MathBlockProgramPopulationCompactResultPolicy? compactResults = null,
         IEnumerable<MathBlockProgramStructure>? initialPrograms = null,
-        MathBlockProgramPopulationSearchState? acceptedState = null)
+        MathBlockProgramPopulationSearchState? acceptedState = null,
+        MathBlockProgramPopulationWavePolicy? wavePolicy = null)
     {
         Population = population ?? throw new ArgumentNullException(nameof(population));
         ObjectiveBinding = objectiveBinding ?? throw new ArgumentNullException(nameof(objectiveBinding));
@@ -473,6 +497,9 @@ public sealed class MathBlockProgramPopulationSearchDefinition
         Envelope = envelope ?? throw new ArgumentNullException(nameof(envelope));
         Validity = validity ?? throw new ArgumentNullException(nameof(validity));
         CompactResults = compactResults ?? new MathBlockProgramPopulationCompactResultPolicy();
+        WavePolicy = wavePolicy ?? new MathBlockProgramPopulationWavePolicy(
+            1,
+            population.ProposalsPerCycle);
         if (population.AcceptedState is not null)
             throw new ArgumentException("A search definition cannot use an enumeration checkpoint.", nameof(population));
         var candidateType = objectiveBinding.Program.Inputs[objectiveBinding.CandidateInput];
@@ -521,6 +548,7 @@ public sealed class MathBlockProgramPopulationSearchDefinition
     public MathBlockProgramPopulationSearchEnvelope Envelope { get; }
     public MathBlockProgramPopulationValidityPolicy Validity { get; }
     public MathBlockProgramPopulationCompactResultPolicy CompactResults { get; }
+    public MathBlockProgramPopulationWavePolicy WavePolicy { get; }
     public IReadOnlyList<MathBlockProgramStructure> InitialPrograms { get; }
     public string Identity { get; }
     public MathBlockProgramPopulationSearchState? AcceptedState { get; }
@@ -633,6 +661,7 @@ public sealed class MathBlockProgramPopulationSearchDefinition
             preserveEnumerationCursor ? previousState.EnumerationTrialCount : 0,
             previousState.TrialCursor,
             previousState.CycleCount,
+            previousState.WaveCursor,
             checked(previousState.EnvelopeGeneration + 1),
             0,
             previousState.RandomState,
@@ -709,7 +738,8 @@ public sealed class MathBlockProgramPopulationSearchDefinition
             Validity,
             CompactResults,
             [],
-            acceptedState);
+            acceptedState,
+            WavePolicy);
 
     private static int GetValidityRowCount(MathBlockValue value) => value.Type.Kind switch
     {
@@ -729,6 +759,8 @@ public sealed class MathBlockProgramPopulationSearchDefinition
         MathBlockProgramPopulationSearchDefinition previousDefinition,
         MathBlockProgramPopulationSearchState previousState)
     {
+        if (previousDefinition.WavePolicy != WavePolicy)
+            throw new InvalidOperationException("The expanded search cannot change proposal-wave policy.");
         if (Evolution.MaximumTrialCount < previousState.TrialCursor)
             throw new InvalidOperationException("The expanded search cannot reduce the accepted trial range.");
         if (Population.FingerprintCapacity < previousState.StructuralFingerprints.Count ||
@@ -868,6 +900,7 @@ public sealed class MathBlockProgramPopulationSearchDefinition
         if (!string.Equals(state.Identity, Identity, StringComparison.Ordinal))
             throw new InvalidOperationException("The accepted search state has an incompatible identity.");
         if (state.TrialCursor > Evolution.MaximumTrialCount ||
+            state.WaveCursor > state.TrialCursor ||
             state.EnumerationCursor > Population.TotalProposalCount ||
             state.EnumerationTrialCount > Evolution.EnumerationProposalCount ||
             state.EnumerationTrialCount > state.TrialCursor ||
@@ -1053,6 +1086,7 @@ public sealed class MathBlockProgramPopulationSearchState
         ulong enumerationTrialCount,
         ulong trialCursor,
         ulong cycleCount,
+        ulong waveCursor,
         ulong envelopeGeneration,
         int refreshCursor,
         MathBlockProgramPopulationRandomState randomState,
@@ -1105,6 +1139,7 @@ public sealed class MathBlockProgramPopulationSearchState
         EnumerationTrialCount = enumerationTrialCount;
         TrialCursor = trialCursor;
         CycleCount = cycleCount;
+        WaveCursor = waveCursor;
         EnvelopeGeneration = envelopeGeneration;
         RefreshCursor = refreshCursor;
         RandomState = randomState;
@@ -1125,6 +1160,7 @@ public sealed class MathBlockProgramPopulationSearchState
     public ulong InvalidEnumerationProposalCount => EnumerationCursor - EnumerationTrialCount;
     public ulong TrialCursor { get; }
     public ulong CycleCount { get; }
+    public ulong WaveCursor { get; }
     public ulong EnvelopeGeneration { get; }
     public int RefreshCursor { get; }
     public MathBlockProgramPopulationRandomState RandomState { get; }
@@ -1204,13 +1240,13 @@ public sealed class MathBlockProgramPopulationSearchCycleResult
 
 internal static class MathBlockProgramPopulationSearchSerialization
 {
-    private const string StateSchema = "mathblocks-population-search-state-v4";
+    private const string StateSchema = "mathblocks-population-search-state-v5";
 
     public static string CreateIdentity(MathBlockProgramPopulationSearchDefinition definition)
     {
         using var stream = new MemoryStream();
         using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
-        writer.Write("mathblocks-population-search-v3");
+        writer.Write("mathblocks-population-search-v4");
         writer.Write(definition.Population.Identity);
         var binding = definition.ObjectiveBinding;
         writer.Write(binding.Program.Fingerprint);
@@ -1251,6 +1287,8 @@ internal static class MathBlockProgramPopulationSearchSerialization
                 writer.Write(objective.ProgramOutput);
             writer.Write((int)objective.Direction);
         }
+        writer.Write(definition.WavePolicy.ProposalWaveSize);
+        writer.Write(definition.WavePolicy.WavesPerCycle);
         var evolution = definition.Evolution;
         writer.Write(evolution.MaximumTrialCount);
         writer.Write(evolution.EnumerationProposalCount);
@@ -1305,6 +1343,7 @@ internal static class MathBlockProgramPopulationSearchSerialization
             writer.Write(state.EnumerationTrialCount);
             writer.Write(state.TrialCursor);
             writer.Write(state.CycleCount);
+            writer.Write(state.WaveCursor);
             writer.Write(state.EnvelopeGeneration);
             writer.Write(state.RefreshCursor);
             writer.Write(state.RandomState.First);
@@ -1347,6 +1386,7 @@ internal static class MathBlockProgramPopulationSearchSerialization
         var enumerationTrialCount = reader.ReadUInt64();
         var trialCursor = reader.ReadUInt64();
         var cycleCount = reader.ReadUInt64();
+        var waveCursor = reader.ReadUInt64();
         var envelopeGeneration = reader.ReadUInt64();
         var refreshCursor = reader.ReadInt32();
         var randomState = new MathBlockProgramPopulationRandomState(reader.ReadUInt64(), reader.ReadUInt64());
@@ -1372,6 +1412,7 @@ internal static class MathBlockProgramPopulationSearchSerialization
             enumerationTrialCount,
             trialCursor,
             cycleCount,
+            waveCursor,
             envelopeGeneration,
             refreshCursor,
             randomState,

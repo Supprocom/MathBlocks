@@ -16,7 +16,6 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
     private IntPtr graph;
     private IntPtr executable;
     private MathBlockProgramPopulationSearchState acceptedState;
-    private long proposalWaveCount;
     private long candidateChunkCount;
     private long serialCandidateExecutionCount;
     private long parallelCandidateExecutionCount;
@@ -66,7 +65,7 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
     public long FullCandidateOutputDownloadCount => 0;
     public long FullCandidateOutputBytes => 0;
     public int CpuNodeDispatchCount => 0;
-    public long ProposalWaveCount => proposalWaveCount;
+    public long ProposalWaveCount => checked((long)acceptedState.WaveCursor);
     public long CandidateChunkCount => candidateChunkCount;
     public int MaximumConcurrentCandidates => maximumConcurrentCandidates;
     public long SerialCandidateExecutionCount => serialCandidateExecutionCount;
@@ -89,10 +88,19 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
                 nameof(executionOptions),
                 "The current resident layout supports one candidate lane.");
         }
+        if (definition.WavePolicy.ProposalWaveSize != 1)
+        {
+            throw new NotSupportedException(
+                "The current resident kernel supports proposal waves of size one.");
+        }
+        var layout = PopulationSearchLayout.Create(
+            definition,
+            executionOptions.CandidateLaneCount,
+            enforceEnvelope: true);
         MathBlocksCudaNative.EnsureContext();
-        var layout = PopulationSearchLayout.Create(definition);
         var initialState = definition.AcceptedState ?? new MathBlockProgramPopulationSearchState(
             definition.Identity,
+            0,
             0,
             0,
             0,
@@ -224,7 +232,6 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
         {
             ThrowIfDisposed();
             MathBlocksCudaNative.EnsureContext();
-            var previousTrialCursor = acceptedState.TrialCursor;
             var previousEvaluatedProgramCount = acceptedState.EvaluatedProgramCount;
             MathBlocksCudaNative.ThrowIfFailed(
                 MathBlocksCudaNative.cuGraphLaunch(executable, stream),
@@ -254,10 +261,8 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
                 });
             }
             acceptedState = parsed.State!;
-            var trialDelta = checked((long)(acceptedState.TrialCursor - previousTrialCursor));
             var evaluatedDelta = checked((long)(
                 acceptedState.EvaluatedProgramCount - previousEvaluatedProgramCount));
-            proposalWaveCount = checked(proposalWaveCount + trialDelta);
             candidateChunkCount = checked(candidateChunkCount + evaluatedDelta);
             if (evaluatedDelta != 0)
                 maximumConcurrentCandidates = 1;
@@ -394,8 +399,8 @@ internal sealed class PopulationSearchLayout
     private const int ObjectiveSourceSize = 16;
     private const int QualityDimensionSize = 32;
     private const int SlotSize = 48;
-    private const int StateHeaderSize = 128;
-    private const int CompactHeaderSize = 128;
+    private const int StateHeaderSize = 144;
+    private const int CompactHeaderSize = 144;
     private const int EntryHeaderSize = 80;
 
     private readonly MathBlockType[] types;
@@ -444,6 +449,8 @@ internal sealed class PopulationSearchLayout
     public int MaximumBandElements { get; private set; }
     public int MaximumValueElements { get; private set; }
     public int MaximumArity { get; private set; }
+    public int CandidateLaneCount { get; private set; }
+    public int LaneStrideBytes { get; private set; }
     public int ScratchBytesPerNode { get; private set; }
     public int PayloadStride { get; private set; }
     public int ObjectivePayloadBytes { get; private set; }
@@ -493,9 +500,14 @@ internal sealed class PopulationSearchLayout
     public int CompactQualityOffset { get; private set; }
     public int CompactTrialOffset { get; private set; }
 
-    public static PopulationSearchLayout Create(MathBlockProgramPopulationSearchDefinition definition)
+    public static PopulationSearchLayout Create(
+        MathBlockProgramPopulationSearchDefinition definition,
+        int candidateLaneCount = 1,
+        bool enforceEnvelope = true)
     {
         ArgumentNullException.ThrowIfNull(definition);
+        if (candidateLaneCount <= 0)
+            throw new ArgumentOutOfRangeException(nameof(candidateLaneCount));
         var typeList = new List<MathBlockType>();
         int AddType(MathBlockType type)
         {
@@ -615,6 +627,7 @@ internal sealed class PopulationSearchLayout
             MaximumBandElements = maximumBandElements,
             MaximumValueElements = maximumValueElements,
             MaximumArity = maximumArity,
+            CandidateLaneCount = candidateLaneCount,
             PayloadStride = CalculateCandidatePayloadStride(definition, maximumCandidateValueElements),
             ScratchBytesPerNode = Math.Max(
                 candidateScratchStride,
@@ -625,15 +638,17 @@ internal sealed class PopulationSearchLayout
                 (1, 8),
                 (maximumArity, sizeof(int)))
         };
-        layout.CalculateOffsets(definition, immutablePayloadBytes);
+        layout.CalculateOffsets(definition, immutablePayloadBytes, enforceEnvelope);
         return layout;
     }
 
     private void CalculateOffsets(
         MathBlockProgramPopulationSearchDefinition definition,
-        int immutablePayloadBytes)
+        int immutablePayloadBytes,
+        bool enforceEnvelope)
     {
         var population = definition.Population;
+        var compactTrialCapacity = definition.WavePolicy.MaximumTrialResultsPerCycle;
         OperationOffset = HeaderSize;
         OperationInputTypeOffset = AdvanceLayout(
             OperationOffset, operations.Length, OperationSize, "operation descriptors");
@@ -690,11 +705,15 @@ internal sealed class PopulationSearchLayout
             checked(MaximumOperationCount * MaximumArity),
             sizeof(int),
             "selected operands");
-        AcceptedStateOffset = AdvanceLayout(
+        var laneEnd = AdvanceLayout(
             SelectedLookbackOffset,
             checked((terminals.Length + MaximumOperationCount) * 2),
             sizeof(int),
             "selected types and lookbacks");
+        LaneStrideBytes = checked(laneEnd - CandidateSlotOffset);
+        AcceptedStateOffset = AlignLayout(
+            checked((long)CandidateSlotOffset + (long)LaneStrideBytes * CandidateLaneCount),
+            "candidate lanes");
         AcceptedStructuralOffset = AdvanceLayout(AcceptedStateOffset, 1, StateHeaderSize, "accepted state");
         AcceptedSemanticOffset = AdvanceLayout(
             AcceptedStructuralOffset, population.FingerprintCapacity, 16, "accepted structural fingerprints");
@@ -735,9 +754,9 @@ internal sealed class PopulationSearchLayout
         CompactOffset = AdvanceLayout(RefreshOffset, refreshCapacity, ArchiveEntrySize, "refresh entries");
         CompactStructuralOffset = AdvanceLayout(CompactOffset, 1, CompactHeaderSize, "compact header");
         CompactSemanticOffset = AdvanceLayout(
-            CompactStructuralOffset, population.ProposalsPerCycle, 16, "compact structural fingerprints");
+            CompactStructuralOffset, compactTrialCapacity, 16, "compact structural fingerprints");
         CompactParetoOffset = AdvanceLayout(
-            CompactSemanticOffset, population.ProposalsPerCycle, 16, "compact semantic fingerprints");
+            CompactSemanticOffset, compactTrialCapacity, 16, "compact semantic fingerprints");
         CompactQualityOffset = AdvanceLayout(
             CompactParetoOffset,
             definition.Selection.ParetoCapacity,
@@ -749,15 +768,15 @@ internal sealed class PopulationSearchLayout
             ArchiveEntrySize,
             "compact quality-diversity entries");
         ArenaSize = AdvanceLayout(
-            CompactTrialOffset, population.ProposalsPerCycle, TrialEntrySize, "compact trial entries");
+            CompactTrialOffset, compactTrialCapacity, TrialEntrySize, "compact trial entries");
         CompactSize = checked(ArenaSize - CompactOffset);
-        if (ArenaSize > definition.Envelope.MaximumResidentBytes)
+        if (enforceEnvelope && ArenaSize > definition.Envelope.MaximumResidentBytes)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(definition),
                 $"The measured resident arena requires {ArenaSize} bytes.");
         }
-        if (CompactSize > definition.Envelope.MaximumCompactDownloadBytes)
+        if (enforceEnvelope && CompactSize > definition.Envelope.MaximumCompactDownloadBytes)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(definition),
@@ -773,6 +792,11 @@ internal sealed class PopulationSearchLayout
             objectiveNodes.Length,
             definition.Selection.ParetoCapacity,
             definition.QualityDiversity.CellCount,
+            checked(ArenaSize - (long)LaneStrideBytes * CandidateLaneCount),
+            LaneStrideBytes,
+            CandidateLaneCount,
+            checked((long)LaneStrideBytes * CandidateLaneCount),
+            ArenaSize,
             ArenaSize,
             CompactSize);
     }
@@ -902,9 +926,12 @@ internal sealed class PopulationSearchLayout
         var refreshCursor = ReadInt32(downloaded, 112);
         var refreshCount = ReadInt32(downloaded, 116);
         var enumerationTrialCount = ReadUInt64(downloaded, 120);
-        if (trialCount < 0 || trialCount > definition.Population.ProposalsPerCycle ||
-            newStructuralCount < 0 || newStructuralCount > definition.Population.ProposalsPerCycle ||
-            newSemanticCount < 0 || newSemanticCount > definition.Population.ProposalsPerCycle ||
+        var waveCursor = ReadUInt64(downloaded, 128);
+        if (trialCount < 0 || trialCount > definition.WavePolicy.MaximumTrialResultsPerCycle ||
+            newStructuralCount < 0 ||
+            newStructuralCount > definition.WavePolicy.MaximumTrialResultsPerCycle ||
+            newSemanticCount < 0 ||
+            newSemanticCount > definition.WavePolicy.MaximumTrialResultsPerCycle ||
             paretoCount < 0 || paretoCount > definition.Selection.ParetoCapacity ||
             qualityCount < 0 || qualityCount > definition.QualityDiversity.CellCount ||
             totalStructuralCount != checked(previous.StructuralFingerprints.Count + newStructuralCount) ||
@@ -918,6 +945,9 @@ internal sealed class PopulationSearchLayout
             enumerationCursor < previous.EnumerationCursor ||
             enumerationTrialCount < previous.EnumerationTrialCount ||
             trialCursor < previous.TrialCursor ||
+            waveCursor < previous.WaveCursor ||
+            waveCursor - previous.WaveCursor != trialCursor - previous.TrialCursor ||
+            waveCursor > trialCursor ||
             enumerationTrialCount - previous.EnumerationTrialCount >
                 trialCursor - previous.TrialCursor ||
             trialCursor > definition.Evolution.MaximumTrialCount ||
@@ -976,6 +1006,7 @@ internal sealed class PopulationSearchLayout
             enumerationTrialCount,
             trialCursor,
             cycleCount,
+            waveCursor,
             generation,
             refreshCursor,
             randomState,
@@ -994,7 +1025,7 @@ internal sealed class PopulationSearchLayout
     private void WriteHeader(Span<byte> bytes, MathBlockProgramPopulationSearchDefinition definition)
     {
         WriteInt32(bytes, 0, unchecked((int)0x4d425334));
-        WriteInt32(bytes, 4, 6);
+        WriteInt32(bytes, 4, 7);
         WriteInt32(bytes, 8, operations.Length);
         WriteInt32(bytes, 12, terminals.Length);
         WriteInt32(bytes, 16, types.Length);
@@ -1044,6 +1075,9 @@ internal sealed class PopulationSearchLayout
         WriteUInt64(bytes, 296, definition.Population.TotalProposalCount);
         WriteUInt64(bytes, 304, definition.Evolution.EnumerationProposalCount);
         WriteUInt64(bytes, 312, definition.Evolution.MaximumTrialCount);
+        WriteInt32(bytes, 320, definition.WavePolicy.MaximumTrialResultsPerCycle);
+        WriteInt32(bytes, 324, definition.WavePolicy.ProposalWaveSize);
+        WriteInt32(bytes, 328, definition.WavePolicy.WavesPerCycle);
     }
 
     private void WriteAcceptedState(
@@ -1068,6 +1102,7 @@ internal sealed class PopulationSearchLayout
         WriteInt32(bytes, AcceptedStateOffset + 96, state.RefreshCursor);
         WriteInt32(bytes, AcceptedStateOffset + 100, state.RefreshPrograms.Count);
         WriteUInt64(bytes, AcceptedStateOffset + 104, state.EnumerationTrialCount);
+        WriteUInt64(bytes, AcceptedStateOffset + 112, state.WaveCursor);
         WriteFingerprints(bytes, AcceptedStructuralOffset, state.StructuralFingerprints);
         WriteFingerprints(bytes, AcceptedSemanticOffset, state.SemanticFingerprints);
         for (var index = 0; index < state.SelectionEntries.Count; index++)

@@ -50,6 +50,18 @@ public sealed class MathBlocksGPUWorker
         ArgumentNullException.ThrowIfNull(executionOptions);
         return MathBlocksGPUProgramPopulationSearch.Create(definition, executionOptions);
     }
+
+    public MathBlockProgramPopulationSearchCapacity MeasurePopulationSearchCapacity(
+        MathBlockProgramPopulationSearchDefinition definition,
+        MathBlockProgramPopulationExecutionOptions executionOptions)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+        ArgumentNullException.ThrowIfNull(executionOptions);
+        return PopulationSearchLayout.Create(
+            definition,
+            executionOptions.CandidateLaneCount,
+            enforceEnvelope: false).Capacity;
+    }
 }
 
 public sealed class MathBlocksGPUProgram : IDisposable
