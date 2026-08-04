@@ -1409,6 +1409,8 @@ internal sealed class PopulationSearchLayout
             var outputType = operation.OutputType;
             if (!candidateType.Accepts(outputType) || !population.Grammar.OutputType.Accepts(outputType))
                 continue;
+            if (outputType.Rows <= 0)
+                throw new InvalidOperationException("The candidate graph vertex authority is unavailable.");
             maximumVertices = Math.Max(maximumVertices, outputType.Rows);
         }
         if (maximumVertices == 0 && candidateType.Accepts(population.Grammar.OutputType))

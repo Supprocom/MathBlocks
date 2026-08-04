@@ -778,6 +778,101 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Resident_search_rejects_mixed_known_and_unknown_graph_vertex_authority()
+    {
+        RequireCuda();
+        var staticGraph = MathBlockType.Graph(vertexCount: 4);
+        var dynamicGraph = MathBlockType.Graph();
+        var eightVertexGraph = MathBlockValue.Graph(new MathBlockGraph(
+            8,
+            [
+                new(0, 1, 1d),
+                new(1, 2, 1d),
+                new(2, 3, 1d),
+                new(3, 4, 1d),
+                new(4, 5, 1d),
+                new(5, 6, 1d),
+                new(6, 7, 1d)
+            ]));
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [
+                    new MathBlockProgramPopulationOperation(
+                        "graph.minimum-spanning-forest",
+                        1,
+                        [staticGraph],
+                        staticGraph),
+                    new MathBlockProgramPopulationOperation(
+                        "graph.minimum-spanning-forest",
+                        1,
+                        [dynamicGraph],
+                        dynamicGraph)
+                ],
+                dynamicGraph),
+            [
+                new MathBlockProgramPopulationTerminal(
+                    "four-vertex-network",
+                    staticGraph,
+                    MathBlockValue.Graph(new MathBlockGraph(
+                        4,
+                        [
+                            new(0, 1, 1d),
+                            new(1, 2, 1d),
+                            new(2, 3, 1d)
+                        ]))),
+                new MathBlockProgramPopulationTerminal(
+                    "eight-vertex-network",
+                    dynamicGraph,
+                    eightVertexGraph)
+            ],
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 7)],
+            proposalsPerCycle: 4,
+            fingerprintCapacity: 16);
+        var objectiveBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = objectiveBuilder.Input("candidate", dynamicGraph);
+        var degree = objectiveBuilder.Apply("graph.degree", inputs: [candidate]);
+        var degreeSum = objectiveBuilder.Apply("vector.sum", inputs: [degree]);
+        var objectiveProgram = objectiveBuilder.Output("degree-sum", degreeSum).Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveProgram,
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "degree-sum",
+                "degree-sum",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        var definition = CreateDefinition(
+            population,
+            binding,
+            maximumTrials: 4,
+            enumerationTrials: 4,
+            validity: new MathBlockProgramPopulationValidityPolicy([0, 1, 2, 3, 4, 5, 6, 7]));
+        var dynamicProgram = new MathBlockProgramStructure(
+            0,
+            0,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                MathBlockProgramCandidateNode.Terminal(1, "eight-vertex-network", dynamicGraph),
+                MathBlockProgramCandidateNode.Operation(
+                    "graph.minimum-spanning-forest",
+                    1,
+                    dynamicGraph,
+                    0)
+            ]);
+
+        var candidateOutput = population.Evaluate(dynamicProgram);
+        var objectiveValues = definition.EvaluateObjectives(dynamicProgram);
+
+        Assert.Equal(8, candidateOutput.AsGraph().VertexCount);
+        Assert.Equal(7, candidateOutput.AsGraph().Count);
+        Assert.Equal([14d], objectiveValues);
+        var exception = Assert.Throws<InvalidOperationException>(
+            () => new MathBlocksGPUWorker().CompilePopulationSearch(definition));
+        Assert.Equal("The candidate graph vertex authority is unavailable.", exception.Message);
+    }
+
+    [Fact]
     public void Resident_search_accepts_more_than_eight_objectives_and_intrinsic_sources()
     {
         RequireCuda();
