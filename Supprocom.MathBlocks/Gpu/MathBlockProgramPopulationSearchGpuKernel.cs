@@ -6,7 +6,9 @@ internal static class MathBlockProgramPopulationSearchGpuKernel
 {
     private static readonly Lazy<KernelState> state = new(Load, LazyThreadSafetyMode.ExecutionAndPublication);
 
-    public static IntPtr Function => state.Value.Function;
+    public static IntPtr BeginFunction => state.Value.BeginFunction;
+    public static IntPtr ExecuteFunction => state.Value.ExecuteFunction;
+    public static IntPtr PublishFunction => state.Value.PublishFunction;
 
     internal static string CreateSource(string residentKernelSource)
     {
@@ -47,14 +49,30 @@ internal static class MathBlockProgramPopulationSearchGpuKernel
             "cuModuleLoadData(mathblocks population search)");
         MathBlocksCudaNative.ThrowIfFailed(
             MathBlocksCudaNative.cuModuleGetFunction(
-                out var function,
+                out var beginFunction,
                 module,
-                "mathblocks_program_population_search"),
-            "cuModuleGetFunction(mathblocks_program_population_search)");
-        return new KernelState(module, function);
+                "mathblocks_program_population_search_begin"),
+            "cuModuleGetFunction(mathblocks_program_population_search_begin)");
+        MathBlocksCudaNative.ThrowIfFailed(
+            MathBlocksCudaNative.cuModuleGetFunction(
+                out var executeFunction,
+                module,
+                "mathblocks_program_population_search_execute"),
+            "cuModuleGetFunction(mathblocks_program_population_search_execute)");
+        MathBlocksCudaNative.ThrowIfFailed(
+            MathBlocksCudaNative.cuModuleGetFunction(
+                out var publishFunction,
+                module,
+                "mathblocks_program_population_search_publish"),
+            "cuModuleGetFunction(mathblocks_program_population_search_publish)");
+        return new KernelState(module, beginFunction, executeFunction, publishFunction);
     }
 
-    private sealed record KernelState(IntPtr Module, IntPtr Function);
+    private sealed record KernelState(
+        IntPtr Module,
+        IntPtr BeginFunction,
+        IntPtr ExecuteFunction,
+        IntPtr PublishFunction);
 
     private const string ResidentDispatchSource = """
         __device__ void mb_population_dispatch(
@@ -1526,7 +1544,50 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             mbp_write_int(arena, compact_offset, status);
         }
 
-        extern "C" __global__ void mathblocks_program_population_search(unsigned char* arena)
+        extern "C" __global__ void mathblocks_program_population_search_begin(unsigned char* arena)
+        {
+            if (blockIdx.x != 0)
+                return;
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 7)
+                return;
+
+            int fingerprint_capacity = mbp_read_int(arena, 40);
+            int pareto_capacity = mbp_read_int(arena, 56);
+            int quality_capacity = mbp_read_int(arena, 60);
+            int entry_size = mbp_read_int(arena, 112);
+            int accepted_state_offset = mbp_header_offset(arena, 23);
+            int accepted_structural_offset = mbp_header_offset(arena, 24);
+            int accepted_semantic_offset = mbp_header_offset(arena, 25);
+            int accepted_pareto_offset = mbp_header_offset(arena, 26);
+            int accepted_quality_offset = mbp_header_offset(arena, 27);
+            int working_state_offset = mbp_header_offset(arena, 28);
+            int working_structural_offset = mbp_header_offset(arena, 29);
+            int working_semantic_offset = mbp_header_offset(arena, 30);
+            int working_pareto_offset = mbp_header_offset(arena, 31);
+            int working_quality_offset = mbp_header_offset(arena, 32);
+            int compact_offset = mbp_header_offset(arena, 34);
+
+            mbp_copy(arena + working_state_offset, arena + accepted_state_offset, 144);
+            mbp_copy(
+                arena + working_structural_offset,
+                arena + accepted_structural_offset,
+                fingerprint_capacity * 16);
+            mbp_copy(
+                arena + working_semantic_offset,
+                arena + accepted_semantic_offset,
+                fingerprint_capacity * 16);
+            mbp_copy(
+                arena + working_pareto_offset,
+                arena + accepted_pareto_offset,
+                pareto_capacity * entry_size);
+            mbp_copy(
+                arena + working_quality_offset,
+                arena + accepted_quality_offset,
+                quality_capacity * entry_size);
+            mbp_clear(arena + compact_offset, 144);
+        }
+
+        extern "C" __global__ void mathblocks_program_population_search_execute(unsigned char* arena)
         {
             if (blockIdx.x != 0)
                 return;
@@ -1655,23 +1716,6 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 return;
             }
 
-            mbp_copy(arena + working_state_offset, arena + accepted_state_offset, 144);
-            mbp_copy(
-                arena + working_structural_offset,
-                arena + accepted_structural_offset,
-                fingerprint_capacity * 16);
-            mbp_copy(
-                arena + working_semantic_offset,
-                arena + accepted_semantic_offset,
-                fingerprint_capacity * 16);
-            mbp_copy(
-                arena + working_pareto_offset,
-                arena + accepted_pareto_offset,
-                pareto_capacity * entry_size);
-            mbp_copy(
-                arena + working_quality_offset,
-                arena + accepted_quality_offset,
-                quality_capacity * entry_size);
             mbp_clear(arena + compact_offset, compact_size);
 
             mbp_update_age_objectives(
@@ -2336,24 +2380,6 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             mbp_write_ull(arena, working_state_offset + 104, enumeration_trial_count);
             mbp_write_ull(arena, working_state_offset + 112, wave_cursor);
 
-            mbp_copy(arena + accepted_state_offset, arena + working_state_offset, 144);
-            mbp_copy(
-                arena + accepted_structural_offset,
-                arena + working_structural_offset,
-                fingerprint_capacity * 16);
-            mbp_copy(
-                arena + accepted_semantic_offset,
-                arena + working_semantic_offset,
-                fingerprint_capacity * 16);
-            mbp_copy(
-                arena + accepted_pareto_offset,
-                arena + working_pareto_offset,
-                pareto_capacity * entry_size);
-            mbp_copy(
-                arena + accepted_quality_offset,
-                arena + working_quality_offset,
-                quality_capacity * entry_size);
-
             mbp_write_int(arena, compact_offset, 0);
             mbp_write_int(arena, compact_offset + 4, trial_result_count);
             mbp_write_int(arena, compact_offset + 8, new_structural_count);
@@ -2382,6 +2408,51 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 pareto_capacity * entry_size);
             mbp_copy(
                 arena + compact_quality_offset,
+                arena + working_quality_offset,
+                quality_capacity * entry_size);
+        }
+
+        extern "C" __global__ void mathblocks_program_population_search_publish(unsigned char* arena)
+        {
+            if (blockIdx.x != 0)
+                return;
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 7)
+                return;
+
+            int compact_offset = mbp_header_offset(arena, 34);
+            if (mbp_read_int(arena, compact_offset) != 0)
+                return;
+
+            int fingerprint_capacity = mbp_read_int(arena, 40);
+            int pareto_capacity = mbp_read_int(arena, 56);
+            int quality_capacity = mbp_read_int(arena, 60);
+            int entry_size = mbp_read_int(arena, 112);
+            int accepted_state_offset = mbp_header_offset(arena, 23);
+            int accepted_structural_offset = mbp_header_offset(arena, 24);
+            int accepted_semantic_offset = mbp_header_offset(arena, 25);
+            int accepted_pareto_offset = mbp_header_offset(arena, 26);
+            int accepted_quality_offset = mbp_header_offset(arena, 27);
+            int working_state_offset = mbp_header_offset(arena, 28);
+            int working_structural_offset = mbp_header_offset(arena, 29);
+            int working_semantic_offset = mbp_header_offset(arena, 30);
+            int working_pareto_offset = mbp_header_offset(arena, 31);
+            int working_quality_offset = mbp_header_offset(arena, 32);
+
+            mbp_copy(arena + accepted_state_offset, arena + working_state_offset, 144);
+            mbp_copy(
+                arena + accepted_structural_offset,
+                arena + working_structural_offset,
+                fingerprint_capacity * 16);
+            mbp_copy(
+                arena + accepted_semantic_offset,
+                arena + working_semantic_offset,
+                fingerprint_capacity * 16);
+            mbp_copy(
+                arena + accepted_pareto_offset,
+                arena + working_pareto_offset,
+                pareto_capacity * entry_size);
+            mbp_copy(
+                arena + accepted_quality_offset,
                 arena + working_quality_offset,
                 quality_capacity * entry_size);
         }

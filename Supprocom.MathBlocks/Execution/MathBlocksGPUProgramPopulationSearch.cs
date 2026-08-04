@@ -158,27 +158,48 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
                 "cuGraphCreate(mathblocks population search)");
 
             arguments = new SearchKernelArguments(deviceArena);
-            var parameters = new MathBlocksCudaNative.KernelNodeParameters
+            var blockSize = executionOptions.Mode == MathBlockProgramPopulationExecutionMode.ParallelResident
+                ? VectorGpuBlockCatalog.BlockSize
+                : 1;
+            var beginParameters = new MathBlocksCudaNative.KernelNodeParameters
             {
-                Function = MathBlockProgramPopulationSearchGpuKernel.Function,
+                Function = MathBlockProgramPopulationSearchGpuKernel.BeginFunction,
                 GridX = 1,
                 GridY = 1,
                 GridZ = 1,
-                BlockX = executionOptions.Mode == MathBlockProgramPopulationExecutionMode.ParallelResident
-                    ? VectorGpuBlockCatalog.BlockSize
-                    : 1,
+                BlockX = blockSize,
                 BlockY = 1,
                 BlockZ = 1,
                 KernelParameters = arguments.PointerArray
             };
             MathBlocksCudaNative.ThrowIfFailed(
                 MathBlocksCudaNative.cuGraphAddKernelNode(
-                    out var kernelNode,
+                    out var beginNode,
                     graph,
                     null,
                     UIntPtr.Zero,
-                    ref parameters),
-                "cuGraphAddKernelNode(mathblocks population search)");
+                    ref beginParameters),
+                "cuGraphAddKernelNode(mathblocks population search begin)");
+            var executeParameters = beginParameters;
+            executeParameters.Function = MathBlockProgramPopulationSearchGpuKernel.ExecuteFunction;
+            MathBlocksCudaNative.ThrowIfFailed(
+                MathBlocksCudaNative.cuGraphAddKernelNode(
+                    out var executeNode,
+                    graph,
+                    [beginNode],
+                    new UIntPtr(1),
+                    ref executeParameters),
+                "cuGraphAddKernelNode(mathblocks population search execute)");
+            var publishParameters = beginParameters;
+            publishParameters.Function = MathBlockProgramPopulationSearchGpuKernel.PublishFunction;
+            MathBlocksCudaNative.ThrowIfFailed(
+                MathBlocksCudaNative.cuGraphAddKernelNode(
+                    out var publishNode,
+                    graph,
+                    [executeNode],
+                    new UIntPtr(1),
+                    ref publishParameters),
+                "cuGraphAddKernelNode(mathblocks population search publish)");
             var copy = MathBlocksCudaNative.MemoryCopy3D.DeviceToHost(
                 checked(deviceArena + (ulong)layout.CompactOffset),
                 downloadArena,
@@ -187,7 +208,7 @@ public sealed class MathBlocksGPUProgramPopulationSearch : IDisposable
                 MathBlocksCudaNative.cuGraphAddMemcpyNode(
                     out _,
                     graph,
-                    [kernelNode],
+                    [publishNode],
                     new UIntPtr(1),
                     ref copy,
                     MathBlocksCudaNative.CurrentContext),
