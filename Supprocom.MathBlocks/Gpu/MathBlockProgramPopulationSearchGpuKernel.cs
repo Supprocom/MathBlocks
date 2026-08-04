@@ -1617,6 +1617,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int new_semantic_count = 0;
             int trial_result_count = 0;
             int processed = 0;
+            int enumeration_scan_count = 0;
 
             while (processed < proposals_per_cycle && refresh_cursor < refresh_count)
             {
@@ -1841,12 +1842,16 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 mbp_ull deterministic_cost = 0ull;
                 bool generated = false;
                 bool enumeration_typed = false;
-                if (enumeration_trial_count < enumeration_limit && enumeration_cursor < total_proposals)
+                if (enumeration_trial_count < enumeration_limit &&
+                    enumeration_cursor < total_proposals &&
+                    enumeration_scan_count < proposals_per_cycle)
                 {
                     source = 0;
-                    while (enumeration_cursor < total_proposals)
+                    while (enumeration_cursor < total_proposals &&
+                        enumeration_scan_count < proposals_per_cycle)
                     {
                         proposal_cursor = enumeration_cursor++;
+                        enumeration_scan_count++;
                         generated = mbp_decode_enumeration(
                             arena,
                             proposal_cursor,
@@ -1893,6 +1898,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                     (enumeration_trial_count >= enumeration_limit || enumeration_cursor >= total_proposals) &&
                     evolution_pattern > 0)
                 {
+                    proposal_cursor = ~0ull;
                     int position = (int)(trial_cursor % (mbp_ull)evolution_pattern);
                     if (position < mutation_trials)
                     {
