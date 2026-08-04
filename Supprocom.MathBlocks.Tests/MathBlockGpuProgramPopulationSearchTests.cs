@@ -1,6 +1,7 @@
 using Supprocom.MathBlocks.Gpu;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace Supprocom.MathBlocks.Tests;
 
@@ -885,6 +886,99 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         Assert.Equal(1, compiled.DownloadCount);
         Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
         Assert.Equal(0, compiled.CpuNodeDispatchCount);
+    }
+
+    [Fact]
+    public void Failed_parallel_commit_discards_partial_working_fingerprints_before_retry()
+    {
+        RequireCuda();
+        var scalar = MathBlockType.Scalar();
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation(
+                    "scalar.add",
+                    1,
+                    [scalar, scalar],
+                    scalar)],
+                scalar),
+            [
+                new MathBlockProgramPopulationTerminal(
+                    "one",
+                    scalar,
+                    MathBlockValue.Scalar(1d)),
+                new MathBlockProgramPopulationTerminal(
+                    "two",
+                    scalar,
+                    MathBlockValue.Scalar(2d))
+            ],
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 1)],
+            proposalsPerCycle: 2,
+            fingerprintCapacity: 4);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = builder.Input("candidate", scalar);
+        var objectiveProgram = builder.Output("value", candidate).Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveProgram,
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "value",
+                "value",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        var baseline = CreateDefinition(
+            population,
+            binding,
+            maximumTrials: 2,
+            enumerationTrials: 2,
+            validity: new MathBlockProgramPopulationValidityPolicy([1]));
+        var definition = new MathBlockProgramPopulationSearchDefinition(
+            baseline.Population,
+            baseline.ObjectiveBinding,
+            baseline.Evolution,
+            baseline.Selection,
+            baseline.QualityDiversity,
+            baseline.Envelope,
+            baseline.Validity,
+            baseline.CompactResults,
+            baseline.InitialPrograms,
+            wavePolicy: new MathBlockProgramPopulationWavePolicy(2, 1));
+        using var compiled = new MathBlocksGPUWorker().CompilePopulationSearch(
+            definition,
+            new MathBlockProgramPopulationExecutionOptions(
+                MathBlockProgramPopulationExecutionMode.ParallelResident,
+                2));
+        SetDeviceFingerprintCapacityForFailureTest(compiled, 1);
+        var acceptedBefore = compiled.AcceptedState.Export();
+
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            var exception = Assert.Throws<InvalidOperationException>(compiled.ExecuteCycle);
+            Assert.Equal(
+                "The resident structural fingerprint capacity is exhausted.",
+                exception.Message);
+            Assert.Equal(acceptedBefore, compiled.AcceptedState.Export());
+            Assert.Equal(0ul, compiled.AcceptedState.TrialCursor);
+            Assert.Empty(compiled.AcceptedState.StructuralFingerprints);
+            Assert.Empty(compiled.AcceptedState.SemanticFingerprints);
+            Assert.Empty(compiled.AcceptedState.SelectionEntries);
+            Assert.Empty(compiled.AcceptedState.QualityDiversityEntries);
+        }
+
+        Assert.Equal(1, compiled.GraphInstanceCount);
+        Assert.Equal(1, compiled.ImmutableUploadCount);
+        Assert.Equal(0, compiled.LaterImmutableUploadCount);
+        Assert.Equal(2, compiled.GraphLaunchCount);
+        Assert.Equal(2, compiled.SynchronizationCount);
+        Assert.Equal(2, compiled.DownloadCount);
+        Assert.Equal(
+            checked(2L * compiled.CompactDownloadBytesPerCycle),
+            compiled.DownloadedBytes);
+        Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputBytes);
+        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        Assert.Equal(0, compiled.CandidateChunkCount);
+        Assert.Equal(0, compiled.ParallelCandidateExecutionCount);
     }
 
     [Fact]
@@ -3859,6 +3953,39 @@ public sealed class MathBlockGpuProgramPopulationSearchTests
         return (int)layout.GetType()
             .GetProperty("ScratchBytesPerNode", BindingFlags.Instance | BindingFlags.Public)!
             .GetValue(layout)!;
+    }
+
+    private static void SetDeviceFingerprintCapacityForFailureTest(
+        MathBlocksGPUProgramPopulationSearch compiled,
+        int capacity)
+    {
+        const int FingerprintCapacityHeaderOffset = 40;
+        var deviceArena = (ulong)typeof(MathBlocksGPUProgramPopulationSearch)
+            .GetField("deviceArena", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(compiled)!;
+        var cudaNative = typeof(MathBlocksGPUProgramPopulationSearch).Assembly.GetType(
+            "Supprocom.MathBlocks.Gpu.MathBlocksCudaNative",
+            throwOnError: true)!;
+        var copyMethod = cudaNative.GetMethod(
+            "cuMemcpyHtoD",
+            BindingFlags.Static | BindingFlags.NonPublic)!;
+        var source = Marshal.AllocHGlobal(sizeof(int));
+        try
+        {
+            Marshal.WriteInt32(source, capacity);
+            var result = (int)copyMethod.Invoke(
+                null,
+                [
+                    checked(deviceArena + (ulong)FingerprintCapacityHeaderOffset),
+                    source,
+                    new UIntPtr(sizeof(int))
+                ])!;
+            Assert.Equal(0, result);
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(source);
+        }
     }
 
     private static void RequireCuda() =>
