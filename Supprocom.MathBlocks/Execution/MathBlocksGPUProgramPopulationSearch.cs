@@ -496,6 +496,7 @@ internal sealed class PopulationSearchLayout
         maximumValueElements = Math.Max(maximumValueElements, maximumBandElements);
         if (maximumOperationCount <= 0 || maximumBandElements <= 0 || maximumValueElements <= 0)
             throw new InvalidOperationException("The population search resource envelope is empty.");
+        var maximumCandidateValueElements = maximumValueElements;
 
         var compiledObjective = CompileObjective(
             definition,
@@ -548,7 +549,10 @@ internal sealed class PopulationSearchLayout
             MaximumValueElements = maximumValueElements,
             MaximumArity = maximumArity,
             PayloadStride = Align(checked(maximumValueElements * 16)),
-            ScratchBytesPerNode = CalculateScratchBytes(definition, maximumValueElements),
+            ScratchBytesPerNode = CalculateScratchBytes(
+                definition,
+                maximumCandidateValueElements,
+                compiledObjective.ScratchBytes),
             ProgramOperationSize = Align(checked(8 + maximumArity * sizeof(int)))
         };
         layout.CalculateOffsets(definition, immutablePayloadBytes);
@@ -1257,17 +1261,19 @@ internal sealed class PopulationSearchLayout
             if (graphShape.Rows > 0)
                 shapeOverrides.Add(binding.CandidateInput, graphShape);
         }
-        var payloadCapacities = MathBlocksGPUProgram.ResolvePayloadCapacities(
+        var payloadLayout = MathBlocksGPUProgram.ResolvePayloadLayout(
             plan,
             binding.ResidentInputs,
             capacityOverrides,
             shapeOverrides);
+        var payloadCapacities = payloadLayout.Capacities;
         for (var index = 0; index < payloadCapacities.Length; index++)
             maximumValueElements = Math.Max(maximumValueElements, payloadCapacities[index]);
         var nodes = new ObjectiveNodeDescriptor[plan.Count];
         var inputs = new List<int>();
         var candidateCount = 0;
         var maskCount = 0;
+        var scratchBytes = 0;
         for (var index = 0; index < plan.Count; index++)
         {
             var node = plan[index];
@@ -1336,6 +1342,9 @@ internal sealed class PopulationSearchLayout
                 inputBase,
                 -1,
                 payloadCapacities[index]);
+            scratchBytes = Math.Max(
+                scratchBytes,
+                MathBlocksGPUProgram.ResolveScratchBytes(node, plan, payloadLayout));
         }
         if (candidateCount != 1)
             throw new ArgumentException("The objective program requires one candidate input.", nameof(definition));
@@ -1369,7 +1378,7 @@ internal sealed class PopulationSearchLayout
         }
         if (multiplier != definition.QualityDiversity.CellCount)
             throw new InvalidOperationException("The quality-diversity cell count is inconsistent.");
-        return new CompiledObjective(nodes, inputs.ToArray(), sources, dimensions);
+        return new CompiledObjective(nodes, inputs.ToArray(), sources, dimensions, scratchBytes);
     }
 
     private static MathBlockGpuShapeAuthority ResolveMatrixCandidateShapeAuthority(
@@ -1474,40 +1483,114 @@ internal sealed class PopulationSearchLayout
 
     private static int CalculateScratchBytes(
         MathBlockProgramPopulationSearchDefinition definition,
-        int maximumElements)
+        int maximumElements,
+        int objectiveScratchBytes)
     {
-        var linear = checked(maximumElements * 16);
-        var quadratic = checked(checked(maximumElements * maximumElements) * 24);
-        var result = Math.Max(linear, quadratic);
+        var result = objectiveScratchBytes;
         foreach (var operation in definition.Population.Grammar.Operations)
-            result = Math.Max(result, ResolveSpecialScratch(operation.Identity, operation.InputTypes, maximumElements));
-        foreach (var node in definition.ObjectiveBinding.Program.PlanNodes)
-        {
-            if (node.Kind != MathBlockProgramNodeKind.Operation)
-                continue;
-            var inputTypes = new MathBlockType[node.Inputs.Count];
-            for (var index = 0; index < inputTypes.Length; index++)
-                inputTypes[index] = definition.ObjectiveBinding.Program.PlanNodes[node.Inputs[index]].Type;
-            result = Math.Max(result, ResolveSpecialScratch(node.OperationIdentity!, inputTypes, maximumElements));
-        }
+            result = Math.Max(
+                result,
+                ResolveCandidateScratchBytes(definition.Population, operation, maximumElements));
         return Align(result);
     }
 
-    private static int ResolveSpecialScratch(
-        string identity,
-        IReadOnlyList<MathBlockType> inputTypes,
+    private static int ResolveCandidateScratchBytes(
+        MathBlockProgramPopulationDefinition population,
+        MathBlockProgramPopulationOperation operation,
         int maximumElements)
     {
-        if (!string.Equals(identity, "transport.minimum-assignment@1", StringComparison.Ordinal) ||
-            inputTypes.Count == 0)
+        var inputCapacities = new int[operation.InputTypes.Count];
+        var inputShapeRows = new int[operation.InputTypes.Count];
+        var inputShapeColumns = new int[operation.InputTypes.Count];
+        for (var index = 0; index < operation.InputTypes.Count; index++)
         {
-            return 0;
+            var type = operation.InputTypes[index];
+            var capacity = ResolveCandidateInputCapacity(type, maximumElements);
+            var shape = ResolveCandidateInputShape(population, type, capacity, maximumElements);
+            inputCapacities[index] = capacity;
+            inputShapeRows[index] = shape.Rows;
+            inputShapeColumns[index] = shape.Columns;
         }
-        var rows = inputTypes[0].Rows > 0 ? inputTypes[0].Rows : Math.Min(maximumElements, 20);
-        if (rows > 20)
-            return 0;
-        return checked(2 * (1 << rows) * sizeof(double));
+        return MathBlocksGPUProgram.ResolveScratchBytes(
+            operation.Identity,
+            operation.OutputType,
+            operation.InputTypes,
+            inputCapacities,
+            inputShapeRows,
+            inputShapeColumns);
     }
+
+    private static int ResolveCandidateInputCapacity(MathBlockType type, int maximumElements) => type.Kind switch
+    {
+        MathBlockValueKind.Scalar or MathBlockValueKind.Boolean => 0,
+        MathBlockValueKind.Complex => 1,
+        MathBlockValueKind.Matrix or MathBlockValueKind.ComplexMatrix
+            when type.Rows > 0 && type.Columns > 0 => checked(type.Rows * type.Columns),
+        MathBlockValueKind.Vector or MathBlockValueKind.BooleanVector or
+            MathBlockValueKind.ComplexVector or MathBlockValueKind.PointSet or MathBlockValueKind.RunSet
+            when type.Rows > 0 => type.Rows,
+        MathBlockValueKind.Vector or MathBlockValueKind.BooleanVector or MathBlockValueKind.Matrix or
+            MathBlockValueKind.ComplexVector or MathBlockValueKind.ComplexMatrix or
+            MathBlockValueKind.PointSet or MathBlockValueKind.Graph or MathBlockValueKind.RunSet => maximumElements,
+        _ => throw new NotSupportedException($"The GPU value ABI does not support '{type.Kind}'.")
+    };
+
+    private static MathBlockGpuShapeAuthority ResolveCandidateInputShape(
+        MathBlockProgramPopulationDefinition population,
+        MathBlockType type,
+        int capacity,
+        int maximumElements)
+    {
+        if (type.Kind == MathBlockValueKind.Graph)
+            return new MathBlockGpuShapeAuthority(ResolveCandidateGraphRows(population, type), 0);
+        if (type.Kind is MathBlockValueKind.Matrix or MathBlockValueKind.ComplexMatrix)
+        {
+            if (type.Rows > 0 && type.Columns > 0)
+                return new MathBlockGpuShapeAuthority(type.Rows, type.Columns);
+            if (type.Rows > 0)
+                return new MathBlockGpuShapeAuthority(type.Rows, maximumElements / type.Rows);
+            if (type.Columns > 0)
+                return new MathBlockGpuShapeAuthority(maximumElements / type.Columns, type.Columns);
+            return new MathBlockGpuShapeAuthority(maximumElements, maximumElements);
+        }
+        if (type.Kind == MathBlockValueKind.PointSet)
+            return new MathBlockGpuShapeAuthority(type.Rows > 0 ? type.Rows : capacity, 2);
+        if (type.Kind is MathBlockValueKind.Vector or MathBlockValueKind.BooleanVector or
+            MathBlockValueKind.ComplexVector or MathBlockValueKind.RunSet)
+        {
+            return new MathBlockGpuShapeAuthority(type.Rows > 0 ? type.Rows : capacity, type.Columns);
+        }
+        return new MathBlockGpuShapeAuthority(type.Rows, type.Columns);
+    }
+
+    private static int ResolveCandidateGraphRows(
+        MathBlockProgramPopulationDefinition population,
+        MathBlockType expectedType)
+    {
+        if (expectedType.Rows > 0)
+            return expectedType.Rows;
+        var rows = 0;
+        foreach (var terminal in population.AllTerminals)
+        {
+            if (TypesCanBind(expectedType, terminal.Type))
+                rows = Math.Max(rows, terminal.Value.Type.Rows);
+        }
+        foreach (var operation in population.Grammar.Operations)
+        {
+            if (!TypesCanBind(expectedType, operation.OutputType))
+                continue;
+            if (operation.OutputType.Rows <= 0)
+                return 0;
+            rows = Math.Max(rows, operation.OutputType.Rows);
+        }
+        return rows;
+    }
+
+    private static bool TypesCanBind(MathBlockType expected, MathBlockType actual) =>
+        expected.Kind == actual.Kind &&
+        expected.Unit == actual.Unit &&
+        (expected.Rows == 0 || actual.Rows == 0 || expected.Rows == actual.Rows) &&
+        (expected.Columns == 0 || actual.Columns == 0 || expected.Columns == actual.Columns);
 
     private static ulong CalculateBandCount(
         IReadOnlyList<MathBlockProgramPopulationOperation> operations,
@@ -1648,7 +1731,8 @@ internal sealed class PopulationSearchLayout
         ObjectiveNodeDescriptor[] Nodes,
         int[] Inputs,
         ObjectiveSourceDescriptor[] Sources,
-        QualityDimensionDescriptor[] QualityDimensions);
+        QualityDimensionDescriptor[] QualityDimensions,
+        int ScratchBytes);
 }
 
 internal static class MathBlockGpuValueLayout

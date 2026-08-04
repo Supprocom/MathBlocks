@@ -4,6 +4,11 @@ namespace Supprocom.MathBlocks.Gpu;
 
 internal readonly record struct MathBlockGpuShapeAuthority(int Rows, int Columns);
 
+internal readonly record struct MathBlockGpuPayloadLayout(
+    int[] Capacities,
+    int[] ShapeRows,
+    int[] ShapeColumns);
+
 public sealed class MathBlocksGPUWorker
 {
     public static bool IsAvailable => MathBlocksCudaNative.IsAvailable();
@@ -125,7 +130,8 @@ public sealed class MathBlocksGPUProgram : IDisposable
 
         var slotOffsets = new int[program.PlanNodes.Count];
         var payloadOffsets = CreateFilledIntArray(program.PlanNodes.Count, -1);
-        var payloadCapacities = ResolvePayloadCapacities(program.PlanNodes, prototypeInputs);
+        var payloadLayout = ResolvePayloadLayout(program.PlanNodes, prototypeInputs);
+        var payloadCapacities = payloadLayout.Capacities;
         var inputPointerOffsets = CreateFilledIntArray(program.PlanNodes.Count, -1);
         var scratchOffsets = CreateFilledIntArray(program.PlanNodes.Count, -1);
         var graphNodes = new IntPtr[program.PlanNodes.Count];
@@ -163,8 +169,7 @@ public sealed class MathBlocksGPUProgram : IDisposable
             var scratchBytes = ResolveScratchBytes(
                 node,
                 program.PlanNodes,
-                payloadCapacities,
-                prototypeInputs);
+                payloadLayout);
             if (scratchBytes == 0)
                 continue;
             scratchOffsets[node.Index] = AlignArenaOffset(arenaSize);
@@ -537,6 +542,17 @@ public sealed class MathBlocksGPUProgram : IDisposable
         IReadOnlyList<MathBlockProgramNode> nodes,
         IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
         IReadOnlyDictionary<string, int>? inputCapacityOverrides = null,
+        IReadOnlyDictionary<string, MathBlockGpuShapeAuthority>? inputShapeOverrides = null) =>
+        ResolvePayloadLayout(
+            nodes,
+            prototypeInputs,
+            inputCapacityOverrides,
+            inputShapeOverrides).Capacities;
+
+    internal static MathBlockGpuPayloadLayout ResolvePayloadLayout(
+        IReadOnlyList<MathBlockProgramNode> nodes,
+        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
+        IReadOnlyDictionary<string, int>? inputCapacityOverrides = null,
         IReadOnlyDictionary<string, MathBlockGpuShapeAuthority>? inputShapeOverrides = null)
     {
         var capacities = new int[nodes.Count];
@@ -591,7 +607,7 @@ public sealed class MathBlocksGPUProgram : IDisposable
         for (var nodeIndex = 0; nodeIndex < published.Length; nodeIndex++)
             if (!published[nodeIndex])
                 throw new InvalidOperationException($"GPU payload capacity for node {nodeIndex} is unavailable.");
-        return capacities;
+        return new MathBlockGpuPayloadLayout(capacities, shapeRows, shapeColumns);
     }
 
     private static IntPtr[] CreateKernelDependencies(
@@ -1272,18 +1288,57 @@ public sealed class MathBlocksGPUProgram : IDisposable
         _ => throw new NotSupportedException($"The GPU value ABI does not support '{value.Type.Kind}'.")
     };
 
-    private static int ResolveScratchBytes(
+    internal static int ResolveScratchBytes(
         MathBlockProgramNode node,
         IReadOnlyList<MathBlockProgramNode> nodes,
-        IReadOnlyList<int> payloadCapacities,
-        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs = null)
+        MathBlockGpuPayloadLayout payloadLayout)
     {
-        if (node.Kind == MathBlockProgramNodeKind.Operation && node.Inputs.Count != 0)
+        if (node.Kind != MathBlockProgramNodeKind.Operation)
+            return 0;
+        var inputTypes = new MathBlockType[node.Inputs.Count];
+        var inputCapacities = new int[node.Inputs.Count];
+        var inputShapeRows = new int[node.Inputs.Count];
+        var inputShapeColumns = new int[node.Inputs.Count];
+        for (var index = 0; index < node.Inputs.Count; index++)
         {
-            var identity = node.OperationIdentity!;
-            var firstCount = payloadCapacities[node.Inputs[0]];
-            var rows = ResolveShapeRows(nodes[node.Inputs[0]], prototypeInputs);
-            var columns = ResolveShapeColumns(nodes[node.Inputs[0]], prototypeInputs);
+            var input = node.Inputs[index];
+            inputTypes[index] = nodes[input].Type;
+            inputCapacities[index] = payloadLayout.Capacities[input];
+            inputShapeRows[index] = payloadLayout.ShapeRows[input];
+            inputShapeColumns[index] = payloadLayout.ShapeColumns[input];
+        }
+        return ResolveScratchBytes(
+            node.OperationIdentity!,
+            node.Type,
+            inputTypes,
+            inputCapacities,
+            inputShapeRows,
+            inputShapeColumns);
+    }
+
+    internal static int ResolveScratchBytes(
+        string identity,
+        MathBlockType outputType,
+        IReadOnlyList<MathBlockType> inputTypes,
+        IReadOnlyList<int> inputCapacities,
+        IReadOnlyList<int> inputShapeRows,
+        IReadOnlyList<int> inputShapeColumns)
+    {
+        if (inputTypes.Count != inputCapacities.Count ||
+            inputTypes.Count != inputShapeRows.Count ||
+            inputTypes.Count != inputShapeColumns.Count)
+        {
+            throw new ArgumentException("GPU scratch input metadata is inconsistent.");
+        }
+        if (inputTypes.Count != 0)
+        {
+            var firstCount = inputCapacities[0];
+            var rows = inputShapeRows[0];
+            var columns = inputShapeColumns[0];
+            if (RequiresScratchRows(identity) && rows <= 0)
+                throw new InvalidOperationException($"GPU scratch row authority is unavailable for '{identity}'.");
+            if (RequiresScratchColumns(identity) && columns <= 0)
+                throw new InvalidOperationException($"GPU scratch column authority is unavailable for '{identity}'.");
             var doubleCount = identity switch
             {
                 "matrix.determinant@1" or "matrix.rank@1" or
@@ -1304,14 +1359,14 @@ public sealed class MathBlocksGPUProgram : IDisposable
                 "information.jensen-shannon@1" => firstCount,
                 "information.mutual-information@1" => checked(rows + columns),
                 "information.conditional-mutual-information@1" =>
-                    ResolveConditionalInformationScratch(node, nodes, prototypeInputs),
+                    ResolveConditionalInformationScratch(inputCapacities),
                 "sequence.rolling-maximum@1" or
                     "sequence.rolling-median@1" or
                     "sequence.rolling-minimum@1" or
                     "sequence.rolling-quantile@1" or
                     "transform.haar@1" => firstCount,
                 "path.dynamic-time-warping@1" => checked(
-                    2 * (payloadCapacities[node.Inputs[1]] + 1)),
+                    2 * (inputCapacities[1] + 1)),
                 "path.signature-level-two@1" => checked(columns * 2),
                 "path.signature-level-three@1" => checked(columns * columns + columns * 2),
                 "statistics.covariance-matrix@1" => columns,
@@ -1323,7 +1378,7 @@ public sealed class MathBlocksGPUProgram : IDisposable
                 "geometry.convex-hull@1" => checked(firstCount * 6),
                 "geometry.delaunay-graph@1" => checked(firstCount * firstCount + firstCount),
                 "geometry.discrete-frechet-distance@1" => checked(
-                    firstCount * payloadCapacities[node.Inputs[1]]),
+                    firstCount * inputCapacities[1]),
                 "topology.zero-dimensional-persistence@1" => checked(
                     firstCount * (firstCount - 1) + firstCount * 2),
                 "graph.algebraic-connectivity@1" => checked(rows * rows * 2 + rows),
@@ -1345,23 +1400,52 @@ public sealed class MathBlocksGPUProgram : IDisposable
                 "transport.sinkhorn-coupling@1" => checked(firstCount + rows + columns),
                 "transport.uniform-wasserstein@1" => checked(firstCount * 2),
                 "transport.weighted-wasserstein-1@1" => checked(
-                    firstCount + payloadCapacities[node.Inputs[2]]),
+                    firstCount + inputCapacities[2]),
                 _ => 0
             };
             if (doubleCount != 0)
                 return checked(doubleCount * sizeof(double));
         }
-        if (node.Type.Kind is not MathBlockValueKind.Scalar and not MathBlockValueKind.Boolean)
+        if (outputType.Kind is not MathBlockValueKind.Scalar and not MathBlockValueKind.Boolean)
             return 0;
         var bytes = 0;
-        foreach (var input in node.Inputs)
+        for (var index = 0; index < inputTypes.Count; index++)
         {
-            var inputBytes = ResolvePayloadBytes(nodes[input].Type.Kind, payloadCapacities[input]);
+            var inputBytes = ResolvePayloadBytes(inputTypes[index].Kind, inputCapacities[index]);
             if (inputBytes > bytes)
                 bytes = inputBytes;
         }
         return bytes;
     }
+
+    private static bool RequiresScratchRows(string identity) => identity is
+        "matrix.solve@1" or
+        "matrix.inverse@1" or
+        "matrix.symmetric-eigenvalues@1" or
+        "matrix.smallest-symmetric-eigenvalue@1" or
+        "matrix.largest-symmetric-eigenvalue@1" or
+        "matrix.perron-vector@1" or
+        "matrix.perron-value@1" or
+        "information.mutual-information@1" or
+        "graph.algebraic-connectivity@1" or
+        "graph.connected-component-count@1" or
+        "graph.is-connected@1" or
+        "graph.hodge-potential@1" or
+        "graph.minimum-spanning-forest@1" or
+        "graph.page-rank@1" or
+        "graph.triangle-count@1" or
+        "graph.undirected-shortest-paths@1" or
+        "markov.stationary-distribution@1" or
+        "transport.minimum-assignment@1" or
+        "transport.sinkhorn-coupling@1";
+
+    private static bool RequiresScratchColumns(string identity) => identity is
+        "matrix.spectral-norm@1" or
+        "information.mutual-information@1" or
+        "path.signature-level-two@1" or
+        "path.signature-level-three@1" or
+        "statistics.covariance-matrix@1" or
+        "transport.sinkhorn-coupling@1";
 
     private static int BinomialCoefficient(int count, int selected)
     {
@@ -1375,14 +1459,11 @@ public sealed class MathBlocksGPUProgram : IDisposable
         return checked((int)result);
     }
 
-    private static int ResolveConditionalInformationScratch(
-        MathBlockProgramNode node,
-        IReadOnlyList<MathBlockProgramNode> nodes,
-        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs)
+    private static int ResolveConditionalInformationScratch(IReadOnlyList<int> inputCapacities)
     {
-        var first = ResolvePrototypeCount(nodes[node.Inputs[1]], prototypeInputs);
-        var second = ResolvePrototypeCount(nodes[node.Inputs[2]], prototypeInputs);
-        var condition = ResolvePrototypeCount(nodes[node.Inputs[3]], prototypeInputs);
+        var first = inputCapacities[1];
+        var second = inputCapacities[2];
+        var condition = inputCapacities[3];
         return checked(first * condition + second * condition + condition);
     }
 
