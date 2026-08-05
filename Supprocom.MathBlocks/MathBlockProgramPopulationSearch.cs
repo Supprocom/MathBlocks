@@ -519,11 +519,6 @@ public sealed class MathBlockProgramPopulationSearchDefinition
             throw new ArgumentException("The objective candidate input has an incompatible type.", nameof(objectiveBinding));
         if (evolution.EnumerationProposalCount > population.TotalProposalCount)
             throw new ArgumentOutOfRangeException(nameof(evolution));
-        if (evolution.MaximumTrialCount > (ulong)population.FingerprintCapacity)
-            throw new ArgumentOutOfRangeException(
-                nameof(evolution),
-                "The fingerprint capacity must contain all visited search trials.");
-
         var qualityIndex = FindObjective(objectiveBinding.Objectives, qualityDiversity.QualityObjective);
         if (qualityIndex < 0)
             throw new ArgumentException("The quality objective is not defined.", nameof(qualityDiversity));
@@ -551,6 +546,7 @@ public sealed class MathBlockProgramPopulationSearchDefinition
         Identity = MathBlockProgramPopulationSearchSerialization.CreateIdentity(this);
         if (acceptedState is not null)
             ValidateState(acceptedState);
+        RequireFingerprintCapacity(acceptedState);
         AcceptedState = acceptedState;
     }
 
@@ -669,7 +665,7 @@ public sealed class MathBlockProgramPopulationSearchDefinition
             HaveEqualHistoryCounts(
                 previousDefinition.Validity.HistoryCounts,
                 Validity.HistoryCounts);
-        return new MathBlockProgramPopulationSearchState(
+        var transition = new MathBlockProgramPopulationSearchState(
             Identity,
             preserveEnumerationCursor ? previousState.EnumerationCursor : 0,
             preserveEnumerationCursor ? previousState.EnumerationTrialCount : 0,
@@ -688,6 +684,9 @@ public sealed class MathBlockProgramPopulationSearchDefinition
             [],
             [],
             refreshPrograms.Values);
+        ValidateState(transition);
+        RequireFingerprintCapacity(transition);
+        return transition;
     }
 
     private void AddRefreshProgram(
@@ -941,6 +940,51 @@ public sealed class MathBlockProgramPopulationSearchDefinition
         foreach (var program in state.RefreshPrograms)
             RequireProgramCapacity(program);
     }
+
+    private void RequireFingerprintCapacity(MathBlockProgramPopulationSearchState? state)
+    {
+        var structuralCount = state?.StructuralFingerprints.Count ?? 0;
+        var semanticCount = state?.SemanticFingerprints.Count ?? 0;
+        var trialCursor = state?.TrialCursor ?? 0;
+        var refreshPrograms = state?.RefreshPrograms ?? InitialPrograms;
+        var refreshCursor = state?.RefreshCursor ?? 0;
+        var pendingRefreshCount = CountUniqueRefreshPrograms(refreshPrograms, refreshCursor);
+        var remainingTrialCount = Evolution.MaximumTrialCount - trialCursor;
+
+        RequireFingerprintCapacity(structuralCount, pendingRefreshCount, remainingTrialCount);
+        RequireFingerprintCapacity(semanticCount, pendingRefreshCount, remainingTrialCount);
+    }
+
+    private void RequireFingerprintCapacity(
+        int existingCount,
+        int pendingRefreshCount,
+        ulong remainingTrialCount)
+    {
+        var available = Population.FingerprintCapacity;
+        if (existingCount > available)
+            ThrowInsufficientFingerprintCapacity();
+        available -= existingCount;
+        if (pendingRefreshCount > available)
+            ThrowInsufficientFingerprintCapacity();
+        available -= pendingRefreshCount;
+        if (remainingTrialCount > (ulong)available)
+            ThrowInsufficientFingerprintCapacity();
+    }
+
+    private static int CountUniqueRefreshPrograms(
+        IReadOnlyList<MathBlockProgramStructure> programs,
+        int startIndex)
+    {
+        var fingerprints = new HashSet<string>(StringComparer.Ordinal);
+        for (var index = startIndex; index < programs.Count; index++)
+            fingerprints.Add(programs[index].StructuralFingerprint);
+        return fingerprints.Count;
+    }
+
+    private static void ThrowInsufficientFingerprintCapacity() =>
+        throw new ArgumentOutOfRangeException(
+            "population",
+            "The fingerprint capacity must contain existing fingerprints, pending refresh programs, and all remaining search trials.");
 
     private void ValidateEntry(MathBlockProgramPopulationArchiveEntry entry)
     {

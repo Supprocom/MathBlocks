@@ -8,6 +8,64 @@ namespace Supprocom.MathBlocks.Tests;
 public sealed class MathBlockCudaProgramPopulationSearchTests
 {
     [Fact]
+    public void Resident_search_reserves_fingerprints_for_initial_programs_and_remaining_trials()
+    {
+        RequireCuda();
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(
+            () => CreateFingerprintCapacitySearch(2, 1, includeInitialPrograms: true));
+        Assert.Equal("population", exception.ParamName);
+
+        var definition = CreateFingerprintCapacitySearch(3, 1, includeInitialPrograms: true);
+        using var compiled = new MathBlocksCUDAWorker().CompilePopulationSearch(definition);
+
+        var result = compiled.ExecuteCycle();
+
+        Assert.Equal(3, definition.Population.FingerprintCapacity);
+        Assert.Equal(2, result.AcceptedState.StructuralFingerprints.Count);
+        Assert.Equal(2, result.AcceptedState.SemanticFingerprints.Count);
+        Assert.Equal(1ul, result.AcceptedState.TrialCursor);
+        AssertResidentCycleContract(compiled);
+    }
+
+    [Fact]
+    public void Resident_search_reserves_fingerprints_for_transition_refresh_and_remaining_trials()
+    {
+        RequireCuda();
+        var initialDefinition = CreateFingerprintCapacitySearch(
+            3,
+            1,
+            includeInitialPrograms: true);
+        using var initialCompiled = new MathBlocksCUDAWorker().CompilePopulationSearch(initialDefinition);
+        var initial = initialCompiled.ExecuteCycle();
+
+        var insufficient = CreateFingerprintCapacitySearch(
+            4,
+            2,
+            includeInitialPrograms: false);
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(
+            () => insufficient.CreateTransitionState(initialDefinition, initial.AcceptedState));
+        Assert.Equal("population", exception.ParamName);
+
+        var expanded = CreateFingerprintCapacitySearch(
+            5,
+            2,
+            includeInitialPrograms: false);
+        var transition = expanded.CreateTransitionState(initialDefinition, initial.AcceptedState);
+        Assert.Equal(2, transition.StructuralFingerprints.Count);
+        Assert.Equal(2, transition.SemanticFingerprints.Count);
+        Assert.Equal(2, transition.RefreshPrograms.Count);
+        Assert.Equal(0, transition.RefreshCursor);
+
+        using var resumed = new MathBlocksCUDAWorker().CompilePopulationSearch(
+            expanded.WithAcceptedState(transition));
+        var result = resumed.ExecuteCycle();
+
+        Assert.Equal(5, expanded.Population.FingerprintCapacity);
+        Assert.Equal(2ul, result.AcceptedState.TrialCursor);
+        AssertResidentCycleContract(resumed);
+    }
+
+    [Fact]
     public void Resident_search_execution_options_require_a_valid_mode_and_lane_count()
     {
         Assert.Throws<ArgumentOutOfRangeException>(
@@ -3155,7 +3213,7 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
                 [],
                 [new MathBlockProgramPopulationResourceBand(1, maximumElements)],
                 proposalsPerCycle: 1,
-                fingerprintCapacity: proposalCount);
+                fingerprintCapacity: checked(proposalCount + 1));
             var objectiveBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
             var candidate = objectiveBuilder.Input("candidate", outputType);
             var objectiveProgram = objectiveBuilder.Output("candidate", candidate).Build();
@@ -4580,6 +4638,75 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
             mutationTrials: mutationTrials,
             crossoverTrials: crossoverTrials,
             immigrantTrials: immigrantTrials);
+    }
+
+    private static MathBlockProgramPopulationSearchDefinition CreateFingerprintCapacitySearch(
+        int fingerprintCapacity,
+        ulong maximumTrials,
+        bool includeInitialPrograms)
+    {
+        var scalar = MathBlockType.Scalar();
+        var terminals = new[]
+        {
+            new MathBlockProgramPopulationTerminal("one", scalar, MathBlockValue.Scalar(1d)),
+            new MathBlockProgramPopulationTerminal("two", scalar, MathBlockValue.Scalar(2d))
+        };
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation("scalar.negate", 1, [scalar], scalar)],
+                scalar),
+            terminals,
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 1)],
+            proposalsPerCycle: 3,
+            fingerprintCapacity);
+        var terminalNodes = terminals
+            .Select((terminal, index) =>
+                MathBlockProgramCandidateNode.Terminal(index, terminal.Identifier, terminal.Type))
+            .ToArray();
+        var initialPrograms = new[]
+        {
+            new MathBlockProgramStructure(
+                0,
+                null,
+                MathBlockProgramPopulationTrialSource.Enumeration,
+                [.. terminalNodes, MathBlockProgramCandidateNode.Operation("scalar.negate", 1, scalar, 0)]),
+            new MathBlockProgramStructure(
+                1,
+                null,
+                MathBlockProgramPopulationTrialSource.Enumeration,
+                [.. terminalNodes, MathBlockProgramCandidateNode.Operation("scalar.negate", 1, scalar, 1)])
+        };
+        var objectiveBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = objectiveBuilder.Input("candidate", scalar);
+        var objectiveProgram = objectiveBuilder.Output("value", candidate).Build();
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveProgram,
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "value",
+                "value",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        return new MathBlockProgramPopulationSearchDefinition(
+            population,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(
+                maximumTrials,
+                maximumTrials,
+                0,
+                0,
+                0,
+                149),
+            new MathBlockProgramPopulationSelectionPolicy(4, 8),
+            new MathBlockProgramPopulationQualityDiversityPolicy(
+                "value",
+                [new MathBlockProgramPopulationQualityDiversityDimension("value", -4, 4, 4)]),
+            new MathBlockProgramPopulationSearchEnvelope(
+                64 * 1024 * 1024,
+                16 * 1024 * 1024),
+            new MathBlockProgramPopulationValidityPolicy([1]),
+            initialPrograms: includeInitialPrograms ? initialPrograms : []);
     }
 
     private static MathBlockProgramPopulationSearchDefinition CreateDefinition(
