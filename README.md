@@ -15,14 +15,14 @@ versions fail before execution.
 Programs form directed acyclic graphs (DAGs). The CPU worker runs independent
 nodes in each graph level in parallel.
 
-CPU and GPU code stays in the single `Supprocom.MathBlocks` production
-assembly. `Supprocom.MathBlocks.Gpu` is only a namespace in that assembly.
+CPU and CUDA code stays in the single `Supprocom.MathBlocks` production
+assembly. `Supprocom.MathBlocks.Cuda` is only a namespace in that assembly.
 
-The exact parity policy requires each GPU block to match its CPU regression
+The exact parity policy requires each CUDA block to match its CPU regression
 result. The comparison includes value data, shape, type, unit, and invalid
 state.
 
-Each block folder owns Definition, CPU, GPU, and Tests files. The catalog
+Each block folder owns Definition, CPU, CUDA, and Tests files. The catalog
 contains 337 block folders.
 
 ## Resident CUDA execution
@@ -49,9 +49,9 @@ The first compile performs one immutable-data upload. Each cycle uses one graph
 launch, one synchronization, and one compact download. Later cycles do not
 upload immutable data again.
 
-The resident cycle enumerates and evolves programs on the GPU. It supports
-typed mutation, typed crossover, random immigrants, and deterministic random
-state.
+The resident cycle enumerates and evolves programs on the CUDA device. It
+supports typed mutation, typed crossover, random immigrants, and deterministic
+random state.
 
 A caller can bind a typed objective DAG and resident numeric inputs. Program
 outputs and objective inputs remain on the device. Only requested compact
@@ -79,7 +79,7 @@ The transition API preserves accepted trial identity across larger graph,
 terminal, objective, and archive bands. It refreshes accepted programs under
 the new resident definition before new proposals.
 
-Every supplied grammar operation uses the same CUDA implementation as the GPU
+Every supplied grammar operation uses the same CUDA implementation as the CUDA
 worker. Compilation fails if an operation has no supported CUDA identity.
 
 Instrumentation reports graph instances, uploads, launches,
@@ -115,9 +115,9 @@ Given a completed search definition, compile four resident lanes as follows.
 
 ```csharp
 using Supprocom.MathBlocks;
-using Supprocom.MathBlocks.Gpu;
+using Supprocom.MathBlocks.Cuda;
 
-var worker = new MathBlocksGPUWorker();
+var worker = new MathBlocksCUDAWorker();
 var options = new MathBlockProgramPopulationExecutionOptions(
     MathBlockProgramPopulationExecutionMode.ParallelResident,
     candidateLaneCount: 4);
@@ -155,7 +155,7 @@ Console.WriteLine(output["area"].AsScalar());
 ## Performance contract
 
 Each block has a sub-millisecond contract target on its contract shape. The CPU
-gate measures warm p95 latency. The GPU block gate measures warm median resident
+gate measures warm p95 latency. The CUDA block gate measures warm median resident
 latency.
 
 The resident formula gate measures warm p99 latency. These gates are test
@@ -172,10 +172,10 @@ serial and parallel samples without claiming an advantage for every workload.
 This Git repository contains source text and project metadata only. It does not
 contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
 
-Get MathBlocks version `0.2.0` from NuGet.org with this command:
+Get MathBlocks version `0.2.1` from NuGet.org with this command:
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.2.0
+dotnet add package Supprocom.MathBlocks --version 0.2.1
 ```
 
 The package declares three external native-acquisition dependencies. This
@@ -208,8 +208,8 @@ Review and accept each third-party license before you use its package. See
 
 ## Build and test
 
-MathBlocks targets .NET 10. CUDA tests require a compatible NVIDIA GPU and
-driver.
+MathBlocks targets .NET 10. CUDA tests require a compatible NVIDIA driver and
+CUDA toolkit.
 
 ```text
 dotnet build Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj --configuration Release

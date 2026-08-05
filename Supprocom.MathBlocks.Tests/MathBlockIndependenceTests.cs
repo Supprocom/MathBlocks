@@ -38,26 +38,80 @@ public sealed partial class MathBlockIndependenceTests
     }
 
     [Fact]
-    public void Public_release_metadata_declares_the_parallel_resident_0_2_0_contract()
+    public void Public_release_metadata_declares_the_CUDA_0_2_1_contract()
     {
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(root, "Supprocom.MathBlocks", "Supprocom.MathBlocks.csproj");
         var document = XDocument.Load(projectPath);
         var readme = File.ReadAllText(Path.Combine(root, "README.md"));
 
-        Assert.Equal("0.2.0", document.Descendants("Version").Single().Value);
+        Assert.Equal("0.2.1", document.Descendants("Version").Single().Value);
         Assert.Equal("AGPL-3.0-only", document.Descendants("PackageLicenseExpression").Single().Value);
         Assert.Contains(
-            "explicit serial and parallel resident search modes",
+            "CUDA implementation paths, namespaces, workers, kernels, catalogs, and tests",
             document.Descendants("PackageReleaseNotes").Single().Value,
             StringComparison.Ordinal);
-        Assert.Equal(new Version(0, 2, 0, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
+        Assert.Equal(new Version(0, 2, 1, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
         Assert.Contains("## Parallel proposal waves", readme, StringComparison.Ordinal);
         Assert.Contains(
-            "dotnet add package Supprocom.MathBlocks --version 0.2.0",
+            "dotnet add package Supprocom.MathBlocks --version 0.2.1",
             readme,
             StringComparison.Ordinal);
         Assert.DoesNotContain("--version 0.1.", readme, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Public_tree_uses_only_CUDA_accelerator_identity()
+    {
+        var root = FindRepositoryRoot();
+        var legacyToken = string.Concat('g', 'p', 'u');
+        var requiredVendorOption = $"--{legacyToken}-architecture";
+        var failures = new List<string>();
+        var vendorOptionCount = 0;
+        var publicRoots = new[]
+        {
+            Path.Combine(root, "README.md"),
+            Path.Combine(root, "THIRD-PARTY-NOTICES.md"),
+            Path.Combine(root, "Supprocom.MathBlocks"),
+            Path.Combine(root, "Supprocom.MathBlocks.Tests")
+        };
+
+        foreach (var publicRoot in publicRoots)
+        {
+            if (File.Exists(publicRoot))
+            {
+                InspectFile(publicRoot);
+                continue;
+            }
+
+            foreach (var file in Directory.EnumerateFiles(publicRoot, "*", SearchOption.AllDirectories))
+            {
+                if (IsBuildOutput(publicRoot, file))
+                    continue;
+                InspectFile(file);
+            }
+        }
+
+        Assert.Equal(1, vendorOptionCount);
+        Assert.Empty(failures);
+        return;
+
+        void InspectFile(string file)
+        {
+            var relative = Path.GetRelativePath(root, file);
+            if (relative.Contains(legacyToken, StringComparison.OrdinalIgnoreCase))
+                failures.Add(relative);
+
+            var source = File.ReadAllText(file);
+            var optionIndex = source.IndexOf(requiredVendorOption, StringComparison.Ordinal);
+            if (optionIndex >= 0)
+            {
+                vendorOptionCount++;
+                source = source.Remove(optionIndex, requiredVendorOption.Length);
+            }
+            if (source.Contains(legacyToken, StringComparison.OrdinalIgnoreCase))
+                failures.Add(relative);
+        }
     }
 
     [Fact]
@@ -74,8 +128,8 @@ public sealed partial class MathBlockIndependenceTests
             foreach (Match match in ForbiddenSemanticWord().Matches(text))
                 failures.Add($"{Path.GetFileName(file)}: {match.Value}");
             var relative = Path.GetRelativePath(sourceRoot, file);
-            var isNativeInfrastructure = relative.StartsWith($"Gpu{Path.DirectorySeparatorChar}", StringComparison.Ordinal) ||
-                                         relative == Path.Combine("Execution", "MathBlocksGPUWorker.cs");
+            var isNativeInfrastructure = relative.StartsWith($"Cuda{Path.DirectorySeparatorChar}", StringComparison.Ordinal) ||
+                                         relative == Path.Combine("Execution", "MathBlocksCUDAWorker.cs");
             if (!isNativeInfrastructure)
                 foreach (Match match in ForbiddenEffectWord().Matches(text))
                     failures.Add($"{Path.GetFileName(file)}: {match.Value}");

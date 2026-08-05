@@ -6,7 +6,7 @@
     <RootNamespace>Supprocom.MathBlocks</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>Supprocom.MathBlocks</PackageId>
-    <Version>0.2.0</Version>
+    <Version>0.2.1</Version>
     <Authors>Supprocom</Authors>
     <Company>Supprocom</Company>
     <Copyright>Copyright (C) 2026 mkn8rn</Copyright>
@@ -17,8 +17,8 @@
     <RepositoryUrl>https://github.com/Supprocom/MathBlocks</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>mathematics;computation-graph;dag;parallel;cpu;cuda;gpu;deterministic;numerics</PackageTags>
-    <PackageReleaseNotes>Adds explicit serial and parallel resident search modes, deterministic proposal waves, exact cross-mode resume, cooperative CUDA execution, and atomic ordinal commit.</PackageReleaseNotes>
+    <PackageTags>mathematics;computation-graph;dag;parallel;cpu;cuda;deterministic;numerics</PackageTags>
+    <PackageReleaseNotes>Renames CUDA implementation paths, namespaces, workers, kernels, catalogs, and tests to use exact CUDA terminology.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType>portable</DebugType>

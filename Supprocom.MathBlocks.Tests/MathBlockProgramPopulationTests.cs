@@ -1,15 +1,15 @@
-using Supprocom.MathBlocks.Gpu;
+using Supprocom.MathBlocks.Cuda;
 
 namespace Supprocom.MathBlocks.Tests;
 
 public sealed class MathBlockProgramPopulationTests
 {
     [Fact]
-    public void GPU_population_completely_enumerates_a_known_typed_grammar()
+    public void CUDA_population_completely_enumerates_a_known_typed_grammar()
     {
-        Assert.True(MathBlocksGPUWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var definition = CreateScalarDefinition(proposalsPerCycle: 3);
-        using var population = new MathBlocksGPUWorker().CompilePopulation(definition);
+        using var population = new MathBlocksCUDAWorker().CompilePopulation(definition);
         var candidates = new List<MathBlockProgramCandidate>();
         MathBlockProgramPopulationCycleResult cycle;
         do
@@ -48,11 +48,11 @@ public sealed class MathBlockProgramPopulationTests
     }
 
     [Fact]
-    public void GPU_population_cycle_uses_one_upload_launch_synchronization_and_download()
+    public void CUDA_population_cycle_uses_one_upload_launch_synchronization_and_download()
     {
-        Assert.True(MathBlocksGPUWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var definition = CreateScalarDefinition(proposalsPerCycle: 8);
-        using var population = new MathBlocksGPUWorker().CompilePopulation(definition);
+        using var population = new MathBlocksCUDAWorker().CompilePopulation(definition);
 
         var cycle = population.ExecuteCycle();
 
@@ -69,17 +69,17 @@ public sealed class MathBlockProgramPopulationTests
     }
 
     [Fact]
-    public void GPU_population_resume_reproduces_the_exact_next_proposal()
+    public void CUDA_population_resume_reproduces_the_exact_next_proposal()
     {
-        Assert.True(MathBlocksGPUWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var initial = CreateScalarDefinition(proposalsPerCycle: 3);
-        using var firstPopulation = new MathBlocksGPUWorker().CompilePopulation(initial);
+        using var firstPopulation = new MathBlocksCUDAWorker().CompilePopulation(initial);
         var firstCycle = firstPopulation.ExecuteCycle();
         var restoredState = MathBlockProgramPopulationState.Import(firstCycle.AcceptedState.Export());
 
         var expected = firstPopulation.ExecuteCycle();
         var resumedDefinition = CreateScalarDefinition(proposalsPerCycle: 3, acceptedState: restoredState);
-        using var resumedPopulation = new MathBlocksGPUWorker().CompilePopulation(resumedDefinition);
+        using var resumedPopulation = new MathBlocksCUDAWorker().CompilePopulation(resumedDefinition);
         var actual = resumedPopulation.ExecuteCycle();
 
         Assert.Equal(expected.AcceptedState.AcceptedCursor, actual.AcceptedState.AcceptedCursor);
@@ -99,9 +99,9 @@ public sealed class MathBlockProgramPopulationTests
     }
 
     [Fact]
-    public void GPU_population_resolves_dynamic_output_capacity_and_matches_CPU()
+    public void CUDA_population_resolves_dynamic_output_capacity_and_matches_CPU()
     {
-        Assert.True(MathBlocksGPUWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var dynamicVector = MathBlockType.Vector(length: 0);
         var scalar = MathBlockType.Scalar();
         var grammar = new MathBlockProgramPopulationGrammar(
@@ -121,7 +121,7 @@ public sealed class MathBlockProgramPopulationTests
             [new MathBlockProgramPopulationResourceBand(1, 3)],
             proposalsPerCycle: 4,
             fingerprintCapacity: 4);
-        using var population = new MathBlocksGPUWorker().CompilePopulation(definition);
+        using var population = new MathBlocksCUDAWorker().CompilePopulation(definition);
 
         var cycle = population.ExecuteCycle();
 
@@ -138,11 +138,11 @@ public sealed class MathBlockProgramPopulationTests
     }
 
     [Fact]
-    public void GPU_population_serializes_concurrent_cycles_without_proposal_loss()
+    public void CUDA_population_serializes_concurrent_cycles_without_proposal_loss()
     {
-        Assert.True(MathBlocksGPUWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var definition = CreateScalarDefinition(proposalsPerCycle: 1);
-        using var population = new MathBlocksGPUWorker().CompilePopulation(definition);
+        using var population = new MathBlocksCUDAWorker().CompilePopulation(definition);
         var cursors = new ulong[8];
 
         Parallel.For(0, cursors.Length, index =>
@@ -162,9 +162,9 @@ public sealed class MathBlockProgramPopulationTests
     }
 
     [Fact]
-    public void GPU_population_failed_cycle_does_not_replace_accepted_state()
+    public void CUDA_population_failed_cycle_does_not_replace_accepted_state()
     {
-        Assert.True(MathBlocksGPUWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var dynamicVector = MathBlockType.Vector(length: 0);
         var grammar = new MathBlockProgramPopulationGrammar(
             [new MathBlockProgramPopulationOperation(
@@ -189,7 +189,7 @@ public sealed class MathBlockProgramPopulationTests
             [new MathBlockProgramPopulationResourceBand(1, 2)],
             proposalsPerCycle: 4,
             fingerprintCapacity: 4);
-        using var population = new MathBlocksGPUWorker().CompilePopulation(definition);
+        using var population = new MathBlocksCUDAWorker().CompilePopulation(definition);
 
         Assert.Throws<InvalidOperationException>(() => population.ExecuteCycle());
         Assert.Equal(0ul, population.AcceptedCursor);
@@ -208,8 +208,8 @@ public sealed class MathBlockProgramPopulationTests
     [Fact]
     public void Every_supported_population_operation_matches_its_CPU_reference()
     {
-        Assert.True(MathBlocksGPUWorker.IsAvailable, "A CUDA device is required.");
-        foreach (var identity in MathBlocksGPUWorker.SupportedPopulationOperationIdentities)
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        foreach (var identity in MathBlocksCUDAWorker.SupportedPopulationOperationIdentities)
         {
             var separator = identity.LastIndexOf('@');
             var operation = MathBlockCatalog.Standard.Get(
@@ -242,7 +242,7 @@ public sealed class MathBlockProgramPopulationTests
                 [new MathBlockProgramPopulationResourceBand(1, maximumOutputElements)],
                 proposalsPerCycle: total,
                 fingerprintCapacity: total);
-            using var population = new MathBlocksGPUWorker().CompilePopulation(definition);
+            using var population = new MathBlocksCUDAWorker().CompilePopulation(definition);
 
             var cycle = population.ExecuteCycle();
 
@@ -296,7 +296,7 @@ public sealed class MathBlockProgramPopulationTests
             proposalsPerCycle: 1,
             fingerprintCapacity: 1);
         Assert.Throws<InvalidOperationException>(() =>
-            new MathBlocksGPUWorker().CompilePopulation(invalidDefinition));
+            new MathBlocksCUDAWorker().CompilePopulation(invalidDefinition));
 
         var scalar = MathBlockType.Scalar();
         var unsupportedGrammar = new MathBlockProgramPopulationGrammar(
@@ -310,7 +310,7 @@ public sealed class MathBlockProgramPopulationTests
             proposalsPerCycle: 1,
             fingerprintCapacity: 1);
         Assert.Throws<NotSupportedException>(() =>
-            new MathBlocksGPUWorker().CompilePopulation(unsupportedDefinition));
+            new MathBlocksCUDAWorker().CompilePopulation(unsupportedDefinition));
     }
 
     private static MathBlockProgramPopulationDefinition CreateScalarDefinition(
