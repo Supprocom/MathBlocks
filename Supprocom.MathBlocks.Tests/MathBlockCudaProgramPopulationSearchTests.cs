@@ -1749,6 +1749,110 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Resident_search_fails_closed_when_convex_hull_exceeds_the_resource_band()
+    {
+        RequireCuda();
+        var staticPointSet = MathBlockType.PointSet(count: 4);
+        var dynamicPointSet = MathBlockType.PointSet();
+        var terminal = new MathBlockProgramPopulationTerminal(
+            "points",
+            staticPointSet,
+            MathBlockValue.PointSet(new MathBlockPointSet([
+                new MathBlockPoint(0d, 0d),
+                new MathBlockPoint(1d, 0d),
+                new MathBlockPoint(1d, 1d),
+                new MathBlockPoint(0d, 1d)
+            ])));
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation(
+                    "geometry.convex-hull",
+                    1,
+                    [staticPointSet],
+                    dynamicPointSet)],
+                dynamicPointSet),
+            [terminal],
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 4)],
+            proposalsPerCycle: 1,
+            fingerprintCapacity: 1);
+        var terminalNode = MathBlockProgramCandidateNode.Terminal(
+            0,
+            terminal.Identifier,
+            terminal.Type);
+        var program = new MathBlockProgramStructure(
+            0,
+            null,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                terminalNode,
+                MathBlockProgramCandidateNode.Operation(
+                    "geometry.convex-hull",
+                    1,
+                    dynamicPointSet,
+                    0)
+            ]);
+        var catalog = new MathBlockProgramPopulationEnumerationCatalog(0, [program]);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = builder.Input("candidate", dynamicPointSet);
+        var diameter = builder.Apply("geometry.diameter", inputs: [candidate]);
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            builder.Output("diameter", diameter).Build(),
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "diameter",
+                "diameter",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        var definition = new MathBlockProgramPopulationSearchDefinition(
+            population,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(1, 1, 0, 0, 0, 19),
+            new MathBlockProgramPopulationSelectionPolicy(2, 4),
+            new MathBlockProgramPopulationQualityDiversityPolicy(
+                "diameter",
+                [new MathBlockProgramPopulationQualityDiversityDimension("diameter", -1, 5, 3)]),
+            new MathBlockProgramPopulationSearchEnvelope(128L * 1024 * 1024, 32 * 1024 * 1024),
+            new MathBlockProgramPopulationValidityPolicy([1]),
+            wavePolicy: new MathBlockProgramPopulationWavePolicy(1, 1),
+            enumerationCatalog: catalog);
+        using var compiled = new MathBlocksCUDAWorker().CompilePopulationSearch(
+            definition,
+            new MathBlockProgramPopulationExecutionOptions(
+                MathBlockProgramPopulationExecutionMode.ParallelResident,
+                1));
+        SetDeviceFirstResourceBandMaximumForFailureTest(compiled, 3);
+        var before = compiled.AcceptedState.Export();
+
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            var exception = Assert.Throws<InvalidOperationException>(compiled.ExecuteCycle);
+            Assert.Equal(
+                "A resident value exceeds the active resource envelope.",
+                exception.Message);
+            Assert.Equal(before, compiled.AcceptedState.Export());
+            Assert.Equal(0ul, compiled.TrialCursor);
+            Assert.Empty(compiled.AcceptedState.StructuralFingerprints);
+            Assert.Empty(compiled.AcceptedState.SemanticFingerprints);
+            Assert.Empty(compiled.AcceptedState.SelectionEntries);
+            Assert.Empty(compiled.AcceptedState.QualityDiversityEntries);
+        }
+
+        Assert.Equal(1, compiled.GraphInstanceCount);
+        Assert.Equal(1, compiled.ImmutableUploadCount);
+        Assert.Equal(0, compiled.LaterImmutableUploadCount);
+        Assert.Equal(2, compiled.GraphLaunchCount);
+        Assert.Equal(2, compiled.SynchronizationCount);
+        Assert.Equal(2, compiled.DownloadCount);
+        Assert.Equal(
+            checked(2L * compiled.CompactDownloadBytesPerCycle),
+            compiled.DownloadedBytes);
+        Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputBytes);
+        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+    }
+
+    [Fact]
     public void Failed_resident_cycle_preserves_the_previous_accepted_checkpoint()
     {
         RequireCuda();
@@ -5696,6 +5800,22 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
         MathBlocksCUDAProgramPopulationSearch compiled,
         int candidateLaneCount) =>
         SetDeviceArenaInt32ForFailureTest(compiled, 352, candidateLaneCount);
+
+    private static void SetDeviceFirstResourceBandMaximumForFailureTest(
+        MathBlocksCUDAProgramPopulationSearch compiled,
+        int maximumOutputElements)
+    {
+        var layout = typeof(MathBlocksCUDAProgramPopulationSearch)
+            .GetField("layout", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(compiled)!;
+        var bandOffset = (int)layout.GetType()
+            .GetProperty("BandOffset", BindingFlags.Instance | BindingFlags.Public)!
+            .GetValue(layout)!;
+        SetDeviceArenaInt32ForFailureTest(
+            compiled,
+            checked(bandOffset + sizeof(int)),
+            maximumOutputElements);
+    }
 
     private static void SetDeviceArenaInt32ForFailureTest(
         MathBlocksCUDAProgramPopulationSearch compiled,

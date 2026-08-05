@@ -387,13 +387,13 @@ internal static class GeometryCudaBlockCatalog
                             }
                             count--;
                         }
+                        output->rows = count;
+                        output->count = count;
                         if (count > output->capacity)
                         {
                             output->valid = 0;
                             break;
                         }
-                        output->rows = count;
-                        output->count = count;
                         for (int index = 0; index < count * 2; index++)
                             result[index] = hull[index];
                         break;
@@ -474,6 +474,9 @@ internal static class GeometryCudaBlockCatalog
                                     continue;
                                 if (edge_count >= output->capacity)
                                 {
+                                    output->count = output->capacity == 2147483647
+                                        ? -1
+                                        : output->capacity + 1;
                                     output->valid = 0;
                                     break;
                                 }
@@ -484,7 +487,8 @@ internal static class GeometryCudaBlockCatalog
                             }
                         }
                         output->rows = count;
-                        output->count = edge_count;
+                        if (output->valid)
+                            output->count = edge_count;
                         break;
                     }
                     case 6:
@@ -592,6 +596,9 @@ internal static class GeometryCudaBlockCatalog
                                     continue;
                                 if (edge_count >= output->capacity)
                                 {
+                                    output->count = output->capacity == 2147483647
+                                        ? -1
+                                        : output->capacity + 1;
                                     output->valid = 0;
                                     break;
                                 }
@@ -602,7 +609,8 @@ internal static class GeometryCudaBlockCatalog
                             }
                         }
                         output->rows = first->count;
-                        output->count = edge_count;
+                        if (output->valid)
+                            output->count = edge_count;
                         break;
                     }
                     case 11:
@@ -767,13 +775,13 @@ internal static class GeometryCudaBlockCatalog
                         break;
                     }
                     case 19:
+                        output->rows = first->rows;
+                        output->count = first->rows;
                         if (first->columns != 2 || first->rows > output->capacity)
                         {
                             output->valid = 0;
                             break;
                         }
-                        output->rows = first->rows;
-                        output->count = first->rows;
                         for (int index = 0; index < first->rows * 2; index++)
                             result[index] = a[index];
                         break;

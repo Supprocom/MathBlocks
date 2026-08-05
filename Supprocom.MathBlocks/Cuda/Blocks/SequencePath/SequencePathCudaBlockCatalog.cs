@@ -607,6 +607,10 @@ internal static class SequencePathCudaBlockCatalog
                                     continue;
                                 if (count >= output->capacity)
                                 {
+                                    output->count = output->capacity == 2147483647
+                                        ? -1
+                                        : output->capacity + 1;
+                                    output->rows = output->count;
                                     output->valid = 0;
                                     break;
                                 }
@@ -616,8 +620,11 @@ internal static class SequencePathCudaBlockCatalog
                                 count++;
                                 start = index;
                             }
-                            output->count = count;
-                            output->rows = count;
+                            if (output->valid)
+                            {
+                                output->count = count;
+                                output->rows = count;
+                            }
                         }
                     }
                     break;

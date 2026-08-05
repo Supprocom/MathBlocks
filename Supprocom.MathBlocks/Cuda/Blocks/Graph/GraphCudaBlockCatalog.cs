@@ -247,6 +247,9 @@ internal static class GraphCudaBlockCatalog
                                 {
                                     if (edge_count >= output->capacity)
                                     {
+                                        output->count = output->capacity == 2147483647
+                                            ? -1
+                                            : output->capacity + 1;
                                         output->valid = 0;
                                         break;
                                     }
@@ -256,7 +259,8 @@ internal static class GraphCudaBlockCatalog
                                     edge_count++;
                                 }
                         output->rows = first->rows;
-                        output->count = edge_count;
+                        if (output->valid)
+                            output->count = edge_count;
                         break;
                     }
                     case 5:
