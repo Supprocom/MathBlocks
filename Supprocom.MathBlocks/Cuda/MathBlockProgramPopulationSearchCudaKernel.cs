@@ -1029,16 +1029,15 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 __syncthreads();
                 if (threadIdx.x == 0)
                 {
-                    if (output->count > band_maximum || output->count > output->capacity)
+                    if (output->count < 0 ||
+                        output->count > band_maximum ||
+                        output->count > output->capacity)
                     {
                         *cooperative_status = -1;
                     }
                     else if (!output->valid)
                     {
-                        int output_type = type_offset + selected_types[output_index] * 48;
-                        int output_kind = mbp_read_int(arena, output_type);
-                        int output_rows = mbp_read_int(arena, output_type + 4);
-                        *cooperative_status = output_rows == 0 && output_kind >= 4 ? -1 : 0;
+                        *cooperative_status = 0;
                     }
                     else if (!mbp_slot_matches_type(
                             arena,

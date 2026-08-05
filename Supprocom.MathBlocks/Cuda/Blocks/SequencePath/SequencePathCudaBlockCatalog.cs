@@ -20,14 +20,14 @@ internal static class SequencePathCudaBlockCatalog
 
         __device__ void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count)
         {
+            output->rows = count;
+            output->columns = 0;
+            output->count = count;
             if (count < 0 || count > output->capacity)
             {
                 output->valid = 0;
                 return;
             }
-            output->rows = count;
-            output->columns = 0;
-            output->count = count;
         }
 
         __device__ void mathblocks_sequence_set_matrix_shape(
@@ -36,14 +36,14 @@ internal static class SequencePathCudaBlockCatalog
             int columns)
         {
             long long count = (long long)rows * columns;
+            output->rows = rows;
+            output->columns = columns;
+            output->count = count > 2147483647LL ? -1 : (int)count;
             if (rows < 0 || columns < 0 || count > output->capacity)
             {
                 output->valid = 0;
                 return;
             }
-            output->rows = rows;
-            output->columns = columns;
-            output->count = (int)count;
         }
 
         __device__ bool mathblocks_sequence_is_power_of_two(int value)

@@ -214,10 +214,10 @@ serial and parallel samples without claiming an advantage for every workload.
 This Git repository contains source text and project metadata only. It does not
 contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
 
-Get MathBlocks version `0.2.1` from NuGet.org with this command:
+Get MathBlocks version `0.2.2` from NuGet.org with this command:
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.2.1
+dotnet add package Supprocom.MathBlocks --version 0.2.2
 ```
 
 The package declares three external native-acquisition dependencies. This

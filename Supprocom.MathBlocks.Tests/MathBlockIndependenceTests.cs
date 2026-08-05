@@ -38,31 +38,23 @@ public sealed partial class MathBlockIndependenceTests
     }
 
     [Fact]
-    public void Public_release_metadata_declares_the_CUDA_0_2_1_contract()
+    public void Public_release_metadata_declares_the_CUDA_0_2_2_contract()
     {
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(root, "Supprocom.MathBlocks", "Supprocom.MathBlocks.csproj");
         var document = XDocument.Load(projectPath);
         var readme = File.ReadAllText(Path.Combine(root, "README.md"));
 
-        Assert.Equal("0.2.1", document.Descendants("Version").Single().Value);
+        Assert.Equal("0.2.2", document.Descendants("Version").Single().Value);
         Assert.Equal("AGPL-3.0-only", document.Descendants("PackageLicenseExpression").Single().Value);
         Assert.Contains(
-            "CUDA implementation paths, namespaces, workers, kernels, catalogs, and tests",
+            "Separates invalid dynamic results from resident resource-envelope overflow",
             document.Descendants("PackageReleaseNotes").Single().Value,
             StringComparison.Ordinal);
-        Assert.Contains(
-            "Decouples resident-search fingerprint capacity from the total raw proposal universe",
-            document.Descendants("PackageReleaseNotes").Single().Value,
-            StringComparison.Ordinal);
-        Assert.Contains(
-            "Adds deterministic typed-program catalogs with global cursor resume and archive-preserving transitions",
-            document.Descendants("PackageReleaseNotes").Single().Value,
-            StringComparison.Ordinal);
-        Assert.Equal(new Version(0, 2, 1, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
+        Assert.Equal(new Version(0, 2, 2, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
         Assert.Contains("## Parallel proposal waves", readme, StringComparison.Ordinal);
         Assert.Contains(
-            "dotnet add package Supprocom.MathBlocks --version 0.2.1",
+            "dotnet add package Supprocom.MathBlocks --version 0.2.2",
             readme,
             StringComparison.Ordinal);
         Assert.DoesNotContain("--version 0.1.", readme, StringComparison.Ordinal);

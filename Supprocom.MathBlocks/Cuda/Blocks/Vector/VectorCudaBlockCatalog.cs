@@ -89,14 +89,14 @@ internal static class VectorCudaBlockCatalog
 
         __device__ void mathblocks_set_vector_shape(MathBlockSlot* output, int count)
         {
+            output->rows = count;
+            output->columns = 0;
+            output->count = count;
             if (count < 0 || count > output->capacity)
             {
                 output->valid = 0;
                 return;
             }
-            output->rows = count;
-            output->columns = 0;
-            output->count = count;
         }
 
         __device__ void mathblocks_copy_and_sort(

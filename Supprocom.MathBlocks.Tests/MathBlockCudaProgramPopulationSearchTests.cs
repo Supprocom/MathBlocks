@@ -1642,6 +1642,113 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Resident_search_rejects_invalid_dynamic_values_without_reporting_capacity_overflow()
+    {
+        RequireCuda();
+        var staticVector = MathBlockType.Vector(length: 4);
+        var dynamicVector = MathBlockType.Vector();
+        var staticBooleanVector = MathBlockType.BooleanVector(4);
+        var scalar = MathBlockType.Scalar();
+        var terminals = new[]
+        {
+            new MathBlockProgramPopulationTerminal(
+                "source",
+                staticVector,
+                MathBlockValue.Vector([1d, 2d, 3d, 4d])),
+            new MathBlockProgramPopulationTerminal(
+                "invalid-lag",
+                scalar,
+                MathBlockValue.Scalar(4d))
+        };
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [
+                    new MathBlockProgramPopulationOperation(
+                        "sequence.difference",
+                        1,
+                        [staticVector, scalar],
+                        dynamicVector),
+                    new MathBlockProgramPopulationOperation(
+                        "vector.equal",
+                        1,
+                        [dynamicVector, staticVector],
+                        staticBooleanVector)
+                ],
+                staticBooleanVector),
+            terminals,
+            [],
+            [
+                new MathBlockProgramPopulationResourceBand(1, 4),
+                new MathBlockProgramPopulationResourceBand(2, 4)
+            ],
+            proposalsPerCycle: 1,
+            fingerprintCapacity: 2);
+        var terminalNodes = terminals
+            .Select((terminal, index) => MathBlockProgramCandidateNode.Terminal(
+                index,
+                terminal.Identifier,
+                terminal.Type))
+            .ToArray();
+        var program = new MathBlockProgramStructure(
+            0,
+            null,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                .. terminalNodes,
+                MathBlockProgramCandidateNode.Operation(
+                    "sequence.difference",
+                    1,
+                    dynamicVector,
+                    0,
+                    1),
+                MathBlockProgramCandidateNode.Operation(
+                    "vector.equal",
+                    1,
+                    staticBooleanVector,
+                    2,
+                    0)
+            ]);
+        var catalog = new MathBlockProgramPopulationEnumerationCatalog(0, [program]);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = builder.Input("candidate", staticBooleanVector);
+        var trueCount = builder.Apply("boolean-vector.true-count", inputs: [candidate]);
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            builder.Output("true-count", trueCount).Build(),
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "true-count",
+                "true-count",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        var definition = new MathBlockProgramPopulationSearchDefinition(
+            population,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(1, 1, 0, 0, 0, 17),
+            new MathBlockProgramPopulationSelectionPolicy(2, 4),
+            new MathBlockProgramPopulationQualityDiversityPolicy(
+                "true-count",
+                [new MathBlockProgramPopulationQualityDiversityDimension("true-count", -1, 5, 3)]),
+            new MathBlockProgramPopulationSearchEnvelope(128L * 1024 * 1024, 32 * 1024 * 1024),
+            new MathBlockProgramPopulationValidityPolicy([1, 1, 1, 1]),
+            wavePolicy: new MathBlockProgramPopulationWavePolicy(1, 1),
+            enumerationCatalog: catalog);
+        using var compiled = new MathBlocksCUDAWorker().CompilePopulationSearch(
+            definition,
+            new MathBlockProgramPopulationExecutionOptions(
+                MathBlockProgramPopulationExecutionMode.ParallelResident,
+                1));
+
+        var result = compiled.ExecuteCycle();
+
+        var trial = Assert.Single(result.Trials);
+        Assert.Equal(MathBlockProgramPopulationTrialStatus.InvalidValue, trial.Status);
+        Assert.Empty(trial.Objectives);
+        Assert.True(result.IsSearchComplete);
+        AssertResidentCycleContract(compiled);
+        Assert.Equal(1, compiled.ActiveCandidateLaneCount);
+    }
+
+    [Fact]
     public void Failed_resident_cycle_preserves_the_previous_accepted_checkpoint()
     {
         RequireCuda();
