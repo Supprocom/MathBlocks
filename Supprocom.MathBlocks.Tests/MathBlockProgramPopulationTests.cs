@@ -280,9 +280,17 @@ public sealed class MathBlockProgramPopulationTests
                     2)
             ],
             MathBlockValue.Scalar(1d)));
-        Assert.Throws<ArgumentOutOfRangeException>(() => CreateScalarDefinition(
+        var boundedFingerprintDefinition = CreateScalarDefinition(
             proposalsPerCycle: 8,
-            fingerprintCapacity: 7));
+            fingerprintCapacity: 7);
+        Assert.Equal(8ul, boundedFingerprintDefinition.TotalProposalCount);
+        var completeEnumerationException = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new MathBlocksCUDAWorker().CompilePopulation(boundedFingerprintDefinition));
+        Assert.Equal("definition", completeEnumerationException.ParamName);
+        Assert.Contains(
+            "Complete population enumeration requires an exact proposal count and fingerprint capacity",
+            completeEnumerationException.Message,
+            StringComparison.Ordinal);
 
         var boolean = MathBlockType.Boolean;
         var invalidGrammar = new MathBlockProgramPopulationGrammar(

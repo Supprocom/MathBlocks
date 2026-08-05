@@ -684,18 +684,11 @@ internal sealed class PopulationSearchLayout
 
         var bandStarts = new ulong[population.ActiveResourceBands.Count];
         var bandCounts = new ulong[population.ActiveResourceBands.Count];
-        ulong cursor = 0;
         for (var index = 0; index < bandCounts.Length; index++)
         {
-            bandStarts[index] = cursor;
-            bandCounts[index] = CalculateBandCount(
-                population.Grammar.Operations,
-                population.AllTerminals.Count,
-                population.ActiveResourceBands[index].OperationCount);
-            cursor = checked(cursor + bandCounts[index]);
+            bandStarts[index] = population.ProposalBandStarts[index];
+            bandCounts[index] = population.ProposalBandCounts[index];
         }
-        if (cursor != population.TotalProposalCount)
-            throw new InvalidOperationException("The population proposal count is inconsistent.");
 
         var payloadOffsets = new int[immutableValues.Count];
         var immutablePayloadBytes = 0;
@@ -2107,31 +2100,6 @@ internal sealed class PopulationSearchLayout
         expected.Unit == actual.Unit &&
         (expected.Rows == 0 || actual.Rows == 0 || expected.Rows == actual.Rows) &&
         (expected.Columns == 0 || actual.Columns == 0 || expected.Columns == actual.Columns);
-
-    private static ulong CalculateBandCount(
-        IReadOnlyList<MathBlockProgramPopulationOperation> operations,
-        int terminalCount,
-        int operationCount)
-    {
-        ulong result = 1;
-        checked
-        {
-            for (var node = 0; node < operationCount; node++)
-            {
-                var available = checked((ulong)(terminalCount + node));
-                ulong choices = 0;
-                foreach (var operation in operations)
-                {
-                    ulong operationChoices = 1;
-                    for (var input = 0; input < operation.InputTypes.Count; input++)
-                        operationChoices *= available;
-                    choices += operationChoices;
-                }
-                result *= choices;
-            }
-        }
-        return result;
-    }
 
     private int FindType(MathBlockType type)
     {

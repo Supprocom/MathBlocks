@@ -59,6 +59,13 @@ public sealed class MathBlocksCUDAProgramPopulation : IDisposable
 
     internal static MathBlocksCUDAProgramPopulation Create(MathBlockProgramPopulationDefinition definition)
     {
+        if (!definition.IsTotalProposalCountExact ||
+            definition.TotalProposalCount > (ulong)definition.FingerprintCapacity)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(definition),
+                "Complete population enumeration requires an exact proposal count and fingerprint capacity for every proposal.");
+        }
         MathBlocksCudaNative.EnsureContext();
         var layout = PopulationLayout.Create(definition);
         var initial = layout.CreateInitialArena(definition);
@@ -456,18 +463,11 @@ internal sealed class PopulationLayout
 
         var bandStarts = new ulong[definition.ActiveResourceBands.Count];
         var bandCounts = new ulong[definition.ActiveResourceBands.Count];
-        ulong cursor = 0;
         for (var index = 0; index < definition.ActiveResourceBands.Count; index++)
         {
-            bandStarts[index] = cursor;
-            bandCounts[index] = CalculateBandCount(
-                definition.Grammar.Operations,
-                definition.AllTerminals.Count,
-                definition.ActiveResourceBands[index].OperationCount);
-            cursor = checked(cursor + bandCounts[index]);
+            bandStarts[index] = definition.ProposalBandStarts[index];
+            bandCounts[index] = definition.ProposalBandCounts[index];
         }
-        if (cursor != definition.TotalProposalCount)
-            throw new InvalidOperationException("The population proposal count is inconsistent.");
 
         var operationOffset = HeaderSize;
         var terminalOffset = Align(operationOffset + checked(definition.Grammar.Operations.Count * OperationSize));
@@ -748,31 +748,6 @@ internal sealed class PopulationLayout
             if (string.Equals(value, identity, StringComparison.Ordinal))
                 return true;
         return false;
-    }
-
-    private static ulong CalculateBandCount(
-        IReadOnlyList<MathBlockProgramPopulationOperation> operations,
-        int terminalCount,
-        int operationCount)
-    {
-        ulong result = 1;
-        checked
-        {
-            for (var nodeIndex = 0; nodeIndex < operationCount; nodeIndex++)
-            {
-                var available = checked((ulong)(terminalCount + nodeIndex));
-                ulong choices = 0;
-                foreach (var operation in operations)
-                {
-                    ulong operationChoices = 1;
-                    for (var inputIndex = 0; inputIndex < operation.InputTypes.Count; inputIndex++)
-                        operationChoices *= available;
-                    choices += operationChoices;
-                }
-                result *= choices;
-            }
-        }
-        return result;
     }
 
     private static MathBlockValue ReadValue(

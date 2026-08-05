@@ -520,7 +520,9 @@ public sealed class MathBlockProgramPopulationSearchDefinition
         if (evolution.EnumerationProposalCount > population.TotalProposalCount)
             throw new ArgumentOutOfRangeException(nameof(evolution));
         if (evolution.MaximumTrialCount > (ulong)population.FingerprintCapacity)
-            throw new ArgumentOutOfRangeException(nameof(evolution), "The fingerprint capacity must contain every search trial.");
+            throw new ArgumentOutOfRangeException(
+                nameof(evolution),
+                "The fingerprint capacity must contain all visited search trials.");
 
         var qualityIndex = FindObjective(objectiveBinding.Objectives, qualityDiversity.QualityObjective);
         if (qualityIndex < 0)

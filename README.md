@@ -75,6 +75,14 @@ The compiler measures the current program, objective, archive, payload, and
 scratch capacities. A larger caller envelope can compile a larger resident
 cycle without a permanent search-space limit.
 
+Fingerprint capacity bounds stored visited identities. It does not depend on
+the total raw proposal universe. Complete finite enumeration still requires
+capacity for every proposal.
+
+`IsTotalProposalCountExact` identifies an exact raw count. Larger universes use
+`ulong.MaxValue` as a cursor boundary while resident evolution remains bounded
+by visited trials.
+
 The transition API preserves accepted trial identity across larger graph,
 terminal, objective, and archive bands. It refreshes accepted programs under
 the new resident definition before new proposals.

@@ -2478,10 +2478,13 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
     }
 
     [Fact]
-    public void Resident_search_dovetails_into_an_expanded_graph_band()
+    public void Resident_search_grows_above_the_Int32_proposal_range_with_bounded_fingerprints_and_exact_resume()
     {
         RequireCuda();
-        var initialDefinition = CreateNegationBandSearch([new MathBlockProgramPopulationResourceBand(1, 1)], 1);
+        var initialDefinition = CreateNegationBandSearch(
+            [new MathBlockProgramPopulationResourceBand(1, 1)],
+            maximumTrials: 2,
+            fingerprintCapacity: 4);
         using var initialCompiled = new MathBlocksCUDAWorker().CompilePopulationSearch(initialDefinition);
         var initial = initialCompiled.ExecuteCycle();
         var initialTrialCursor = initial.AcceptedState.TrialCursor;
@@ -2489,19 +2492,70 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
         var expandedDefinition = CreateNegationBandSearch(
             [
                 new MathBlockProgramPopulationResourceBand(1, 1),
-                new MathBlockProgramPopulationResourceBand(9, 1)
+                new MathBlockProgramPopulationResourceBand(20, 1)
             ],
-            3);
+            maximumTrials: 7,
+            fingerprintCapacity: 10,
+            enumerationTrials: 4,
+            mutationTrials: 1,
+            crossoverTrials: 1,
+            immigrantTrials: 1);
         var transition = expandedDefinition.CreateTransitionState(initialDefinition, initial.AcceptedState);
-        var resumedDefinition = expandedDefinition.WithAcceptedState(transition);
-        using var resumed = new MathBlocksCUDAWorker().CompilePopulationSearch(resumedDefinition);
-        var result = resumed.ExecuteCycle();
+        var restored = MathBlockProgramPopulationSearchState.Import(transition.Export());
+        using var uninterrupted = new MathBlocksCUDAWorker().CompilePopulationSearch(
+            expandedDefinition.WithAcceptedState(transition));
+        var expected = uninterrupted.ExecuteCycle();
+        using var resumed = new MathBlocksCUDAWorker().CompilePopulationSearch(
+            expandedDefinition.WithAcceptedState(restored));
+        var actual = resumed.ExecuteCycle();
 
-        Assert.Equal(1ul, result.AcceptedState.EnvelopeGeneration);
-        Assert.True(result.AcceptedState.TrialCursor > initialTrialCursor);
-        Assert.Contains(result.Trials, trial =>
+        Assert.Equal(ulong.MaxValue, expandedDefinition.Population.TotalProposalCount);
+        Assert.False(expandedDefinition.Population.IsTotalProposalCountExact);
+        Assert.True(expandedDefinition.Population.TotalProposalCount > int.MaxValue);
+        Assert.Equal(10, expandedDefinition.Population.FingerprintCapacity);
+        Assert.True(
+            expandedDefinition.Population.TotalProposalCount >
+            (ulong)expandedDefinition.Population.FingerprintCapacity);
+        Assert.Equal(
+            initial.AcceptedState.StructuralFingerprints,
+            transition.StructuralFingerprints);
+        Assert.Equal(expected.AcceptedState.Export(), actual.AcceptedState.Export());
+        Assert.Equal(expected.Trials.Select(TrialIdentity), actual.Trials.Select(TrialIdentity));
+        Assert.Equal(1ul, actual.AcceptedState.EnvelopeGeneration);
+        Assert.True(actual.AcceptedState.TrialCursor > initialTrialCursor);
+        Assert.Contains(
+            actual.Trials,
+            trial => trial.Program.Source == MathBlockProgramPopulationTrialSource.Mutation);
+        Assert.Contains(
+            actual.Trials,
+            trial => trial.Program.Source == MathBlockProgramPopulationTrialSource.Crossover);
+        Assert.Contains(
+            actual.Trials,
+            trial => trial.Program.Source == MathBlockProgramPopulationTrialSource.RandomImmigrant);
+        Assert.Contains(actual.Trials, trial =>
             trial.Program.Nodes.Count -
-                (resumedDefinition.Population.Terminals.Count + resumedDefinition.Population.ScalarConstants.Count) == 9);
+                (expandedDefinition.Population.Terminals.Count +
+                    expandedDefinition.Population.ScalarConstants.Count) == 20);
+        Assert.Contains(actual.Trials, trial => trial.Objectives.Count != 0);
+        Assert.All(actual.Trials.Where(trial => trial.Objectives.Count != 0), trial =>
+        {
+            Assert.Equal(
+                expandedDefinition.EvaluateObjectives(trial.Program)
+                    .Select(BitConverter.DoubleToInt64Bits),
+                trial.Objectives.Select(BitConverter.DoubleToInt64Bits));
+        });
+        Assert.All(initial.AcceptedState.StructuralFingerprints, fingerprint =>
+            Assert.Contains(fingerprint, actual.AcceptedState.StructuralFingerprints));
+        Assert.Equal(1, uninterrupted.GraphInstanceCount);
+        Assert.Equal(1, uninterrupted.ImmutableUploadCount);
+        Assert.Equal(0, uninterrupted.LaterImmutableUploadCount);
+        Assert.Equal(1, uninterrupted.GraphLaunchCount);
+        Assert.Equal(1, uninterrupted.SynchronizationCount);
+        Assert.Equal(1, uninterrupted.DownloadCount);
+        Assert.Equal(0, uninterrupted.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, uninterrupted.FullCandidateOutputBytes);
+        Assert.Equal(0, uninterrupted.CpuNodeDispatchCount);
+        Assert.Equal(1, resumed.GraphInstanceCount);
         Assert.Equal(1, resumed.ImmutableUploadCount);
         Assert.Equal(0, resumed.LaterImmutableUploadCount);
         Assert.Equal(1, resumed.GraphLaunchCount);
@@ -4486,18 +4540,26 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
 
     private static MathBlockProgramPopulationSearchDefinition CreateNegationBandSearch(
         IEnumerable<MathBlockProgramPopulationResourceBand> bands,
-        ulong maximumTrials)
+        ulong maximumTrials,
+        int fingerprintCapacity,
+        ulong? enumerationTrials = null,
+        int mutationTrials = 0,
+        int crossoverTrials = 0,
+        int immigrantTrials = 0)
     {
         var scalar = MathBlockType.Scalar();
         var population = new MathBlockProgramPopulationDefinition(
             new MathBlockProgramPopulationGrammar(
                 [new MathBlockProgramPopulationOperation("scalar.negate", 1, [scalar], scalar)],
                 scalar),
-            [new MathBlockProgramPopulationTerminal("one", scalar, MathBlockValue.Scalar(1d))],
+            [
+                new MathBlockProgramPopulationTerminal("one", scalar, MathBlockValue.Scalar(1d)),
+                new MathBlockProgramPopulationTerminal("two", scalar, MathBlockValue.Scalar(2d))
+            ],
             [],
             bands,
-            proposalsPerCycle: 4,
-            fingerprintCapacity: 400_000);
+            proposalsPerCycle: 8,
+            fingerprintCapacity);
         var objectiveBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var candidate = objectiveBuilder.Input("candidate", scalar);
         var objectiveProgram = objectiveBuilder.Output("value", candidate).Build();
@@ -4513,8 +4575,11 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
             population,
             binding,
             maximumTrials,
-            maximumTrials,
-            new MathBlockProgramPopulationValidityPolicy([1]));
+            enumerationTrials ?? maximumTrials,
+            new MathBlockProgramPopulationValidityPolicy([1]),
+            mutationTrials: mutationTrials,
+            crossoverTrials: crossoverTrials,
+            immigrantTrials: immigrantTrials);
     }
 
     private static MathBlockProgramPopulationSearchDefinition CreateDefinition(

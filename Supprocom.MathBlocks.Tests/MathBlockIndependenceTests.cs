@@ -51,6 +51,10 @@ public sealed partial class MathBlockIndependenceTests
             "CUDA implementation paths, namespaces, workers, kernels, catalogs, and tests",
             document.Descendants("PackageReleaseNotes").Single().Value,
             StringComparison.Ordinal);
+        Assert.Contains(
+            "Decouples resident-search fingerprint capacity from the total raw proposal universe",
+            document.Descendants("PackageReleaseNotes").Single().Value,
+            StringComparison.Ordinal);
         Assert.Equal(new Version(0, 2, 1, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
         Assert.Contains("## Parallel proposal waves", readme, StringComparison.Ordinal);
         Assert.Contains(

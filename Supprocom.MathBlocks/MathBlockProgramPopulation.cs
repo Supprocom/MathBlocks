@@ -128,6 +128,8 @@ public readonly record struct MathBlockProgramPopulationResourceBand
 public sealed partial class MathBlockProgramPopulationDefinition
 {
     private readonly MathBlockProgramPopulationTerminal[] allTerminals;
+    private readonly ReadOnlyCollection<ulong> proposalBandStarts;
+    private readonly ReadOnlyCollection<ulong> proposalBandCounts;
 
     public MathBlockProgramPopulationDefinition(
         MathBlockProgramPopulationGrammar grammar,
@@ -189,16 +191,14 @@ public sealed partial class MathBlockProgramPopulationDefinition
                 MathBlockValue.Scalar(constant.Value, constant.Unit));
         }
 
-        TotalProposalCount = MathBlockProgramPopulationValidation.CalculateProposalCount(
+        var proposalSpace = MathBlockProgramPopulationValidation.CalculateProposalSpace(
             Grammar.Operations,
             allTerminals.Length,
             ActiveResourceBands);
-        if (TotalProposalCount > (ulong)fingerprintCapacity)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(fingerprintCapacity),
-                "The fingerprint capacity must contain every proposal in the active resource bands.");
-        }
+        TotalProposalCount = proposalSpace.TotalCount;
+        IsTotalProposalCountExact = proposalSpace.IsExact;
+        proposalBandStarts = Array.AsReadOnly(proposalSpace.BandStarts);
+        proposalBandCounts = Array.AsReadOnly(proposalSpace.BandCounts);
 
         Identity = MathBlockProgramPopulationValidation.CreateDefinitionIdentity(
             Grammar,
@@ -229,10 +229,13 @@ public sealed partial class MathBlockProgramPopulationDefinition
     public int ProposalsPerCycle { get; }
     public int FingerprintCapacity { get; }
     public ulong TotalProposalCount { get; }
+    public bool IsTotalProposalCountExact { get; }
     public string Identity { get; }
     public MathBlockProgramPopulationState? AcceptedState { get; }
 
     internal IReadOnlyList<MathBlockProgramPopulationTerminal> AllTerminals => allTerminals;
+    internal IReadOnlyList<ulong> ProposalBandStarts => proposalBandStarts;
+    internal IReadOnlyList<ulong> ProposalBandCounts => proposalBandCounts;
 
     public MathBlockValue Evaluate(MathBlockProgramCandidate candidate, MathBlockRegistry? registry = null)
     {
@@ -902,29 +905,44 @@ internal static class MathBlockProgramPopulationValidation
         return builder.Append("->").Append(operation.OutputType).ToString();
     }
 
-    public static ulong CalculateProposalCount(
+    public static (
+        ulong TotalCount,
+        bool IsExact,
+        ulong[] BandStarts,
+        ulong[] BandCounts) CalculateProposalSpace(
         IReadOnlyList<MathBlockProgramPopulationOperation> operations,
         int terminalCount,
         IReadOnlyList<MathBlockProgramPopulationResourceBand> bands)
     {
+        var bandStarts = new ulong[bands.Count];
+        var bandCounts = new ulong[bands.Count];
         ulong total = 0;
-        checked
+        var exact = true;
+        for (var bandIndex = 0; bandIndex < bands.Count; bandIndex++)
         {
-            foreach (var band in bands)
+            bandStarts[bandIndex] = total;
+            var bandExact = true;
+            ulong bandCount = 1;
+            var band = bands[bandIndex];
+            for (var nodeIndex = 0; nodeIndex < band.OperationCount; nodeIndex++)
             {
-                ulong bandCount = 1;
-                for (var nodeIndex = 0; nodeIndex < band.OperationCount; nodeIndex++)
-                {
-                    var available = checked((ulong)(terminalCount + nodeIndex));
-                    ulong choices = 0;
-                    foreach (var operation in operations)
-                        choices += Pow(available, operation.InputTypes.Count);
-                    bandCount *= choices;
-                }
-                total += bandCount;
+                var available = checked((ulong)(terminalCount + nodeIndex));
+                ulong choices = 0;
+                foreach (var operation in operations)
+                    choices = SaturatingAdd(
+                        choices,
+                        SaturatingPow(available, operation.InputTypes.Count, ref bandExact),
+                        ref bandExact);
+                bandCount = SaturatingMultiply(bandCount, choices, ref bandExact);
             }
+
+            var remaining = ulong.MaxValue - total;
+            if (!bandExact || bandCount > remaining)
+                exact = false;
+            bandCounts[bandIndex] = bandCount > remaining ? remaining : bandCount;
+            total += bandCounts[bandIndex];
         }
-        return total;
+        return (total, exact, bandStarts, bandCounts);
     }
 
     public static string CreateDefinitionIdentity(
@@ -1044,15 +1062,28 @@ internal static class MathBlockProgramPopulationValidation
             throw new ArgumentOutOfRangeException(parameterName, "A population value must be finite.");
     }
 
-    private static ulong Pow(ulong value, int exponent)
+    private static ulong SaturatingPow(ulong value, int exponent, ref bool exact)
     {
         ulong result = 1;
-        checked
-        {
-            for (var index = 0; index < exponent; index++)
-                result *= value;
-        }
+        for (var index = 0; index < exponent; index++)
+            result = SaturatingMultiply(result, value, ref exact);
         return result;
+    }
+
+    private static ulong SaturatingAdd(ulong first, ulong second, ref bool exact)
+    {
+        if (ulong.MaxValue - first >= second)
+            return first + second;
+        exact = false;
+        return ulong.MaxValue;
+    }
+
+    private static ulong SaturatingMultiply(ulong first, ulong second, ref bool exact)
+    {
+        if (first == 0 || second <= ulong.MaxValue / first)
+            return first * second;
+        exact = false;
+        return ulong.MaxValue;
     }
 
     private static void WriteType(BinaryWriter writer, MathBlockType type)

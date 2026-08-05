@@ -203,8 +203,17 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             mbp_ull result = 1ull;
             for (int index = 0; index < exponent; index++)
+            {
+                if (result != 0ull && value > ~0ull / result)
+                    return ~0ull;
                 result *= value;
+            }
             return result;
+        }
+
+        __device__ mbp_ull mbp_saturating_add(mbp_ull first, mbp_ull second)
+        {
+            return ~0ull - first < second ? ~0ull : first + second;
         }
 
         __device__ void mbp_hash_byte(MbpHash* hash, unsigned char value)
@@ -595,7 +604,9 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 for (int operation_index = 0; operation_index < operation_count; operation_index++)
                 {
                     int operation = operation_offset + operation_index * 48;
-                    choices += mbp_power(available, mbp_read_int(arena, operation + 8));
+                    choices = mbp_saturating_add(
+                        choices,
+                        mbp_power(available, mbp_read_int(arena, operation + 8)));
                 }
                 if (choices == 0ull)
                     return false;
