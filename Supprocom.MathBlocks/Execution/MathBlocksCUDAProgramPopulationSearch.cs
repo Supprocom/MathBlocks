@@ -627,6 +627,12 @@ internal sealed class PopulationSearchLayout
         }
 
         var population = definition.Population;
+        if (definition.EnumerationCatalog is not null)
+        {
+            MathBlockProgramPopulationCatalogCapacityPlanner.RequireResourceBands(
+                population,
+                definition.EnumerationCatalog);
+        }
         var flatInputTypes = new List<int>();
         var operations = new CudaOperationDescriptor[population.Grammar.Operations.Count];
         var maximumArity = 0;

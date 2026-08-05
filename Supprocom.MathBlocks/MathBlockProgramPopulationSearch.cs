@@ -815,10 +815,17 @@ public sealed class MathBlockProgramPopulationSearchDefinition
             previousDefinition.Population,
             previousState.QualityDiversityEntries);
         var preservedFingerprints = new HashSet<string>(StringComparer.Ordinal);
+        var preservedSemanticFingerprints = new HashSet<string>(StringComparer.Ordinal);
         foreach (var entry in preservedSelection)
+        {
             preservedFingerprints.Add(entry.Program.StructuralFingerprint);
+            preservedSemanticFingerprints.Add(entry.SemanticFingerprint);
+        }
         foreach (var entry in preservedQuality)
+        {
             preservedFingerprints.Add(entry.Program.StructuralFingerprint);
+            preservedSemanticFingerprints.Add(entry.SemanticFingerprint);
+        }
         foreach (var program in currentCatalog.Programs)
         {
             if (preservedFingerprints.Contains(program.StructuralFingerprint))
@@ -852,8 +859,8 @@ public sealed class MathBlockProgramPopulationSearchDefinition
             previousState.SemanticDuplicateCount,
             previousState.EvaluatedProgramCount,
             previousState.AcceptedProgramCount,
-            [],
-            [],
+            preservedFingerprints,
+            preservedSemanticFingerprints,
             preservedSelection,
             preservedQuality,
             refreshPrograms.Values);

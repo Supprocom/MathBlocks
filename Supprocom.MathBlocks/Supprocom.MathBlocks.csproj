@@ -18,7 +18,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>mathematics;computation-graph;dag;parallel;cpu;cuda;deterministic;numerics</PackageTags>
-    <PackageReleaseNotes>Renames CUDA implementation paths, namespaces, workers, kernels, catalogs, and tests. Decouples resident-search fingerprint capacity from the total raw proposal universe. Reserves fingerprint capacity for accepted state, pending refresh programs, and remaining trials. Adds deterministic typed-program catalogs with global cursor resume and archive-preserving transitions.</PackageReleaseNotes>
+    <PackageReleaseNotes>Renames CUDA implementation paths, namespaces, workers, kernels, catalogs, and tests. Decouples resident-search fingerprint capacity from the total raw proposal universe. Reserves fingerprint capacity for accepted state, pending refresh programs, and remaining trials. Adds deterministic typed-program catalogs with global cursor resume and archive-preserving transitions. Adds exact host-side CUDA capacity planning for explicit catalogs.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType>portable</DebugType>

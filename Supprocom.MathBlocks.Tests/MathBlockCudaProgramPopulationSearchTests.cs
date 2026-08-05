@@ -181,8 +181,7 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
         Assert.Equal(0ul, transition.EnumerationCursor);
         Assert.Equal(0ul, transition.EnumerationTrialCount);
         Assert.Empty(transition.RefreshPrograms);
-        Assert.Empty(transition.StructuralFingerprints);
-        Assert.Empty(transition.SemanticFingerprints);
+        AssertArchiveFingerprintAuthority(transition);
         Assert.Equal(
             first.AcceptedState.SelectionEntries.Select(ArchiveIdentity),
             transition.SelectionEntries.Select(ArchiveIdentity));
@@ -243,8 +242,7 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
             firstDefinition,
             first.AcceptedState);
 
-        Assert.Empty(transition.StructuralFingerprints);
-        Assert.Empty(transition.SemanticFingerprints);
+        AssertArchiveFingerprintAuthority(transition);
         Assert.Empty(transition.RefreshPrograms);
         Assert.Equal(first.AcceptedState.SelectionEntries.Count, transition.SelectionEntries.Count);
         Assert.Equal(
@@ -297,6 +295,227 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
         Assert.Equal([4ul, 5ul], actual.Trials.Select(trial => trial.Program.ProposalCursor!.Value));
         AssertResidentCycleContract(uninterrupted);
         AssertResidentCycleContract(resumed);
+    }
+
+    [Fact]
+    public void Resident_catalog_transition_preserves_archive_duplicate_authority_and_exact_resume()
+    {
+        RequireCuda();
+        var firstDefinition = CreateScalarDuplicateCatalogSearch(
+            useAbsolute: true,
+            cursorStart: 0,
+            maximumTrialCount: 1,
+            immigrantTrials: 0);
+        var options = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.ParallelResident,
+            2);
+        using var firstCompiled = new MathBlocksCUDAWorker().CompilePopulationSearch(
+            firstDefinition,
+            options);
+        var first = firstCompiled.ExecuteCycle();
+        var preservedPareto = Assert.Single(first.AcceptedState.SelectionEntries);
+        var preservedQuality = Assert.Single(first.AcceptedState.QualityDiversityEntries);
+
+        var secondDefinition = CreateScalarDuplicateCatalogSearch(
+            useAbsolute: false,
+            cursorStart: 1,
+            maximumTrialCount: 10,
+            immigrantTrials: 1);
+        var transition = secondDefinition.CreateTransitionState(
+            firstDefinition,
+            first.AcceptedState);
+        AssertArchiveFingerprintAuthority(transition);
+        Assert.Single(transition.StructuralFingerprints);
+        Assert.Single(transition.SemanticFingerprints);
+        Assert.Empty(transition.RefreshPrograms);
+
+        var restored = MathBlockProgramPopulationSearchState.Import(transition.Export());
+        using var uninterrupted = new MathBlocksCUDAWorker().CompilePopulationSearch(
+            secondDefinition.WithAcceptedState(transition),
+            options);
+        using var resumed = new MathBlocksCUDAWorker().CompilePopulationSearch(
+            secondDefinition.WithAcceptedState(restored),
+            options);
+        var expected = uninterrupted.ExecuteCycle();
+        var actual = resumed.ExecuteCycle();
+
+        Assert.Equal(expected.AcceptedState.Export(), actual.AcceptedState.Export());
+        Assert.Equal(expected.Trials.Select(TrialIdentity), actual.Trials.Select(TrialIdentity));
+        AssertResidentCycleContract(resumed);
+
+        var trials = new List<MathBlockProgramPopulationTrialResult>(expected.Trials);
+        var current = expected;
+        var cycleCount = 1;
+        while (!current.IsSearchComplete)
+        {
+            current = uninterrupted.ExecuteCycle();
+            trials.AddRange(current.Trials);
+            cycleCount++;
+        }
+
+        var semanticDuplicate = Assert.Single(
+            trials,
+            trial => trial.Program.Source == MathBlockProgramPopulationTrialSource.Enumeration);
+        Assert.Equal(MathBlockProgramPopulationTrialStatus.SemanticDuplicate, semanticDuplicate.Status);
+        Assert.Equal(preservedPareto.SemanticFingerprint, semanticDuplicate.SemanticFingerprint);
+        Assert.Equal(
+            preservedPareto.Objectives.Select(BitConverter.DoubleToInt64Bits),
+            semanticDuplicate.Objectives.Select(BitConverter.DoubleToInt64Bits));
+        Assert.Equal(
+            transition.SemanticDuplicateCount + 1,
+            current.AcceptedState.SemanticDuplicateCount);
+        Assert.Contains(trials, trial =>
+            trial.Program.Source == MathBlockProgramPopulationTrialSource.RandomImmigrant &&
+            trial.StructuralFingerprint == preservedPareto.StructuralFingerprint &&
+            trial.Status == MathBlockProgramPopulationTrialStatus.StructuralDuplicate);
+        var finalPareto = Assert.Single(current.AcceptedState.SelectionEntries);
+        var finalQuality = Assert.Single(current.AcceptedState.QualityDiversityEntries);
+        Assert.Equal(preservedPareto.StructuralFingerprint, finalPareto.StructuralFingerprint);
+        Assert.Equal(preservedQuality.StructuralFingerprint, finalQuality.StructuralFingerprint);
+        Assert.Equal(preservedPareto.SemanticFingerprint, finalPareto.SemanticFingerprint);
+        Assert.Equal(preservedQuality.SemanticFingerprint, finalQuality.SemanticFingerprint);
+        Assert.Equal(
+            preservedPareto.Objectives.Select(BitConverter.DoubleToInt64Bits),
+            finalPareto.Objectives.Select(BitConverter.DoubleToInt64Bits));
+        Assert.Equal(
+            preservedQuality.Objectives.Select(BitConverter.DoubleToInt64Bits),
+            finalQuality.Objectives.Select(BitConverter.DoubleToInt64Bits));
+        Assert.Contains(finalPareto.StructuralFingerprint, current.AcceptedState.StructuralFingerprints);
+        Assert.Contains(finalPareto.SemanticFingerprint, current.AcceptedState.SemanticFingerprints);
+        Assert.Equal(1, uninterrupted.GraphInstanceCount);
+        Assert.Equal(1, uninterrupted.ImmutableUploadCount);
+        Assert.Equal(0, uninterrupted.LaterImmutableUploadCount);
+        Assert.Equal(cycleCount, uninterrupted.GraphLaunchCount);
+        Assert.Equal(cycleCount, uninterrupted.SynchronizationCount);
+        Assert.Equal(cycleCount, uninterrupted.DownloadCount);
+        Assert.Equal(
+            (long)cycleCount * uninterrupted.CompactDownloadBytesPerCycle,
+            uninterrupted.DownloadedBytes);
+        Assert.Equal(0, uninterrupted.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, uninterrupted.FullCandidateOutputBytes);
+        Assert.Equal(0, uninterrupted.CpuNodeDispatchCount);
+    }
+
+    [Fact]
+    public void Enumeration_catalog_capacity_planner_proves_exact_expanding_formula_bound()
+    {
+        RequireCuda();
+        var underBound = CreateExpandingCatalogCapacitySearch(8);
+        var catalog = Assert.IsType<MathBlockProgramPopulationEnumerationCatalog>(
+            underBound.EnumerationCatalog);
+        var worker = new MathBlocksCUDAWorker();
+
+        var planned = worker.PlanPopulationEnumerationCatalogResourceBands(
+            underBound.Population,
+            catalog);
+
+        var requirement = Assert.Single(planned);
+        Assert.Equal(2, requirement.OperationCount);
+        Assert.Equal(9, requirement.MaximumOutputElements);
+        var exception = Assert.Throws<InvalidOperationException>(
+            () => worker.CompilePopulationSearch(underBound));
+        Assert.Contains(
+            "requires at least 9 output elements for operation count 2",
+            exception.Message,
+            StringComparison.Ordinal);
+
+        var exact = CreateExpandingCatalogCapacitySearch(requirement.MaximumOutputElements);
+        var expectedProgram = Assert.Single(exact.EnumerationCatalog!.Programs);
+        var expectedObjectives = exact.EvaluateObjectives(expectedProgram);
+        var expectedSemantic = exact.CreateSemanticFingerprint(expectedProgram);
+        Assert.Equal(
+            BitConverter.DoubleToInt64Bits(14d),
+            BitConverter.DoubleToInt64Bits(Assert.Single(expectedObjectives)));
+        using var compiled = worker.CompilePopulationSearch(
+            exact,
+            new MathBlockProgramPopulationExecutionOptions(
+                MathBlockProgramPopulationExecutionMode.ParallelResident,
+                2));
+
+        var result = compiled.ExecuteCycle();
+
+        var accepted = Assert.Single(result.Trials);
+        Assert.Equal(MathBlockProgramPopulationTrialStatus.Accepted, accepted.Status);
+        Assert.Equal(expectedProgram.StructuralFingerprint, accepted.StructuralFingerprint);
+        Assert.Equal(expectedSemantic, accepted.SemanticFingerprint);
+        Assert.Equal(
+            expectedObjectives.Select(BitConverter.DoubleToInt64Bits),
+            accepted.Objectives.Select(BitConverter.DoubleToInt64Bits));
+        Assert.Equal(1ul, result.AcceptedState.EvaluatedProgramCount);
+        Assert.Equal(1ul, result.AcceptedState.AcceptedProgramCount);
+        Assert.True(result.IsSearchComplete);
+        Assert.Equal(1, compiled.GraphInstanceCount);
+        Assert.Equal(1, compiled.ImmutableUploadCount);
+        Assert.Equal(0, compiled.LaterImmutableUploadCount);
+        Assert.Equal(1, compiled.GraphLaunchCount);
+        Assert.Equal(1, compiled.SynchronizationCount);
+        Assert.Equal(1, compiled.DownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputBytes);
+        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        Assert.Equal((long)compiled.CompactDownloadBytesPerCycle, compiled.DownloadedBytes);
+    }
+
+    [Fact]
+    public void Enumeration_catalog_capacity_planner_rejects_unbounded_shape_authority()
+    {
+        var scalar = MathBlockType.Scalar();
+        var vector = MathBlockType.Vector();
+        var terminals = new[]
+        {
+            new MathBlockProgramPopulationTerminal(
+                "value",
+                scalar,
+                MathBlockValue.Scalar(5d)),
+            new MathBlockProgramPopulationTerminal(
+                "first-count",
+                scalar,
+                MathBlockValue.Scalar(1d)),
+            new MathBlockProgramPopulationTerminal(
+                "second-count",
+                scalar,
+                MathBlockValue.Scalar(2d))
+        };
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [
+                    new MathBlockProgramPopulationOperation(
+                        "scalar.add",
+                        1,
+                        [scalar, scalar],
+                        scalar),
+                    new MathBlockProgramPopulationOperation(
+                        "vector.repeat",
+                        1,
+                        [scalar, scalar],
+                        vector)
+                ],
+                vector),
+            terminals,
+            [],
+            [new MathBlockProgramPopulationResourceBand(2, 16)],
+            proposalsPerCycle: 1,
+            fingerprintCapacity: 8);
+        var catalog = new MathBlockProgramPopulationEnumerationCatalog(
+            0,
+            [new MathBlockProgramStructure(
+                0,
+                null,
+                MathBlockProgramPopulationTrialSource.Enumeration,
+                [
+                    MathBlockProgramCandidateNode.Terminal(0, "value", scalar),
+                    MathBlockProgramCandidateNode.Terminal(1, "first-count", scalar),
+                    MathBlockProgramCandidateNode.Terminal(2, "second-count", scalar),
+                    MathBlockProgramCandidateNode.Operation("scalar.add", 1, scalar, 1, 2),
+                    MathBlockProgramCandidateNode.Operation("vector.repeat", 1, vector, 0, 3)
+                ])]);
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            new MathBlocksCUDAWorker().PlanPopulationEnumerationCatalogResourceBands(
+                population,
+                catalog));
+
+        Assert.Contains("CUDA shape input for node 3 is unavailable", exception.Message);
     }
 
     [Fact]
@@ -4617,6 +4836,148 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
             enumerationCatalog: catalog);
     }
 
+    private static MathBlockProgramPopulationSearchDefinition CreateScalarDuplicateCatalogSearch(
+        bool useAbsolute,
+        ulong cursorStart,
+        ulong maximumTrialCount,
+        int immigrantTrials)
+    {
+        var scalar = MathBlockType.Scalar();
+        var operations = new[]
+        {
+            new MathBlockProgramPopulationOperation(
+                "scalar.absolute", 1, [scalar], scalar),
+            new MathBlockProgramPopulationOperation(
+                "scalar.negate", 1, [scalar], scalar)
+        };
+        var terminal = new MathBlockProgramPopulationTerminal(
+            "negative-two",
+            scalar,
+            MathBlockValue.Scalar(-2d));
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(operations, scalar),
+            [terminal],
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 1)],
+            proposalsPerCycle: 8,
+            fingerprintCapacity: 64);
+        var program = new MathBlockProgramStructure(
+            0,
+            null,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                MathBlockProgramCandidateNode.Terminal(0, terminal.Identifier, terminal.Type),
+                MathBlockProgramCandidateNode.Operation(
+                    useAbsolute ? "scalar.absolute" : "scalar.negate",
+                    1,
+                    scalar,
+                    0)
+            ]);
+        var catalog = new MathBlockProgramPopulationEnumerationCatalog(cursorStart, [program]);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = builder.Input("candidate", scalar);
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            builder.Output("value", candidate).Build(),
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "value",
+                "value",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        return new MathBlockProgramPopulationSearchDefinition(
+            population,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(
+                maximumTrialCount,
+                1,
+                0,
+                0,
+                immigrantTrials,
+                randomSeed: 123,
+                randomSequence: 9),
+            new MathBlockProgramPopulationSelectionPolicy(4, 64),
+            new MathBlockProgramPopulationQualityDiversityPolicy(
+                "value",
+                [new MathBlockProgramPopulationQualityDiversityDimension("value", 0, 4, 4)]),
+            new MathBlockProgramPopulationSearchEnvelope(64L * 1024 * 1024, 16 * 1024 * 1024),
+            new MathBlockProgramPopulationValidityPolicy([1]),
+            wavePolicy: new MathBlockProgramPopulationWavePolicy(2, 2),
+            enumerationCatalog: catalog);
+    }
+
+    private static MathBlockProgramPopulationSearchDefinition CreateExpandingCatalogCapacitySearch(
+        int maximumOutputElements)
+    {
+        var vector = MathBlockType.Vector();
+        var matrix = MathBlockType.Matrix();
+        var scalar = MathBlockType.Scalar();
+        var terminal = new MathBlockProgramPopulationTerminal(
+            "coordinates",
+            vector,
+            MathBlockValue.Vector([1d, 2d, 3d]));
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [
+                    new MathBlockProgramPopulationOperation(
+                        "matrix.outer-product",
+                        1,
+                        [vector, vector],
+                        matrix),
+                    new MathBlockProgramPopulationOperation(
+                        "matrix.frobenius-norm",
+                        1,
+                        [matrix],
+                        scalar)
+                ],
+                scalar),
+            [terminal],
+            [],
+            [new MathBlockProgramPopulationResourceBand(2, maximumOutputElements)],
+            proposalsPerCycle: 1,
+            fingerprintCapacity: 8);
+        var program = new MathBlockProgramStructure(
+            0,
+            null,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                MathBlockProgramCandidateNode.Terminal(0, terminal.Identifier, terminal.Type),
+                MathBlockProgramCandidateNode.Operation(
+                    "matrix.outer-product",
+                    1,
+                    matrix,
+                    0,
+                    0),
+                MathBlockProgramCandidateNode.Operation(
+                    "matrix.frobenius-norm",
+                    1,
+                    scalar,
+                    1)
+            ]);
+        var catalog = new MathBlockProgramPopulationEnumerationCatalog(0, [program]);
+        var objectiveBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = objectiveBuilder.Input("candidate", scalar);
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveBuilder.Output("value", candidate).Build(),
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "value",
+                "value",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        return new MathBlockProgramPopulationSearchDefinition(
+            population,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(1, 1, 0, 0, 0, 53),
+            new MathBlockProgramPopulationSelectionPolicy(2, 8),
+            new MathBlockProgramPopulationQualityDiversityPolicy(
+                "value",
+                [new MathBlockProgramPopulationQualityDiversityDimension("value", 0, 20, 4)]),
+            new MathBlockProgramPopulationSearchEnvelope(64L * 1024 * 1024, 16 * 1024 * 1024),
+            new MathBlockProgramPopulationValidityPolicy([1]),
+            wavePolicy: new MathBlockProgramPopulationWavePolicy(1, 1),
+            enumerationCatalog: catalog);
+    }
+
     private static IReadOnlyDictionary<string, (double Objective, string SemanticFingerprint)>
         CreateVectorOverloadCpuReference(MathBlockProgramPopulationSearchDefinition definition)
     {
@@ -4989,6 +5350,25 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
         Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
         Assert.Equal(0, compiled.FullCandidateOutputBytes);
         Assert.Equal(0, compiled.CpuNodeDispatchCount);
+    }
+
+    private static void AssertArchiveFingerprintAuthority(
+        MathBlockProgramPopulationSearchState state)
+    {
+        var structural = new HashSet<string>(StringComparer.Ordinal);
+        var semantic = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var entry in state.SelectionEntries)
+        {
+            structural.Add(entry.StructuralFingerprint);
+            semantic.Add(entry.SemanticFingerprint);
+        }
+        foreach (var entry in state.QualityDiversityEntries)
+        {
+            structural.Add(entry.StructuralFingerprint);
+            semantic.Add(entry.SemanticFingerprint);
+        }
+        Assert.True(structural.SetEquals(state.StructuralFingerprints));
+        Assert.True(semantic.SetEquals(state.SemanticFingerprints));
     }
 
     private static MathBlockProgramPopulationDefinition CreateScalarPopulation(int proposalsPerCycle)

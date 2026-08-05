@@ -96,12 +96,26 @@ An enumeration-only catalog disables mutation, crossover, and random
 immigrants. Its global maximum trial cursor equals its exclusive catalog end.
 
 A later disjoint catalog starts at the prior accepted global cursor. Compatible
-transitions reset visited fingerprints and preserve archive programs with their
-objective bits.
+transitions drop visited fingerprints that have no archive owner. They preserve
+archive programs, objective bits, and archive-owned duplicate authority.
 
 Terminals, typed operations, and resource bands can grow by exact prefix during
 this transition. MathBlocks normalizes preserved terminal indexes and rejects
 catalog overlap with the preserved archive.
+
+Use the host-side CUDA capacity planner before you create the final resource
+bands for a catalog. The planner applies the same checked payload and shape
+rules that resident CUDA execution uses.
+
+```csharp
+var worker = new MathBlocksCUDAWorker();
+var requiredBands = worker.PlanPopulationEnumerationCatalogResourceBands(
+    population,
+    catalog);
+```
+
+The result gives the minimum `MaximumOutputElements` for each catalog operation
+count. The planner does not evaluate operations or start a CUDA context.
 
 The raw transition API preserves accepted trial identity across larger graph,
 terminal, objective, and archive bands. It refreshes accepted programs before

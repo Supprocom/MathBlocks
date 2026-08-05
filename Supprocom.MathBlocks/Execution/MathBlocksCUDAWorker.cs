@@ -51,6 +51,16 @@ public sealed class MathBlocksCUDAWorker
         return MathBlocksCUDAProgramPopulationSearch.Create(definition, executionOptions);
     }
 
+    public IReadOnlyList<MathBlockProgramPopulationResourceBand>
+        PlanPopulationEnumerationCatalogResourceBands(
+            MathBlockProgramPopulationDefinition population,
+            MathBlockProgramPopulationEnumerationCatalog catalog)
+    {
+        ArgumentNullException.ThrowIfNull(population);
+        ArgumentNullException.ThrowIfNull(catalog);
+        return MathBlockProgramPopulationCatalogCapacityPlanner.Plan(population, catalog);
+    }
+
     public MathBlockProgramPopulationSearchCapacity MeasurePopulationSearchCapacity(
         MathBlockProgramPopulationSearchDefinition definition)
     {
@@ -70,6 +80,122 @@ public sealed class MathBlocksCUDAWorker
             definition,
             executionOptions.CandidateLaneCount,
             enforceEnvelope: false).Capacity;
+    }
+}
+
+internal static class MathBlockProgramPopulationCatalogCapacityPlanner
+{
+    public static IReadOnlyList<MathBlockProgramPopulationResourceBand> Plan(
+        MathBlockProgramPopulationDefinition population,
+        MathBlockProgramPopulationEnumerationCatalog catalog)
+    {
+        var requiredByOperationCount = new Dictionary<int, int>();
+        for (var programIndex = 0; programIndex < catalog.Programs.Count; programIndex++)
+        {
+            var structure = catalog.Programs[programIndex];
+            population.ValidateResidentStructure(structure);
+            var plan = BuildPlan(population, structure);
+            MathBlocksCUDAProgram.ValidateProgram(plan);
+            var layout = MathBlocksCUDAProgram.ResolvePayloadLayout(plan, null);
+            var operationCount = checked(structure.Nodes.Count - population.AllTerminals.Count);
+            var requiredElements = 1;
+            for (var nodeIndex = population.AllTerminals.Count;
+                nodeIndex < plan.Count;
+                nodeIndex++)
+            {
+                if (!structure.Nodes[nodeIndex].Type.Accepts(plan[nodeIndex].Type))
+                {
+                    throw new InvalidOperationException(
+                        $"Enumeration catalog program {programIndex} has incompatible resolved CUDA type authority at node {nodeIndex}.");
+                }
+                requiredElements = Math.Max(requiredElements, layout.Capacities[nodeIndex]);
+            }
+            if (!requiredByOperationCount.TryGetValue(operationCount, out var current) ||
+                requiredElements > current)
+            {
+                requiredByOperationCount[operationCount] = requiredElements;
+            }
+        }
+
+        var result = new MathBlockProgramPopulationResourceBand[requiredByOperationCount.Count];
+        var resultIndex = 0;
+        foreach (var requirement in requiredByOperationCount)
+        {
+            result[resultIndex++] = new MathBlockProgramPopulationResourceBand(
+                requirement.Key,
+                requirement.Value);
+        }
+        MathBlockCollectionPrimitives.StableMergeSort(
+            result,
+            (left, right) => left.OperationCount.CompareTo(right.OperationCount));
+        return Array.AsReadOnly(result);
+    }
+
+    public static void RequireResourceBands(
+        MathBlockProgramPopulationDefinition population,
+        MathBlockProgramPopulationEnumerationCatalog catalog)
+    {
+        var requirements = Plan(population, catalog);
+        for (var requirementIndex = 0; requirementIndex < requirements.Count; requirementIndex++)
+        {
+            var requirement = requirements[requirementIndex];
+            MathBlockProgramPopulationResourceBand? active = null;
+            for (var bandIndex = 0; bandIndex < population.ActiveResourceBands.Count; bandIndex++)
+            {
+                var band = population.ActiveResourceBands[bandIndex];
+                if (band.OperationCount == requirement.OperationCount)
+                {
+                    active = band;
+                    break;
+                }
+            }
+            if (!active.HasValue ||
+                active.Value.MaximumOutputElements < requirement.MaximumOutputElements)
+            {
+                throw new InvalidOperationException(
+                    $"The enumeration catalog requires at least {requirement.MaximumOutputElements} output elements for operation count {requirement.OperationCount}.");
+            }
+        }
+    }
+
+    private static IReadOnlyList<MathBlockProgramNode> BuildPlan(
+        MathBlockProgramPopulationDefinition population,
+        MathBlockProgramStructure structure)
+    {
+        var registry = MathBlockCatalog.Standard;
+        var plan = new MathBlockProgramNode[structure.Nodes.Count];
+        for (var nodeIndex = 0; nodeIndex < structure.Nodes.Count; nodeIndex++)
+        {
+            var node = structure.Nodes[nodeIndex];
+            if (node.Kind == MathBlockProgramCandidateNodeKind.Terminal)
+            {
+                var terminal = population.AllTerminals[node.TerminalIndex];
+                plan[nodeIndex] = new MathBlockProgramNode(
+                    nodeIndex,
+                    new MathBlockProgram.Node(
+                        MathBlockProgramBuilder.NodeDefinition.Constant(terminal.Value)));
+                continue;
+            }
+
+            var operands = new int[node.OperandIndexes.Count];
+            var inputTypes = new MathBlockType[node.OperandIndexes.Count];
+            for (var operandIndex = 0; operandIndex < operands.Length; operandIndex++)
+            {
+                var producerIndex = node.OperandIndexes[operandIndex];
+                operands[operandIndex] = producerIndex;
+                inputTypes[operandIndex] = plan[producerIndex].Type;
+            }
+            var operation = registry.Get(node.OperationIdentifier!, node.OperationVersion);
+            var outputType = operation.ResolveOutputType(inputTypes);
+            plan[nodeIndex] = new MathBlockProgramNode(
+                nodeIndex,
+                new MathBlockProgram.Node(
+                    MathBlockProgramBuilder.NodeDefinition.CreateOperation(
+                        operation,
+                        operands,
+                        outputType)));
+        }
+        return Array.AsReadOnly(plan);
     }
 }
 
@@ -684,12 +810,15 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         return result;
     }
 
-    private static void ValidateProgram(MathBlockProgram program)
+    internal static void ValidateProgram(MathBlockProgram program) =>
+        ValidateProgram(program.PlanNodes);
+
+    internal static void ValidateProgram(IReadOnlyList<MathBlockProgramNode> nodes)
     {
         var unsupportedKindList = new List<MathBlockValueKind>();
-        for (var nodeIndex = 0; nodeIndex < program.PlanNodes.Count; nodeIndex++)
+        for (var nodeIndex = 0; nodeIndex < nodes.Count; nodeIndex++)
         {
-            var kind = program.PlanNodes[nodeIndex].Type.Kind;
+            var kind = nodes[nodeIndex].Type.Kind;
             if (!IsSupportedKind(kind) && !ContainsKind(unsupportedKindList, kind))
                 unsupportedKindList.Add(kind);
         }
@@ -701,9 +830,9 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         }
 
         var missingList = new List<string>();
-        for (var nodeIndex = 0; nodeIndex < program.PlanNodes.Count; nodeIndex++)
+        for (var nodeIndex = 0; nodeIndex < nodes.Count; nodeIndex++)
         {
-            var node = program.PlanNodes[nodeIndex];
+            var node = nodes[nodeIndex];
             if (node.Kind != MathBlockProgramNodeKind.Operation)
                 continue;
             var identity = node.OperationIdentity!;
