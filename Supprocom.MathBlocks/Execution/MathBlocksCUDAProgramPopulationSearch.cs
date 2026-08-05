@@ -90,13 +90,17 @@ public sealed class MathBlocksCUDAProgramPopulationSearch : IDisposable
             executionOptions.CandidateLaneCount,
             enforceEnvelope: true);
         MathBlocksCudaNative.EnsureContext();
+        var initialTrialCursor = definition.InitialTrialCursor;
+        var proposalWaveSize = checked((ulong)definition.WavePolicy.ProposalWaveSize);
+        var initialWaveCursor = initialTrialCursor / proposalWaveSize +
+            (initialTrialCursor % proposalWaveSize == 0 ? 0ul : 1ul);
         var initialState = definition.AcceptedState ?? new MathBlockProgramPopulationSearchState(
             definition.Identity,
             0,
             0,
+            initialTrialCursor,
             0,
-            0,
-            0,
+            initialWaveCursor,
             0,
             0,
             MathBlockProgramPopulationSearchSerialization.CreateInitialRandomState(definition.Evolution),
@@ -373,7 +377,7 @@ public sealed class MathBlocksCUDAProgramPopulationSearch : IDisposable
                 ParallelCandidateExecutionCount);
             var enumerationComplete =
                 acceptedState.EnumerationTrialCount == definition.Evolution.EnumerationProposalCount ||
-                acceptedState.EnumerationCursor == definition.Population.TotalProposalCount;
+                acceptedState.EnumerationCursor == definition.EnumerationCursorLimit;
             var searchComplete =
                 acceptedState.TrialCursor == definition.Evolution.MaximumTrialCount ||
                 enumerationComplete && definition.Evolution.EvolutionPatternLength == 0;
@@ -570,6 +574,7 @@ internal sealed class PopulationSearchLayout
     public int ObjectiveSourceOffset { get; private set; }
     public int QualityDimensionOffset { get; private set; }
     public int HistoryOffset { get; private set; }
+    public int EnumerationCatalogOffset { get; private set; }
     public int CandidateSlotOffset { get; private set; }
     public int ObjectiveSlotOffset { get; private set; }
     public int MaskSlotOffset { get; private set; }
@@ -771,8 +776,13 @@ internal sealed class PopulationSearchLayout
             ObjectiveSourceOffset, objectiveSources.Length, ObjectiveSourceSize, "objective sources");
         HistoryOffset = AdvanceLayout(
             QualityDimensionOffset, qualityDimensions.Length, QualityDimensionSize, "quality dimensions");
-        CandidateSlotOffset = AdvanceLayout(
+        EnumerationCatalogOffset = AdvanceLayout(
             HistoryOffset, definition.Validity.HistoryCounts.Count, sizeof(int), "history counts");
+        CandidateSlotOffset = AdvanceLayout(
+            EnumerationCatalogOffset,
+            definition.EnumerationCatalog?.Programs.Count ?? 0,
+            ArchiveEntrySize,
+            "enumeration catalog");
         ObjectiveSlotOffset = AdvanceLayout(
             CandidateSlotOffset,
             checked(terminals.Length + MaximumOperationCount),
@@ -1008,6 +1018,21 @@ internal sealed class PopulationSearchLayout
         }
         for (var index = 0; index < definition.Validity.HistoryCounts.Count; index++)
             WriteInt32(bytes, HistoryOffset + index * sizeof(int), definition.Validity.HistoryCounts[index]);
+        if (definition.EnumerationCatalog is not null)
+        {
+            for (var index = 0; index < definition.EnumerationCatalog.Programs.Count; index++)
+            {
+                WriteProgramEntry(
+                    bytes,
+                    EnumerationCatalogOffset + index * ArchiveEntrySize,
+                    definition,
+                    definition.EnumerationCatalog.Programs[index],
+                    0,
+                    -1,
+                    null,
+                    null);
+            }
+        }
         WriteAcceptedState(bytes, definition, state);
         return bytes;
     }
@@ -1069,7 +1094,7 @@ internal sealed class PopulationSearchLayout
             totalSemanticCount != checked(previous.SemanticFingerprints.Count + newSemanticCount) ||
             totalStructuralCount > definition.Population.FingerprintCapacity ||
             totalSemanticCount > definition.Population.FingerprintCapacity ||
-            enumerationCursor > definition.Population.TotalProposalCount ||
+            enumerationCursor > definition.EnumerationCursorLimit ||
             enumerationTrialCount > definition.Evolution.EnumerationProposalCount ||
             enumerationTrialCount > enumerationCursor ||
             enumerationTrialCount > trialCursor ||
@@ -1167,7 +1192,7 @@ internal sealed class PopulationSearchLayout
     private void WriteHeader(Span<byte> bytes, MathBlockProgramPopulationSearchDefinition definition)
     {
         WriteInt32(bytes, 0, unchecked((int)0x4d425334));
-        WriteInt32(bytes, 4, 10);
+        WriteInt32(bytes, 4, 11);
         WriteInt32(bytes, 8, operations.Length);
         WriteInt32(bytes, 12, terminals.Length);
         WriteInt32(bytes, 16, types.Length);
@@ -1214,7 +1239,7 @@ internal sealed class PopulationSearchLayout
         };
         for (var index = 0; index < offsets.Length; index++)
             WriteInt32(bytes, 128 + index * sizeof(int), offsets[index]);
-        WriteUInt64(bytes, 296, definition.Population.TotalProposalCount);
+        WriteUInt64(bytes, 296, definition.EnumerationCursorLimit);
         WriteUInt64(bytes, 304, definition.Evolution.EnumerationProposalCount);
         WriteUInt64(bytes, 312, definition.Evolution.MaximumTrialCount);
         WriteInt32(bytes, 320, definition.WavePolicy.MaximumTrialResultsPerCycle);
@@ -1227,6 +1252,9 @@ internal sealed class PopulationSearchLayout
         WriteInt32(bytes, 348, ProposalWaveControlOffset);
         WriteInt32(bytes, 352, CandidateLaneCount);
         WriteInt32(bytes, 356, LaneStrideBytes);
+        WriteUInt64(bytes, 360, definition.EnumerationCatalog?.CursorStart ?? 0);
+        WriteInt32(bytes, 368, EnumerationCatalogOffset);
+        WriteInt32(bytes, 372, definition.EnumerationCatalog?.Programs.Count ?? 0);
     }
 
     private void WriteAcceptedState(

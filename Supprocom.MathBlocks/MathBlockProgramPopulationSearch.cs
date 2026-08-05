@@ -316,9 +316,7 @@ public sealed class MathBlockProgramPopulationEvolutionPolicy
             throw new ArgumentOutOfRangeException(nameof(enumerationProposalCount));
         if (mutationTrials < 0 || crossoverTrials < 0 || randomImmigrantTrials < 0)
             throw new ArgumentOutOfRangeException(nameof(mutationTrials));
-        var evolutionPatternLength = checked(mutationTrials + crossoverTrials + randomImmigrantTrials);
-        if (maximumTrialCount > enumerationProposalCount && evolutionPatternLength == 0)
-            throw new ArgumentException("Evolution trials require an enabled proposal source.");
+        _ = checked(mutationTrials + crossoverTrials + randomImmigrantTrials);
         MaximumTrialCount = maximumTrialCount;
         EnumerationProposalCount = enumerationProposalCount;
         MutationTrials = mutationTrials;
@@ -434,6 +432,55 @@ public sealed class MathBlockProgramPopulationSearchEnvelope
     public int MaximumCompactDownloadBytes { get; }
 }
 
+public sealed class MathBlockProgramPopulationEnumerationCatalog
+{
+    public MathBlockProgramPopulationEnumerationCatalog(
+        ulong cursorStart,
+        IEnumerable<MathBlockProgramStructure> programs)
+    {
+        ArgumentNullException.ThrowIfNull(programs);
+        var supplied = MathBlockCollectionPrimitives.CopyEnumerable(programs);
+        if (supplied.Length == 0)
+            throw new ArgumentException("An enumeration catalog requires a program.", nameof(programs));
+        var normalized = new MathBlockProgramStructure[supplied.Length];
+        var fingerprints = new HashSet<string>(StringComparer.Ordinal);
+        for (var index = 0; index < supplied.Length; index++)
+        {
+            var program = supplied[index] ??
+                throw new ArgumentException("An enumeration catalog program is null.", nameof(programs));
+            if (program.Source != MathBlockProgramPopulationTrialSource.Enumeration)
+                throw new ArgumentException("An enumeration catalog program has an invalid source.", nameof(programs));
+            var proposalCursor = checked(cursorStart + (ulong)index);
+            if (program.ProposalCursor.HasValue && program.ProposalCursor.Value != proposalCursor)
+            {
+                throw new ArgumentException(
+                    "An enumeration catalog program has an incompatible proposal cursor.",
+                    nameof(programs));
+            }
+            normalized[index] = new MathBlockProgramStructure(
+                0,
+                proposalCursor,
+                MathBlockProgramPopulationTrialSource.Enumeration,
+                program.Nodes);
+            if (!fingerprints.Add(normalized[index].StructuralFingerprint))
+            {
+                throw new ArgumentException(
+                    "An enumeration catalog contains a duplicate program structure.",
+                    nameof(programs));
+            }
+        }
+        CursorStart = cursorStart;
+        CursorEndExclusive = checked(cursorStart + (ulong)normalized.Length);
+        Programs = Array.AsReadOnly(normalized);
+        Identity = MathBlockProgramPopulationSearchSerialization.CreateEnumerationCatalogIdentity(this);
+    }
+
+    public ulong CursorStart { get; }
+    public ulong CursorEndExclusive { get; }
+    public IReadOnlyList<MathBlockProgramStructure> Programs { get; }
+    public string Identity { get; }
+}
+
 public sealed class MathBlockProgramPopulationValidityPolicy
 {
     private readonly int[] historyCounts;
@@ -499,7 +546,8 @@ public sealed class MathBlockProgramPopulationSearchDefinition
         MathBlockProgramPopulationCompactResultPolicy? compactResults = null,
         IEnumerable<MathBlockProgramStructure>? initialPrograms = null,
         MathBlockProgramPopulationSearchState? acceptedState = null,
-        MathBlockProgramPopulationWavePolicy? wavePolicy = null)
+        MathBlockProgramPopulationWavePolicy? wavePolicy = null,
+        MathBlockProgramPopulationEnumerationCatalog? enumerationCatalog = null)
     {
         Population = population ?? throw new ArgumentNullException(nameof(population));
         ObjectiveBinding = objectiveBinding ?? throw new ArgumentNullException(nameof(objectiveBinding));
@@ -512,13 +560,42 @@ public sealed class MathBlockProgramPopulationSearchDefinition
         WavePolicy = wavePolicy ?? new MathBlockProgramPopulationWavePolicy(
             1,
             population.ProposalsPerCycle);
+        EnumerationCatalog = enumerationCatalog;
         if (population.AcceptedState is not null)
             throw new ArgumentException("A search definition cannot use an enumeration checkpoint.", nameof(population));
         var candidateType = objectiveBinding.Program.Inputs[objectiveBinding.CandidateInput];
         if (!candidateType.Accepts(population.Grammar.OutputType))
             throw new ArgumentException("The objective candidate input has an incompatible type.", nameof(objectiveBinding));
-        if (evolution.EnumerationProposalCount > population.TotalProposalCount)
+        if (evolution.EnumerationProposalCount > EnumerationCursorLimit)
             throw new ArgumentOutOfRangeException(nameof(evolution));
+        if (enumerationCatalog is not null &&
+            evolution.EnumerationProposalCount != (ulong)enumerationCatalog.Programs.Count)
+        {
+            throw new ArgumentException(
+                "The enumeration proposal count must equal the explicit catalog count.",
+                nameof(evolution));
+        }
+        if (enumerationCatalog is not null &&
+            evolution.MaximumTrialCount < enumerationCatalog.CursorEndExclusive)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(evolution),
+                "The maximum trial cursor does not contain the enumeration catalog range.");
+        }
+        if (enumerationCatalog is not null &&
+            evolution.EvolutionPatternLength == 0 &&
+            evolution.MaximumTrialCount != enumerationCatalog.CursorEndExclusive)
+        {
+            throw new ArgumentException(
+                "Enumeration-only search must end at the catalog cursor boundary.",
+                nameof(evolution));
+        }
+        if (enumerationCatalog is null &&
+            evolution.MaximumTrialCount > evolution.EnumerationProposalCount &&
+            evolution.EvolutionPatternLength == 0)
+        {
+            throw new ArgumentException("Evolution trials require an enabled proposal source.", nameof(evolution));
+        }
         var qualityIndex = FindObjective(objectiveBinding.Objectives, qualityDiversity.QualityObjective);
         if (qualityIndex < 0)
             throw new ArgumentException("The quality objective is not defined.", nameof(qualityDiversity));
@@ -543,6 +620,23 @@ public sealed class MathBlockProgramPopulationSearchDefinition
             _ = Population.Evaluate(initial[index]);
         }
         InitialPrograms = Array.AsReadOnly(initial);
+        if (enumerationCatalog is not null)
+        {
+            var initialFingerprints = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var program in initial)
+                initialFingerprints.Add(program.StructuralFingerprint);
+            foreach (var program in enumerationCatalog.Programs)
+            {
+                RequireProgramCapacity(program);
+                Population.ValidateResidentStructure(program);
+                if (initialFingerprints.Contains(program.StructuralFingerprint))
+                {
+                    throw new ArgumentException(
+                        "The enumeration catalog overlaps an initial program.",
+                        nameof(enumerationCatalog));
+                }
+            }
+        }
         Identity = MathBlockProgramPopulationSearchSerialization.CreateIdentity(this);
         if (acceptedState is not null)
             ValidateState(acceptedState);
@@ -559,11 +653,16 @@ public sealed class MathBlockProgramPopulationSearchDefinition
     public MathBlockProgramPopulationValidityPolicy Validity { get; }
     public MathBlockProgramPopulationCompactResultPolicy CompactResults { get; }
     public MathBlockProgramPopulationWavePolicy WavePolicy { get; }
+    public MathBlockProgramPopulationEnumerationCatalog? EnumerationCatalog { get; }
     public IReadOnlyList<MathBlockProgramStructure> InitialPrograms { get; }
     public string Identity { get; }
     public MathBlockProgramPopulationSearchState? AcceptedState { get; }
     internal int QualityObjectiveIndex { get; }
     internal IReadOnlyList<int> QualityDiversityObjectiveIndexes { get; }
+    internal ulong EnumerationCursorLimit => EnumerationCatalog is null
+        ? Population.TotalProposalCount
+        : (ulong)EnumerationCatalog.Programs.Count;
+    internal ulong InitialTrialCursor => EnumerationCatalog?.CursorStart ?? 0;
 
     public IReadOnlyList<double> EvaluateObjectives(MathBlockProgramStructure program, int age = 0)
     {
@@ -650,6 +749,9 @@ public sealed class MathBlockProgramPopulationSearchDefinition
             throw new InvalidOperationException("The previous state does not match its search definition.");
         ValidateTransition(previousDefinition, previousState);
 
+        if (previousDefinition.EnumerationCatalog is not null && EnumerationCatalog is not null)
+            return CreateCatalogTransitionState(previousDefinition, previousState);
+
         var refreshPrograms = new Dictionary<string, MathBlockProgramStructure>(StringComparer.Ordinal);
         foreach (var entry in previousState.SelectionEntries)
             AddRefreshProgram(refreshPrograms, previousDefinition.Population, entry.Program);
@@ -660,7 +762,7 @@ public sealed class MathBlockProgramPopulationSearchDefinition
         foreach (var program in InitialPrograms)
             refreshPrograms.TryAdd(program.StructuralFingerprint, program);
 
-        var preserveEnumerationCursor = HasStableEnumerationPrefix(previousDefinition.Population, Population);
+        var preserveEnumerationCursor = HasStableEnumerationPrefix(previousDefinition, this);
         var preserveSemanticFingerprints = preserveEnumerationCursor &&
             HaveEqualHistoryCounts(
                 previousDefinition.Validity.HistoryCounts,
@@ -684,9 +786,99 @@ public sealed class MathBlockProgramPopulationSearchDefinition
             [],
             [],
             refreshPrograms.Values);
+        RequireCatalogDoesNotOverlap(refreshPrograms.Values);
         ValidateState(transition);
         RequireFingerprintCapacity(transition);
         return transition;
+    }
+
+    private MathBlockProgramPopulationSearchState CreateCatalogTransitionState(
+        MathBlockProgramPopulationSearchDefinition previousDefinition,
+        MathBlockProgramPopulationSearchState previousState)
+    {
+        var previousCatalog = previousDefinition.EnumerationCatalog!;
+        var currentCatalog = EnumerationCatalog!;
+        if (previousState.TrialCursor != currentCatalog.CursorStart ||
+            previousState.TrialCursor != previousCatalog.CursorEndExclusive ||
+            previousState.TrialCursor != previousDefinition.Evolution.MaximumTrialCount ||
+            previousState.EnumerationCursor != previousDefinition.EnumerationCursorLimit ||
+            previousState.EnumerationTrialCount != previousDefinition.Evolution.EnumerationProposalCount ||
+            previousState.RefreshCursor != previousState.RefreshPrograms.Count)
+        {
+            throw new InvalidOperationException("The prior enumeration catalog is not complete at the transition cursor.");
+        }
+        RequireArchivePreservationCompatibility(previousDefinition, previousState);
+        var preservedSelection = NormalizeArchiveEntries(
+            previousDefinition.Population,
+            previousState.SelectionEntries);
+        var preservedQuality = NormalizeArchiveEntries(
+            previousDefinition.Population,
+            previousState.QualityDiversityEntries);
+        var preservedFingerprints = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var entry in preservedSelection)
+            preservedFingerprints.Add(entry.Program.StructuralFingerprint);
+        foreach (var entry in preservedQuality)
+            preservedFingerprints.Add(entry.Program.StructuralFingerprint);
+        foreach (var program in currentCatalog.Programs)
+        {
+            if (preservedFingerprints.Contains(program.StructuralFingerprint))
+            {
+                throw new InvalidOperationException(
+                    "The enumeration catalog overlaps a preserved archive program.");
+            }
+        }
+        var refreshPrograms = new Dictionary<string, MathBlockProgramStructure>(StringComparer.Ordinal);
+        foreach (var program in InitialPrograms)
+        {
+            if (preservedFingerprints.Contains(program.StructuralFingerprint))
+            {
+                throw new InvalidOperationException(
+                    "An initial program overlaps a preserved archive program.");
+            }
+            refreshPrograms.TryAdd(program.StructuralFingerprint, program);
+        }
+        RequireCatalogDoesNotOverlap(refreshPrograms.Values);
+        var transition = new MathBlockProgramPopulationSearchState(
+            Identity,
+            0,
+            0,
+            previousState.TrialCursor,
+            previousState.CycleCount,
+            previousState.WaveCursor,
+            checked(previousState.EnvelopeGeneration + 1),
+            0,
+            previousState.RandomState,
+            previousState.StructuralDuplicateCount,
+            previousState.SemanticDuplicateCount,
+            previousState.EvaluatedProgramCount,
+            previousState.AcceptedProgramCount,
+            [],
+            [],
+            preservedSelection,
+            preservedQuality,
+            refreshPrograms.Values);
+        ValidateState(transition);
+        RequireFingerprintCapacity(transition);
+        return transition;
+    }
+
+    private MathBlockProgramPopulationArchiveEntry[] NormalizeArchiveEntries(
+        MathBlockProgramPopulationDefinition previousPopulation,
+        IReadOnlyList<MathBlockProgramPopulationArchiveEntry> entries)
+    {
+        var result = new MathBlockProgramPopulationArchiveEntry[entries.Count];
+        for (var index = 0; index < entries.Count; index++)
+        {
+            var entry = entries[index];
+            var program = NormalizeProgram(previousPopulation, Population, entry.Program);
+            result[index] = new MathBlockProgramPopulationArchiveEntry(
+                program,
+                entry.Objectives,
+                entry.Age,
+                entry.SemanticFingerprint,
+                entry.QualityDiversityCell);
+        }
+        return result;
     }
 
     private void AddRefreshProgram(
@@ -752,7 +944,8 @@ public sealed class MathBlockProgramPopulationSearchDefinition
             CompactResults,
             [],
             acceptedState,
-            WavePolicy);
+            WavePolicy,
+            EnumerationCatalog);
 
     private static int GetValidityRowCount(MathBlockValue value) => value.Type.Kind switch
     {
@@ -785,12 +978,124 @@ public sealed class MathBlockProgramPopulationSearchDefinition
             throw new InvalidOperationException("The expanded search output type is incompatible.");
         RequireOperationPrefix(previousDefinition.Population.Grammar.Operations, Population.Grammar.Operations);
         RequireTerminalPrefix(previousDefinition.Population.AllTerminals, Population.AllTerminals);
+        RequireResourceBandPrefix(
+            previousDefinition.Population.ActiveResourceBands,
+            Population.ActiveResourceBands);
         foreach (var entry in previousState.SelectionEntries)
             RequireProgramCapacity(entry.Program, previousDefinition.Population.AllTerminals.Count);
         foreach (var entry in previousState.QualityDiversityEntries)
             RequireProgramCapacity(entry.Program, previousDefinition.Population.AllTerminals.Count);
         foreach (var program in previousState.RefreshPrograms)
             RequireProgramCapacity(program, previousDefinition.Population.AllTerminals.Count);
+    }
+
+    private void RequireArchivePreservationCompatibility(
+        MathBlockProgramPopulationSearchDefinition previousDefinition,
+        MathBlockProgramPopulationSearchState previousState)
+    {
+        if (!HaveOperationPrefix(
+                previousDefinition.Population.Grammar.Operations,
+                Population.Grammar.Operations) ||
+            !HaveResourceBandPrefix(
+                previousDefinition.Population.ActiveResourceBands,
+                Population.ActiveResourceBands) ||
+            previousDefinition.Population.Grammar.OutputType != Population.Grammar.OutputType ||
+            !HaveTerminalPrefix(
+                previousDefinition.Population.AllTerminals,
+                Population.AllTerminals) ||
+            !HaveEqualHistoryCounts(
+                previousDefinition.Validity.HistoryCounts,
+                Validity.HistoryCounts) ||
+            !string.Equals(
+                MathBlockProgramPopulationSearchSerialization.CreateObjectiveBindingIdentity(
+                    previousDefinition.ObjectiveBinding),
+                MathBlockProgramPopulationSearchSerialization.CreateObjectiveBindingIdentity(ObjectiveBinding),
+                StringComparison.Ordinal) ||
+            previousDefinition.Selection.ParetoCapacity != Selection.ParetoCapacity ||
+            previousDefinition.Selection.MaximumAge != Selection.MaximumAge ||
+            !HaveEqualQualityPolicy(
+                previousDefinition.QualityDiversity,
+                QualityDiversity))
+        {
+            throw new InvalidOperationException(
+                "The enumeration catalog transition cannot preserve incompatible archive evidence.");
+        }
+        foreach (var entry in previousState.SelectionEntries)
+        {
+            var normalized = NormalizeProgram(
+                previousDefinition.Population,
+                Population,
+                entry.Program);
+            RequireProgramCapacity(normalized);
+            Population.ValidateResidentStructure(normalized);
+            ValidateEntry(entry);
+        }
+        foreach (var entry in previousState.QualityDiversityEntries)
+        {
+            var normalized = NormalizeProgram(
+                previousDefinition.Population,
+                Population,
+                entry.Program);
+            RequireProgramCapacity(normalized);
+            Population.ValidateResidentStructure(normalized);
+            ValidateEntry(entry);
+        }
+    }
+
+    private static bool HaveOperationPrefix(
+        IReadOnlyList<MathBlockProgramPopulationOperation> previous,
+        IReadOnlyList<MathBlockProgramPopulationOperation> current)
+    {
+        if (previous.Count > current.Count)
+            return false;
+        for (var index = 0; index < previous.Count; index++)
+        {
+            if (!string.Equals(
+                    MathBlockProgramPopulationValidation.CreateOperationSignature(previous[index]),
+                    MathBlockProgramPopulationValidation.CreateOperationSignature(current[index]),
+                    StringComparison.Ordinal) ||
+                previous[index].DeterministicCost != current[index].DeterministicCost)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static bool HaveTerminalPrefix(
+        IReadOnlyList<MathBlockProgramPopulationTerminal> previous,
+        IReadOnlyList<MathBlockProgramPopulationTerminal> current)
+    {
+        if (previous.Count > current.Count)
+            return false;
+        for (var index = 0; index < previous.Count; index++)
+        {
+            var left = previous[index];
+            var right = current[index];
+            if (!string.Equals(left.Identifier, right.Identifier, StringComparison.Ordinal) ||
+                left.Type != right.Type ||
+                left.Lookback != right.Lookback ||
+                !MathBlockProgramPopulationValidation.ValuesAreBitwiseEqual(left.Value, right.Value))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static bool HaveEqualQualityPolicy(
+        MathBlockProgramPopulationQualityDiversityPolicy previous,
+        MathBlockProgramPopulationQualityDiversityPolicy current)
+    {
+        if (!string.Equals(previous.QualityObjective, current.QualityObjective, StringComparison.Ordinal) ||
+            previous.Dimensions.Count != current.Dimensions.Count)
+        {
+            return false;
+        }
+        for (var index = 0; index < previous.Dimensions.Count; index++)
+            if (previous.Dimensions[index] != current.Dimensions[index])
+                return false;
+        return true;
     }
 
     private void RequireProgramCapacity(MathBlockProgramStructure program) =>
@@ -800,9 +1105,13 @@ public sealed class MathBlockProgramPopulationSearchDefinition
     {
         var operationCount = program.Nodes.Count - terminalCount;
         var maximum = 0;
+        var supported = false;
         foreach (var band in Population.ActiveResourceBands)
+        {
             maximum = Math.Max(maximum, band.OperationCount);
-        if (operationCount <= 0 || operationCount > maximum)
+            supported |= band.OperationCount == operationCount;
+        }
+        if (operationCount <= 0 || operationCount > maximum || !supported)
             throw new InvalidOperationException("An accepted program exceeds the expanded graph-size envelope.");
     }
 
@@ -848,17 +1157,52 @@ public sealed class MathBlockProgramPopulationSearchDefinition
             if (!string.Equals(left.Identifier, right.Identifier, StringComparison.Ordinal) ||
                 left.Type != right.Type ||
                 left.Lookback != right.Lookback ||
-                !left.Value.Equals(right.Value))
+                !MathBlockProgramPopulationValidation.ValuesAreBitwiseEqual(left.Value, right.Value))
             {
                 throw new InvalidOperationException("The expanded grammar changed an accepted terminal.");
             }
         }
     }
 
-    private static bool HasStableEnumerationPrefix(
-        MathBlockProgramPopulationDefinition previous,
-        MathBlockProgramPopulationDefinition current)
+    private static bool HaveResourceBandPrefix(
+        IReadOnlyList<MathBlockProgramPopulationResourceBand> previous,
+        IReadOnlyList<MathBlockProgramPopulationResourceBand> current)
     {
+        if (previous.Count > current.Count)
+            return false;
+        for (var index = 0; index < previous.Count; index++)
+            if (previous[index] != current[index])
+                return false;
+        return true;
+    }
+
+    private static void RequireResourceBandPrefix(
+        IReadOnlyList<MathBlockProgramPopulationResourceBand> previous,
+        IReadOnlyList<MathBlockProgramPopulationResourceBand> current)
+    {
+        if (current.Count < previous.Count)
+            throw new InvalidOperationException("The expanded search removed a resource band.");
+        for (var index = 0; index < previous.Count; index++)
+            if (previous[index] != current[index])
+                throw new InvalidOperationException("The expanded search changed an accepted resource band.");
+    }
+
+    private static bool HasStableEnumerationPrefix(
+        MathBlockProgramPopulationSearchDefinition previousDefinition,
+        MathBlockProgramPopulationSearchDefinition currentDefinition)
+    {
+        var previousCatalog = previousDefinition.EnumerationCatalog;
+        var currentCatalog = currentDefinition.EnumerationCatalog;
+        if (previousCatalog is null != (currentCatalog is null) ||
+            previousCatalog is not null && !string.Equals(
+                previousCatalog.Identity,
+                currentCatalog!.Identity,
+                StringComparison.Ordinal))
+        {
+            return false;
+        }
+        var previous = previousDefinition.Population;
+        var current = currentDefinition.Population;
         if (previous.Grammar.Operations.Count != current.Grammar.Operations.Count ||
             previous.AllTerminals.Count != current.AllTerminals.Count ||
             previous.ActiveResourceBands.Count > current.ActiveResourceBands.Count)
@@ -869,6 +1213,23 @@ public sealed class MathBlockProgramPopulationSearchDefinition
             if (previous.ActiveResourceBands[index] != current.ActiveResourceBands[index])
                 return false;
         return true;
+    }
+
+    private void RequireCatalogDoesNotOverlap(IEnumerable<MathBlockProgramStructure> programs)
+    {
+        if (EnumerationCatalog is null)
+            return;
+        var catalogFingerprints = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var program in EnumerationCatalog.Programs)
+            catalogFingerprints.Add(program.StructuralFingerprint);
+        foreach (var program in programs)
+        {
+            if (catalogFingerprints.Contains(program.StructuralFingerprint))
+            {
+                throw new InvalidOperationException(
+                    "The enumeration catalog overlaps a refresh program.");
+            }
+        }
     }
 
     private static bool TypesAreCompatible(MathBlockType previous, MathBlockType current) =>
@@ -916,11 +1277,12 @@ public sealed class MathBlockProgramPopulationSearchDefinition
         var minimumWaveCursor = state.TrialCursor / proposalWaveSize +
             (state.TrialCursor % proposalWaveSize == 0 ? 0ul : 1ul);
         if (state.TrialCursor > Evolution.MaximumTrialCount ||
+            state.TrialCursor < InitialTrialCursor ||
             state.WaveCursor > state.TrialCursor ||
             state.WaveCursor < minimumWaveCursor ||
-            state.EnumerationCursor > Population.TotalProposalCount ||
+            state.EnumerationCursor > EnumerationCursorLimit ||
             state.EnumerationTrialCount > Evolution.EnumerationProposalCount ||
-            state.EnumerationTrialCount > state.TrialCursor ||
+            state.EnumerationTrialCount > state.TrialCursor - InitialTrialCursor ||
             state.EnumerationTrialCount > state.EnumerationCursor)
         {
             throw new InvalidOperationException("The accepted search cursor is outside its range.");
@@ -945,7 +1307,7 @@ public sealed class MathBlockProgramPopulationSearchDefinition
     {
         var structuralCount = state?.StructuralFingerprints.Count ?? 0;
         var semanticCount = state?.SemanticFingerprints.Count ?? 0;
-        var trialCursor = state?.TrialCursor ?? 0;
+        var trialCursor = state?.TrialCursor ?? InitialTrialCursor;
         var refreshPrograms = state?.RefreshPrograms ?? InitialPrograms;
         var refreshCursor = state?.RefreshCursor ?? 0;
         var pendingRefreshCount = CountUniqueRefreshPrograms(refreshPrograms, refreshCursor);
@@ -1308,8 +1670,11 @@ internal static class MathBlockProgramPopulationSearchSerialization
     {
         using var stream = new MemoryStream();
         using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
-        writer.Write("mathblocks-population-search-v4");
+        writer.Write("mathblocks-population-search-v5");
         writer.Write(definition.Population.Identity);
+        writer.Write(definition.EnumerationCatalog is not null);
+        if (definition.EnumerationCatalog is not null)
+            writer.Write(definition.EnumerationCatalog.Identity);
         var binding = definition.ObjectiveBinding;
         writer.Write(binding.Program.Fingerprint);
         writer.Write(binding.CandidateInput);
@@ -1379,6 +1744,69 @@ internal static class MathBlockProgramPopulationSearchSerialization
         writer.Write(definition.InitialPrograms.Count);
         foreach (var program in definition.InitialPrograms)
             WriteStructure(writer, program);
+        return Convert.ToHexString(SHA256.HashData(stream.ToArray())).ToLowerInvariant();
+    }
+
+    public static string CreateEnumerationCatalogIdentity(
+        MathBlockProgramPopulationEnumerationCatalog catalog)
+    {
+        ArgumentNullException.ThrowIfNull(catalog);
+        using var stream = new MemoryStream();
+        using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
+        writer.Write("mathblocks-population-enumeration-catalog-v1");
+        writer.Write(catalog.CursorStart);
+        writer.Write(catalog.CursorEndExclusive);
+        writer.Write(catalog.Programs.Count);
+        foreach (var program in catalog.Programs)
+            WriteStructure(writer, program);
+        return Convert.ToHexString(SHA256.HashData(stream.ToArray())).ToLowerInvariant();
+    }
+
+    public static string CreateObjectiveBindingIdentity(
+        MathBlockProgramPopulationObjectiveBinding binding)
+    {
+        ArgumentNullException.ThrowIfNull(binding);
+        using var stream = new MemoryStream();
+        using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
+        writer.Write("mathblocks-population-objective-binding-v1");
+        writer.Write(binding.Program.Fingerprint);
+        writer.Write(binding.CandidateInput);
+        writer.Write(binding.CandidateValidityMaskInput is not null);
+        if (binding.CandidateValidityMaskInput is not null)
+            writer.Write(binding.CandidateValidityMaskInput);
+        var residentNames = new string[binding.ResidentInputs.Count];
+        var residentIndex = 0;
+        foreach (var name in binding.ResidentInputs.Keys)
+            residentNames[residentIndex++] = name;
+        for (var index = 1; index < residentNames.Length; index++)
+        {
+            var name = residentNames[index];
+            var destination = index;
+            while (destination > 0 &&
+                string.CompareOrdinal(residentNames[destination - 1], name) > 0)
+            {
+                residentNames[destination] = residentNames[destination - 1];
+                destination--;
+            }
+            residentNames[destination] = name;
+        }
+        writer.Write(residentNames.Length);
+        foreach (var name in residentNames)
+        {
+            writer.Write(name);
+            WriteValue(writer, binding.ResidentInputs[name]);
+        }
+        writer.Write(binding.Objectives.Count);
+        foreach (var objective in binding.Objectives)
+        {
+            writer.Write(objective.Name);
+            writer.Write((int)objective.SourceKind);
+            writer.Write(objective.SourceIdentity);
+            writer.Write(objective.ProgramOutput is not null);
+            if (objective.ProgramOutput is not null)
+                writer.Write(objective.ProgramOutput);
+            writer.Write((int)objective.Direction);
+        }
         return Convert.ToHexString(SHA256.HashData(stream.ToArray())).ToLowerInvariant();
     }
 
@@ -1752,9 +2180,83 @@ internal static class MathBlockProgramPopulationSearchSerialization
 
 public sealed partial class MathBlockProgramPopulationDefinition
 {
+    public void ValidateStructure(MathBlockProgramStructure program)
+    {
+        ArgumentNullException.ThrowIfNull(program);
+        for (var nodeIndex = 0; nodeIndex < program.Nodes.Count; nodeIndex++)
+        {
+            var node = program.Nodes[nodeIndex];
+            if (node.Kind == MathBlockProgramCandidateNodeKind.Terminal)
+            {
+                if ((uint)node.TerminalIndex >= (uint)allTerminals.Length)
+                    throw new InvalidOperationException("A program terminal index is outside the definition.");
+                var terminal = allTerminals[node.TerminalIndex];
+                if (terminal.Type != node.Type ||
+                    !string.Equals(terminal.Identifier, node.TerminalIdentifier, StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException("A program terminal does not match the definition.");
+                }
+                continue;
+            }
+            MathBlockProgramPopulationOperation? descriptor = null;
+            foreach (var candidateOperation in Grammar.Operations)
+            {
+                if (!string.Equals(candidateOperation.Identifier, node.OperationIdentifier, StringComparison.Ordinal) ||
+                    candidateOperation.Version != node.OperationVersion ||
+                    candidateOperation.OutputType != node.Type ||
+                    candidateOperation.InputTypes.Count != node.OperandIndexes.Count)
+                {
+                    continue;
+                }
+                var matches = true;
+                for (var inputIndex = 0; inputIndex < candidateOperation.InputTypes.Count; inputIndex++)
+                {
+                    if (candidateOperation.InputTypes[inputIndex] !=
+                        program.Nodes[node.OperandIndexes[inputIndex]].Type)
+                    {
+                        matches = false;
+                        break;
+                    }
+                }
+                if (!matches)
+                    continue;
+                if (descriptor is not null)
+                    throw new InvalidOperationException("A program operation matches multiple grammar entries.");
+                descriptor = candidateOperation;
+            }
+            if (descriptor is null)
+                throw new InvalidOperationException("A program operation is outside the typed grammar.");
+        }
+        if (!Grammar.OutputType.Accepts(program.Nodes[^1].Type))
+            throw new InvalidOperationException("The program output type does not match the grammar.");
+    }
+
+    internal void ValidateResidentStructure(MathBlockProgramStructure program)
+    {
+        ValidateStructure(program);
+        if (program.Nodes.Count <= allTerminals.Length)
+            throw new InvalidOperationException("A resident program structure requires an operation node.");
+        for (var terminalIndex = 0; terminalIndex < allTerminals.Length; terminalIndex++)
+        {
+            var node = program.Nodes[terminalIndex];
+            var terminal = allTerminals[terminalIndex];
+            if (node.Kind != MathBlockProgramCandidateNodeKind.Terminal ||
+                node.TerminalIndex != terminalIndex ||
+                node.Type != terminal.Type ||
+                !string.Equals(node.TerminalIdentifier, terminal.Identifier, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException("A resident program terminal does not match the population.");
+            }
+        }
+        for (var nodeIndex = allTerminals.Length; nodeIndex < program.Nodes.Count; nodeIndex++)
+            if (program.Nodes[nodeIndex].Kind != MathBlockProgramCandidateNodeKind.Operation)
+                throw new InvalidOperationException("A resident program operation node is invalid.");
+    }
+
     public MathBlockValue Evaluate(MathBlockProgramStructure program, MathBlockRegistry? registry = null)
     {
         ArgumentNullException.ThrowIfNull(program);
+        ValidateStructure(program);
         registry ??= MathBlockCatalog.Standard;
         var values = new MathBlockValue[program.Nodes.Count];
         for (var nodeIndex = 0; nodeIndex < program.Nodes.Count; nodeIndex++)

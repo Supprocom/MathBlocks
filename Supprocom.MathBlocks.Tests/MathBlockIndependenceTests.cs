@@ -55,6 +55,10 @@ public sealed partial class MathBlockIndependenceTests
             "Decouples resident-search fingerprint capacity from the total raw proposal universe",
             document.Descendants("PackageReleaseNotes").Single().Value,
             StringComparison.Ordinal);
+        Assert.Contains(
+            "Adds deterministic typed-program catalogs with global cursor resume and archive-preserving transitions",
+            document.Descendants("PackageReleaseNotes").Single().Value,
+            StringComparison.Ordinal);
         Assert.Equal(new Version(0, 2, 1, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
         Assert.Contains("## Parallel proposal waves", readme, StringComparison.Ordinal);
         Assert.Contains(

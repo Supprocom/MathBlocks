@@ -84,9 +84,28 @@ every proposal.
 `ulong.MaxValue` as a cursor boundary while resident evolution remains bounded
 by visited trials.
 
-The transition API preserves accepted trial identity across larger graph,
-terminal, objective, and archive bands. It refreshes accepted programs under
-the new resident definition before new proposals.
+An explicit enumeration catalog accepts caller-supplied, type-valid program
+structures in deterministic order. Its cursor start and ordered structures
+enter the search identity.
+
+Catalog execution reads each entry with a durable monotonic cursor. Each entry
+receives one global trial cursor without raw descriptor decoding or host-side
+proposal filtering.
+
+An enumeration-only catalog disables mutation, crossover, and random
+immigrants. Its global maximum trial cursor equals its exclusive catalog end.
+
+A later disjoint catalog starts at the prior accepted global cursor. Compatible
+transitions reset visited fingerprints and preserve archive programs with their
+objective bits.
+
+Terminals, typed operations, and resource bands can grow by exact prefix during
+this transition. MathBlocks normalizes preserved terminal indexes and rejects
+catalog overlap with the preserved archive.
+
+The raw transition API preserves accepted trial identity across larger graph,
+terminal, objective, and archive bands. It refreshes accepted programs before
+new raw proposals.
 
 Every supplied grammar operation uses the same CUDA implementation as the CUDA
 worker. Compilation fails if an operation has no supported CUDA identity.

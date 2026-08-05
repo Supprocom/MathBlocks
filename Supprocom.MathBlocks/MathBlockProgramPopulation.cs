@@ -993,6 +993,22 @@ internal static class MathBlockProgramPopulationValidation
         return Convert.ToHexString(SHA256.HashData(stream.ToArray())).ToLowerInvariant();
     }
 
+    public static bool ValuesAreBitwiseEqual(MathBlockValue left, MathBlockValue right)
+    {
+        if (left.Type != right.Type || left.IsValid != right.IsValid)
+            return false;
+        if (!left.IsValid)
+            return string.Equals(left.InvalidReason, right.InvalidReason, StringComparison.Ordinal);
+        using var leftStream = new MemoryStream();
+        using var leftWriter = new BinaryWriter(leftStream, Encoding.UTF8, leaveOpen: true);
+        WriteValue(leftWriter, left);
+        using var rightStream = new MemoryStream();
+        using var rightWriter = new BinaryWriter(rightStream, Encoding.UTF8, leaveOpen: true);
+        WriteValue(rightWriter, right);
+        return leftStream.GetBuffer().AsSpan(0, checked((int)leftStream.Length)).SequenceEqual(
+            rightStream.GetBuffer().AsSpan(0, checked((int)rightStream.Length)));
+    }
+
     public static void RequireFiniteValue(MathBlockValue value, string parameterName)
     {
         switch (value.Type.Kind)
