@@ -29,10 +29,6 @@ public sealed class MathBlocksCUDAWorker
     public static bool IsAvailable => MathBlocksCudaNative.IsAvailable();
     public static IReadOnlyCollection<string> SupportedBlockIdentities =>
         MathBlocksCudaKernelModule.SupportedBlockIdentities;
-    public static IReadOnlyCollection<string> SupportedPopulationOperationIdentities =>
-        MathBlockProgramPopulationCudaOperations.SupportedIdentities;
-    public static IReadOnlyCollection<string> SupportedPopulationSearchOperationIdentities =>
-        MathBlockCudaFeatureIndex.SupportedIdentities;
 
     public MathBlocksCUDAProgram Compile(
         MathBlockProgram program,
@@ -40,37 +36,6 @@ public sealed class MathBlocksCUDAWorker
     {
         ArgumentNullException.ThrowIfNull(program);
         return MathBlocksCUDAProgram.Create(program, prototypeInputs);
-    }
-
-    public MathBlocksCUDAProgramPopulation CompilePopulation(
-        MathBlockProgramPopulationDefinition definition)
-    {
-        ArgumentNullException.ThrowIfNull(definition);
-        return MathBlocksCUDAProgramPopulation.Create(definition);
-    }
-
-    public MathBlocksCUDAProgramPopulationSearch CompilePopulationSearch(
-        MathBlockProgramPopulationSearchDefinition definition)
-    {
-        return CompilePopulationSearch(
-            definition,
-            MathBlockProgramPopulationExecutionOptions.SerialResident);
-    }
-
-    public MathBlocksCUDAProgramPopulationSearch CompilePopulationSearch(
-        MathBlockProgramPopulationSearchDefinition definition,
-        MathBlockProgramPopulationExecutionOptions executionOptions)
-    {
-        ArgumentNullException.ThrowIfNull(definition);
-        ArgumentNullException.ThrowIfNull(executionOptions);
-        return MathBlocksCUDAProgramPopulationSearch.Create(definition, executionOptions);
-    }
-
-    public MathBlockProgramPopulationStaticFeasibilityPlan PlanPopulationSearchStaticFeasibility(
-        MathBlockProgramPopulationSearchDefinition definition)
-    {
-        ArgumentNullException.ThrowIfNull(definition);
-        return MathBlockProgramPopulationCatalogCapacityPlanner.CreateFeasibilityPlan(definition);
     }
 
     public MathBlockRollingOrderStatisticWorkPlan PlanRollingOrderStatisticWork(
@@ -139,500 +104,6 @@ public sealed class MathBlocksCUDAWorker
             checked(radixVisits + heapOperations + selectionOperations));
     }
 
-    public IReadOnlyList<MathBlockProgramPopulationResourceBand>
-        PlanPopulationEnumerationCatalogResourceBands(
-            MathBlockProgramPopulationDefinition population,
-            MathBlockProgramPopulationEnumerationCatalog catalog)
-    {
-        ArgumentNullException.ThrowIfNull(population);
-        ArgumentNullException.ThrowIfNull(catalog);
-        return MathBlockProgramPopulationCatalogCapacityPlanner.Plan(population, catalog);
-    }
-
-    public MathBlockProgramPopulationSearchCapacity MeasurePopulationSearchCapacity(
-        MathBlockProgramPopulationSearchDefinition definition)
-    {
-        return MeasurePopulationSearchCapacity(
-            definition,
-            MathBlockProgramPopulationExecutionOptions.SerialResident);
-    }
-
-    public MathBlockProgramPopulationSearchCapacity MeasurePopulationSearchCapacity(
-        MathBlockProgramPopulationSearchDefinition definition,
-        MathBlockProgramPopulationExecutionOptions executionOptions)
-    {
-        ArgumentNullException.ThrowIfNull(definition);
-        ArgumentNullException.ThrowIfNull(executionOptions);
-        executionOptions.ValidateResidentExecution(nameof(executionOptions));
-        return PopulationSearchLayout.Create(
-            definition,
-            executionOptions.CandidateLaneCount,
-            enforceEnvelope: false).Capacity;
-    }
-}
-
-internal static class MathBlockProgramPopulationCatalogCapacityPlanner
-{
-    public static MathBlockProgramPopulationStaticFeasibilityPlan CreateFeasibilityPlan(
-        MathBlockProgramPopulationSearchDefinition definition)
-    {
-        var catalog = definition.EnumerationCatalog ??
-            throw new ArgumentException("Static catalog feasibility requires an enumeration catalog.", nameof(definition));
-        var feasible = new List<MathBlockProgramStructure>();
-        var rejected = new List<MathBlockProgramPopulationStaticRejection>();
-        var requiredByOperationCount = new Dictionary<int, int>();
-        var inspectedNodes = 0;
-        var liveNodes = 0;
-        var constantFolds = 0;
-        var commonSubexpressions = 0;
-        var expressions = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var structure in catalog.Programs)
-        {
-            inspectedNodes = checked(
-                inspectedNodes +
-                structure.Nodes.Count +
-                definition.ObjectiveBinding.Program.PlanNodes.Count);
-            CountProgramAuthorities(
-                definition,
-                structure,
-                ref liveNodes,
-                ref constantFolds,
-                ref commonSubexpressions,
-                expressions);
-            if (TryAnalyzeProgram(definition, structure, out var requiredElements, out var reason))
-            {
-                feasible.Add(structure);
-                var operationCount = checked(
-                    structure.Nodes.Count - definition.Population.AllTerminals.Count);
-                if (!requiredByOperationCount.TryGetValue(operationCount, out var current) ||
-                    requiredElements > current)
-                {
-                    requiredByOperationCount[operationCount] = requiredElements;
-                }
-            }
-            else
-            {
-                rejected.Add(new MathBlockProgramPopulationStaticRejection(
-                    structure.ProposalCursor!.Value,
-                    structure.StructuralFingerprint,
-                    reason ?? "Static CUDA feasibility failed."));
-            }
-        }
-        var bands = new MathBlockProgramPopulationResourceBand[requiredByOperationCount.Count];
-        var bandIndex = 0;
-        foreach (var requirement in requiredByOperationCount)
-        {
-            bands[bandIndex++] = new MathBlockProgramPopulationResourceBand(
-                requirement.Key,
-                requirement.Value);
-        }
-        MathBlockCollectionPrimitives.StableMergeSort(
-            bands,
-            (left, right) => left.OperationCount.CompareTo(right.OperationCount));
-        return new MathBlockProgramPopulationStaticFeasibilityPlan(
-            feasible,
-            rejected,
-            bands,
-            new MathBlockProgramPopulationStaticInstrumentation(
-                catalog.Programs.Count,
-                feasible.Count,
-                rejected.Count,
-                inspectedNodes,
-                liveNodes,
-                checked(inspectedNodes - liveNodes),
-                constantFolds,
-                commonSubexpressions,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0));
-    }
-
-    public static bool TryAnalyzeProgram(
-        MathBlockProgramPopulationSearchDefinition definition,
-        MathBlockProgramStructure structure,
-        out int requiredElements,
-        out string? rejectionReason)
-    {
-        ArgumentNullException.ThrowIfNull(definition);
-        ArgumentNullException.ThrowIfNull(structure);
-        if (!TryResolveCandidateLayout(
-                definition.Population,
-                structure,
-                out var candidatePlan,
-                out var candidateLayout,
-                out requiredElements,
-                out rejectionReason))
-        {
-            return false;
-        }
-
-        try
-        {
-            var outputIndex = candidatePlan.Count - 1;
-            ValidateObjective(
-                definition,
-                candidateLayout.ResolvedTypes[outputIndex],
-                candidateLayout.Capacities[outputIndex],
-                new MathBlockCudaShapeAuthority(
-                    candidateLayout.ShapeRows[outputIndex],
-                    candidateLayout.ShapeColumns[outputIndex]));
-            rejectionReason = null;
-            return true;
-        }
-        catch (Exception exception) when (exception is
-            InvalidOperationException or OverflowException or NotSupportedException)
-        {
-            requiredElements = 0;
-            rejectionReason = exception.Message;
-            return false;
-        }
-    }
-
-    public static IReadOnlyList<MathBlockProgramPopulationResourceBand> Plan(
-        MathBlockProgramPopulationDefinition population,
-        MathBlockProgramPopulationEnumerationCatalog catalog)
-    {
-        var requiredByOperationCount = new Dictionary<int, int>();
-        for (var programIndex = 0; programIndex < catalog.Programs.Count; programIndex++)
-        {
-            var structure = catalog.Programs[programIndex];
-            if (!TryResolveCandidateLayout(
-                    population,
-                    structure,
-                    out _,
-                    out _,
-                    out var requiredElements,
-                    out _))
-            {
-                continue;
-            }
-            var operationCount = checked(structure.Nodes.Count - population.AllTerminals.Count);
-            if (!requiredByOperationCount.TryGetValue(operationCount, out var current) ||
-                requiredElements > current)
-            {
-                requiredByOperationCount[operationCount] = requiredElements;
-            }
-        }
-
-        var result = new MathBlockProgramPopulationResourceBand[requiredByOperationCount.Count];
-        var resultIndex = 0;
-        foreach (var requirement in requiredByOperationCount)
-        {
-            result[resultIndex++] = new MathBlockProgramPopulationResourceBand(
-                requirement.Key,
-                requirement.Value);
-        }
-        MathBlockCollectionPrimitives.StableMergeSort(
-            result,
-            (left, right) => left.OperationCount.CompareTo(right.OperationCount));
-        return Array.AsReadOnly(result);
-    }
-
-    private static bool TryResolveCandidateLayout(
-        MathBlockProgramPopulationDefinition population,
-        MathBlockProgramStructure structure,
-        out IReadOnlyList<MathBlockProgramNode> plan,
-        out MathBlockCudaPayloadLayout layout,
-        out int requiredElements,
-        out string? rejectionReason)
-    {
-        try
-        {
-            population.ValidateResidentStructure(structure);
-            plan = BuildPlan(population, structure);
-            MathBlocksCUDAProgram.ValidateProgram(plan);
-            layout = MathBlocksCUDAProgram.ResolvePayloadLayout(plan, null);
-            requiredElements = 1;
-            for (var nodeIndex = population.AllTerminals.Count;
-                nodeIndex < plan.Count;
-                nodeIndex++)
-            {
-                if (!structure.Nodes[nodeIndex].Type.Accepts(layout.ResolvedTypes[nodeIndex]))
-                {
-                    throw new InvalidOperationException(
-                        $"Enumeration catalog node {nodeIndex} has incompatible resolved CUDA type authority.");
-                }
-                requiredElements = Math.Max(requiredElements, layout.Capacities[nodeIndex]);
-            }
-            rejectionReason = null;
-            return true;
-        }
-        catch (Exception exception) when (exception is
-            InvalidOperationException or OverflowException or NotSupportedException)
-        {
-            plan = [];
-            layout = default;
-            requiredElements = 0;
-            rejectionReason = exception.Message;
-            return false;
-        }
-    }
-
-    public static void RequireResourceBands(
-        MathBlockProgramPopulationSearchDefinition definition)
-    {
-        var population = definition.Population;
-        var catalog = definition.EnumerationCatalog ??
-            throw new ArgumentException("A catalog is required.", nameof(definition));
-        var requiredByOperationCount = new Dictionary<int, int>();
-        foreach (var structure in catalog.Programs)
-        {
-            if (!TryAnalyzeProgram(definition, structure, out var requiredElements, out _))
-                continue;
-            var operationCount = checked(structure.Nodes.Count - population.AllTerminals.Count);
-            if (!requiredByOperationCount.TryGetValue(operationCount, out var current) ||
-                requiredElements > current)
-            {
-                requiredByOperationCount[operationCount] = requiredElements;
-            }
-        }
-        foreach (var requirementPair in requiredByOperationCount)
-        {
-            var requirement = new MathBlockProgramPopulationResourceBand(
-                requirementPair.Key,
-                requirementPair.Value);
-            MathBlockProgramPopulationResourceBand? active = null;
-            for (var bandIndex = 0; bandIndex < population.ActiveResourceBands.Count; bandIndex++)
-            {
-                var band = population.ActiveResourceBands[bandIndex];
-                if (band.OperationCount == requirement.OperationCount)
-                {
-                    active = band;
-                    break;
-                }
-            }
-            if (!active.HasValue ||
-                active.Value.MaximumOutputElements < requirement.MaximumOutputElements)
-            {
-                throw new InvalidOperationException(
-                    $"The enumeration catalog requires at least {requirement.MaximumOutputElements} output elements for operation count {requirement.OperationCount}.");
-            }
-        }
-    }
-
-    private static void ValidateObjective(
-        MathBlockProgramPopulationSearchDefinition definition,
-        MathBlockType candidateType,
-        int candidateCapacity,
-        MathBlockCudaShapeAuthority candidateShape)
-    {
-        var binding = definition.ObjectiveBinding;
-        if (!binding.Program.Inputs[binding.CandidateInput].Accepts(candidateType))
-            throw new InvalidOperationException("The resolved candidate type is incompatible with the objective input.");
-        var capacities = new Dictionary<string, int>(StringComparer.Ordinal)
-        {
-            [binding.CandidateInput] = candidateCapacity
-        };
-        var shapes = new Dictionary<string, MathBlockCudaShapeAuthority>(StringComparer.Ordinal)
-        {
-            [binding.CandidateInput] = candidateShape
-        };
-        if (binding.CandidateValidityMaskInput is not null)
-        {
-            var validityRows = ResolveCandidateValidityRows(
-                candidateType,
-                candidateCapacity,
-                candidateShape);
-            capacities.Add(binding.CandidateValidityMaskInput, validityRows);
-            shapes.Add(
-                binding.CandidateValidityMaskInput,
-                new MathBlockCudaShapeAuthority(validityRows, 0));
-        }
-        _ = MathBlocksCUDAProgram.ResolvePayloadLayout(
-            binding.Program.PlanNodes,
-            binding.ResidentInputs,
-            capacities,
-            shapes,
-            CreateObjectiveActiveNodes(binding));
-    }
-
-    internal static int ResolveCandidateValidityRows(
-        MathBlockType candidateType,
-        int candidateCapacity,
-        MathBlockCudaShapeAuthority candidateShape)
-    {
-        var rows = candidateType.Kind switch
-        {
-            MathBlockValueKind.Scalar or MathBlockValueKind.Boolean or MathBlockValueKind.Complex => 1,
-            MathBlockValueKind.Matrix or MathBlockValueKind.ComplexMatrix or MathBlockValueKind.Graph =>
-                candidateShape.Rows,
-            MathBlockValueKind.Vector or MathBlockValueKind.BooleanVector or
-                MathBlockValueKind.ComplexVector or MathBlockValueKind.PointSet or
-                MathBlockValueKind.RunSet => candidateShape.Rows > 0
-                    ? candidateShape.Rows
-                    : candidateCapacity,
-            _ => throw new NotSupportedException(
-                $"The CUDA candidate validity contract does not support '{candidateType.Kind}'.")
-        };
-        if (rows <= 0)
-            throw new InvalidOperationException("The CUDA candidate validity-row authority is unavailable.");
-        return rows;
-    }
-
-    private static bool[] CreateObjectiveActiveNodes(
-        MathBlockProgramPopulationObjectiveBinding binding)
-    {
-        var plan = binding.Program.PlanNodes;
-        var active = new bool[plan.Count];
-        var stack = new Stack<int>();
-        foreach (var objective in binding.Objectives)
-        {
-            if (objective.SourceKind == MathBlockProgramPopulationObjectiveSourceKind.ProgramOutput)
-                stack.Push(binding.Program.OutputNodeIndexes[objective.ProgramOutput!]);
-        }
-        while (stack.Count != 0)
-        {
-            var nodeIndex = stack.Pop();
-            if (active[nodeIndex])
-                continue;
-            active[nodeIndex] = true;
-            foreach (var input in plan[nodeIndex].Inputs)
-                stack.Push(input);
-        }
-        for (var nodeIndex = 0; nodeIndex < plan.Count; nodeIndex++)
-        {
-            var node = plan[nodeIndex];
-            if (node.Kind == MathBlockProgramNodeKind.Input &&
-                string.Equals(node.Name, binding.CandidateInput, StringComparison.Ordinal))
-            {
-                active[nodeIndex] = true;
-                break;
-            }
-        }
-        return active;
-    }
-
-    private static void CountProgramAuthorities(
-        MathBlockProgramPopulationSearchDefinition definition,
-        MathBlockProgramStructure structure,
-        ref int liveNodes,
-        ref int constantFolds,
-        ref int commonSubexpressions,
-        HashSet<string> expressions)
-    {
-        liveNodes = checked(liveNodes + structure.Nodes.Count);
-        foreach (var node in structure.Nodes)
-        {
-            if (node.Kind == MathBlockProgramCandidateNodeKind.Terminal)
-                continue;
-            var key = string.Concat(
-                node.OperationIdentifier,
-                "@",
-                node.OperationVersion.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                ":",
-                string.Join(",", node.OperandIndexes));
-            if (!expressions.Add(key))
-                commonSubexpressions++;
-        }
-        var objectiveActive = CreateObjectiveActiveNodes(definition.ObjectiveBinding);
-        var objectivePlan = definition.ObjectiveBinding.Program.PlanNodes;
-        var objectiveSources = new int[objectivePlan.Count];
-        var objectiveFolded = new bool[objectivePlan.Count];
-        var objectiveExpressions = new Dictionary<string, int>(StringComparer.Ordinal);
-        for (var nodeIndex = 0; nodeIndex < objectiveActive.Length; nodeIndex++)
-        {
-            objectiveSources[nodeIndex] = nodeIndex;
-            if (!objectiveActive[nodeIndex])
-                continue;
-            liveNodes++;
-            var node = objectivePlan[nodeIndex];
-            if (node.Kind == MathBlockProgramNodeKind.Operation &&
-                node.Type.Kind is MathBlockValueKind.Scalar or
-                    MathBlockValueKind.Boolean or
-                    MathBlockValueKind.Complex)
-            {
-                var allConstants = true;
-                foreach (var input in node.Inputs)
-                {
-                    var producer = objectivePlan[input];
-                    if (producer.Kind != MathBlockProgramNodeKind.Constant &&
-                        !objectiveFolded[input])
-                    {
-                        allConstants = false;
-                        break;
-                    }
-                }
-                if (allConstants)
-                {
-                    constantFolds++;
-                    objectiveFolded[nodeIndex] = true;
-                    continue;
-                }
-            }
-            if (node.Kind == MathBlockProgramNodeKind.Operation)
-            {
-                var builder = new System.Text.StringBuilder(node.OperationIdentity);
-                builder.Append(':');
-                for (var inputIndex = 0; inputIndex < node.Inputs.Count; inputIndex++)
-                {
-                    if (inputIndex != 0)
-                        builder.Append(',');
-                    builder.Append(objectiveSources[node.Inputs[inputIndex]]);
-                }
-                var key = builder.ToString();
-                if (objectiveExpressions.TryGetValue(key, out var source))
-                {
-                    commonSubexpressions++;
-                    objectiveSources[nodeIndex] = source;
-                }
-                else
-                {
-                    objectiveExpressions.Add(key, nodeIndex);
-                }
-            }
-        }
-    }
-
-    internal static IReadOnlyList<MathBlockProgramNode> BuildPlan(
-        MathBlockProgramPopulationDefinition population,
-        MathBlockProgramStructure structure)
-    {
-        var registry = MathBlockCatalog.Standard;
-        var plan = new MathBlockProgramNode[structure.Nodes.Count];
-        for (var nodeIndex = 0; nodeIndex < structure.Nodes.Count; nodeIndex++)
-        {
-            var node = structure.Nodes[nodeIndex];
-            if (node.Kind == MathBlockProgramCandidateNodeKind.Terminal)
-            {
-                var terminal = population.AllTerminals[node.TerminalIndex];
-                plan[nodeIndex] = new MathBlockProgramNode(
-                    nodeIndex,
-                    new MathBlockProgram.Node(
-                        MathBlockProgramBuilder.NodeDefinition.Constant(terminal.Value)));
-                continue;
-            }
-
-            var operands = new int[node.OperandIndexes.Count];
-            var inputTypes = new MathBlockType[node.OperandIndexes.Count];
-            for (var operandIndex = 0; operandIndex < operands.Length; operandIndex++)
-            {
-                var producerIndex = node.OperandIndexes[operandIndex];
-                operands[operandIndex] = producerIndex;
-                inputTypes[operandIndex] = plan[producerIndex].Type;
-            }
-            var operation = registry.Get(node.OperationIdentifier!, node.OperationVersion);
-            var outputType = operation.ResolveOutputType(inputTypes);
-            if (!node.Type.Accepts(outputType))
-            {
-                throw new InvalidOperationException(
-                    $"Enumeration catalog node {nodeIndex} has an incompatible declared type.");
-            }
-            plan[nodeIndex] = new MathBlockProgramNode(
-                nodeIndex,
-                new MathBlockProgram.Node(
-                    MathBlockProgramBuilder.NodeDefinition.CreateOperation(
-                        operation,
-                        operands,
-                        node.Type)));
-        }
-        return Array.AsReadOnly(plan);
-    }
 }
 
 public sealed class MathBlocksCUDAProgram : IDisposable
@@ -813,7 +284,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 var scratchPointer = scratchOffsets[node.Index] < 0
                     ? 0ul
                     : checked(deviceArena + (ulong)scratchOffsets[node.Index]);
-                WriteHeader(
+                MathBlockCudaValueCodec.WriteHeader(
                     uploadArena,
                     slotOffsets[node.Index],
                     payloadPointer,
@@ -823,7 +294,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                     valid: false);
                 if (node.Kind == MathBlockProgramNodeKind.Constant)
                 {
-                    WriteValue(
+                    MathBlockCudaValueCodec.WriteValue(
                         uploadArena,
                         slotOffsets[node.Index],
                         payloadOffsets[node.Index],
@@ -836,7 +307,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                          prototypeInputs is not null &&
                          prototypeInputs.TryGetValue(node.Name!, out var prototype))
                 {
-                    WriteValue(
+                    MathBlockCudaValueCodec.WriteValue(
                         uploadArena,
                         slotOffsets[node.Index],
                         payloadOffsets[node.Index],
@@ -989,7 +460,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 var payloadPointer = payloadOffsets[node.Index] < 0
                     ? 0ul
                     : checked(deviceArena + (ulong)payloadOffsets[node.Index]);
-                WriteValue(
+                MathBlockCudaValueCodec.WriteValue(
                     uploadArena,
                     slotOffsets[node.Index],
                     payloadOffsets[node.Index],
@@ -1061,7 +532,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             {
                 outputs.Add(
                     output.Key,
-                    ReadValue(
+                    MathBlockCudaValueCodec.ReadValue(
                         downloadArena,
                         checked(slotOffsets[output.Value] - downloadArenaOffset),
                         payloadOffsets[output.Value] < 0
@@ -1698,7 +1169,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         if (node.Type.Kind == MathBlockValueKind.Complex)
             return 1;
         if (node.Kind == MathBlockProgramNodeKind.Constant)
-            return ValueElementCount(node.Value);
+            return MathBlockCudaValueCodec.GetElementCount(node.Value);
         if (node.Kind == MathBlockProgramNodeKind.Input &&
             inputCapacityOverrides is not null &&
             inputCapacityOverrides.TryGetValue(node.Name!, out var overrideCapacity))
@@ -1711,7 +1182,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             prototypeInputs is not null &&
             prototypeInputs.TryGetValue(node.Name!, out var prototype))
         {
-            return ValueElementCount(prototype);
+                return MathBlockCudaValueCodec.GetElementCount(prototype);
         }
         if (node.Type.Kind is MathBlockValueKind.Matrix or MathBlockValueKind.ComplexMatrix &&
             node.Type.Rows > 0 &&
@@ -2248,39 +1719,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         return (int)scalar;
     }
 
-    private static unsafe int ResolvePayloadBytes(MathBlockValueKind kind, int capacity)
-    {
-        if (capacity == 0)
-            return 0;
-        return kind switch
-        {
-            MathBlockValueKind.Scalar or MathBlockValueKind.Boolean or MathBlockValueKind.Vector or
-                MathBlockValueKind.Matrix => checked(capacity * sizeof(double)),
-            MathBlockValueKind.BooleanVector => checked(capacity * sizeof(int)),
-            MathBlockValueKind.Complex or MathBlockValueKind.ComplexVector or
-                MathBlockValueKind.ComplexMatrix or MathBlockValueKind.PointSet =>
-                checked(capacity * 2 * sizeof(double)),
-            MathBlockValueKind.Graph => checked(capacity * sizeof(MathBlockCudaGraphEdge)),
-            MathBlockValueKind.RunSet => checked(capacity * sizeof(MathBlockCudaRun)),
-            _ => throw new NotSupportedException($"The CUDA value ABI does not support '{kind}'.")
-        };
-    }
-
-    private static int ValueElementCount(MathBlockValue value) => value.Type.Kind switch
-    {
-        MathBlockValueKind.Scalar or MathBlockValueKind.Boolean => 0,
-        MathBlockValueKind.Complex => 1,
-        MathBlockValueKind.Vector => value.AsVector().Count,
-        MathBlockValueKind.BooleanVector => value.AsBooleanVector().Count,
-        MathBlockValueKind.Matrix => checked(value.AsMatrix().Rows * value.AsMatrix().Columns),
-        MathBlockValueKind.ComplexVector => value.AsComplexVector().Count,
-        MathBlockValueKind.ComplexMatrix => checked(
-            value.AsComplexMatrix().Rows * value.AsComplexMatrix().Columns),
-        MathBlockValueKind.PointSet => value.AsPointSet().Count,
-        MathBlockValueKind.Graph => value.AsGraph().Count,
-        MathBlockValueKind.RunSet => value.AsRunSet().Count,
-        _ => throw new NotSupportedException($"The CUDA value ABI does not support '{value.Type.Kind}'.")
-    };
+    private static int ResolvePayloadBytes(MathBlockValueKind kind, int capacity) =>
+        MathBlockCudaValueCodec.GetPayloadByteCount(kind, capacity);
 
     internal static int ResolveScratchBytes(
         MathBlockProgramNode node,
@@ -2541,355 +1981,10 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             destination[index] = checked(deviceArena + (ulong)slotOffsets[inputs[index]]);
     }
 
-    private static unsafe void WriteHeader(
-        IntPtr arena,
-        int slotOffset,
-        ulong payloadPointer,
-        ulong scratchPointer,
-        int capacity,
-        MathBlockType type,
-        bool valid)
-    {
-        var slot = new MathBlockCudaSlot
-        {
-            DataPointer = payloadPointer,
-            ScratchPointer = scratchPointer,
-            Valid = valid ? 1 : 0,
-            Rows = type.Rows,
-            Columns = type.Columns,
-            Count = type.Kind is MathBlockValueKind.Matrix or MathBlockValueKind.ComplexMatrix &&
-                    type.Rows > 0 &&
-                    type.Columns > 0
-                ? checked(type.Rows * type.Columns)
-                : type.Kind == MathBlockValueKind.Complex
-                    ? 1
-                    : capacity,
-            Capacity = capacity
-        };
-        *(MathBlockCudaSlot*)((byte*)arena + slotOffset) = slot;
-    }
-
-    private static unsafe void WriteValue(
-        IntPtr arena,
-        int slotOffset,
-        int payloadOffset,
-        ulong payloadPointer,
-        ulong scratchPointer,
-        int capacity,
-        MathBlockValue value)
-    {
-        var count = value.IsValid ? ValueElementCount(value) : 0;
-        if (count > capacity)
-            throw new ArgumentException($"The CUDA input requires {count} elements, but its capacity is {capacity}.");
-        var slot = new MathBlockCudaSlot
-        {
-            ScalarValue = value.IsValid && value.Type.Kind == MathBlockValueKind.Scalar ? value.AsScalar() : 0d,
-            DataPointer = payloadPointer,
-            ScratchPointer = scratchPointer,
-            BooleanValue = value.IsValid && value.Type.Kind == MathBlockValueKind.Boolean && value.AsBoolean() ? 1 : 0,
-            Valid = value.IsValid ? 1 : 0,
-            Rows = ValueRows(value, count),
-            Columns = ValueColumns(value),
-            Count = count,
-            Capacity = capacity
-        };
-        if (value.IsValid && count != 0)
-        {
-            if (payloadOffset < 0)
-                throw new InvalidOperationException("The CUDA value has no payload allocation.");
-            if (value.Type.Kind is MathBlockValueKind.Vector or MathBlockValueKind.Matrix)
-            {
-                var destination = (double*)((byte*)arena + payloadOffset);
-                if (value.Type.Kind == MathBlockValueKind.Vector)
-                {
-                    var source = value.AsVector();
-                    for (var index = 0; index < count; index++)
-                        destination[index] = source[index];
-                }
-                else
-                {
-                    var source = value.AsMatrix();
-                    var index = 0;
-                    for (var row = 0; row < source.Rows; row++)
-                    for (var column = 0; column < source.Columns; column++)
-                        destination[index++] = source[row, column];
-                }
-            }
-            else if (value.Type.Kind == MathBlockValueKind.BooleanVector)
-            {
-                var source = value.AsBooleanVector();
-                var destination = (int*)((byte*)arena + payloadOffset);
-                for (var index = 0; index < count; index++)
-                    destination[index] = source[index] ? 1 : 0;
-            }
-            else if (value.Type.Kind == MathBlockValueKind.Complex)
-            {
-                var source = value.AsComplex();
-                var destination = (double*)((byte*)arena + payloadOffset);
-                destination[0] = source.Real;
-                destination[1] = source.Imaginary;
-            }
-            else if (value.Type.Kind is MathBlockValueKind.ComplexVector or MathBlockValueKind.ComplexMatrix)
-            {
-                var destination = (double*)((byte*)arena + payloadOffset);
-                if (value.Type.Kind == MathBlockValueKind.ComplexVector)
-                {
-                    var source = value.AsComplexVector();
-                    for (var index = 0; index < count; index++)
-                    {
-                        destination[index * 2] = source[index].Real;
-                        destination[index * 2 + 1] = source[index].Imaginary;
-                    }
-                }
-                else
-                {
-                    var source = value.AsComplexMatrix();
-                    var index = 0;
-                    for (var row = 0; row < source.Rows; row++)
-                    for (var column = 0; column < source.Columns; column++)
-                    {
-                        var item = source[row, column];
-                        destination[index * 2] = item.Real;
-                        destination[index * 2 + 1] = item.Imaginary;
-                        index++;
-                    }
-                }
-            }
-            else if (value.Type.Kind == MathBlockValueKind.PointSet)
-            {
-                var source = value.AsPointSet();
-                var destination = (double*)((byte*)arena + payloadOffset);
-                for (var index = 0; index < count; index++)
-                {
-                    destination[index * 2] = source[index].X;
-                    destination[index * 2 + 1] = source[index].Y;
-                }
-            }
-            else if (value.Type.Kind == MathBlockValueKind.Graph)
-            {
-                var source = value.AsGraph();
-                var destination = (MathBlockCudaGraphEdge*)((byte*)arena + payloadOffset);
-                for (var index = 0; index < count; index++)
-                {
-                    destination[index] = new MathBlockCudaGraphEdge
-                    {
-                        From = source[index].From,
-                        To = source[index].To,
-                        Weight = source[index].Weight
-                    };
-                }
-            }
-            else if (value.Type.Kind == MathBlockValueKind.RunSet)
-            {
-                var source = value.AsRunSet();
-                var destination = (MathBlockCudaRun*)((byte*)arena + payloadOffset);
-                for (var index = 0; index < count; index++)
-                {
-                    destination[index] = new MathBlockCudaRun
-                    {
-                        Start = source[index].Start,
-                        Length = source[index].Length,
-                        Value = source[index].Value
-                    };
-                }
-            }
-        }
-        *(MathBlockCudaSlot*)((byte*)arena + slotOffset) = slot;
-    }
-
-    private static unsafe MathBlockValue ReadValue(
-        IntPtr arena,
-        int slotOffset,
-        int payloadOffset,
-        MathBlockType type)
-    {
-        var slot = *(MathBlockCudaSlot*)((byte*)arena + slotOffset);
-        if (slot.Valid == 0)
-            return MathBlockValue.Invalid(type, "The CUDA result is invalid.");
-        if (slot.Count < 0 || slot.Count > slot.Capacity)
-            throw new InvalidOperationException("The CUDA result count exceeds its arena capacity.");
-        return type.Kind switch
-        {
-            MathBlockValueKind.Scalar => MathBlockValue.Scalar(slot.ScalarValue, type.Unit),
-            MathBlockValueKind.Boolean => MathBlockValue.Boolean(slot.BooleanValue != 0),
-            MathBlockValueKind.Complex => MathBlockValue.Complex(
-                ReadComplex(arena, payloadOffset),
-                type.Unit),
-            MathBlockValueKind.Vector => MathBlockValue.Vector(ReadDoubles(arena, payloadOffset, slot.Count), type.Unit),
-            MathBlockValueKind.BooleanVector => MathBlockValue.BooleanVector(
-                ReadBooleans(arena, payloadOffset, slot.Count)),
-            MathBlockValueKind.Matrix => MathBlockValue.Matrix(
-                new MathBlockMatrix(slot.Rows, slot.Columns, ReadDoubles(arena, payloadOffset, slot.Count)),
-                type.Unit),
-            MathBlockValueKind.ComplexVector => MathBlockValue.ComplexVector(
-                ReadComplexValues(arena, payloadOffset, slot.Count),
-                type.Unit),
-            MathBlockValueKind.ComplexMatrix => MathBlockValue.ComplexMatrix(
-                new MathBlockComplexMatrix(
-                    slot.Rows,
-                    slot.Columns,
-                    ReadComplexValues(arena, payloadOffset, slot.Count)),
-                type.Unit),
-            MathBlockValueKind.PointSet => MathBlockValue.PointSet(
-                new MathBlockPointSet(ReadPoints(arena, payloadOffset, slot.Count)),
-                type.Unit),
-            MathBlockValueKind.Graph => MathBlockValue.Graph(
-                new MathBlockGraph(slot.Rows, ReadGraphEdges(arena, payloadOffset, slot.Count)),
-                type.Unit),
-            MathBlockValueKind.RunSet => MathBlockValue.RunSet(
-                new MathBlockRunSet(ReadRuns(arena, payloadOffset, slot.Count)),
-                type.Unit),
-            _ => throw new InvalidOperationException($"Unsupported CUDA output kind '{type.Kind}'.")
-        };
-    }
-
-    private static int ValueRows(MathBlockValue value, int count)
-    {
-        if (!value.IsValid)
-            return value.Type.Rows;
-        return value.Type.Kind switch
-        {
-            MathBlockValueKind.Matrix => value.AsMatrix().Rows,
-            MathBlockValueKind.ComplexMatrix => value.AsComplexMatrix().Rows,
-            MathBlockValueKind.Graph => value.AsGraph().VertexCount,
-            MathBlockValueKind.Scalar or MathBlockValueKind.Boolean or MathBlockValueKind.Complex => 0,
-            _ => count
-        };
-    }
-
-    private static int ValueColumns(MathBlockValue value)
-    {
-        if (!value.IsValid)
-            return value.Type.Columns;
-        return value.Type.Kind switch
-        {
-            MathBlockValueKind.Matrix => value.AsMatrix().Columns,
-            MathBlockValueKind.ComplexMatrix => value.AsComplexMatrix().Columns,
-            _ => 0
-        };
-    }
-
-    private static unsafe Complex ReadComplex(IntPtr arena, int payloadOffset)
-    {
-        RequirePayload(payloadOffset);
-        var source = (double*)((byte*)arena + payloadOffset);
-        return new Complex(source[0], source[1]);
-    }
-
-    private static unsafe Complex[] ReadComplexValues(IntPtr arena, int payloadOffset, int count)
-    {
-        var values = new Complex[count];
-        if (count == 0)
-            return values;
-        RequirePayload(payloadOffset);
-        var source = (double*)((byte*)arena + payloadOffset);
-        for (var index = 0; index < count; index++)
-            values[index] = new Complex(source[index * 2], source[index * 2 + 1]);
-        return values;
-    }
-
-    private static unsafe MathBlockPoint[] ReadPoints(IntPtr arena, int payloadOffset, int count)
-    {
-        var values = new MathBlockPoint[count];
-        if (count == 0)
-            return values;
-        RequirePayload(payloadOffset);
-        var source = (double*)((byte*)arena + payloadOffset);
-        for (var index = 0; index < count; index++)
-            values[index] = new MathBlockPoint(source[index * 2], source[index * 2 + 1]);
-        return values;
-    }
-
-    private static unsafe MathBlockGraphEdge[] ReadGraphEdges(IntPtr arena, int payloadOffset, int count)
-    {
-        var values = new MathBlockGraphEdge[count];
-        if (count == 0)
-            return values;
-        RequirePayload(payloadOffset);
-        var source = (MathBlockCudaGraphEdge*)((byte*)arena + payloadOffset);
-        for (var index = 0; index < count; index++)
-            values[index] = new MathBlockGraphEdge(source[index].From, source[index].To, source[index].Weight);
-        return values;
-    }
-
-    private static unsafe MathBlockRun[] ReadRuns(IntPtr arena, int payloadOffset, int count)
-    {
-        var values = new MathBlockRun[count];
-        if (count == 0)
-            return values;
-        RequirePayload(payloadOffset);
-        var source = (MathBlockCudaRun*)((byte*)arena + payloadOffset);
-        for (var index = 0; index < count; index++)
-            values[index] = new MathBlockRun(source[index].Start, source[index].Length, source[index].Value);
-        return values;
-    }
-
-    private static void RequirePayload(int payloadOffset)
-    {
-        if (payloadOffset < 0)
-            throw new InvalidOperationException("The CUDA result has no payload allocation.");
-    }
-
-    private static unsafe double[] ReadDoubles(IntPtr arena, int payloadOffset, int count)
-    {
-        var values = new double[count];
-        if (count == 0)
-            return values;
-        if (payloadOffset < 0)
-            throw new InvalidOperationException("The CUDA result has no payload allocation.");
-        var source = (double*)((byte*)arena + payloadOffset);
-        for (var index = 0; index < count; index++)
-            values[index] = source[index];
-        return values;
-    }
-
-    private static unsafe bool[] ReadBooleans(IntPtr arena, int payloadOffset, int count)
-    {
-        var values = new bool[count];
-        if (count == 0)
-            return values;
-        if (payloadOffset < 0)
-            throw new InvalidOperationException("The CUDA result has no payload allocation.");
-        var source = (int*)((byte*)arena + payloadOffset);
-        for (var index = 0; index < count; index++)
-            values[index] = source[index] != 0;
-        return values;
-    }
-
     private void ThrowIfDisposed()
     {
         if (disposed)
             throw new ObjectDisposedException(nameof(MathBlocksCUDAProgram));
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct MathBlockCudaSlot
-    {
-        public double ScalarValue;
-        public ulong DataPointer;
-        public ulong ScratchPointer;
-        public int BooleanValue;
-        public int Valid;
-        public int Rows;
-        public int Columns;
-        public int Count;
-        public int Capacity;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct MathBlockCudaGraphEdge
-    {
-        public int From;
-        public int To;
-        public double Weight;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct MathBlockCudaRun
-    {
-        public int Start;
-        public int Length;
-        public double Value;
     }
 
     private sealed class KernelArgumentStorage : IDisposable
@@ -2980,17 +2075,7 @@ internal static class MathBlocksCudaKernelModule
 
     private static ModuleState Load()
     {
-        var source = ScalarCudaBlockCatalog.KernelSource + "\n" +
-                     VectorCudaBlockCatalog.KernelSource + "\n" +
-                     ComplexCudaBlockCatalog.KernelSource + "\n" +
-                     MatrixCudaBlockCatalog.KernelSource + "\n" +
-                     ProbabilityCudaBlockCatalog.KernelSource + "\n" +
-                     SequencePathCudaBlockCatalog.KernelSource + "\n" +
-                     StatisticsCudaBlockCatalog.KernelSource + "\n" +
-                     GeometryCudaBlockCatalog.KernelSource + "\n" +
-                     GraphCudaBlockCatalog.KernelSource + "\n" +
-                     AdvancedCudaBlockCatalog.KernelSource + "\n" +
-                     TransportCudaBlockCatalog.KernelSource;
+        var source = MathBlockCudaDeviceModule.Source;
         var ptx = MathBlocksCudaNative.CompilePtx(source, "mathblocks.cu");
         MathBlocksCudaNative.ThrowIfFailed(
             MathBlocksCudaNative.cuModuleLoadData(out var module, ptx),

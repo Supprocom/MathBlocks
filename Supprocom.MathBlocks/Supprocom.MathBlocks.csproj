@@ -6,19 +6,19 @@
     <RootNamespace>Supprocom.MathBlocks</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>Supprocom.MathBlocks</PackageId>
-    <Version>0.2.4</Version>
+    <Version>0.3.0</Version>
     <Authors>Supprocom</Authors>
     <Company>Supprocom</Company>
     <Copyright>Copyright (C) 2026 mkn8rn</Copyright>
-    <Description>Deterministic typed computation graphs for parallel CPU and CUDA execution with versioned operations, exact parity, and resident graph replay.</Description>
-    <PackageDescription>Deterministic typed computation graphs for parallel CPU and CUDA execution with versioned operations, exact parity, and resident graph replay.</PackageDescription>
+    <Description>Immutable mathematical-operation contracts for deterministic CPU and CUDA composition.</Description>
+    <PackageDescription>Immutable mathematical-operation contracts for deterministic CPU and CUDA composition.</PackageDescription>
     <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Supprocom/MathBlocks</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Supprocom/MathBlocks</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>mathematics;computation-graph;dag;parallel;cpu;cuda;deterministic;numerics</PackageTags>
-    <PackageReleaseNotes>Binds candidate validity masks to output rows and retains static catalog rejections during capacity planning.</PackageReleaseNotes>
+    <PackageTags>mathematics;operation-contract;computation-graph;cpu;cuda;deterministic;numerics</PackageTags>
+    <PackageReleaseNotes>Removes formula-search APIs and exposes the complete versioned CPU and CUDA operation contract.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType>portable</DebugType>

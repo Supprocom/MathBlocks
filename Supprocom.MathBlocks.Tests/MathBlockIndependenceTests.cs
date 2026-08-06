@@ -38,26 +38,93 @@ public sealed partial class MathBlockIndependenceTests
     }
 
     [Fact]
-    public void Public_release_metadata_declares_the_CUDA_0_2_4_contract()
+    public void Public_release_metadata_declares_the_CUDA_0_3_0_contract()
     {
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(root, "Supprocom.MathBlocks", "Supprocom.MathBlocks.csproj");
         var document = XDocument.Load(projectPath);
         var readme = File.ReadAllText(Path.Combine(root, "README.md"));
 
-        Assert.Equal("0.2.4", document.Descendants("Version").Single().Value);
+        Assert.Equal("0.3.0", document.Descendants("Version").Single().Value);
         Assert.Equal("AGPL-3.0-only", document.Descendants("PackageLicenseExpression").Single().Value);
         Assert.Contains(
-            "Binds candidate validity masks to output rows",
+            "Removes formula-search APIs",
             document.Descendants("PackageReleaseNotes").Single().Value,
             StringComparison.Ordinal);
-        Assert.Equal(new Version(0, 2, 4, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
-        Assert.Contains("## Parallel proposal waves", readme, StringComparison.Ordinal);
+        Assert.Equal(new Version(0, 3, 0, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
+        Assert.Contains("## Operation contract", readme, StringComparison.Ordinal);
+        Assert.Contains("## CUDA composition", readme, StringComparison.Ordinal);
         Assert.Contains(
-            "dotnet add package Supprocom.MathBlocks --version 0.2.4",
+            "dotnet add package Supprocom.MathBlocks --version 0.3.0",
             readme,
             StringComparison.Ordinal);
-        Assert.DoesNotContain("--version 0.1.", readme, StringComparison.Ordinal);
+        Assert.DoesNotContain("## Resident typed program search", readme, StringComparison.Ordinal);
+        Assert.DoesNotContain("## Parallel proposal waves", readme, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Production_and_public_contract_contain_no_formula_search_ownership()
+    {
+        var forbidden = new[]
+        {
+            "MathBlockProgramPopulation",
+            "PopulationSearch",
+            "EvolutionPolicy",
+            "RandomImmigrant",
+            "QualityDiversity",
+            "ParetoArchive",
+            "SearchCheckpoint",
+            "SearchCursor",
+            "ObjectivePolicy"
+        };
+        var assembly = typeof(MathBlockCatalog).Assembly;
+        var publicNames = assembly.ExportedTypes
+            .SelectMany(type => type.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
+                .Select(member => $"{type.FullName}.{member.Name}")
+                .Prepend(type.FullName ?? type.Name))
+            .ToArray();
+        var failures = new List<string>();
+        foreach (var name in publicNames)
+            foreach (var token in forbidden)
+                if (name.Contains(token, StringComparison.Ordinal))
+                    failures.Add(name);
+
+        var root = FindRepositoryRoot();
+        var sourceRoot = Path.Combine(root, "Supprocom.MathBlocks");
+        foreach (var file in Directory.EnumerateFiles(sourceRoot, "*.cs", SearchOption.AllDirectories))
+        {
+            if (IsBuildOutput(sourceRoot, file) || file.EndsWith(".Tests.cs", StringComparison.Ordinal))
+                continue;
+            var source = File.ReadAllText(file);
+            foreach (var token in forbidden)
+                if (source.Contains(token, StringComparison.Ordinal))
+                    failures.Add($"{Path.GetRelativePath(sourceRoot, file)}: {token}");
+        }
+
+        Assert.DoesNotContain(
+            assembly.GetCustomAttributesData(),
+            attribute => attribute.AttributeType.FullName == "System.Runtime.CompilerServices.InternalsVisibleToAttribute");
+        Assert.Empty(failures);
+    }
+
+    [Fact]
+    public void External_consumer_uses_only_the_packed_public_package()
+    {
+        var root = FindRepositoryRoot();
+        var projectPath = Path.Combine(
+            root,
+            "Supprocom.MathBlocks.ExternalConsumer",
+            "Supprocom.MathBlocks.ExternalConsumer.csproj");
+        var sourcePath = Path.Combine(root, "Supprocom.MathBlocks.ExternalConsumer", "Program.cs");
+        var document = XDocument.Load(projectPath);
+        var source = File.ReadAllText(sourcePath);
+
+        Assert.Empty(document.Descendants("ProjectReference"));
+        var package = Assert.Single(document.Descendants("PackageReference"));
+        Assert.Equal("Supprocom.MathBlocks", package.Attribute("Include")!.Value);
+        Assert.DoesNotContain("System.Reflection", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("InternalsVisibleTo", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("MathBlocksCUDAProgram", source, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -73,7 +140,8 @@ public sealed partial class MathBlockIndependenceTests
             Path.Combine(root, "README.md"),
             Path.Combine(root, "THIRD-PARTY-NOTICES.md"),
             Path.Combine(root, "Supprocom.MathBlocks"),
-            Path.Combine(root, "Supprocom.MathBlocks.Tests")
+            Path.Combine(root, "Supprocom.MathBlocks.Tests"),
+            Path.Combine(root, "Supprocom.MathBlocks.ExternalConsumer")
         };
 
         foreach (var publicRoot in publicRoots)

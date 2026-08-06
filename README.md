@@ -1,196 +1,34 @@
 # MathBlocks
 
-MathBlocks is a deterministic, typed computation-graph runtime for parallel CPU
-and CUDA execution. It builds reusable formulas from versioned operations and
-typed values.
+MathBlocks is an immutable mathematical-operation contract for deterministic CPU
+and CUDA execution. It provides versioned operations, typed values, and
+composable computation programs.
 
-## Contract model
+## Operation contract
 
-Each block is pure and input-independent. A block receives typed values and
-does not depend on their domain meaning.
+Each operation has an identifier and a positive version. Its version binds
+operand rules, output rules, units, shapes, capacity, scratch, validity, and
+execution behavior.
 
-Formula builders select each operation by identifier and version. Unknown
-versions fail before execution.
+The standard catalog contains 337 operations. Each operation has CPU regression
+evidence, CUDA regression evidence, and a contract-shape performance target.
 
-Programs form directed acyclic graphs (DAGs). The CPU worker runs independent
-nodes in each graph level in parallel.
+A caller can combine compatible operations in any directed acyclic graph.
+Unknown versions and incompatible types fail before execution.
 
 CPU and CUDA code stays in the single `Supprocom.MathBlocks` production
 assembly. `Supprocom.MathBlocks.Cuda` is only a namespace in that assembly.
 
-The exact parity policy requires each CUDA block to match its CPU regression
-result. The comparison includes value data, shape, type, unit, and invalid
-state.
+MathBlocks does not propose formulas. It does not own mutation, crossover,
+selection, archives, cursors, or checkpoints.
 
-Each block folder owns Definition, CPU, CUDA, and Tests files. The catalog
-contains 337 block folders.
+## CPU composition
 
-## Resident CUDA execution
+`MathBlockProgramBuilder` creates a typed program without reflection or internal
+type names. `MathBlocksCPUWorker` executes independent nodes in parallel by
+graph level.
 
-CUDA compilation creates one resident CUDA graph for each compiled program.
-The CUDA path has a one-upload, one-resident-CUDA-graph, one-download execution
-contract.
-
-Callers can queue resident replays before one synchronization and output read.
-The compiled program serializes atomic state changes, which keeps concurrent
-calls safe.
-
-## Resident typed program search
-
-MathBlocks compiles an immutable typed grammar and typed terminals into one
-resident CUDA search cycle. The definition preserves exact scalar bits,
-caller resource envelopes, validity history, objective bindings, and accepted
-state.
-
-Each program is a typed DAG. Its operation nodes contain an operation
-identifier, a version, and backward operand indexes.
-
-The first compile performs one immutable-data upload. Each cycle uses one graph
-launch, one synchronization, and one compact download. Later cycles do not
-upload immutable data again.
-
-The resident cycle enumerates and evolves programs on the CUDA device. It
-supports typed mutation, typed crossover, random immigrants, and deterministic
-random state.
-
-A caller can bind a typed objective DAG and resident numeric inputs. Program
-outputs and objective inputs remain on the device. Only requested compact
-results, fingerprints, counters, and accepted state return to the host.
-
-Generic intrinsic objective sources expose expanded operation count, maximum
-lookback, deterministic execution cost, and age. Each source has an exact
-identity and a caller-selected direction.
-
-Declared history counts and program lookback create a valid-row mask. Objective
-evaluation and semantic fingerprinting use only declared valid rows.
-
-Selection maintains Pareto, quality-diversity, and age state on the device.
-Accepted checkpoints include the exact proposal cursor and deterministic random
-state.
-
-An incompatible checkpoint fails before CUDA execution. An unsuccessful cycle
-does not replace the last accepted state.
-
-The compiler measures the current program, objective, archive, payload, and
-scratch capacities. A larger caller envelope can compile a larger resident
-cycle without a permanent search-space limit.
-
-Fingerprint capacity covers existing accepted fingerprints, pending unique
-refresh programs, and remaining trials. It does not depend on the total raw
-proposal universe. Complete finite enumeration still requires capacity for
-every proposal.
-
-`IsTotalProposalCountExact` identifies an exact raw count. Larger universes use
-`ulong.MaxValue` as a cursor boundary while resident evolution remains bounded
-by visited trials.
-
-An explicit enumeration catalog accepts caller-supplied, type-valid program
-structures in deterministic order. Its cursor start and ordered structures
-enter the search identity.
-
-Catalog execution reads each entry with a durable monotonic cursor. Each entry
-receives one global trial cursor without raw descriptor decoding or host-side
-proposal filtering.
-
-An enumeration-only catalog disables mutation, crossover, and random
-immigrants. Its global maximum trial cursor equals its exclusive catalog end.
-
-A later disjoint catalog starts at the prior accepted global cursor. Compatible
-transitions drop visited fingerprints that have no archive owner. They preserve
-archive programs, objective bits, and archive-owned duplicate authority.
-
-Terminals, typed operations, and resource bands can grow by exact prefix during
-this transition. MathBlocks normalizes preserved terminal indexes and rejects
-catalog overlap with the preserved archive.
-
-Use the host-side CUDA capacity planner before you create the final resource
-bands for a catalog. The planner applies the same checked payload and shape
-rules that resident CUDA execution uses.
-
-```csharp
-var worker = new MathBlocksCUDAWorker();
-var requiredBands = worker.PlanPopulationEnumerationCatalogResourceBands(
-    population,
-    catalog);
-```
-
-The result gives the minimum `MaximumOutputElements` for each catalog operation
-count. The planner does not evaluate operations or start a CUDA context.
-
-Use `PlanPopulationSearchStaticFeasibility` to inspect an explicit catalog
-before CUDA setup. The planner propagates exact types, units, shapes,
-capacities, and available scalar constants through each complete typed DAG.
-
-The planner rejects statically invalid parameter domains and downstream shape
-mismatches. Thus, an unusable consumer prevents all CUDA work for its expensive
-producer.
-
-The objective compiler removes dead nodes before it creates CUDA descriptors.
-It folds exact scalar constants and aliases exact common subexpressions. These
-nodes do not allocate payload or scratch storage and do not dispatch CUDA code.
-
-Mixed catalog cycles preserve trial order for rejected programs. A rejected
-program does not enter a candidate lane or dispatch a CUDA node. Valid programs
-in the same resident cycle keep the normal transaction contract.
-
-The raw transition API preserves accepted trial identity across larger graph,
-terminal, objective, and archive bands. It refreshes accepted programs before
-new raw proposals.
-
-Every supplied grammar operation uses the same CUDA implementation as the CUDA
-worker. Compilation fails if an operation has no supported CUDA identity.
-
-Instrumentation reports graph instances, uploads, launches,
-synchronizations, downloads, resident bytes, compact bytes, duplicate counts,
-evaluated programs, and the accepted cursor.
-
-## Parallel proposal waves
-
-The search definition owns a `MathBlockProgramPopulationWavePolicy`.
-`ProposalWaveSize` changes search semantics and checkpoint identity.
-
-Every proposal in a wave reads one frozen accepted-state snapshot. Ordered
-commit applies trial results after all candidates in that wave finish.
-
-`SerialResident` evaluates each wave with one candidate lane.
-`ParallelResident` assigns independent candidate slots to the requested lanes.
-
-Fixed candidate chunks handle waves that are wider than the lane count. Chunk
-boundaries do not change trial identities, objective bits, or accepted state.
-
-Execution mode and requested lane count do not enter search identity. Thus, a
-complete accepted checkpoint can resume across modes and lane counts.
-
-Call `MeasurePopulationSearchCapacity` before compilation. The result reports
-shared bytes, lane stride, working bytes, wave slots, peak bytes, and compact
-bytes.
-
-Compilation rejects an insufficient resident or compact envelope. The runtime
-reserves the requested lane count and reports requested and active lanes
-separately.
-
-Given a completed search definition, compile four resident lanes as follows.
-
-```csharp
-using Supprocom.MathBlocks;
-using Supprocom.MathBlocks.Cuda;
-
-var worker = new MathBlocksCUDAWorker();
-var options = new MathBlockProgramPopulationExecutionOptions(
-    MathBlockProgramPopulationExecutionMode.ParallelResident,
-    candidateLaneCount: 4);
-
-var capacity = worker.MeasurePopulationSearchCapacity(definition, options);
-using var search = worker.CompilePopulationSearch(definition, options);
-var cycle = search.ExecuteCycle();
-
-Console.WriteLine(capacity.PeakResidentBytes);
-Console.WriteLine(cycle.Instrumentation.MaximumConcurrentCandidates);
-```
-
-## Geometry example
-
-This program calculates the area of a rectangle with a versioned scalar block.
+This program calculates the area of a rectangle.
 
 ```csharp
 using Supprocom.MathBlocks;
@@ -210,74 +48,153 @@ var output = program.Evaluate(new Dictionary<string, MathBlockValue>
 Console.WriteLine(output["area"].AsScalar());
 ```
 
+## CUDA composition
+
+`MathBlockCudaDeviceModule` exposes the supported device source, complete
+dispatch table, source fingerprint, and ABI fingerprint.
+
+`MathBlockCudaDeviceModule.Operations` contains one public contract for each
+standard operation. Each contract exposes its family, opcode, arity, rules,
+execution behavior, and immutable fingerprint.
+
+`ResolveOutputType` applies the CPU type contract. `PlanCUDA` applies the same
+checked shape, capacity, and scratch authority as CUDA execution.
+
+`MathBlockCudaSlotDescriptor` defines the 48-byte host and device slot.
+`MathBlockCudaValueCodec` writes and reads every supported value kind without
+internal types.
+
+A consumer appends its CUDA kernel with `ComposeSource`. It can also compile the
+complete source with `CompilePtx`.
+
+The device function has this supported signature.
+
+```text
+__device__ void mathblocks_operation_dispatch(
+    int family,
+    int opcode,
+    const MathBlockSlot* const* inputs,
+    int input_count,
+    MathBlockSlot* output)
+```
+
+All threads in one 128-thread block must call the dispatcher uniformly. The
+dispatcher completes one operation before the consumer calls the next operation.
+
+This CUDA fragment composes addition and multiplication inside a consumer-owned
+kernel.
+
+```cuda
+extern "C" __global__ void rectangle_area(MathBlockSlot* slots)
+{
+    if (blockIdx.x != 0)
+        return;
+
+    const MathBlockSlot* sum_inputs[2] = { &slots[0], &slots[1] };
+    mathblocks_operation_dispatch(ADD_FAMILY, ADD_OPCODE, sum_inputs, 2, &slots[2]);
+
+    const MathBlockSlot* area_inputs[2] = { &slots[2], &slots[3] };
+    mathblocks_operation_dispatch(
+        MULTIPLY_FAMILY,
+        MULTIPLY_OPCODE,
+        area_inputs,
+        2,
+        &slots[4]);
+}
+```
+
+The host generates the four constants from
+`MathBlockCudaDeviceModule.GetOperation`. Do not hardcode family or opcode
+values in production code.
+
+The external package gate compiles a consumer-owned CUDA kernel. It executes all
+337 operation identities and one nested DAG in one launch.
+
+The gate performs one immutable arena upload, one launch, one synchronization,
+and one download. MathBlocks does not control that transaction.
+
+## Managed CUDA programs
+
+`MathBlocksCUDAWorker` compiles a typed program into one resident CUDA graph. It
+remains a stateless operation utility.
+
+The first input update performs one upload. A resident execution performs one
+graph launch, one synchronization, and one output download.
+
+Callers can queue resident executions before synchronization. The compiled
+program serializes state changes for safe concurrent calls.
+
+The exact parity policy requires CUDA results to match CPU results. Parity
+includes data bits, shape, type, unit, and invalid state.
+
+## Contract fingerprints
+
+Each operation fingerprint binds its identity, version, family, opcode, arity,
+rule identities, execution behavior, and device-source fingerprint.
+
+The source fingerprint binds the exact CUDA definitions and dispatch
+implementation. The ABI fingerprint binds the slot layout, dispatcher signature,
+source, and complete operation table.
+
+A consumer must reject a stored ABI fingerprint that differs from the loaded
+package. A package version change does not replace this check.
+
 ## Performance contract
 
-Each block has a sub-millisecond contract target on its contract shape. The CPU
-gate measures warm p95 latency. The CUDA block gate measures warm median resident
-latency.
+Each operation has a sub-millisecond target on its contract shape. The CPU gate
+measures warm p95 latency. The CUDA gate measures warm median latency.
 
-The resident formula gate measures warm p99 latency. These gates are test
-contracts and are not universal latency guarantees.
-
-Results depend on hardware, input shape, operating-system scheduling,
-percentile, and measurement method.
-
-Parallel resident mode can be slower for small workloads. Package tests report
-serial and parallel samples without claiming an advantage for every workload.
+These targets are test contracts. Results depend on hardware, input shape,
+operating-system scheduling, percentile, and measurement method.
 
 Rolling median and rolling quantile use exact order statistics without a
-semantic window limit. General probabilities use one parallel radix
-preparation and indexed sliding heaps. Their fixed work bound is linear radix
-work plus `O(N log W)` heap work.
+semantic window limit. General probabilities use linear radix preparation and
+indexed sliding heaps.
 
-Quantile probabilities zero and one use a linear monotonic deque. They do not
-sort. A width of one uses a parallel copy.
+The general work bound is `O(N log W)`. Quantile probabilities zero and one use
+a linear monotonic deque and do not sort.
 
-Call `PlanRollingOrderStatisticWork` to inspect the deterministic work bound.
-CUDA compilation uses checked scratch arithmetic and rejects an unrepresentable
-resource requirement before launch.
-
-The package gate covers 305,581 values, five window widths, five adversarial
-input orders, and quantile probabilities zero, one-half, and one. The gate
-requires exact CPU and CUDA output parity.
+A width of one uses a parallel copy. Checked scratch arithmetic rejects an
+unrepresentable resource requirement before launch.
 
 ## Source-only repository
 
 This Git repository contains source text and project metadata only. It does not
 contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
 
-Get MathBlocks version `0.2.4` from NuGet.org with this command:
+Get MathBlocks version `0.3.0` from NuGet.org with this command after
+publication.
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.2.4
+dotnet add package Supprocom.MathBlocks --version 0.3.0
 ```
 
 The package declares three external native-acquisition dependencies. This
 dependency graph is the same on all pack hosts.
 
-Install the .NET 10 SDK before you restore the projects. Install a compatible
-NVIDIA driver before you run CUDA code.
+Install the .NET 10 SDK before project restore. Install a compatible NVIDIA
+driver before CUDA execution.
 
-Windows CUDA execution requires x64 Windows and
-`libtorch-cuda-12.8-win-x64-part1` 2.10.0. It also requires
-`libtorch-cuda-12.8-win-x64-part8` 2.10.0.
+Windows CUDA execution requires x64 Windows. It requires
+`libtorch-cuda-12.8-win-x64-part1` and `libtorch-cuda-12.8-win-x64-part8`
+version 2.10.0.
 
-Linux CUDA execution requires x64 Linux and `TorchSharp-cuda-linux` 0.107.0.
-That package supplies its declared Linux dependencies.
+Linux CUDA execution requires x64 Linux and `TorchSharp-cuda-linux` version
+0.107.0. That package supplies its declared Linux dependencies.
 
-NuGet can download all three declared packages during restore. It stores them
-in the user's global package cache, outside this Git repository.
+NuGet downloads all declared packages during restore. It stores them outside
+this Git repository in the user package cache.
 
-Use this command to get the declared packages:
+Use this command to restore the source tests.
 
 ```text
 dotnet restore Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj
 ```
 
-The build can copy runtime assets into ignored output directories. Do not
-commit or redistribute those output directories.
+The build can copy runtime assets into ignored output directories. Do not commit
+or redistribute those output directories.
 
-Review and accept each third-party license before you use its package. See
+Review each third-party license before package use. See
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the recorded identities.
 
 ## Build and test
@@ -290,11 +207,13 @@ dotnet build Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj --conf
 dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj --configuration Release
 ```
 
+The external consumer project restores only the packed public package. It has no
+project reference to the production project.
+
 ## License
 
-MathBlocks is licensed under GNU Affero General Public License version 3 only.
-The SPDX expression is `AGPL-3.0-only`.
+MathBlocks uses the GNU Affero General Public License version 3 only. The SPDX
+expression is `AGPL-3.0-only`.
 
 The AGPL does not change third-party licenses for CUDA, TorchSharp, LibTorch, or
-test packages. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the
-dependency audit.
+test packages. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
