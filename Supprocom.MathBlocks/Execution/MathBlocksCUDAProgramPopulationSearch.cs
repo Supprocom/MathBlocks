@@ -91,9 +91,10 @@ public sealed class MathBlocksCUDAProgramPopulationSearch : IDisposable
         ArgumentNullException.ThrowIfNull(definition);
         ArgumentNullException.ThrowIfNull(executionOptions);
         executionOptions.ValidateResidentExecution(nameof(executionOptions));
+        MathBlockProgramPopulationStaticFeasibilityPlan? staticPlan = null;
         if (definition.EnumerationCatalog is not null)
         {
-            var staticPlan = MathBlockProgramPopulationCatalogCapacityPlanner
+            staticPlan = MathBlockProgramPopulationCatalogCapacityPlanner
                 .CreateFeasibilityPlan(definition);
             if (!staticPlan.HasFeasiblePrograms)
             {
@@ -104,7 +105,8 @@ public sealed class MathBlocksCUDAProgramPopulationSearch : IDisposable
         var layout = PopulationSearchLayout.Create(
             definition,
             executionOptions.CandidateLaneCount,
-            enforceEnvelope: true);
+            enforceEnvelope: true,
+            staticPlan: staticPlan);
         MathBlocksCudaNative.EnsureContext();
         var initialTrialCursor = definition.InitialTrialCursor;
         var proposalWaveSize = checked((ulong)definition.WavePolicy.ProposalWaveSize);
@@ -539,8 +541,10 @@ internal sealed class PopulationSearchLayout
     private readonly CudaTerminalDescriptor[] terminals;
     private readonly MathBlockValue[] immutableValues;
     private readonly int[] immutablePayloadOffsets;
+    private readonly MathBlockProgramPopulationResourceBand[] resourceBands;
     private readonly ulong[] bandStarts;
     private readonly ulong[] bandCounts;
+    private readonly MathBlockProgramStructure[] enumerationPrograms;
     private readonly ObjectiveNodeDescriptor[] objectiveNodes;
     private readonly int[] objectiveInputs;
     private readonly ObjectiveSourceDescriptor[] objectiveSources;
@@ -553,8 +557,10 @@ internal sealed class PopulationSearchLayout
         CudaTerminalDescriptor[] terminals,
         MathBlockValue[] immutableValues,
         int[] immutablePayloadOffsets,
+        MathBlockProgramPopulationResourceBand[] resourceBands,
         ulong[] bandStarts,
         ulong[] bandCounts,
+        MathBlockProgramStructure[] enumerationPrograms,
         ObjectiveNodeDescriptor[] objectiveNodes,
         int[] objectiveInputs,
         ObjectiveSourceDescriptor[] objectiveSources,
@@ -566,8 +572,10 @@ internal sealed class PopulationSearchLayout
         this.terminals = terminals;
         this.immutableValues = immutableValues;
         this.immutablePayloadOffsets = immutablePayloadOffsets;
+        this.resourceBands = resourceBands;
         this.bandStarts = bandStarts;
         this.bandCounts = bandCounts;
+        this.enumerationPrograms = enumerationPrograms;
         this.objectiveNodes = objectiveNodes;
         this.objectiveInputs = objectiveInputs;
         this.objectiveSources = objectiveSources;
@@ -639,7 +647,8 @@ internal sealed class PopulationSearchLayout
     public static PopulationSearchLayout Create(
         MathBlockProgramPopulationSearchDefinition definition,
         int candidateLaneCount = 1,
-        bool enforceEnvelope = true)
+        bool enforceEnvelope = true,
+        MathBlockProgramPopulationStaticFeasibilityPlan? staticPlan = null)
     {
         ArgumentNullException.ThrowIfNull(definition);
         if (candidateLaneCount <= 0)
@@ -655,10 +664,22 @@ internal sealed class PopulationSearchLayout
         }
 
         var population = definition.Population;
+        var enumerationPrograms = Array.Empty<MathBlockProgramStructure>();
+        var useFeasibleOnlyResources = false;
         if (definition.EnumerationCatalog is not null)
         {
+            staticPlan ??= MathBlockProgramPopulationCatalogCapacityPlanner
+                .CreateFeasibilityPlan(definition);
+            if (!staticPlan.HasFeasiblePrograms)
+            {
+                throw new InvalidOperationException(
+                    "Static CUDA feasibility rejected every enumeration catalog program before CUDA setup.");
+            }
             MathBlockProgramPopulationCatalogCapacityPlanner.RequireResourceBands(
                 definition);
+            enumerationPrograms = MathBlockCollectionPrimitives.CopyEnumerable(
+                staticPlan.FeasiblePrograms);
+            useFeasibleOnlyResources = definition.Evolution.EvolutionPatternLength == 0;
         }
         var flatInputTypes = new List<int>();
         var operations = new CudaOperationDescriptor[population.Grammar.Operations.Count];
@@ -671,7 +692,6 @@ internal sealed class PopulationSearchLayout
             var inputBase = flatInputTypes.Count;
             foreach (var inputType in descriptor.InputTypes)
                 flatInputTypes.Add(AddType(inputType));
-            maximumArity = Math.Max(maximumArity, descriptor.InputTypes.Count);
             var key = MathBlockProgramPopulationFingerprint.CreateOperationKey(descriptor.Identity);
             operations[index] = new CudaOperationDescriptor(
                 (int)feature.Family,
@@ -700,12 +720,102 @@ internal sealed class PopulationSearchLayout
                 terminal.Lookback);
         }
 
-        var maximumOperationCount = 0;
+        var requiredByOperationCount = new Dictionary<int, int>();
+        void AddResourceRequirement(int operationCount, int maximumElements)
+        {
+            if (!requiredByOperationCount.TryGetValue(operationCount, out var current) ||
+                maximumElements > current)
+            {
+                requiredByOperationCount[operationCount] = maximumElements;
+            }
+        }
+        if (useFeasibleOnlyResources)
+        {
+            foreach (var band in staticPlan!.RequiredResourceBands)
+                AddResourceRequirement(band.OperationCount, band.MaximumOutputElements);
+        }
+        else
+        {
+            foreach (var band in population.ActiveResourceBands)
+                AddResourceRequirement(band.OperationCount, band.MaximumOutputElements);
+        }
+
+        var executableOperationIndexes = new bool[population.Grammar.Operations.Count];
+        var residentOperationIndexes = new bool[population.Grammar.Operations.Count];
+        var maximumResidentOperationCount = 0;
+        void IncludeProgram(MathBlockProgramStructure program, bool executable)
+        {
+            var operationCount = checked(program.Nodes.Count - population.AllTerminals.Count);
+            maximumResidentOperationCount = Math.Max(maximumResidentOperationCount, operationCount);
+            for (var nodeIndex = population.AllTerminals.Count;
+                nodeIndex < program.Nodes.Count;
+                nodeIndex++)
+            {
+                var operationIndex = FindOperationIndex(population, program, nodeIndex);
+                residentOperationIndexes[operationIndex] = true;
+                if (executable)
+                    executableOperationIndexes[operationIndex] = true;
+            }
+            if (!executable)
+                return;
+            if (!MathBlockProgramPopulationCatalogCapacityPlanner.TryAnalyzeProgram(
+                    definition,
+                    program,
+                    out var requiredElements,
+                    out var reason))
+            {
+                throw new InvalidOperationException(
+                    reason ?? "A resident program has incompatible CUDA capacity authority.");
+            }
+            AddResourceRequirement(operationCount, requiredElements);
+        }
+        if (useFeasibleOnlyResources)
+        {
+            foreach (var program in enumerationPrograms)
+                IncludeProgram(program, executable: true);
+            foreach (var program in definition.InitialPrograms)
+                IncludeProgram(program, executable: true);
+            if (definition.AcceptedState is not null)
+            {
+                foreach (var program in definition.AcceptedState.RefreshPrograms)
+                    IncludeProgram(program, executable: true);
+                foreach (var entry in definition.AcceptedState.SelectionEntries)
+                    IncludeProgram(entry.Program, executable: false);
+                foreach (var entry in definition.AcceptedState.QualityDiversityEntries)
+                    IncludeProgram(entry.Program, executable: false);
+            }
+        }
+        else
+        {
+            for (var index = 0; index < executableOperationIndexes.Length; index++)
+            {
+                executableOperationIndexes[index] = true;
+                residentOperationIndexes[index] = true;
+            }
+        }
+
+        var resourceBands = new MathBlockProgramPopulationResourceBand[requiredByOperationCount.Count];
+        var resourceBandIndex = 0;
+        foreach (var requirement in requiredByOperationCount)
+        {
+            resourceBands[resourceBandIndex++] = new MathBlockProgramPopulationResourceBand(
+                requirement.Key,
+                requirement.Value);
+        }
+        MathBlockCollectionPrimitives.StableMergeSort(
+            resourceBands,
+            (left, right) => left.OperationCount.CompareTo(right.OperationCount));
+        var maximumOperationCount = maximumResidentOperationCount;
         var maximumBandElements = 0;
-        foreach (var band in population.ActiveResourceBands)
+        foreach (var band in resourceBands)
         {
             maximumOperationCount = Math.Max(maximumOperationCount, band.OperationCount);
             maximumBandElements = Math.Max(maximumBandElements, band.MaximumOutputElements);
+        }
+        for (var index = 0; index < residentOperationIndexes.Length; index++)
+        {
+            if (residentOperationIndexes[index])
+                maximumArity = Math.Max(maximumArity, population.Grammar.Operations[index].InputTypes.Count);
         }
         maximumValueElements = Math.Max(maximumValueElements, maximumBandElements);
         if (maximumOperationCount <= 0 || maximumBandElements <= 0 || maximumValueElements <= 0)
@@ -720,10 +830,12 @@ internal sealed class PopulationSearchLayout
             ref maximumArity,
             ref maximumValueElements);
 
-        var bandStarts = new ulong[population.ActiveResourceBands.Count];
-        var bandCounts = new ulong[population.ActiveResourceBands.Count];
+        var bandStarts = new ulong[resourceBands.Length];
+        var bandCounts = new ulong[resourceBands.Length];
         for (var index = 0; index < bandCounts.Length; index++)
         {
+            if (useFeasibleOnlyResources)
+                continue;
             bandStarts[index] = population.ProposalBandStarts[index];
             bandCounts[index] = population.ProposalBandCounts[index];
         }
@@ -742,7 +854,8 @@ internal sealed class PopulationSearchLayout
 
         var candidateScratchStride = CalculateCandidateScratchBytes(
             definition,
-            maximumCandidateValueElements);
+            maximumCandidateValueElements,
+            executableOperationIndexes);
         var layout = new PopulationSearchLayout(
             typeList.ToArray(),
             operations,
@@ -750,8 +863,10 @@ internal sealed class PopulationSearchLayout
             terminalDescriptors,
             immutableValues.ToArray(),
             payloadOffsets,
+            resourceBands,
             bandStarts,
             bandCounts,
+            enumerationPrograms,
             compiledObjective.Nodes,
             compiledObjective.Inputs,
             compiledObjective.Sources,
@@ -762,7 +877,10 @@ internal sealed class PopulationSearchLayout
             MaximumValueElements = maximumValueElements,
             MaximumArity = maximumArity,
             CandidateLaneCount = candidateLaneCount,
-            PayloadStride = CalculateCandidatePayloadStride(definition, maximumCandidateValueElements),
+            PayloadStride = CalculateCandidatePayloadStride(
+                definition,
+                maximumCandidateValueElements,
+                executableOperationIndexes),
             ScratchBytesPerNode = Math.Max(
                 candidateScratchStride,
                 compiledObjective.MaximumScratchBytes),
@@ -813,7 +931,7 @@ internal sealed class PopulationSearchLayout
             HistoryOffset, definition.Validity.HistoryCounts.Count, sizeof(int), "history counts");
         CandidateSlotOffset = AdvanceLayout(
             EnumerationCatalogOffset,
-            definition.EnumerationCatalog?.Programs.Count ?? 0,
+            enumerationPrograms.Length,
             ArchiveEntrySize,
             "enumeration catalog");
         ObjectiveSlotOffset = AdvanceLayout(
@@ -997,7 +1115,7 @@ internal sealed class PopulationSearchLayout
             WriteType(bytes, TypeOffset + index * TypeSize, types[index]);
         for (var index = 0; index < bandStarts.Length; index++)
         {
-            var band = definition.Population.ActiveResourceBands[index];
+            var band = resourceBands[index];
             var offset = BandOffset + index * BandSize;
             WriteInt32(bytes, offset, band.OperationCount);
             WriteInt32(bytes, offset + 4, band.MaximumOutputElements);
@@ -1051,29 +1169,20 @@ internal sealed class PopulationSearchLayout
         }
         for (var index = 0; index < definition.Validity.HistoryCounts.Count; index++)
             WriteInt32(bytes, HistoryOffset + index * sizeof(int), definition.Validity.HistoryCounts[index]);
-        if (definition.EnumerationCatalog is not null)
+        if (enumerationPrograms.Length != 0)
         {
-            for (var index = 0; index < definition.EnumerationCatalog.Programs.Count; index++)
+            for (var index = 0; index < enumerationPrograms.Length; index++)
             {
                 WriteProgramEntry(
                     bytes,
                     EnumerationCatalogOffset + index * ArchiveEntrySize,
                     definition,
-                    definition.EnumerationCatalog.Programs[index],
+                    enumerationPrograms[index],
                     0,
                     -1,
                     null,
                     null);
-                var program = definition.EnumerationCatalog.Programs[index];
-                var feasible = MathBlockProgramPopulationCatalogCapacityPlanner.TryAnalyzeProgram(
-                    definition,
-                    program,
-                    out _,
-                    out _);
-                WriteInt32(
-                    bytes,
-                    EnumerationCatalogOffset + index * ArchiveEntrySize + 20,
-                    feasible ? 0 : 7);
+                WriteInt32(bytes, EnumerationCatalogOffset + index * ArchiveEntrySize + 20, 0);
             }
         }
         WriteAcceptedState(bytes, definition, state);
@@ -1241,7 +1350,7 @@ internal sealed class PopulationSearchLayout
     private void WriteHeader(Span<byte> bytes, MathBlockProgramPopulationSearchDefinition definition)
     {
         WriteInt32(bytes, 0, unchecked((int)0x4d425334));
-        WriteInt32(bytes, 4, 12);
+        WriteInt32(bytes, 4, 13);
         WriteInt32(bytes, 8, operations.Length);
         WriteInt32(bytes, 12, terminals.Length);
         WriteInt32(bytes, 16, types.Length);
@@ -1303,7 +1412,7 @@ internal sealed class PopulationSearchLayout
         WriteInt32(bytes, 356, LaneStrideBytes);
         WriteUInt64(bytes, 360, definition.EnumerationCatalog?.CursorStart ?? 0);
         WriteInt32(bytes, 368, EnumerationCatalogOffset);
-        WriteInt32(bytes, 372, definition.EnumerationCatalog?.Programs.Count ?? 0);
+        WriteInt32(bytes, 372, enumerationPrograms.Length);
     }
 
     private void WriteAcceptedState(
@@ -1479,6 +1588,37 @@ internal sealed class PopulationSearchLayout
         {
             throw new InvalidDataException("A resident trial entry is outside its bounds.");
         }
+        if (status == MathBlockProgramPopulationTrialStatus.StaticallyRejected)
+        {
+            var catalog = definition.EnumerationCatalog;
+            var proposalCursor = ReadProposalCursor(bytes, offset + 40);
+            if (source != MathBlockProgramPopulationTrialSource.Enumeration ||
+                catalog is null ||
+                !proposalCursor.HasValue ||
+                proposalCursor.Value < catalog.CursorStart ||
+                proposalCursor.Value >= catalog.CursorEndExclusive ||
+                operationCount != 0 ||
+                cell != -1 ||
+                flags != 0)
+            {
+                throw new InvalidDataException("A static rejection trial entry is invalid.");
+            }
+            var catalogIndex = checked((int)(proposalCursor.Value - catalog.CursorStart));
+            var sourceProgram = catalog.Programs[catalogIndex];
+            var staticProgram = new MathBlockProgramStructure(
+                ReadUInt64(bytes, offset + 32),
+                proposalCursor,
+                source,
+                sourceProgram.Nodes);
+            return new MathBlockProgramPopulationTrialResult(
+                staticProgram,
+                status,
+                [],
+                null,
+                false,
+                false,
+                -1);
+        }
         var program = ReadProgram(
             bytes,
             offset,
@@ -1578,39 +1718,50 @@ internal sealed class PopulationSearchLayout
         }
         var result = new int[program.Nodes.Count - terminalCount];
         for (var operationNode = 0; operationNode < result.Length; operationNode++)
-        {
-            var node = program.Nodes[terminalCount + operationNode];
-            var match = -1;
-            for (var operationIndex = 0; operationIndex < population.Grammar.Operations.Count; operationIndex++)
-            {
-                var descriptor = population.Grammar.Operations[operationIndex];
-                if (!string.Equals(descriptor.Identifier, node.OperationIdentifier, StringComparison.Ordinal) ||
-                    descriptor.Version != node.OperationVersion ||
-                    descriptor.OutputType != node.Type ||
-                    descriptor.InputTypes.Count != node.OperandIndexes.Count)
-                {
-                    continue;
-                }
-                var valid = true;
-                for (var input = 0; input < descriptor.InputTypes.Count; input++)
-                {
-                    if (descriptor.InputTypes[input] != program.Nodes[node.OperandIndexes[input]].Type)
-                    {
-                        valid = false;
-                        break;
-                    }
-                }
-                if (!valid)
-                    continue;
-                if (match >= 0)
-                    throw new InvalidOperationException("An archive operation is ambiguous.");
-                match = operationIndex;
-            }
-            if (match < 0)
-                throw new InvalidOperationException("An archive operation is incompatible.");
-            result[operationNode] = match;
-        }
+            result[operationNode] = FindOperationIndex(
+                population,
+                program,
+                terminalCount + operationNode);
         return result;
+    }
+
+    private static int FindOperationIndex(
+        MathBlockProgramPopulationDefinition population,
+        MathBlockProgramStructure program,
+        int nodeIndex)
+    {
+        var node = program.Nodes[nodeIndex];
+        var match = -1;
+        for (var operationIndex = 0;
+            operationIndex < population.Grammar.Operations.Count;
+            operationIndex++)
+        {
+            var descriptor = population.Grammar.Operations[operationIndex];
+            if (!string.Equals(descriptor.Identifier, node.OperationIdentifier, StringComparison.Ordinal) ||
+                descriptor.Version != node.OperationVersion ||
+                descriptor.OutputType != node.Type ||
+                descriptor.InputTypes.Count != node.OperandIndexes.Count)
+            {
+                continue;
+            }
+            var valid = true;
+            for (var input = 0; input < descriptor.InputTypes.Count; input++)
+            {
+                if (descriptor.InputTypes[input] != program.Nodes[node.OperandIndexes[input]].Type)
+                {
+                    valid = false;
+                    break;
+                }
+            }
+            if (!valid)
+                continue;
+            if (match >= 0)
+                throw new InvalidOperationException("An archive operation is ambiguous.");
+            match = operationIndex;
+        }
+        if (match < 0)
+            throw new InvalidOperationException("An archive operation is incompatible.");
+        return match;
     }
 
     private double[] ReadObjectives(ReadOnlySpan<byte> bytes, int offset)
@@ -2209,11 +2360,17 @@ internal sealed class PopulationSearchLayout
 
     private static int CalculateCandidatePayloadStride(
         MathBlockProgramPopulationSearchDefinition definition,
-        int maximumElements)
+        int maximumElements,
+        IReadOnlyList<bool> executableOperationIndexes)
     {
         var result = 0;
-        foreach (var operation in definition.Population.Grammar.Operations)
+        for (var index = 0;
+            index < definition.Population.Grammar.Operations.Count;
+            index++)
         {
+            if (!executableOperationIndexes[index])
+                continue;
+            var operation = definition.Population.Grammar.Operations[index];
             result = Math.Max(
                 result,
                 MeasurePayloadBytes(
@@ -2231,13 +2388,21 @@ internal sealed class PopulationSearchLayout
 
     private static int CalculateCandidateScratchBytes(
         MathBlockProgramPopulationSearchDefinition definition,
-        int maximumElements)
+        int maximumElements,
+        IReadOnlyList<bool> executableOperationIndexes)
     {
         var result = 0;
-        foreach (var operation in definition.Population.Grammar.Operations)
+        for (var index = 0;
+            index < definition.Population.Grammar.Operations.Count;
+            index++)
+        {
+            if (!executableOperationIndexes[index])
+                continue;
+            var operation = definition.Population.Grammar.Operations[index];
             result = Math.Max(
                 result,
                 ResolveCandidateScratchBytes(definition, operation, maximumElements));
+        }
         return Align(result);
     }
 

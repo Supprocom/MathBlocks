@@ -537,6 +537,156 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Static_rejection_removes_large_programs_from_resident_layout_and_upload()
+    {
+        RequireCuda();
+        var scalar = MathBlockType.Scalar();
+        var smallVector = MathBlockType.Vector(length: 1);
+        var dynamicVector = MathBlockType.Vector();
+        var singleBoolean = MathBlockType.BooleanVector(1);
+        var terminals = new[]
+        {
+            new MathBlockProgramPopulationTerminal("value", scalar, MathBlockValue.Scalar(-3d)),
+            new MathBlockProgramPopulationTerminal("large-count", scalar, MathBlockValue.Scalar(65_536d)),
+            new MathBlockProgramPopulationTerminal("single", smallVector, MathBlockValue.Vector([1d]))
+        };
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [
+                    new MathBlockProgramPopulationOperation(
+                        "scalar.absolute", 1, [scalar], scalar),
+                    new MathBlockProgramPopulationOperation(
+                        "vector.repeat", 1, [scalar, scalar], dynamicVector),
+                    new MathBlockProgramPopulationOperation(
+                        "vector.equal", 1, [dynamicVector, smallVector], singleBoolean),
+                    new MathBlockProgramPopulationOperation(
+                        "boolean-vector.true-count", 1, [singleBoolean], scalar)
+                ],
+                scalar),
+            terminals,
+            [],
+            [
+                new MathBlockProgramPopulationResourceBand(1, 1),
+                new MathBlockProgramPopulationResourceBand(3, 65_536)
+            ],
+            proposalsPerCycle: 2,
+            fingerprintCapacity: 8);
+        var terminalNodes = terminals.Select((terminal, index) =>
+            MathBlockProgramCandidateNode.Terminal(index, terminal.Identifier, terminal.Type)).ToArray();
+        var rejected = new MathBlockProgramStructure(
+            0,
+            null,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                .. terminalNodes,
+                MathBlockProgramCandidateNode.Operation(
+                    "vector.repeat", 1, dynamicVector, 0, 1),
+                MathBlockProgramCandidateNode.Operation(
+                    "vector.equal", 1, singleBoolean, 3, 2),
+                MathBlockProgramCandidateNode.Operation(
+                    "boolean-vector.true-count", 1, scalar, 4)
+            ]);
+        var feasible = new MathBlockProgramStructure(
+            0,
+            null,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                .. terminalNodes,
+                MathBlockProgramCandidateNode.Operation(
+                    "scalar.absolute", 1, scalar, 0)
+            ]);
+        var mixedCatalog = new MathBlockProgramPopulationEnumerationCatalog(0, [rejected, feasible]);
+        var feasibleCatalog = new MathBlockProgramPopulationEnumerationCatalog(1, [mixedCatalog.Programs[1]]);
+        var objectiveBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = objectiveBuilder.Input("candidate", scalar);
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveBuilder.Output("value", candidate).Build(),
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "value",
+                "value",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        MathBlockProgramPopulationSearchDefinition CreateDefinition(
+            MathBlockProgramPopulationEnumerationCatalog catalog,
+            ulong enumerationCount) => new(
+                population,
+                binding,
+                new MathBlockProgramPopulationEvolutionPolicy(2, enumerationCount, 0, 0, 0, 2307),
+                new MathBlockProgramPopulationSelectionPolicy(2, 2),
+                new MathBlockProgramPopulationQualityDiversityPolicy(
+                    "value",
+                    [new MathBlockProgramPopulationQualityDiversityDimension("value", 0, 8, 2)]),
+                new MathBlockProgramPopulationSearchEnvelope(
+                    128L * 1024 * 1024,
+                    16 * 1024 * 1024),
+                new MathBlockProgramPopulationValidityPolicy([int.MaxValue]),
+                wavePolicy: new MathBlockProgramPopulationWavePolicy(2, 1),
+                enumerationCatalog: catalog);
+        var mixedDefinition = CreateDefinition(mixedCatalog, 2);
+        var feasibleDefinition = CreateDefinition(feasibleCatalog, 1);
+        var worker = new MathBlocksCUDAWorker();
+        var plan = worker.PlanPopulationSearchStaticFeasibility(mixedDefinition);
+        Assert.Single(plan.FeasiblePrograms);
+        Assert.Single(plan.Rejections);
+        var requiredBand = Assert.Single(plan.RequiredResourceBands);
+        Assert.Equal(1, requiredBand.OperationCount);
+        Assert.Equal(1, requiredBand.MaximumOutputElements);
+        var options = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.ParallelResident,
+            2);
+        using var mixed = worker.CompilePopulationSearch(mixedDefinition, options);
+        using var feasibleOnly = worker.CompilePopulationSearch(feasibleDefinition, options);
+
+        Assert.Equal(feasibleOnly.Capacity, mixed.Capacity);
+        Assert.Equal(feasibleOnly.ResidentBytes, mixed.ResidentBytes);
+        Assert.Equal(1, mixed.Capacity.MaximumExpandedOperationCount);
+        Assert.Equal(1, mixed.Capacity.MaximumValueElements);
+        var mixedLayout = ReadLayout(mixed);
+        var feasibleLayout = ReadLayout(feasibleOnly);
+        Assert.Single((Array)mixedLayout.GetType()
+            .GetField("enumerationPrograms", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(mixedLayout)!);
+        Assert.Single((Array)mixedLayout.GetType()
+            .GetField("resourceBands", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(mixedLayout)!);
+        var mixedArena = CreateInitialArena(mixedLayout, mixedDefinition, mixed.AcceptedState);
+        var feasibleArena = CreateInitialArena(
+            feasibleLayout,
+            feasibleDefinition,
+            feasibleOnly.AcceptedState);
+        var descriptorStart = (int)mixedLayout.GetType().GetProperty("OperationOffset")!
+            .GetValue(mixedLayout)!;
+        var descriptorEnd = (int)mixedLayout.GetType().GetProperty("CandidateSlotOffset")!
+            .GetValue(mixedLayout)!;
+        Assert.Equal(
+            feasibleArena[descriptorStart..descriptorEnd],
+            mixedArena[descriptorStart..descriptorEnd]);
+
+        var result = mixed.ExecuteCycle();
+
+        Assert.Equal(2, result.Trials.Count);
+        Assert.Equal(MathBlockProgramPopulationTrialStatus.StaticallyRejected, result.Trials[0].Status);
+        Assert.Equal(mixedCatalog.Programs[0].StructuralFingerprint, result.Trials[0].StructuralFingerprint);
+        Assert.Equal(3, result.Trials[0].Program.Nodes.Count - terminals.Length);
+        Assert.NotEqual(MathBlockProgramPopulationTrialStatus.StaticallyRejected, result.Trials[1].Status);
+        Assert.Equal(mixedCatalog.Programs[1].StructuralFingerprint, result.Trials[1].StructuralFingerprint);
+        Assert.Equal(1ul, result.AcceptedState.EvaluatedProgramCount);
+        Assert.Equal(1, mixed.CudaCandidateDispatchCount);
+        Assert.Equal(1, mixed.CudaNodeDispatchCount);
+        Assert.Equal(1, mixed.StaticallyRejectedProgramCount);
+        AssertResidentCycleContract(mixed);
+
+        static byte[] CreateInitialArena(
+            object layout,
+            MathBlockProgramPopulationSearchDefinition definition,
+            MathBlockProgramPopulationSearchState state) =>
+            (byte[])layout.GetType()
+                .GetMethod("CreateInitialArena", BindingFlags.Instance | BindingFlags.Public)!
+                .Invoke(layout, [definition, state, 0ul])!;
+    }
+
+    [Fact]
     public void Static_rejection_resume_preserves_state_and_reaches_the_valid_candidate_exactly()
     {
         RequireCuda();

@@ -1643,6 +1643,47 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 selected_operands);
         }
 
+        __device__ int mbp_find_catalog_entry(
+            unsigned char* arena,
+            int catalog_offset,
+            int catalog_count,
+            int entry_size,
+            mbp_ull proposal_cursor)
+        {
+            int low = 0;
+            int high = catalog_count - 1;
+            while (low <= high)
+            {
+                int middle = low + ((high - low) >> 1);
+                int entry = catalog_offset + middle * entry_size;
+                mbp_ull current = mbp_read_ull(arena, entry + 40);
+                if (current < proposal_cursor)
+                    low = middle + 1;
+                else if (current > proposal_cursor)
+                    high = middle - 1;
+                else
+                    return entry;
+            }
+            return -1;
+        }
+
+        __device__ void mbp_prepare_static_rejection(
+            unsigned char* arena,
+            int entry,
+            int entry_size,
+            mbp_ull trial_cursor,
+            mbp_ull proposal_cursor)
+        {
+            mbp_clear(arena + entry, entry_size);
+            mbp_write_int(arena, entry, 7);
+            mbp_write_int(arena, entry + 4, 0);
+            mbp_write_int(arena, entry + 12, 0);
+            mbp_write_int(arena, entry + 16, -1);
+            mbp_write_int(arena, entry + 24, 0);
+            mbp_write_ull(arena, entry + 32, trial_cursor);
+            mbp_write_ull(arena, entry + 40, proposal_cursor);
+        }
+
         __device__ void mbp_fail(unsigned char* arena, int compact_offset, int status)
         {
             mbp_clear(arena + compact_offset, 144);
@@ -1653,7 +1694,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 12)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 13)
                 return;
 
             int fingerprint_capacity = mbp_read_int(arena, 40);
@@ -1697,7 +1738,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             if (blockIdx.x != 0)
                 return;
             __shared__ int cooperative_status;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 12)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 13)
                 return;
 
             int grammar_operation_count = mbp_read_int(arena, 8);
@@ -2138,7 +2179,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 12)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 13)
                 return;
 
             int compact_offset = mbp_header_offset(arena, 34);
@@ -2192,7 +2233,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             mbp_ull maximum_trials = mbp_read_ull(arena, 312);
             if (control_offset <= 0 || candidate_lane_count <= 0 || catalog_count < 0 ||
                 (catalog_count > 0 &&
-                    (catalog_offset <= 0 || total_proposals != (mbp_ull)catalog_count)) ||
+                    (catalog_offset <= 0 || total_proposals < (mbp_ull)catalog_count)) ||
                 proposal_wave_size <= 0 || proposal_wave_size > cycle_work_limit)
             {
                 mbp_fail(arena, compact_offset, 4);
@@ -2253,39 +2294,48 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                     enumeration_scan_count < proposals_per_cycle)
                 {
                     source = 0;
-                    int catalog_index = (int)enumeration_cursor;
                     proposal_cursor = catalog_cursor_start + enumeration_cursor;
                     enumeration_cursor++;
                     enumeration_scan_count++;
-                    catalog_entry = catalog_offset + catalog_index * entry_size;
-                    preflight_status = mbp_read_int(arena, catalog_entry + 20);
-                    if (preflight_status != 0 && preflight_status != 7)
-                    {
-                        mbp_fail(arena, compact_offset, 4);
-                        return;
-                    }
-                    mbp_load_entry_program(
+                    catalog_entry = mbp_find_catalog_entry(
                         arena,
-                        catalog_entry,
-                        objective_count,
-                        program_operation_size,
-                        maximum_arity,
-                        selected_operations,
-                        selected_operands,
-                        &candidate_operation_count);
-                    int band_index = mbp_band_for_operation_count(
-                        arena,
-                        band_offset,
-                        band_count,
-                        candidate_operation_count);
-                    if (band_index < 0)
+                        catalog_offset,
+                        catalog_count,
+                        entry_size,
+                        proposal_cursor);
+                    if (catalog_entry < 0)
                     {
-                        mbp_fail(arena, compact_offset, 4);
-                        return;
+                        preflight_status = 7;
+                        generated = true;
                     }
-                    band_maximum = mbp_read_int(arena, band_offset + band_index * 24 + 4);
-                    if (preflight_status == 0)
+                    else
                     {
+                        preflight_status = mbp_read_int(arena, catalog_entry + 20);
+                        if (preflight_status != 0)
+                        {
+                            mbp_fail(arena, compact_offset, 4);
+                            return;
+                        }
+                        mbp_load_entry_program(
+                            arena,
+                            catalog_entry,
+                            objective_count,
+                            program_operation_size,
+                            maximum_arity,
+                            selected_operations,
+                            selected_operands,
+                            &candidate_operation_count);
+                        int band_index = mbp_band_for_operation_count(
+                            arena,
+                            band_offset,
+                            band_count,
+                            candidate_operation_count);
+                        if (band_index < 0)
+                        {
+                            mbp_fail(arena, compact_offset, 4);
+                            return;
+                        }
+                        band_maximum = mbp_read_int(arena, band_offset + band_index * 24 + 4);
                         enumeration_typed = mbp_type_program(
                             arena,
                             operation_offset,
@@ -2307,8 +2357,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                             mbp_fail(arena, compact_offset, 4);
                             return;
                         }
+                        generated = true;
                     }
-                    generated = true;
                     enumeration_trial_count++;
                 }
                 else if (catalog_count == 0 &&
@@ -2457,6 +2507,17 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                 processed++;
                 int candidate_entry =
                     proposal_wave_slot_offset + wave_result_count * entry_size;
+                if (preflight_status == 7)
+                {
+                    mbp_prepare_static_rejection(
+                        arena,
+                        candidate_entry,
+                        entry_size,
+                        current_trial,
+                        proposal_cursor);
+                    wave_result_count++;
+                    continue;
+                }
                 MbpHash structural = mbp_structural_hash(
                     arena,
                     operation_offset,
@@ -2488,8 +2549,8 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                     selected_operands);
                 mbp_write_int(arena, candidate_entry + 20, band_maximum);
 
-                int status = preflight_status == 7 ? 7 : 1;
-                bool typed = preflight_status == 7 || enumeration_typed || generated && mbp_type_program(
+                int status = 1;
+                bool typed = enumeration_typed || generated && mbp_type_program(
                     arena,
                     operation_offset,
                     operation_input_type_offset,
@@ -2505,11 +2566,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                     selected_lookbacks,
                     &maximum_lookback,
                     &deterministic_cost);
-                if (preflight_status == 7)
-                {
-                    status = 7;
-                }
-                else if (!typed)
+                if (!typed)
                 {
                     status = 4;
                 }
@@ -2553,7 +2610,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             if (blockIdx.x != 0)
                 return;
             __shared__ int cooperative_status;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 12)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 13)
                 return;
 
             int compact_offset = mbp_header_offset(arena, 34);
@@ -2778,7 +2835,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 12)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 13)
                 return;
 
             int compact_offset = mbp_header_offset(arena, 34);
@@ -3032,7 +3089,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 12)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 13)
                 return;
 
             int compact_offset = mbp_header_offset(arena, 34);
@@ -3114,7 +3171,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 12)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 13)
                 return;
 
             int compact_offset = mbp_header_offset(arena, 34);

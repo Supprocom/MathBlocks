@@ -22,8 +22,8 @@ public static partial class MathBlockVectorMath
                 while (head < tail && deque[head] <= index - width)
                     head++;
                 while (head < tail && (minimum
-                    ? values[deque[tail - 1]] >= values[index]
-                    : values[deque[tail - 1]] <= values[index]))
+                    ? values[deque[tail - 1]] > values[index]
+                    : values[deque[tail - 1]] < values[index]))
                 {
                     tail--;
                 }

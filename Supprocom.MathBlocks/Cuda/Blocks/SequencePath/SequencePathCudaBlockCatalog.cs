@@ -61,14 +61,6 @@ internal static class SequencePathCudaBlockCatalog
             return value > 0 && (value & (value - 1)) == 0;
         }
 
-        __device__ double mathblocks_sequence_order_value(unsigned long long key)
-        {
-            unsigned long long bits = (key & 0x8000000000000000ull) != 0ull
-                ? key ^ 0x8000000000000000ull
-                : ~key;
-            return __longlong_as_double((long long)bits);
-        }
-
         __device__ void mathblocks_sequence_prepare_order_ranks(
             const double* values,
             int count,
@@ -365,8 +357,8 @@ internal static class SequencePathCudaBlockCatalog
                 while (head < tail && deque[head] <= index - width)
                     head++;
                 while (head < tail && (minimum
-                    ? values[deque[tail - 1]] >= values[index]
-                    : values[deque[tail - 1]] <= values[index]))
+                    ? values[deque[tail - 1]] > values[index]
+                    : values[deque[tail - 1]] < values[index]))
                 {
                     tail--;
                 }
@@ -625,10 +617,8 @@ internal static class SequencePathCudaBlockCatalog
                     {
                         if (thread == 0)
                         {
-                            double lower_value = mathblocks_sequence_order_value(
-                                first_keys[lower_index]);
-                            double upper_value = mathblocks_sequence_order_value(
-                                first_keys[upper_index]);
+                            double lower_value = a[first_indexes[lower_index]];
+                            double upper_value = a[first_indexes[upper_index]];
                             result[0] = lower_value * (1.0 - weight) + upper_value * weight;
                             output->valid = isfinite(result[0]);
                             output->scalar_value = (double)((long long)first->count * 64 + 2);

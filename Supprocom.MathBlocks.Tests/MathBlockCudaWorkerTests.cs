@@ -388,6 +388,79 @@ public sealed class MathBlockCudaWorkerTests
     }
 
     [Fact]
+    public void CUDA_rolling_order_statistics_preserve_signed_zero_bits()
+    {
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        var negativeZero = BitConverter.Int64BitsToDouble(long.MinValue);
+        Verify(
+            [negativeZero, negativeZero, negativeZero, negativeZero, negativeZero],
+            5,
+            [negativeZero],
+            [negativeZero],
+            [negativeZero]);
+        Verify(
+            [negativeZero, 0d, 0d, negativeZero, 0d],
+            3,
+            [negativeZero, 0d, 0d],
+            [0d, 0d, negativeZero],
+            [negativeZero, 0d, 0d]);
+
+        void Verify(
+            IReadOnlyList<double> source,
+            int widthValue,
+            IReadOnlyList<double> expectedMinimum,
+            IReadOnlyList<double> expectedMedian,
+            IReadOnlyList<double> expectedMaximum)
+        {
+            var values = MathBlockValue.Vector(source);
+            var width = MathBlockValue.Scalar(widthValue);
+            var zero = MathBlockValue.Scalar(0d);
+            var half = MathBlockValue.Scalar(0.5d);
+            var one = MathBlockValue.Scalar(1d);
+            var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
+            {
+                ["values"] = values,
+                ["width"] = width,
+                ["zero"] = zero,
+                ["half"] = half,
+                ["one"] = one
+            };
+            var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+            var valueNode = builder.Input("values", values.Type);
+            var widthNode = builder.Input("width", width.Type);
+            var zeroNode = builder.Input("zero", zero.Type);
+            var halfNode = builder.Input("half", half.Type);
+            var oneNode = builder.Input("one", one.Type);
+            var minimum = builder.Apply(
+                "sequence.rolling-quantile",
+                inputs: [valueNode, widthNode, zeroNode]);
+            var median = builder.Apply(
+                "sequence.rolling-quantile",
+                inputs: [valueNode, widthNode, halfNode]);
+            var maximum = builder.Apply(
+                "sequence.rolling-quantile",
+                inputs: [valueNode, widthNode, oneNode]);
+            var program = builder
+                .Output("minimum", minimum)
+                .Output("median", median)
+                .Output("maximum", maximum)
+                .Build();
+            var cpu = program.Evaluate(inputs);
+            AssertExact(MathBlockValue.Vector(expectedMinimum), cpu["minimum"]);
+            AssertExact(MathBlockValue.Vector(expectedMedian), cpu["median"]);
+            AssertExact(MathBlockValue.Vector(expectedMaximum), cpu["maximum"]);
+            using var compiled = new MathBlocksCUDAWorker().Compile(program, inputs);
+            compiled.UploadInputs(inputs);
+            compiled.ExecuteResident();
+            var cuda = compiled.ReadOutputs();
+            AssertExact(cpu["minimum"], cuda["minimum"]);
+            AssertExact(cpu["median"], cuda["median"]);
+            AssertExact(cpu["maximum"], cuda["maximum"]);
+            AssertResidentExecutionContract(compiled);
+        }
+    }
+
+    [Fact]
     [Trait("Category", "Performance")]
     public void CUDA_rolling_order_statistics_are_exact_and_scale_subquadratically()
     {
