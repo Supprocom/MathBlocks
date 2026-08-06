@@ -214,6 +214,160 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Resident_catalog_transition_keeps_deep_archives_out_of_shallow_lane_authority()
+    {
+        RequireCuda();
+        var scalar = MathBlockType.Scalar();
+        var terminals = new[]
+        {
+            new MathBlockProgramPopulationTerminal("value", scalar, MathBlockValue.Scalar(-3d)),
+            new MathBlockProgramPopulationTerminal("minimum", scalar, MathBlockValue.Scalar(0d)),
+            new MathBlockProgramPopulationTerminal("maximum", scalar, MathBlockValue.Scalar(10d))
+        };
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [
+                    new MathBlockProgramPopulationOperation(
+                        "scalar.clamp", 1, [scalar, scalar, scalar], scalar),
+                    new MathBlockProgramPopulationOperation(
+                        "scalar.absolute", 1, [scalar], scalar)
+                ],
+                scalar),
+            terminals,
+            [],
+            [
+                new MathBlockProgramPopulationResourceBand(1, 1),
+                new MathBlockProgramPopulationResourceBand(3, 1)
+            ],
+            proposalsPerCycle: 1,
+            fingerprintCapacity: 8);
+        var terminalNodes = terminals.Select((terminal, index) =>
+            MathBlockProgramCandidateNode.Terminal(
+                index,
+                terminal.Identifier,
+                terminal.Type)).ToArray();
+        var deepProgram = new MathBlockProgramStructure(
+            0,
+            null,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                .. terminalNodes,
+                MathBlockProgramCandidateNode.Operation("scalar.clamp", 1, scalar, 0, 1, 2),
+                MathBlockProgramCandidateNode.Operation("scalar.clamp", 1, scalar, 3, 1, 2),
+                MathBlockProgramCandidateNode.Operation("scalar.clamp", 1, scalar, 4, 1, 2)
+            ]);
+        var shallowProgram = new MathBlockProgramStructure(
+            0,
+            null,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                .. terminalNodes,
+                MathBlockProgramCandidateNode.Operation("scalar.absolute", 1, scalar, 0)
+            ]);
+        var objectiveBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = objectiveBuilder.Input("candidate", scalar);
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveBuilder.Output("value", candidate).Build(),
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "value",
+                "value",
+                MathBlockProgramPopulationObjectiveDirection.Minimize)]);
+        var selection = new MathBlockProgramPopulationSelectionPolicy(4, 8);
+        var quality = new MathBlockProgramPopulationQualityDiversityPolicy(
+            "value",
+            [new MathBlockProgramPopulationQualityDiversityDimension("value", 0, 10, 2)]);
+        var envelope = new MathBlockProgramPopulationSearchEnvelope(
+            128L * 1024 * 1024,
+            16 * 1024 * 1024);
+        var validity = new MathBlockProgramPopulationValidityPolicy([int.MaxValue]);
+        MathBlockProgramPopulationSearchDefinition CreateDefinition(
+            MathBlockProgramPopulationEnumerationCatalog catalog) => new(
+                population,
+                binding,
+                new MathBlockProgramPopulationEvolutionPolicy(
+                    catalog.CursorEndExclusive,
+                    1,
+                    0,
+                    0,
+                    0,
+                    2309),
+                selection,
+                quality,
+                envelope,
+                validity,
+                wavePolicy: new MathBlockProgramPopulationWavePolicy(1, 1),
+                enumerationCatalog: catalog);
+        var firstDefinition = CreateDefinition(
+            new MathBlockProgramPopulationEnumerationCatalog(0, [deepProgram]));
+        var secondDefinition = CreateDefinition(
+            new MathBlockProgramPopulationEnumerationCatalog(1, [shallowProgram]));
+        var options = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.ParallelResident,
+            2);
+        using var firstCompiled = new MathBlocksCUDAWorker().CompilePopulationSearch(
+            firstDefinition,
+            options);
+        var first = firstCompiled.ExecuteCycle();
+        var preservedSelection = Assert.Single(first.AcceptedState.SelectionEntries);
+        var preservedQuality = Assert.Single(first.AcceptedState.QualityDiversityEntries);
+        Assert.Equal(3, preservedSelection.Program.Nodes.Count - terminals.Length);
+        var transition = secondDefinition.CreateTransitionState(
+            firstDefinition,
+            first.AcceptedState);
+        var restored = MathBlockProgramPopulationSearchState.Import(transition.Export());
+
+        using var shallowOnly = new MathBlocksCUDAWorker().CompilePopulationSearch(
+            secondDefinition,
+            options);
+        using var uninterrupted = new MathBlocksCUDAWorker().CompilePopulationSearch(
+            secondDefinition.WithAcceptedState(transition),
+            options);
+        using var resumed = new MathBlocksCUDAWorker().CompilePopulationSearch(
+            secondDefinition.WithAcceptedState(restored),
+            options);
+        var shallowLayout = ReadLayout(shallowOnly);
+        var transitionLayout = ReadLayout(uninterrupted);
+
+        Assert.Equal(shallowOnly.Capacity.MaximumExpandedOperationCount,
+            uninterrupted.Capacity.MaximumExpandedOperationCount);
+        Assert.Equal(1, uninterrupted.Capacity.MaximumExpandedOperationCount);
+        Assert.Equal(shallowOnly.Capacity.MaximumArity, uninterrupted.Capacity.MaximumArity);
+        Assert.Equal(1, uninterrupted.Capacity.MaximumArity);
+        Assert.Equal(shallowOnly.Capacity.LaneStrideBytes, uninterrupted.Capacity.LaneStrideBytes);
+        Assert.Equal(
+            ReadLayoutInt32(shallowLayout, "PayloadStride"),
+            ReadLayoutInt32(transitionLayout, "PayloadStride"));
+        Assert.Equal(
+            ReadLayoutInt32(shallowLayout, "ScratchBytesPerNode"),
+            ReadLayoutInt32(transitionLayout, "ScratchBytesPerNode"));
+        Assert.Equal(3, ReadLayoutInt32(transitionLayout, "ArchiveOperationCount"));
+        Assert.Equal(
+            ArchiveIdentity(preservedSelection),
+            ArchiveIdentity(Assert.Single(transition.SelectionEntries)));
+        Assert.Equal(
+            ArchiveIdentity(preservedQuality),
+            ArchiveIdentity(Assert.Single(transition.QualityDiversityEntries)));
+
+        var expected = uninterrupted.ExecuteCycle();
+        var actual = resumed.ExecuteCycle();
+
+        Assert.Equal(expected.AcceptedState.Export(), actual.AcceptedState.Export());
+        Assert.Equal(expected.Trials.Select(TrialIdentity), actual.Trials.Select(TrialIdentity));
+        Assert.Contains(expected.AcceptedState.SelectionEntries, entry =>
+            entry.StructuralFingerprint == preservedSelection.StructuralFingerprint &&
+            entry.Objectives.Select(BitConverter.DoubleToInt64Bits).SequenceEqual(
+                preservedSelection.Objectives.Select(BitConverter.DoubleToInt64Bits)));
+        Assert.Contains(expected.AcceptedState.QualityDiversityEntries, entry =>
+            entry.StructuralFingerprint == preservedQuality.StructuralFingerprint &&
+            entry.Objectives.Select(BitConverter.DoubleToInt64Bits).SequenceEqual(
+                preservedQuality.Objectives.Select(BitConverter.DoubleToInt64Bits)));
+        AssertResidentCycleContract(uninterrupted);
+        AssertResidentCycleContract(resumed);
+    }
+
+    [Fact]
     public void Resident_catalog_transition_normalizes_archive_programs_for_terminal_prefix_growth()
     {
         RequireCuda();
@@ -737,6 +891,142 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
         Assert.Equal(0, resumed.CudaCandidateDispatchCount);
         Assert.Equal(2, resumed.StaticallyRejectedProgramCount);
         AssertResidentCycleContract(resumed);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void False_static_rejection_for_a_feasible_cursor_fails_without_state_advance(
+        bool includeRejectedTrials)
+    {
+        RequireCuda();
+        var baseline = CreateScalarDuplicateCatalogSearch(
+            useAbsolute: true,
+            cursorStart: 0,
+            maximumTrialCount: 1,
+            immigrantTrials: 0);
+        var definition = new MathBlockProgramPopulationSearchDefinition(
+            baseline.Population,
+            baseline.ObjectiveBinding,
+            baseline.Evolution,
+            baseline.Selection,
+            baseline.QualityDiversity,
+            baseline.Envelope,
+            baseline.Validity,
+            new MathBlockProgramPopulationCompactResultPolicy(includeRejectedTrials),
+            baseline.InitialPrograms,
+            wavePolicy: baseline.WavePolicy,
+            enumerationCatalog: baseline.EnumerationCatalog);
+        var worker = new MathBlocksCUDAWorker();
+        var plan = worker.PlanPopulationSearchStaticFeasibility(definition);
+        Assert.Single(plan.FeasiblePrograms);
+        Assert.Empty(plan.Rejections);
+        var options = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.ParallelResident,
+            1);
+        using var reference = worker.CompilePopulationSearch(definition, options);
+        var expected = reference.ExecuteCycle();
+        var forged = ReadCompactDownload(reference);
+        var referenceLayout = ReadLayout(reference);
+        if (includeRejectedTrials)
+        {
+            var trialOffset = checked(
+                ReadLayoutInt32(referenceLayout, "CompactTrialOffset") -
+                ReadLayoutInt32(referenceLayout, "CompactOffset"));
+            WriteInt32(forged, trialOffset, (int)MathBlockProgramPopulationTrialStatus.StaticallyRejected);
+            WriteInt32(forged, trialOffset + 12, 0);
+            WriteInt32(forged, trialOffset + 16, -1);
+            WriteInt32(forged, trialOffset + 24, 0);
+        }
+        else
+        {
+            WriteUInt64(forged, 160, 1);
+        }
+
+        using var victim = worker.CompilePopulationSearch(definition, options);
+        var acceptedBefore = victim.AcceptedState.Export();
+        var victimLayout = ReadLayout(victim);
+        var parse = victimLayout.GetType().GetMethod(
+            "ParseCycle",
+            BindingFlags.Instance | BindingFlags.Public)!;
+
+        var exception = Assert.Throws<TargetInvocationException>(() => parse.Invoke(
+            victimLayout,
+            [definition, victim.AcceptedState, forged]));
+
+        Assert.IsType<InvalidDataException>(exception.InnerException);
+        Assert.Equal(acceptedBefore, victim.AcceptedState.Export());
+        Assert.Equal(0ul, victim.TrialCursor);
+        Assert.Equal(0, victim.GraphLaunchCount);
+        var actual = victim.ExecuteCycle();
+        Assert.Equal(expected.AcceptedState.Export(), actual.AcceptedState.Export());
+        Assert.Equal(expected.Trials.Select(TrialIdentity), actual.Trials.Select(TrialIdentity));
+        AssertResidentCycleContract(victim);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void False_device_static_rejection_fails_before_checkpoint_publication(
+        bool includeRejectedTrials)
+    {
+        RequireCuda();
+        var baseline = CreateExplicitMixedUnitCatalogSearch(
+            catalogCount: 2,
+            cursorStart: 0);
+        var definition = new MathBlockProgramPopulationSearchDefinition(
+            baseline.Population,
+            baseline.ObjectiveBinding,
+            baseline.Evolution,
+            baseline.Selection,
+            baseline.QualityDiversity,
+            baseline.Envelope,
+            baseline.Validity,
+            new MathBlockProgramPopulationCompactResultPolicy(includeRejectedTrials),
+            baseline.InitialPrograms,
+            wavePolicy: new MathBlockProgramPopulationWavePolicy(1, 1),
+            enumerationCatalog: baseline.EnumerationCatalog);
+        var options = new MathBlockProgramPopulationExecutionOptions(
+            MathBlockProgramPopulationExecutionMode.ParallelResident,
+            1);
+        var worker = new MathBlocksCUDAWorker();
+        using var reference = worker.CompilePopulationSearch(definition, options);
+        var referenceFirst = reference.ExecuteCycle();
+        var expected = reference.ExecuteCycle();
+        using var victim = worker.CompilePopulationSearch(definition, options);
+        var victimFirst = victim.ExecuteCycle();
+        Assert.Equal(referenceFirst.AcceptedState.Export(), victimFirst.AcceptedState.Export());
+        Assert.Equal(referenceFirst.Trials.Select(TrialIdentity), victimFirst.Trials.Select(TrialIdentity));
+        SetDeviceEnumerationCatalogCountForFailureTest(victim, 1);
+        var acceptedBefore = victim.AcceptedState.Export();
+
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            var exception = Assert.Throws<InvalidOperationException>(victim.ExecuteCycle);
+            Assert.Equal("The resident population search cycle failed closed.", exception.Message);
+            Assert.Equal(acceptedBefore, victim.AcceptedState.Export());
+            Assert.Equal(1ul, victim.AcceptedState.EnumerationCursor);
+            Assert.Equal(1ul, victim.AcceptedState.TrialCursor);
+            Assert.Equal(1ul, victim.AcceptedState.CycleCount);
+        }
+
+        SetDeviceEnumerationCatalogCountForFailureTest(victim, 2);
+        var actual = victim.ExecuteCycle();
+
+        Assert.Equal(expected.AcceptedState.Export(), actual.AcceptedState.Export());
+        Assert.Equal(expected.Trials.Select(TrialIdentity), actual.Trials.Select(TrialIdentity));
+        Assert.Equal(1, victim.GraphInstanceCount);
+        Assert.Equal(1, victim.ImmutableUploadCount);
+        Assert.Equal(0, victim.LaterImmutableUploadCount);
+        Assert.Equal(4, victim.GraphLaunchCount);
+        Assert.Equal(4, victim.SynchronizationCount);
+        Assert.Equal(4, victim.DownloadCount);
+        Assert.Equal(
+            checked(4L * victim.CompactDownloadBytesPerCycle),
+            victim.DownloadedBytes);
+        Assert.Equal(0, victim.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, victim.FullCandidateOutputBytes);
+        Assert.Equal(0, victim.CpuNodeDispatchCount);
     }
 
     [Fact]
@@ -4997,6 +5287,36 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
             .GetField("layout", BindingFlags.Instance | BindingFlags.NonPublic)!
             .GetValue(compiled)!;
 
+    private static int ReadLayoutInt32(object layout, string property) =>
+        (int)layout.GetType()
+            .GetProperty(property, BindingFlags.Instance | BindingFlags.Public)!
+            .GetValue(layout)!;
+
+    private static byte[] ReadCompactDownload(
+        MathBlocksCUDAProgramPopulationSearch compiled)
+    {
+        var layout = ReadLayout(compiled);
+        var length = ReadLayoutInt32(layout, "CompactSize");
+        var pointer = (IntPtr)typeof(MathBlocksCUDAProgramPopulationSearch)
+            .GetField("downloadArena", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(compiled)!;
+        var result = new byte[length];
+        Marshal.Copy(pointer, result, 0, result.Length);
+        return result;
+    }
+
+    private static void WriteInt32(Span<byte> bytes, int offset, int value)
+    {
+        if (!BitConverter.TryWriteBytes(bytes[offset..], value))
+            throw new InvalidOperationException("The test integer write failed.");
+    }
+
+    private static void WriteUInt64(Span<byte> bytes, int offset, ulong value)
+    {
+        if (!BitConverter.TryWriteBytes(bytes[offset..], value))
+            throw new InvalidOperationException("The test unsigned integer write failed.");
+    }
+
     private static void AssertObjectivePayloadLifetimes(
         MathBlocksCUDAProgramPopulationSearch compiled)
     {
@@ -6812,6 +7132,11 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
         MathBlocksCUDAProgramPopulationSearch compiled,
         int candidateLaneCount) =>
         SetDeviceArenaInt32ForFailureTest(compiled, 352, candidateLaneCount);
+
+    private static void SetDeviceEnumerationCatalogCountForFailureTest(
+        MathBlocksCUDAProgramPopulationSearch compiled,
+        int catalogCount) =>
+        SetDeviceArenaInt32ForFailureTest(compiled, 372, catalogCount);
 
     private static void SetDeviceFirstResourceBandMaximumForFailureTest(
         MathBlocksCUDAProgramPopulationSearch compiled,

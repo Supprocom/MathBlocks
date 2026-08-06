@@ -545,6 +545,7 @@ internal sealed class PopulationSearchLayout
     private readonly ulong[] bandStarts;
     private readonly ulong[] bandCounts;
     private readonly MathBlockProgramStructure[] enumerationPrograms;
+    private readonly ulong[] enumerationProposalCursors;
     private readonly ObjectiveNodeDescriptor[] objectiveNodes;
     private readonly int[] objectiveInputs;
     private readonly ObjectiveSourceDescriptor[] objectiveSources;
@@ -576,6 +577,13 @@ internal sealed class PopulationSearchLayout
         this.bandStarts = bandStarts;
         this.bandCounts = bandCounts;
         this.enumerationPrograms = enumerationPrograms;
+        enumerationProposalCursors = new ulong[enumerationPrograms.Length];
+        for (var index = 0; index < enumerationPrograms.Length; index++)
+        {
+            enumerationProposalCursors[index] = enumerationPrograms[index].ProposalCursor ??
+                throw new InvalidOperationException(
+                    "A feasible enumeration program requires a proposal cursor.");
+        }
         this.objectiveNodes = objectiveNodes;
         this.objectiveInputs = objectiveInputs;
         this.objectiveSources = objectiveSources;
@@ -584,6 +592,7 @@ internal sealed class PopulationSearchLayout
 
     public MathBlockProgramPopulationSearchCapacity Capacity { get; private set; }
     public int MaximumOperationCount { get; private set; }
+    public int ArchiveOperationCount { get; private set; }
     public int MaximumBandElements { get; private set; }
     public int MaximumValueElements { get; private set; }
     public int MaximumArity { get; private set; }
@@ -741,23 +750,30 @@ internal sealed class PopulationSearchLayout
         }
 
         var executableOperationIndexes = new bool[population.Grammar.Operations.Count];
-        var residentOperationIndexes = new bool[population.Grammar.Operations.Count];
-        var maximumResidentOperationCount = 0;
+        var maximumExecutableOperationCount = 0;
+        var maximumArchiveOperationCount = 0;
+        var maximumArchiveArity = 0;
         void IncludeProgram(MathBlockProgramStructure program, bool executable)
         {
             var operationCount = checked(program.Nodes.Count - population.AllTerminals.Count);
-            maximumResidentOperationCount = Math.Max(maximumResidentOperationCount, operationCount);
+            maximumArchiveOperationCount = Math.Max(maximumArchiveOperationCount, operationCount);
             for (var nodeIndex = population.AllTerminals.Count;
                 nodeIndex < program.Nodes.Count;
                 nodeIndex++)
             {
                 var operationIndex = FindOperationIndex(population, program, nodeIndex);
-                residentOperationIndexes[operationIndex] = true;
-                if (executable)
-                    executableOperationIndexes[operationIndex] = true;
+                var operationArity = population.Grammar.Operations[operationIndex].InputTypes.Count;
+                maximumArchiveArity = Math.Max(maximumArchiveArity, operationArity);
+                if (!executable)
+                    continue;
+                executableOperationIndexes[operationIndex] = true;
+                maximumArity = Math.Max(maximumArity, operationArity);
             }
             if (!executable)
                 return;
+            maximumExecutableOperationCount = Math.Max(
+                maximumExecutableOperationCount,
+                operationCount);
             if (!MathBlockProgramPopulationCatalogCapacityPlanner.TryAnalyzeProgram(
                     definition,
                     program,
@@ -790,7 +806,9 @@ internal sealed class PopulationSearchLayout
             for (var index = 0; index < executableOperationIndexes.Length; index++)
             {
                 executableOperationIndexes[index] = true;
-                residentOperationIndexes[index] = true;
+                var operationArity = population.Grammar.Operations[index].InputTypes.Count;
+                maximumArity = Math.Max(maximumArity, operationArity);
+                maximumArchiveArity = Math.Max(maximumArchiveArity, operationArity);
             }
         }
 
@@ -805,18 +823,17 @@ internal sealed class PopulationSearchLayout
         MathBlockCollectionPrimitives.StableMergeSort(
             resourceBands,
             (left, right) => left.OperationCount.CompareTo(right.OperationCount));
-        var maximumOperationCount = maximumResidentOperationCount;
+        var maximumOperationCount = maximumExecutableOperationCount;
         var maximumBandElements = 0;
         foreach (var band in resourceBands)
         {
             maximumOperationCount = Math.Max(maximumOperationCount, band.OperationCount);
             maximumBandElements = Math.Max(maximumBandElements, band.MaximumOutputElements);
         }
-        for (var index = 0; index < residentOperationIndexes.Length; index++)
-        {
-            if (residentOperationIndexes[index])
-                maximumArity = Math.Max(maximumArity, population.Grammar.Operations[index].InputTypes.Count);
-        }
+        maximumArchiveOperationCount = Math.Max(
+            maximumArchiveOperationCount,
+            maximumOperationCount);
+        maximumArchiveArity = Math.Max(maximumArchiveArity, maximumArity);
         maximumValueElements = Math.Max(maximumValueElements, maximumBandElements);
         if (maximumOperationCount <= 0 || maximumBandElements <= 0 || maximumValueElements <= 0)
             throw new InvalidOperationException("The population search resource envelope is empty.");
@@ -873,6 +890,7 @@ internal sealed class PopulationSearchLayout
             compiledObjective.QualityDimensions)
         {
             MaximumOperationCount = maximumOperationCount,
+            ArchiveOperationCount = maximumArchiveOperationCount,
             MaximumBandElements = maximumBandElements,
             MaximumValueElements = maximumValueElements,
             MaximumArity = maximumArity,
@@ -888,7 +906,7 @@ internal sealed class PopulationSearchLayout
             ProgramOperationSize = MeasureLayout(
                 "program operation",
                 (1, 8),
-                (maximumArity, sizeof(int)))
+                (maximumArchiveArity, sizeof(int)))
         };
         layout.CalculateOffsets(definition, immutablePayloadBytes, enforceEnvelope);
         return layout;
@@ -905,7 +923,7 @@ internal sealed class PopulationSearchLayout
             "archive entry",
             (1, EntryHeaderSize),
             (objectiveSources.Length, sizeof(ulong)),
-            (MaximumOperationCount, ProgramOperationSize));
+            (ArchiveOperationCount, ProgramOperationSize));
         TrialEntrySize = ArchiveEntrySize;
         OperationOffset = HeaderSize;
         OperationInputTypeOffset = AdvanceLayout(
@@ -1192,8 +1210,9 @@ internal sealed class PopulationSearchLayout
     public PopulationSearchCycleParseResult ParseCycle(
         MathBlockProgramPopulationSearchDefinition definition,
         MathBlockProgramPopulationSearchState previous,
-        ReadOnlySpan<byte> downloaded)
+        byte[] downloaded)
     {
+        ArgumentNullException.ThrowIfNull(downloaded);
         if (downloaded.Length != CompactSize)
             throw new InvalidDataException("The resident search download length is invalid.");
         var status = (PopulationSearchCycleStatus)ReadInt32(downloaded, 0);
@@ -1276,6 +1295,15 @@ internal sealed class PopulationSearchLayout
         {
             throw new InvalidDataException("The resident search state is invalid.");
         }
+        var expectedStaticRejectionCount = CountExpectedStaticRejections(
+            definition,
+            previous.EnumerationCursor,
+            enumerationCursor);
+        if (staticallyRejectedProgramCount != expectedStaticRejectionCount)
+        {
+            throw new InvalidDataException(
+                "The resident static rejection count is incompatible with the host feasibility plan.");
+        }
 
         var structural = AppendFingerprints(
             previous.StructuralFingerprints,
@@ -1317,6 +1345,20 @@ internal sealed class PopulationSearchLayout
                 CompactTrialOffset - CompactOffset + index * TrialEntrySize,
                 definition);
         }
+        ulong retainedStaticRejectionCount = 0;
+        for (var index = 0; index < trials.Length; index++)
+        {
+            if (trials[index].Status == MathBlockProgramPopulationTrialStatus.StaticallyRejected)
+                retainedStaticRejectionCount = checked(retainedStaticRejectionCount + 1);
+        }
+        var expectedRetainedStaticRejectionCount = definition.CompactResults.IncludeRejectedTrials
+            ? expectedStaticRejectionCount
+            : 0ul;
+        if (retainedStaticRejectionCount != expectedRetainedStaticRejectionCount)
+        {
+            throw new InvalidDataException(
+                "The resident static rejection results are incompatible with the compact-result policy.");
+        }
         var state = new MathBlockProgramPopulationSearchState(
             definition.Identity,
             enumerationCursor,
@@ -1350,7 +1392,7 @@ internal sealed class PopulationSearchLayout
     private void WriteHeader(Span<byte> bytes, MathBlockProgramPopulationSearchDefinition definition)
     {
         WriteInt32(bytes, 0, unchecked((int)0x4d425334));
-        WriteInt32(bytes, 4, 13);
+        WriteInt32(bytes, 4, 14);
         WriteInt32(bytes, 8, operations.Length);
         WriteInt32(bytes, 12, terminals.Length);
         WriteInt32(bytes, 16, types.Length);
@@ -1413,6 +1455,7 @@ internal sealed class PopulationSearchLayout
         WriteUInt64(bytes, 360, definition.EnumerationCatalog?.CursorStart ?? 0);
         WriteInt32(bytes, 368, EnumerationCatalogOffset);
         WriteInt32(bytes, 372, enumerationPrograms.Length);
+        WriteInt32(bytes, 376, enumerationPrograms.Length);
     }
 
     private void WriteAcceptedState(
@@ -1540,7 +1583,7 @@ internal sealed class PopulationSearchLayout
         var operationCount = ReadInt32(bytes, offset + 12);
         var cell = ReadInt32(bytes, offset + 16);
         if (age < 0 || age > definition.Selection.MaximumAge ||
-            operationCount <= 0 || operationCount > MaximumOperationCount ||
+            operationCount <= 0 || operationCount > ArchiveOperationCount ||
             cell < -1 || cell >= definition.QualityDiversity.CellCount ||
             requiredCell.HasValue && cell != requiredCell.Value)
         {
@@ -1597,6 +1640,7 @@ internal sealed class PopulationSearchLayout
                 !proposalCursor.HasValue ||
                 proposalCursor.Value < catalog.CursorStart ||
                 proposalCursor.Value >= catalog.CursorEndExclusive ||
+                IsFeasibleCatalogCursor(proposalCursor.Value) ||
                 operationCount != 0 ||
                 cell != -1 ||
                 flags != 0)
@@ -1652,6 +1696,44 @@ internal sealed class PopulationSearchLayout
             cell);
     }
 
+    private ulong CountExpectedStaticRejections(
+        MathBlockProgramPopulationSearchDefinition definition,
+        ulong previousEnumerationCursor,
+        ulong enumerationCursor)
+    {
+        var catalog = definition.EnumerationCatalog;
+        if (catalog is null)
+            return 0;
+        var rangeStart = checked(catalog.CursorStart + previousEnumerationCursor);
+        var rangeEnd = checked(catalog.CursorStart + enumerationCursor);
+        var firstFeasible = FindFeasibleCursorLowerBound(rangeStart);
+        var lastFeasible = FindFeasibleCursorLowerBound(rangeEnd);
+        var feasibleCount = checked((ulong)(lastFeasible - firstFeasible));
+        return checked(enumerationCursor - previousEnumerationCursor - feasibleCount);
+    }
+
+    private bool IsFeasibleCatalogCursor(ulong proposalCursor)
+    {
+        var index = FindFeasibleCursorLowerBound(proposalCursor);
+        return index < enumerationProposalCursors.Length &&
+            enumerationProposalCursors[index] == proposalCursor;
+    }
+
+    private int FindFeasibleCursorLowerBound(ulong proposalCursor)
+    {
+        var low = 0;
+        var high = enumerationProposalCursors.Length;
+        while (low < high)
+        {
+            var middle = low + ((high - low) >> 1);
+            if (enumerationProposalCursors[middle] < proposalCursor)
+                low = middle + 1;
+            else
+                high = middle;
+        }
+        return low;
+    }
+
     private MathBlockProgramStructure ReadProgram(
         ReadOnlySpan<byte> bytes,
         int entryOffset,
@@ -1700,7 +1782,7 @@ internal sealed class PopulationSearchLayout
     {
         var terminalCount = population.AllTerminals.Count;
         if (program.Nodes.Count <= terminalCount ||
-            program.Nodes.Count - terminalCount > MaximumOperationCount)
+            program.Nodes.Count - terminalCount > ArchiveOperationCount)
         {
             throw new InvalidOperationException("An archive program has an invalid operation count.");
         }
