@@ -1,7 +1,8 @@
-using System.Security.Cryptography;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Globalization;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Supprocom.MathBlocks.Cuda;
 
@@ -40,6 +41,22 @@ public static class MathBlockCudaSlotLayout
     public const int CapacityOffset = 44;
 }
 
+public static class MathBlockCudaGraphEdgeLayout
+{
+    public const int Size = 16;
+    public const int FromOffset = 0;
+    public const int ToOffset = 4;
+    public const int WeightOffset = 8;
+}
+
+public static class MathBlockCudaRunLayout
+{
+    public const int Size = 16;
+    public const int StartOffset = 0;
+    public const int LengthOffset = 4;
+    public const int ValueOffset = 8;
+}
+
 [StructLayout(LayoutKind.Explicit, Size = MathBlockCudaSlotLayout.Size)]
 public struct MathBlockCudaSlotDescriptor
 {
@@ -71,20 +88,109 @@ public struct MathBlockCudaSlotDescriptor
     public int Capacity;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Explicit, Size = MathBlockCudaGraphEdgeLayout.Size)]
 public struct MathBlockCudaGraphEdgeDescriptor
 {
+    [FieldOffset(MathBlockCudaGraphEdgeLayout.FromOffset)]
     public int From;
+
+    [FieldOffset(MathBlockCudaGraphEdgeLayout.ToOffset)]
     public int To;
+
+    [FieldOffset(MathBlockCudaGraphEdgeLayout.WeightOffset)]
     public double Weight;
 }
 
-[StructLayout(LayoutKind.Sequential)]
+[StructLayout(LayoutKind.Explicit, Size = MathBlockCudaRunLayout.Size)]
 public struct MathBlockCudaRunDescriptor
 {
+    [FieldOffset(MathBlockCudaRunLayout.StartOffset)]
     public int Start;
+
+    [FieldOffset(MathBlockCudaRunLayout.LengthOffset)]
     public int Length;
+
+    [FieldOffset(MathBlockCudaRunLayout.ValueOffset)]
     public double Value;
+}
+
+public readonly record struct MathBlockCudaSlotAbi(
+    int Size,
+    int ScalarValueOffset,
+    int DataPointerOffset,
+    int ScratchPointerOffset,
+    int BooleanValueOffset,
+    int ValidOffset,
+    int RowsOffset,
+    int ColumnsOffset,
+    int CountOffset,
+    int CapacityOffset);
+
+public readonly record struct MathBlockCudaGraphEdgeAbi(
+    int Size,
+    int FromOffset,
+    int ToOffset,
+    int WeightOffset);
+
+public readonly record struct MathBlockCudaRunAbi(
+    int Size,
+    int StartOffset,
+    int LengthOffset,
+    int ValueOffset);
+
+public readonly record struct MathBlockCudaDeviceAbi(
+    int Version,
+    int DispatcherBlockSize,
+    string DispatchFunctionName,
+    string DispatchSignature,
+    MathBlockCudaSlotAbi Slot,
+    MathBlockCudaGraphEdgeAbi GraphEdge,
+    MathBlockCudaRunAbi Run,
+    MathBlockCudaValueCodecSchema ValueCodecSchema,
+    string ValueCodecImplementationFingerprint,
+    string SourceFingerprint,
+    string OperationTableFingerprint)
+{
+    public string Fingerprint => MathBlockCudaContractHash.Create(CreateFingerprintMaterial());
+
+    private string CreateFingerprintMaterial()
+    {
+        var builder = new StringBuilder("mathblocks-cuda-device-abi-v2\n");
+        Append(builder, Version);
+        Append(builder, DispatcherBlockSize);
+        Append(builder, DispatchFunctionName);
+        Append(builder, DispatchSignature);
+        Append(builder, Slot.Size);
+        Append(builder, Slot.ScalarValueOffset);
+        Append(builder, Slot.DataPointerOffset);
+        Append(builder, Slot.ScratchPointerOffset);
+        Append(builder, Slot.BooleanValueOffset);
+        Append(builder, Slot.ValidOffset);
+        Append(builder, Slot.RowsOffset);
+        Append(builder, Slot.ColumnsOffset);
+        Append(builder, Slot.CountOffset);
+        Append(builder, Slot.CapacityOffset);
+        Append(builder, GraphEdge.Size);
+        Append(builder, GraphEdge.FromOffset);
+        Append(builder, GraphEdge.ToOffset);
+        Append(builder, GraphEdge.WeightOffset);
+        Append(builder, Run.Size);
+        Append(builder, Run.StartOffset);
+        Append(builder, Run.LengthOffset);
+        Append(builder, Run.ValueOffset);
+        Append(builder, ValueCodecSchema.Version);
+        Append(builder, ValueCodecSchema.Fingerprint);
+        Append(builder, ValueCodecImplementationFingerprint);
+        Append(builder, SourceFingerprint);
+        Append(builder, OperationTableFingerprint);
+        return builder.ToString();
+    }
+
+    private static void Append(StringBuilder builder, int value) =>
+        builder.Append(value.ToString(CultureInfo.InvariantCulture)).Append('\n');
+
+    private static void Append(StringBuilder builder, string value) =>
+        builder.Append(value).Append('\n');
 }
 
 public sealed class MathBlockCudaContractCase
@@ -142,8 +248,10 @@ public sealed class MathBlockCudaOperationContract
         ValidityRule = $"{operation.Identity}/validity";
         ExecutionRule = $"{operation.Identity}/execution";
         var cases = new MathBlockCudaContractCase[operation.RegressionCases.Count];
+        PerformanceEvidenceFingerprint = CreatePerformanceEvidenceFingerprint(
+            operation.PerformanceCase);
         var fingerprintSource = new StringBuilder(
-            $"mathblocks-cuda-operation-contract-v2\n" +
+            $"mathblocks-cuda-operation-contract-v3\n" +
             $"{operation.Identifier}\n{operation.Version}\n{operation.Arity}\n" +
             $"{(int)family}\n{opcode}\n{RequiredBlockSize}\n{nativeBlockSize}\n" +
             $"{(int)ExecutionBehavior}\n" +
@@ -160,7 +268,8 @@ public sealed class MathBlockCudaOperationContract
                 var input = regression.Inputs[operandIndex];
                 operandTypes[operandIndex] = input.Type;
                 evidence.Append(input.Type).Append('\n')
-                    .Append(MathBlockCudaContractHash.CreateValue(input)).Append('\n');
+                    .Append(MathBlockCudaContractHash.CreateValue(input)).Append('\n')
+                    .Append(input.InvalidReason).Append('\n');
             }
             var plan = PlanCUDA(regression.Inputs);
             evidence.Append(regression.Expected.Type).Append('\n')
@@ -180,6 +289,7 @@ public sealed class MathBlockCudaOperationContract
                 evidenceFingerprint);
             fingerprintSource.Append(evidenceFingerprint).Append('\n');
         }
+        fingerprintSource.Append(PerformanceEvidenceFingerprint).Append('\n');
         contractCases = Array.AsReadOnly(cases);
         Fingerprint = MathBlockCudaContractHash.Create(fingerprintSource.ToString());
     }
@@ -201,6 +311,7 @@ public sealed class MathBlockCudaOperationContract
     public string ScratchRule { get; }
     public string ValidityRule { get; }
     public string ExecutionRule { get; }
+    public string PerformanceEvidenceFingerprint { get; }
     public string Fingerprint { get; }
     public IReadOnlyList<MathBlockRegressionCase> RegressionCases => operation.RegressionCases;
     public MathBlockPerformanceCase PerformanceCase => operation.PerformanceCase;
@@ -258,6 +369,28 @@ public sealed class MathBlockCudaOperationContract
             layout.ShapeColumns[output],
             scratchBytes);
     }
+
+    private static string CreatePerformanceEvidenceFingerprint(
+        MathBlockPerformanceCase performanceCase)
+    {
+        var evidence = new StringBuilder("mathblocks-cuda-performance-evidence-v1\n");
+        evidence.Append(performanceCase.Inputs.Count.ToString(CultureInfo.InvariantCulture))
+            .Append('\n');
+        for (var index = 0; index < performanceCase.Inputs.Count; index++)
+        {
+            var input = performanceCase.Inputs[index];
+            evidence.Append(input.Type).Append('\n')
+                .Append(MathBlockCudaContractHash.CreateValue(input)).Append('\n')
+                .Append(input.InvalidReason).Append('\n');
+        }
+        evidence.Append(performanceCase.Iterations.ToString(CultureInfo.InvariantCulture))
+            .Append('\n')
+            .Append(performanceCase.MaximumWarmLatencyMicroseconds.ToString(
+                "R",
+                CultureInfo.InvariantCulture))
+            .Append('\n');
+        return MathBlockCudaContractHash.Create(evidence.ToString());
+    }
 }
 
 public static class MathBlockCudaDeviceModule
@@ -266,7 +399,7 @@ public static class MathBlockCudaDeviceModule
         CreateState,
         LazyThreadSafetyMode.ExecutionAndPublication);
 
-    public const int AbiVersion = 1;
+    public const int AbiVersion = 2;
     public const int DispatcherBlockSize = 128;
     public const string DispatchFunctionName = "mathblocks_operation_dispatch";
     public const string DispatchSignature =
@@ -275,7 +408,8 @@ public static class MathBlockCudaDeviceModule
 
     public static string Source => state.Value.Source;
     public static string SourceFingerprint => state.Value.SourceFingerprint;
-    public static string AbiFingerprint => state.Value.AbiFingerprint;
+    public static MathBlockCudaDeviceAbi Abi => state.Value.Abi;
+    public static string AbiFingerprint => state.Value.Abi.Fingerprint;
     public static IReadOnlyList<MathBlockCudaOperationContract> Operations => state.Value.Operations;
     public static IReadOnlyCollection<string> SupportedOperationIdentities =>
         state.Value.SupportedOperationIdentities;
@@ -326,33 +460,61 @@ public static class MathBlockCudaDeviceModule
             identities[index] = contract.Identity;
         }
 
-        var fingerprint = new StringBuilder();
-        fingerprint.Append("mathblocks-cuda-device-abi-v1\n")
-            .Append(AbiVersion).Append('\n')
-            .Append(DispatcherBlockSize).Append('\n')
-            .Append(DispatchFunctionName).Append('\n')
-            .Append(MathBlockCudaSlotLayout.Size).Append('\n')
-            .Append(MathBlockCudaSlotLayout.ScalarValueOffset).Append('\n')
-            .Append(MathBlockCudaSlotLayout.DataPointerOffset).Append('\n')
-            .Append(MathBlockCudaSlotLayout.ScratchPointerOffset).Append('\n')
-            .Append(MathBlockCudaSlotLayout.BooleanValueOffset).Append('\n')
-            .Append(MathBlockCudaSlotLayout.ValidOffset).Append('\n')
-            .Append(MathBlockCudaSlotLayout.RowsOffset).Append('\n')
-            .Append(MathBlockCudaSlotLayout.ColumnsOffset).Append('\n')
-            .Append(MathBlockCudaSlotLayout.CountOffset).Append('\n')
-            .Append(MathBlockCudaSlotLayout.CapacityOffset).Append('\n')
-            .Append(sourceFingerprint).Append('\n');
+        var operationTable = new StringBuilder("mathblocks-cuda-operation-table-v1\n");
         for (var index = 0; index < contracts.Length; index++)
-            fingerprint.Append(contracts[index].Fingerprint).Append('\n');
+        {
+            operationTable.Append(contracts[index].Identity).Append('\n')
+                .Append(contracts[index].Family).Append('\n')
+                .Append(((int)contracts[index].Family).ToString(CultureInfo.InvariantCulture))
+                .Append('\n')
+                .Append(contracts[index].Opcode.ToString(CultureInfo.InvariantCulture))
+                .Append('\n')
+                .Append(contracts[index].Fingerprint).Append('\n');
+        }
+        var operationTableFingerprint = MathBlockCudaContractHash.Create(
+            operationTable.ToString());
+        var abi = new MathBlockCudaDeviceAbi(
+            AbiVersion,
+            DispatcherBlockSize,
+            DispatchFunctionName,
+            DispatchSignature,
+            new MathBlockCudaSlotAbi(
+                Marshal.SizeOf<MathBlockCudaSlotDescriptor>(),
+                OffsetOf<MathBlockCudaSlotDescriptor>(nameof(MathBlockCudaSlotDescriptor.ScalarValue)),
+                OffsetOf<MathBlockCudaSlotDescriptor>(nameof(MathBlockCudaSlotDescriptor.DataPointer)),
+                OffsetOf<MathBlockCudaSlotDescriptor>(nameof(MathBlockCudaSlotDescriptor.ScratchPointer)),
+                OffsetOf<MathBlockCudaSlotDescriptor>(nameof(MathBlockCudaSlotDescriptor.BooleanValue)),
+                OffsetOf<MathBlockCudaSlotDescriptor>(nameof(MathBlockCudaSlotDescriptor.Valid)),
+                OffsetOf<MathBlockCudaSlotDescriptor>(nameof(MathBlockCudaSlotDescriptor.Rows)),
+                OffsetOf<MathBlockCudaSlotDescriptor>(nameof(MathBlockCudaSlotDescriptor.Columns)),
+                OffsetOf<MathBlockCudaSlotDescriptor>(nameof(MathBlockCudaSlotDescriptor.Count)),
+                OffsetOf<MathBlockCudaSlotDescriptor>(nameof(MathBlockCudaSlotDescriptor.Capacity))),
+            new MathBlockCudaGraphEdgeAbi(
+                Marshal.SizeOf<MathBlockCudaGraphEdgeDescriptor>(),
+                OffsetOf<MathBlockCudaGraphEdgeDescriptor>(nameof(MathBlockCudaGraphEdgeDescriptor.From)),
+                OffsetOf<MathBlockCudaGraphEdgeDescriptor>(nameof(MathBlockCudaGraphEdgeDescriptor.To)),
+                OffsetOf<MathBlockCudaGraphEdgeDescriptor>(nameof(MathBlockCudaGraphEdgeDescriptor.Weight))),
+            new MathBlockCudaRunAbi(
+                Marshal.SizeOf<MathBlockCudaRunDescriptor>(),
+                OffsetOf<MathBlockCudaRunDescriptor>(nameof(MathBlockCudaRunDescriptor.Start)),
+                OffsetOf<MathBlockCudaRunDescriptor>(nameof(MathBlockCudaRunDescriptor.Length)),
+                OffsetOf<MathBlockCudaRunDescriptor>(nameof(MathBlockCudaRunDescriptor.Value))),
+            MathBlockCudaValueCodec.Schema,
+            MathBlockCudaValueCodec.ImplementationFingerprint,
+            sourceFingerprint,
+            operationTableFingerprint);
 
         return new ModuleState(
             source,
             sourceFingerprint,
-            MathBlockCudaContractHash.Create(fingerprint.ToString()),
+            abi,
             Array.AsReadOnly(contracts),
             contractsByIdentity,
             Array.AsReadOnly(identities));
     }
+
+    private static int OffsetOf<T>(string fieldName) where T : struct =>
+        Marshal.OffsetOf<T>(fieldName).ToInt32();
 
     private static string CreateSource()
     {
@@ -544,7 +706,7 @@ public static class MathBlockCudaDeviceModule
     private sealed record ModuleState(
         string Source,
         string SourceFingerprint,
-        string AbiFingerprint,
+        MathBlockCudaDeviceAbi Abi,
         IReadOnlyList<MathBlockCudaOperationContract> Operations,
         IReadOnlyDictionary<string, MathBlockCudaOperationContract> ContractsByIdentity,
         IReadOnlyCollection<string> SupportedOperationIdentities);
@@ -580,5 +742,83 @@ internal static class MathBlockCudaContractHash
         {
             Marshal.FreeHGlobal(arena);
         }
+    }
+
+    public static string CreateImplementation(Type type)
+    {
+        ArgumentNullException.ThrowIfNull(type);
+        var reflectedMethods = type.GetMethods(
+            BindingFlags.Public |
+            BindingFlags.NonPublic |
+            BindingFlags.Static |
+            BindingFlags.DeclaredOnly);
+        var methods = new List<MethodBase>(reflectedMethods.Length + 1);
+        foreach (var method in reflectedMethods)
+            methods.Add(method);
+        if (type.TypeInitializer is not null)
+            methods.Add(type.TypeInitializer);
+        methods.Sort((left, right) => StringComparer.Ordinal.Compare(
+            CreateMethodIdentity(left),
+            CreateMethodIdentity(right)));
+
+        var material = new StringBuilder("mathblocks-managed-implementation-v1\n")
+            .Append(type.FullName).Append('\n');
+        foreach (var method in methods)
+        {
+            material.Append(CreateMethodIdentity(method)).Append('\n');
+            var body = method.GetMethodBody();
+            if (body is null)
+            {
+                material.Append("body:none\n");
+                continue;
+            }
+
+            material.Append(body.InitLocals ? "init-locals:1\n" : "init-locals:0\n")
+                .Append("max-stack:")
+                .Append(body.MaxStackSize.ToString(CultureInfo.InvariantCulture))
+                .Append('\n');
+            foreach (var local in body.LocalVariables)
+            {
+                material.Append("local:")
+                    .Append(local.LocalIndex.ToString(CultureInfo.InvariantCulture)).Append(':')
+                    .Append(local.LocalType.AssemblyQualifiedName).Append(':')
+                    .Append(local.IsPinned ? '1' : '0').Append('\n');
+            }
+            foreach (var clause in body.ExceptionHandlingClauses)
+            {
+                material.Append("clause:")
+                    .Append(((int)clause.Flags).ToString(CultureInfo.InvariantCulture)).Append(':')
+                    .Append(clause.TryOffset.ToString(CultureInfo.InvariantCulture)).Append(':')
+                    .Append(clause.TryLength.ToString(CultureInfo.InvariantCulture)).Append(':')
+                    .Append(clause.HandlerOffset.ToString(CultureInfo.InvariantCulture)).Append(':')
+                    .Append(clause.HandlerLength.ToString(CultureInfo.InvariantCulture)).Append(':')
+                    .Append((clause.Flags == ExceptionHandlingClauseOptions.Filter
+                        ? clause.FilterOffset
+                        : -1).ToString(CultureInfo.InvariantCulture)).Append(':')
+                    .Append(clause.Flags == ExceptionHandlingClauseOptions.Clause
+                        ? clause.CatchType?.AssemblyQualifiedName
+                        : null).Append('\n');
+            }
+            material.Append("il:")
+                .Append(Convert.ToHexString(body.GetILAsByteArray() ?? []))
+                .Append('\n');
+        }
+        return Create(material.ToString());
+    }
+
+    private static string CreateMethodIdentity(MethodBase method)
+    {
+        var identity = new StringBuilder(method.Name).Append('(');
+        var parameters = method.GetParameters();
+        for (var index = 0; index < parameters.Length; index++)
+        {
+            if (index != 0)
+                identity.Append(',');
+            identity.Append(parameters[index].ParameterType.AssemblyQualifiedName);
+        }
+        identity.Append(')');
+        if (method is MethodInfo methodInfo)
+            identity.Append("->").Append(methodInfo.ReturnType.AssemblyQualifiedName);
+        return identity.ToString();
     }
 }

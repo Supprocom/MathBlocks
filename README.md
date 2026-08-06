@@ -132,9 +132,14 @@ includes data bits, shape, type, unit, and invalid state.
 Each operation fingerprint binds its identity, version, family, opcode, arity,
 rule identities, execution behavior, and device-source fingerprint.
 
+It also binds every regression case and every performance-case input. The
+performance iteration count and maximum warm latency are part of the same
+identity.
+
 The source fingerprint binds the exact CUDA definitions and dispatch
-implementation. The ABI fingerprint binds the slot layout, dispatcher signature,
-source, and complete operation table.
+implementation. The ABI fingerprint binds the exact dispatcher signature, slot
+layout, graph-edge layout, run layout, versioned value-codec schema, codec
+implementation, source, and complete operation table.
 
 A consumer must reject a stored ABI fingerprint that differs from the loaded
 package. A package version change does not replace this check.

@@ -2,8 +2,47 @@ using System.Runtime.InteropServices;
 
 namespace Supprocom.MathBlocks.Cuda;
 
+public readonly record struct MathBlockCudaValueCodecSchema(
+    int Version,
+    string Definition)
+{
+    public string Fingerprint => MathBlockCudaContractHash.Create(
+        "mathblocks-cuda-value-codec-schema\n" +
+        Version.ToString(System.Globalization.CultureInfo.InvariantCulture) + "\n" +
+        Definition + "\n");
+}
+
 public static class MathBlockCudaValueCodec
 {
+    public const int SchemaVersion = 1;
+    public const string SchemaDefinition = """
+        byte-order=little-endian
+        slot=scalar:f64,data:u64,scratch:u64,boolean:i32,valid:i32,rows:i32,columns:i32,count:i32,capacity:i32
+        invalid=valid:0,count:0,payload:none
+        scalar=slot.scalar:f64,payload:none,count:0,rows:0,columns:0
+        boolean=slot.boolean:i32,payload:none,count:0,rows:0,columns:0
+        complex=payload:[real:f64,imaginary:f64],count:1,rows:0,columns:0
+        vector=payload:f64[count],rows:count,columns:0
+        boolean-vector=payload:i32[count],rows:count,columns:0
+        matrix=payload:f64[rows*columns],count:rows*columns
+        complex-vector=payload:[real:f64,imaginary:f64][count],rows:count,columns:0
+        complex-matrix=payload:[real:f64,imaginary:f64][rows*columns],count:rows*columns
+        point-set=payload:[x:f64,y:f64][count],rows:count,columns:0
+        graph=payload:graph-edge[count],rows:vertex-count,columns:0
+        run-set=payload:run[count],rows:count,columns:0
+        header-count=static-matrix-product|complex-one|declared-capacity
+        read-validity=valid-zero-is-invalid
+        capacity=count-must-not-exceed-capacity
+        """;
+
+    public static MathBlockCudaValueCodecSchema Schema { get; } =
+        new(SchemaVersion, SchemaDefinition);
+
+    public static string SchemaFingerprint => Schema.Fingerprint;
+
+    public static string ImplementationFingerprint { get; } =
+        MathBlockCudaContractHash.CreateImplementation(typeof(MathBlockCudaValueCodec));
+
     public static unsafe int GetPayloadByteCount(MathBlockValueKind kind, int capacity)
     {
         if (capacity < 0)
