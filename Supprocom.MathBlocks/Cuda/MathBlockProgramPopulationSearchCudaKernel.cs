@@ -1075,6 +1075,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             const MathBlockSlot* output,
             int history_offset,
             int history_count,
+            int mask_capacity,
             int maximum_lookback,
             MathBlockSlot* mask_slot,
             int* mask_values,
@@ -1084,7 +1085,9 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             {
                 int kind = mbp_read_int(arena, type_offset + output_type * 48);
                 int row_count = mbp_validity_rows(kind, output);
-                *cooperative_status = row_count >= 0 && row_count <= history_count ? 1 : 0;
+                *cooperative_status = row_count >= 0 &&
+                    row_count <= history_count &&
+                    row_count <= mask_capacity ? 1 : 0;
                 if (*cooperative_status != 0)
                 {
                     mask_slot->scalar_value = 0.0;
@@ -1095,7 +1098,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                     mask_slot->rows = row_count;
                     mask_slot->columns = 0;
                     mask_slot->count = row_count;
-                    mask_slot->capacity = history_count;
+                    mask_slot->capacity = mask_capacity;
                 }
             }
             __syncthreads();
@@ -1694,7 +1697,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 14)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 15)
                 return;
 
             int fingerprint_capacity = mbp_read_int(arena, 40);
@@ -1738,7 +1741,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             if (blockIdx.x != 0)
                 return;
             __shared__ int cooperative_status;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 14)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 15)
                 return;
 
             int grammar_operation_count = mbp_read_int(arena, 8);
@@ -1774,6 +1777,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int program_operation_size = mbp_read_int(arena, 108);
             int entry_size = mbp_read_int(arena, 112);
             int history_count = mbp_read_int(arena, 120);
+            int mask_capacity = mbp_read_int(arena, 380);
             int refresh_count = mbp_read_int(arena, 124);
 
             int operation_offset = mbp_header_offset(arena, 0);
@@ -1987,6 +1991,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                         &candidate_slots[final_node],
                         history_offset,
                         history_count,
+                        mask_capacity,
                         maximum_lookback,
                         mask_slot,
                         mask_values,
@@ -2179,7 +2184,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 14)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 15)
                 return;
 
             int compact_offset = mbp_header_offset(arena, 34);
@@ -2610,7 +2615,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             if (blockIdx.x != 0)
                 return;
             __shared__ int cooperative_status;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 14)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 15)
                 return;
 
             int compact_offset = mbp_header_offset(arena, 34);
@@ -2641,6 +2646,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
             int program_operation_size = mbp_read_int(arena, 108);
             int entry_size = mbp_read_int(arena, 112);
             int history_count = mbp_read_int(arena, 120);
+            int mask_capacity = mbp_read_int(arena, 380);
             int proposal_wave_slot_offset = mbp_read_int(arena, 332);
 
             int operation_offset = mbp_header_offset(arena, 0);
@@ -2769,6 +2775,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
                     &candidate_slots[final_node],
                     history_offset,
                     history_count,
+                    mask_capacity,
                     maximum_lookback,
                     mask_slot,
                     mask_values,
@@ -2835,7 +2842,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 14)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 15)
                 return;
 
             int compact_offset = mbp_header_offset(arena, 34);
@@ -3105,7 +3112,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 14)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 15)
                 return;
 
             int compact_offset = mbp_header_offset(arena, 34);
@@ -3187,7 +3194,7 @@ internal static class MathBlockProgramPopulationSearchResidentKernel
         {
             if (blockIdx.x != 0)
                 return;
-            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 14)
+            if (mbp_read_int(arena, 0) != (int)0x4d425334 || mbp_read_int(arena, 4) != 15)
                 return;
 
             int compact_offset = mbp_header_offset(arena, 34);

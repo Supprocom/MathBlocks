@@ -2937,6 +2937,131 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
     }
 
     [Fact]
+    public void Trailing_candidate_binds_validity_mask_to_candidate_output_rows()
+    {
+        RequireCuda();
+        var definition = CreateTrailingValidityCatalogSearch(includePointwise: false);
+        var program = Assert.Single(definition.EnumerationCatalog!.Programs);
+        var expected = definition.EvaluateObjectives(program);
+        Assert.Equal(
+            BitConverter.DoubleToInt64Bits(32d),
+            BitConverter.DoubleToInt64Bits(Assert.Single(expected)));
+        var worker = new MathBlocksCUDAWorker();
+        var plan = worker.PlanPopulationSearchStaticFeasibility(definition);
+        Assert.Single(plan.FeasiblePrograms);
+        Assert.Empty(plan.Rejections);
+        using var compiled = worker.CompilePopulationSearch(definition);
+        var layout = ReadLayout(compiled);
+        Assert.Equal(
+            4,
+            (int)layout.GetType().GetProperty("MaximumValidityRows")!.GetValue(layout)!);
+
+        var result = compiled.ExecuteCycle();
+
+        var trial = Assert.Single(result.Trials);
+        Assert.Equal(MathBlockProgramPopulationTrialStatus.Accepted, trial.Status);
+        Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits),
+            trial.Objectives.Select(BitConverter.DoubleToInt64Bits));
+        Assert.Equal(definition.CreateSemanticFingerprint(program), trial.SemanticFingerprint);
+        Assert.Equal(1, compiled.CudaCandidateDispatchCount);
+        Assert.Equal(3, compiled.CudaNodeDispatchCount);
+        AssertResidentCycleContract(compiled);
+    }
+
+    [Fact]
+    public void Mixed_pointwise_and_trailing_catalog_uses_each_runtime_validity_length()
+    {
+        RequireCuda();
+        var definition = CreateTrailingValidityCatalogSearch(includePointwise: true);
+        var expected = definition.EnumerationCatalog!.Programs
+            .Select(program => definition.EvaluateObjectives(program))
+            .ToArray();
+        Assert.Equal([56d, 32d], expected.Select(values => Assert.Single(values)));
+        using var compiled = new MathBlocksCUDAWorker().CompilePopulationSearch(
+            definition,
+            new MathBlockProgramPopulationExecutionOptions(
+                MathBlockProgramPopulationExecutionMode.ParallelResident,
+                2));
+        var layout = ReadLayout(compiled);
+        Assert.Equal(
+            6,
+            (int)layout.GetType().GetProperty("MaximumValidityRows")!.GetValue(layout)!);
+
+        var result = compiled.ExecuteCycle();
+
+        Assert.Equal(2, result.Trials.Count);
+        Assert.Equal(
+            expected.SelectMany(values => values).Select(BitConverter.DoubleToInt64Bits),
+            result.Trials.SelectMany(trial => trial.Objectives).Select(BitConverter.DoubleToInt64Bits));
+        Assert.Equal(
+            definition.EnumerationCatalog.Programs.Select(definition.CreateSemanticFingerprint),
+            result.Trials.Select(trial => trial.SemanticFingerprint));
+        Assert.Equal(2ul, result.AcceptedState.EvaluatedProgramCount);
+        Assert.Equal(2, compiled.CudaCandidateDispatchCount);
+        Assert.Equal(6, compiled.CudaNodeDispatchCount);
+        AssertResidentCycleContract(compiled);
+    }
+
+    [Fact]
+    public void Catalog_capacity_planner_skips_static_hysteresis_rejection_and_preserves_lineage()
+    {
+        RequireCuda();
+        var definition = CreateHysteresisStaticRejectionCatalogSearch();
+        var catalog = Assert.IsType<MathBlockProgramPopulationEnumerationCatalog>(
+            definition.EnumerationCatalog);
+        var worker = new MathBlocksCUDAWorker();
+
+        var planned = worker.PlanPopulationEnumerationCatalogResourceBands(
+            definition.Population,
+            catalog);
+        var band = Assert.Single(planned);
+        Assert.Equal(1, band.OperationCount);
+        Assert.Equal(5, band.MaximumOutputElements);
+        var feasibility = worker.PlanPopulationSearchStaticFeasibility(definition);
+        Assert.Single(feasibility.FeasiblePrograms);
+        var rejection = Assert.Single(feasibility.Rejections);
+        Assert.Equal(0ul, rejection.ProposalCursor);
+        Assert.Contains("hysteresis thresholds", rejection.Reason, StringComparison.Ordinal);
+        using var compiled = worker.CompilePopulationSearch(definition);
+        var initial = compiled.AcceptedState;
+
+        var rejectedCycle = compiled.ExecuteCycle();
+
+        var rejected = Assert.Single(rejectedCycle.Trials);
+        Assert.Equal(MathBlockProgramPopulationTrialStatus.StaticallyRejected, rejected.Status);
+        Assert.Equal(0ul, rejected.Program.ProposalCursor);
+        Assert.Equal(catalog.Programs[0].StructuralFingerprint, rejected.StructuralFingerprint);
+        Assert.Equal(initial.RandomState, rejectedCycle.AcceptedState.RandomState);
+        Assert.Empty(rejectedCycle.AcceptedState.StructuralFingerprints);
+        Assert.Empty(rejectedCycle.AcceptedState.SemanticFingerprints);
+        Assert.Empty(rejectedCycle.AcceptedState.SelectionEntries);
+        Assert.Empty(rejectedCycle.AcceptedState.QualityDiversityEntries);
+        Assert.Equal(0ul, rejectedCycle.AcceptedState.EvaluatedProgramCount);
+        Assert.Equal(0, compiled.CudaCandidateDispatchCount);
+        Assert.Equal(0, compiled.CudaNodeDispatchCount);
+
+        var validCycle = compiled.ExecuteCycle();
+
+        var valid = Assert.Single(validCycle.Trials);
+        Assert.Equal(1ul, valid.Program.ProposalCursor);
+        Assert.NotEqual(MathBlockProgramPopulationTrialStatus.StaticallyRejected, valid.Status);
+        Assert.Equal(
+            definition.EvaluateObjectives(catalog.Programs[1]).Select(BitConverter.DoubleToInt64Bits),
+            valid.Objectives.Select(BitConverter.DoubleToInt64Bits));
+        Assert.Equal(1ul, validCycle.AcceptedState.EvaluatedProgramCount);
+        Assert.Equal(1, compiled.CudaCandidateDispatchCount);
+        Assert.Equal(2, compiled.CudaNodeDispatchCount);
+        Assert.Equal(1, compiled.StaticallyRejectedProgramCount);
+        Assert.Equal(1, compiled.ImmutableUploadCount);
+        Assert.Equal(0, compiled.LaterImmutableUploadCount);
+        Assert.Equal(2, compiled.GraphLaunchCount);
+        Assert.Equal(2, compiled.SynchronizationCount);
+        Assert.Equal(2, compiled.DownloadCount);
+        Assert.Equal(0, compiled.FullCandidateOutputDownloadCount);
+        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+    }
+
+    [Fact]
     public void Resident_search_binds_candidate_and_validity_mask_through_rank_objectives()
     {
         RequireCuda();
@@ -6517,6 +6642,190 @@ public sealed class MathBlockCudaProgramPopulationSearchTests
                 [new MathBlockProgramPopulationQualityDiversityDimension("value", 0, 20, 4)]),
             new MathBlockProgramPopulationSearchEnvelope(64L * 1024 * 1024, 16 * 1024 * 1024),
             new MathBlockProgramPopulationValidityPolicy([1]),
+            wavePolicy: new MathBlockProgramPopulationWavePolicy(1, 1),
+            enumerationCatalog: catalog);
+    }
+
+    private static MathBlockProgramPopulationSearchDefinition CreateTrailingValidityCatalogSearch(
+        bool includePointwise)
+    {
+        var sourceType = MathBlockType.Vector(length: 6);
+        var dynamicVector = MathBlockType.Vector();
+        var dynamicMask = MathBlockType.BooleanVector();
+        var scalar = MathBlockType.Scalar();
+        var terminals = new[]
+        {
+            new MathBlockProgramPopulationTerminal(
+                "source",
+                sourceType,
+                MathBlockValue.Vector([1d, 3d, 6d, 10d, 15d, 21d])),
+            new MathBlockProgramPopulationTerminal(
+                "lag",
+                scalar,
+                MathBlockValue.Scalar(2d))
+        };
+        var operations = new List<MathBlockProgramPopulationOperation>();
+        if (includePointwise)
+        {
+            operations.Add(new MathBlockProgramPopulationOperation(
+                "vector.absolute",
+                1,
+                [sourceType],
+                sourceType));
+        }
+        operations.Add(new MathBlockProgramPopulationOperation(
+            "sequence.difference",
+            1,
+            [sourceType, scalar],
+            dynamicVector));
+        var maximumOutputElements = includePointwise ? 6 : 4;
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(operations, dynamicVector),
+            terminals,
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, maximumOutputElements)],
+            proposalsPerCycle: includePointwise ? 2 : 1,
+            fingerprintCapacity: includePointwise ? 4 : 2);
+        var terminalNodes = terminals
+            .Select((terminal, index) => MathBlockProgramCandidateNode.Terminal(
+                index,
+                terminal.Identifier,
+                terminal.Type))
+            .ToArray();
+        var programs = new List<MathBlockProgramStructure>();
+        if (includePointwise)
+        {
+            programs.Add(new MathBlockProgramStructure(
+                0,
+                null,
+                MathBlockProgramPopulationTrialSource.Enumeration,
+                [
+                    .. terminalNodes,
+                    MathBlockProgramCandidateNode.Operation(
+                        "vector.absolute",
+                        1,
+                        sourceType,
+                        0)
+                ]));
+        }
+        programs.Add(new MathBlockProgramStructure(
+            0,
+            null,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                .. terminalNodes,
+                MathBlockProgramCandidateNode.Operation(
+                    "sequence.difference",
+                    1,
+                    dynamicVector,
+                    0,
+                    1)
+            ]));
+        var catalog = new MathBlockProgramPopulationEnumerationCatalog(0, programs);
+        var objectiveBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = objectiveBuilder.Input("candidate", dynamicVector);
+        var validity = objectiveBuilder.Input("validity", dynamicMask);
+        var selected = objectiveBuilder.Apply(
+            "vector.select",
+            inputs: [validity, candidate, candidate]);
+        var sum = objectiveBuilder.Apply("vector.sum", inputs: [selected]);
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveBuilder.Output("sum", sum).Build(),
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "sum",
+                "sum",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)],
+            candidateValidityMaskInput: "validity");
+        var trialCount = (ulong)programs.Count;
+        return new MathBlockProgramPopulationSearchDefinition(
+            population,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(trialCount, trialCount, 0, 0, 0, 61),
+            new MathBlockProgramPopulationSelectionPolicy(4, 8),
+            new MathBlockProgramPopulationQualityDiversityPolicy(
+                "sum",
+                [new MathBlockProgramPopulationQualityDiversityDimension("sum", 0, 64, 4)]),
+            new MathBlockProgramPopulationSearchEnvelope(64L * 1024 * 1024, 16 * 1024 * 1024),
+            new MathBlockProgramPopulationValidityPolicy([0, 1, 2, 3, 4, 5]),
+            wavePolicy: new MathBlockProgramPopulationWavePolicy(programs.Count, 1),
+            enumerationCatalog: catalog);
+    }
+
+    private static MathBlockProgramPopulationSearchDefinition
+        CreateHysteresisStaticRejectionCatalogSearch()
+    {
+        var vector = MathBlockType.Vector(length: 5);
+        var scalar = MathBlockType.Scalar();
+        var terminals = new[]
+        {
+            new MathBlockProgramPopulationTerminal(
+                "source",
+                vector,
+                MathBlockValue.Vector([-2d, 0d, 2d, 0d, -2d])),
+            new MathBlockProgramPopulationTerminal("invalid-lower", scalar, MathBlockValue.Scalar(1d)),
+            new MathBlockProgramPopulationTerminal("invalid-upper", scalar, MathBlockValue.Scalar(0d)),
+            new MathBlockProgramPopulationTerminal("valid-lower", scalar, MathBlockValue.Scalar(-1d)),
+            new MathBlockProgramPopulationTerminal("valid-upper", scalar, MathBlockValue.Scalar(1d))
+        };
+        var population = new MathBlockProgramPopulationDefinition(
+            new MathBlockProgramPopulationGrammar(
+                [new MathBlockProgramPopulationOperation(
+                    "path.hysteresis",
+                    1,
+                    [vector, scalar, scalar],
+                    vector)],
+                vector),
+            terminals,
+            [],
+            [new MathBlockProgramPopulationResourceBand(1, 5)],
+            proposalsPerCycle: 1,
+            fingerprintCapacity: 4);
+        var terminalNodes = terminals
+            .Select((terminal, index) => MathBlockProgramCandidateNode.Terminal(
+                index,
+                terminal.Identifier,
+                terminal.Type))
+            .ToArray();
+        MathBlockProgramStructure CreateProgram(int lower, int upper) => new(
+            0,
+            null,
+            MathBlockProgramPopulationTrialSource.Enumeration,
+            [
+                .. terminalNodes,
+                MathBlockProgramCandidateNode.Operation(
+                    "path.hysteresis",
+                    1,
+                    vector,
+                    0,
+                    lower,
+                    upper)
+            ]);
+        var catalog = new MathBlockProgramPopulationEnumerationCatalog(
+            0,
+            [CreateProgram(1, 2), CreateProgram(3, 4)]);
+        var objectiveBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var candidate = objectiveBuilder.Input("candidate", vector);
+        var sum = objectiveBuilder.Apply("vector.sum", inputs: [candidate]);
+        var binding = new MathBlockProgramPopulationObjectiveBinding(
+            objectiveBuilder.Output("sum", sum).Build(),
+            "candidate",
+            new Dictionary<string, MathBlockValue>(),
+            [new MathBlockProgramPopulationObjective(
+                "sum",
+                "sum",
+                MathBlockProgramPopulationObjectiveDirection.Maximize)]);
+        return new MathBlockProgramPopulationSearchDefinition(
+            population,
+            binding,
+            new MathBlockProgramPopulationEvolutionPolicy(2, 2, 0, 0, 0, 67),
+            new MathBlockProgramPopulationSelectionPolicy(4, 8),
+            new MathBlockProgramPopulationQualityDiversityPolicy(
+                "sum",
+                [new MathBlockProgramPopulationQualityDiversityDimension("sum", -5, 5, 4)]),
+            new MathBlockProgramPopulationSearchEnvelope(64L * 1024 * 1024, 16 * 1024 * 1024),
+            new MathBlockProgramPopulationValidityPolicy([0, 1, 2, 3, 4]),
             wavePolicy: new MathBlockProgramPopulationWavePolicy(1, 1),
             enumerationCatalog: catalog);
     }

@@ -601,6 +601,7 @@ internal sealed class PopulationSearchLayout
     public int ScratchBytesPerNode { get; private set; }
     public int PayloadStride { get; private set; }
     public int ObjectivePayloadBytes { get; private set; }
+    public int MaximumValidityRows { get; private set; }
     public int ProgramOperationSize { get; private set; }
     public int ArchiveEntrySize { get; private set; }
     public int TrialEntrySize { get; private set; }
@@ -903,6 +904,7 @@ internal sealed class PopulationSearchLayout
                 candidateScratchStride,
                 compiledObjective.MaximumScratchBytes),
             ObjectivePayloadBytes = compiledObjective.PayloadBytes,
+            MaximumValidityRows = compiledObjective.MaximumValidityRows,
             ProgramOperationSize = MeasureLayout(
                 "program operation",
                 (1, 8),
@@ -969,7 +971,7 @@ internal sealed class PopulationSearchLayout
             ObjectivePayloadOffset, 1, ObjectivePayloadBytes, "objective payload");
         ScratchOffset = AdvanceLayout(
             MaskPayloadOffset,
-            definition.Validity.HistoryCounts.Count,
+            MaximumValidityRows,
             sizeof(int),
             "validity-mask payload");
         InputPointerOffset = AdvanceLayout(
@@ -1392,7 +1394,7 @@ internal sealed class PopulationSearchLayout
     private void WriteHeader(Span<byte> bytes, MathBlockProgramPopulationSearchDefinition definition)
     {
         WriteInt32(bytes, 0, unchecked((int)0x4d425334));
-        WriteInt32(bytes, 4, 14);
+        WriteInt32(bytes, 4, 15);
         WriteInt32(bytes, 8, operations.Length);
         WriteInt32(bytes, 12, terminals.Length);
         WriteInt32(bytes, 16, types.Length);
@@ -1456,6 +1458,7 @@ internal sealed class PopulationSearchLayout
         WriteInt32(bytes, 368, EnumerationCatalogOffset);
         WriteInt32(bytes, 372, enumerationPrograms.Length);
         WriteInt32(bytes, 376, enumerationPrograms.Length);
+        WriteInt32(bytes, 380, MaximumValidityRows);
     }
 
     private void WriteAcceptedState(
@@ -1872,28 +1875,41 @@ internal sealed class PopulationSearchLayout
         {
             [binding.CandidateInput] = maximumCandidateElements
         };
-        if (binding.CandidateValidityMaskInput is not null)
-        {
-            capacityOverrides.Add(
-                binding.CandidateValidityMaskInput,
-                definition.Validity.HistoryCounts.Count);
-        }
         var shapeOverrides = new Dictionary<string, MathBlockCudaShapeAuthority>(StringComparer.Ordinal);
         var candidateType = binding.Program.Inputs[binding.CandidateInput];
+        var candidateShape = default(MathBlockCudaShapeAuthority);
         if (candidateType.Kind is MathBlockValueKind.Matrix or MathBlockValueKind.ComplexMatrix)
         {
-            shapeOverrides.Add(
-                binding.CandidateInput,
-                ResolveMatrixCandidateShapeAuthority(
-                    definition.Population,
-                    candidateType,
-                    maximumCandidateElements));
+            candidateShape = ResolveMatrixCandidateShapeAuthority(
+                definition.Population,
+                candidateType,
+                maximumCandidateElements);
+            shapeOverrides.Add(binding.CandidateInput, candidateShape);
         }
         else if (candidateType.Kind == MathBlockValueKind.Graph)
         {
-            var graphShape = ResolveGraphCandidateShapeAuthority(definition.Population, candidateType);
-            if (graphShape.Rows > 0)
-                shapeOverrides.Add(binding.CandidateInput, graphShape);
+            candidateShape = ResolveGraphCandidateShapeAuthority(definition.Population, candidateType);
+            if (candidateShape.Rows > 0)
+                shapeOverrides.Add(binding.CandidateInput, candidateShape);
+        }
+        else if (candidateType.Kind is MathBlockValueKind.Vector or MathBlockValueKind.BooleanVector or
+            MathBlockValueKind.ComplexVector or MathBlockValueKind.PointSet or MathBlockValueKind.RunSet)
+        {
+            candidateShape = new MathBlockCudaShapeAuthority(
+                candidateType.Rows > 0 ? candidateType.Rows : maximumCandidateElements,
+                candidateType.Columns);
+        }
+        var maximumValidityRows = MathBlockProgramPopulationCatalogCapacityPlanner
+            .ResolveCandidateValidityRows(
+                candidateType,
+                maximumCandidateElements,
+                candidateShape);
+        if (binding.CandidateValidityMaskInput is not null)
+        {
+            capacityOverrides.Add(binding.CandidateValidityMaskInput, maximumValidityRows);
+            shapeOverrides.Add(
+                binding.CandidateValidityMaskInput,
+                new MathBlockCudaShapeAuthority(maximumValidityRows, 0));
         }
         var activeNodes = CreateObjectiveActiveNodes(binding);
         var payloadLayout = MathBlocksCUDAProgram.ResolvePayloadLayout(
@@ -2095,7 +2111,8 @@ internal sealed class PopulationSearchLayout
             sources,
             dimensions,
             objectivePayloadLayout.PayloadBytes,
-            maximumScratchBytes);
+            maximumScratchBytes,
+            maximumValidityRows);
     }
 
     private static ObjectivePayloadLayout CreateObjectivePayloadLayout(
@@ -2785,7 +2802,8 @@ internal sealed class PopulationSearchLayout
         ObjectiveSourceDescriptor[] Sources,
         QualityDimensionDescriptor[] QualityDimensions,
         int PayloadBytes,
-        int MaximumScratchBytes);
+        int MaximumScratchBytes,
+        int MaximumValidityRows);
 }
 
 internal static class MathBlockCudaValueLayout

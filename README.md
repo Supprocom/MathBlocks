@@ -246,10 +246,10 @@ requires exact CPU and CUDA output parity.
 This Git repository contains source text and project metadata only. It does not
 contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
 
-Get MathBlocks version `0.2.3` from NuGet.org with this command:
+Get MathBlocks version `0.2.4` from NuGet.org with this command:
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.2.3
+dotnet add package Supprocom.MathBlocks --version 0.2.4
 ```
 
 The package declares three external native-acquisition dependencies. This

@@ -261,31 +261,19 @@ internal static class MathBlockProgramPopulationCatalogCapacityPlanner
     {
         ArgumentNullException.ThrowIfNull(definition);
         ArgumentNullException.ThrowIfNull(structure);
+        if (!TryResolveCandidateLayout(
+                definition.Population,
+                structure,
+                out var candidatePlan,
+                out var candidateLayout,
+                out requiredElements,
+                out rejectionReason))
+        {
+            return false;
+        }
+
         try
         {
-            var population = definition.Population;
-            population.ValidateResidentStructure(structure);
-            var candidatePlan = BuildPlan(population, structure);
-            MathBlocksCUDAProgram.ValidateProgram(candidatePlan);
-            var candidateLayout = MathBlocksCUDAProgram.ResolvePayloadLayout(
-                candidatePlan,
-                null);
-            requiredElements = 1;
-            for (var nodeIndex = population.AllTerminals.Count;
-                nodeIndex < candidatePlan.Count;
-                nodeIndex++)
-            {
-                if (!structure.Nodes[nodeIndex].Type.Accepts(
-                        candidateLayout.ResolvedTypes[nodeIndex]))
-                {
-                    throw new InvalidOperationException(
-                        $"Enumeration catalog node {nodeIndex} has incompatible resolved CUDA type authority.");
-                }
-                requiredElements = Math.Max(
-                    requiredElements,
-                    candidateLayout.Capacities[nodeIndex]);
-            }
-
             var outputIndex = candidatePlan.Count - 1;
             ValidateObjective(
                 definition,
@@ -314,23 +302,17 @@ internal static class MathBlockProgramPopulationCatalogCapacityPlanner
         for (var programIndex = 0; programIndex < catalog.Programs.Count; programIndex++)
         {
             var structure = catalog.Programs[programIndex];
-            population.ValidateResidentStructure(structure);
-            var plan = BuildPlan(population, structure);
-            MathBlocksCUDAProgram.ValidateProgram(plan);
-            var layout = MathBlocksCUDAProgram.ResolvePayloadLayout(plan, null);
-            var operationCount = checked(structure.Nodes.Count - population.AllTerminals.Count);
-            var requiredElements = 1;
-            for (var nodeIndex = population.AllTerminals.Count;
-                nodeIndex < plan.Count;
-                nodeIndex++)
+            if (!TryResolveCandidateLayout(
+                    population,
+                    structure,
+                    out _,
+                    out _,
+                    out var requiredElements,
+                    out _))
             {
-                if (!structure.Nodes[nodeIndex].Type.Accepts(plan[nodeIndex].Type))
-                {
-                    throw new InvalidOperationException(
-                        $"Enumeration catalog program {programIndex} has incompatible resolved CUDA type authority at node {nodeIndex}.");
-                }
-                requiredElements = Math.Max(requiredElements, layout.Capacities[nodeIndex]);
+                continue;
             }
+            var operationCount = checked(structure.Nodes.Count - population.AllTerminals.Count);
             if (!requiredByOperationCount.TryGetValue(operationCount, out var current) ||
                 requiredElements > current)
             {
@@ -350,6 +332,46 @@ internal static class MathBlockProgramPopulationCatalogCapacityPlanner
             result,
             (left, right) => left.OperationCount.CompareTo(right.OperationCount));
         return Array.AsReadOnly(result);
+    }
+
+    private static bool TryResolveCandidateLayout(
+        MathBlockProgramPopulationDefinition population,
+        MathBlockProgramStructure structure,
+        out IReadOnlyList<MathBlockProgramNode> plan,
+        out MathBlockCudaPayloadLayout layout,
+        out int requiredElements,
+        out string? rejectionReason)
+    {
+        try
+        {
+            population.ValidateResidentStructure(structure);
+            plan = BuildPlan(population, structure);
+            MathBlocksCUDAProgram.ValidateProgram(plan);
+            layout = MathBlocksCUDAProgram.ResolvePayloadLayout(plan, null);
+            requiredElements = 1;
+            for (var nodeIndex = population.AllTerminals.Count;
+                nodeIndex < plan.Count;
+                nodeIndex++)
+            {
+                if (!structure.Nodes[nodeIndex].Type.Accepts(layout.ResolvedTypes[nodeIndex]))
+                {
+                    throw new InvalidOperationException(
+                        $"Enumeration catalog node {nodeIndex} has incompatible resolved CUDA type authority.");
+                }
+                requiredElements = Math.Max(requiredElements, layout.Capacities[nodeIndex]);
+            }
+            rejectionReason = null;
+            return true;
+        }
+        catch (Exception exception) when (exception is
+            InvalidOperationException or OverflowException or NotSupportedException)
+        {
+            plan = [];
+            layout = default;
+            requiredElements = 0;
+            rejectionReason = exception.Message;
+            return false;
+        }
     }
 
     public static void RequireResourceBands(
@@ -413,10 +435,14 @@ internal static class MathBlockProgramPopulationCatalogCapacityPlanner
         };
         if (binding.CandidateValidityMaskInput is not null)
         {
-            capacities.Add(binding.CandidateValidityMaskInput, definition.Validity.HistoryCounts.Count);
+            var validityRows = ResolveCandidateValidityRows(
+                candidateType,
+                candidateCapacity,
+                candidateShape);
+            capacities.Add(binding.CandidateValidityMaskInput, validityRows);
             shapes.Add(
                 binding.CandidateValidityMaskInput,
-                new MathBlockCudaShapeAuthority(definition.Validity.HistoryCounts.Count, 0));
+                new MathBlockCudaShapeAuthority(validityRows, 0));
         }
         _ = MathBlocksCUDAProgram.ResolvePayloadLayout(
             binding.Program.PlanNodes,
@@ -424,6 +450,29 @@ internal static class MathBlockProgramPopulationCatalogCapacityPlanner
             capacities,
             shapes,
             CreateObjectiveActiveNodes(binding));
+    }
+
+    internal static int ResolveCandidateValidityRows(
+        MathBlockType candidateType,
+        int candidateCapacity,
+        MathBlockCudaShapeAuthority candidateShape)
+    {
+        var rows = candidateType.Kind switch
+        {
+            MathBlockValueKind.Scalar or MathBlockValueKind.Boolean or MathBlockValueKind.Complex => 1,
+            MathBlockValueKind.Matrix or MathBlockValueKind.ComplexMatrix or MathBlockValueKind.Graph =>
+                candidateShape.Rows,
+            MathBlockValueKind.Vector or MathBlockValueKind.BooleanVector or
+                MathBlockValueKind.ComplexVector or MathBlockValueKind.PointSet or
+                MathBlockValueKind.RunSet => candidateShape.Rows > 0
+                    ? candidateShape.Rows
+                    : candidateCapacity,
+            _ => throw new NotSupportedException(
+                $"The CUDA candidate validity contract does not support '{candidateType.Kind}'.")
+        };
+        if (rows <= 0)
+            throw new InvalidOperationException("The CUDA candidate validity-row authority is unavailable.");
+        return rows;
     }
 
     private static bool[] CreateObjectiveActiveNodes(
