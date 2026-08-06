@@ -19,6 +19,9 @@ public sealed class MathBlocksCUDAProgramPopulationSearch : IDisposable
     private long candidateChunkCount;
     private long serialCandidateExecutionCount;
     private long parallelCandidateExecutionCount;
+    private long cudaNodeDispatchCount;
+    private long cudaCandidateDispatchCount;
+    private long staticallyRejectedProgramCount;
     private int maximumConcurrentCandidates;
     private bool disposed;
 
@@ -72,6 +75,9 @@ public sealed class MathBlocksCUDAProgramPopulationSearch : IDisposable
     public int MaximumConcurrentCandidates => maximumConcurrentCandidates;
     public long SerialCandidateExecutionCount => serialCandidateExecutionCount;
     public long ParallelCandidateExecutionCount => parallelCandidateExecutionCount;
+    public long CudaNodeDispatchCount => cudaNodeDispatchCount;
+    public long CudaCandidateDispatchCount => cudaCandidateDispatchCount;
+    public long StaticallyRejectedProgramCount => staticallyRejectedProgramCount;
     public ulong EnumerationCursor => acceptedState.EnumerationCursor;
     public ulong EnumerationTrialCount => acceptedState.EnumerationTrialCount;
     public ulong InvalidEnumerationProposalCount => acceptedState.InvalidEnumerationProposalCount;
@@ -85,6 +91,16 @@ public sealed class MathBlocksCUDAProgramPopulationSearch : IDisposable
         ArgumentNullException.ThrowIfNull(definition);
         ArgumentNullException.ThrowIfNull(executionOptions);
         executionOptions.ValidateResidentExecution(nameof(executionOptions));
+        if (definition.EnumerationCatalog is not null)
+        {
+            var staticPlan = MathBlockProgramPopulationCatalogCapacityPlanner
+                .CreateFeasibilityPlan(definition);
+            if (!staticPlan.HasFeasiblePrograms)
+            {
+                throw new InvalidOperationException(
+                    "Static CUDA feasibility rejected every enumeration catalog program before CUDA setup.");
+            }
+        }
         var layout = PopulationSearchLayout.Create(
             definition,
             executionOptions.CandidateLaneCount,
@@ -338,6 +354,12 @@ public sealed class MathBlocksCUDAProgramPopulationSearch : IDisposable
             maximumConcurrentCandidates = Math.Max(
                 maximumConcurrentCandidates,
                 parsed.MaximumConcurrentCandidates);
+            cudaNodeDispatchCount = checked(
+                cudaNodeDispatchCount + checked((long)parsed.CudaNodeDispatchCount));
+            cudaCandidateDispatchCount = checked(
+                cudaCandidateDispatchCount + checked((long)parsed.CudaCandidateDispatchCount));
+            staticallyRejectedProgramCount = checked(
+                staticallyRejectedProgramCount + checked((long)parsed.StaticallyRejectedProgramCount));
             if (executionOptions.Mode == MathBlockProgramPopulationExecutionMode.SerialResident)
                 serialCandidateExecutionCount = checked(serialCandidateExecutionCount + evaluatedDelta);
             else
@@ -374,7 +396,10 @@ public sealed class MathBlocksCUDAProgramPopulationSearch : IDisposable
                 CandidateChunkCount,
                 MaximumConcurrentCandidates,
                 SerialCandidateExecutionCount,
-                ParallelCandidateExecutionCount);
+                ParallelCandidateExecutionCount,
+                CudaNodeDispatchCount,
+                CudaCandidateDispatchCount,
+                StaticallyRejectedProgramCount);
             var enumerationComplete =
                 acceptedState.EnumerationTrialCount == definition.Evolution.EnumerationProposalCount ||
                 acceptedState.EnumerationCursor == definition.EnumerationCursorLimit;
@@ -487,12 +512,15 @@ internal sealed record PopulationSearchCycleParseResult(
     MathBlockProgramPopulationSearchState? State,
     IReadOnlyList<MathBlockProgramPopulationTrialResult> Trials,
     int CandidateChunkCount,
-    int MaximumConcurrentCandidates);
+    int MaximumConcurrentCandidates,
+    ulong CudaNodeDispatchCount,
+    ulong CudaCandidateDispatchCount,
+    ulong StaticallyRejectedProgramCount);
 
 internal sealed class PopulationSearchLayout
 {
     private const int HeaderSize = 384;
-    private const int ProposalWaveControlSize = 32;
+    private const int ProposalWaveControlSize = 56;
     private const int TypeSize = 48;
     private const int OperationSize = 48;
     private const int TerminalSize = 32;
@@ -502,7 +530,7 @@ internal sealed class PopulationSearchLayout
     private const int QualityDimensionSize = 32;
     private const int SlotSize = 48;
     private const int StateHeaderSize = 144;
-    private const int CompactHeaderSize = 144;
+    private const int CompactHeaderSize = 168;
     private const int EntryHeaderSize = 80;
 
     private readonly MathBlockType[] types;
@@ -630,8 +658,7 @@ internal sealed class PopulationSearchLayout
         if (definition.EnumerationCatalog is not null)
         {
             MathBlockProgramPopulationCatalogCapacityPlanner.RequireResourceBands(
-                population,
-                definition.EnumerationCatalog);
+                definition);
         }
         var flatInputTypes = new List<int>();
         var operations = new CudaOperationDescriptor[population.Grammar.Operations.Count];
@@ -1037,6 +1064,16 @@ internal sealed class PopulationSearchLayout
                     -1,
                     null,
                     null);
+                var program = definition.EnumerationCatalog.Programs[index];
+                var feasible = MathBlockProgramPopulationCatalogCapacityPlanner.TryAnalyzeProgram(
+                    definition,
+                    program,
+                    out _,
+                    out _);
+                WriteInt32(
+                    bytes,
+                    EnumerationCatalogOffset + index * ArchiveEntrySize + 20,
+                    feasible ? 0 : 7);
             }
         }
         WriteAcceptedState(bytes, definition, state);
@@ -1054,7 +1091,7 @@ internal sealed class PopulationSearchLayout
         if (!Enum.IsDefined(status))
             throw new InvalidDataException("The resident search status is invalid.");
         if (status != PopulationSearchCycleStatus.Success)
-            return new PopulationSearchCycleParseResult(status, null, [], 0, 0);
+            return new PopulationSearchCycleParseResult(status, null, [], 0, 0, 0, 0, 0);
         var trialCount = ReadInt32(downloaded, 4);
         var newStructuralCount = ReadInt32(downloaded, 8);
         var newSemanticCount = ReadInt32(downloaded, 12);
@@ -1079,6 +1116,9 @@ internal sealed class PopulationSearchLayout
         var waveCursor = ReadUInt64(downloaded, 128);
         var candidateChunkCount = ReadInt32(downloaded, 136);
         var maximumConcurrentCandidates = ReadInt32(downloaded, 140);
+        var cudaNodeDispatchCount = ReadUInt64(downloaded, 144);
+        var cudaCandidateDispatchCount = ReadUInt64(downloaded, 152);
+        var staticallyRejectedProgramCount = ReadUInt64(downloaded, 160);
         var trialDelta = trialCursor >= previous.TrialCursor
             ? trialCursor - previous.TrialCursor
             : ulong.MaxValue;
@@ -1192,13 +1232,16 @@ internal sealed class PopulationSearchLayout
             state,
             trials,
             candidateChunkCount,
-            maximumConcurrentCandidates);
+            maximumConcurrentCandidates,
+            cudaNodeDispatchCount,
+            cudaCandidateDispatchCount,
+            staticallyRejectedProgramCount);
     }
 
     private void WriteHeader(Span<byte> bytes, MathBlockProgramPopulationSearchDefinition definition)
     {
         WriteInt32(bytes, 0, unchecked((int)0x4d425334));
-        WriteInt32(bytes, 4, 11);
+        WriteInt32(bytes, 4, 12);
         WriteInt32(bytes, 8, operations.Length);
         WriteInt32(bytes, 12, terminals.Length);
         WriteInt32(bytes, 16, types.Length);
@@ -1619,16 +1662,33 @@ internal sealed class PopulationSearchLayout
             if (graphShape.Rows > 0)
                 shapeOverrides.Add(binding.CandidateInput, graphShape);
         }
+        var activeNodes = CreateObjectiveActiveNodes(binding);
         var payloadLayout = MathBlocksCUDAProgram.ResolvePayloadLayout(
             plan,
             binding.ResidentInputs,
             capacityOverrides,
-            shapeOverrides);
+            shapeOverrides,
+            activeNodes);
         var payloadCapacities = payloadLayout.Capacities;
         for (var index = 0; index < payloadCapacities.Length; index++)
             maximumValueElements = Math.Max(maximumValueElements, payloadCapacities[index]);
-        var objectivePayloadLayout = CreateObjectivePayloadLayout(binding, payloadCapacities);
-        var nodes = new ObjectiveNodeDescriptor[plan.Count];
+        var commonSources = CreateObjectiveCommonSources(
+            binding,
+            activeNodes,
+            payloadLayout.ExactValues);
+        var objectivePayloadLayout = CreateObjectivePayloadLayout(
+            binding,
+            payloadCapacities,
+            activeNodes,
+            commonSources);
+        var compactIndexes = new int[plan.Count];
+        for (var index = 0; index < compactIndexes.Length; index++)
+            compactIndexes[index] = -1;
+        var activeNodeCount = 0;
+        for (var index = 0; index < plan.Count; index++)
+            if (activeNodes[index])
+                compactIndexes[index] = activeNodeCount++;
+        var nodes = new ObjectiveNodeDescriptor[activeNodeCount];
         var inputs = new List<int>();
         var candidateCount = 0;
         var maskCount = 0;
@@ -1636,10 +1696,13 @@ internal sealed class PopulationSearchLayout
         for (var index = 0; index < plan.Count; index++)
         {
             var node = plan[index];
+            if (!activeNodes[index])
+                continue;
+            var compactIndex = compactIndexes[index];
             if (node.Kind == MathBlockProgramNodeKind.Input &&
                 string.Equals(node.Name, binding.CandidateInput, StringComparison.Ordinal))
             {
-                nodes[index] = new ObjectiveNodeDescriptor(
+                nodes[compactIndex] = new ObjectiveNodeDescriptor(
                     0,
                     addType(node.Type),
                     -1,
@@ -1656,7 +1719,7 @@ internal sealed class PopulationSearchLayout
             if (node.Kind == MathBlockProgramNodeKind.Input &&
                 string.Equals(node.Name, binding.CandidateValidityMaskInput, StringComparison.Ordinal))
             {
-                nodes[index] = new ObjectiveNodeDescriptor(
+                nodes[compactIndex] = new ObjectiveNodeDescriptor(
                     1,
                     addType(node.Type),
                     -1,
@@ -1678,7 +1741,7 @@ internal sealed class PopulationSearchLayout
                 var immutableIndex = immutableValues.Count;
                 immutableValues.Add(value);
                 maximumValueElements = Math.Max(maximumValueElements, MathBlockCudaValueLayout.GetElementCount(value));
-                nodes[index] = new ObjectiveNodeDescriptor(
+                nodes[compactIndex] = new ObjectiveNodeDescriptor(
                     2,
                     addType(node.Type),
                     -1,
@@ -1693,14 +1756,46 @@ internal sealed class PopulationSearchLayout
             }
             if (node.Kind != MathBlockProgramNodeKind.Operation)
                 throw new NotSupportedException("An objective program node kind is unsupported.");
+            if (payloadLayout.ExactValues[index] is { } folded)
+            {
+                var immutableIndex = immutableValues.Count;
+                immutableValues.Add(folded);
+                nodes[compactIndex] = new ObjectiveNodeDescriptor(
+                    2,
+                    addType(folded.Type),
+                    -1,
+                    -1,
+                    0,
+                    inputs.Count,
+                    immutableIndex,
+                    0,
+                    -1,
+                    0);
+                continue;
+            }
+            if (commonSources[index] >= 0)
+            {
+                nodes[compactIndex] = new ObjectiveNodeDescriptor(
+                    5,
+                    addType(node.Type),
+                    -1,
+                    -1,
+                    0,
+                    inputs.Count,
+                    compactIndexes[commonSources[index]],
+                    payloadCapacities[index],
+                    -1,
+                    0);
+                continue;
+            }
             var feature = MathBlockCudaFeatureIndex.Resolve(node.OperationIdentity!);
             var inputBase = inputs.Count;
             foreach (var input in node.Inputs)
-                inputs.Add(input);
+                inputs.Add(compactIndexes[input]);
             maximumArity = Math.Max(maximumArity, node.Inputs.Count);
             var nodeScratchBytes = MathBlocksCUDAProgram.ResolveScratchBytes(node, plan, payloadLayout);
             maximumScratchBytes = Math.Max(maximumScratchBytes, nodeScratchBytes);
-            nodes[index] = new ObjectiveNodeDescriptor(
+            nodes[compactIndex] = new ObjectiveNodeDescriptor(
                 3,
                 addType(node.Type),
                 (int)feature.Family,
@@ -1712,9 +1807,21 @@ internal sealed class PopulationSearchLayout
                 objectivePayloadLayout.Offsets[index],
                 nodeScratchBytes);
         }
-        if (candidateCount != 1)
-            throw new ArgumentException("The objective program requires one candidate input.", nameof(definition));
-        if ((binding.CandidateValidityMaskInput is null ? 0 : 1) != maskCount)
+        var expectedCandidateCount = 0;
+        var expectedMaskCount = 0;
+        for (var nodeIndex = 0; nodeIndex < plan.Count; nodeIndex++)
+        {
+            var node = plan[nodeIndex];
+            if (!activeNodes[nodeIndex] || node.Kind != MathBlockProgramNodeKind.Input)
+                continue;
+            if (string.Equals(node.Name, binding.CandidateInput, StringComparison.Ordinal))
+                expectedCandidateCount = 1;
+            if (string.Equals(node.Name, binding.CandidateValidityMaskInput, StringComparison.Ordinal))
+                expectedMaskCount = 1;
+        }
+        if (candidateCount != expectedCandidateCount)
+            throw new ArgumentException("The objective candidate-input liveness is inconsistent.", nameof(definition));
+        if (maskCount != expectedMaskCount)
             throw new ArgumentException("The objective validity-mask binding is inconsistent.", nameof(definition));
 
         var sources = new ObjectiveSourceDescriptor[binding.Objectives.Count];
@@ -1722,8 +1829,13 @@ internal sealed class PopulationSearchLayout
         {
             var objective = binding.Objectives[index];
             var programNode = objective.SourceKind == MathBlockProgramPopulationObjectiveSourceKind.ProgramOutput
-                ? binding.Program.OutputNodeIndexes[objective.ProgramOutput!]
+                ? compactIndexes[binding.Program.OutputNodeIndexes[objective.ProgramOutput!]]
                 : -1;
+            if (objective.SourceKind == MathBlockProgramPopulationObjectiveSourceKind.ProgramOutput &&
+                programNode < 0)
+            {
+                throw new InvalidOperationException("An objective output was removed as dead work.");
+            }
             sources[index] = new ObjectiveSourceDescriptor(
                 (int)objective.SourceKind,
                 programNode,
@@ -1755,7 +1867,9 @@ internal sealed class PopulationSearchLayout
 
     private static ObjectivePayloadLayout CreateObjectivePayloadLayout(
         MathBlockProgramPopulationObjectiveBinding binding,
-        IReadOnlyList<int> payloadCapacities)
+        IReadOnlyList<int> payloadCapacities,
+        IReadOnlyList<bool> activeNodes,
+        IReadOnlyList<int> commonSources)
     {
         var plan = binding.Program.PlanNodes;
         if (payloadCapacities.Count != plan.Count)
@@ -1765,6 +1879,8 @@ internal sealed class PopulationSearchLayout
         for (var nodeIndex = 0; nodeIndex < plan.Count; nodeIndex++)
         {
             lastUses[nodeIndex] = nodeIndex;
+            if (!activeNodes[nodeIndex])
+                continue;
             foreach (var inputIndex in plan[nodeIndex].Inputs)
             {
                 if (inputIndex < 0 || inputIndex >= nodeIndex)
@@ -1779,6 +1895,12 @@ internal sealed class PopulationSearchLayout
             if (!binding.Program.OutputNodeIndexes.TryGetValue(objective.ProgramOutput!, out var sourceIndex))
                 throw new ArgumentException("An objective output source is absent.", "definition");
             lastUses[sourceIndex] = plan.Count;
+        }
+        for (var nodeIndex = 0; nodeIndex < commonSources.Count; nodeIndex++)
+        {
+            var source = commonSources[nodeIndex];
+            if (source >= 0)
+                lastUses[source] = Math.Max(lastUses[source], lastUses[nodeIndex]);
         }
 
         var offsets = new int[plan.Count];
@@ -1797,7 +1919,9 @@ internal sealed class PopulationSearchLayout
             }
 
             var node = plan[nodeIndex];
-            if (node.Kind != MathBlockProgramNodeKind.Operation)
+            if (!activeNodes[nodeIndex] ||
+                commonSources[nodeIndex] >= 0 ||
+                node.Kind != MathBlockProgramNodeKind.Operation)
                 continue;
             var payloadBytes = MeasurePayloadBytes(
                 node.Type.Kind,
@@ -1824,6 +1948,86 @@ internal sealed class PopulationSearchLayout
             }
         }
         return new ObjectivePayloadLayout(offsets, peakBytes);
+    }
+
+    private static bool[] CreateObjectiveActiveNodes(
+        MathBlockProgramPopulationObjectiveBinding binding)
+    {
+        var plan = binding.Program.PlanNodes;
+        var active = new bool[plan.Count];
+        var stack = new Stack<int>();
+        foreach (var objective in binding.Objectives)
+        {
+            if (objective.SourceKind != MathBlockProgramPopulationObjectiveSourceKind.ProgramOutput)
+                continue;
+            if (!binding.Program.OutputNodeIndexes.TryGetValue(
+                    objective.ProgramOutput!,
+                    out var outputNode))
+            {
+                throw new ArgumentException("An objective output source is absent.", nameof(binding));
+            }
+            stack.Push(outputNode);
+        }
+        while (stack.Count != 0)
+        {
+            var nodeIndex = stack.Pop();
+            if ((uint)nodeIndex >= (uint)plan.Count)
+                throw new ArgumentException("An objective node index is invalid.", nameof(binding));
+            if (active[nodeIndex])
+                continue;
+            active[nodeIndex] = true;
+            foreach (var input in plan[nodeIndex].Inputs)
+                stack.Push(input);
+        }
+        for (var nodeIndex = 0; nodeIndex < plan.Count; nodeIndex++)
+        {
+            var node = plan[nodeIndex];
+            if (node.Kind == MathBlockProgramNodeKind.Input &&
+                string.Equals(node.Name, binding.CandidateInput, StringComparison.Ordinal))
+            {
+                active[nodeIndex] = true;
+                break;
+            }
+        }
+        return active;
+    }
+
+    private static int[] CreateObjectiveCommonSources(
+        MathBlockProgramPopulationObjectiveBinding binding,
+        IReadOnlyList<bool> activeNodes,
+        IReadOnlyList<MathBlockValue?> exactValues)
+    {
+        var plan = binding.Program.PlanNodes;
+        var result = new int[plan.Count];
+        for (var index = 0; index < result.Length; index++)
+            result[index] = -1;
+        var normalizedNodes = new int[plan.Count];
+        var expressions = new Dictionary<string, int>(StringComparer.Ordinal);
+        for (var nodeIndex = 0; nodeIndex < plan.Count; nodeIndex++)
+        {
+            normalizedNodes[nodeIndex] = nodeIndex;
+            var node = plan[nodeIndex];
+            if (!activeNodes[nodeIndex] ||
+                node.Kind != MathBlockProgramNodeKind.Operation ||
+                exactValues[nodeIndex].HasValue)
+            {
+                continue;
+            }
+            var builder = new System.Text.StringBuilder(node.OperationIdentity);
+            foreach (var input in node.Inputs)
+                builder.Append('|').Append(normalizedNodes[input]);
+            var key = builder.ToString();
+            if (expressions.TryGetValue(key, out var source))
+            {
+                result[nodeIndex] = source;
+                normalizedNodes[nodeIndex] = source;
+            }
+            else
+            {
+                expressions.Add(key, nodeIndex);
+            }
+        }
+        return result;
     }
 
     private static int AllocateObjectivePayloadRange(
@@ -1998,7 +2202,7 @@ internal sealed class PopulationSearchLayout
         {
             throw new InvalidOperationException("A population operation has invalid input types.", exception);
         }
-        if (resolved != descriptor.OutputType)
+        if (!descriptor.OutputType.Accepts(resolved))
             throw new InvalidOperationException("A population operation output type is incompatible.");
         _ = MathBlockCudaFeatureIndex.Resolve(descriptor.Identity);
     }
@@ -2033,15 +2237,16 @@ internal sealed class PopulationSearchLayout
         foreach (var operation in definition.Population.Grammar.Operations)
             result = Math.Max(
                 result,
-                ResolveCandidateScratchBytes(definition.Population, operation, maximumElements));
+                ResolveCandidateScratchBytes(definition, operation, maximumElements));
         return Align(result);
     }
 
     private static int ResolveCandidateScratchBytes(
-        MathBlockProgramPopulationDefinition population,
+        MathBlockProgramPopulationSearchDefinition definition,
         MathBlockProgramPopulationOperation operation,
         int maximumElements)
     {
+        var population = definition.Population;
         var inputCapacities = new int[operation.InputTypes.Count];
         var inputShapeRows = new int[operation.InputTypes.Count];
         var inputShapeColumns = new int[operation.InputTypes.Count];
@@ -2053,6 +2258,14 @@ internal sealed class PopulationSearchLayout
             inputCapacities[index] = capacity;
             inputShapeRows[index] = shape.Rows;
             inputShapeColumns[index] = shape.Columns;
+        }
+        if (operation.Identity is
+                "sequence.rolling-median@1" or
+                "sequence.rolling-quantile@1")
+        {
+            return MathBlocksCUDAProgram.ResolveRollingOrderStatisticScratchBytes(
+                maximumElements,
+                maximumElements);
         }
         return MathBlocksCUDAProgram.ResolveScratchBytes(
             operation.Identity,

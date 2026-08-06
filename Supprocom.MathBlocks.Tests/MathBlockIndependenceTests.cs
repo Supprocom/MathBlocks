@@ -38,23 +38,23 @@ public sealed partial class MathBlockIndependenceTests
     }
 
     [Fact]
-    public void Public_release_metadata_declares_the_CUDA_0_2_2_contract()
+    public void Public_release_metadata_declares_the_CUDA_0_2_3_contract()
     {
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(root, "Supprocom.MathBlocks", "Supprocom.MathBlocks.csproj");
         var document = XDocument.Load(projectPath);
         var readme = File.ReadAllText(Path.Combine(root, "README.md"));
 
-        Assert.Equal("0.2.2", document.Descendants("Version").Single().Value);
+        Assert.Equal("0.2.3", document.Descendants("Version").Single().Value);
         Assert.Equal("AGPL-3.0-only", document.Descendants("PackageLicenseExpression").Single().Value);
         Assert.Contains(
-            "Separates invalid dynamic results from resident resource-envelope overflow",
+            "Rejects statically infeasible catalog programs before CUDA work",
             document.Descendants("PackageReleaseNotes").Single().Value,
             StringComparison.Ordinal);
-        Assert.Equal(new Version(0, 2, 2, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
+        Assert.Equal(new Version(0, 2, 3, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
         Assert.Contains("## Parallel proposal waves", readme, StringComparison.Ordinal);
         Assert.Contains(
-            "dotnet add package Supprocom.MathBlocks --version 0.2.2",
+            "dotnet add package Supprocom.MathBlocks --version 0.2.3",
             readme,
             StringComparison.Ordinal);
         Assert.DoesNotContain("--version 0.1.", readme, StringComparison.Ordinal);

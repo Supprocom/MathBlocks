@@ -44,7 +44,8 @@ public enum MathBlockProgramPopulationTrialStatus
     SemanticDuplicate,
     InvalidType,
     InvalidValue,
-    InsufficientParents
+    InsufficientParents,
+    StaticallyRejected
 }
 
 public enum MathBlockProgramPopulationExecutionMode
@@ -432,6 +433,54 @@ public sealed class MathBlockProgramPopulationSearchEnvelope
     public int MaximumCompactDownloadBytes { get; }
 }
 
+public sealed record MathBlockProgramPopulationStaticRejection(
+    ulong ProposalCursor,
+    string StructuralFingerprint,
+    string Reason);
+
+public readonly record struct MathBlockProgramPopulationStaticInstrumentation(
+    int CandidateCount,
+    int FeasibleCandidateCount,
+    int RejectedCandidateCount,
+    int InspectedNodeCount,
+    int LiveNodeCount,
+    int DeadNodeCount,
+    int ConstantFoldCount,
+    int CommonSubexpressionCount,
+    long CudaNodeDispatchCount,
+    long CandidateLaneAllocationCount,
+    long DescriptorAllocationCount,
+    long ScratchAllocationCount,
+    long UploadCount,
+    long LaunchCount,
+    long SynchronizationCount,
+    long DownloadCount,
+    int CpuNodeDispatchCount);
+
+public sealed class MathBlockProgramPopulationStaticFeasibilityPlan
+{
+    internal MathBlockProgramPopulationStaticFeasibilityPlan(
+        IEnumerable<MathBlockProgramStructure> feasiblePrograms,
+        IEnumerable<MathBlockProgramPopulationStaticRejection> rejections,
+        IEnumerable<MathBlockProgramPopulationResourceBand> requiredResourceBands,
+        MathBlockProgramPopulationStaticInstrumentation instrumentation)
+    {
+        FeasiblePrograms = Array.AsReadOnly(
+            MathBlockCollectionPrimitives.CopyEnumerable(feasiblePrograms));
+        Rejections = Array.AsReadOnly(
+            MathBlockCollectionPrimitives.CopyEnumerable(rejections));
+        RequiredResourceBands = Array.AsReadOnly(
+            MathBlockCollectionPrimitives.CopyEnumerable(requiredResourceBands));
+        Instrumentation = instrumentation;
+    }
+
+    public IReadOnlyList<MathBlockProgramStructure> FeasiblePrograms { get; }
+    public IReadOnlyList<MathBlockProgramPopulationStaticRejection> Rejections { get; }
+    public IReadOnlyList<MathBlockProgramPopulationResourceBand> RequiredResourceBands { get; }
+    public MathBlockProgramPopulationStaticInstrumentation Instrumentation { get; }
+    public bool HasFeasiblePrograms => FeasiblePrograms.Count != 0;
+}
+
 public sealed class MathBlockProgramPopulationEnumerationCatalog
 {
     public MathBlockProgramPopulationEnumerationCatalog(
@@ -457,11 +506,12 @@ public sealed class MathBlockProgramPopulationEnumerationCatalog
                     "An enumeration catalog program has an incompatible proposal cursor.",
                     nameof(programs));
             }
+            var liveNodes = RemoveDeadOperations(program.Nodes);
             normalized[index] = new MathBlockProgramStructure(
                 0,
                 proposalCursor,
                 MathBlockProgramPopulationTrialSource.Enumeration,
-                program.Nodes);
+                liveNodes);
             if (!fingerprints.Add(normalized[index].StructuralFingerprint))
             {
                 throw new ArgumentException(
@@ -479,6 +529,71 @@ public sealed class MathBlockProgramPopulationEnumerationCatalog
     public ulong CursorEndExclusive { get; }
     public IReadOnlyList<MathBlockProgramStructure> Programs { get; }
     public string Identity { get; }
+
+    private static IReadOnlyList<MathBlockProgramCandidateNode> RemoveDeadOperations(
+        IReadOnlyList<MathBlockProgramCandidateNode> nodes)
+    {
+        var terminalCount = 0;
+        while (terminalCount < nodes.Count &&
+            nodes[terminalCount].Kind == MathBlockProgramCandidateNodeKind.Terminal)
+        {
+            terminalCount++;
+        }
+        var live = new bool[nodes.Count];
+        live[^1] = true;
+        for (var nodeIndex = nodes.Count - 1; nodeIndex >= terminalCount; nodeIndex--)
+        {
+            if (!live[nodeIndex])
+                continue;
+            foreach (var operand in nodes[nodeIndex].OperandIndexes)
+                live[operand] = true;
+        }
+        var remap = new int[nodes.Count];
+        for (var index = 0; index < remap.Length; index++)
+            remap[index] = -1;
+        var result = new List<MathBlockProgramCandidateNode>(nodes.Count);
+        var commonExpressions = new Dictionary<
+            (string Identifier, int Version, MathBlockType Type, string Operands),
+            int>();
+        for (var nodeIndex = 0; nodeIndex < terminalCount; nodeIndex++)
+        {
+            remap[nodeIndex] = result.Count;
+            result.Add(nodes[nodeIndex]);
+        }
+        for (var nodeIndex = terminalCount; nodeIndex < nodes.Count; nodeIndex++)
+        {
+            if (!live[nodeIndex])
+                continue;
+            var node = nodes[nodeIndex];
+            var operands = new int[node.OperandIndexes.Count];
+            for (var inputIndex = 0; inputIndex < operands.Length; inputIndex++)
+            {
+                operands[inputIndex] = remap[node.OperandIndexes[inputIndex]];
+                if (operands[inputIndex] < 0)
+                    throw new InvalidOperationException("A live catalog node depends on removed work.");
+            }
+            var expression = (
+                node.OperationIdentifier!,
+                node.OperationVersion,
+                node.Type,
+                string.Join(",", operands));
+            if (commonExpressions.TryGetValue(expression, out var commonSource))
+            {
+                remap[nodeIndex] = commonSource;
+                continue;
+            }
+            remap[nodeIndex] = result.Count;
+            commonExpressions.Add(expression, result.Count);
+            result.Add(MathBlockProgramCandidateNode.Operation(
+                node.OperationIdentifier!,
+                node.OperationVersion,
+                node.Type,
+                operands));
+        }
+        if (remap[^1] != result.Count - 1)
+            throw new InvalidOperationException("Catalog optimization did not preserve the final output node.");
+        return Array.AsReadOnly(result.ToArray());
+    }
 }
 
 public sealed class MathBlockProgramPopulationValidityPolicy
@@ -1643,7 +1758,10 @@ public readonly record struct MathBlockProgramPopulationSearchInstrumentation(
     long CandidateChunkCount,
     int MaximumConcurrentCandidates,
     long SerialCandidateExecutionCount,
-    long ParallelCandidateExecutionCount);
+    long ParallelCandidateExecutionCount,
+    long CudaNodeDispatchCount,
+    long CudaCandidateDispatchCount,
+    long StaticallyRejectedProgramCount);
 
 public sealed class MathBlockProgramPopulationSearchCycleResult
 {

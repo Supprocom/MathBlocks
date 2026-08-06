@@ -46,35 +46,334 @@ internal static class SequencePathCudaBlockCatalog
             }
         }
 
+        __device__ unsigned long long mathblocks_sequence_order_key(double value)
+        {
+            unsigned long long bits = (unsigned long long)__double_as_longlong(value);
+            if (value == 0.0)
+                bits = 0ull;
+            return (bits & 0x8000000000000000ull) != 0ull
+                ? ~bits
+                : bits ^ 0x8000000000000000ull;
+        }
+
         __device__ bool mathblocks_sequence_is_power_of_two(int value)
         {
             return value > 0 && (value & (value - 1)) == 0;
         }
 
-        __device__ double mathblocks_sequence_quantile(
+        __device__ double mathblocks_sequence_order_value(unsigned long long key)
+        {
+            unsigned long long bits = (key & 0x8000000000000000ull) != 0ull
+                ? key ^ 0x8000000000000000ull
+                : ~key;
+            return __longlong_as_double((long long)bits);
+        }
+
+        __device__ void mathblocks_sequence_prepare_order_ranks(
             const double* values,
             int count,
-            double probability,
-            double* scratch)
+            unsigned char* scratch,
+            MathBlockSlot* output)
         {
+            int thread = (int)threadIdx.x;
+            unsigned long long* first_keys = (unsigned long long*)scratch;
+            unsigned long long* second_keys = first_keys + count;
+            int* first_indexes = (int*)(second_keys + count);
+            int* second_indexes = first_indexes + count;
+            int* ranks = second_indexes + count;
+            int* lower_heap = ranks + count;
+            int* upper_heap = lower_heap + output->boolean_value;
+            int* positions = upper_heap + output->boolean_value;
+            int* kinds = positions + count;
+            int* zero_counts = kinds + count;
+            int* zero_prefix = zero_counts + 128;
+
+            for (int index = thread; index < count; index += blockDim.x)
+            {
+                if (!isfinite(values[index]))
+                    atomicExch(&output->valid, 0);
+                first_keys[index] = mathblocks_sequence_order_key(values[index]);
+                first_indexes[index] = index;
+            }
+            __syncthreads();
+            if (!output->valid)
+                return;
+
+            unsigned long long* source_keys = first_keys;
+            unsigned long long* destination_keys = second_keys;
+            int* source_indexes = first_indexes;
+            int* destination_indexes = second_indexes;
+            for (int bit = 0; bit < 64; bit++)
+            {
+                int begin = (int)(((long long)count * thread) / blockDim.x);
+                int end = (int)(((long long)count * (thread + 1)) / blockDim.x);
+                int zeros = 0;
+                for (int index = begin; index < end; index++)
+                    if (((source_keys[index] >> bit) & 1ull) == 0ull)
+                        zeros++;
+                zero_counts[thread] = zeros;
+                __syncthreads();
+                if (thread == 0)
+                {
+                    int prefix = 0;
+                    for (int lane = 0; lane < blockDim.x; lane++)
+                    {
+                        zero_prefix[lane] = prefix;
+                        prefix += zero_counts[lane];
+                    }
+                    output->columns = prefix;
+                }
+                __syncthreads();
+                int zero_destination = zero_prefix[thread];
+                int one_destination = output->columns + begin - zero_destination;
+                for (int index = begin; index < end; index++)
+                {
+                    unsigned long long key = source_keys[index];
+                    int destination = ((key >> bit) & 1ull) == 0ull
+                        ? zero_destination++
+                        : one_destination++;
+                    destination_keys[destination] = key;
+                    destination_indexes[destination] = source_indexes[index];
+                }
+                __syncthreads();
+                unsigned long long* key_swap = source_keys;
+                source_keys = destination_keys;
+                destination_keys = key_swap;
+                int* index_swap = source_indexes;
+                source_indexes = destination_indexes;
+                destination_indexes = index_swap;
+            }
+            for (int index = thread; index < count; index += blockDim.x)
+                ranks[source_indexes[index]] = index;
+            __syncthreads();
+            if (thread == 0)
+                output->columns = 0;
+            __syncthreads();
+        }
+
+        __device__ void mathblocks_sequence_heap_swap(
+            int* heap,
+            int left,
+            int right,
+            int* positions)
+        {
+            int value = heap[left];
+            heap[left] = heap[right];
+            heap[right] = value;
+            positions[heap[left]] = left;
+            positions[heap[right]] = right;
+        }
+
+        __device__ bool mathblocks_sequence_heap_precedes(
+            int left,
+            int right,
+            const int* ranks,
+            bool maximum)
+        {
+            return maximum
+                ? ranks[left] > ranks[right]
+                : ranks[left] < ranks[right];
+        }
+
+        __device__ void mathblocks_sequence_heap_sift_up(
+            int* heap,
+            int position,
+            int* positions,
+            const int* ranks,
+            bool maximum)
+        {
+            while (position > 0)
+            {
+                int parent = (position - 1) >> 1;
+                if (!mathblocks_sequence_heap_precedes(
+                        heap[position],
+                        heap[parent],
+                        ranks,
+                        maximum))
+                {
+                    break;
+                }
+                mathblocks_sequence_heap_swap(heap, position, parent, positions);
+                position = parent;
+            }
+        }
+
+        __device__ void mathblocks_sequence_heap_sift_down(
+            int* heap,
+            int count,
+            int position,
+            int* positions,
+            const int* ranks,
+            bool maximum)
+        {
+            while (true)
+            {
+                int left = position * 2 + 1;
+                if (left >= count)
+                    return;
+                int right = left + 1;
+                int selected = right < count && mathblocks_sequence_heap_precedes(
+                        heap[right],
+                        heap[left],
+                        ranks,
+                        maximum)
+                    ? right
+                    : left;
+                if (!mathblocks_sequence_heap_precedes(
+                        heap[selected],
+                        heap[position],
+                        ranks,
+                        maximum))
+                {
+                    return;
+                }
+                mathblocks_sequence_heap_swap(heap, position, selected, positions);
+                position = selected;
+            }
+        }
+
+        __device__ void mathblocks_sequence_heap_insert(
+            int* heap,
+            int* count,
+            int item,
+            int kind,
+            int* positions,
+            int* kinds,
+            const int* ranks,
+            bool maximum)
+        {
+            int position = (*count)++;
+            heap[position] = item;
+            positions[item] = position;
+            kinds[item] = kind;
+            mathblocks_sequence_heap_sift_up(
+                heap,
+                position,
+                positions,
+                ranks,
+                maximum);
+        }
+
+        __device__ void mathblocks_sequence_heap_remove(
+            int* heap,
+            int* count,
+            int item,
+            int* positions,
+            int* kinds,
+            const int* ranks,
+            bool maximum)
+        {
+            int position = positions[item];
+            int replacement = heap[--(*count)];
+            kinds[item] = -1;
+            positions[item] = -1;
+            if (position >= *count)
+                return;
+            heap[position] = replacement;
+            positions[replacement] = position;
+            if (position > 0 && mathblocks_sequence_heap_precedes(
+                    heap[position],
+                    heap[(position - 1) >> 1],
+                    ranks,
+                    maximum))
+            {
+                mathblocks_sequence_heap_sift_up(
+                    heap,
+                    position,
+                    positions,
+                    ranks,
+                    maximum);
+            }
+            else
+            {
+                mathblocks_sequence_heap_sift_down(
+                    heap,
+                    *count,
+                    position,
+                    positions,
+                    ranks,
+                    maximum);
+            }
+        }
+
+        __device__ void mathblocks_sequence_rebalance_heaps(
+            int* lower_heap,
+            int* lower_count,
+            int* upper_heap,
+            int* upper_count,
+            int target_lower_count,
+            int* positions,
+            int* kinds,
+            const int* ranks)
+        {
+            while (*lower_count > target_lower_count)
+            {
+                int item = lower_heap[0];
+                mathblocks_sequence_heap_remove(
+                    lower_heap,
+                    lower_count,
+                    item,
+                    positions,
+                    kinds,
+                    ranks,
+                    true);
+                mathblocks_sequence_heap_insert(
+                    upper_heap,
+                    upper_count,
+                    item,
+                    1,
+                    positions,
+                    kinds,
+                    ranks,
+                    false);
+            }
+            while (*lower_count < target_lower_count)
+            {
+                int item = upper_heap[0];
+                mathblocks_sequence_heap_remove(
+                    upper_heap,
+                    upper_count,
+                    item,
+                    positions,
+                    kinds,
+                    ranks,
+                    false);
+                mathblocks_sequence_heap_insert(
+                    lower_heap,
+                    lower_count,
+                    item,
+                    0,
+                    positions,
+                    kinds,
+                    ranks,
+                    true);
+            }
+        }
+
+        __device__ void mathblocks_sequence_rolling_extreme(
+            const double* values,
+            int count,
+            int width,
+            double* result,
+            int* deque,
+            bool minimum)
+        {
+            int head = 0;
+            int tail = 0;
             for (int index = 0; index < count; index++)
             {
-                double value = values[index];
-                int position = index;
-                while (position > 0 && scratch[position - 1] > value)
+                while (head < tail && deque[head] <= index - width)
+                    head++;
+                while (head < tail && (minimum
+                    ? values[deque[tail - 1]] >= values[index]
+                    : values[deque[tail - 1]] <= values[index]))
                 {
-                    scratch[position] = scratch[position - 1];
-                    position--;
+                    tail--;
                 }
-                scratch[position] = value;
+                deque[tail++] = index;
+                if (index >= width - 1)
+                    result[index - width + 1] = values[deque[head]];
             }
-            if (count == 1)
-                return scratch[0];
-            double position = probability * (count - 1);
-            int lower = (int)floor(position);
-            int upper = (int)ceil(position);
-            double weight = position - lower;
-            return scratch[lower] * (1.0 - weight) + scratch[upper] * weight;
         }
 
         __device__ void mathblocks_sequence_rolling_sum(
@@ -245,27 +544,271 @@ internal static class SequencePathCudaBlockCatalog
                     break;
                 case 5:
                 case 7:
+                {
+                    int width = 0;
+                    double probability = 0.0;
                     if (thread == 0)
                     {
-                        int width = 0;
-                        double probability = opcode == 5 ? 0.5 : third->scalar_value;
+                        probability = opcode == 5 ? 0.5 : third->scalar_value;
                         if (!mathblocks_sequence_positive_integer(second->scalar_value, &width) ||
-                            width > first->count || !(probability >= 0.0 && probability <= 1.0) || scratch == nullptr)
+                            width > first->count || !(probability >= 0.0 && probability <= 1.0) ||
+                            (width > 1 && scratch == nullptr))
                         {
                             output->valid = 0;
                         }
                         else
                         {
                             mathblocks_sequence_set_vector_shape(output, first->count - width + 1);
-                            for (int start = 0; start < output->count; start++)
-                            {
-                                result[start] = mathblocks_sequence_quantile(a + start, width, probability, scratch);
-                                if (!isfinite(result[start]))
-                                    output->valid = 0;
-                            }
                         }
+                        output->scalar_value = probability;
+                        output->boolean_value = width;
                     }
+                    __syncthreads();
+                    width = output->boolean_value;
+                    probability = output->scalar_value;
+                    if (!output->valid)
+                        break;
+                    if (width == 1)
+                    {
+                        for (int index = thread; index < first->count; index += blockDim.x)
+                            result[index] = a[index];
+                        __syncthreads();
+                        if (thread == 0)
+                        {
+                            output->scalar_value = (double)first->count;
+                            output->boolean_value = 0;
+                        }
+                        break;
+                    }
+                    if (probability == 0.0 || probability == 1.0)
+                    {
+                        if (thread == 0)
+                        {
+                            mathblocks_sequence_rolling_extreme(
+                                a,
+                                first->count,
+                                width,
+                                result,
+                                (int*)scratch,
+                                probability == 0.0);
+                            output->scalar_value = (double)(
+                                (long long)first->count * 3 + output->count);
+                            output->boolean_value = 0;
+                        }
+                        __syncthreads();
+                        break;
+                    }
+
+                    unsigned char* order_scratch = (unsigned char*)scratch;
+                    mathblocks_sequence_prepare_order_ranks(
+                        a,
+                        first->count,
+                        order_scratch,
+                        output);
+                    if (!output->valid)
+                        break;
+                    unsigned long long* first_keys = (unsigned long long*)order_scratch;
+                    unsigned long long* second_keys = first_keys + first->count;
+                    int* first_indexes = (int*)(second_keys + first->count);
+                    int* second_indexes = first_indexes + first->count;
+                    int* ranks = second_indexes + first->count;
+                    int* lower_heap = ranks + first->count;
+                    int* upper_heap = lower_heap + width;
+                    int* positions = upper_heap + width;
+                    int* kinds = positions + first->count;
+                    double quantile_position = probability * (width - 1);
+                    int lower_index = (int)floor(quantile_position);
+                    int upper_index = (int)ceil(quantile_position);
+                    double weight = quantile_position - lower_index;
+
+                    if (output->count == 1)
+                    {
+                        if (thread == 0)
+                        {
+                            double lower_value = mathblocks_sequence_order_value(
+                                first_keys[lower_index]);
+                            double upper_value = mathblocks_sequence_order_value(
+                                first_keys[upper_index]);
+                            result[0] = lower_value * (1.0 - weight) + upper_value * weight;
+                            output->valid = isfinite(result[0]);
+                            output->scalar_value = (double)((long long)first->count * 64 + 2);
+                            output->boolean_value = 64;
+                        }
+                        __syncthreads();
+                        break;
+                    }
+
+                    for (int index = thread; index < first->count; index += blockDim.x)
+                    {
+                        positions[index] = -1;
+                        kinds[index] = -1;
+                    }
+                    __syncthreads();
+                    if (thread == 0)
+                    {
+                        int lower_count = 0;
+                        int upper_count = 0;
+                        int target_lower_count = lower_index + 1;
+                        for (int index = 0; index < width; index++)
+                        {
+                            if (lower_count == 0 && upper_count == 0)
+                            {
+                                mathblocks_sequence_heap_insert(
+                                    lower_heap,
+                                    &lower_count,
+                                    index,
+                                    0,
+                                    positions,
+                                    kinds,
+                                    ranks,
+                                    true);
+                            }
+                            else if (lower_count == 0)
+                            {
+                                mathblocks_sequence_heap_insert(
+                                    upper_heap,
+                                    &upper_count,
+                                    index,
+                                    1,
+                                    positions,
+                                    kinds,
+                                    ranks,
+                                    false);
+                            }
+                            else if (ranks[index] <= ranks[lower_heap[0]])
+                            {
+                                mathblocks_sequence_heap_insert(
+                                    lower_heap,
+                                    &lower_count,
+                                    index,
+                                    0,
+                                    positions,
+                                    kinds,
+                                    ranks,
+                                    true);
+                            }
+                            else
+                            {
+                                mathblocks_sequence_heap_insert(
+                                    upper_heap,
+                                    &upper_count,
+                                    index,
+                                    1,
+                                    positions,
+                                    kinds,
+                                    ranks,
+                                    false);
+                            }
+                            int active_target = target_lower_count < index + 1
+                                ? target_lower_count
+                                : index + 1;
+                            mathblocks_sequence_rebalance_heaps(
+                                lower_heap,
+                                &lower_count,
+                                upper_heap,
+                                &upper_count,
+                                active_target,
+                                positions,
+                                kinds,
+                                ranks);
+                        }
+                        for (int start = 0; start < output->count; start++)
+                        {
+                            double lower_value = a[lower_heap[0]];
+                            double upper_value = lower_index == upper_index
+                                ? lower_value
+                                : a[upper_heap[0]];
+                            result[start] = lower_value * (1.0 - weight) + upper_value * weight;
+                            if (!isfinite(result[start]))
+                            {
+                                output->valid = 0;
+                                break;
+                            }
+                            if (start + 1 == output->count)
+                                break;
+                            int outgoing = start;
+                            int incoming = start + width;
+                            if (kinds[outgoing] == 0)
+                            {
+                                mathblocks_sequence_heap_remove(
+                                    lower_heap,
+                                    &lower_count,
+                                    outgoing,
+                                    positions,
+                                    kinds,
+                                    ranks,
+                                    true);
+                            }
+                            else
+                            {
+                                mathblocks_sequence_heap_remove(
+                                    upper_heap,
+                                    &upper_count,
+                                    outgoing,
+                                    positions,
+                                    kinds,
+                                    ranks,
+                                    false);
+                            }
+                            if (lower_count == 0)
+                            {
+                                mathblocks_sequence_heap_insert(
+                                    upper_heap,
+                                    &upper_count,
+                                    incoming,
+                                    1,
+                                    positions,
+                                    kinds,
+                                    ranks,
+                                    false);
+                            }
+                            else if (ranks[incoming] <= ranks[lower_heap[0]])
+                            {
+                                mathblocks_sequence_heap_insert(
+                                    lower_heap,
+                                    &lower_count,
+                                    incoming,
+                                    0,
+                                    positions,
+                                    kinds,
+                                    ranks,
+                                    true);
+                            }
+                            else
+                            {
+                                mathblocks_sequence_heap_insert(
+                                    upper_heap,
+                                    &upper_count,
+                                    incoming,
+                                    1,
+                                    positions,
+                                    kinds,
+                                    ranks,
+                                    false);
+                            }
+                            mathblocks_sequence_rebalance_heaps(
+                                lower_heap,
+                                &lower_count,
+                                upper_heap,
+                                &upper_count,
+                                target_lower_count,
+                                positions,
+                                kinds,
+                                ranks);
+                        }
+                        int heap_height = 1;
+                        for (int value = width; value > 1; value = (value + 1) >> 1)
+                            heap_height++;
+                        long long heap_bound = ((long long)width +
+                            2ll * (first->count - width)) * heap_height;
+                        long long selection_bound = (long long)output->count * 2;
+                        output->scalar_value = (double)(
+                            (long long)first->count * 64 + heap_bound + selection_bound);
+                        output->boolean_value = 64;
+                    }
+                    __syncthreads();
                     break;
+                }
                 case 8:
                 case 10:
                     if (thread == 0)

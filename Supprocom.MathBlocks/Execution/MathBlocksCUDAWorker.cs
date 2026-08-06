@@ -7,7 +7,22 @@ internal readonly record struct MathBlockCudaShapeAuthority(int Rows, int Column
 internal readonly record struct MathBlockCudaPayloadLayout(
     int[] Capacities,
     int[] ShapeRows,
-    int[] ShapeColumns);
+    int[] ShapeColumns,
+    MathBlockValue?[] ExactValues,
+    MathBlockType[] ResolvedTypes);
+
+public readonly record struct MathBlockRollingOrderStatisticWorkPlan(
+    int InputCount,
+    int WindowWidth,
+    int OutputCount,
+    double Probability,
+    bool UsesLinearExtremeDeque,
+    bool UsesParallelRadixPreparation,
+    int RadixPassCount,
+    long ParallelKeyVisitCount,
+    long HeapOperationBound,
+    long SelectionOperationBound,
+    long TotalOperationBound);
 
 public sealed class MathBlocksCUDAWorker
 {
@@ -51,6 +66,79 @@ public sealed class MathBlocksCUDAWorker
         return MathBlocksCUDAProgramPopulationSearch.Create(definition, executionOptions);
     }
 
+    public MathBlockProgramPopulationStaticFeasibilityPlan PlanPopulationSearchStaticFeasibility(
+        MathBlockProgramPopulationSearchDefinition definition)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+        return MathBlockProgramPopulationCatalogCapacityPlanner.CreateFeasibilityPlan(definition);
+    }
+
+    public MathBlockRollingOrderStatisticWorkPlan PlanRollingOrderStatisticWork(
+        int inputCount,
+        int windowWidth,
+        double probability)
+    {
+        if (inputCount <= 0)
+            throw new ArgumentOutOfRangeException(nameof(inputCount));
+        if (windowWidth <= 0 || windowWidth > inputCount)
+            throw new ArgumentOutOfRangeException(nameof(windowWidth));
+        if (!double.IsFinite(probability) || probability is < 0d or > 1d)
+            throw new ArgumentOutOfRangeException(nameof(probability));
+        var outputCount = checked(inputCount - windowWidth + 1);
+        if (windowWidth == 1)
+        {
+            return new MathBlockRollingOrderStatisticWorkPlan(
+                inputCount,
+                windowWidth,
+                outputCount,
+                probability,
+                false,
+                false,
+                0,
+                inputCount,
+                0,
+                0,
+                inputCount);
+        }
+        if (probability is 0d or 1d)
+        {
+            var linearBound = checked((long)inputCount * 3);
+            return new MathBlockRollingOrderStatisticWorkPlan(
+                inputCount,
+                windowWidth,
+                outputCount,
+                probability,
+                true,
+                false,
+                0,
+                linearBound,
+                0,
+                outputCount,
+                checked(linearBound + outputCount));
+        }
+        var heapHeight = 1;
+        for (var value = windowWidth; value > 1; value = (value + 1) >> 1)
+            heapHeight++;
+        var radixVisits = checked((long)inputCount * 64);
+        var heapOperations = outputCount == 1
+            ? 0
+            : checked(
+                ((long)windowWidth + checked(2L * (inputCount - windowWidth))) * heapHeight);
+        var selectionOperations = checked((long)outputCount * 2);
+        return new MathBlockRollingOrderStatisticWorkPlan(
+            inputCount,
+            windowWidth,
+            outputCount,
+            probability,
+            false,
+            true,
+            64,
+            radixVisits,
+            heapOperations,
+            selectionOperations,
+            checked(radixVisits + heapOperations + selectionOperations));
+    }
+
     public IReadOnlyList<MathBlockProgramPopulationResourceBand>
         PlanPopulationEnumerationCatalogResourceBands(
             MathBlockProgramPopulationDefinition population,
@@ -85,6 +173,139 @@ public sealed class MathBlocksCUDAWorker
 
 internal static class MathBlockProgramPopulationCatalogCapacityPlanner
 {
+    public static MathBlockProgramPopulationStaticFeasibilityPlan CreateFeasibilityPlan(
+        MathBlockProgramPopulationSearchDefinition definition)
+    {
+        var catalog = definition.EnumerationCatalog ??
+            throw new ArgumentException("Static catalog feasibility requires an enumeration catalog.", nameof(definition));
+        var feasible = new List<MathBlockProgramStructure>();
+        var rejected = new List<MathBlockProgramPopulationStaticRejection>();
+        var requiredByOperationCount = new Dictionary<int, int>();
+        var inspectedNodes = 0;
+        var liveNodes = 0;
+        var constantFolds = 0;
+        var commonSubexpressions = 0;
+        var expressions = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var structure in catalog.Programs)
+        {
+            inspectedNodes = checked(
+                inspectedNodes +
+                structure.Nodes.Count +
+                definition.ObjectiveBinding.Program.PlanNodes.Count);
+            CountProgramAuthorities(
+                definition,
+                structure,
+                ref liveNodes,
+                ref constantFolds,
+                ref commonSubexpressions,
+                expressions);
+            if (TryAnalyzeProgram(definition, structure, out var requiredElements, out var reason))
+            {
+                feasible.Add(structure);
+                var operationCount = checked(
+                    structure.Nodes.Count - definition.Population.AllTerminals.Count);
+                if (!requiredByOperationCount.TryGetValue(operationCount, out var current) ||
+                    requiredElements > current)
+                {
+                    requiredByOperationCount[operationCount] = requiredElements;
+                }
+            }
+            else
+            {
+                rejected.Add(new MathBlockProgramPopulationStaticRejection(
+                    structure.ProposalCursor!.Value,
+                    structure.StructuralFingerprint,
+                    reason ?? "Static CUDA feasibility failed."));
+            }
+        }
+        var bands = new MathBlockProgramPopulationResourceBand[requiredByOperationCount.Count];
+        var bandIndex = 0;
+        foreach (var requirement in requiredByOperationCount)
+        {
+            bands[bandIndex++] = new MathBlockProgramPopulationResourceBand(
+                requirement.Key,
+                requirement.Value);
+        }
+        MathBlockCollectionPrimitives.StableMergeSort(
+            bands,
+            (left, right) => left.OperationCount.CompareTo(right.OperationCount));
+        return new MathBlockProgramPopulationStaticFeasibilityPlan(
+            feasible,
+            rejected,
+            bands,
+            new MathBlockProgramPopulationStaticInstrumentation(
+                catalog.Programs.Count,
+                feasible.Count,
+                rejected.Count,
+                inspectedNodes,
+                liveNodes,
+                checked(inspectedNodes - liveNodes),
+                constantFolds,
+                commonSubexpressions,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0));
+    }
+
+    public static bool TryAnalyzeProgram(
+        MathBlockProgramPopulationSearchDefinition definition,
+        MathBlockProgramStructure structure,
+        out int requiredElements,
+        out string? rejectionReason)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+        ArgumentNullException.ThrowIfNull(structure);
+        try
+        {
+            var population = definition.Population;
+            population.ValidateResidentStructure(structure);
+            var candidatePlan = BuildPlan(population, structure);
+            MathBlocksCUDAProgram.ValidateProgram(candidatePlan);
+            var candidateLayout = MathBlocksCUDAProgram.ResolvePayloadLayout(
+                candidatePlan,
+                null);
+            requiredElements = 1;
+            for (var nodeIndex = population.AllTerminals.Count;
+                nodeIndex < candidatePlan.Count;
+                nodeIndex++)
+            {
+                if (!structure.Nodes[nodeIndex].Type.Accepts(
+                        candidateLayout.ResolvedTypes[nodeIndex]))
+                {
+                    throw new InvalidOperationException(
+                        $"Enumeration catalog node {nodeIndex} has incompatible resolved CUDA type authority.");
+                }
+                requiredElements = Math.Max(
+                    requiredElements,
+                    candidateLayout.Capacities[nodeIndex]);
+            }
+
+            var outputIndex = candidatePlan.Count - 1;
+            ValidateObjective(
+                definition,
+                candidateLayout.ResolvedTypes[outputIndex],
+                candidateLayout.Capacities[outputIndex],
+                new MathBlockCudaShapeAuthority(
+                    candidateLayout.ShapeRows[outputIndex],
+                    candidateLayout.ShapeColumns[outputIndex]));
+            rejectionReason = null;
+            return true;
+        }
+        catch (Exception exception) when (exception is
+            InvalidOperationException or OverflowException or NotSupportedException)
+        {
+            requiredElements = 0;
+            rejectionReason = exception.Message;
+            return false;
+        }
+    }
+
     public static IReadOnlyList<MathBlockProgramPopulationResourceBand> Plan(
         MathBlockProgramPopulationDefinition population,
         MathBlockProgramPopulationEnumerationCatalog catalog)
@@ -132,13 +353,28 @@ internal static class MathBlockProgramPopulationCatalogCapacityPlanner
     }
 
     public static void RequireResourceBands(
-        MathBlockProgramPopulationDefinition population,
-        MathBlockProgramPopulationEnumerationCatalog catalog)
+        MathBlockProgramPopulationSearchDefinition definition)
     {
-        var requirements = Plan(population, catalog);
-        for (var requirementIndex = 0; requirementIndex < requirements.Count; requirementIndex++)
+        var population = definition.Population;
+        var catalog = definition.EnumerationCatalog ??
+            throw new ArgumentException("A catalog is required.", nameof(definition));
+        var requiredByOperationCount = new Dictionary<int, int>();
+        foreach (var structure in catalog.Programs)
         {
-            var requirement = requirements[requirementIndex];
+            if (!TryAnalyzeProgram(definition, structure, out var requiredElements, out _))
+                continue;
+            var operationCount = checked(structure.Nodes.Count - population.AllTerminals.Count);
+            if (!requiredByOperationCount.TryGetValue(operationCount, out var current) ||
+                requiredElements > current)
+            {
+                requiredByOperationCount[operationCount] = requiredElements;
+            }
+        }
+        foreach (var requirementPair in requiredByOperationCount)
+        {
+            var requirement = new MathBlockProgramPopulationResourceBand(
+                requirementPair.Key,
+                requirementPair.Value);
             MathBlockProgramPopulationResourceBand? active = null;
             for (var bandIndex = 0; bandIndex < population.ActiveResourceBands.Count; bandIndex++)
             {
@@ -158,7 +394,153 @@ internal static class MathBlockProgramPopulationCatalogCapacityPlanner
         }
     }
 
-    private static IReadOnlyList<MathBlockProgramNode> BuildPlan(
+    private static void ValidateObjective(
+        MathBlockProgramPopulationSearchDefinition definition,
+        MathBlockType candidateType,
+        int candidateCapacity,
+        MathBlockCudaShapeAuthority candidateShape)
+    {
+        var binding = definition.ObjectiveBinding;
+        if (!binding.Program.Inputs[binding.CandidateInput].Accepts(candidateType))
+            throw new InvalidOperationException("The resolved candidate type is incompatible with the objective input.");
+        var capacities = new Dictionary<string, int>(StringComparer.Ordinal)
+        {
+            [binding.CandidateInput] = candidateCapacity
+        };
+        var shapes = new Dictionary<string, MathBlockCudaShapeAuthority>(StringComparer.Ordinal)
+        {
+            [binding.CandidateInput] = candidateShape
+        };
+        if (binding.CandidateValidityMaskInput is not null)
+        {
+            capacities.Add(binding.CandidateValidityMaskInput, definition.Validity.HistoryCounts.Count);
+            shapes.Add(
+                binding.CandidateValidityMaskInput,
+                new MathBlockCudaShapeAuthority(definition.Validity.HistoryCounts.Count, 0));
+        }
+        _ = MathBlocksCUDAProgram.ResolvePayloadLayout(
+            binding.Program.PlanNodes,
+            binding.ResidentInputs,
+            capacities,
+            shapes,
+            CreateObjectiveActiveNodes(binding));
+    }
+
+    private static bool[] CreateObjectiveActiveNodes(
+        MathBlockProgramPopulationObjectiveBinding binding)
+    {
+        var plan = binding.Program.PlanNodes;
+        var active = new bool[plan.Count];
+        var stack = new Stack<int>();
+        foreach (var objective in binding.Objectives)
+        {
+            if (objective.SourceKind == MathBlockProgramPopulationObjectiveSourceKind.ProgramOutput)
+                stack.Push(binding.Program.OutputNodeIndexes[objective.ProgramOutput!]);
+        }
+        while (stack.Count != 0)
+        {
+            var nodeIndex = stack.Pop();
+            if (active[nodeIndex])
+                continue;
+            active[nodeIndex] = true;
+            foreach (var input in plan[nodeIndex].Inputs)
+                stack.Push(input);
+        }
+        for (var nodeIndex = 0; nodeIndex < plan.Count; nodeIndex++)
+        {
+            var node = plan[nodeIndex];
+            if (node.Kind == MathBlockProgramNodeKind.Input &&
+                string.Equals(node.Name, binding.CandidateInput, StringComparison.Ordinal))
+            {
+                active[nodeIndex] = true;
+                break;
+            }
+        }
+        return active;
+    }
+
+    private static void CountProgramAuthorities(
+        MathBlockProgramPopulationSearchDefinition definition,
+        MathBlockProgramStructure structure,
+        ref int liveNodes,
+        ref int constantFolds,
+        ref int commonSubexpressions,
+        HashSet<string> expressions)
+    {
+        liveNodes = checked(liveNodes + structure.Nodes.Count);
+        foreach (var node in structure.Nodes)
+        {
+            if (node.Kind == MathBlockProgramCandidateNodeKind.Terminal)
+                continue;
+            var key = string.Concat(
+                node.OperationIdentifier,
+                "@",
+                node.OperationVersion.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ":",
+                string.Join(",", node.OperandIndexes));
+            if (!expressions.Add(key))
+                commonSubexpressions++;
+        }
+        var objectiveActive = CreateObjectiveActiveNodes(definition.ObjectiveBinding);
+        var objectivePlan = definition.ObjectiveBinding.Program.PlanNodes;
+        var objectiveSources = new int[objectivePlan.Count];
+        var objectiveFolded = new bool[objectivePlan.Count];
+        var objectiveExpressions = new Dictionary<string, int>(StringComparer.Ordinal);
+        for (var nodeIndex = 0; nodeIndex < objectiveActive.Length; nodeIndex++)
+        {
+            objectiveSources[nodeIndex] = nodeIndex;
+            if (!objectiveActive[nodeIndex])
+                continue;
+            liveNodes++;
+            var node = objectivePlan[nodeIndex];
+            if (node.Kind == MathBlockProgramNodeKind.Operation &&
+                node.Type.Kind is MathBlockValueKind.Scalar or
+                    MathBlockValueKind.Boolean or
+                    MathBlockValueKind.Complex)
+            {
+                var allConstants = true;
+                foreach (var input in node.Inputs)
+                {
+                    var producer = objectivePlan[input];
+                    if (producer.Kind != MathBlockProgramNodeKind.Constant &&
+                        !objectiveFolded[input])
+                    {
+                        allConstants = false;
+                        break;
+                    }
+                }
+                if (allConstants)
+                {
+                    constantFolds++;
+                    objectiveFolded[nodeIndex] = true;
+                    continue;
+                }
+            }
+            if (node.Kind == MathBlockProgramNodeKind.Operation)
+            {
+                var builder = new System.Text.StringBuilder(node.OperationIdentity);
+                builder.Append(':');
+                for (var inputIndex = 0; inputIndex < node.Inputs.Count; inputIndex++)
+                {
+                    if (inputIndex != 0)
+                        builder.Append(',');
+                    builder.Append(objectiveSources[node.Inputs[inputIndex]]);
+                }
+                var key = builder.ToString();
+                if (objectiveExpressions.TryGetValue(key, out var source))
+                {
+                    commonSubexpressions++;
+                    objectiveSources[nodeIndex] = source;
+                }
+                else
+                {
+                    objectiveExpressions.Add(key, nodeIndex);
+                }
+            }
+        }
+    }
+
+    internal static IReadOnlyList<MathBlockProgramNode> BuildPlan(
         MathBlockProgramPopulationDefinition population,
         MathBlockProgramStructure structure)
     {
@@ -187,13 +569,18 @@ internal static class MathBlockProgramPopulationCatalogCapacityPlanner
             }
             var operation = registry.Get(node.OperationIdentifier!, node.OperationVersion);
             var outputType = operation.ResolveOutputType(inputTypes);
+            if (!node.Type.Accepts(outputType))
+            {
+                throw new InvalidOperationException(
+                    $"Enumeration catalog node {nodeIndex} has an incompatible declared type.");
+            }
             plan[nodeIndex] = new MathBlockProgramNode(
                 nodeIndex,
                 new MathBlockProgram.Node(
                     MathBlockProgramBuilder.NodeDefinition.CreateOperation(
                         operation,
                         operands,
-                        outputType)));
+                        node.Type)));
         }
         return Array.AsReadOnly(plan);
     }
@@ -208,6 +595,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     private readonly int[] slotOffsets;
     private readonly int[] payloadOffsets;
     private readonly int[] payloadCapacities;
+    private readonly MathBlockType[] resolvedTypes;
     private readonly int[] inputPointerOffsets;
     private readonly IntPtr[] graphNodes;
     private readonly List<KernelArgumentStorage> kernelArguments;
@@ -229,6 +617,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         int[] slotOffsets,
         int[] payloadOffsets,
         int[] payloadCapacities,
+        MathBlockType[] resolvedTypes,
         int[] inputPointerOffsets,
         IntPtr[] graphNodes,
         List<KernelArgumentStorage> kernelArguments,
@@ -247,6 +636,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         this.slotOffsets = slotOffsets;
         this.payloadOffsets = payloadOffsets;
         this.payloadCapacities = payloadCapacities;
+        this.resolvedTypes = resolvedTypes;
         this.inputPointerOffsets = inputPointerOffsets;
         this.graphNodes = graphNodes;
         this.kernelArguments = kernelArguments;
@@ -302,7 +692,9 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         {
             slotOffsets[node.Index] = AlignArenaOffset(arenaSize);
             arenaSize = checked(slotOffsets[node.Index] + SlotSize);
-            var payloadBytes = ResolvePayloadBytes(node.Type.Kind, payloadCapacities[node.Index]);
+            var payloadBytes = ResolvePayloadBytes(
+                payloadLayout.ResolvedTypes[node.Index].Kind,
+                payloadCapacities[node.Index]);
             if (payloadBytes == 0)
                 return;
             payloadOffsets[node.Index] = AlignArenaOffset(arenaSize);
@@ -378,7 +770,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                     payloadPointer,
                     scratchPointer,
                     payloadCapacities[node.Index],
-                    node.Type,
+                    payloadLayout.ResolvedTypes[node.Index],
                     valid: false);
                 if (node.Kind == MathBlockProgramNodeKind.Constant)
                 {
@@ -491,6 +883,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 slotOffsets,
                 payloadOffsets,
                 payloadCapacities,
+                payloadLayout.ResolvedTypes,
                 inputPointerOffsets,
                 graphNodes,
                 arguments,
@@ -625,7 +1018,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                         payloadOffsets[output.Value] < 0
                             ? -1
                             : checked(payloadOffsets[output.Value] - downloadArenaOffset),
-                        program.PlanNodes[output.Value].Type));
+                        resolvedTypes[output.Value]));
                 HostOutputReadCount++;
             }
             return outputs;
@@ -710,20 +1103,34 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         IReadOnlyList<MathBlockProgramNode> nodes,
         IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
         IReadOnlyDictionary<string, int>? inputCapacityOverrides = null,
-        IReadOnlyDictionary<string, MathBlockCudaShapeAuthority>? inputShapeOverrides = null)
+        IReadOnlyDictionary<string, MathBlockCudaShapeAuthority>? inputShapeOverrides = null,
+        IReadOnlyList<bool>? activeNodes = null)
     {
         var capacities = new int[nodes.Count];
         var shapeRows = new int[nodes.Count];
         var shapeColumns = new int[nodes.Count];
+        var exactValues = new MathBlockValue?[nodes.Count];
+        var resolvedTypes = new MathBlockType[nodes.Count];
         var published = new bool[nodes.Count];
+        if (activeNodes is not null && activeNodes.Count != nodes.Count)
+            throw new ArgumentException("The CUDA active-node count is inconsistent.", nameof(activeNodes));
         foreach (var node in nodes)
         {
             if ((uint)node.Index >= (uint)nodes.Count || published[node.Index])
                 throw new InvalidOperationException($"CUDA payload node index {node.Index} is invalid.");
 
+            if (activeNodes is not null && !activeNodes[node.Index])
+            {
+                resolvedTypes[node.Index] = node.Type;
+                published[node.Index] = true;
+                continue;
+            }
+
             var inputCapacities = new int[node.Inputs.Count];
             var inputShapeRows = new int[node.Inputs.Count];
             var inputShapeColumns = new int[node.Inputs.Count];
+            var inputExactValues = new MathBlockValue?[node.Inputs.Count];
+            var inputTypes = new MathBlockType[node.Inputs.Count];
             for (var inputIndex = 0; inputIndex < node.Inputs.Count; inputIndex++)
             {
                 var producerIndex = node.Inputs[inputIndex];
@@ -735,6 +1142,25 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 inputCapacities[inputIndex] = capacities[producerIndex];
                 inputShapeRows[inputIndex] = shapeRows[producerIndex];
                 inputShapeColumns[inputIndex] = shapeColumns[producerIndex];
+                inputExactValues[inputIndex] = exactValues[producerIndex];
+                inputTypes[inputIndex] = resolvedTypes[producerIndex];
+            }
+
+            MathBlockType resolvedType;
+            if (node.Kind == MathBlockProgramNodeKind.Operation)
+            {
+                var operation = ResolveOperation(node.OperationIdentity!);
+                resolvedType = operation.ResolveOutputType(inputTypes);
+                ValidateStaticOperation(
+                    node,
+                    inputCapacities,
+                    inputShapeRows,
+                    inputShapeColumns,
+                    inputExactValues);
+            }
+            else
+            {
+                resolvedType = node.Type;
             }
 
             var capacity = ResolvePayloadCapacity(
@@ -744,7 +1170,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 inputShapeRows,
                 inputShapeColumns,
                 prototypeInputs,
-                inputCapacityOverrides);
+                inputCapacityOverrides,
+                inputExactValues);
             if (capacity < 0)
                 throw new InvalidOperationException($"CUDA payload capacity for node {node.Index} is negative.");
             var shape = ResolveShapeAuthority(
@@ -754,17 +1181,41 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 inputShapeRows,
                 inputShapeColumns,
                 prototypeInputs,
-                inputShapeOverrides);
+                inputShapeOverrides,
+                inputExactValues);
+            resolvedType = new MathBlockType(
+                resolvedType.Kind,
+                resolvedType.Unit,
+                shape.Rows,
+                shape.Columns);
+            if (!node.Type.Accepts(resolvedType) &&
+                !(HasRuntimeShape(node.OperationIdentity) &&
+                    node.Type.Kind == resolvedType.Kind &&
+                    node.Type.Unit == resolvedType.Unit))
+            {
+                throw new InvalidOperationException(
+                    $"CUDA resolved type authority for node {node.Index} is incompatible with its declared type.");
+            }
             capacities[node.Index] = capacity;
             shapeRows[node.Index] = shape.Rows;
             shapeColumns[node.Index] = shape.Columns;
+            resolvedTypes[node.Index] = resolvedType;
+            exactValues[node.Index] = ResolveExactValue(
+                node,
+                prototypeInputs,
+                inputExactValues);
             published[node.Index] = true;
         }
 
         for (var nodeIndex = 0; nodeIndex < published.Length; nodeIndex++)
             if (!published[nodeIndex])
                 throw new InvalidOperationException($"CUDA payload capacity for node {nodeIndex} is unavailable.");
-        return new MathBlockCudaPayloadLayout(capacities, shapeRows, shapeColumns);
+        return new MathBlockCudaPayloadLayout(
+            capacities,
+            shapeRows,
+            shapeColumns,
+            exactValues,
+            resolvedTypes);
     }
 
     private static IntPtr[] CreateKernelDependencies(
@@ -893,6 +1344,296 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         return maximumWidth;
     }
 
+    private static MathBlockOperation ResolveOperation(string identity)
+    {
+        var separator = identity.LastIndexOf('@');
+        if (separator <= 0 || separator == identity.Length - 1 ||
+            !int.TryParse(
+                identity.AsSpan(separator + 1),
+                System.Globalization.NumberStyles.None,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out var version))
+        {
+            throw new InvalidOperationException($"CUDA operation identity '{identity}' is invalid.");
+        }
+        return MathBlockCatalog.Standard.Get(identity[..separator], version);
+    }
+
+    private static void ValidateStaticOperation(
+        MathBlockProgramNode node,
+        IReadOnlyList<int> inputCapacities,
+        IReadOnlyList<int> inputShapeRows,
+        IReadOnlyList<int> inputShapeColumns,
+        IReadOnlyList<MathBlockValue?> inputExactValues)
+    {
+        var identity = node.OperationIdentity!;
+        if (identity == "sequence.difference@1" &&
+            TryGetExactInteger(inputExactValues, 1, out var lag))
+        {
+            var count = RequireInputShapeRows(node, 0, inputShapeRows);
+            RequireDomain(lag > 0 && lag < count, node, "lag");
+        }
+        if (IsRollingIdentity(identity) &&
+            TryGetExactInteger(inputExactValues, 1, out var width))
+        {
+            var count = RequireInputShapeRows(node, 0, inputShapeRows);
+            RequireDomain(width > 0 && width <= count, node, "rolling window");
+        }
+        if (identity == "sequence.rolling-quantile@1" &&
+            TryGetExactScalar(inputExactValues, 2, out var rollingProbability))
+        {
+            RequireDomain(
+                rollingProbability is >= 0d and <= 1d,
+                node,
+                "rolling probability");
+        }
+        if (identity == "sequence.exponential-moving-average@1" &&
+            TryGetExactScalar(inputExactValues, 1, out var alpha))
+        {
+            RequireDomain(alpha is > 0d and <= 1d, node, "smoothing input");
+        }
+        if (identity == "vector.quantile@1" &&
+            TryGetExactScalar(inputExactValues, 1, out var probability))
+        {
+            RequireDomain(probability is >= 0d and <= 1d, node, "probability");
+            RequireDomain(inputCapacities[0] > 0, node, "vector length");
+        }
+        if (identity is "vector.repeat@1" or "vector.linspace@1")
+        {
+            var countInput = identity == "vector.repeat@1" ? 1 : 2;
+            if (TryGetExactInteger(inputExactValues, countInput, out var count))
+            {
+                var minimum = identity == "vector.repeat@1" ? 0 : 1;
+                RequireDomain(count >= minimum && count <= 1_000_000, node, "output length");
+            }
+        }
+        if (identity == "vector.slice@1" &&
+            TryGetExactInteger(inputExactValues, 1, out var start) &&
+            TryGetExactInteger(inputExactValues, 2, out var length))
+        {
+            var count = RequireInputShapeRows(node, 0, inputShapeRows);
+            RequireDomain(start >= 0 && length >= 0 && start <= count && length <= count - start,
+                node,
+                "slice");
+        }
+        if (identity == "matrix.identity@1" &&
+            TryGetExactInteger(inputExactValues, 0, out var matrixSize))
+        {
+            RequireDomain(matrixSize > 0 && matrixSize <= 4096, node, "matrix size");
+        }
+        if (identity == "matrix.reshape@1" &&
+            TryGetExactInteger(inputExactValues, 1, out var rows) &&
+            TryGetExactInteger(inputExactValues, 2, out var columns))
+        {
+            RequireDomain(
+                rows > 0 && columns > 0 && checked((long)rows * columns) == inputCapacities[0],
+                node,
+                "matrix shape");
+        }
+        if (identity == "matrix.schur-complement@1" &&
+            TryGetExactInteger(inputExactValues, 1, out var retained))
+        {
+            var matrixRows = RequireInputShapeRows(node, 0, inputShapeRows);
+            RequireDomain(retained > 0 && retained < matrixRows, node, "retained size");
+        }
+        if (identity == "statistics.autocorrelation@1" &&
+            TryGetExactInteger(inputExactValues, 1, out var correlationLag))
+        {
+            RequireDomain(
+                correlationLag > 0 && correlationLag < inputCapacities[0],
+                node,
+                "correlation lag");
+        }
+        if (identity == "state.transition-counts@1" &&
+            TryGetExactInteger(inputExactValues, 1, out var stateCount))
+        {
+            RequireDomain(stateCount > 0, node, "state count");
+        }
+        if (identity == "information.conditional-mutual-information@1" &&
+            TryGetExactInteger(inputExactValues, 1, out var firstStateCount) &&
+            TryGetExactInteger(inputExactValues, 2, out var secondStateCount) &&
+            TryGetExactInteger(inputExactValues, 3, out var conditionStateCount))
+        {
+            RequireDomain(
+                firstStateCount > 0 &&
+                secondStateCount > 0 &&
+                conditionStateCount > 0 &&
+                checked((long)firstStateCount * secondStateCount * conditionStateCount) == inputCapacities[0],
+                node,
+                "conditional information shape");
+        }
+        if (identity == "graph.undirected-shortest-paths@1" &&
+            TryGetExactInteger(inputExactValues, 1, out var source))
+        {
+            RequireDomain(
+                source >= 0 && source < RequireInputShapeRows(node, 0, inputShapeRows),
+                node,
+                "graph source");
+        }
+        if (identity == "path.recurrence-rate@1" &&
+            TryGetExactScalar(inputExactValues, 1, out var threshold))
+        {
+            RequireDomain(inputCapacities[0] > 0 && threshold >= 0d, node, "recurrence threshold");
+        }
+        if (identity == "path.hysteresis@1" &&
+            TryGetExactScalar(inputExactValues, 1, out var lower) &&
+            TryGetExactScalar(inputExactValues, 2, out var upper))
+        {
+            RequireDomain(lower < upper, node, "hysteresis thresholds");
+        }
+        if (identity == "polynomial.bernstein-evaluate@1" &&
+            TryGetExactScalar(inputExactValues, 1, out var bernsteinInput))
+        {
+            RequireDomain(
+                inputCapacities[0] > 0 && bernsteinInput is >= 0d and <= 1d,
+                node,
+                "Bernstein input");
+        }
+        if (identity == "polynomial.elementary-symmetric@1" &&
+            TryGetExactInteger(inputExactValues, 1, out var order))
+        {
+            RequireDomain(order >= 0 && order <= inputCapacities[0], node, "polynomial order");
+        }
+        if (identity == "transport.uniform-wasserstein@1" &&
+            TryGetExactScalar(inputExactValues, 2, out var transportOrder))
+        {
+            RequireDomain(inputCapacities[0] > 0 && transportOrder >= 1d, node, "transport order");
+        }
+        if (identity == "special.regularized-incomplete-beta@1" &&
+            TryGetExactScalar(inputExactValues, 0, out var betaInput) &&
+            TryGetExactScalar(inputExactValues, 1, out var betaLeft) &&
+            TryGetExactScalar(inputExactValues, 2, out var betaRight))
+        {
+            RequireDomain(
+                betaInput is >= 0d and <= 1d && betaLeft > 0d && betaRight > 0d,
+                node,
+                "beta inputs");
+        }
+    }
+
+    private static MathBlockValue? ResolveExactValue(
+        MathBlockProgramNode node,
+        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
+        IReadOnlyList<MathBlockValue?> inputExactValues)
+    {
+        if (node.Kind == MathBlockProgramNodeKind.Constant)
+            return IsCompileTimeValue(node.Value) ? node.Value : null;
+        if (node.Kind == MathBlockProgramNodeKind.Input &&
+            prototypeInputs is not null &&
+            prototypeInputs.TryGetValue(node.Name!, out var prototype))
+        {
+            return IsCompileTimeValue(prototype) ? prototype : null;
+        }
+        if (node.Kind != MathBlockProgramNodeKind.Operation ||
+            node.Type.Kind is not (
+                MathBlockValueKind.Scalar or
+                MathBlockValueKind.Boolean or
+                MathBlockValueKind.Complex))
+        {
+            return null;
+        }
+        var inputs = new MathBlockValue[inputExactValues.Count];
+        for (var index = 0; index < inputs.Length; index++)
+        {
+            if (!inputExactValues[index].HasValue)
+                return null;
+            inputs[index] = inputExactValues[index]!.Value;
+            if (!IsCompileTimeValue(inputs[index]))
+                return null;
+        }
+        var result = ResolveOperation(node.OperationIdentity!).Evaluate(inputs);
+        if (!result.IsValid)
+        {
+            throw new InvalidOperationException(
+                $"CUDA constant folding rejected node {node.Index}: {result.InvalidReason}");
+        }
+        return IsCompileTimeValue(result) ? result : null;
+    }
+
+    private static bool IsCompileTimeValue(MathBlockValue value) => value.Type.Kind is
+        MathBlockValueKind.Scalar or MathBlockValueKind.Boolean or MathBlockValueKind.Complex;
+
+    private static bool IsRollingIdentity(string identity) => identity is
+        "sequence.rolling-maximum@1" or
+        "sequence.rolling-mean@1" or
+        "sequence.rolling-median@1" or
+        "sequence.rolling-minimum@1" or
+        "sequence.rolling-quantile@1" or
+        "sequence.rolling-standard-deviation@1" or
+        "sequence.rolling-sum@1" or
+        "sequence.rolling-variance@1";
+
+    private static bool HasRuntimeShape(string? identity) => identity is
+        "sequence.difference@1" or
+        "sequence.rolling-maximum@1" or
+        "sequence.rolling-mean@1" or
+        "sequence.rolling-median@1" or
+        "sequence.rolling-minimum@1" or
+        "sequence.rolling-quantile@1" or
+        "sequence.rolling-standard-deviation@1" or
+        "sequence.rolling-sum@1" or
+        "sequence.rolling-variance@1" or
+        "vector.linspace@1" or
+        "vector.repeat@1" or
+        "vector.slice@1" or
+        "vector.concatenate@1";
+
+    private static bool TryGetExactScalar(
+        IReadOnlyList<MathBlockValue?> values,
+        int index,
+        out double result)
+    {
+        if ((uint)index < (uint)values.Count &&
+            values[index] is { } value &&
+            value.Type.Kind == MathBlockValueKind.Scalar)
+        {
+            result = value.AsScalar();
+            return true;
+        }
+        result = 0d;
+        return false;
+    }
+
+    private static bool TryGetExactInteger(
+        IReadOnlyList<MathBlockValue?> values,
+        int index,
+        out int result)
+    {
+        if (TryGetExactScalar(values, index, out var scalar) &&
+            scalar >= int.MinValue && scalar <= int.MaxValue &&
+            scalar == Math.Truncate(scalar))
+        {
+            result = (int)scalar;
+            return true;
+        }
+        result = 0;
+        return false;
+    }
+
+    private static bool TryGetExactNonnegativeInteger(
+        IReadOnlyList<MathBlockValue?> values,
+        int index,
+        out int result) =>
+        TryGetExactInteger(values, index, out result) && result >= 0;
+
+    private static int ResolveExactCount(
+        MathBlockProgramNode node,
+        int inputIndex,
+        IReadOnlyList<MathBlockValue?> inputExactValues,
+        IReadOnlyList<MathBlockProgramNode> nodes,
+        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs)
+    {
+        if (TryGetExactNonnegativeInteger(inputExactValues, inputIndex, out var count))
+            return count;
+        return ResolvePrototypeCount(nodes[node.Inputs[inputIndex]], prototypeInputs);
+    }
+
+    private static void RequireDomain(bool condition, MathBlockProgramNode node, string domain)
+    {
+        if (!condition)
+            throw new InvalidOperationException($"CUDA static {domain} authority rejected node {node.Index}.");
+    }
+
     private static int ResolvePayloadCapacity(
         MathBlockProgramNode node,
         IReadOnlyList<MathBlockProgramNode> nodes,
@@ -900,7 +1641,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         IReadOnlyList<int> inputShapeRows,
         IReadOnlyList<int> inputShapeColumns,
         IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
-        IReadOnlyDictionary<string, int>? inputCapacityOverrides)
+        IReadOnlyDictionary<string, int>? inputCapacityOverrides,
+        IReadOnlyList<MathBlockValue?> inputExactValues)
     {
         if (node.Type.Kind is MathBlockValueKind.Scalar or MathBlockValueKind.Boolean)
             return 0;
@@ -1020,6 +1762,13 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 "sequence.rolling-sum@1" or
                 "sequence.rolling-variance@1")
             {
+                if (TryGetExactNonnegativeInteger(inputExactValues, 1, out var parameter))
+                {
+                    var inputCount = RequireInputShapeRows(node, 0, inputShapeRows);
+                    return identity == "sequence.difference@1"
+                        ? checked(inputCount - parameter)
+                        : checked(inputCount - parameter + 1);
+                }
                 return inputCapacities[0];
             }
             if (identity == "path.lead-lag-transform@1")
@@ -1141,11 +1890,11 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                     inputCapacities[1]);
             }
             if (identity == "vector.linspace@1")
-                return ResolvePrototypeCount(nodes[node.Inputs[2]], prototypeInputs);
+                return ResolveExactCount(node, 2, inputExactValues, nodes, prototypeInputs);
             if (identity == "vector.repeat@1")
-                return ResolvePrototypeCount(nodes[node.Inputs[1]], prototypeInputs);
+                return ResolveExactCount(node, 1, inputExactValues, nodes, prototypeInputs);
             if (identity == "vector.slice@1")
-                return ResolvePrototypeCount(nodes[node.Inputs[2]], prototypeInputs);
+                return ResolveExactCount(node, 2, inputExactValues, nodes, prototypeInputs);
             if (identity == "vector.gather@1")
                 return inputCapacities[1];
             if (node.Inputs.Count != 0)
@@ -1170,7 +1919,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         IReadOnlyList<int> inputShapeRows,
         IReadOnlyList<int> inputShapeColumns,
         IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
-        IReadOnlyDictionary<string, MathBlockCudaShapeAuthority>? inputShapeOverrides)
+        IReadOnlyDictionary<string, MathBlockCudaShapeAuthority>? inputShapeOverrides,
+        IReadOnlyList<MathBlockValue?> inputExactValues)
     {
         if (node.Kind == MathBlockProgramNodeKind.Constant)
         {
@@ -1205,7 +1955,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 node,
                 inputCapacities,
                 inputShapeRows,
-                inputShapeColumns);
+                inputShapeColumns,
+                inputExactValues);
             if (rows == 0)
                 rows = inferred.Rows;
             if (columns == 0)
@@ -1218,7 +1969,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         MathBlockProgramNode node,
         IReadOnlyList<int> inputCapacities,
         IReadOnlyList<int> inputShapeRows,
-        IReadOnlyList<int> inputShapeColumns)
+        IReadOnlyList<int> inputShapeColumns,
+        IReadOnlyList<MathBlockValue?> inputExactValues)
     {
         var identity = node.OperationIdentity!;
         if (identity is "matrix.gram@1" or "statistics.covariance-matrix@1")
@@ -1270,6 +2022,39 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         {
             var count = inputCapacities[0];
             return new MathBlockCudaShapeAuthority(count == 0 ? 0 : checked(2 * count - 1), 2);
+        }
+        if (identity == "sequence.difference@1" &&
+            TryGetExactNonnegativeInteger(inputExactValues, 1, out var lag))
+        {
+            return new MathBlockCudaShapeAuthority(
+                checked(RequireInputShapeRows(node, 0, inputShapeRows) - lag),
+                0);
+        }
+        if (IsRollingIdentity(identity) &&
+            TryGetExactNonnegativeInteger(inputExactValues, 1, out var width))
+        {
+            return new MathBlockCudaShapeAuthority(
+                checked(RequireInputShapeRows(node, 0, inputShapeRows) - width + 1),
+                0);
+        }
+        if (identity == "vector.concatenate@1")
+        {
+            return new MathBlockCudaShapeAuthority(
+                checked(
+                    RequireInputShapeRows(node, 0, inputShapeRows) +
+                    RequireInputShapeRows(node, 1, inputShapeRows)),
+                0);
+        }
+        if (identity is "vector.linspace@1" or "vector.repeat@1")
+        {
+            var countInput = identity == "vector.linspace@1" ? 2 : 1;
+            if (TryGetExactNonnegativeInteger(inputExactValues, countInput, out var count))
+                return new MathBlockCudaShapeAuthority(count, 0);
+        }
+        if (identity == "vector.slice@1" &&
+            TryGetExactNonnegativeInteger(inputExactValues, 2, out var length))
+        {
+            return new MathBlockCudaShapeAuthority(length, 0);
         }
         if (identity == "point-set.to-matrix@1")
             return new MathBlockCudaShapeAuthority(inputCapacities[0], 2);
@@ -1467,6 +2252,30 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             inputShapeRows[index] = payloadLayout.ShapeRows[input];
             inputShapeColumns[index] = payloadLayout.ShapeColumns[input];
         }
+        if ((node.OperationIdentity is
+                "sequence.rolling-median@1" or
+                "sequence.rolling-quantile@1") &&
+            node.Inputs.Count is >= 2 &&
+            payloadLayout.ExactValues[node.Inputs[1]] is { } widthValue &&
+            widthValue.Type.Kind == MathBlockValueKind.Scalar)
+        {
+            var width = widthValue.AsScalar();
+            if (width > 0d && width <= int.MaxValue && width == Math.Truncate(width))
+            {
+                var inputCount = payloadLayout.Capacities[node.Inputs[0]];
+                if ((int)width == 1)
+                    return 0;
+                if (node.OperationIdentity == "sequence.rolling-quantile@1" &&
+                    node.Inputs.Count is >= 3 &&
+                    payloadLayout.ExactValues[node.Inputs[2]] is { } probabilityValue &&
+                    probabilityValue.Type.Kind == MathBlockValueKind.Scalar &&
+                    probabilityValue.AsScalar() is 0d or 1d)
+                {
+                    return checked(inputCount * sizeof(int));
+                }
+                return ResolveRollingOrderStatisticScratchBytes(inputCount, (int)width);
+            }
+        }
         return ResolveScratchBytes(
             node.OperationIdentity!,
             node.Type,
@@ -1489,6 +2298,14 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             inputTypes.Count != inputShapeColumns.Count)
         {
             throw new ArgumentException("CUDA scratch input metadata is inconsistent.");
+        }
+        if (identity is "sequence.rolling-median@1" or "sequence.rolling-quantile@1")
+        {
+            return inputCapacities.Count == 0
+                ? 0
+                : ResolveRollingOrderStatisticScratchBytes(
+                    inputCapacities[0],
+                    inputCapacities[0]);
         }
         if (inputTypes.Count != 0)
         {
@@ -1520,9 +2337,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 "information.mutual-information@1" => checked(rows + columns),
                 "information.conditional-mutual-information@1" => checked(firstCount * 3),
                 "sequence.rolling-maximum@1" or
-                    "sequence.rolling-median@1" or
                     "sequence.rolling-minimum@1" or
-                    "sequence.rolling-quantile@1" or
                     "transform.haar@1" => firstCount,
                 "path.dynamic-time-warping@1" => checked(
                     2 * (inputCapacities[1] + 1)),
@@ -1623,6 +2438,27 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         if (size < 0 || size > 20)
             throw new InvalidOperationException("CUDA assignment shape is outside the operation domain.");
         return checked(2 * (1 << size));
+    }
+
+    internal static int ResolveRollingOrderStatisticScratchBytes(int inputCount, int windowWidth)
+    {
+        if (inputCount <= 0 || windowWidth <= 1)
+            return 0;
+        if (windowWidth > inputCount)
+        {
+            throw new InvalidOperationException(
+                "CUDA rolling window shape exceeds its input.");
+        }
+        var bytes = checked(
+            checked((long)inputCount * 36) +
+            checked((long)windowWidth * 8) +
+            checked((long)(int)SequencePathCudaBlockCatalog.BlockSize * sizeof(int) * 2));
+        if (bytes > int.MaxValue)
+        {
+            throw new InvalidOperationException(
+                "CUDA rolling order-statistic scratch exceeds the supported resource range.");
+        }
+        return (int)bytes;
     }
 
     private static int AlignArenaOffset(int offset) => checked((offset + 7) & ~7);

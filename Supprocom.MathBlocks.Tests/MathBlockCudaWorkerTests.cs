@@ -388,6 +388,240 @@ public sealed class MathBlockCudaWorkerTests
     }
 
     [Fact]
+    [Trait("Category", "Performance")]
+    public void CUDA_rolling_order_statistics_are_exact_and_scale_subquadratically()
+    {
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        var measurements = new List<double>();
+        foreach (var count in new[] { 2_048, 4_096, 8_192 })
+        {
+            var values = MathBlockValue.Vector(
+                Enumerable.Range(0, count).Select(index =>
+                    (double)((index * 104_729 + 17) % 65_521)));
+            var width = MathBlockValue.Scalar(count);
+            var probability = MathBlockValue.Scalar(0.375d);
+            var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
+            {
+                ["values"] = values,
+                ["width"] = width,
+                ["probability"] = probability
+            };
+            var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+            var valueNode = builder.Input("values", values.Type);
+            var widthNode = builder.Input("width", width.Type);
+            var probabilityNode = builder.Input("probability", probability.Type);
+            var median = builder.Apply(
+                "sequence.rolling-median",
+                inputs: [valueNode, widthNode]);
+            var quantile = builder.Apply(
+                "sequence.rolling-quantile",
+                inputs: [valueNode, widthNode, probabilityNode]);
+            var program = builder
+                .Output("median", median)
+                .Output("quantile", quantile)
+                .Build();
+            var cpu = program.Evaluate(inputs);
+            using var compiled = new MathBlocksCUDAWorker().Compile(program, inputs);
+            compiled.UploadInputs(inputs);
+            for (var warmup = 0; warmup < 3; warmup++)
+            {
+                compiled.ExecuteResident();
+                compiled.Synchronize();
+            }
+            var samples = new double[7];
+            for (var sample = 0; sample < samples.Length; sample++)
+            {
+                var started = Stopwatch.GetTimestamp();
+                compiled.ExecuteResident();
+                compiled.Synchronize();
+                samples[sample] = Stopwatch.GetElapsedTime(started).TotalMicroseconds;
+            }
+            Array.Sort(samples);
+            measurements.Add(samples[samples.Length / 2]);
+            var cuda = compiled.ReadOutputs();
+            AssertExact(cpu["median"], cuda["median"]);
+            AssertExact(cpu["quantile"], cuda["quantile"]);
+            Assert.Single(cuda["median"].AsVector());
+            Assert.Single(cuda["quantile"].AsVector());
+            Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        }
+
+        Assert.True(
+            measurements[1] < measurements[0] * 3.5d,
+            $"The 2x rolling-size latency ratio was {measurements[1] / measurements[0]:F3}.");
+        Assert.True(
+            measurements[2] < measurements[1] * 3.5d,
+            $"The 2x rolling-size latency ratio was {measurements[2] / measurements[1]:F3}.");
+        Console.WriteLine(
+            $"Rolling CUDA median latency: 2048={measurements[0]:F3} us, " +
+            $"4096={measurements[1]:F3} us, 8192={measurements[2]:F3} us.");
+    }
+
+    [Fact]
+    [Trait("Category", "Performance")]
+    public void CUDA_full_history_order_statistics_are_exact_and_finish_under_one_second()
+    {
+        const int count = 305_581;
+        var values = MathBlockValue.Vector(
+            Enumerable.Range(0, count).Select(index =>
+                (double)((index * 104_729L + 17) % 1_000_003)));
+        var width = MathBlockValue.Scalar(count);
+        var worker = new MathBlocksCUDAWorker();
+        var median = Measure("sequence.rolling-median", null);
+        var quantile = Measure("sequence.rolling-quantile", 0.375d);
+        var work = worker.PlanRollingOrderStatisticWork(count, count, 0.375d);
+        Assert.True(work.UsesParallelRadixPreparation);
+        Assert.False(work.UsesLinearExtremeDeque);
+        Assert.Equal(64, work.RadixPassCount);
+        Assert.Equal((long)count * 64, work.ParallelKeyVisitCount);
+        Assert.Equal(0, work.HeapOperationBound);
+        Assert.Equal(2, work.SelectionOperationBound);
+        Assert.True(median.WorstMilliseconds < 1_000d, $"Median worst time was {median.WorstMilliseconds:F3} ms.");
+        Assert.True(quantile.WorstMilliseconds < 1_000d, $"Quantile worst time was {quantile.WorstMilliseconds:F3} ms.");
+        Console.WriteLine(
+            $"Full-history CUDA order statistics at {count} values: " +
+            $"median median={median.MedianMilliseconds:F3} ms worst={median.WorstMilliseconds:F3} ms; " +
+            $"quantile median={quantile.MedianMilliseconds:F3} ms worst={quantile.WorstMilliseconds:F3} ms; " +
+            $"radix-passes={work.RadixPassCount}; key-visits={work.ParallelKeyVisitCount}.");
+
+        (double MedianMilliseconds, double WorstMilliseconds) Measure(
+            string identity,
+            double? probability)
+        {
+            var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
+            {
+                ["values"] = values,
+                ["width"] = width
+            };
+            var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+            var valueNode = builder.Input("values", values.Type);
+            var widthNode = builder.Input("width", width.Type);
+            int output;
+            if (probability.HasValue)
+            {
+                var probabilityValue = MathBlockValue.Scalar(probability.Value);
+                inputs.Add("probability", probabilityValue);
+                var probabilityNode = builder.Input("probability", probabilityValue.Type);
+                output = builder.Apply(identity, inputs: [valueNode, widthNode, probabilityNode]);
+            }
+            else
+            {
+                output = builder.Apply(identity, inputs: [valueNode, widthNode]);
+            }
+            var program = builder.Output("result", output).Build();
+            var cpu = program.Evaluate(inputs)["result"];
+            using var compiled = worker.Compile(program, inputs);
+            compiled.UploadInputs(inputs);
+            for (var warmup = 0; warmup < 3; warmup++)
+            {
+                compiled.ExecuteResident();
+                compiled.Synchronize();
+            }
+            var samples = new double[5];
+            for (var sample = 0; sample < samples.Length; sample++)
+            {
+                var started = Stopwatch.GetTimestamp();
+                compiled.ExecuteResident();
+                compiled.Synchronize();
+                samples[sample] = Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+            }
+            var cuda = compiled.ReadOutputs()["result"];
+            AssertExact(cpu, cuda);
+            Assert.Single(cuda.AsVector());
+            Array.Sort(samples);
+            return (samples[samples.Length / 2], samples[^1]);
+        }
+    }
+
+    [Fact]
+    [Trait("Category", "Performance")]
+    public void CUDA_rolling_order_statistics_cover_full_scale_windows_and_adversarial_inputs()
+    {
+        const int count = 305_581;
+        var widths = new[] { 1, 100, 2_048, count / 2, count };
+        var worker = new MathBlocksCUDAWorker();
+        foreach (var pattern in new[] { "ordered", "reverse", "equal", "alternating", "pseudorandom" })
+        {
+            var raw = new double[count];
+            for (var index = 0; index < raw.Length; index++)
+            {
+                raw[index] = pattern switch
+                {
+                    "ordered" => index - count / 2d,
+                    "reverse" => count / 2d - index,
+                    "equal" => 17d,
+                    "alternating" => (index & 1) == 0 ? -1e100 : 1e100,
+                    _ => (index * 104_729L + 17) % 1_000_003 - 500_001d
+                };
+            }
+            var values = MathBlockValue.Vector(raw);
+            foreach (var widthValue in widths)
+            {
+                var width = MathBlockValue.Scalar(widthValue);
+                var zero = MathBlockValue.Scalar(0d);
+                var half = MathBlockValue.Scalar(0.5d);
+                var one = MathBlockValue.Scalar(1d);
+                var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
+                {
+                    ["values"] = values,
+                    ["width"] = width,
+                    ["zero"] = zero,
+                    ["half"] = half,
+                    ["one"] = one
+                };
+                var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+                var valuesNode = builder.Input("values", values.Type);
+                var widthNode = builder.Input("width", width.Type);
+                var zeroNode = builder.Input("zero", zero.Type);
+                var halfNode = builder.Input("half", half.Type);
+                var oneNode = builder.Input("one", one.Type);
+                var median = builder.Apply(
+                    "sequence.rolling-median",
+                    inputs: [valuesNode, widthNode]);
+                var minimum = builder.Apply(
+                    "sequence.rolling-quantile",
+                    inputs: [valuesNode, widthNode, zeroNode]);
+                var quantile = builder.Apply(
+                    "sequence.rolling-quantile",
+                    inputs: [valuesNode, widthNode, halfNode]);
+                var maximum = builder.Apply(
+                    "sequence.rolling-quantile",
+                    inputs: [valuesNode, widthNode, oneNode]);
+                var program = builder
+                    .Output("median", median)
+                    .Output("minimum", minimum)
+                    .Output("quantile", quantile)
+                    .Output("maximum", maximum)
+                    .Build();
+                var cpu = program.Evaluate(inputs);
+                using var compiled = worker.Compile(program, inputs);
+                var cuda = compiled.Execute(inputs);
+                AssertExact(cpu["median"], cuda["median"]);
+                AssertExact(cpu["minimum"], cuda["minimum"]);
+                AssertExact(cpu["quantile"], cuda["quantile"]);
+                AssertExact(cpu["maximum"], cuda["maximum"]);
+                AssertExact(cpu["median"], cpu["quantile"]);
+
+                var minimumWork = worker.PlanRollingOrderStatisticWork(count, widthValue, 0d);
+                var medianWork = worker.PlanRollingOrderStatisticWork(count, widthValue, 0.5d);
+                var maximumWork = worker.PlanRollingOrderStatisticWork(count, widthValue, 1d);
+                Assert.Equal(0, minimumWork.RadixPassCount);
+                Assert.Equal(0, maximumWork.RadixPassCount);
+                Assert.True(widthValue == 1 || minimumWork.UsesLinearExtremeDeque);
+                Assert.True(widthValue == 1 || maximumWork.UsesLinearExtremeDeque);
+                Assert.True(
+                    medianWork.TotalOperationBound < (long)count * count,
+                    $"The fixed work bound is not subquadratic for width {widthValue}.");
+                Assert.Equal(1, compiled.HostToDeviceTransferCount);
+                Assert.Equal(1, compiled.GraphLaunchCount);
+                Assert.Equal(1, compiled.SynchronizationCount);
+                Assert.Equal(1, compiled.DeviceToHostTransferCount);
+                Assert.Equal(0, compiled.CpuNodeDispatchCount);
+            }
+        }
+    }
+
+    [Fact]
     public void CUDA_program_is_safe_for_concurrent_atomic_executions()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");

@@ -117,6 +117,22 @@ var requiredBands = worker.PlanPopulationEnumerationCatalogResourceBands(
 The result gives the minimum `MaximumOutputElements` for each catalog operation
 count. The planner does not evaluate operations or start a CUDA context.
 
+Use `PlanPopulationSearchStaticFeasibility` to inspect an explicit catalog
+before CUDA setup. The planner propagates exact types, units, shapes,
+capacities, and available scalar constants through each complete typed DAG.
+
+The planner rejects statically invalid parameter domains and downstream shape
+mismatches. Thus, an unusable consumer prevents all CUDA work for its expensive
+producer.
+
+The objective compiler removes dead nodes before it creates CUDA descriptors.
+It folds exact scalar constants and aliases exact common subexpressions. These
+nodes do not allocate payload or scratch storage and do not dispatch CUDA code.
+
+Mixed catalog cycles preserve trial order for rejected programs. A rejected
+program does not enter a candidate lane or dispatch a CUDA node. Valid programs
+in the same resident cycle keep the normal transaction contract.
+
 The raw transition API preserves accepted trial identity across larger graph,
 terminal, objective, and archive bands. It refreshes accepted programs before
 new raw proposals.
@@ -209,15 +225,31 @@ percentile, and measurement method.
 Parallel resident mode can be slower for small workloads. Package tests report
 serial and parallel samples without claiming an advantage for every workload.
 
+Rolling median and rolling quantile use exact order statistics without a
+semantic window limit. General probabilities use one parallel radix
+preparation and indexed sliding heaps. Their fixed work bound is linear radix
+work plus `O(N log W)` heap work.
+
+Quantile probabilities zero and one use a linear monotonic deque. They do not
+sort. A width of one uses a parallel copy.
+
+Call `PlanRollingOrderStatisticWork` to inspect the deterministic work bound.
+CUDA compilation uses checked scratch arithmetic and rejects an unrepresentable
+resource requirement before launch.
+
+The package gate covers 305,581 values, five window widths, five adversarial
+input orders, and quantile probabilities zero, one-half, and one. The gate
+requires exact CPU and CUDA output parity.
+
 ## Source-only repository
 
 This Git repository contains source text and project metadata only. It does not
 contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
 
-Get MathBlocks version `0.2.2` from NuGet.org with this command:
+Get MathBlocks version `0.2.3` from NuGet.org with this command:
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.2.2
+dotnet add package Supprocom.MathBlocks --version 0.2.3
 ```
 
 The package declares three external native-acquisition dependencies. This
