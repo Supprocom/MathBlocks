@@ -1,19 +1,73 @@
+using CSharp2CUDA;
+
 namespace Supprocom.MathBlocks.Cuda;
 
 internal static class GeometryCudaBlockCatalog
 {
-        public static string KernelEntryPoint => "mathblocks_geometry";
+    public static string KernelEntryPoint => "mathblocks_geometry";
     public static uint BlockSize => 128;
 
-    public const string KernelSource = """
-        struct MathBlockGeometryEdge
-        {
-            int from;
-            int to;
-            double weight;
-        };
+    public static string KernelSource { get; } = Transpile();
 
-        __device__ double mathblocks_geometry_distance_coordinates(
+    private static string Transpile()
+    {
+        var result = CudaTranspiler.Transpile(
+            TranslationUnitSource,
+            new CudaTranspilationOptions { NewLine = "\r\n" },
+            "GeometryCudaBlockCatalog.cs");
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(
+                $"Geometry CUDA translation failed: {string.Join(Environment.NewLine, result.Diagnostics)}");
+        }
+
+        return result.Source;
+    }
+
+    private const string TranslationUnitSource = """
+    using System;
+    using CSharp2CUDA;
+
+    [CudaTranslationUnit]
+    internal static unsafe class GeometryModule
+    {
+        [CudaExternal]
+        public struct MathBlockSlot
+        {
+            public double scalar_value;
+            public ulong data_pointer;
+            public ulong scratch_pointer;
+            public CudaInt32 boolean_value;
+            public CudaInt32 valid;
+            public int rows;
+            public int columns;
+            public int count;
+            public int capacity;
+        }
+
+        [CudaExternal]
+        private static double mathblocks_arc_cosine(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_positive_infinity() => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static void mathblocks_sequence_set_matrix_shape(MathBlockSlot* output, int rows, int columns) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+        public struct MathBlockGeometryEdge
+        {
+            public int from;
+            public int to;
+            public double weight;
+        }
+
+        [CudaDevice]
+        private static double mathblocks_geometry_distance_coordinates(
             double left_x,
             double left_y,
             double right_x,
@@ -24,10 +78,11 @@ internal static class GeometryCudaBlockCatalog
             return mathblocks_square_root(x * x + y * y);
         }
 
-        __device__ double mathblocks_geometry_distance(
-            const double* left,
+        [CudaDevice]
+        private static double mathblocks_geometry_distance(
+            [CudaReadOnly] double* left,
             int left_index,
-            const double* right,
+            [CudaReadOnly] double* right,
             int right_index)
         {
             return mathblocks_geometry_distance_coordinates(
@@ -37,7 +92,8 @@ internal static class GeometryCudaBlockCatalog
                 right[2 * right_index + 1]);
         }
 
-        __device__ double mathblocks_geometry_cross(
+        [CudaDevice]
+        private static double mathblocks_geometry_cross(
             double origin_x,
             double origin_y,
             double left_x,
@@ -49,7 +105,8 @@ internal static class GeometryCudaBlockCatalog
                    (left_y - origin_y) * (right_x - origin_x);
         }
 
-        __device__ double mathblocks_geometry_point_to_segment(
+        [CudaDevice]
+        private static double mathblocks_geometry_point_to_segment(
             double point_x,
             double point_y,
             double start_x,
@@ -72,7 +129,8 @@ internal static class GeometryCudaBlockCatalog
                 start_y + projection * y);
         }
 
-        __device__ void mathblocks_geometry_barycentric(
+        [CudaDevice]
+        private static void mathblocks_geometry_barycentric(
             double point_x,
             double point_y,
             double first_x,
@@ -94,8 +152,9 @@ internal static class GeometryCudaBlockCatalog
             result[2] = 1.0 - first_weight - second_weight;
         }
 
-        __device__ bool mathblocks_geometry_try_circumcircle(
-            const double* points,
+        [CudaDevice]
+        private static bool mathblocks_geometry_try_circumcircle(
+            [CudaReadOnly] double* points,
             int first,
             int second,
             int third,
@@ -134,8 +193,9 @@ internal static class GeometryCudaBlockCatalog
             return true;
         }
 
-        __device__ bool mathblocks_geometry_point_less(
-            const double* points,
+        [CudaDevice]
+        private static bool mathblocks_geometry_point_less(
+            [CudaReadOnly] double* points,
             int left,
             int right)
         {
@@ -154,8 +214,9 @@ internal static class GeometryCudaBlockCatalog
             return left < right;
         }
 
-        __device__ void mathblocks_geometry_sort_indices(
-            const double* points,
+        [CudaDevice]
+        private static void mathblocks_geometry_sort_indices(
+            [CudaReadOnly] double* points,
             int count,
             int* indices)
         {
@@ -172,7 +233,8 @@ internal static class GeometryCudaBlockCatalog
             }
         }
 
-        __device__ int mathblocks_geometry_find(int* parent, int value)
+        [CudaDevice]
+        private static int mathblocks_geometry_find(int* parent, int value)
         {
             while (parent[value] != value)
             {
@@ -182,9 +244,10 @@ internal static class GeometryCudaBlockCatalog
             return value;
         }
 
-        __device__ bool mathblocks_geometry_edge_less(
-            const MathBlockGeometryEdge& left,
-            const MathBlockGeometryEdge& right)
+        [CudaDevice]
+        private static bool mathblocks_geometry_edge_less(
+            in MathBlockGeometryEdge left,
+            in MathBlockGeometryEdge right)
         {
             if (left.weight < right.weight)
                 return true;
@@ -197,18 +260,19 @@ internal static class GeometryCudaBlockCatalog
             return left.to < right.to;
         }
 
-        extern "C" __global__ void mathblocks_geometry(
+        [CudaGlobal]
+        private static void mathblocks_geometry(
             int opcode,
-            const MathBlockSlot* const* inputs,
+            [CudaReadOnly] MathBlockSlot** inputs,
             int input_count,
             MathBlockSlot* output)
         {
-            int thread = (int)threadIdx.x;
-            if (blockIdx.x != 0)
+            int thread = (int)Cuda.ThreadIdx.X;
+            if (Cuda.BlockIdx.X != 0)
                 return;
 
-            const MathBlockSlot* first = input_count > 0 ? inputs[0] : nullptr;
-            const MathBlockSlot* second = input_count > 1 ? inputs[1] : nullptr;
+            MathBlockSlot* first = Cuda.ReadOnly(input_count > 0 ? inputs[0] : null);
+            MathBlockSlot* second = Cuda.ReadOnly(input_count > 1 ? inputs[1] : null);
             if (thread == 0)
             {
                 output->scalar_value = 0.0;
@@ -216,16 +280,16 @@ internal static class GeometryCudaBlockCatalog
                 output->rows = 0;
                 output->columns = 0;
                 output->count = 0;
-                output->valid = first == nullptr || first->valid;
-                if (second != nullptr)
+                output->valid = first == null || first->valid;
+                if (second != null)
                     output->valid = output->valid && second->valid;
             }
-            __syncthreads();
+            Cuda.SyncThreads();
             if (!output->valid)
                 return;
 
-            const double* a = first == nullptr ? nullptr : (const double*)first->data_pointer;
-            const double* b = second == nullptr ? nullptr : (const double*)second->data_pointer;
+            double* a = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
+            double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
             double* result = (double*)output->data_pointer;
             double* scratch = (double*)output->scratch_pointer;
 
@@ -243,7 +307,7 @@ internal static class GeometryCudaBlockCatalog
                         mathblocks_geometry_barycentric(
                             a[0], a[1], b[0], b[1], b[2], b[3], b[4], b[5], result);
                         for (int index = 0; index < 3; index++)
-                            if (!isfinite(result[index])) output->valid = 0;
+                            if (!double.IsFinite(result[index])) output->valid = 0;
                         break;
                     case 1:
                         output->rows = 1;
@@ -276,7 +340,7 @@ internal static class GeometryCudaBlockCatalog
                         double cross = mathblocks_geometry_cross(
                             a[0], a[1], a[2], a[3], a[4], a[5]);
                         output->scalar_value = first_length * second_length * third_length /
-                            (2.0 * fabs(cross));
+                            (2.0 * Math.Abs(cross));
                         break;
                     }
                     case 3:
@@ -313,7 +377,7 @@ internal static class GeometryCudaBlockCatalog
                         break;
                     }
                     case 4:
-                        if (first->count <= 0 || scratch == nullptr)
+                        if (first->count <= 0 || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -399,7 +463,7 @@ internal static class GeometryCudaBlockCatalog
                         break;
                     }
                     case 5:
-                        if (first->count < 2 || scratch == nullptr)
+                        if (first->count < 2 || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -470,7 +534,7 @@ internal static class GeometryCudaBlockCatalog
                         {
                             for (int right = left + 1; right < count; right++)
                             {
-                                if (!adjacency[left * count + right])
+                                if (!Cuda.Bool(adjacency[left * count + right]))
                                     continue;
                                 if (edge_count >= output->capacity)
                                 {
@@ -509,7 +573,7 @@ internal static class GeometryCudaBlockCatalog
                         break;
                     }
                     case 7:
-                        if (first->count <= 0 || second->count <= 0 || scratch == nullptr)
+                        if (first->count <= 0 || second->count <= 0 || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -740,7 +804,7 @@ internal static class GeometryCudaBlockCatalog
                             twice_area += a[2 * index] * a[2 * next + 1] -
                                           a[2 * next] * a[2 * index + 1];
                         }
-                        output->scalar_value = opcode == 16 ? fabs(twice_area / 2.0) : twice_area / 2.0;
+                        output->scalar_value = opcode == 16 ? Math.Abs(twice_area / 2.0) : twice_area / 2.0;
                         break;
                     }
                     case 18:
@@ -752,7 +816,7 @@ internal static class GeometryCudaBlockCatalog
                     {
                         int containing = 0;
                         int total = 0;
-                        double coordinates[3];
+                        double* coordinates = stackalloc double[3];
                         for (int one = 0; one < first->count; one++)
                             for (int two = one + 1; two < first->count; two++)
                                 for (int three = two + 1; three < first->count; three++)
@@ -796,7 +860,7 @@ internal static class GeometryCudaBlockCatalog
                             result[index] = a[index];
                         break;
                     case 21:
-                        if (first->count <= 0 || scratch == nullptr)
+                        if (first->count <= 0 || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -831,7 +895,7 @@ internal static class GeometryCudaBlockCatalog
                             edges[position] = value;
                         }
                         int* parent = (int*)(edges + edge_capacity);
-                        unsigned char* rank = (unsigned char*)(parent + vertex_count);
+                        byte* rank = (byte*)(parent + vertex_count);
                         for (int index = 0; index < vertex_count; index++)
                         {
                             parent[index] = index;
@@ -862,11 +926,12 @@ internal static class GeometryCudaBlockCatalog
                 if (output->valid &&
                     opcode != 0 && opcode != 1 && opcode != 3 && opcode != 4 && opcode != 5 &&
                     opcode != 10 && opcode != 19 && opcode != 20 && opcode != 21 &&
-                    !isfinite(output->scalar_value))
+                    !double.IsFinite(output->scalar_value))
                 {
                     output->valid = 0;
                 }
             }
         }
-        """;
+    }
+    """;
 }

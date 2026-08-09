@@ -1,20 +1,139 @@
+using CSharp2CUDA;
+
 namespace Supprocom.MathBlocks.Cuda;
 
 internal static class ProbabilityCudaBlockCatalog
 {
-        public static string KernelEntryPoint => "mathblocks_probability";
+    public static string KernelEntryPoint => "mathblocks_probability";
     public static uint BlockSize => 128;
 
-    public const string KernelSource = """
-        __device__ bool mathblocks_probability_integer(double value, int* result)
+    public static string KernelSource { get; } = Transpile();
+
+    private static string Transpile()
+    {
+        var result = CudaTranspiler.Transpile(
+            TranslationUnitSource,
+            new CudaTranspilationOptions { NewLine = "\r\n" },
+            "ProbabilityCudaBlockCatalog.cs");
+        if (!result.Succeeded)
         {
-            if (value < -2147483648.0 || value > 2147483647.0 || value != trunc(value))
+            throw new InvalidOperationException(
+                $"Probability CUDA translation failed: {string.Join(Environment.NewLine, result.Diagnostics)}");
+        }
+
+        return result.Source;
+    }
+
+    private const string TranslationUnitSource = """
+    using System;
+    using CSharp2CUDA;
+
+    [CudaTranslationUnit]
+    internal static unsafe class ProbabilityModule
+    {
+        [CudaExternal]
+        public struct MathBlockSlot
+        {
+            public double scalar_value;
+            public ulong data_pointer;
+            public ulong scratch_pointer;
+            public CudaInt32 boolean_value;
+            public CudaInt32 valid;
+            public int rows;
+            public int columns;
+            public int count;
+            public int capacity;
+        }
+
+        [CudaExternal]
+        public struct MathBlockComplexValue
+        {
+            public double real;
+            public double imaginary;
+        }
+
+        [CudaExternal]
+        private static double mathblocks_compensated_product_sum([CudaReadOnly] double* first, [CudaReadOnly] double* second, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_compensated_sum([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static MathBlockComplexValue mathblocks_complex_add(MathBlockComplexValue left, MathBlockComplexValue right) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static MathBlockComplexValue mathblocks_complex_conjugate(MathBlockComplexValue value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static MathBlockComplexValue mathblocks_complex_divide(MathBlockComplexValue left, MathBlockComplexValue right) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static bool mathblocks_complex_finite(MathBlockComplexValue value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static MathBlockComplexValue mathblocks_complex_from_polar(double magnitude, double phase) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_complex_magnitude(MathBlockComplexValue value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static MathBlockComplexValue mathblocks_complex_make(double real, double imaginary) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static MathBlockComplexValue mathblocks_complex_multiply(MathBlockComplexValue left, MathBlockComplexValue right) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_complex_phase(MathBlockComplexValue value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static void mathblocks_complex_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static MathBlockComplexValue mathblocks_complex_square_root(MathBlockComplexValue value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static MathBlockComplexValue mathblocks_complex_subtract(MathBlockComplexValue left, MathBlockComplexValue right) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_cube_root(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_error_function(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_exponential(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_log_one_plus(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_maximum(double first, double second) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_natural_logarithm(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_power(double value, double exponent) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static void mathblocks_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_sine(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+        [CudaDevice]
+        private static bool mathblocks_probability_integer(double value, int* result)
+        {
+            if (value < -2147483648.0 || value > 2147483647.0 || value != Math.Truncate(value))
                 return false;
             *result = (int)value;
             return true;
         }
 
-        __device__ double mathblocks_probability_binomial(int n, int k)
+        [CudaDevice]
+        private static double mathblocks_probability_binomial(int n, int k)
         {
             if (k < 0 || k > n)
                 return 0.0;
@@ -26,16 +145,18 @@ internal static class ProbabilityCudaBlockCatalog
             return result;
         }
 
-        __device__ bool mathblocks_probability_distribution(const double* values, int count)
+        [CudaDevice]
+        private static bool mathblocks_probability_distribution([CudaReadOnly] double* values, int count)
         {
             if (count <= 0)
                 return false;
             for (int index = 0; index < count; index++)
                 if (values[index] < 0.0) return false;
-            return fabs(mathblocks_compensated_sum(values, count) - 1.0) <= 1e-10;
+            return Math.Abs(mathblocks_compensated_sum(values, count) - 1.0) <= 1e-10;
         }
 
-        __device__ double mathblocks_probability_entropy(const double* values, int count)
+        [CudaDevice]
+        private static double mathblocks_probability_entropy([CudaReadOnly] double* values, int count)
         {
             double entropy = 0.0;
             for (int index = 0; index < count; index++)
@@ -44,9 +165,10 @@ internal static class ProbabilityCudaBlockCatalog
             return entropy;
         }
 
-        __device__ double mathblocks_probability_kl(
-            const double* probabilities,
-            const double* reference,
+        [CudaDevice]
+        private static double mathblocks_probability_kl(
+            [CudaReadOnly] double* probabilities,
+            [CudaReadOnly] double* reference,
             int count)
         {
             double result = 0.0;
@@ -57,9 +179,10 @@ internal static class ProbabilityCudaBlockCatalog
             return result;
         }
 
-        __device__ double mathblocks_probability_log_gamma_core(double value)
+        [CudaDevice]
+        private static double mathblocks_probability_log_gamma_core(double value)
         {
-            const double coefficients[8] =
+            ReadOnlySpan<double> coefficients = stackalloc double[8]
             {
                 676.5203681218851,
                 -1259.1392167224028,
@@ -81,7 +204,8 @@ internal static class ProbabilityCudaBlockCatalog
                    mathblocks_natural_logarithm(sum);
         }
 
-        __device__ double mathblocks_probability_log_gamma(double value)
+        [CudaDevice]
+        private static double mathblocks_probability_log_gamma(double value)
         {
             if (value < 0.5)
             {
@@ -93,7 +217,8 @@ internal static class ProbabilityCudaBlockCatalog
             return mathblocks_probability_log_gamma_core(value);
         }
 
-        __device__ double mathblocks_probability_beta_fraction(double x, double left, double right)
+        [CudaDevice]
+        private static double mathblocks_probability_beta_fraction(double x, double left, double right)
         {
             const int maximum_iterations = 256;
             const double tolerance = 3e-14;
@@ -103,7 +228,7 @@ internal static class ProbabilityCudaBlockCatalog
             double qam = left - 1.0;
             double c = 1.0;
             double d = 1.0 - qab * x / qap;
-            if (fabs(d) < minimum) d = minimum;
+            if (Math.Abs(d) < minimum) d = minimum;
             d = 1.0 / d;
             double result = d;
             for (int iteration = 1; iteration <= maximum_iterations; iteration++)
@@ -112,27 +237,28 @@ internal static class ProbabilityCudaBlockCatalog
                 double coefficient = iteration * (right - iteration) * x /
                     ((qam + doubled) * (left + doubled));
                 d = 1.0 + coefficient * d;
-                if (fabs(d) < minimum) d = minimum;
+                if (Math.Abs(d) < minimum) d = minimum;
                 c = 1.0 + coefficient / c;
-                if (fabs(c) < minimum) c = minimum;
+                if (Math.Abs(c) < minimum) c = minimum;
                 d = 1.0 / d;
                 result *= d * c;
                 coefficient = -(left + iteration) * (qab + iteration) * x /
                     ((left + doubled) * (qap + doubled));
                 d = 1.0 + coefficient * d;
-                if (fabs(d) < minimum) d = minimum;
+                if (Math.Abs(d) < minimum) d = minimum;
                 c = 1.0 + coefficient / c;
-                if (fabs(c) < minimum) c = minimum;
+                if (Math.Abs(c) < minimum) c = minimum;
                 d = 1.0 / d;
                 double delta = d * c;
                 result *= delta;
-                if (fabs(delta - 1.0) <= tolerance)
+                if (Math.Abs(delta - 1.0) <= tolerance)
                     break;
             }
             return result;
         }
 
-        __device__ double mathblocks_probability_incomplete_beta(
+        [CudaDevice]
+        private static double mathblocks_probability_incomplete_beta(
             double x,
             double left,
             double right)
@@ -150,7 +276,8 @@ internal static class ProbabilityCudaBlockCatalog
                 : 1.0 - front * mathblocks_probability_beta_fraction(1.0 - x, right, left) / right;
         }
 
-        __device__ MathBlockComplexValue mathblocks_probability_complex_cube_root(
+        [CudaDevice]
+        private static MathBlockComplexValue mathblocks_probability_complex_cube_root(
             MathBlockComplexValue value)
         {
             if (value.real == 0.0 && value.imaginary == 0.0)
@@ -160,17 +287,18 @@ internal static class ProbabilityCudaBlockCatalog
                 mathblocks_complex_phase(value) / 3.0);
         }
 
-        extern "C" __global__ void mathblocks_probability(
+        [CudaGlobal]
+        private static void mathblocks_probability(
             int opcode,
-            const MathBlockSlot* const* inputs,
+            [CudaReadOnly] MathBlockSlot** inputs,
             int input_count,
             MathBlockSlot* output)
         {
-            int thread = (int)threadIdx.x;
-            const MathBlockSlot* first = input_count > 0 ? inputs[0] : nullptr;
-            const MathBlockSlot* second = input_count > 1 ? inputs[1] : nullptr;
-            const MathBlockSlot* third = input_count > 2 ? inputs[2] : nullptr;
-            const MathBlockSlot* fourth = input_count > 3 ? inputs[3] : nullptr;
+            int thread = (int)Cuda.ThreadIdx.X;
+            MathBlockSlot* first = Cuda.ReadOnly(input_count > 0 ? inputs[0] : null);
+            MathBlockSlot* second = Cuda.ReadOnly(input_count > 1 ? inputs[1] : null);
+            MathBlockSlot* third = Cuda.ReadOnly(input_count > 2 ? inputs[2] : null);
+            MathBlockSlot* fourth = Cuda.ReadOnly(input_count > 3 ? inputs[3] : null);
             if (thread == 0)
             {
                 output->scalar_value = 0.0;
@@ -180,14 +308,14 @@ internal static class ProbabilityCudaBlockCatalog
                 output->count = 0;
                 output->valid = 1;
                 for (int index = 0; index < input_count; index++)
-                    if (inputs[index] == nullptr || !inputs[index]->valid) output->valid = 0;
+                    if (inputs[index] == null || !inputs[index]->valid) output->valid = 0;
             }
-            __syncthreads();
+            Cuda.SyncThreads();
             if (!output->valid)
                 return;
 
-            const double* a = first == nullptr ? nullptr : (const double*)first->data_pointer;
-            const double* b = second == nullptr ? nullptr : (const double*)second->data_pointer;
+            double* a = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
+            double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
             double* result = (double*)output->data_pointer;
             double* scratch = (double*)output->scratch_pointer;
 
@@ -202,8 +330,8 @@ internal static class ProbabilityCudaBlockCatalog
                     }
                     mathblocks_set_vector_shape(output, (1 << first->count) - 1);
                 }
-                __syncthreads();
-                for (int mask = thread + 1; output->valid && mask <= output->count; mask += blockDim.x)
+                Cuda.SyncThreads();
+                for (int mask = thread + 1; output->valid && mask <= output->count; mask += Cuda.BlockDim.X)
                 {
                     double sum = 0.0;
                     for (int index = 0; index < first->count; index++)
@@ -217,14 +345,14 @@ internal static class ProbabilityCudaBlockCatalog
             {
                 int count = first->count <= 1 ? 1 : first->count - 1;
                 if (thread == 0) mathblocks_set_vector_shape(output, count);
-                __syncthreads();
+                Cuda.SyncThreads();
                 if (first->count <= 1)
                 {
                     if (thread == 0) result[0] = 0.0;
                 }
                 else
                 {
-                    for (int index = thread + 1; index < first->count; index += blockDim.x)
+                    for (int index = thread + 1; index < first->count; index += Cuda.BlockDim.X)
                         result[index - 1] = index * a[index];
                 }
                 return;
@@ -261,7 +389,7 @@ internal static class ProbabilityCudaBlockCatalog
                             result[index] *= scale;
                     }
                     for (int index = 0; index < first->count; index++)
-                        if (!isfinite(result[index])) output->valid = 0;
+                        if (!double.IsFinite(result[index])) output->valid = 0;
                 }
                 return;
             }
@@ -297,7 +425,7 @@ internal static class ProbabilityCudaBlockCatalog
                     for (int index = 2; index <= first_integer; index++) factorial *= index;
                     output->scalar_value = factorial;
                 }
-                if (!isfinite(output->scalar_value)) output->valid = 0;
+                if (!double.IsFinite(output->scalar_value)) output->valid = 0;
                 return;
             }
 
@@ -333,7 +461,7 @@ internal static class ProbabilityCudaBlockCatalog
                     if (!mathblocks_probability_integer(second->scalar_value, &first_count) || first_count <= 0 ||
                         !mathblocks_probability_integer(third->scalar_value, &second_count) || second_count <= 0 ||
                         !mathblocks_probability_integer(fourth->scalar_value, &condition_count) || condition_count <= 0 ||
-                        (long long)first_count * second_count * condition_count != first->count || scratch == nullptr)
+                        (long)first_count * second_count * condition_count != first->count || scratch == null)
                     {
                         output->valid = 0;
                         return;
@@ -396,7 +524,7 @@ internal static class ProbabilityCudaBlockCatalog
                 }
                 else if (opcode == 10)
                 {
-                    if (scratch == nullptr)
+                    if (scratch == null)
                     {
                         output->valid = 0;
                         return;
@@ -420,7 +548,7 @@ internal static class ProbabilityCudaBlockCatalog
                 {
                     int rows = first->rows;
                     int columns = first->columns;
-                    if (scratch == nullptr)
+                    if (scratch == null)
                     {
                         output->valid = 0;
                         return;
@@ -473,11 +601,11 @@ internal static class ProbabilityCudaBlockCatalog
                 else if (opcode == 15)
                 {
                     for (int index = 0; index < first->count; index++)
-                        value += fabs(a[index] - b[index]);
+                        value += Math.Abs(a[index] - b[index]);
                     value /= 2.0;
                 }
                 output->scalar_value = value;
-                if (!isfinite(value)) output->valid = 0;
+                if (!double.IsFinite(value)) output->valid = 0;
                 return;
             }
 
@@ -496,7 +624,7 @@ internal static class ProbabilityCudaBlockCatalog
                         mathblocks_power(parameter, (double)index) *
                         mathblocks_power(1.0 - parameter, (double)(degree - index));
                 output->scalar_value = value;
-                if (!isfinite(value)) output->valid = 0;
+                if (!double.IsFinite(value)) output->valid = 0;
                 return;
             }
 
@@ -559,7 +687,7 @@ internal static class ProbabilityCudaBlockCatalog
             {
                 int order = 0;
                 if (!mathblocks_probability_integer(second->scalar_value, &order) ||
-                    order < 0 || order > first->count || scratch == nullptr)
+                    order < 0 || order > first->count || scratch == null)
                 {
                     output->valid = 0;
                     return;
@@ -582,7 +710,7 @@ internal static class ProbabilityCudaBlockCatalog
                 for (int index = first->count - 1; index >= 0; index--)
                     value = value * second->scalar_value + a[index];
                 output->scalar_value = value;
-                if (!isfinite(value)) output->valid = 0;
+                if (!double.IsFinite(value)) output->valid = 0;
                 return;
             }
 
@@ -600,7 +728,7 @@ internal static class ProbabilityCudaBlockCatalog
                 for (int index = 0; index < first->count; index++)
                     sum += mathblocks_exponential(a[index] - maximum);
                 output->scalar_value = maximum + mathblocks_natural_logarithm(sum);
-                if (!isfinite(output->scalar_value)) output->valid = 0;
+                if (!double.IsFinite(output->scalar_value)) output->valid = 0;
                 return;
             }
 
@@ -608,7 +736,7 @@ internal static class ProbabilityCudaBlockCatalog
             {
                 output->scalar_value = 0.5 * (1.0 + mathblocks_error_function(
                     first->scalar_value / mathblocks_square_root(2.0)));
-                if (!isfinite(output->scalar_value)) output->valid = 0;
+                if (!double.IsFinite(output->scalar_value)) output->valid = 0;
                 return;
             }
 
@@ -634,7 +762,7 @@ internal static class ProbabilityCudaBlockCatalog
                     value += probability;
                 }
                 output->scalar_value = value;
-                if (!isfinite(value)) output->valid = 0;
+                if (!double.IsFinite(value)) output->valid = 0;
                 return;
             }
 
@@ -661,7 +789,8 @@ internal static class ProbabilityCudaBlockCatalog
                 }
                 output->scalar_value = mathblocks_probability_incomplete_beta(x, left, right);
             }
-            if (!isfinite(output->scalar_value)) output->valid = 0;
+            if (!double.IsFinite(output->scalar_value)) output->valid = 0;
         }
-        """;
+    }
+    """;
 }

@@ -1,18 +1,82 @@
+using CSharp2CUDA;
+
 namespace Supprocom.MathBlocks.Cuda;
 
 internal static class StatisticsCudaBlockCatalog
 {
-        public static string KernelEntryPoint => "mathblocks_statistics";
+    public static string KernelEntryPoint => "mathblocks_statistics";
     public static uint BlockSize => 128;
 
-    public const string KernelSource = """
-        __device__ double mathblocks_statistics_mean(const double* values, int count)
+    public static string KernelSource { get; } = Transpile();
+
+    private static string Transpile()
+    {
+        var result = CudaTranspiler.Transpile(
+            TranslationUnitSource,
+            new CudaTranspilationOptions { NewLine = "\r\n" },
+            "StatisticsCudaBlockCatalog.cs");
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(
+                $"Statistics CUDA translation failed: {string.Join(Environment.NewLine, result.Diagnostics)}");
+        }
+
+        return result.Source;
+    }
+
+    private const string TranslationUnitSource = """
+    using System;
+    using CSharp2CUDA;
+
+    [CudaTranslationUnit]
+    internal static unsafe class StatisticsModule
+    {
+        [CudaExternal]
+        public struct MathBlockSlot
+        {
+            public double scalar_value;
+            public ulong data_pointer;
+            public ulong scratch_pointer;
+            public CudaInt32 boolean_value;
+            public CudaInt32 valid;
+            public int rows;
+            public int columns;
+            public int count;
+            public int capacity;
+        }
+
+        [CudaExternal]
+        private static double mathblocks_compensated_product_sum([CudaReadOnly] double* first, [CudaReadOnly] double* second, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_compensated_sum([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static bool mathblocks_nonnegative_integer(double value, int* result) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_power(double value, double exponent) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static bool mathblocks_sequence_positive_integer(double value, int* result) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static void mathblocks_sequence_set_matrix_shape(MathBlockSlot* output, int rows, int columns) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+        [CudaDevice]
+        private static double mathblocks_statistics_mean([CudaReadOnly] double* values, int count)
         {
             return mathblocks_compensated_sum(values, count) / count;
         }
 
-        __device__ double mathblocks_statistics_population_variance(
-            const double* values,
+        [CudaDevice]
+        private static double mathblocks_statistics_population_variance(
+            [CudaReadOnly] double* values,
             int count)
         {
             double mean = mathblocks_statistics_mean(values, count);
@@ -25,9 +89,10 @@ internal static class StatisticsCudaBlockCatalog
             return sum / count;
         }
 
-        __device__ double mathblocks_statistics_population_covariance(
-            const double* left,
-            const double* right,
+        [CudaDevice]
+        private static double mathblocks_statistics_population_covariance(
+            [CudaReadOnly] double* left,
+            [CudaReadOnly] double* right,
             int count)
         {
             double left_mean = mathblocks_statistics_mean(left, count);
@@ -38,9 +103,10 @@ internal static class StatisticsCudaBlockCatalog
             return sum / count;
         }
 
-        __device__ double mathblocks_statistics_pearson(
-            const double* left,
-            const double* right,
+        [CudaDevice]
+        private static double mathblocks_statistics_pearson(
+            [CudaReadOnly] double* left,
+            [CudaReadOnly] double* right,
             int count)
         {
             return mathblocks_statistics_population_covariance(left, right, count) /
@@ -48,8 +114,9 @@ internal static class StatisticsCudaBlockCatalog
                  mathblocks_square_root(mathblocks_statistics_population_variance(right, count)));
         }
 
-        __device__ void mathblocks_statistics_sort_copy(
-            const double* values,
+        [CudaDevice]
+        private static void mathblocks_statistics_sort_copy(
+            [CudaReadOnly] double* values,
             int count,
             double* result)
         {
@@ -66,7 +133,8 @@ internal static class StatisticsCudaBlockCatalog
             }
         }
 
-        __device__ void mathblocks_statistics_sort_in_place(double* values, int count)
+        [CudaDevice]
+        private static void mathblocks_statistics_sort_in_place(double* values, int count)
         {
             for (int index = 1; index < count; index++)
             {
@@ -81,28 +149,31 @@ internal static class StatisticsCudaBlockCatalog
             }
         }
 
-        __device__ double mathblocks_statistics_sorted_quantile(
-            const double* sorted,
+        [CudaDevice]
+        private static double mathblocks_statistics_sorted_quantile(
+            [CudaReadOnly] double* sorted,
             int count,
             double probability)
         {
             if (count == 1)
                 return sorted[0];
             double position = probability * (count - 1);
-            int lower = (int)floor(position);
-            int upper = (int)ceil(position);
+            int lower = (int)Math.Floor(position);
+            int upper = (int)Math.Ceiling(position);
             double weight = position - lower;
             return sorted[lower] * (1.0 - weight) + sorted[upper] * weight;
         }
 
-        __device__ double mathblocks_statistics_median(double* values, int count)
+        [CudaDevice]
+        private static double mathblocks_statistics_median(double* values, int count)
         {
             mathblocks_statistics_sort_in_place(values, count);
             return mathblocks_statistics_sorted_quantile(values, count, 0.5);
         }
 
-        __device__ void mathblocks_statistics_rank(
-            const double* values,
+        [CudaDevice]
+        private static void mathblocks_statistics_rank(
+            [CudaReadOnly] double* values,
             int count,
             double* result)
         {
@@ -121,8 +192,9 @@ internal static class StatisticsCudaBlockCatalog
             }
         }
 
-        __device__ void mathblocks_statistics_center_distance(
-            const double* values,
+        [CudaDevice]
+        private static void mathblocks_statistics_center_distance(
+            [CudaReadOnly] double* values,
             int count,
             double* result,
             double* row_means)
@@ -133,7 +205,7 @@ internal static class StatisticsCudaBlockCatalog
                 row_means[row] = 0.0;
                 for (int column = 0; column < count; column++)
                 {
-                    double distance = fabs(values[row] - values[column]);
+                    double distance = Math.Abs(values[row] - values[column]);
                     result[row * count + column] = distance;
                     row_means[row] += distance;
                     total_mean += distance;
@@ -147,18 +219,19 @@ internal static class StatisticsCudaBlockCatalog
                         row_means[row] + row_means[column] - total_mean;
         }
 
-        extern "C" __global__ void mathblocks_statistics(
+        [CudaGlobal]
+        private static void mathblocks_statistics(
             int opcode,
-            const MathBlockSlot* const* inputs,
+            [CudaReadOnly] MathBlockSlot** inputs,
             int input_count,
             MathBlockSlot* output)
         {
-            int thread = (int)threadIdx.x;
-            if (blockIdx.x != 0)
+            int thread = (int)Cuda.ThreadIdx.X;
+            if (Cuda.BlockIdx.X != 0)
                 return;
 
-            const MathBlockSlot* first = input_count > 0 ? inputs[0] : nullptr;
-            const MathBlockSlot* second = input_count > 1 ? inputs[1] : nullptr;
+            MathBlockSlot* first = Cuda.ReadOnly(input_count > 0 ? inputs[0] : null);
+            MathBlockSlot* second = Cuda.ReadOnly(input_count > 1 ? inputs[1] : null);
             if (thread == 0)
             {
                 output->scalar_value = 0.0;
@@ -166,16 +239,16 @@ internal static class StatisticsCudaBlockCatalog
                 output->rows = 0;
                 output->columns = 0;
                 output->count = 0;
-                output->valid = first == nullptr || first->valid;
-                if (second != nullptr)
+                output->valid = first == null || first->valid;
+                if (second != null)
                     output->valid = output->valid && second->valid;
             }
-            __syncthreads();
+            Cuda.SyncThreads();
             if (!output->valid)
                 return;
 
-            const double* a = first == nullptr ? nullptr : (const double*)first->data_pointer;
-            const double* b = second == nullptr ? nullptr : (const double*)second->data_pointer;
+            double* a = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
+            double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
             double* result = (double*)output->data_pointer;
             double* scratch = (double*)output->scratch_pointer;
 
@@ -217,7 +290,7 @@ internal static class StatisticsCudaBlockCatalog
                         int rows = first->rows;
                         int columns = first->columns;
                         mathblocks_sequence_set_matrix_shape(output, columns, columns);
-                        if (rows <= 0 || columns <= 0 || scratch == nullptr)
+                        if (rows <= 0 || columns <= 0 || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -248,7 +321,7 @@ internal static class StatisticsCudaBlockCatalog
                     case 3:
                     {
                         int count = first->count;
-                        if (count <= 0 || count != second->count || scratch == nullptr)
+                        if (count <= 0 || count != second->count || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -306,7 +379,7 @@ internal static class StatisticsCudaBlockCatalog
                     }
                     case 5:
                     {
-                        if (first->count <= 0 || scratch == nullptr)
+                        if (first->count <= 0 || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -324,10 +397,10 @@ internal static class StatisticsCudaBlockCatalog
                             output->valid = 0;
                             break;
                         }
-                        long long concordant = 0;
-                        long long discordant = 0;
-                        long long left_ties = 0;
-                        long long right_ties = 0;
+                        long concordant = 0;
+                        long discordant = 0;
+                        long left_ties = 0;
+                        long right_ties = 0;
                         for (int left = 0; left < first->count; left++)
                         {
                             for (int right = left + 1; right < first->count; right++)
@@ -396,7 +469,7 @@ internal static class StatisticsCudaBlockCatalog
                     }
                     case 10:
                     {
-                        if (first->count <= 0 || scratch == nullptr)
+                        if (first->count <= 0 || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -406,7 +479,7 @@ internal static class StatisticsCudaBlockCatalog
                         mathblocks_statistics_sort_copy(a, first->count, sorted);
                         double median = mathblocks_statistics_sorted_quantile(sorted, first->count, 0.5);
                         for (int index = 0; index < first->count; index++)
-                            deviations[index] = fabs(a[index] - median);
+                            deviations[index] = Math.Abs(a[index] - median);
                         mathblocks_statistics_sort_copy(deviations, first->count, sorted);
                         output->scalar_value = mathblocks_statistics_sorted_quantile(sorted, first->count, 0.5);
                         break;
@@ -456,7 +529,7 @@ internal static class StatisticsCudaBlockCatalog
                     }
                     case 17:
                     {
-                        if (first->count <= 0 || scratch == nullptr)
+                        if (first->count <= 0 || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -474,7 +547,7 @@ internal static class StatisticsCudaBlockCatalog
                         break;
                     case 23:
                     {
-                        if (first->count <= 0 || first->count != second->count || scratch == nullptr)
+                        if (first->count <= 0 || first->count != second->count || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -491,7 +564,7 @@ internal static class StatisticsCudaBlockCatalog
                     }
                     case 24:
                     {
-                        if (first->count != second->count || scratch == nullptr)
+                        if (first->count != second->count || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -539,9 +612,10 @@ internal static class StatisticsCudaBlockCatalog
                         break;
                     }
                 }
-                if (output->valid && opcode != 2 && opcode != 4 && !isfinite(output->scalar_value))
+                if (output->valid && opcode != 2 && opcode != 4 && !double.IsFinite(output->scalar_value))
                     output->valid = 0;
             }
         }
-        """;
+    }
+    """;
 }

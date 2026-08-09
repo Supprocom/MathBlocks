@@ -1,17 +1,75 @@
+using CSharp2CUDA;
+
 namespace Supprocom.MathBlocks.Cuda;
 
 internal static class AdvancedCudaBlockCatalog
 {
-        public static string KernelEntryPoint => "mathblocks_advanced";
+    public static string KernelEntryPoint => "mathblocks_advanced";
     public static uint BlockSize => 128;
 
-    public const string KernelSource = """
-        __device__ bool mathblocks_advanced_power_of_two(int value)
+    public static string KernelSource { get; } = Transpile();
+
+    private static string Transpile()
+    {
+        var result = CudaTranspiler.Transpile(
+            TranslationUnitSource,
+            new CudaTranspilationOptions { NewLine = "\r\n" },
+            "AdvancedCudaBlockCatalog.cs");
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(
+                $"Advanced CUDA translation failed: {string.Join(Environment.NewLine, result.Diagnostics)}");
+        }
+
+        return result.Source;
+    }
+
+    private const string TranslationUnitSource = """
+    using System;
+    using CSharp2CUDA;
+
+    [CudaTranslationUnit]
+    internal static unsafe class AdvancedModule
+    {
+        [CudaExternal]
+        public struct MathBlockSlot
+        {
+            public double scalar_value;
+            public ulong data_pointer;
+            public ulong scratch_pointer;
+            public CudaInt32 boolean_value;
+            public CudaInt32 valid;
+            public int rows;
+            public int columns;
+            public int count;
+            public int capacity;
+        }
+
+        [CudaExternal]
+        private static double mathblocks_compensated_sum([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_natural_logarithm(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_positive_infinity() => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static bool mathblocks_probability_distribution([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static bool mathblocks_sequence_positive_integer(double value, int* result) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
+        [CudaDevice]
+        private static bool mathblocks_advanced_power_of_two(int value)
         {
             return value > 0 && (value & (value - 1)) == 0;
         }
 
-        __device__ int mathblocks_advanced_log_two(int value)
+        [CudaDevice]
+        private static int mathblocks_advanced_log_two(int value)
         {
             int result = 0;
             while (value > 1)
@@ -22,7 +80,8 @@ internal static class AdvancedCudaBlockCatalog
             return result;
         }
 
-        __device__ int mathblocks_advanced_popcount(int value)
+        [CudaDevice]
+        private static int mathblocks_advanced_popcount(int value)
         {
             int result = 0;
             while (value != 0)
@@ -33,7 +92,8 @@ internal static class AdvancedCudaBlockCatalog
             return result;
         }
 
-        __device__ double mathblocks_advanced_factorial(int value)
+        [CudaDevice]
+        private static double mathblocks_advanced_factorial(int value)
         {
             double result = 1.0;
             for (int index = 2; index <= value; index++)
@@ -41,13 +101,15 @@ internal static class AdvancedCudaBlockCatalog
             return result;
         }
 
-        __device__ bool mathblocks_advanced_distribution(const double* values, int count)
+        [CudaDevice]
+        private static bool mathblocks_advanced_distribution([CudaReadOnly] double* values, int count)
         {
             return mathblocks_probability_distribution(values, count);
         }
 
-        __device__ bool mathblocks_advanced_transition(
-            const double* values,
+        [CudaDevice]
+        private static bool mathblocks_advanced_transition(
+            [CudaReadOnly] double* values,
             int rows,
             int columns)
         {
@@ -63,14 +125,15 @@ internal static class AdvancedCudaBlockCatalog
                         return false;
                     sum += value;
                 }
-                if (fabs(sum - 1.0) > 1e-10)
+                if (Math.Abs(sum - 1.0) > 1e-10)
                     return false;
             }
             return true;
         }
 
-        __device__ void mathblocks_advanced_sort_descending(
-            const double* values,
+        [CudaDevice]
+        private static void mathblocks_advanced_sort_descending(
+            [CudaReadOnly] double* values,
             int count,
             double* result)
         {
@@ -87,20 +150,21 @@ internal static class AdvancedCudaBlockCatalog
             }
         }
 
-        extern "C" __global__ void mathblocks_advanced(
+        [CudaGlobal]
+        private static void mathblocks_advanced(
             int opcode,
-            const MathBlockSlot* const* inputs,
+            [CudaReadOnly] MathBlockSlot** inputs,
             int input_count,
             MathBlockSlot* output)
         {
-            int thread = (int)threadIdx.x;
-            if (blockIdx.x != 0)
+            int thread = (int)Cuda.ThreadIdx.X;
+            if (Cuda.BlockIdx.X != 0)
                 return;
 
-            const MathBlockSlot* first = input_count > 0 ? inputs[0] : nullptr;
-            const MathBlockSlot* second = input_count > 1 ? inputs[1] : nullptr;
-            const MathBlockSlot* third = input_count > 2 ? inputs[2] : nullptr;
-            const MathBlockSlot* fourth = input_count > 3 ? inputs[3] : nullptr;
+            MathBlockSlot* first = Cuda.ReadOnly(input_count > 0 ? inputs[0] : null);
+            MathBlockSlot* second = Cuda.ReadOnly(input_count > 1 ? inputs[1] : null);
+            MathBlockSlot* third = Cuda.ReadOnly(input_count > 2 ? inputs[2] : null);
+            MathBlockSlot* fourth = Cuda.ReadOnly(input_count > 3 ? inputs[3] : null);
             if (thread == 0)
             {
                 output->scalar_value = 0.0;
@@ -110,15 +174,15 @@ internal static class AdvancedCudaBlockCatalog
                 output->count = 0;
                 output->valid = 1;
                 for (int index = 0; index < input_count; index++)
-                    if (inputs[index] == nullptr || !inputs[index]->valid) output->valid = 0;
+                    if (inputs[index] == null || !inputs[index]->valid) output->valid = 0;
             }
-            __syncthreads();
+            Cuda.SyncThreads();
             if (!output->valid)
                 return;
 
-            const double* a = first == nullptr ? nullptr : (const double*)first->data_pointer;
-            const double* b = second == nullptr ? nullptr : (const double*)second->data_pointer;
-            const double* c = third == nullptr ? nullptr : (const double*)third->data_pointer;
+            double* a = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
+            double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
+            double* c = Cuda.ReadOnly(third == null ? null : (double*)third->data_pointer);
             double* result = (double*)output->data_pointer;
             double* scratch = (double*)output->scratch_pointer;
 
@@ -128,7 +192,7 @@ internal static class AdvancedCudaBlockCatalog
                 {
                     case 0:
                         if (first->count <= 0 || first->count >= 31 ||
-                            second->count != (1 << first->count) || scratch == nullptr)
+                            second->count != (1 << first->count) || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -236,8 +300,8 @@ internal static class AdvancedCudaBlockCatalog
                             for (int index = 0; index < first->count; index++)
                             {
                                 double candidate = opcode == 4
-                                    ? b[index] + fourth->scalar_value * fabs(c[query] - a[index])
-                                    : b[index] - fourth->scalar_value * fabs(c[query] - a[index]);
+                                    ? b[index] + fourth->scalar_value * Math.Abs(c[query] - a[index])
+                                    : b[index] - fourth->scalar_value * Math.Abs(c[query] - a[index]);
                                 selected = opcode == 4
                                     ? (selected < candidate ? selected : candidate)
                                     : (selected > candidate ? selected : candidate);
@@ -255,7 +319,7 @@ internal static class AdvancedCudaBlockCatalog
                         double sum = 0.0;
                         for (int left = 0; left < first->count; left++)
                             for (int right = 0; right < first->count; right++)
-                                sum += fabs(a[left] - a[right]);
+                                sum += Math.Abs(a[left] - a[right]);
                         output->scalar_value = sum /
                             (2.0 * first->count * mathblocks_compensated_sum(a, first->count));
                         break;
@@ -313,7 +377,7 @@ internal static class AdvancedCudaBlockCatalog
                     }
                     case 9:
                         mathblocks_sequence_set_vector_shape(output, first->rows);
-                        if (!mathblocks_advanced_transition(a, first->rows, first->columns) || scratch == nullptr)
+                        if (!mathblocks_advanced_transition(a, first->rows, first->columns) || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -341,7 +405,7 @@ internal static class AdvancedCudaBlockCatalog
                     }
                     case 10:
                         mathblocks_sequence_set_vector_shape(output, first->count);
-                        if (first->count <= 0 || scratch == nullptr)
+                        if (first->count <= 0 || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -377,7 +441,7 @@ internal static class AdvancedCudaBlockCatalog
                         break;
                     }
                     case 11:
-                        if (first->count != second->count || scratch == nullptr)
+                        if (first->count != second->count || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -426,7 +490,7 @@ internal static class AdvancedCudaBlockCatalog
                     case 13:
                     case 16:
                         mathblocks_sequence_set_vector_shape(output, first->count);
-                        if (first->count <= 0 || scratch == nullptr)
+                        if (first->count <= 0 || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -464,7 +528,7 @@ internal static class AdvancedCudaBlockCatalog
                         break;
                     }
                     case 14:
-                        if (scratch == nullptr)
+                        if (scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -538,7 +602,7 @@ internal static class AdvancedCudaBlockCatalog
                     opcode != 1 && opcode != 2 && opcode != 3 && opcode != 4 && opcode != 5 &&
                     opcode != 7 && opcode != 9 && opcode != 10 && opcode != 11 && opcode != 13 &&
                     opcode != 14 && opcode != 15 && opcode != 16 && opcode != 17 && opcode != 18 &&
-                    !isfinite(output->scalar_value))
+                    !double.IsFinite(output->scalar_value))
                 {
                     output->valid = 0;
                 }
@@ -548,9 +612,10 @@ internal static class AdvancedCudaBlockCatalog
                      opcode == 18))
                 {
                     for (int index = 0; index < output->count; index++)
-                        if (!isfinite(result[index])) output->valid = 0;
+                        if (!double.IsFinite(result[index])) output->valid = 0;
                 }
             }
         }
-        """;
+    }
+    """;
 }

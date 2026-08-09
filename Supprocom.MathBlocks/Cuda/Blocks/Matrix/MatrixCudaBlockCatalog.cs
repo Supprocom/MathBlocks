@@ -1,35 +1,108 @@
+using CSharp2CUDA;
+
 namespace Supprocom.MathBlocks.Cuda;
 
 internal static class MatrixCudaBlockCatalog
 {
-        public static string KernelEntryPoint => "mathblocks_matrix";
+    public static string KernelEntryPoint => "mathblocks_matrix";
     public static uint BlockSize => 128;
 
-    public const string KernelSource = """
-        __device__ void mathblocks_matrix_shape(MathBlockSlot* output, int rows, int columns)
+    public static string KernelSource { get; } = Transpile();
+
+    private static string Transpile()
+    {
+        var result = CudaTranspiler.Transpile(
+            TranslationUnitSource,
+            new CudaTranspilationOptions { NewLine = "\r\n" },
+            "MatrixCudaBlockCatalog.cs");
+        if (!result.Succeeded)
         {
-            long long count = (long long)rows * columns;
+            throw new InvalidOperationException(
+                $"Matrix CUDA translation failed: {string.Join(Environment.NewLine, result.Diagnostics)}");
+        }
+
+        return result.Source;
+    }
+
+    private const string TranslationUnitSource = """
+    using System;
+    using CSharp2CUDA;
+
+    [CudaTranslationUnit]
+    internal static unsafe class MatrixModule
+    {
+        [CudaExternal]
+        public struct MathBlockSlot
+        {
+            public double scalar_value;
+            public ulong data_pointer;
+            public ulong scratch_pointer;
+            public CudaInt32 boolean_value;
+            public CudaInt32 valid;
+            public int rows;
+            public int columns;
+            public int count;
+            public int capacity;
+        }
+
+        [CudaExternal]
+        private static double mathblocks_arc_tangent_2(double left, double right) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_binary_logarithm(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_compensated_product_sum([CudaReadOnly] double* first, [CudaReadOnly] double* second, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_compensated_sum([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_cosine(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static bool mathblocks_nonnegative_integer(double value, int* result) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_power(double value, double exponent) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static void mathblocks_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_sine(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+
+        [CudaDevice]
+        private static void mathblocks_matrix_shape(MathBlockSlot* output, int rows, int columns)
+        {
+            long count = (long)rows * columns;
             output->rows = rows;
             output->columns = columns;
-            output->count = count > 2147483647LL ? -1 : (int)count;
+            output->count = count > 2147483647L ? -1 : (int)count;
             if (rows <= 0 || columns <= 0 || count > output->capacity)
                 output->valid = 0;
         }
 
-        __device__ bool mathblocks_matrix_compatible(
-            const MathBlockSlot* left,
-            const MathBlockSlot* right)
+        [CudaDevice]
+        private static bool mathblocks_matrix_compatible(
+            [CudaReadOnly] MathBlockSlot* left,
+            [CudaReadOnly] MathBlockSlot* right)
         {
             return left->rows == right->rows && left->columns == right->columns;
         }
 
-        __device__ void mathblocks_matrix_copy(const double* source, double* destination, int count)
+        [CudaDevice]
+        private static void mathblocks_matrix_copy([CudaReadOnly] double* source, double* destination, int count)
         {
             for (int index = 0; index < count; index++)
                 destination[index] = source[index];
         }
 
-        __device__ void mathblocks_matrix_swap_rows(
+        [CudaDevice]
+        private static void mathblocks_matrix_swap_rows(
             double* values,
             int columns,
             int left,
@@ -45,8 +118,9 @@ internal static class MatrixCudaBlockCatalog
             }
         }
 
-        __device__ double mathblocks_matrix_determinant(
-            const double* source,
+        [CudaDevice]
+        private static double mathblocks_matrix_determinant(
+            [CudaReadOnly] double* source,
             int size,
             double* work)
         {
@@ -56,7 +130,7 @@ internal static class MatrixCudaBlockCatalog
             {
                 int pivot_row = pivot;
                 for (int row = pivot + 1; row < size; row++)
-                    if (fabs(work[row * size + pivot]) > fabs(work[pivot_row * size + pivot]))
+                    if (Math.Abs(work[row * size + pivot]) > Math.Abs(work[pivot_row * size + pivot]))
                         pivot_row = row;
                 if (work[pivot_row * size + pivot] == 0.0)
                     return 0.0;
@@ -77,9 +151,10 @@ internal static class MatrixCudaBlockCatalog
             return determinant;
         }
 
-        __device__ bool mathblocks_matrix_try_solve(
-            const double* matrix,
-            const double* right,
+        [CudaDevice]
+        private static bool mathblocks_matrix_try_solve(
+            [CudaReadOnly] double* matrix,
+            [CudaReadOnly] double* right,
             int size,
             double* augmented,
             double* solution)
@@ -95,8 +170,8 @@ internal static class MatrixCudaBlockCatalog
             {
                 int pivot_row = pivot;
                 for (int row = pivot + 1; row < size; row++)
-                    if (fabs(augmented[row * columns + pivot]) >
-                        fabs(augmented[pivot_row * columns + pivot]))
+                    if (Math.Abs(augmented[row * columns + pivot]) >
+                        Math.Abs(augmented[pivot_row * columns + pivot]))
                     {
                         pivot_row = row;
                     }
@@ -120,14 +195,15 @@ internal static class MatrixCudaBlockCatalog
             for (int row = 0; row < size; row++)
             {
                 solution[row] = augmented[row * columns + size];
-                if (!isfinite(solution[row]))
+                if (!double.IsFinite(solution[row]))
                     return false;
             }
             return true;
         }
 
-        __device__ bool mathblocks_matrix_try_solve_basis(
-            const double* matrix,
+        [CudaDevice]
+        private static bool mathblocks_matrix_try_solve_basis(
+            [CudaReadOnly] double* matrix,
             int size,
             int basis,
             double* augmented,
@@ -144,8 +220,8 @@ internal static class MatrixCudaBlockCatalog
             {
                 int pivot_row = pivot;
                 for (int row = pivot + 1; row < size; row++)
-                    if (fabs(augmented[row * columns + pivot]) >
-                        fabs(augmented[pivot_row * columns + pivot]))
+                    if (Math.Abs(augmented[row * columns + pivot]) >
+                        Math.Abs(augmented[pivot_row * columns + pivot]))
                     {
                         pivot_row = row;
                     }
@@ -169,13 +245,14 @@ internal static class MatrixCudaBlockCatalog
             for (int row = 0; row < size; row++)
             {
                 solution[row] = augmented[row * columns + size];
-                if (!isfinite(solution[row]))
+                if (!double.IsFinite(solution[row]))
                     return false;
             }
             return true;
         }
 
-        __device__ bool mathblocks_matrix_is_symmetric(const double* values, int rows, int columns)
+        [CudaDevice]
+        private static bool mathblocks_matrix_is_symmetric([CudaReadOnly] double* values, int rows, int columns)
         {
             if (rows != columns)
                 return false;
@@ -186,8 +263,9 @@ internal static class MatrixCudaBlockCatalog
             return true;
         }
 
-        __device__ bool mathblocks_matrix_is_positive_definite(
-            const double* values,
+        [CudaDevice]
+        private static bool mathblocks_matrix_is_positive_definite(
+            [CudaReadOnly] double* values,
             int size,
             double* lower)
         {
@@ -217,8 +295,9 @@ internal static class MatrixCudaBlockCatalog
             return true;
         }
 
-        __device__ void mathblocks_matrix_symmetric_eigenvalues(
-            const double* source,
+        [CudaDevice]
+        private static void mathblocks_matrix_symmetric_eigenvalues(
+            [CudaReadOnly] double* source,
             int size,
             double* work,
             double* eigenvalues)
@@ -233,7 +312,7 @@ internal static class MatrixCudaBlockCatalog
                 {
                     for (int column = row + 1; column < size; column++)
                     {
-                        double magnitude = fabs(work[row * size + column]);
+                        double magnitude = Math.Abs(work[row * size + column]);
                         if (magnitude <= largest)
                             continue;
                         largest = magnitude;
@@ -287,7 +366,8 @@ internal static class MatrixCudaBlockCatalog
             }
         }
 
-        __device__ int mathblocks_matrix_rank(const double* source, int rows, int columns, double* work)
+        [CudaDevice]
+        private static int mathblocks_matrix_rank([CudaReadOnly] double* source, int rows, int columns, double* work)
         {
             mathblocks_matrix_copy(source, work, rows * columns);
             int rank = 0;
@@ -296,8 +376,8 @@ internal static class MatrixCudaBlockCatalog
             {
                 int pivot_row = rank;
                 for (int row = rank + 1; row < rows; row++)
-                    if (fabs(work[row * columns + pivot_column]) >
-                        fabs(work[pivot_row * columns + pivot_column]))
+                    if (Math.Abs(work[row * columns + pivot_column]) >
+                        Math.Abs(work[pivot_row * columns + pivot_column]))
                     {
                         pivot_row = row;
                     }
@@ -320,9 +400,10 @@ internal static class MatrixCudaBlockCatalog
             return rank;
         }
 
-        __device__ void mathblocks_matrix_multiply_square(
-            const double* left,
-            const double* right,
+        [CudaDevice]
+        private static void mathblocks_matrix_multiply_square(
+            [CudaReadOnly] double* left,
+            [CudaReadOnly] double* right,
             int size,
             double* destination)
         {
@@ -338,7 +419,8 @@ internal static class MatrixCudaBlockCatalog
             }
         }
 
-        __device__ int mathblocks_pop_count(int value)
+        [CudaDevice]
+        private static int mathblocks_pop_count(int value)
         {
             int count = 0;
             while (value != 0)
@@ -349,8 +431,9 @@ internal static class MatrixCudaBlockCatalog
             return count;
         }
 
-        __device__ void mathblocks_matrix_submatrix_from_masks(
-            const double* source,
+        [CudaDevice]
+        private static void mathblocks_matrix_submatrix_from_masks(
+            [CudaReadOnly] double* source,
             int source_columns,
             int row_mask,
             int column_mask,
@@ -375,16 +458,17 @@ internal static class MatrixCudaBlockCatalog
             }
         }
 
-        extern "C" __global__ void mathblocks_matrix(
+        [CudaGlobal]
+        private static void mathblocks_matrix(
             int opcode,
-            const MathBlockSlot* const* inputs,
+            [CudaReadOnly] MathBlockSlot** inputs,
             int input_count,
             MathBlockSlot* output)
         {
-            int thread = (int)threadIdx.x;
-            const MathBlockSlot* first = input_count > 0 ? inputs[0] : nullptr;
-            const MathBlockSlot* second = input_count > 1 ? inputs[1] : nullptr;
-            const MathBlockSlot* third = input_count > 2 ? inputs[2] : nullptr;
+            int thread = (int)Cuda.ThreadIdx.X;
+            MathBlockSlot* first = Cuda.ReadOnly(input_count > 0 ? inputs[0] : null);
+            MathBlockSlot* second = Cuda.ReadOnly(input_count > 1 ? inputs[1] : null);
+            MathBlockSlot* third = Cuda.ReadOnly(input_count > 2 ? inputs[2] : null);
             if (thread == 0)
             {
                 output->scalar_value = 0.0;
@@ -394,14 +478,14 @@ internal static class MatrixCudaBlockCatalog
                 output->count = 0;
                 output->valid = 1;
                 for (int index = 0; index < input_count; index++)
-                    if (inputs[index] == nullptr || !inputs[index]->valid) output->valid = 0;
+                    if (inputs[index] == null || !inputs[index]->valid) output->valid = 0;
             }
-            __syncthreads();
+            Cuda.SyncThreads();
             if (!output->valid)
                 return;
 
-            const double* a = first == nullptr ? nullptr : (const double*)first->data_pointer;
-            const double* b = second == nullptr ? nullptr : (const double*)second->data_pointer;
+            double* a = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
+            double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
             double* result = (double*)output->data_pointer;
             double* scratch = (double*)output->scratch_pointer;
 
@@ -412,14 +496,14 @@ internal static class MatrixCudaBlockCatalog
                     mathblocks_matrix_shape(output, first->rows, first->columns);
                     if (!mathblocks_matrix_compatible(first, second)) output->valid = 0;
                 }
-                __syncthreads();
-                for (int index = thread; output->valid && index < first->count; index += blockDim.x)
+                Cuda.SyncThreads();
+                for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
                 {
                     double value = opcode == 0 ? a[index] + b[index]
                         : opcode == 10 ? a[index] * b[index]
                         : a[index] - b[index];
                     result[index] = value;
-                    if (!isfinite(value)) atomicExch(&output->valid, 0);
+                    if (!double.IsFinite(value)) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 return;
             }
@@ -431,8 +515,8 @@ internal static class MatrixCudaBlockCatalog
                     mathblocks_matrix_shape(output, first->rows + 1, first->columns);
                     if (second->count != first->columns) output->valid = 0;
                 }
-                __syncthreads();
-                for (int index = thread; output->valid && index < output->count; index += blockDim.x)
+                Cuda.SyncThreads();
+                for (int index = thread; output->valid && index < output->count; index += Cuda.BlockDim.X)
                     result[index] = index < first->count ? a[index] : b[index - first->count];
                 return;
             }
@@ -441,8 +525,8 @@ internal static class MatrixCudaBlockCatalog
             {
                 int count = opcode == 2 ? first->columns : first->rows;
                 if (thread == 0) mathblocks_set_vector_shape(output, count);
-                __syncthreads();
-                for (int index = thread; output->valid && index < count; index += blockDim.x)
+                Cuda.SyncThreads();
+                for (int index = thread; output->valid && index < count; index += Cuda.BlockDim.X)
                 {
                     double sum = 0.0;
                     if (opcode == 2)
@@ -456,7 +540,7 @@ internal static class MatrixCudaBlockCatalog
                             sum += a[index * first->columns + column];
                     }
                     result[index] = sum;
-                    if (!isfinite(sum)) atomicExch(&output->valid, 0);
+                    if (!double.IsFinite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 return;
             }
@@ -472,8 +556,8 @@ internal static class MatrixCudaBlockCatalog
                     mathblocks_set_vector_shape(output, count);
                     if (!valid_index || selected >= limit) output->valid = 0;
                 }
-                __syncthreads();
-                for (int index = thread; output->valid && index < count; index += blockDim.x)
+                Cuda.SyncThreads();
+                for (int index = thread; output->valid && index < count; index += Cuda.BlockDim.X)
                     result[index] = opcode == 3
                         ? a[index * first->columns + selected]
                         : a[selected * first->columns + index];
@@ -488,8 +572,8 @@ internal static class MatrixCudaBlockCatalog
                     if (!mathblocks_matrix_compatible(first, second) || first->rows != first->columns)
                         output->valid = 0;
                 }
-                __syncthreads();
-                for (int flat = thread; output->valid && flat < output->count; flat += blockDim.x)
+                Cuda.SyncThreads();
+                for (int flat = thread; output->valid && flat < output->count; flat += Cuda.BlockDim.X)
                 {
                     int row = flat / first->columns;
                     int column = flat - row * first->columns;
@@ -503,7 +587,7 @@ internal static class MatrixCudaBlockCatalog
                             a[inner * first->columns + column];
                     }
                     result[flat] = left_product - right_product;
-                    if (!isfinite(result[flat])) atomicExch(&output->valid, 0);
+                    if (!double.IsFinite(result[flat])) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 return;
             }
@@ -516,8 +600,8 @@ internal static class MatrixCudaBlockCatalog
                     mathblocks_matrix_shape(output, size, size);
                     if (size <= 0) output->valid = 0;
                 }
-                __syncthreads();
-                for (int flat = thread; output->valid && flat < size * size; flat += blockDim.x)
+                Cuda.SyncThreads();
+                for (int flat = thread; output->valid && flat < size * size; flat += Cuda.BlockDim.X)
                 {
                     int row = flat / size;
                     int column = flat - row * size;
@@ -530,8 +614,8 @@ internal static class MatrixCudaBlockCatalog
             {
                 int count = first->rows < first->columns ? first->rows : first->columns;
                 if (thread == 0) mathblocks_set_vector_shape(output, count);
-                __syncthreads();
-                for (int index = thread; output->valid && index < count; index += blockDim.x)
+                Cuda.SyncThreads();
+                for (int index = thread; output->valid && index < count; index += Cuda.BlockDim.X)
                     result[index] = a[index * first->columns + index];
                 return;
             }
@@ -539,8 +623,8 @@ internal static class MatrixCudaBlockCatalog
             if (opcode == 7)
             {
                 if (thread == 0) mathblocks_set_vector_shape(output, first->count);
-                __syncthreads();
-                for (int index = thread; output->valid && index < first->count; index += blockDim.x)
+                Cuda.SyncThreads();
+                for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
                     result[index] = a[index];
                 return;
             }
@@ -551,7 +635,7 @@ internal static class MatrixCudaBlockCatalog
                 {
                     output->scalar_value = mathblocks_square_root(
                         mathblocks_compensated_product_sum(a, a, first->count));
-                    if (!isfinite(output->scalar_value)) output->valid = 0;
+                    if (!double.IsFinite(output->scalar_value)) output->valid = 0;
                 }
                 return;
             }
@@ -560,8 +644,8 @@ internal static class MatrixCudaBlockCatalog
             {
                 int size = first->columns;
                 if (thread == 0) mathblocks_matrix_shape(output, size, size);
-                __syncthreads();
-                for (int flat = thread; output->valid && flat < size * size; flat += blockDim.x)
+                Cuda.SyncThreads();
+                for (int flat = thread; output->valid && flat < size * size; flat += Cuda.BlockDim.X)
                 {
                     int row = flat / size;
                     int column = flat - row * size;
@@ -569,7 +653,7 @@ internal static class MatrixCudaBlockCatalog
                     for (int inner = 0; inner < first->rows; inner++)
                         sum += a[inner * first->columns + row] * a[inner * first->columns + column];
                     result[flat] = sum;
-                    if (!isfinite(sum)) atomicExch(&output->valid, 0);
+                    if (!double.IsFinite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 return;
             }
@@ -585,8 +669,8 @@ internal static class MatrixCudaBlockCatalog
                         output->valid = 0;
                     }
                 }
-                __syncthreads();
-                for (int flat = thread; output->valid && flat < output->count; flat += blockDim.x)
+                Cuda.SyncThreads();
+                for (int flat = thread; output->valid && flat < output->count; flat += Cuda.BlockDim.X)
                 {
                     int row = flat / second->count;
                     int column = flat - row * second->count;
@@ -612,8 +696,8 @@ internal static class MatrixCudaBlockCatalog
                     mathblocks_matrix_shape(output, size, size);
                     if (!valid_size || size <= 0 || size > 4096) output->valid = 0;
                 }
-                __syncthreads();
-                for (int flat = thread; output->valid && flat < size * size; flat += blockDim.x)
+                Cuda.SyncThreads();
+                for (int flat = thread; output->valid && flat < size * size; flat += Cuda.BlockDim.X)
                 {
                     int row = flat / size;
                     int column = flat - row * size;
@@ -627,8 +711,8 @@ internal static class MatrixCudaBlockCatalog
                 int rows = first->rows * second->rows;
                 int columns = first->columns * second->columns;
                 if (thread == 0) mathblocks_matrix_shape(output, rows, columns);
-                __syncthreads();
-                for (int flat = thread; output->valid && flat < rows * columns; flat += blockDim.x)
+                Cuda.SyncThreads();
+                for (int flat = thread; output->valid && flat < rows * columns; flat += Cuda.BlockDim.X)
                 {
                     int row = flat / columns;
                     int column = flat - row * columns;
@@ -638,7 +722,7 @@ internal static class MatrixCudaBlockCatalog
                     int right_column = column - left_column * second->columns;
                     result[flat] = a[left_row * first->columns + left_column] *
                         b[right_row * second->columns + right_column];
-                    if (!isfinite(result[flat])) atomicExch(&output->valid, 0);
+                    if (!double.IsFinite(result[flat])) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 return;
             }
@@ -650,14 +734,14 @@ internal static class MatrixCudaBlockCatalog
                     mathblocks_set_vector_shape(output, first->rows);
                     if (first->columns != second->count) output->valid = 0;
                 }
-                __syncthreads();
-                for (int row = thread; output->valid && row < first->rows; row += blockDim.x)
+                Cuda.SyncThreads();
+                for (int row = thread; output->valid && row < first->rows; row += Cuda.BlockDim.X)
                 {
                     double sum = 0.0;
                     for (int column = 0; column < first->columns; column++)
                         sum += a[row * first->columns + column] * b[column];
                     result[row] = sum;
-                    if (!isfinite(sum)) atomicExch(&output->valid, 0);
+                    if (!double.IsFinite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 return;
             }
@@ -669,8 +753,8 @@ internal static class MatrixCudaBlockCatalog
                     mathblocks_matrix_shape(output, first->rows, second->columns);
                     if (first->columns != second->rows) output->valid = 0;
                 }
-                __syncthreads();
-                for (int flat = thread; output->valid && flat < output->count; flat += blockDim.x)
+                Cuda.SyncThreads();
+                for (int flat = thread; output->valid && flat < output->count; flat += Cuda.BlockDim.X)
                 {
                     int row = flat / second->columns;
                     int column = flat - row * second->columns;
@@ -678,7 +762,7 @@ internal static class MatrixCudaBlockCatalog
                     for (int inner = 0; inner < first->columns; inner++)
                         sum += a[row * first->columns + inner] * b[inner * second->columns + column];
                     result[flat] = sum;
-                    if (!isfinite(sum)) atomicExch(&output->valid, 0);
+                    if (!double.IsFinite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 return;
             }
@@ -686,13 +770,13 @@ internal static class MatrixCudaBlockCatalog
             if (opcode == 16)
             {
                 if (thread == 0) mathblocks_matrix_shape(output, first->count, second->count);
-                __syncthreads();
-                for (int flat = thread; output->valid && flat < output->count; flat += blockDim.x)
+                Cuda.SyncThreads();
+                for (int flat = thread; output->valid && flat < output->count; flat += Cuda.BlockDim.X)
                 {
                     int row = flat / second->count;
                     int column = flat - row * second->count;
                     result[flat] = a[row] * b[column];
-                    if (!isfinite(result[flat])) atomicExch(&output->valid, 0);
+                    if (!double.IsFinite(result[flat])) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 return;
             }
@@ -707,13 +791,13 @@ internal static class MatrixCudaBlockCatalog
                 {
                     mathblocks_matrix_shape(output, rows, columns);
                     if (!valid_rows || !valid_columns || rows <= 0 || columns <= 0 ||
-                        (long long)rows * columns != first->count)
+                        (long)rows * columns != first->count)
                     {
                         output->valid = 0;
                     }
                 }
-                __syncthreads();
-                for (int index = thread; output->valid && index < first->count; index += blockDim.x)
+                Cuda.SyncThreads();
+                for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
                     result[index] = a[index];
                 return;
             }
@@ -721,11 +805,11 @@ internal static class MatrixCudaBlockCatalog
             if (opcode == 20)
             {
                 if (thread == 0) mathblocks_matrix_shape(output, first->rows, first->columns);
-                __syncthreads();
-                for (int index = thread; output->valid && index < first->count; index += blockDim.x)
+                Cuda.SyncThreads();
+                for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
                 {
                     result[index] = a[index] * second->scalar_value;
-                    if (!isfinite(result[index])) atomicExch(&output->valid, 0);
+                    if (!double.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 return;
             }
@@ -737,8 +821,8 @@ internal static class MatrixCudaBlockCatalog
                     mathblocks_matrix_shape(output, 2, first->count);
                     if (first->count != second->count) output->valid = 0;
                 }
-                __syncthreads();
-                for (int index = thread; output->valid && index < first->count; index += blockDim.x)
+                Cuda.SyncThreads();
+                for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
                 {
                     result[index] = a[index];
                     result[first->count + index] = b[index];
@@ -759,7 +843,7 @@ internal static class MatrixCudaBlockCatalog
                     for (int index = 0; index < first->rows; index++)
                         trace += a[index * first->columns + index];
                     output->scalar_value = trace;
-                    if (!isfinite(trace)) output->valid = 0;
+                    if (!double.IsFinite(trace)) output->valid = 0;
                 }
                 return;
             }
@@ -767,8 +851,8 @@ internal static class MatrixCudaBlockCatalog
             if (opcode == 25)
             {
                 if (thread == 0) mathblocks_matrix_shape(output, first->columns, first->rows);
-                __syncthreads();
-                for (int flat = thread; output->valid && flat < output->count; flat += blockDim.x)
+                Cuda.SyncThreads();
+                for (int flat = thread; output->valid && flat < output->count; flat += Cuda.BlockDim.X)
                 {
                     int row = flat / first->rows;
                     int column = flat - row * first->rows;
@@ -782,13 +866,13 @@ internal static class MatrixCudaBlockCatalog
 
             if (opcode == 26)
             {
-                if (first->rows != first->columns || scratch == nullptr)
+                if (first->rows != first->columns || scratch == null)
                 {
                     output->valid = 0;
                     return;
                 }
                 output->scalar_value = mathblocks_matrix_determinant(a, first->rows, scratch);
-                if (!isfinite(output->scalar_value)) output->valid = 0;
+                if (!double.IsFinite(output->scalar_value)) output->valid = 0;
                 return;
             }
 
@@ -796,7 +880,7 @@ internal static class MatrixCudaBlockCatalog
             {
                 int size = first->rows;
                 int count = first->count;
-                if (size != first->columns || scratch == nullptr)
+                if (size != first->columns || scratch == null)
                 {
                     output->valid = 0;
                     return;
@@ -807,10 +891,10 @@ internal static class MatrixCudaBlockCatalog
                 {
                     double row_sum = 0.0;
                     for (int column = 0; column < size; column++)
-                        row_sum += fabs(a[row * size + column]);
+                        row_sum += Math.Abs(a[row * size + column]);
                     if (row_sum > norm) norm = row_sum;
                 }
-                int scaling = norm > 1.0 ? (int)ceil(mathblocks_binary_logarithm(norm)) : 0;
+                int scaling = norm > 1.0 ? (int)Math.Ceiling(mathblocks_binary_logarithm(norm)) : 0;
                 if (scaling < 0) scaling = 0;
                 double scale = mathblocks_power(2.0, (double)-scaling);
                 double* scaled = scratch;
@@ -843,7 +927,7 @@ internal static class MatrixCudaBlockCatalog
                     mathblocks_matrix_copy(temporary, result, count);
                 }
                 for (int index = 0; index < count; index++)
-                    if (!isfinite(result[index])) output->valid = 0;
+                    if (!double.IsFinite(result[index])) output->valid = 0;
                 return;
             }
 
@@ -852,7 +936,7 @@ internal static class MatrixCudaBlockCatalog
                 int exponent = 0;
                 if (first->rows != first->columns ||
                     !mathblocks_nonnegative_integer(second->scalar_value, &exponent) ||
-                    scratch == nullptr)
+                    scratch == null)
                 {
                     output->valid = 0;
                     return;
@@ -882,14 +966,14 @@ internal static class MatrixCudaBlockCatalog
                     }
                 }
                 for (int index = 0; index < count; index++)
-                    if (!isfinite(result[index])) output->valid = 0;
+                    if (!double.IsFinite(result[index])) output->valid = 0;
                 return;
             }
 
             if (opcode == 29)
             {
                 int size = first->rows;
-                if (size != first->columns || scratch == nullptr)
+                if (size != first->columns || scratch == null)
                 {
                     output->valid = 0;
                     return;
@@ -912,7 +996,7 @@ internal static class MatrixCudaBlockCatalog
 
             if (opcode == 30)
             {
-                output->boolean_value = first->rows == first->columns && scratch != nullptr &&
+                output->boolean_value = first->rows == first->columns && scratch != null &&
                     mathblocks_matrix_is_positive_definite(a, first->rows, scratch);
                 return;
             }
@@ -925,7 +1009,7 @@ internal static class MatrixCudaBlockCatalog
 
             if (opcode == 32)
             {
-                if (first->rows > 8 || first->columns > 8 || scratch == nullptr)
+                if (first->rows > 8 || first->columns > 8 || scratch == null)
                 {
                     output->valid = 0;
                     return;
@@ -967,7 +1051,7 @@ internal static class MatrixCudaBlockCatalog
             if (opcode == 33 || opcode == 40 || opcode == 43)
             {
                 int size = first->rows;
-                if (size != first->columns || scratch == nullptr)
+                if (size != first->columns || scratch == null)
                 {
                     output->valid = 0;
                     return;
@@ -983,13 +1067,13 @@ internal static class MatrixCudaBlockCatalog
                 if (opcode == 33) output->scalar_value = eigenvalues[size - 1];
                 else if (opcode == 40) output->scalar_value = eigenvalues[0];
                 for (int index = 0; index < size; index++)
-                    if (!isfinite(eigenvalues[index])) output->valid = 0;
+                    if (!double.IsFinite(eigenvalues[index])) output->valid = 0;
                 return;
             }
 
             if (opcode == 34)
             {
-                if (first->rows > first->columns || first->columns > 20 || scratch == nullptr)
+                if (first->rows > first->columns || first->columns > 20 || scratch == null)
                 {
                     output->valid = 0;
                     return;
@@ -1025,7 +1109,7 @@ internal static class MatrixCudaBlockCatalog
                 int size = first->rows;
                 if (size != first->columns ||
                     !mathblocks_nonnegative_integer(second->scalar_value, &iterations) ||
-                    iterations <= 0 || scratch == nullptr)
+                    iterations <= 0 || scratch == null)
                 {
                     output->valid = 0;
                     return;
@@ -1071,14 +1155,14 @@ internal static class MatrixCudaBlockCatalog
                     products[index] = vector[index] * vector[index];
                 double denominator = mathblocks_compensated_sum(products, size);
                 output->scalar_value = numerator / denominator;
-                if (!isfinite(output->scalar_value)) output->valid = 0;
+                if (!double.IsFinite(output->scalar_value)) output->valid = 0;
                 return;
             }
 
             if (opcode == 37)
             {
                 int size = first->rows;
-                if (size != first->columns || size > 20 || scratch == nullptr)
+                if (size != first->columns || size > 20 || scratch == null)
                 {
                     output->valid = 0;
                     return;
@@ -1104,7 +1188,7 @@ internal static class MatrixCudaBlockCatalog
 
             if (opcode == 38)
             {
-                if (scratch == nullptr)
+                if (scratch == null)
                 {
                     output->valid = 0;
                     return;
@@ -1123,7 +1207,7 @@ internal static class MatrixCudaBlockCatalog
                 int size = first->rows;
                 if (size != first->columns ||
                     !mathblocks_nonnegative_integer(second->scalar_value, &retained) ||
-                    retained <= 0 || retained >= size || scratch == nullptr)
+                    retained <= 0 || retained >= size || scratch == null)
                 {
                     output->valid = 0;
                     return;
@@ -1194,7 +1278,7 @@ internal static class MatrixCudaBlockCatalog
                 for (int index = 0; index < retained * retained; index++)
                 {
                     result[index] = leading[index] - product[index];
-                    if (!isfinite(result[index])) output->valid = 0;
+                    if (!double.IsFinite(result[index])) output->valid = 0;
                 }
                 return;
             }
@@ -1202,7 +1286,7 @@ internal static class MatrixCudaBlockCatalog
             if (opcode == 41)
             {
                 int size = first->rows;
-                if (size != first->columns || second->count != size || scratch == nullptr)
+                if (size != first->columns || second->count != size || scratch == null)
                 {
                     output->valid = 0;
                     return;
@@ -1217,7 +1301,7 @@ internal static class MatrixCudaBlockCatalog
             {
                 int iterations = 0;
                 if (!mathblocks_nonnegative_integer(second->scalar_value, &iterations) ||
-                    iterations <= 0 || scratch == nullptr)
+                    iterations <= 0 || scratch == null)
                 {
                     output->valid = 0;
                     return;
@@ -1241,8 +1325,9 @@ internal static class MatrixCudaBlockCatalog
                 double largest = eigenvalues[size - 1];
                 if (largest < 0.0) largest = 0.0;
                 output->scalar_value = mathblocks_square_root(largest);
-                if (!isfinite(output->scalar_value)) output->valid = 0;
+                if (!double.IsFinite(output->scalar_value)) output->valid = 0;
             }
         }
-        """;
+    }
+    """;
 }

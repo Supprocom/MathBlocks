@@ -1,24 +1,77 @@
+using CSharp2CUDA;
+
 namespace Supprocom.MathBlocks.Cuda;
 
 internal static class SequencePathCudaBlockCatalog
 {
-        public static string KernelEntryPoint => "mathblocks_sequence_path";
+    public static string KernelEntryPoint => "mathblocks_sequence_path";
     public static uint BlockSize => 128;
 
-    public const string KernelSource = """
-        struct MathBlockSequencePathRun
-        {
-            int start;
-            int length;
-            double value;
-        };
+    public static string KernelSource { get; } = Transpile();
 
-        __device__ bool mathblocks_sequence_positive_integer(double value, int* result)
+    private static string Transpile()
+    {
+        var result = CudaTranspiler.Transpile(
+            TranslationUnitSource,
+            new CudaTranspilationOptions { NewLine = "\r\n" },
+            "SequencePathCudaBlockCatalog.cs");
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(
+                $"SequencePath CUDA translation failed: {string.Join(Environment.NewLine, result.Diagnostics)}");
+        }
+
+        return result.Source;
+    }
+
+    private const string TranslationUnitSource = """
+    using System;
+    using CSharp2CUDA;
+
+    [CudaTranslationUnit]
+    internal static unsafe class SequencePathModule
+    {
+        [CudaExternal]
+        public struct MathBlockSlot
+        {
+            public double scalar_value;
+            public ulong data_pointer;
+            public ulong scratch_pointer;
+            public CudaInt32 boolean_value;
+            public CudaInt32 valid;
+            public int rows;
+            public int columns;
+            public int count;
+            public int capacity;
+        }
+
+        [CudaExternal]
+        private static bool mathblocks_nonnegative_integer(double value, int* result) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_positive_infinity() => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_power(double value, double exponent) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+
+        public struct MathBlockSequencePathRun
+        {
+            public int start;
+            public int length;
+            public double value;
+        }
+
+        [CudaDevice]
+        private static bool mathblocks_sequence_positive_integer(double value, int* result)
         {
             return mathblocks_nonnegative_integer(value, result) && *result > 0;
         }
 
-        __device__ void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count)
+        [CudaDevice]
+        private static void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count)
         {
             output->rows = count;
             output->columns = 0;
@@ -30,15 +83,16 @@ internal static class SequencePathCudaBlockCatalog
             }
         }
 
-        __device__ void mathblocks_sequence_set_matrix_shape(
+        [CudaDevice]
+        private static void mathblocks_sequence_set_matrix_shape(
             MathBlockSlot* output,
             int rows,
             int columns)
         {
-            long long count = (long long)rows * columns;
+            long count = (long)rows * columns;
             output->rows = rows;
             output->columns = columns;
-            output->count = count > 2147483647LL ? -1 : (int)count;
+            output->count = count > 2147483647L ? -1 : (int)count;
             if (rows < 0 || columns < 0 || count > output->capacity)
             {
                 output->valid = 0;
@@ -46,30 +100,33 @@ internal static class SequencePathCudaBlockCatalog
             }
         }
 
-        __device__ unsigned long long mathblocks_sequence_order_key(double value)
+        [CudaDevice]
+        private static ulong mathblocks_sequence_order_key(double value)
         {
-            unsigned long long bits = (unsigned long long)__double_as_longlong(value);
+            ulong bits = (ulong)BitConverter.DoubleToInt64Bits(value);
             if (value == 0.0)
-                bits = 0ull;
-            return (bits & 0x8000000000000000ull) != 0ull
+                bits = 0UL;
+            return (bits & 0x8000000000000000UL) != 0UL
                 ? ~bits
-                : bits ^ 0x8000000000000000ull;
+                : bits ^ 0x8000000000000000UL;
         }
 
-        __device__ bool mathblocks_sequence_is_power_of_two(int value)
+        [CudaDevice]
+        private static bool mathblocks_sequence_is_power_of_two(int value)
         {
             return value > 0 && (value & (value - 1)) == 0;
         }
 
-        __device__ void mathblocks_sequence_prepare_order_ranks(
-            const double* values,
+        [CudaDevice]
+        private static void mathblocks_sequence_prepare_order_ranks(
+            [CudaReadOnly] double* values,
             int count,
-            unsigned char* scratch,
+            byte* scratch,
             MathBlockSlot* output)
         {
-            int thread = (int)threadIdx.x;
-            unsigned long long* first_keys = (unsigned long long*)scratch;
-            unsigned long long* second_keys = first_keys + count;
+            int thread = (int)Cuda.ThreadIdx.X;
+            ulong* first_keys = (ulong*)scratch;
+            ulong* second_keys = first_keys + count;
             int* first_indexes = (int*)(second_keys + count);
             int* second_indexes = first_indexes + count;
             int* ranks = second_indexes + count;
@@ -80,70 +137,71 @@ internal static class SequencePathCudaBlockCatalog
             int* zero_counts = kinds + count;
             int* zero_prefix = zero_counts + 128;
 
-            for (int index = thread; index < count; index += blockDim.x)
+            for (int index = thread; index < count; index += Cuda.BlockDim.X)
             {
-                if (!isfinite(values[index]))
-                    atomicExch(&output->valid, 0);
+                if (!double.IsFinite(values[index]))
+                    Cuda.AtomicExchange(ref output->valid, 0);
                 first_keys[index] = mathblocks_sequence_order_key(values[index]);
                 first_indexes[index] = index;
             }
-            __syncthreads();
+            Cuda.SyncThreads();
             if (!output->valid)
                 return;
 
-            unsigned long long* source_keys = first_keys;
-            unsigned long long* destination_keys = second_keys;
+            ulong* source_keys = first_keys;
+            ulong* destination_keys = second_keys;
             int* source_indexes = first_indexes;
             int* destination_indexes = second_indexes;
             for (int bit = 0; bit < 64; bit++)
             {
-                int begin = (int)(((long long)count * thread) / blockDim.x);
-                int end = (int)(((long long)count * (thread + 1)) / blockDim.x);
+                int begin = (int)(((long)count * thread) / Cuda.BlockDim.X);
+                int end = (int)(((long)count * (thread + 1)) / Cuda.BlockDim.X);
                 int zeros = 0;
                 for (int index = begin; index < end; index++)
-                    if (((source_keys[index] >> bit) & 1ull) == 0ull)
+                    if (((source_keys[index] >> bit) & 1UL) == 0UL)
                         zeros++;
                 zero_counts[thread] = zeros;
-                __syncthreads();
+                Cuda.SyncThreads();
                 if (thread == 0)
                 {
                     int prefix = 0;
-                    for (int lane = 0; lane < blockDim.x; lane++)
+                    for (int lane = 0; lane < Cuda.BlockDim.X; lane++)
                     {
                         zero_prefix[lane] = prefix;
                         prefix += zero_counts[lane];
                     }
                     output->columns = prefix;
                 }
-                __syncthreads();
+                Cuda.SyncThreads();
                 int zero_destination = zero_prefix[thread];
                 int one_destination = output->columns + begin - zero_destination;
                 for (int index = begin; index < end; index++)
                 {
-                    unsigned long long key = source_keys[index];
-                    int destination = ((key >> bit) & 1ull) == 0ull
+                    ulong key = source_keys[index];
+                    int destination = ((key >> bit) & 1UL) == 0UL
                         ? zero_destination++
                         : one_destination++;
                     destination_keys[destination] = key;
                     destination_indexes[destination] = source_indexes[index];
                 }
-                __syncthreads();
-                unsigned long long* key_swap = source_keys;
+                Cuda.SyncThreads();
+                ulong* key_swap = source_keys;
                 source_keys = destination_keys;
                 destination_keys = key_swap;
                 int* index_swap = source_indexes;
                 source_indexes = destination_indexes;
                 destination_indexes = index_swap;
             }
-            for (int index = thread; index < count; index += blockDim.x)
+            for (int index = thread; index < count; index += Cuda.BlockDim.X)
                 ranks[source_indexes[index]] = index;
-            __syncthreads();
+            Cuda.SyncThreads();
             if (thread == 0)
                 output->columns = 0;
-            __syncthreads();
+            Cuda.SyncThreads();
         }
 
-        __device__ void mathblocks_sequence_heap_swap(
+        [CudaDevice]
+        private static void mathblocks_sequence_heap_swap(
             int* heap,
             int left,
             int right,
@@ -156,10 +214,11 @@ internal static class SequencePathCudaBlockCatalog
             positions[heap[right]] = right;
         }
 
-        __device__ bool mathblocks_sequence_heap_precedes(
+        [CudaDevice]
+        private static bool mathblocks_sequence_heap_precedes(
             int left,
             int right,
-            const int* ranks,
+            [CudaReadOnly] int* ranks,
             bool maximum)
         {
             return maximum
@@ -167,11 +226,12 @@ internal static class SequencePathCudaBlockCatalog
                 : ranks[left] < ranks[right];
         }
 
-        __device__ void mathblocks_sequence_heap_sift_up(
+        [CudaDevice]
+        private static void mathblocks_sequence_heap_sift_up(
             int* heap,
             int position,
             int* positions,
-            const int* ranks,
+            [CudaReadOnly] int* ranks,
             bool maximum)
         {
             while (position > 0)
@@ -190,12 +250,13 @@ internal static class SequencePathCudaBlockCatalog
             }
         }
 
-        __device__ void mathblocks_sequence_heap_sift_down(
+        [CudaDevice]
+        private static void mathblocks_sequence_heap_sift_down(
             int* heap,
             int count,
             int position,
             int* positions,
-            const int* ranks,
+            [CudaReadOnly] int* ranks,
             bool maximum)
         {
             while (true)
@@ -224,14 +285,15 @@ internal static class SequencePathCudaBlockCatalog
             }
         }
 
-        __device__ void mathblocks_sequence_heap_insert(
+        [CudaDevice]
+        private static void mathblocks_sequence_heap_insert(
             int* heap,
             int* count,
             int item,
             int kind,
             int* positions,
             int* kinds,
-            const int* ranks,
+            [CudaReadOnly] int* ranks,
             bool maximum)
         {
             int position = (*count)++;
@@ -246,13 +308,14 @@ internal static class SequencePathCudaBlockCatalog
                 maximum);
         }
 
-        __device__ void mathblocks_sequence_heap_remove(
+        [CudaDevice]
+        private static void mathblocks_sequence_heap_remove(
             int* heap,
             int* count,
             int item,
             int* positions,
             int* kinds,
-            const int* ranks,
+            [CudaReadOnly] int* ranks,
             bool maximum)
         {
             int position = positions[item];
@@ -288,7 +351,8 @@ internal static class SequencePathCudaBlockCatalog
             }
         }
 
-        __device__ void mathblocks_sequence_rebalance_heaps(
+        [CudaDevice]
+        private static void mathblocks_sequence_rebalance_heaps(
             int* lower_heap,
             int* lower_count,
             int* upper_heap,
@@ -296,7 +360,7 @@ internal static class SequencePathCudaBlockCatalog
             int target_lower_count,
             int* positions,
             int* kinds,
-            const int* ranks)
+            [CudaReadOnly] int* ranks)
         {
             while (*lower_count > target_lower_count)
             {
@@ -342,8 +406,9 @@ internal static class SequencePathCudaBlockCatalog
             }
         }
 
-        __device__ void mathblocks_sequence_rolling_extreme(
-            const double* values,
+        [CudaDevice]
+        private static void mathblocks_sequence_rolling_extreme(
+            [CudaReadOnly] double* values,
             int count,
             int width,
             double* result,
@@ -368,8 +433,9 @@ internal static class SequencePathCudaBlockCatalog
             }
         }
 
-        __device__ void mathblocks_sequence_rolling_sum(
-            const double* values,
+        [CudaDevice]
+        private static void mathblocks_sequence_rolling_sum(
+            [CudaReadOnly] double* values,
             int count,
             int width,
             double* result)
@@ -385,19 +451,20 @@ internal static class SequencePathCudaBlockCatalog
             }
         }
 
-        extern "C" __global__ void mathblocks_sequence_path(
+        [CudaGlobal]
+        private static void mathblocks_sequence_path(
             int opcode,
-            const MathBlockSlot* const* inputs,
+            [CudaReadOnly] MathBlockSlot** inputs,
             int input_count,
             MathBlockSlot* output)
         {
-            int thread = (int)threadIdx.x;
-            if (blockIdx.x != 0)
+            int thread = (int)Cuda.ThreadIdx.X;
+            if (Cuda.BlockIdx.X != 0)
                 return;
 
-            const MathBlockSlot* first = input_count > 0 ? inputs[0] : nullptr;
-            const MathBlockSlot* second = input_count > 1 ? inputs[1] : nullptr;
-            const MathBlockSlot* third = input_count > 2 ? inputs[2] : nullptr;
+            MathBlockSlot* first = Cuda.ReadOnly(input_count > 0 ? inputs[0] : null);
+            MathBlockSlot* second = Cuda.ReadOnly(input_count > 1 ? inputs[1] : null);
+            MathBlockSlot* third = Cuda.ReadOnly(input_count > 2 ? inputs[2] : null);
             if (thread == 0)
             {
                 output->scalar_value = 0.0;
@@ -405,19 +472,19 @@ internal static class SequencePathCudaBlockCatalog
                 output->rows = 0;
                 output->columns = 0;
                 output->count = 0;
-                output->valid = first == nullptr || first->valid;
-                if (second != nullptr)
+                output->valid = first == null || first->valid;
+                if (second != null)
                     output->valid = output->valid && second->valid;
-                if (third != nullptr)
+                if (third != null)
                     output->valid = output->valid && third->valid;
             }
-            __syncthreads();
+            Cuda.SyncThreads();
             if (!output->valid)
                 return;
 
-            const double* a = first == nullptr ? nullptr : (const double*)first->data_pointer;
-            const double* b = second == nullptr ? nullptr : (const double*)second->data_pointer;
-            const int* boolean_a = first == nullptr ? nullptr : (const int*)first->data_pointer;
+            double* a = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
+            double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
+            CudaInt32* boolean_a = Cuda.ReadOnly(first == null ? null : (CudaInt32*)first->data_pointer);
             double* result = (double*)output->data_pointer;
             double* scratch = (double*)output->scratch_pointer;
 
@@ -437,7 +504,7 @@ internal static class SequencePathCudaBlockCatalog
                             for (int right = 0; right < second->count; right++)
                             {
                                 result[left + right] += a[left] * b[right];
-                                if (!isfinite(result[left + right]))
+                                if (!double.IsFinite(result[left + right]))
                                     output->valid = 0;
                             }
                         }
@@ -454,9 +521,9 @@ internal static class SequencePathCudaBlockCatalog
                             mathblocks_sequence_set_vector_shape(output, first->count - lag);
                         output->scalar_value = (double)lag;
                     }
-                    __syncthreads();
+                    Cuda.SyncThreads();
                     lag = (int)output->scalar_value;
-                    for (int index = thread; output->valid && index < output->count; index += blockDim.x)
+                    for (int index = thread; output->valid && index < output->count; index += Cuda.BlockDim.X)
                         result[index] = a[index + lag] - a[index];
                     break;
                 }
@@ -473,7 +540,7 @@ internal static class SequencePathCudaBlockCatalog
                             for (int index = 1; index < first->count; index++)
                             {
                                 result[index] = alpha * a[index] + (1.0 - alpha) * result[index - 1];
-                                if (!isfinite(result[index]))
+                                if (!double.IsFinite(result[index]))
                                     output->valid = 0;
                             }
                         }
@@ -485,7 +552,7 @@ internal static class SequencePathCudaBlockCatalog
                     {
                         int width = 0;
                         if (!mathblocks_sequence_positive_integer(second->scalar_value, &width) ||
-                            width > first->count || scratch == nullptr)
+                            width > first->count || scratch == null)
                         {
                             output->valid = 0;
                         }
@@ -544,7 +611,7 @@ internal static class SequencePathCudaBlockCatalog
                         probability = opcode == 5 ? 0.5 : third->scalar_value;
                         if (!mathblocks_sequence_positive_integer(second->scalar_value, &width) ||
                             width > first->count || !(probability >= 0.0 && probability <= 1.0) ||
-                            (width > 1 && scratch == nullptr))
+                            (width > 1 && scratch == null))
                         {
                             output->valid = 0;
                         }
@@ -555,16 +622,16 @@ internal static class SequencePathCudaBlockCatalog
                         output->scalar_value = probability;
                         output->boolean_value = width;
                     }
-                    __syncthreads();
+                    Cuda.SyncThreads();
                     width = output->boolean_value;
                     probability = output->scalar_value;
                     if (!output->valid)
                         break;
                     if (width == 1)
                     {
-                        for (int index = thread; index < first->count; index += blockDim.x)
+                        for (int index = thread; index < first->count; index += Cuda.BlockDim.X)
                             result[index] = a[index];
-                        __syncthreads();
+                        Cuda.SyncThreads();
                         if (thread == 0)
                         {
                             output->scalar_value = (double)first->count;
@@ -584,14 +651,14 @@ internal static class SequencePathCudaBlockCatalog
                                 (int*)scratch,
                                 probability == 0.0);
                             output->scalar_value = (double)(
-                                (long long)first->count * 3 + output->count);
+                                (long)first->count * 3 + output->count);
                             output->boolean_value = 0;
                         }
-                        __syncthreads();
+                        Cuda.SyncThreads();
                         break;
                     }
 
-                    unsigned char* order_scratch = (unsigned char*)scratch;
+                    byte* order_scratch = (byte*)scratch;
                     mathblocks_sequence_prepare_order_ranks(
                         a,
                         first->count,
@@ -599,8 +666,8 @@ internal static class SequencePathCudaBlockCatalog
                         output);
                     if (!output->valid)
                         break;
-                    unsigned long long* first_keys = (unsigned long long*)order_scratch;
-                    unsigned long long* second_keys = first_keys + first->count;
+                    ulong* first_keys = (ulong*)order_scratch;
+                    ulong* second_keys = first_keys + first->count;
                     int* first_indexes = (int*)(second_keys + first->count);
                     int* second_indexes = first_indexes + first->count;
                     int* ranks = second_indexes + first->count;
@@ -609,8 +676,8 @@ internal static class SequencePathCudaBlockCatalog
                     int* positions = upper_heap + width;
                     int* kinds = positions + first->count;
                     double quantile_position = probability * (width - 1);
-                    int lower_index = (int)floor(quantile_position);
-                    int upper_index = (int)ceil(quantile_position);
+                    int lower_index = (int)Math.Floor(quantile_position);
+                    int upper_index = (int)Math.Ceiling(quantile_position);
                     double weight = quantile_position - lower_index;
 
                     if (output->count == 1)
@@ -620,20 +687,20 @@ internal static class SequencePathCudaBlockCatalog
                             double lower_value = a[first_indexes[lower_index]];
                             double upper_value = a[first_indexes[upper_index]];
                             result[0] = lower_value * (1.0 - weight) + upper_value * weight;
-                            output->valid = isfinite(result[0]);
-                            output->scalar_value = (double)((long long)first->count * 64 + 2);
+                            output->valid = double.IsFinite(result[0]);
+                            output->scalar_value = (double)((long)first->count * 64 + 2);
                             output->boolean_value = 64;
                         }
-                        __syncthreads();
+                        Cuda.SyncThreads();
                         break;
                     }
 
-                    for (int index = thread; index < first->count; index += blockDim.x)
+                    for (int index = thread; index < first->count; index += Cuda.BlockDim.X)
                     {
                         positions[index] = -1;
                         kinds[index] = -1;
                     }
-                    __syncthreads();
+                    Cuda.SyncThreads();
                     if (thread == 0)
                     {
                         int lower_count = 0;
@@ -709,7 +776,7 @@ internal static class SequencePathCudaBlockCatalog
                                 ? lower_value
                                 : a[upper_heap[0]];
                             result[start] = lower_value * (1.0 - weight) + upper_value * weight;
-                            if (!isfinite(result[start]))
+                            if (!double.IsFinite(result[start]))
                             {
                                 output->valid = 0;
                                 break;
@@ -789,14 +856,14 @@ internal static class SequencePathCudaBlockCatalog
                         int heap_height = 1;
                         for (int value = width; value > 1; value = (value + 1) >> 1)
                             heap_height++;
-                        long long heap_bound = ((long long)width +
-                            2ll * (first->count - width)) * heap_height;
-                        long long selection_bound = (long long)output->count * 2;
+                        long heap_bound = ((long)width +
+                            2l * (first->count - width)) * heap_height;
+                        long selection_bound = (long)output->count * 2;
                         output->scalar_value = (double)(
-                            (long long)first->count * 64 + heap_bound + selection_bound);
+                            (long)first->count * 64 + heap_bound + selection_bound);
                         output->boolean_value = 64;
                     }
-                    __syncthreads();
+                    Cuda.SyncThreads();
                     break;
                 }
                 case 8:
@@ -825,7 +892,7 @@ internal static class SequencePathCudaBlockCatalog
                                 }
                                 double deviation = mathblocks_square_root(sum_squares / width);
                                 result[start] = opcode == 8 ? deviation : deviation * deviation;
-                                if (!isfinite(result[start]))
+                                if (!double.IsFinite(result[start]))
                                     output->valid = 0;
                             }
                         }
@@ -835,7 +902,7 @@ internal static class SequencePathCudaBlockCatalog
                     if (thread == 0)
                     {
                         mathblocks_sequence_set_vector_shape(output, first->count);
-                        if (!mathblocks_sequence_is_power_of_two(first->count) || scratch == nullptr)
+                        if (!mathblocks_sequence_is_power_of_two(first->count) || scratch == null)
                         {
                             output->valid = 0;
                         }
@@ -900,7 +967,7 @@ internal static class SequencePathCudaBlockCatalog
                         {
                             sum += a[index] - second->scalar_value;
                             result[index] = sum;
-                            if (!isfinite(sum))
+                            if (!double.IsFinite(sum))
                                 output->valid = 0;
                         }
                     }
@@ -908,7 +975,7 @@ internal static class SequencePathCudaBlockCatalog
                 case 14:
                     if (thread == 0)
                     {
-                        if (first->count <= 0 || second->count <= 0 || scratch == nullptr)
+                        if (first->count <= 0 || second->count <= 0 || scratch == null)
                         {
                             output->valid = 0;
                         }
@@ -929,14 +996,14 @@ internal static class SequencePathCudaBlockCatalog
                                         ? previous[right + 1]
                                         : current[right];
                                     minimum = minimum < previous[right] ? minimum : previous[right];
-                                    current[right + 1] = fabs(a[left] - b[right]) + minimum;
+                                    current[right + 1] = Math.Abs(a[left] - b[right]) + minimum;
                                 }
                                 double* swap = previous;
                                 previous = current;
                                 current = swap;
                             }
                             output->scalar_value = previous[second->count];
-                            if (!isfinite(output->scalar_value))
+                            if (!double.IsFinite(output->scalar_value))
                                 output->valid = 0;
                         }
                     }
@@ -1042,7 +1109,7 @@ internal static class SequencePathCudaBlockCatalog
                                 decline = decline > candidate ? decline : candidate;
                             }
                             output->scalar_value = decline;
-                            if (!isfinite(decline))
+                            if (!double.IsFinite(decline))
                                 output->valid = 0;
                         }
                     }
@@ -1058,7 +1125,7 @@ internal static class SequencePathCudaBlockCatalog
                         }
                         else
                         {
-                            double order = opcode == 22 ? 2.0 : second == nullptr ? 1.0 : second->scalar_value;
+                            double order = opcode == 22 ? 2.0 : second == null ? 1.0 : second->scalar_value;
                             if (!(order > 0.0))
                             {
                                 output->valid = 0;
@@ -1068,11 +1135,11 @@ internal static class SequencePathCudaBlockCatalog
                                 double total = 0.0;
                                 for (int index = 1; index < first->count; index++)
                                 {
-                                    double change = fabs(a[index] - a[index - 1]);
+                                    double change = Math.Abs(a[index] - a[index - 1]);
                                     total += opcode == 29 ? change : mathblocks_power(change, order);
                                 }
                                 output->scalar_value = total;
-                                if (!isfinite(total))
+                                if (!double.IsFinite(total))
                                     output->valid = 0;
                             }
                         }
@@ -1088,11 +1155,11 @@ internal static class SequencePathCudaBlockCatalog
                         }
                         else
                         {
-                            long long recurrent = 0;
-                            long long total = (long long)first->count * first->count;
+                            long recurrent = 0;
+                            long total = (long)first->count * first->count;
                             for (int left = 0; left < first->count; left++)
                                 for (int right = 0; right < first->count; right++)
-                                    if (fabs(a[left] - a[right]) <= threshold)
+                                    if (Math.Abs(a[left] - a[right]) <= threshold)
                                         recurrent++;
                             output->scalar_value = (double)recurrent / total;
                         }
@@ -1115,7 +1182,7 @@ internal static class SequencePathCudaBlockCatalog
                                 cumulative += a[index];
                                 minimum = minimum < cumulative ? minimum : cumulative;
                                 result[index] = cumulative - minimum;
-                                if (!isfinite(result[index]))
+                                if (!double.IsFinite(result[index]))
                                     output->valid = 0;
                             }
                         }
@@ -1182,7 +1249,7 @@ internal static class SequencePathCudaBlockCatalog
                         int dimension = first->columns;
                         int count = dimension * dimension * dimension;
                         mathblocks_sequence_set_vector_shape(output, count);
-                        if (first->rows < 1 || scratch == nullptr)
+                        if (first->rows < 1 || scratch == null)
                         {
                             output->valid = 0;
                         }
@@ -1228,7 +1295,7 @@ internal static class SequencePathCudaBlockCatalog
                     {
                         int dimension = first->columns;
                         mathblocks_sequence_set_matrix_shape(output, dimension, dimension);
-                        if (scratch == nullptr)
+                        if (scratch == null)
                         {
                             output->valid = 0;
                         }
@@ -1305,5 +1372,6 @@ internal static class SequencePathCudaBlockCatalog
                     break;
             }
         }
-        """;
+    }
+    """;
 }

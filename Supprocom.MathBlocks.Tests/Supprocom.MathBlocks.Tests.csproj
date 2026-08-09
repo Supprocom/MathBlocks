@@ -29,6 +29,28 @@
   <ItemGroup>
     <None Include="Golden\ScalarCudaBlockCatalog.cu"
           CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Golden\VectorCudaBlockCatalog.cu"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Golden\ComplexCudaBlockCatalog.cu"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Golden\MatrixCudaBlockCatalog.cu"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Golden\ProbabilityCudaBlockCatalog.cu"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Golden\SequencePathCudaBlockCatalog.cu"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Golden\StatisticsCudaBlockCatalog.cu"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Golden\GeometryCudaBlockCatalog.cu"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Golden\GraphCudaBlockCatalog.cu"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Golden\AdvancedCudaBlockCatalog.cu"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Golden\TransportCudaBlockCatalog.cu"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Golden\DeviceDispatchCudaBlockCatalog.cu"
+          CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

@@ -143,9 +143,13 @@ public sealed class MathBlockCudaWorkerTests
                 "Blocks",
                 family,
                 $"{family}CudaBlockCatalog.cs"));
-            Assert.Contains("const MathBlockSlot* const* inputs", source, StringComparison.Ordinal);
+            Assert.Contains("[CudaReadOnly] MathBlockSlot** inputs", source, StringComparison.Ordinal);
         }
 
+        Assert.Contains(
+            "const MathBlockSlot* const* inputs",
+            MathBlockCudaDeviceModule.Source,
+            StringComparison.Ordinal);
         Assert.DoesNotContain("Inputs.Count >", workerSource, StringComparison.Ordinal);
         Assert.Contains("WriteInputPointers(", workerSource, StringComparison.Ordinal);
     }

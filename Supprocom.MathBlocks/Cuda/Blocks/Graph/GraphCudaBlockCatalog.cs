@@ -1,20 +1,83 @@
+using CSharp2CUDA;
+
 namespace Supprocom.MathBlocks.Cuda;
 
 internal static class GraphCudaBlockCatalog
 {
-        public static string KernelEntryPoint => "mathblocks_graph";
+    public static string KernelEntryPoint => "mathblocks_graph";
     public static uint BlockSize => 128;
 
-    public const string KernelSource = """
-        struct MathBlockGraphKernelEdge
-        {
-            int from;
-            int to;
-            double weight;
-        };
+    public static string KernelSource { get; } = Transpile();
 
-        __device__ int mathblocks_graph_component_count(
-            const MathBlockGraphKernelEdge* edges,
+    private static string Transpile()
+    {
+        var result = CudaTranspiler.Transpile(
+            TranslationUnitSource,
+            new CudaTranspilationOptions { NewLine = "\r\n" },
+            "GraphCudaBlockCatalog.cs");
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(
+                $"Graph CUDA translation failed: {string.Join(Environment.NewLine, result.Diagnostics)}");
+        }
+
+        return result.Source;
+    }
+
+    private const string TranslationUnitSource = """
+    using System;
+    using CSharp2CUDA;
+
+    [CudaTranslationUnit]
+    internal static unsafe class GraphModule
+    {
+        [CudaExternal]
+        public struct MathBlockSlot
+        {
+            public double scalar_value;
+            public ulong data_pointer;
+            public ulong scratch_pointer;
+            public CudaInt32 boolean_value;
+            public CudaInt32 valid;
+            public int rows;
+            public int columns;
+            public int count;
+            public int capacity;
+        }
+
+        [CudaExternal]
+        private static void mathblocks_matrix_symmetric_eigenvalues([CudaReadOnly] double* source, int size, double* work, double* eigenvalues) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static bool mathblocks_matrix_try_solve([CudaReadOnly] double* matrix, [CudaReadOnly] double* right, int size, double* augmented, double* solution) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static bool mathblocks_nonnegative_integer(double value, int* result) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_positive_infinity() => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static bool mathblocks_sequence_positive_integer(double value, int* result) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static void mathblocks_sequence_set_matrix_shape(MathBlockSlot* output, int rows, int columns) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+        public struct MathBlockGraphKernelEdge
+        {
+            public int from;
+            public int to;
+            public double weight;
+        }
+
+        [CudaDevice]
+        private static int mathblocks_graph_component_count(
+            [CudaReadOnly] MathBlockGraphKernelEdge* edges,
             int edge_count,
             int vertex_count,
             int* visited,
@@ -25,7 +88,7 @@ internal static class GraphCudaBlockCatalog
             int components = 0;
             for (int start = 0; start < vertex_count; start++)
             {
-                if (visited[start])
+                if (Cuda.Bool(visited[start]))
                     continue;
                 components++;
                 int head = 0;
@@ -42,7 +105,7 @@ internal static class GraphCudaBlockCatalog
                             : edges[edge_index].to == vertex
                                 ? edges[edge_index].from
                                 : -1;
-                        if (neighbor < 0 || visited[neighbor])
+                        if (neighbor < 0 || Cuda.Bool(visited[neighbor]))
                             continue;
                         visited[neighbor] = 1;
                         queue[tail++] = neighbor;
@@ -52,9 +115,10 @@ internal static class GraphCudaBlockCatalog
             return components;
         }
 
-        __device__ bool mathblocks_graph_edge_less(
-            const MathBlockGraphKernelEdge& left,
-            const MathBlockGraphKernelEdge& right)
+        [CudaDevice]
+        private static bool mathblocks_graph_edge_less(
+            in MathBlockGraphKernelEdge left,
+            in MathBlockGraphKernelEdge right)
         {
             if (left.weight < right.weight)
                 return true;
@@ -67,7 +131,8 @@ internal static class GraphCudaBlockCatalog
             return left.to < right.to;
         }
 
-        __device__ int mathblocks_graph_find(int* parent, int vertex)
+        [CudaDevice]
+        private static int mathblocks_graph_find(int* parent, int vertex)
         {
             while (parent[vertex] != vertex)
             {
@@ -77,19 +142,20 @@ internal static class GraphCudaBlockCatalog
             return vertex;
         }
 
-        extern "C" __global__ void mathblocks_graph(
+        [CudaGlobal]
+        private static void mathblocks_graph(
             int opcode,
-            const MathBlockSlot* const* inputs,
+            [CudaReadOnly] MathBlockSlot** inputs,
             int input_count,
             MathBlockSlot* output)
         {
-            int thread = (int)threadIdx.x;
-            if (blockIdx.x != 0)
+            int thread = (int)Cuda.ThreadIdx.X;
+            if (Cuda.BlockIdx.X != 0)
                 return;
 
-            const MathBlockSlot* first = input_count > 0 ? inputs[0] : nullptr;
-            const MathBlockSlot* second = input_count > 1 ? inputs[1] : nullptr;
-            const MathBlockSlot* third = input_count > 2 ? inputs[2] : nullptr;
+            MathBlockSlot* first = Cuda.ReadOnly(input_count > 0 ? inputs[0] : null);
+            MathBlockSlot* second = Cuda.ReadOnly(input_count > 1 ? inputs[1] : null);
+            MathBlockSlot* third = Cuda.ReadOnly(input_count > 2 ? inputs[2] : null);
             if (thread == 0)
             {
                 output->scalar_value = 0.0;
@@ -97,21 +163,21 @@ internal static class GraphCudaBlockCatalog
                 output->rows = 0;
                 output->columns = 0;
                 output->count = 0;
-                output->valid = first == nullptr || first->valid;
-                if (second != nullptr)
+                output->valid = first == null || first->valid;
+                if (second != null)
                     output->valid = output->valid && second->valid;
-                if (third != nullptr)
+                if (third != null)
                     output->valid = output->valid && third->valid;
             }
-            __syncthreads();
+            Cuda.SyncThreads();
             if (!output->valid)
                 return;
 
-            const MathBlockGraphKernelEdge* edges =
-                first == nullptr ? nullptr : (const MathBlockGraphKernelEdge*)first->data_pointer;
-            const double* matrix = first == nullptr ? nullptr : (const double*)first->data_pointer;
-            const int* boolean_values = second == nullptr ? nullptr : (const int*)second->data_pointer;
-            const double* vector = second == nullptr ? nullptr : (const double*)second->data_pointer;
+            MathBlockGraphKernelEdge* edges =
+                Cuda.ReadOnly(first == null ? null : (MathBlockGraphKernelEdge*)first->data_pointer);
+            double* matrix = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
+            int* boolean_values = Cuda.ReadOnly(second == null ? null : (int*)second->data_pointer);
+            double* vector = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
             double* result = (double*)output->data_pointer;
             double* scratch = (double*)output->scratch_pointer;
 
@@ -126,7 +192,7 @@ internal static class GraphCudaBlockCatalog
                             output->scalar_value = 0.0;
                             break;
                         }
-                        if (scratch == nullptr)
+                        if (scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -179,11 +245,11 @@ internal static class GraphCudaBlockCatalog
                                 output->valid = 0;
                                 break;
                             }
-                            if (boolean_values[edges[index].from])
+                            if (Cuda.Bool(boolean_values[edges[index].from]))
                                 left_volume += edges[index].weight;
                             else
                                 right_volume += edges[index].weight;
-                            if (boolean_values[edges[index].to])
+                            if (Cuda.Bool(boolean_values[edges[index].to]))
                                 left_volume += edges[index].weight;
                             else
                                 right_volume += edges[index].weight;
@@ -199,7 +265,7 @@ internal static class GraphCudaBlockCatalog
                     }
                     case 2:
                     case 7:
-                        if (scratch == nullptr)
+                        if (scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -265,7 +331,7 @@ internal static class GraphCudaBlockCatalog
                     }
                     case 5:
                         mathblocks_sequence_set_vector_shape(output, vertex_count);
-                        if (vertex_count <= 0 || scratch == nullptr)
+                        if (vertex_count <= 0 || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -332,7 +398,7 @@ internal static class GraphCudaBlockCatalog
                         break;
                     }
                     case 8:
-                        if (scratch == nullptr)
+                        if (scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -353,7 +419,7 @@ internal static class GraphCudaBlockCatalog
                             work[position] = value;
                         }
                         int* parent = (int*)(work + first->count);
-                        unsigned char* rank = (unsigned char*)(parent + vertex_count);
+                        byte* rank = (byte*)(parent + vertex_count);
                         for (int index = 0; index < vertex_count; index++)
                         {
                             parent[index] = index;
@@ -385,7 +451,7 @@ internal static class GraphCudaBlockCatalog
                     }
                     case 9:
                         mathblocks_sequence_set_vector_shape(output, vertex_count);
-                        if (vertex_count <= 0 || scratch == nullptr)
+                        if (vertex_count <= 0 || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -465,7 +531,7 @@ internal static class GraphCudaBlockCatalog
                         }
                         break;
                     case 11:
-                        if (scratch == nullptr)
+                        if (scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -483,9 +549,9 @@ internal static class GraphCudaBlockCatalog
                         for (int one = 0; one < vertex_count; one++)
                             for (int two = one + 1; two < vertex_count; two++)
                                 for (int three = two + 1; three < vertex_count; three++)
-                                    if (adjacency[one * vertex_count + two] &&
-                                        adjacency[one * vertex_count + three] &&
-                                        adjacency[two * vertex_count + three])
+                                    if (Cuda.Bool(adjacency[one * vertex_count + two]) &&
+                                        Cuda.Bool(adjacency[one * vertex_count + three]) &&
+                                        Cuda.Bool(adjacency[two * vertex_count + three]))
                                     {
                                         count++;
                                     }
@@ -494,7 +560,7 @@ internal static class GraphCudaBlockCatalog
                     }
                     case 14:
                         mathblocks_sequence_set_vector_shape(output, vertex_count);
-                        if (scratch == nullptr)
+                        if (scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -518,7 +584,7 @@ internal static class GraphCudaBlockCatalog
                             int vertex = -1;
                             double best = mathblocks_positive_infinity();
                             for (int candidate = 0; candidate < vertex_count; candidate++)
-                                if (!visited[candidate] && result[candidate] < best)
+                                if (!Cuda.Bool(visited[candidate]) && result[candidate] < best)
                                 {
                                     best = result[candidate];
                                     vertex = candidate;
@@ -553,7 +619,7 @@ internal static class GraphCudaBlockCatalog
                 if (output->valid &&
                     opcode != 3 && opcode != 4 && opcode != 5 && opcode != 7 && opcode != 8 &&
                     opcode != 9 && opcode != 10 && opcode != 12 && opcode != 13 && opcode != 14 &&
-                    opcode != 15 && !isfinite(output->scalar_value))
+                    opcode != 15 && !double.IsFinite(output->scalar_value))
                 {
                     output->valid = 0;
                 }
@@ -562,9 +628,10 @@ internal static class GraphCudaBlockCatalog
                      opcode == 13 || opcode == 14 || opcode == 15))
                 {
                     for (int index = 0; index < output->count; index++)
-                        if (!isfinite(result[index])) output->valid = 0;
+                        if (!double.IsFinite(result[index])) output->valid = 0;
                 }
             }
         }
-        """;
+    }
+    """;
 }

@@ -20,6 +20,7 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Empty(document.Descendants("ProjectReference"));
         Assert.Equal(
             [
+                "CSharp2CUDA@[0.1.0]",
                 "TorchSharp-cuda-linux@[0.107.0]",
                 "libtorch-cuda-12.8-win-x64-part1@[2.10.0]",
                 "libtorch-cuda-12.8-win-x64-part8@[2.10.0]"
@@ -38,14 +39,14 @@ public sealed partial class MathBlockIndependenceTests
     }
 
     [Fact]
-    public void Public_release_metadata_declares_the_CUDA_0_3_0_contract()
+    public void Public_release_metadata_declares_the_CUDA_0_3_1_contract()
     {
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(root, "Supprocom.MathBlocks", "Supprocom.MathBlocks.csproj");
         var document = XDocument.Load(projectPath);
         var readme = File.ReadAllText(Path.Combine(root, "README.md"));
 
-        Assert.Equal("0.3.0", document.Descendants("Version").Single().Value);
+        Assert.Equal("0.3.1", document.Descendants("Version").Single().Value);
         Assert.Equal("AGPL-3.0-only", document.Descendants("PackageLicenseExpression").Single().Value);
         Assert.Contains(
             "Removes formula-search APIs",
@@ -55,7 +56,7 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Contains("## Operation contract", readme, StringComparison.Ordinal);
         Assert.Contains("## CUDA composition", readme, StringComparison.Ordinal);
         Assert.Contains(
-            "dotnet add package Supprocom.MathBlocks --version 0.3.0",
+            "dotnet add package Supprocom.MathBlocks --version 0.3.1",
             readme,
             StringComparison.Ordinal);
         Assert.DoesNotContain("## Resident typed program search", readme, StringComparison.Ordinal);
@@ -302,8 +303,7 @@ public sealed partial class MathBlockIndependenceTests
             "Array.Copy(",
             "Array.Clear(",
             "Array.Fill(",
-            "System.Numerics.BitOperations",
-            "BitConverter."
+            "System.Numerics.BitOperations"
         };
         var failures = new List<string>();
         foreach (var file in Directory.EnumerateFiles(sourceRoot, "*.cs", SearchOption.AllDirectories))

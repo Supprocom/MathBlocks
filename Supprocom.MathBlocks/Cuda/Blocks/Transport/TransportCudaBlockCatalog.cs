@@ -1,13 +1,82 @@
+using CSharp2CUDA;
+
 namespace Supprocom.MathBlocks.Cuda;
 
 internal static class TransportCudaBlockCatalog
 {
-        public static string KernelEntryPoint => "mathblocks_transport";
+    public static string KernelEntryPoint => "mathblocks_transport";
     public static uint BlockSize => 128;
 
-    public const string KernelSource = """
-        __device__ void mathblocks_transport_sort_values(
-            const double* values,
+    public static string KernelSource { get; } = Transpile();
+
+    private static string Transpile()
+    {
+        var result = CudaTranspiler.Transpile(
+            TranslationUnitSource,
+            new CudaTranspilationOptions { NewLine = "\r\n" },
+            "TransportCudaBlockCatalog.cs");
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(
+                $"Transport CUDA translation failed: {string.Join(Environment.NewLine, result.Diagnostics)}");
+        }
+
+        return result.Source;
+    }
+
+    private const string TranslationUnitSource = """
+    using System;
+    using CSharp2CUDA;
+
+    [CudaTranslationUnit]
+    internal static unsafe class TransportModule
+    {
+        [CudaExternal]
+        public struct MathBlockSlot
+        {
+            public double scalar_value;
+            public ulong data_pointer;
+            public ulong scratch_pointer;
+            public CudaInt32 boolean_value;
+            public CudaInt32 valid;
+            public int rows;
+            public int columns;
+            public int count;
+            public int capacity;
+        }
+
+        [CudaExternal]
+        private static bool mathblocks_advanced_distribution([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static int mathblocks_advanced_popcount(int value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_exponential(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static bool mathblocks_nonnegative_integer(double value, int* result) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_positive_infinity() => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_power(double value, double exponent) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static bool mathblocks_sequence_positive_integer(double value, int* result) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static void mathblocks_sequence_set_matrix_shape(MathBlockSlot* output, int rows, int columns) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+        [CudaDevice]
+        private static void mathblocks_transport_sort_values(
+            [CudaReadOnly] double* values,
             int count,
             double* result)
         {
@@ -24,8 +93,9 @@ internal static class TransportCudaBlockCatalog
             }
         }
 
-        __device__ void mathblocks_transport_sort_indices(
-            const double* locations,
+        [CudaDevice]
+        private static void mathblocks_transport_sort_indices(
+            [CudaReadOnly] double* locations,
             int count,
             int* result)
         {
@@ -41,34 +111,36 @@ internal static class TransportCudaBlockCatalog
             }
         }
 
-        __device__ double mathblocks_transport_mean_pairwise(
-            const double* left,
+        [CudaDevice]
+        private static double mathblocks_transport_mean_pairwise(
+            [CudaReadOnly] double* left,
             int left_count,
-            const double* right,
+            [CudaReadOnly] double* right,
             int right_count)
         {
             double sum = 0.0;
             for (int left_index = 0; left_index < left_count; left_index++)
                 for (int right_index = 0; right_index < right_count; right_index++)
-                    sum += fabs(left[left_index] - right[right_index]);
+                    sum += Math.Abs(left[left_index] - right[right_index]);
             return sum / (left_count * right_count);
         }
 
-        extern "C" __global__ void mathblocks_transport(
+        [CudaGlobal]
+        private static void mathblocks_transport(
             int opcode,
-            const MathBlockSlot* const* inputs,
+            [CudaReadOnly] MathBlockSlot** inputs,
             int input_count,
             MathBlockSlot* output)
         {
-            int thread = (int)threadIdx.x;
-            if (blockIdx.x != 0)
+            int thread = (int)Cuda.ThreadIdx.X;
+            if (Cuda.BlockIdx.X != 0)
                 return;
 
-            const MathBlockSlot* first = input_count > 0 ? inputs[0] : nullptr;
-            const MathBlockSlot* second = input_count > 1 ? inputs[1] : nullptr;
-            const MathBlockSlot* third = input_count > 2 ? inputs[2] : nullptr;
-            const MathBlockSlot* fourth = input_count > 3 ? inputs[3] : nullptr;
-            const MathBlockSlot* fifth = input_count > 4 ? inputs[4] : nullptr;
+            MathBlockSlot* first = Cuda.ReadOnly(input_count > 0 ? inputs[0] : null);
+            MathBlockSlot* second = Cuda.ReadOnly(input_count > 1 ? inputs[1] : null);
+            MathBlockSlot* third = Cuda.ReadOnly(input_count > 2 ? inputs[2] : null);
+            MathBlockSlot* fourth = Cuda.ReadOnly(input_count > 3 ? inputs[3] : null);
+            MathBlockSlot* fifth = Cuda.ReadOnly(input_count > 4 ? inputs[4] : null);
             if (thread == 0)
             {
                 output->scalar_value = 0.0;
@@ -78,16 +150,16 @@ internal static class TransportCudaBlockCatalog
                 output->count = 0;
                 output->valid = 1;
                 for (int index = 0; index < input_count; index++)
-                    if (inputs[index] == nullptr || !inputs[index]->valid) output->valid = 0;
+                    if (inputs[index] == null || !inputs[index]->valid) output->valid = 0;
             }
-            __syncthreads();
+            Cuda.SyncThreads();
             if (!output->valid)
                 return;
 
-            const double* a = first == nullptr ? nullptr : (const double*)first->data_pointer;
-            const double* b = second == nullptr ? nullptr : (const double*)second->data_pointer;
-            const double* c = third == nullptr ? nullptr : (const double*)third->data_pointer;
-            const double* d = fourth == nullptr ? nullptr : (const double*)fourth->data_pointer;
+            double* a = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
+            double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
+            double* c = Cuda.ReadOnly(third == null ? null : (double*)third->data_pointer);
+            double* d = Cuda.ReadOnly(fourth == null ? null : (double*)fourth->data_pointer);
             double* result = (double*)output->data_pointer;
             double* scratch = (double*)output->scratch_pointer;
 
@@ -149,7 +221,7 @@ internal static class TransportCudaBlockCatalog
                         break;
                     }
                     case 3:
-                        if (first->rows != first->columns || first->rows > 20 || scratch == nullptr)
+                        if (first->rows != first->columns || first->rows > 20 || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -171,7 +243,7 @@ internal static class TransportCudaBlockCatalog
                         for (int mask = 0; mask < state_count; mask++)
                         {
                             int row = mathblocks_advanced_popcount(mask);
-                            if (row >= size || !isfinite(values[mask]))
+                            if (row >= size || !double.IsFinite(values[mask]))
                                 continue;
                             for (int column = 0; column < size; column++)
                             {
@@ -238,7 +310,7 @@ internal static class TransportCudaBlockCatalog
                         for (int index = 0; index < first->count - 1; index++)
                         {
                             cumulative += a[index] - b[index];
-                            total += fabs(cumulative);
+                            total += Math.Abs(cumulative);
                         }
                         output->scalar_value = total;
                         break;
@@ -248,7 +320,7 @@ internal static class TransportCudaBlockCatalog
                         if (first->rows != second->count || first->columns != third->count ||
                             !mathblocks_advanced_distribution(b, second->count) ||
                             !mathblocks_advanced_distribution(c, third->count) ||
-                            fourth->scalar_value <= 0.0 || scratch == nullptr)
+                            fourth->scalar_value <= 0.0 || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -298,7 +370,7 @@ internal static class TransportCudaBlockCatalog
                     }
                     case 7:
                         if (first->count <= 0 || first->count != second->count ||
-                            third->scalar_value < 1.0 || scratch == nullptr)
+                            third->scalar_value < 1.0 || scratch == null)
                         {
                             output->valid = 0;
                             break;
@@ -311,7 +383,7 @@ internal static class TransportCudaBlockCatalog
                         double sum = 0.0;
                         for (int index = 0; index < first->count; index++)
                             sum += mathblocks_power(
-                                fabs(left_sorted[index] - right_sorted[index]),
+                                Math.Abs(left_sorted[index] - right_sorted[index]),
                                 third->scalar_value);
                         output->scalar_value = mathblocks_power(
                             sum / first->count,
@@ -320,7 +392,7 @@ internal static class TransportCudaBlockCatalog
                     }
                     case 8:
                         if (first->count <= 0 || first->count != second->count ||
-                            third->count <= 0 || third->count != fourth->count || scratch == nullptr ||
+                            third->count <= 0 || third->count != fourth->count || scratch == null ||
                             !mathblocks_advanced_distribution(b, second->count) ||
                             !mathblocks_advanced_distribution(d, fourth->count))
                         {
@@ -342,7 +414,7 @@ internal static class TransportCudaBlockCatalog
                             double amount = left_remaining < right_remaining
                                 ? left_remaining
                                 : right_remaining;
-                            total += amount * fabs(
+                            total += amount * Math.Abs(
                                 a[left_order[left_index]] - c[right_order[right_index]]);
                             left_remaining -= amount;
                             right_remaining -= amount;
@@ -383,14 +455,15 @@ internal static class TransportCudaBlockCatalog
 
                 if (output->valid &&
                     opcode != 3 && opcode != 4 && opcode != 6 && opcode != 9 && opcode != 10 &&
-                    !isfinite(output->scalar_value))
+                    !double.IsFinite(output->scalar_value))
                 {
                     output->valid = 0;
                 }
                 if (output->valid && (opcode == 3 || opcode == 4 || opcode == 6 || opcode == 9 || opcode == 10))
                     for (int index = 0; index < output->count; index++)
-                        if (!isfinite(result[index])) output->valid = 0;
+                        if (!double.IsFinite(result[index])) output->valid = 0;
             }
         }
-        """;
+    }
+    """;
 }

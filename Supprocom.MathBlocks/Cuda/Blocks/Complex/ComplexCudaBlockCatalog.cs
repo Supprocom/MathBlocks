@@ -1,18 +1,76 @@
+using CSharp2CUDA;
+
 namespace Supprocom.MathBlocks.Cuda;
 
 internal static class ComplexCudaBlockCatalog
 {
-        public static string KernelEntryPoint => "mathblocks_complex";
+    public static string KernelEntryPoint => "mathblocks_complex";
     public static uint BlockSize => 128;
 
-    public const string KernelSource = """
-        struct MathBlockComplexValue
-        {
-            double real;
-            double imaginary;
-        };
+    public static string KernelSource { get; } = Transpile();
 
-        __device__ MathBlockComplexValue mathblocks_complex_make(double real, double imaginary)
+    private static string Transpile()
+    {
+        var result = CudaTranspiler.Transpile(
+            TranslationUnitSource,
+            new CudaTranspilationOptions { NewLine = "\r\n" },
+            "ComplexCudaBlockCatalog.cs");
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(
+                $"Complex CUDA translation failed: {string.Join(Environment.NewLine, result.Diagnostics)}");
+        }
+
+        return result.Source;
+    }
+
+    private const string TranslationUnitSource = """
+    using System;
+    using CSharp2CUDA;
+
+    [CudaTranslationUnit]
+    internal static unsafe class ComplexModule
+    {
+        [CudaExternal]
+        public struct MathBlockSlot
+        {
+            public double scalar_value;
+            public ulong data_pointer;
+            public ulong scratch_pointer;
+            public CudaInt32 boolean_value;
+            public CudaInt32 valid;
+            public int rows;
+            public int columns;
+            public int count;
+            public int capacity;
+        }
+
+        [CudaExternal]
+        private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_arc_tangent_2(double left, double right) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_exponential(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_cosine(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_sine(double value) => throw new NotSupportedException();
+
+        [CudaExternal]
+        private static double mathblocks_natural_logarithm(double value) => throw new NotSupportedException();
+
+        public struct MathBlockComplexValue
+        {
+            public double real;
+            public double imaginary;
+        }
+
+        [CudaDevice]
+        private static MathBlockComplexValue mathblocks_complex_make(double real, double imaginary)
         {
             MathBlockComplexValue result;
             result.real = real;
@@ -20,21 +78,24 @@ internal static class ComplexCudaBlockCatalog
             return result;
         }
 
-        __device__ MathBlockComplexValue mathblocks_complex_add(
+        [CudaDevice]
+        private static MathBlockComplexValue mathblocks_complex_add(
             MathBlockComplexValue left,
             MathBlockComplexValue right)
         {
             return mathblocks_complex_make(left.real + right.real, left.imaginary + right.imaginary);
         }
 
-        __device__ MathBlockComplexValue mathblocks_complex_subtract(
+        [CudaDevice]
+        private static MathBlockComplexValue mathblocks_complex_subtract(
             MathBlockComplexValue left,
             MathBlockComplexValue right)
         {
             return mathblocks_complex_make(left.real - right.real, left.imaginary - right.imaginary);
         }
 
-        __device__ MathBlockComplexValue mathblocks_complex_multiply(
+        [CudaDevice]
+        private static MathBlockComplexValue mathblocks_complex_multiply(
             MathBlockComplexValue left,
             MathBlockComplexValue right)
         {
@@ -43,7 +104,8 @@ internal static class ComplexCudaBlockCatalog
                 left.real * right.imaginary + left.imaginary * right.real);
         }
 
-        __device__ MathBlockComplexValue mathblocks_complex_divide(
+        [CudaDevice]
+        private static MathBlockComplexValue mathblocks_complex_divide(
             MathBlockComplexValue left,
             MathBlockComplexValue right)
         {
@@ -53,15 +115,17 @@ internal static class ComplexCudaBlockCatalog
                 (left.imaginary * right.real - left.real * right.imaginary) / denominator);
         }
 
-        __device__ MathBlockComplexValue mathblocks_complex_conjugate(MathBlockComplexValue value)
+        [CudaDevice]
+        private static MathBlockComplexValue mathblocks_complex_conjugate(MathBlockComplexValue value)
         {
             return mathblocks_complex_make(value.real, -value.imaginary);
         }
 
-        __device__ double mathblocks_complex_magnitude(MathBlockComplexValue value)
+        [CudaDevice]
+        private static double mathblocks_complex_magnitude(MathBlockComplexValue value)
         {
-            double real = fabs(value.real);
-            double imaginary = fabs(value.imaginary);
+            double real = Math.Abs(value.real);
+            double imaginary = Math.Abs(value.imaginary);
             if (real < imaginary)
             {
                 double temporary = real;
@@ -74,12 +138,14 @@ internal static class ComplexCudaBlockCatalog
             return real * mathblocks_square_root(1.0 + ratio * ratio);
         }
 
-        __device__ double mathblocks_complex_phase(MathBlockComplexValue value)
+        [CudaDevice]
+        private static double mathblocks_complex_phase(MathBlockComplexValue value)
         {
             return mathblocks_arc_tangent_2(value.imaginary, value.real);
         }
 
-        __device__ MathBlockComplexValue mathblocks_complex_exponential(MathBlockComplexValue value)
+        [CudaDevice]
+        private static MathBlockComplexValue mathblocks_complex_exponential(MathBlockComplexValue value)
         {
             double scale = mathblocks_exponential(value.real);
             return mathblocks_complex_make(
@@ -87,24 +153,27 @@ internal static class ComplexCudaBlockCatalog
                 scale * mathblocks_sine(value.imaginary));
         }
 
-        __device__ MathBlockComplexValue mathblocks_complex_logarithm(MathBlockComplexValue value)
+        [CudaDevice]
+        private static MathBlockComplexValue mathblocks_complex_logarithm(MathBlockComplexValue value)
         {
             return mathblocks_complex_make(
                 mathblocks_natural_logarithm(mathblocks_complex_magnitude(value)),
                 mathblocks_complex_phase(value));
         }
 
-        __device__ MathBlockComplexValue mathblocks_complex_square_root(MathBlockComplexValue value)
+        [CudaDevice]
+        private static MathBlockComplexValue mathblocks_complex_square_root(MathBlockComplexValue value)
         {
             if (value.real == 0.0 && value.imaginary == 0.0)
                 return mathblocks_complex_make(0.0, value.imaginary);
             double magnitude = mathblocks_complex_magnitude(value);
             return mathblocks_complex_make(
                 mathblocks_square_root((magnitude + value.real) / 2.0),
-                copysign(mathblocks_square_root((magnitude - value.real) / 2.0), value.imaginary));
+                Math.CopySign(mathblocks_square_root((magnitude - value.real) / 2.0), value.imaginary));
         }
 
-        __device__ MathBlockComplexValue mathblocks_complex_power(
+        [CudaDevice]
+        private static MathBlockComplexValue mathblocks_complex_power(
             MathBlockComplexValue value,
             MathBlockComplexValue exponent)
         {
@@ -112,19 +181,22 @@ internal static class ComplexCudaBlockCatalog
                 mathblocks_complex_multiply(exponent, mathblocks_complex_logarithm(value)));
         }
 
-        __device__ MathBlockComplexValue mathblocks_complex_from_polar(double magnitude, double phase)
+        [CudaDevice]
+        private static MathBlockComplexValue mathblocks_complex_from_polar(double magnitude, double phase)
         {
             return mathblocks_complex_make(
                 magnitude * mathblocks_cosine(phase),
                 magnitude * mathblocks_sine(phase));
         }
 
-        __device__ bool mathblocks_complex_finite(MathBlockComplexValue value)
+        [CudaDevice]
+        private static bool mathblocks_complex_finite(MathBlockComplexValue value)
         {
-            return isfinite(value.real) && isfinite(value.imaginary);
+            return double.IsFinite(value.real) && double.IsFinite(value.imaginary);
         }
 
-        __device__ void mathblocks_complex_shape(MathBlockSlot* output, int count)
+        [CudaDevice]
+        private static void mathblocks_complex_shape(MathBlockSlot* output, int count)
         {
             output->rows = count;
             output->columns = 0;
@@ -133,32 +205,33 @@ internal static class ComplexCudaBlockCatalog
                 output->valid = 0;
         }
 
-        extern "C" __global__ void mathblocks_complex(
+        [CudaGlobal]
+        private static void mathblocks_complex(
             int opcode,
-            const MathBlockSlot* const* inputs,
+            [CudaReadOnly] MathBlockSlot** inputs,
             int input_count,
             MathBlockSlot* output)
         {
-            int thread = threadIdx.x;
-            const MathBlockSlot* first = input_count > 0 ? inputs[0] : nullptr;
-            const MathBlockSlot* second = input_count > 1 ? inputs[1] : nullptr;
+            int thread = Cuda.ThreadIdx.X;
+            MathBlockSlot* first = Cuda.ReadOnly(input_count > 0 ? inputs[0] : null);
+            MathBlockSlot* second = Cuda.ReadOnly(input_count > 1 ? inputs[1] : null);
             if (thread == 0)
             {
                 output->scalar_value = 0.0;
                 output->boolean_value = 0;
                 output->valid = 1;
                 for (int index = 0; index < input_count; index++)
-                    if (inputs[index] == nullptr || !inputs[index]->valid) output->valid = 0;
+                    if (inputs[index] == null || !inputs[index]->valid) output->valid = 0;
             }
-            __syncthreads();
+            Cuda.SyncThreads();
             if (!output->valid)
                 return;
 
             MathBlockComplexValue* result = (MathBlockComplexValue*)output->data_pointer;
-            const MathBlockComplexValue* complex_first =
-                first == nullptr ? nullptr : (const MathBlockComplexValue*)first->data_pointer;
-            const MathBlockComplexValue* complex_second =
-                second == nullptr ? nullptr : (const MathBlockComplexValue*)second->data_pointer;
+            MathBlockComplexValue* complex_first =
+                Cuda.ReadOnly(first == null ? null : (MathBlockComplexValue*)first->data_pointer);
+            MathBlockComplexValue* complex_second =
+                Cuda.ReadOnly(second == null ? null : (MathBlockComplexValue*)second->data_pointer);
 
             if (opcode <= 13)
             {
@@ -227,10 +300,10 @@ internal static class ComplexCudaBlockCatalog
                     mathblocks_complex_shape(output, first->count);
                     if (first->count != second->count) output->valid = 0;
                 }
-                __syncthreads();
-                const double* real = (const double*)first->data_pointer;
-                const double* imaginary = (const double*)second->data_pointer;
-                for (int index = thread; output->valid && index < first->count; index += blockDim.x)
+                Cuda.SyncThreads();
+                double* real = Cuda.ReadOnly((double*)first->data_pointer);
+                double* imaginary = Cuda.ReadOnly((double*)second->data_pointer);
+                for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
                     result[index] = mathblocks_complex_make(real[index], imaginary[index]);
                 return;
             }
@@ -238,9 +311,9 @@ internal static class ComplexCudaBlockCatalog
             if (opcode >= 15 && opcode <= 17)
             {
                 if (thread == 0) mathblocks_complex_shape(output, first->count);
-                __syncthreads();
+                Cuda.SyncThreads();
                 double* projected = (double*)output->data_pointer;
-                for (int index = thread; output->valid && index < first->count; index += blockDim.x)
+                for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
                 {
                     if (opcode == 15) projected[index] = complex_first[index].imaginary;
                     else if (opcode == 16) projected[index] = mathblocks_complex_magnitude(complex_first[index]);
@@ -260,16 +333,16 @@ internal static class ComplexCudaBlockCatalog
                     if (count <= 0 || count != second->count || output->count > output->capacity)
                         output->valid = 0;
                 }
-                for (int index = thread; index < count; index += blockDim.x)
+                for (int index = thread; index < count; index += Cuda.BlockDim.X)
                 {
                     if (mathblocks_complex_magnitude(complex_first[index]) >= 1.0 ||
                         mathblocks_complex_magnitude(complex_second[index]) > 1.0)
                     {
-                        atomicExch(&output->valid, 0);
+                        Cuda.AtomicExchange(ref output->valid, 0);
                     }
                 }
-                __syncthreads();
-                for (int flat = thread; output->valid && flat < count * count; flat += blockDim.x)
+                Cuda.SyncThreads();
+                for (int flat = thread; output->valid && flat < count * count; flat += Cuda.BlockDim.X)
                 {
                     int row = flat / count;
                     int column = flat - row * count;
@@ -285,7 +358,7 @@ internal static class ComplexCudaBlockCatalog
                             complex_first[row],
                             mathblocks_complex_conjugate(complex_first[column])));
                     result[flat] = mathblocks_complex_divide(numerator, denominator);
-                    if (!mathblocks_complex_finite(result[flat])) atomicExch(&output->valid, 0);
+                    if (!mathblocks_complex_finite(result[flat])) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 return;
             }
@@ -297,9 +370,9 @@ internal static class ComplexCudaBlockCatalog
                     mathblocks_complex_shape(output, first->count);
                     if (first->count <= 0) output->valid = 0;
                 }
-                __syncthreads();
-                const double* source = (const double*)first->data_pointer;
-                for (int frequency = thread; output->valid && frequency < first->count; frequency += blockDim.x)
+                Cuda.SyncThreads();
+                double* source = Cuda.ReadOnly((double*)first->data_pointer);
+                for (int frequency = thread; output->valid && frequency < first->count; frequency += Cuda.BlockDim.X)
                 {
                     MathBlockComplexValue sum = mathblocks_complex_make(0.0, 0.0);
                     for (int index = 0; index < first->count; index++)
@@ -313,7 +386,7 @@ internal static class ComplexCudaBlockCatalog
                                 mathblocks_complex_from_polar(1.0, angle)));
                     }
                     result[frequency] = sum;
-                    if (!mathblocks_complex_finite(sum)) atomicExch(&output->valid, 0);
+                    if (!mathblocks_complex_finite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 return;
             }
@@ -325,8 +398,8 @@ internal static class ComplexCudaBlockCatalog
                     mathblocks_complex_shape(output, first->count);
                     if (first->count <= 0) output->valid = 0;
                 }
-                __syncthreads();
-                for (int index = thread; output->valid && index < first->count; index += blockDim.x)
+                Cuda.SyncThreads();
+                for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
                 {
                     MathBlockComplexValue sum = mathblocks_complex_make(0.0, 0.0);
                     for (int frequency = 0; frequency < first->count; frequency++)
@@ -342,9 +415,10 @@ internal static class ComplexCudaBlockCatalog
                     result[index] = mathblocks_complex_divide(
                         sum,
                         mathblocks_complex_make((double)first->count, 0.0));
-                    if (!mathblocks_complex_finite(result[index])) atomicExch(&output->valid, 0);
+                    if (!mathblocks_complex_finite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
                 }
             }
         }
-        """;
+    }
+    """;
 }

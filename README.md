@@ -167,11 +167,11 @@ unrepresentable resource requirement before launch.
 This Git repository contains source text and project metadata only. It does not
 contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
 
-Get MathBlocks version `0.3.0` from NuGet.org with this command after
+Get MathBlocks version `0.3.1` from NuGet.org with this command after
 publication.
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.3.0
+dotnet add package Supprocom.MathBlocks --version 0.3.1
 ```
 
 The package declares three external native-acquisition dependencies. This
