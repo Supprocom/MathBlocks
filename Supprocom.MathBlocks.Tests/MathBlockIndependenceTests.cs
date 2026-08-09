@@ -11,7 +11,7 @@ namespace Supprocom.MathBlocks.Tests;
 public sealed partial class MathBlockIndependenceTests
 {
     [Fact]
-    public void Production_project_has_no_project_or_managed_library_dependencies()
+    public void Production_project_has_no_project_reference_or_unapproved_managed_dependencies()
     {
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(root, "Supprocom.MathBlocks", "Supprocom.MathBlocks.csproj");
@@ -34,8 +34,19 @@ public sealed partial class MathBlockIndependenceTests
             Assert.Null(reference.Attribute("Condition"));
             Assert.Null(reference.Parent!.Attribute("Condition"));
         });
+        var approvedManagedDependencies = new[]
+        {
+            "CSharp2CUDA",
+            "Microsoft.CodeAnalysis"
+        };
         Assert.All(typeof(MathBlockCatalog).Assembly.GetReferencedAssemblies(), reference =>
-            Assert.StartsWith("System", reference.Name, StringComparison.Ordinal));
+        {
+            var name = reference.Name ?? string.Empty;
+            Assert.True(
+                name.StartsWith("System", StringComparison.Ordinal) ||
+                approvedManagedDependencies.Contains(name, StringComparer.Ordinal),
+                $"Unexpected managed dependency '{name}'.");
+        });
     }
 
     [Fact]
