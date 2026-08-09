@@ -24,7 +24,7 @@ internal static class DeviceDispatchCudaBlockCatalog
     private const string TranslationUnitSource = """
     using System;
     using CSharp2CUDA;
-    
+
     [CudaTranslationUnit]
     internal static unsafe class DeviceDispatchModule
     {
@@ -41,37 +41,37 @@ internal static class DeviceDispatchCudaBlockCatalog
             public int count;
             public int capacity;
         }
-    
+
         [CudaExternal]
         private static void mathblocks_advanced_dispatch(int opcode, [CudaReadOnly] MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
-    
+
         [CudaExternal]
         private static void mathblocks_complex_dispatch(int opcode, [CudaReadOnly] MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
-    
+
         [CudaExternal]
         private static void mathblocks_geometry_dispatch(int opcode, [CudaReadOnly] MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
-    
+
         [CudaExternal]
         private static void mathblocks_graph_dispatch(int opcode, [CudaReadOnly] MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
-    
+
         [CudaExternal]
         private static void mathblocks_matrix_dispatch(int opcode, [CudaReadOnly] MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
-    
+
         [CudaExternal]
         private static void mathblocks_probability_dispatch(int opcode, [CudaReadOnly] MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
-    
+
         [CudaExternal]
         private static void mathblocks_scalar_dispatch(int opcode, [CudaReadOnly] MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
-    
+
         [CudaExternal]
         private static void mathblocks_sequence_path_dispatch(int opcode, [CudaReadOnly] MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
-    
+
         [CudaExternal]
         private static void mathblocks_statistics_dispatch(int opcode, [CudaReadOnly] MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
-    
+
         [CudaExternal]
         private static void mathblocks_transport_dispatch(int opcode, [CudaReadOnly] MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
-    
+
         [CudaExternal]
         private static void mathblocks_vector_dispatch(int opcode, [CudaReadOnly] MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
         [CudaDevice]
@@ -105,7 +105,7 @@ internal static class DeviceDispatchCudaBlockCatalog
             }
             Cuda.SyncThreads();
         }
-    
+
         [CudaGlobal]
         private static void mathblocks_scalar(
             int opcode,
@@ -115,7 +115,7 @@ internal static class DeviceDispatchCudaBlockCatalog
         {
             mathblocks_scalar_dispatch(opcode, inputs, input_count, output);
         }
-    
+
         [CudaGlobal]
         private static void mathblocks_vector(
             int opcode,
@@ -125,7 +125,7 @@ internal static class DeviceDispatchCudaBlockCatalog
         {
             mathblocks_vector_dispatch(opcode, inputs, input_count, output);
         }
-    
+
         [CudaGlobal]
         private static void mathblocks_complex(
             int opcode,
@@ -135,7 +135,7 @@ internal static class DeviceDispatchCudaBlockCatalog
         {
             mathblocks_complex_dispatch(opcode, inputs, input_count, output);
         }
-    
+
         [CudaGlobal]
         private static void mathblocks_matrix(
             int opcode,
@@ -145,7 +145,7 @@ internal static class DeviceDispatchCudaBlockCatalog
         {
             mathblocks_matrix_dispatch(opcode, inputs, input_count, output);
         }
-    
+
         [CudaGlobal]
         private static void mathblocks_probability(
             int opcode,
@@ -155,7 +155,7 @@ internal static class DeviceDispatchCudaBlockCatalog
         {
             mathblocks_probability_dispatch(opcode, inputs, input_count, output);
         }
-    
+
         [CudaGlobal]
         private static void mathblocks_sequence_path(
             int opcode,
@@ -165,7 +165,7 @@ internal static class DeviceDispatchCudaBlockCatalog
         {
             mathblocks_sequence_path_dispatch(opcode, inputs, input_count, output);
         }
-    
+
         [CudaGlobal]
         private static void mathblocks_statistics(
             int opcode,
@@ -175,7 +175,7 @@ internal static class DeviceDispatchCudaBlockCatalog
         {
             mathblocks_statistics_dispatch(opcode, inputs, input_count, output);
         }
-    
+
         [CudaGlobal]
         private static void mathblocks_geometry(
             int opcode,
@@ -185,7 +185,7 @@ internal static class DeviceDispatchCudaBlockCatalog
         {
             mathblocks_geometry_dispatch(opcode, inputs, input_count, output);
         }
-    
+
         [CudaGlobal]
         private static void mathblocks_graph(
             int opcode,
@@ -195,7 +195,7 @@ internal static class DeviceDispatchCudaBlockCatalog
         {
             mathblocks_graph_dispatch(opcode, inputs, input_count, output);
         }
-    
+
         [CudaGlobal]
         private static void mathblocks_advanced(
             int opcode,
@@ -205,7 +205,7 @@ internal static class DeviceDispatchCudaBlockCatalog
         {
             mathblocks_advanced_dispatch(opcode, inputs, input_count, output);
         }
-    
+
         [CudaGlobal]
         private static void mathblocks_transport(
             int opcode,

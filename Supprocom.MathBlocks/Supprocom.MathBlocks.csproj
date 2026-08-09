@@ -30,7 +30,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSharp2CUDA" Version="[0.1.0]" />
     <PackageReference Include="libtorch-cuda-12.8-win-x64-part1" Version="[2.10.0]" />
     <PackageReference Include="libtorch-cuda-12.8-win-x64-part8" Version="[2.10.0]" />
     <PackageReference Include="TorchSharp-cuda-linux" Version="[0.107.0]" />
@@ -38,6 +37,8 @@
 
   <ItemGroup>
     <Compile Remove="Blocks\**\*.Tests.cs" />
+    <Compile Remove="Cuda\Blocks\**\*CudaBlockCatalog.cs" />
+    <Compile Include="$(IntermediateOutputPath)MathBlockCudaGeneratedSource.g.cs" AutoGen="true" Visible="false" />
     <None Include="..\README.md" Pack="true" PackagePath="README.md" />
     <None Include="..\LICENSE.md" Pack="true" PackagePath="LICENSE.md" />
     <None Include="..\THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="THIRD-PARTY-NOTICES.md" />
@@ -47,6 +48,12 @@
   <Target Name="ValidatePackageProvenance" BeforeTargets="_IntermediatePack">
     <Error Condition="'$(RepositoryCommit)' == ''" Text="RepositoryCommit is required for package creation." />
     <Error Condition="'$(RepositoryBranch)' == ''" Text="RepositoryBranch is required for package creation." />
+  </Target>
+
+  <Target Name="GenerateMathBlocksCudaSource" BeforeTargets="CoreCompile">
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+    <Exec WorkingDirectory="$(MSBuildProjectDirectory)"
+          Command="dotnet run --project &quot;$(MSBuildProjectDirectory)\..\build\MathBlocks.CudaSourceGenerator\MathBlocks.CudaSourceGenerator.csproj&quot; --configuration $(Configuration) --no-launch-profile -- --source-root &quot;$(MSBuildProjectDirectory)&quot; --golden-root &quot;$(MSBuildProjectDirectory)\..\Supprocom.MathBlocks.Tests\Golden&quot; --generated-source &quot;$(IntermediateOutputPath)MathBlockCudaGeneratedSource.g.cs&quot; --generated-cuda &quot;$(IntermediateOutputPath)MathBlockCudaGeneratedSource.cu&quot;" />
   </Target>
 
 </Project>

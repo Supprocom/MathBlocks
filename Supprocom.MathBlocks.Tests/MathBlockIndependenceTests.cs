@@ -20,7 +20,6 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Empty(document.Descendants("ProjectReference"));
         Assert.Equal(
             [
-                "CSharp2CUDA@[0.1.0]",
                 "TorchSharp-cuda-linux@[0.107.0]",
                 "libtorch-cuda-12.8-win-x64-part1@[2.10.0]",
                 "libtorch-cuda-12.8-win-x64-part8@[2.10.0]"
@@ -34,17 +33,11 @@ public sealed partial class MathBlockIndependenceTests
             Assert.Null(reference.Attribute("Condition"));
             Assert.Null(reference.Parent!.Attribute("Condition"));
         });
-        var approvedManagedDependencies = new[]
-        {
-            "CSharp2CUDA",
-            "Microsoft.CodeAnalysis"
-        };
         Assert.All(typeof(MathBlockCatalog).Assembly.GetReferencedAssemblies(), reference =>
         {
             var name = reference.Name ?? string.Empty;
             Assert.True(
-                name.StartsWith("System", StringComparison.Ordinal) ||
-                approvedManagedDependencies.Contains(name, StringComparer.Ordinal),
+                name.StartsWith("System", StringComparison.Ordinal),
                 $"Unexpected managed dependency '{name}'.");
         });
     }

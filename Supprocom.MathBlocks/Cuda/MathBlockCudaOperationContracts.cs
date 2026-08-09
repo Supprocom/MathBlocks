@@ -518,140 +518,22 @@ public static class MathBlockCudaDeviceModule
 
     private static string CreateSource()
     {
-        var builder = new StringBuilder();
-        AppendDeviceCatalog(builder, ScalarCudaBlockCatalog.KernelSource, "mathblocks_scalar");
-        AppendDeviceCatalog(builder, VectorCudaBlockCatalog.KernelSource, "mathblocks_vector");
-        AppendDeviceCatalog(builder, ComplexCudaBlockCatalog.KernelSource, "mathblocks_complex");
-        AppendDeviceCatalog(builder, MatrixCudaBlockCatalog.KernelSource, "mathblocks_matrix");
-        AppendDeviceCatalog(builder, ProbabilityCudaBlockCatalog.KernelSource, "mathblocks_probability");
-        AppendDeviceCatalog(builder, SequencePathCudaBlockCatalog.KernelSource, "mathblocks_sequence_path");
-        AppendDeviceCatalog(builder, StatisticsCudaBlockCatalog.KernelSource, "mathblocks_statistics");
-        AppendDeviceCatalog(builder, GeometryCudaBlockCatalog.KernelSource, "mathblocks_geometry");
-        AppendDeviceCatalog(builder, GraphCudaBlockCatalog.KernelSource, "mathblocks_graph");
-        AppendDeviceCatalog(builder, AdvancedCudaBlockCatalog.KernelSource, "mathblocks_advanced");
-        AppendDeviceCatalog(builder, TransportCudaBlockCatalog.KernelSource, "mathblocks_transport");
-        builder.Append('\n').Append(
-            DeviceDispatchCudaBlockCatalog.KernelSource
-                .Replace("\r\n", "\n", StringComparison.Ordinal)
-                .Replace('\r', '\n'));
-        return builder.ToString();
+        return MathBlockCudaGeneratedSource.Source;
     }
-
-    private static void AppendDeviceCatalog(StringBuilder builder, string source, string entryPoint)
-    {
-        var globalDeclaration = $"extern \"C\" __global__ void {entryPoint}(";
-        var deviceDeclaration = $"__device__ void {entryPoint}_dispatch(";
-        var declarationIndex = source.IndexOf(globalDeclaration, StringComparison.Ordinal);
-        if (declarationIndex < 0 ||
-            source.IndexOf(globalDeclaration, declarationIndex + globalDeclaration.Length, StringComparison.Ordinal) >= 0)
-        {
-            throw new InvalidOperationException($"CUDA entry point '{entryPoint}' is not unique.");
-        }
-
-        var deviceSource = source.Replace(
-            globalDeclaration,
-            deviceDeclaration,
-            StringComparison.Ordinal);
-        deviceSource = entryPoint == "mathblocks_scalar"
-            ? deviceSource.Replace("blockIdx.x != 0 || ", string.Empty, StringComparison.Ordinal)
-            : deviceSource.Replace("blockIdx.x != 0", "false", StringComparison.Ordinal);
-        deviceSource = CanonicalizePublishedLineEndings(deviceSource, entryPoint);
-        builder.Append(deviceSource).Append('\n');
-    }
-
-    private static string CanonicalizePublishedLineEndings(string source, string entryPoint)
-    {
-        var builder = new StringBuilder(source.Length);
-        var newlineIndex = 0;
-        for (var index = 0; index < source.Length; index++)
-        {
-            var character = source[index];
-            if (character == '\r')
-            {
-                if (index + 1 < source.Length && source[index + 1] == '\n')
-                    index++;
-                AppendPublishedNewline(builder, entryPoint, ++newlineIndex);
-                continue;
-            }
-
-            if (character == '\n')
-            {
-                AppendPublishedNewline(builder, entryPoint, ++newlineIndex);
-                continue;
-            }
-
-            builder.Append(character);
-        }
-
-        return builder.ToString();
-    }
-
-    private static void AppendPublishedNewline(
-        StringBuilder builder,
-        string entryPoint,
-        int newlineIndex)
-    {
-        if (IsPublishedLfOnlyLine(entryPoint, newlineIndex))
-            builder.Append('\n');
-        else
-            builder.Append("\r\n");
-    }
-
-    private static bool IsPublishedLfOnlyLine(string entryPoint, int newlineIndex) =>
-        entryPoint switch
-        {
-            "mathblocks_scalar" => newlineIndex == 474,
-            "mathblocks_vector" =>
-                IsInRange(newlineIndex, 82, 92) ||
-                IsInRange(newlineIndex, 609, 642) ||
-                newlineIndex == 676,
-            "mathblocks_complex" => newlineIndex == 340,
-            "mathblocks_matrix" => newlineIndex == 1238,
-            "mathblocks_probability" => newlineIndex == 657,
-            "mathblocks_sequence_path" =>
-                IsInRange(newlineIndex, 13, 23) ||
-                IsInRange(newlineIndex, 29, 39) ||
-                IsInRange(newlineIndex, 41, 361) ||
-                IsInRange(newlineIndex, 529, 793) ||
-                IsInRange(newlineIndex, 1133, 1141) ||
-                IsInRange(newlineIndex, 1145, 1153) ||
-                newlineIndex == 1299,
-            "mathblocks_statistics" => newlineIndex == 537,
-            "mathblocks_geometry" =>
-                IsInRange(newlineIndex, 382, 390) ||
-                IsInRange(newlineIndex, 467, 474) ||
-                IsInRange(newlineIndex, 480, 483) ||
-                IsInRange(newlineIndex, 589, 596) ||
-                IsInRange(newlineIndex, 602, 605) ||
-                IsInRange(newlineIndex, 768, 778) ||
-                newlineIndex == 862,
-            "mathblocks_graph" =>
-                IsInRange(newlineIndex, 240, 247) ||
-                IsInRange(newlineIndex, 252, 255) ||
-                newlineIndex == 560,
-            "mathblocks_advanced" => newlineIndex == 546,
-            "mathblocks_transport" =>
-                IsInRange(newlineIndex, 386, 387),
-            _ => throw new InvalidOperationException(
-                $"CUDA line-ending authority is missing for '{entryPoint}'.")
-        };
-
-    private static bool IsInRange(int value, int minimum, int maximum) =>
-        value >= minimum && value <= maximum;
 
     private static uint ResolveBlockSize(MathBlockCudaFamily family) => family switch
     {
         MathBlockCudaFamily.Scalar => 1,
-        MathBlockCudaFamily.Vector => VectorCudaBlockCatalog.BlockSize,
-        MathBlockCudaFamily.Complex => ComplexCudaBlockCatalog.BlockSize,
-        MathBlockCudaFamily.Matrix => MatrixCudaBlockCatalog.BlockSize,
-        MathBlockCudaFamily.Probability => ProbabilityCudaBlockCatalog.BlockSize,
-        MathBlockCudaFamily.SequencePath => SequencePathCudaBlockCatalog.BlockSize,
-        MathBlockCudaFamily.Statistics => StatisticsCudaBlockCatalog.BlockSize,
-        MathBlockCudaFamily.Geometry => GeometryCudaBlockCatalog.BlockSize,
-        MathBlockCudaFamily.Graph => GraphCudaBlockCatalog.BlockSize,
-        MathBlockCudaFamily.Advanced => AdvancedCudaBlockCatalog.BlockSize,
-        MathBlockCudaFamily.Transport => TransportCudaBlockCatalog.BlockSize,
+        MathBlockCudaFamily.Vector => 128,
+        MathBlockCudaFamily.Complex => 128,
+        MathBlockCudaFamily.Matrix => 128,
+        MathBlockCudaFamily.Probability => 128,
+        MathBlockCudaFamily.SequencePath => 128,
+        MathBlockCudaFamily.Statistics => 128,
+        MathBlockCudaFamily.Geometry => 128,
+        MathBlockCudaFamily.Graph => 128,
+        MathBlockCudaFamily.Advanced => 128,
+        MathBlockCudaFamily.Transport => 128,
         _ => throw new InvalidOperationException($"CUDA family '{family}' is not supported.")
     };
 

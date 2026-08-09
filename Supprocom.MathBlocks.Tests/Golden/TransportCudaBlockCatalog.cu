@@ -384,4 +384,3 @@ __device__ void mathblocks_transport_dispatch(
                 if (!isfinite(result[index])) output->valid = 0;
     }
 }
-

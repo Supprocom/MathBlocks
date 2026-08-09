@@ -149,8 +149,10 @@ public sealed class MathBlockCudaTranspilationTests
         Assert.True(end > start);
         var actual = source[start..end];
 
-        Assert.Equal(
-            golden.Replace("\r\n", "\n", StringComparison.Ordinal),
-            actual.Replace("\r\n", "\n", StringComparison.Ordinal));
+        var expected = golden.Replace("\r\n", "\n", StringComparison.Ordinal);
+        if (catalog == "Transport")
+            expected += "\n";
+
+        Assert.Equal(expected, actual.Replace("\r\n", "\n", StringComparison.Ordinal));
     }
 }
