@@ -252,28 +252,78 @@ internal static class Program
 
     private static string CreateGeneratedSource(byte[] source)
     {
-        var base64 = Convert.ToBase64String(source);
+        var text = Encoding.UTF8.GetString(source);
         var builder = new StringBuilder();
-        builder.AppendLine("using System;");
-        builder.AppendLine("using System.Text;");
-        builder.AppendLine();
         builder.AppendLine("namespace Supprocom.MathBlocks.Cuda;");
         builder.AppendLine();
         builder.AppendLine("internal static class MathBlockCudaGeneratedSource");
         builder.AppendLine("{");
-        builder.AppendLine("    private const string SourceBase64 =");
-        for (var offset = 0; offset < base64.Length; offset += 8192)
+        builder.AppendLine("    public const string Source =");
+
+        var lineStart = 0;
+        while (lineStart < text.Length)
         {
-            var count = Math.Min(8192, base64.Length - offset);
-            var suffix = offset + count == base64.Length ? ";" : " +";
-            builder.Append("        \"").Append(base64, offset, count).Append("\"").AppendLine(suffix);
+            var lineEnd = lineStart;
+            while (lineEnd < text.Length && text[lineEnd] is not ('\r' or '\n'))
+                lineEnd++;
+
+            builder.Append("        \"");
+            AppendEscapedCSharpString(builder, text.Substring(lineStart, lineEnd - lineStart));
+
+            if (lineEnd < text.Length)
+            {
+                if (text[lineEnd] == '\r' &&
+                    lineEnd + 1 < text.Length &&
+                    text[lineEnd + 1] == '\n')
+                {
+                    builder.Append("\\r\\n");
+                    lineEnd += 2;
+                }
+                else
+                {
+                    builder.Append(text[lineEnd] == '\r' ? "\\r" : "\\n");
+                    lineEnd++;
+                }
+            }
+
+            builder.Append('"');
+            builder.AppendLine(lineEnd < text.Length ? " +" : ";");
+            lineStart = lineEnd;
         }
 
-        builder.AppendLine();
-        builder.AppendLine("    public static string Source { get; } =");
-        builder.AppendLine("        Encoding.UTF8.GetString(Convert.FromBase64String(SourceBase64));");
         builder.AppendLine("}");
         return builder.ToString();
+    }
+
+    private static void AppendEscapedCSharpString(StringBuilder builder, string value)
+    {
+        foreach (var character in value)
+        {
+            switch (character)
+            {
+                case '\\':
+                    builder.Append("\\\\");
+                    break;
+                case '"':
+                    builder.Append("\\\"");
+                    break;
+                case '\t':
+                    builder.Append("\\t");
+                    break;
+                case '\r':
+                    builder.Append("\\r");
+                    break;
+                case '\n':
+                    builder.Append("\\n");
+                    break;
+                default:
+                    if (character < ' ')
+                        builder.Append("\\u").Append(((int)character).ToString("X4"));
+                    else
+                        builder.Append(character);
+                    break;
+            }
+        }
     }
 
     private static void WriteUnitEvidence(string evidenceRoot, Unit unit, string source)
