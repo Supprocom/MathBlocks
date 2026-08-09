@@ -6,7 +6,8 @@
     <RootNamespace>Supprocom.MathBlocks</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>Supprocom.MathBlocks</PackageId>
-    <Version>0.3.0</Version>
+    <Version>0.3.1</Version>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
     <Authors>Supprocom</Authors>
     <Company>Supprocom</Company>
     <Copyright>Copyright (C) 2026 mkn8rn</Copyright>
@@ -29,6 +30,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CSharp2CUDA" Version="[0.1.0]" />
     <PackageReference Include="libtorch-cuda-12.8-win-x64-part1" Version="[2.10.0]" />
     <PackageReference Include="libtorch-cuda-12.8-win-x64-part8" Version="[2.10.0]" />
     <PackageReference Include="TorchSharp-cuda-linux" Version="[0.107.0]" />

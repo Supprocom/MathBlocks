@@ -1,64 +1,93 @@
+using CSharp2CUDA;
+
 namespace Supprocom.MathBlocks.Cuda;
 
 internal static class ScalarCudaBlockCatalog
 {
-        public static string KernelEntryPoint => "mathblocks_scalar";
+    public static string KernelEntryPoint => "mathblocks_scalar";
 
-    public const string KernelSource = """
-        struct MathBlockSlot
-        {
-            double scalar_value;
-            unsigned long long data_pointer;
-            unsigned long long scratch_pointer;
-            int boolean_value;
-            int valid;
-            int rows;
-            int columns;
-            int count;
-            int capacity;
-        };
+    public static string KernelSource { get; } = Transpile();
 
-        __device__ double mathblocks_positive_infinity()
+    private static string Transpile()
+    {
+        var result = CudaTranspiler.Transpile(
+            TranslationUnitSource,
+            new CudaTranspilationOptions { NewLine = "\r\n" },
+            "ScalarCudaBlockCatalog.cs");
+        if (!result.Succeeded)
         {
-            return __longlong_as_double((long long)0x7ff0000000000000ull);
+            throw new InvalidOperationException(
+                $"Scalar CUDA translation failed: {string.Join(Environment.NewLine, result.Diagnostics)}");
         }
 
-        __device__ double mathblocks_quiet_nan()
+        return result.Source;
+    }
+
+    private const string TranslationUnitSource = """
+    using System;
+    using CSharp2CUDA;
+
+    [CudaTranslationUnit]
+    internal static unsafe class ScalarModule
+    {
+        public struct MathBlockSlot
         {
-            return __longlong_as_double((long long)0x7ff8000000000000ull);
+            public double scalar_value;
+            public ulong data_pointer;
+            public ulong scratch_pointer;
+            public CudaInt32 boolean_value;
+            public CudaInt32 valid;
+            public int rows;
+            public int columns;
+            public int count;
+            public int capacity;
         }
 
-        __device__ double mathblocks_square_root(double value)
+        [CudaDevice]
+        private static double mathblocks_positive_infinity()
         {
-            if (value == 0.0 || (isinf(value) && value > 0.0))
+            return BitConverter.Int64BitsToDouble((long)0x7ff0000000000000UL);
+        }
+
+        [CudaDevice]
+        private static double mathblocks_quiet_nan()
+        {
+            return BitConverter.Int64BitsToDouble((long)0x7ff8000000000000UL);
+        }
+
+        [CudaDevice]
+        private static double mathblocks_square_root(double value)
+        {
+            if (value == 0.0 || (double.IsInfinity(value) && value > 0.0))
                 return value;
-            if (value < 0.0 || isnan(value))
+            if (value < 0.0 || double.IsNaN(value))
                 return mathblocks_quiet_nan();
 
             double scaled = value;
             double correction = 1.0;
-            unsigned long long bits = (unsigned long long)__double_as_longlong(scaled);
-            if ((bits & 0x7ff0000000000000ull) == 0ull)
+            ulong bits = (ulong)BitConverter.DoubleToInt64Bits(scaled);
+            if ((bits & 0x7ff0000000000000UL) == 0UL)
             {
-                scaled *= __longlong_as_double((long long)0x4350000000000000ull);
-                correction = __longlong_as_double((long long)0x3e40000000000000ull);
-                bits = (unsigned long long)__double_as_longlong(scaled);
+                scaled *= BitConverter.Int64BitsToDouble((long)0x4350000000000000UL);
+                correction = BitConverter.Int64BitsToDouble((long)0x3e40000000000000UL);
+                bits = (ulong)BitConverter.DoubleToInt64Bits(scaled);
             }
 
-            double estimate = __longlong_as_double((long long)((bits >> 1) + 0x1ff8000000000000ull));
+            double estimate = BitConverter.Int64BitsToDouble((long)((bits >> 1) + 0x1ff8000000000000UL));
             for (int iteration = 0; iteration < 7; iteration++)
                 estimate = 0.5 * (estimate + scaled / estimate);
             return estimate * correction;
         }
 
-        __device__ double mathblocks_exponential(double value)
+        [CudaDevice]
+        private static double mathblocks_exponential(double value)
         {
             if (value > 709.782712893383973096)
                 return mathblocks_positive_infinity();
             if (value < -745.13321910194110842)
                 return 0.0;
 
-            double exponent_value = floor(1.44269504088896340736 * value + 0.5);
+            double exponent_value = Math.Floor(1.44269504088896340736 * value + 0.5);
             int exponent = (int)exponent_value;
             double reduced = value - exponent_value * 0.693359375;
             reduced -= exponent_value * -0.000212194440054690582768;
@@ -69,20 +98,21 @@ internal static class ScalarCudaBlockCatalog
                 0.00000300198505138664455042 * square + 0.00252448340349684104192) * square +
                 0.227265548208155028766) * square + 2.0);
             double result = 1.0 + 2.0 * numerator / (denominator - numerator);
-            return ldexp(result, exponent);
+            return Math.ScaleB(result, exponent);
         }
 
-        __device__ double mathblocks_natural_logarithm(double value)
+        [CudaDevice]
+        private static double mathblocks_natural_logarithm(double value)
         {
             if (value == 0.0)
                 return -mathblocks_positive_infinity();
-            if (value < 0.0 || isnan(value))
+            if (value < 0.0 || double.IsNaN(value))
                 return mathblocks_quiet_nan();
-            if (isinf(value))
+            if (double.IsInfinity(value))
                 return mathblocks_positive_infinity();
 
-            int exponent = ilogb(value) + 1;
-            double reduced = ldexp(value, -exponent);
+            int exponent = Math.ILogB(value) + 1;
+            double reduced = Math.ScaleB(value, -exponent);
             if (reduced < 0.70710678118654752440)
             {
                 exponent--;
@@ -108,7 +138,8 @@ internal static class ScalarCudaBlockCatalog
             return reduced + correction + exponent * 0.693359375;
         }
 
-        __device__ double mathblocks_log_one_plus(double value)
+        [CudaDevice]
+        private static double mathblocks_log_one_plus(double value)
         {
             double sum = 1.0 + value;
             return sum == 1.0
@@ -116,41 +147,44 @@ internal static class ScalarCudaBlockCatalog
                 : mathblocks_natural_logarithm(sum) - ((sum - 1.0) - value) / sum;
         }
 
-        __device__ double mathblocks_binary_logarithm(double value)
+        [CudaDevice]
+        private static double mathblocks_binary_logarithm(double value)
         {
-            unsigned long long bits = __double_as_longlong(value);
-            int exponent = (int)((bits >> 52) & 0x7ffull);
-            unsigned long long fraction = bits & 0x000fffffffffffffull;
-            if (exponent > 0 && exponent < 0x7ff && fraction == 0ull)
+            ulong bits = Cuda.Unsigned(BitConverter.DoubleToInt64Bits(value));
+            int exponent = (int)((bits >> 52) & 0x7ffUL);
+            ulong fraction = bits & 0x000fffffffffffffUL;
+            if (exponent > 0 && exponent < 0x7ff && fraction == 0UL)
                 return (double)(exponent - 1023);
             return mathblocks_natural_logarithm(value) / 0.69314718055994530942;
         }
 
-        __device__ double mathblocks_integer_power(double value, long long exponent)
+        [CudaDevice]
+        private static double mathblocks_integer_power(double value, long exponent)
         {
             if (exponent == 0)
                 return 1.0;
             bool negative = exponent < 0;
-            unsigned long long remaining = negative
-                ? (unsigned long long)(-(exponent + 1)) + 1ull
-                : (unsigned long long)exponent;
+            ulong remaining = negative
+                ? (ulong)(-(exponent + 1)) + 1UL
+                : (ulong)exponent;
             double power_base = value;
             double result = 1.0;
-            while (remaining != 0ull)
+            while (remaining != 0UL)
             {
-                if ((remaining & 1ull) != 0ull)
+                if ((remaining & 1UL) != 0UL)
                     result *= power_base;
                 remaining >>= 1;
-                if (remaining != 0ull)
+                if (remaining != 0UL)
                     power_base *= power_base;
             }
             return negative ? 1.0 / result : result;
         }
 
-        __device__ double mathblocks_power(double value, double exponent)
+        [CudaDevice]
+        private static double mathblocks_power(double value, double exponent)
         {
-            if (exponent == trunc(exponent) && fabs(exponent) <= 9223372036854775807.0)
-                return mathblocks_integer_power(value, (long long)exponent);
+            if (exponent == Math.Truncate(exponent) && Math.Abs(exponent) <= 9223372036854775807.0)
+                return mathblocks_integer_power(value, (long)exponent);
             if (value < 0.0)
                 return mathblocks_quiet_nan();
             if (value == 0.0)
@@ -158,18 +192,20 @@ internal static class ScalarCudaBlockCatalog
             return mathblocks_exponential(exponent * mathblocks_natural_logarithm(value));
         }
 
-        __device__ double mathblocks_cube_root(double value)
+        [CudaDevice]
+        private static double mathblocks_cube_root(double value)
         {
             if (value == 0.0)
                 return value;
-            double magnitude = fabs(value);
+            double magnitude = Math.Abs(value);
             double estimate = mathblocks_exponential(mathblocks_natural_logarithm(magnitude) / 3.0);
             for (int iteration = 0; iteration < 3; iteration++)
                 estimate = (2.0 * estimate + magnitude / (estimate * estimate)) / 3.0;
-            return copysign(estimate, value);
+            return Math.CopySign(estimate, value);
         }
 
-        __device__ double mathblocks_sine(double value)
+        [CudaDevice]
+        private static double mathblocks_sine(double value)
         {
             double sign = 1.0;
             double x = value;
@@ -178,8 +214,8 @@ internal static class ScalarCudaBlockCatalog
                 sign = -1.0;
                 x = -x;
             }
-            double octant_value = floor(x / 0.78539816339744830962);
-            int octant = (int)(octant_value - floor(octant_value * 0.125) * 8.0);
+            double octant_value = Math.Floor(x / 0.78539816339744830962);
+            int octant = (int)(octant_value - Math.Floor(octant_value * 0.125) * 8.0);
             if ((octant & 1) != 0)
             {
                 octant++;
@@ -216,12 +252,13 @@ internal static class ScalarCudaBlockCatalog
             return sign * (reduced + reduced * square * sine_polynomial);
         }
 
-        __device__ double mathblocks_cosine(double value)
+        [CudaDevice]
+        private static double mathblocks_cosine(double value)
         {
-            double x = fabs(value);
+            double x = Math.Abs(value);
             double sign = 1.0;
-            double octant_value = floor(x / 0.78539816339744830962);
-            int octant = (int)(octant_value - floor(octant_value * 0.125) * 8.0);
+            double octant_value = Math.Floor(x / 0.78539816339744830962);
+            int octant = (int)(octant_value - Math.Floor(octant_value * 0.125) * 8.0);
             if ((octant & 1) != 0)
             {
                 octant++;
@@ -260,10 +297,11 @@ internal static class ScalarCudaBlockCatalog
             return sign * (1.0 - 0.5 * square + square * square * polynomial);
         }
 
-        __device__ double mathblocks_arc_tangent(double value)
+        [CudaDevice]
+        private static double mathblocks_arc_tangent(double value)
         {
             double sign = value < 0.0 ? -1.0 : 1.0;
-            double x = fabs(value);
+            double x = Math.Abs(value);
             double offset = 0.0;
             if (x > 2.4142135623730950488)
             {
@@ -288,7 +326,8 @@ internal static class ScalarCudaBlockCatalog
             return sign * (offset + x + x * z * numerator / denominator);
         }
 
-        __device__ double mathblocks_arc_tangent_2(double y, double x)
+        [CudaDevice]
+        private static double mathblocks_arc_tangent_2(double y, double x)
         {
             const double pi = 3.14159265358979323846;
             if (x > 0.0)
@@ -304,7 +343,8 @@ internal static class ScalarCudaBlockCatalog
             return 0.0;
         }
 
-        __device__ double mathblocks_arc_cosine(double value)
+        [CudaDevice]
+        private static double mathblocks_arc_cosine(double value)
         {
             if (value < -1.0 || value > 1.0)
                 return mathblocks_quiet_nan();
@@ -313,21 +353,23 @@ internal static class ScalarCudaBlockCatalog
                 value);
         }
 
-        __device__ double mathblocks_inverse_hyperbolic_sine(double value)
+        [CudaDevice]
+        private static double mathblocks_inverse_hyperbolic_sine(double value)
         {
             if (value == 0.0)
                 return value;
-            double magnitude = fabs(value);
-            return copysign(
+            double magnitude = Math.Abs(value);
+            return Math.CopySign(
                 mathblocks_natural_logarithm(magnitude + mathblocks_square_root(magnitude * magnitude + 1.0)),
                 value);
         }
 
-        __device__ double mathblocks_error_function(double value)
+        [CudaDevice]
+        private static double mathblocks_error_function(double value)
         {
             if (value == 0.0)
                 return 0.0;
-            double magnitude = fabs(value);
+            double magnitude = Math.Abs(value);
             double t = 1.0 / (1.0 + 0.5 * magnitude);
             double tau = t * mathblocks_exponential(
                 -magnitude * magnitude - 1.26551223 +
@@ -339,35 +381,36 @@ internal static class ScalarCudaBlockCatalog
                 t * (-1.13520398 +
                 t * (1.48851587 +
                 t * (-0.82215223 + t * 0.17087277)))))))));
-            return copysign(1.0 - tau, value);
+            return Math.CopySign(1.0 - tau, value);
         }
 
-        extern "C" __global__ void mathblocks_scalar(
+        [CudaGlobal]
+        private static void mathblocks_scalar(
             int opcode,
-            const MathBlockSlot* const* inputs,
+            [CudaReadOnly] MathBlockSlot** inputs,
             int input_count,
             MathBlockSlot* output)
         {
-            if (blockIdx.x != 0 || threadIdx.x != 0)
+            if (Cuda.BlockIdx.X != 0 || Cuda.ThreadIdx.X != 0)
                 return;
 
-            const MathBlockSlot* first = input_count > 0 ? inputs[0] : nullptr;
-            const MathBlockSlot* second = input_count > 1 ? inputs[1] : nullptr;
-            const MathBlockSlot* third = input_count > 2 ? inputs[2] : nullptr;
+            MathBlockSlot* first = Cuda.ReadOnly(input_count > 0 ? inputs[0] : null);
+            MathBlockSlot* second = Cuda.ReadOnly(input_count > 1 ? inputs[1] : null);
+            MathBlockSlot* third = Cuda.ReadOnly(input_count > 2 ? inputs[2] : null);
 
             output->scalar_value = 0.0;
             output->boolean_value = 0;
-            output->valid = first == nullptr || first->valid;
-            if (second != nullptr)
+            output->valid = first == null || first->valid;
+            if (second != null)
                 output->valid = output->valid && second->valid;
-            if (third != nullptr)
+            if (third != null)
                 output->valid = output->valid && third->valid;
             if (!output->valid)
                 return;
 
-            double a = first == nullptr ? 0.0 : first->scalar_value;
-            double b = second == nullptr ? 0.0 : second->scalar_value;
-            double c = third == nullptr ? 0.0 : third->scalar_value;
+            double a = first == null ? 0.0 : first->scalar_value;
+            double b = second == null ? 0.0 : second->scalar_value;
+            double c = third == null ? 0.0 : third->scalar_value;
             bool scalar_output = true;
 
             switch (opcode)
@@ -377,12 +420,12 @@ internal static class ScalarCudaBlockCatalog
                 case 2: output->scalar_value = a * b; break;
                 case 3: output->scalar_value = a / b; break;
                 case 4: output->scalar_value = -a; break;
-                case 5: output->scalar_value = fabs(a); break;
-                case 6: output->scalar_value = (a > 0.0) - (a < 0.0); break;
+                case 5: output->scalar_value = Math.Abs(a); break;
+                case 6: output->scalar_value = Cuda.Int(a > 0.0) - Cuda.Int(a < 0.0); break;
                 case 7: output->scalar_value = a > 0.0 ? a : 0.0; break;
-                case 8: output->scalar_value = fmin(a, b); break;
-                case 9: output->scalar_value = fmax(a, b); break;
-                case 10: output->scalar_value = fmin(fmax(a, b), c); break;
+                case 8: output->scalar_value = Math.Min(a, b); break;
+                case 9: output->scalar_value = Math.Max(a, b); break;
+                case 10: output->scalar_value = Math.Min(Math.Max(a, b), c); break;
                 case 11: output->scalar_value = 1.0 / a; break;
                 case 12: output->scalar_value = a * a; break;
                 case 13: output->scalar_value = a * a * a; break;
@@ -398,7 +441,7 @@ internal static class ScalarCudaBlockCatalog
                 case 21: output->scalar_value = mathblocks_sine(a); break;
                 case 22: output->scalar_value = mathblocks_cosine(a); break;
                 case 23: output->scalar_value = mathblocks_sine(a) / mathblocks_cosine(a); break;
-                case 24: output->scalar_value = asin(a); break;
+                case 24: output->scalar_value = Math.Asin(a); break;
                 case 25: output->scalar_value = mathblocks_arc_cosine(a); break;
                 case 26: output->scalar_value = mathblocks_arc_tangent(a); break;
                 case 27: output->scalar_value = mathblocks_arc_tangent_2(a, b); break;
@@ -429,11 +472,11 @@ internal static class ScalarCudaBlockCatalog
                         a + mathblocks_square_root(a * a - 1.0));
                     break;
                 case 33: output->scalar_value = 0.5 * mathblocks_log_one_plus(2.0 * a / (1.0 - a)); break;
-                case 34: output->scalar_value = floor(a); break;
-                case 35: output->scalar_value = ceil(a); break;
-                case 36: output->scalar_value = nearbyint(a); break;
-                case 37: output->scalar_value = trunc(a); break;
-                case 38: output->scalar_value = fmod(a, b); break;
+                case 34: output->scalar_value = Math.Floor(a); break;
+                case 35: output->scalar_value = Math.Ceiling(a); break;
+                case 36: output->scalar_value = Cuda.NearbyInteger(a); break;
+                case 37: output->scalar_value = Math.Truncate(a); break;
+                case 38: output->scalar_value = Cuda.FloatingRemainder(a, b); break;
                 case 39:
                     output->scalar_value = a >= 0.0
                         ? 1.0 / (1.0 + mathblocks_exponential(-a))
@@ -443,8 +486,8 @@ internal static class ScalarCudaBlockCatalog
                     output->scalar_value = mathblocks_natural_logarithm(a / (1.0 - a));
                     break;
                 case 41:
-                    output->scalar_value = fmax(a, 0.0) +
-                        mathblocks_log_one_plus(mathblocks_exponential(-fabs(a)));
+                    output->scalar_value = Math.Max(a, 0.0) +
+                        mathblocks_log_one_plus(mathblocks_exponential(-Math.Abs(a)));
                     break;
                 case 42: output->scalar_value = mathblocks_log_one_plus(a); break;
                 case 43: output->scalar_value = mathblocks_error_function(a); break;
@@ -476,8 +519,9 @@ internal static class ScalarCudaBlockCatalog
                 default: output->valid = 0; return;
             }
 
-            if (scalar_output && !isfinite(output->scalar_value))
+            if (scalar_output && !double.IsFinite(output->scalar_value))
                 output->valid = 0;
         }
-        """;
+    }
+    """;
 }
