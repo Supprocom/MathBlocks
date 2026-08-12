@@ -1,4 +1,4 @@
-using CSharp2CUDA;
+using Supprocom.CSharp2CUDA;
 
 namespace Supprocom.MathBlocks.Cuda;
 
@@ -26,9 +26,9 @@ internal static class MatrixCudaBlockCatalog
 
     private const string TranslationUnitSource = """
     using System;
-    using CSharp2CUDA;
+    using Supprocom.CSharp2CUDA;
 
-    [CudaTranslationUnit]
+    [TranspileToCUDA]
     internal static unsafe class MatrixModule
     {
         [CudaExternal]
@@ -45,34 +45,34 @@ internal static class MatrixCudaBlockCatalog
             public int capacity;
         }
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_arc_tangent_2(double left, double right) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_binary_logarithm(double value) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_compensated_product_sum([CudaReadOnly] double* first, [CudaReadOnly] double* second, int count) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_compensated_sum([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_cosine(double value) => throw new NotSupportedException();
 
         [CudaExternal]
         private static bool mathblocks_nonnegative_integer(double value, int* result) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_power(double value, double exponent) => throw new NotSupportedException();
 
         [CudaExternal]
         private static void mathblocks_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_sine(double value) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_square_root(double value) => throw new NotSupportedException();
 
         [CudaDevice]

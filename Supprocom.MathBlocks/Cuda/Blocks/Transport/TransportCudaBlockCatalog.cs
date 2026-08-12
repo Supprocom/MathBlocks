@@ -1,4 +1,4 @@
-using CSharp2CUDA;
+using Supprocom.CSharp2CUDA;
 
 namespace Supprocom.MathBlocks.Cuda;
 
@@ -26,9 +26,9 @@ internal static class TransportCudaBlockCatalog
 
     private const string TranslationUnitSource = """
     using System;
-    using CSharp2CUDA;
+    using Supprocom.CSharp2CUDA;
 
-    [CudaTranslationUnit]
+    [TranspileToCUDA]
     internal static unsafe class TransportModule
     {
         [CudaExternal]
@@ -45,22 +45,22 @@ internal static class TransportCudaBlockCatalog
             public int capacity;
         }
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static bool mathblocks_advanced_distribution([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static int mathblocks_advanced_popcount(int value) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_exponential(double value) => throw new NotSupportedException();
 
         [CudaExternal]
         private static bool mathblocks_nonnegative_integer(double value, int* result) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_positive_infinity() => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_power(double value, double exponent) => throw new NotSupportedException();
 
         [CudaExternal]
@@ -72,7 +72,7 @@ internal static class TransportCudaBlockCatalog
         [CudaExternal]
         private static void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_square_root(double value) => throw new NotSupportedException();
         [CudaDevice]
         private static void mathblocks_transport_sort_values(

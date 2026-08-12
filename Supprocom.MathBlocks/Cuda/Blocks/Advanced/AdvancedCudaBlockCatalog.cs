@@ -1,4 +1,4 @@
-using CSharp2CUDA;
+using Supprocom.CSharp2CUDA;
 
 namespace Supprocom.MathBlocks.Cuda;
 
@@ -26,9 +26,9 @@ internal static class AdvancedCudaBlockCatalog
 
     private const string TranslationUnitSource = """
     using System;
-    using CSharp2CUDA;
+    using Supprocom.CSharp2CUDA;
 
-    [CudaTranslationUnit]
+    [TranspileToCUDA]
     internal static unsafe class AdvancedModule
     {
         [CudaExternal]
@@ -45,16 +45,16 @@ internal static class AdvancedCudaBlockCatalog
             public int capacity;
         }
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_compensated_sum([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_natural_logarithm(double value) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_positive_infinity() => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static bool mathblocks_probability_distribution([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
 
         [CudaExternal]

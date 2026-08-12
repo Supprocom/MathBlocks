@@ -1,4 +1,4 @@
-using CSharp2CUDA;
+using Supprocom.CSharp2CUDA;
 
 namespace Supprocom.MathBlocks.Cuda;
 
@@ -23,9 +23,9 @@ internal static class DeviceDispatchCudaBlockCatalog
 
     private const string TranslationUnitSource = """
     using System;
-    using CSharp2CUDA;
+    using Supprocom.CSharp2CUDA;
 
-    [CudaTranslationUnit]
+    [TranspileToCUDA]
     internal static unsafe class DeviceDispatchModule
     {
         [CudaExternal]

@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using CSharp2CUDA;
+using Supprocom.CSharp2CUDA;
 
 internal static class Program
 {
@@ -25,15 +25,22 @@ internal static class Program
         {
             var options = Arguments.Parse(args);
             var generatedUnits = new List<string>(Units.Length);
+            var translationRoot = Path.Combine(
+                Path.GetDirectoryName(options.GeneratedSource)!,
+                "MathBlocks.CudaTranslationUnits");
+            Directory.CreateDirectory(translationRoot);
 
             foreach (var unit in Units)
             {
                 var sourcePath = Path.Combine(options.SourceRoot, unit.SourcePath.Replace('/', Path.DirectorySeparatorChar));
                 var source = ExtractTranslationUnit(sourcePath);
-                var result = CudaTranspiler.Transpile(
-                    source,
-                    new CudaTranspilationOptions { NewLine = "\r\n" },
-                    Path.GetFileName(sourcePath));
+                var translationPath = WriteTranslationUnit(
+                    translationRoot,
+                    Path.GetFileName(sourcePath),
+                    source);
+                var result = CudaTranspiler.TranspileFile(
+                    translationPath,
+                    options: new CudaTranspilationOptions { NewLine = "\n" });
                 if (!result.Succeeded)
                 {
                     throw new InvalidOperationException(
@@ -45,9 +52,9 @@ internal static class Program
                 var goldenPath = Path.Combine(options.GoldenRoot, $"{unit.Name}CudaBlockCatalog.cu");
                 var golden = File.ReadAllText(goldenPath, Encoding.UTF8);
 
-                AssertExact(unit.Name, NormalizeLineEndings(publishedUnit), NormalizeLineEndings(golden));
+                AssertExact(unit.Name, NormalizeLineEndings(deviceSource), NormalizeLineEndings(golden));
                 generatedUnits.Add(publishedUnit);
-                WriteUnitEvidence(options.EvidenceRoot, unit, publishedUnit);
+                WriteUnitEvidence(options.EvidenceRoot, unit, deviceSource);
                 Console.WriteLine(
                     $"unit={unit.Name} bytes={Encoding.UTF8.GetByteCount(publishedUnit)} " +
                     $"sha256={Hash(publishedUnit)} exact=True diagnostics=0");
@@ -57,10 +64,13 @@ internal static class Program
                 options.SourceRoot,
                 "Cuda/Blocks/DeviceDispatch/DeviceDispatchCudaBlockCatalog.cs".Replace('/', Path.DirectorySeparatorChar));
             var dispatchSource = ExtractTranslationUnit(dispatchSourcePath);
-            var dispatchResult = CudaTranspiler.Transpile(
-                dispatchSource,
-                new CudaTranspilationOptions { NewLine = "\r\n" },
-                Path.GetFileName(dispatchSourcePath));
+            var dispatchTranslationPath = WriteTranslationUnit(
+                translationRoot,
+                Path.GetFileName(dispatchSourcePath),
+                dispatchSource);
+            var dispatchResult = CudaTranspiler.TranspileFile(
+                dispatchTranslationPath,
+                options: new CudaTranspilationOptions { NewLine = "\n" });
             if (!dispatchResult.Succeeded)
             {
                 throw new InvalidOperationException(
@@ -82,7 +92,7 @@ internal static class Program
             var fullBytes = Encoding.UTF8.GetBytes(fullSource);
             var fullHash = Convert.ToHexString(SHA256.HashData(fullBytes));
             const string expectedFullHash =
-                "4C1A777AC24A1A7ECF5477F021351DEA0B4205EE39EF41D293FF1645F181E35C";
+                "EEFF3D494A9F8499F66164DAEA5BA8BA7C813D2E37A0357987A4BC46A13DA92A";
             if (!string.Equals(fullHash, expectedFullHash, StringComparison.Ordinal))
             {
                 throw new InvalidOperationException(
@@ -140,98 +150,46 @@ internal static class Program
         return string.Join('\n', lines);
     }
 
+    private static string WriteTranslationUnit(string root, string fileName, string source)
+    {
+        var path = Path.Combine(root, fileName);
+        File.WriteAllText(
+            path,
+            "#pragma warning disable CS0078, CS0649\n\n" + source,
+            new UTF8Encoding(false));
+        return path;
+    }
+
     private static string ToDeviceSource(string source, string entryPoint)
     {
         var globalDeclaration = $"extern \"C\" __global__ void {entryPoint}(";
         var deviceDeclaration = $"__device__ void {entryPoint}_dispatch(";
-        var declarationIndex = source.IndexOf(globalDeclaration, StringComparison.Ordinal);
-        if (declarationIndex < 0 ||
-            source.IndexOf(globalDeclaration, declarationIndex + globalDeclaration.Length, StringComparison.Ordinal) >= 0)
+        var declarationCount = CountOccurrences(source, globalDeclaration);
+        if (declarationCount != 2)
         {
-            throw new InvalidOperationException($"CUDA entry point '{entryPoint}' is not unique.");
+            throw new InvalidOperationException(
+                $"CUDA entry point '{entryPoint}' requires one prototype and one definition. " +
+                $"Actual declaration count={declarationCount}.");
         }
 
         var deviceSource = source.Replace(globalDeclaration, deviceDeclaration, StringComparison.Ordinal);
-        deviceSource = entryPoint == "mathblocks_scalar"
+        return entryPoint == "mathblocks_scalar"
             ? deviceSource.Replace("blockIdx.x != 0 || ", string.Empty, StringComparison.Ordinal)
             : deviceSource.Replace("blockIdx.x != 0", "false", StringComparison.Ordinal);
-        return CanonicalizePublishedLineEndings(deviceSource, entryPoint);
     }
 
-    private static string CanonicalizePublishedLineEndings(string source, string entryPoint)
+    private static int CountOccurrences(string source, string value)
     {
-        var builder = new StringBuilder(source.Length);
-        var newlineIndex = 0;
-        for (var index = 0; index < source.Length; index++)
+        var count = 0;
+        var index = 0;
+        while ((index = source.IndexOf(value, index, StringComparison.Ordinal)) >= 0)
         {
-            var character = source[index];
-            if (character == '\r')
-            {
-                if (index + 1 < source.Length && source[index + 1] == '\n')
-                    index++;
-                AppendPublishedNewline(builder, entryPoint, ++newlineIndex);
-                continue;
-            }
-
-            if (character == '\n')
-            {
-                AppendPublishedNewline(builder, entryPoint, ++newlineIndex);
-                continue;
-            }
-
-            builder.Append(character);
+            count++;
+            index += value.Length;
         }
 
-        return builder.ToString();
+        return count;
     }
-
-    private static void AppendPublishedNewline(StringBuilder builder, string entryPoint, int newlineIndex)
-    {
-        if (IsPublishedLfOnlyLine(entryPoint, newlineIndex))
-            builder.Append('\n');
-        else
-            builder.Append("\r\n");
-    }
-
-    private static bool IsPublishedLfOnlyLine(string entryPoint, int newlineIndex) =>
-        entryPoint switch
-        {
-            "mathblocks_scalar" => newlineIndex == 474,
-            "mathblocks_vector" =>
-                IsInRange(newlineIndex, 82, 92) ||
-                IsInRange(newlineIndex, 609, 642) ||
-                newlineIndex == 676,
-            "mathblocks_complex" => newlineIndex == 340,
-            "mathblocks_matrix" => newlineIndex == 1238,
-            "mathblocks_probability" => newlineIndex == 657,
-            "mathblocks_sequence_path" =>
-                IsInRange(newlineIndex, 13, 23) ||
-                IsInRange(newlineIndex, 29, 39) ||
-                IsInRange(newlineIndex, 41, 361) ||
-                IsInRange(newlineIndex, 529, 793) ||
-                IsInRange(newlineIndex, 1133, 1141) ||
-                IsInRange(newlineIndex, 1145, 1153) ||
-                newlineIndex == 1299,
-            "mathblocks_statistics" => newlineIndex == 537,
-            "mathblocks_geometry" =>
-                IsInRange(newlineIndex, 382, 390) ||
-                IsInRange(newlineIndex, 467, 474) ||
-                IsInRange(newlineIndex, 480, 483) ||
-                IsInRange(newlineIndex, 589, 596) ||
-                IsInRange(newlineIndex, 602, 605) ||
-                IsInRange(newlineIndex, 768, 778) ||
-                newlineIndex == 862,
-            "mathblocks_graph" =>
-                IsInRange(newlineIndex, 240, 247) ||
-                IsInRange(newlineIndex, 252, 255) ||
-                newlineIndex == 560,
-            "mathblocks_advanced" => newlineIndex == 546,
-            "mathblocks_transport" => IsInRange(newlineIndex, 386, 387),
-            _ => throw new InvalidOperationException(
-                $"CUDA line-ending authority is missing for '{entryPoint}'.")
-        };
-
-    private static bool IsInRange(int value, int minimum, int maximum) => value >= minimum && value <= maximum;
 
     private static string NormalizeLineEndings(string value) =>
         value.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n');

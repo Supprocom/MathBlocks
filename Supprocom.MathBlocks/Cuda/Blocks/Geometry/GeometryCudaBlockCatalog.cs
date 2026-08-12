@@ -1,4 +1,4 @@
-using CSharp2CUDA;
+using Supprocom.CSharp2CUDA;
 
 namespace Supprocom.MathBlocks.Cuda;
 
@@ -26,9 +26,9 @@ internal static class GeometryCudaBlockCatalog
 
     private const string TranslationUnitSource = """
     using System;
-    using CSharp2CUDA;
+    using Supprocom.CSharp2CUDA;
 
-    [CudaTranslationUnit]
+    [TranspileToCUDA]
     internal static unsafe class GeometryModule
     {
         [CudaExternal]
@@ -45,10 +45,10 @@ internal static class GeometryCudaBlockCatalog
             public int capacity;
         }
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_arc_cosine(double value) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_positive_infinity() => throw new NotSupportedException();
 
         [CudaExternal]
@@ -57,7 +57,7 @@ internal static class GeometryCudaBlockCatalog
         [CudaExternal]
         private static void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_square_root(double value) => throw new NotSupportedException();
         public struct MathBlockGeometryEdge
         {

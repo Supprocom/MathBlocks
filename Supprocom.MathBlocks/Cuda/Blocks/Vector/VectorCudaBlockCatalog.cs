@@ -1,4 +1,4 @@
-using CSharp2CUDA;
+using Supprocom.CSharp2CUDA;
 
 namespace Supprocom.MathBlocks.Cuda;
 
@@ -26,9 +26,9 @@ internal static class VectorCudaBlockCatalog
 
     private const string TranslationUnitSource = """
     using System;
-    using CSharp2CUDA;
+    using Supprocom.CSharp2CUDA;
 
-    [CudaTranslationUnit]
+    [TranspileToCUDA]
     internal static unsafe class VectorModule
     {
         [CudaExternal]
@@ -45,16 +45,16 @@ internal static class VectorCudaBlockCatalog
             public int capacity;
         }
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_exponential(double value) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_natural_logarithm(double value) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_power(double value, double exponent) => throw new NotSupportedException();
 
-        [CudaExternal]
+        [CudaExternal(IsPure = true)]
         private static double mathblocks_square_root(double value) => throw new NotSupportedException();
 
         [CudaDevice]

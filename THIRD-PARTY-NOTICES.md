@@ -1,10 +1,24 @@
 # Third-party dependency notices
 
 This document records the dependency identities reviewed for MathBlocks on
-August 3, 2026. It does not replace the applicable license text.
+August 12, 2026. It does not replace the applicable license text.
 
 The `AGPL-3.0-only` license applies to MathBlocks source. It does not change any
 third-party license.
+
+## CUDA source build tool
+
+[`Supprocom.CSharp2CUDA` 0.2.1](https://www.nuget.org/packages/Supprocom.CSharp2CUDA/0.2.1)
+is the direct build-tool dependency. Its NuGet metadata uses the
+`AGPL-3.0-only` expression.
+
+The package depends on
+[`Microsoft.CodeAnalysis.CSharp` 5.6.0](https://www.nuget.org/packages/Microsoft.CodeAnalysis.CSharp/5.6.0).
+That package and its Microsoft.CodeAnalysis dependency use MIT terms.
+
+The MathBlocks build invokes the translator before production compilation. The
+MathBlocks runtime package does not contain or depend on the translator or
+Roslyn assemblies.
 
 ## Production project on Windows
 

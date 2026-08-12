@@ -43,24 +43,73 @@ public sealed partial class MathBlockIndependenceTests
     }
 
     [Fact]
-    public void Public_release_metadata_declares_the_CUDA_0_3_1_contract()
+    public void CUDA_source_generator_uses_exact_public_CSharp2CUDA_dependency()
+    {
+        var root = FindRepositoryRoot();
+        var projectPath = Path.Combine(
+            root,
+            "build",
+            "MathBlocks.CudaSourceGenerator",
+            "MathBlocks.CudaSourceGenerator.csproj");
+        var sourcePath = Path.Combine(
+            root,
+            "build",
+            "MathBlocks.CudaSourceGenerator",
+            "Program.cs");
+        var document = XDocument.Load(projectPath);
+        var package = Assert.Single(document.Descendants("PackageReference"));
+
+        Assert.Empty(document.Descendants("ProjectReference"));
+        Assert.Equal("Supprocom.CSharp2CUDA", package.Attribute("Include")!.Value);
+        Assert.Equal("[0.2.1]", package.Attribute("Version")!.Value);
+        Assert.Null(package.Attribute("Condition"));
+        Assert.Null(package.Parent!.Attribute("Condition"));
+
+        var catalogSources = Directory.EnumerateFiles(
+                Path.Combine(root, "Supprocom.MathBlocks", "Cuda", "Blocks"),
+                "*CudaBlockCatalog.cs",
+                SearchOption.AllDirectories)
+            .OrderBy(path => path, StringComparer.Ordinal)
+            .ToArray();
+        Assert.Equal(12, catalogSources.Length);
+
+        foreach (var source in catalogSources.Append(sourcePath))
+        {
+            var text = File.ReadAllText(source);
+            Assert.Contains("using Supprocom.CSharp2CUDA;", text, StringComparison.Ordinal);
+            Assert.DoesNotContain("using CSharp2CUDA;", text, StringComparison.Ordinal);
+        }
+
+        foreach (var source in catalogSources)
+        {
+            var text = File.ReadAllText(source);
+            Assert.Contains("[TranspileToCUDA]", text, StringComparison.Ordinal);
+            Assert.DoesNotContain("[CudaTranslationUnit]", text, StringComparison.Ordinal);
+        }
+
+        var generatorSource = File.ReadAllText(sourcePath);
+        Assert.Contains("CudaTranspiler.TranspileFile(", generatorSource, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Public_release_metadata_declares_the_CUDA_0_3_2_contract()
     {
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(root, "Supprocom.MathBlocks", "Supprocom.MathBlocks.csproj");
         var document = XDocument.Load(projectPath);
         var readme = File.ReadAllText(Path.Combine(root, "README.md"));
 
-        Assert.Equal("0.3.1", document.Descendants("Version").Single().Value);
+        Assert.Equal("0.3.2", document.Descendants("Version").Single().Value);
         Assert.Equal("AGPL-3.0-only", document.Descendants("PackageLicenseExpression").Single().Value);
         Assert.Contains(
-            "Removes formula-search APIs",
+            "Migrates CUDA source generation to exact Supprocom.CSharp2CUDA 0.2.1",
             document.Descendants("PackageReleaseNotes").Single().Value,
             StringComparison.Ordinal);
         Assert.Equal(new Version(0, 3, 0, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
         Assert.Contains("## Operation contract", readme, StringComparison.Ordinal);
         Assert.Contains("## CUDA composition", readme, StringComparison.Ordinal);
         Assert.Contains(
-            "dotnet add package Supprocom.MathBlocks --version 0.3.1",
+            "dotnet add package Supprocom.MathBlocks --version 0.3.2",
             readme,
             StringComparison.Ordinal);
         Assert.DoesNotContain("## Resident typed program search", readme, StringComparison.Ordinal);
