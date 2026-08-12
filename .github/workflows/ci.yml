@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      NUGET_PACKAGES: ${{ runner.temp }}/nuget-packages
-      ARTIFACT_ROOT: ${{ runner.temp }}/mathblocks-artifacts
+      NUGET_PACKAGES: /tmp/mathblocks-nuget-packages
+      ARTIFACT_ROOT: /tmp/mathblocks-artifacts
     steps:
       - name: Check out the exact commit
         uses: actions/checkout@v4
