@@ -138,11 +138,10 @@ public sealed class MathBlockCudaWorkerTests
         {
             var source = File.ReadAllText(Path.Combine(
                 root,
-                "Supprocom.MathBlocks",
-                "Cuda",
-                "Blocks",
-                family,
-                $"{family}CudaBlockCatalog.cs"));
+                "build",
+                "MathBlocks.CudaSourceGenerator",
+                "TranslationUnits",
+                $"{family}Module.cs"));
             Assert.Contains("[CudaReadOnly] MathBlockSlot** inputs", source, StringComparison.Ordinal);
         }
 

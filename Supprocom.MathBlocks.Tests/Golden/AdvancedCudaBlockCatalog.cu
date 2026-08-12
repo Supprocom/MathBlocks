@@ -418,9 +418,6 @@ __device__ void mathblocks_advanced_dispatch(
     MathBlockSlot* output)
 {
     int thread = (int)threadIdx.x;
-    if (false)
-        return;
-
     const MathBlockSlot* first = input_count > 0 ? inputs[0] : nullptr;
     const MathBlockSlot* second = input_count > 1 ? inputs[1] : nullptr;
     const MathBlockSlot* third = input_count > 2 ? inputs[2] : nullptr;

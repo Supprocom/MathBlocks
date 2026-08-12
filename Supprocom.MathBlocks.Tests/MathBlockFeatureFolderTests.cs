@@ -53,8 +53,8 @@ public sealed class MathBlockFeatureFolderTests
         foreach (var path in Directory.GetFiles(cpuRoot, "*.cs", SearchOption.TopDirectoryOnly))
             Assert.DoesNotContain("void Register(", File.ReadAllText(path), StringComparison.Ordinal);
 
-        var cudaRoot = Path.Combine(root, "Supprocom.MathBlocks", "Cuda", "Blocks");
-        foreach (var path in Directory.GetFiles(cudaRoot, "*CudaBlockCatalog.cs", SearchOption.AllDirectories))
+        var cudaRoot = Path.Combine(root, "build", "MathBlocks.CudaSourceGenerator", "TranslationUnits");
+        foreach (var path in Directory.GetFiles(cudaRoot, "*Module.cs", SearchOption.TopDirectoryOnly))
         {
             var source = File.ReadAllText(path);
             Assert.DoesNotContain("CreateOpcodes", source, StringComparison.Ordinal);

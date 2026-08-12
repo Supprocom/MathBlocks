@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build direct CUDA source contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NUGET_PACKAGES: ${{ runner.temp }}/nuget-packages
+      ARTIFACT_ROOT: ${{ runner.temp }}/mathblocks-artifacts
+    steps:
+      - name: Check out the exact commit
+        uses: actions/checkout@v4
+
+      - name: Install .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Verify the direct source boundary
+        shell: pwsh
+        run: |
+          $units = @(Get-ChildItem 'build/MathBlocks.CudaSourceGenerator/TranslationUnits' -Filter '*Module.cs')
+          if ($units.Count -ne 12) {
+              throw "The generator requires exactly 12 direct translation units."
+          }
+
+          $legacy = @(Get-ChildItem 'Supprocom.MathBlocks/Cuda/Blocks' -Filter '*CudaBlockCatalog.cs' -Recurse)
+          if ($legacy.Count -ne 0) {
+              throw "Legacy CUDA catalog wrappers are present."
+          }
+
+          $generator = Get-Content 'build/MathBlocks.CudaSourceGenerator/Program.cs' -Raw
+          foreach ($token in @('ToDeviceSource', 'ExtractTranslationUnit', 'TranslationUnitSource', 'extern "C" __global__', 'blockIdx.x')) {
+              if ($generator.IndexOf($token, [StringComparison]::Ordinal) -ge 0) {
+                  throw "The generator contains the forbidden CUDA rewrite token '$token'."
+              }
+          }
+
+          $deviceUnits = @($units | Where-Object {
+              (Get-Content $_.FullName -Raw).IndexOf('[CudaDevice(Name = "mathblocks_', [StringComparison]::Ordinal) -ge 0
+          })
+          if ($deviceUnits.Count -ne 11) {
+              throw "Each operation family requires one direct CUDA device dispatcher."
+          }
+
+          foreach ($unit in $deviceUnits) {
+              $source = Get-Content $unit.FullName -Raw
+              if ($source.IndexOf('[CudaGlobal]', [StringComparison]::Ordinal) -ge 0 -or
+                  $source.IndexOf('Cuda.BlockIdx.X', [StringComparison]::Ordinal) -ge 0) {
+                  throw "An operation family contains a global-kernel compatibility path."
+              }
+          }
+
+      - name: Restore the source generator
+        run: >-
+          dotnet restore build/MathBlocks.CudaSourceGenerator/MathBlocks.CudaSourceGenerator.csproj
+          --force-evaluate -p:NuGetAuditMode=all --artifacts-path "$ARTIFACT_ROOT/generator"
+
+      - name: Build the source generator
+        run: >-
+          dotnet build build/MathBlocks.CudaSourceGenerator/MathBlocks.CudaSourceGenerator.csproj
+          -c Release --no-restore --no-incremental --warnaserror
+          --artifacts-path "$ARTIFACT_ROOT/generator"
+
+      - name: Restore MathBlocks
+        run: >-
+          dotnet restore Supprocom.MathBlocks/Supprocom.MathBlocks.csproj
+          --force-evaluate -p:NuGetAuditMode=all --artifacts-path "$ARTIFACT_ROOT/product"
+
+      - name: Build MathBlocks
+        run: >-
+          dotnet build Supprocom.MathBlocks/Supprocom.MathBlocks.csproj
+          -c Release --no-restore --no-incremental --warnaserror
+          --artifacts-path "$ARTIFACT_ROOT/product"
+
+      - name: Check the tracked diff
+        run: git diff --check

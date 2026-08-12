@@ -65,30 +65,82 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Null(package.Attribute("Condition"));
         Assert.Null(package.Parent!.Attribute("Condition"));
 
-        var catalogSources = Directory.EnumerateFiles(
-                Path.Combine(root, "Supprocom.MathBlocks", "Cuda", "Blocks"),
-                "*CudaBlockCatalog.cs",
-                SearchOption.AllDirectories)
+        var translationRoot = Path.Combine(
+            root,
+            "build",
+            "MathBlocks.CudaSourceGenerator",
+            "TranslationUnits");
+        var translationSources = Directory.EnumerateFiles(
+                translationRoot,
+                "*Module.cs",
+                SearchOption.TopDirectoryOnly)
             .OrderBy(path => path, StringComparer.Ordinal)
             .ToArray();
-        Assert.Equal(12, catalogSources.Length);
+        Assert.Equal(12, translationSources.Length);
+        Assert.Empty(Directory.EnumerateFiles(
+            Path.Combine(root, "Supprocom.MathBlocks", "Cuda", "Blocks"),
+            "*CudaBlockCatalog.cs",
+            SearchOption.AllDirectories));
 
-        foreach (var source in catalogSources.Append(sourcePath))
+        foreach (var source in translationSources.Append(sourcePath))
         {
             var text = File.ReadAllText(source);
             Assert.Contains("using Supprocom.CSharp2CUDA;", text, StringComparison.Ordinal);
             Assert.DoesNotContain("using CSharp2CUDA;", text, StringComparison.Ordinal);
         }
 
-        foreach (var source in catalogSources)
+        foreach (var source in translationSources)
         {
             var text = File.ReadAllText(source);
             Assert.Contains("[TranspileToCUDA]", text, StringComparison.Ordinal);
             Assert.DoesNotContain("[CudaTranslationUnit]", text, StringComparison.Ordinal);
+            Assert.DoesNotContain("TranslationUnitSource", text, StringComparison.Ordinal);
         }
+
+        var operationSources = translationSources
+            .Where(path => !path.EndsWith("DeviceDispatchModule.cs", StringComparison.Ordinal))
+            .ToArray();
+        Assert.Equal(11, operationSources.Length);
+        Assert.All(operationSources, source =>
+        {
+            var text = File.ReadAllText(source);
+            Assert.Contains("[CudaDevice(Name = \"mathblocks_", text, StringComparison.Ordinal);
+            Assert.DoesNotContain("[CudaGlobal]", text, StringComparison.Ordinal);
+            Assert.DoesNotContain("Cuda.BlockIdx.X", text, StringComparison.Ordinal);
+        });
 
         var generatorSource = File.ReadAllText(sourcePath);
         Assert.Contains("CudaTranspiler.TranspileFile(", generatorSource, StringComparison.Ordinal);
+        Assert.Contains("--translation-root", generatorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("ToDeviceSource", generatorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("ExtractTranslationUnit", generatorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("TranslationUnitSource", generatorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("extern \"C\" __global__", generatorSource, StringComparison.Ordinal);
+        Assert.DoesNotContain("blockIdx.x", generatorSource, StringComparison.Ordinal);
+        Assert.Equal(
+            11,
+            operationSources.Count(path =>
+                File.ReadAllText(path).Contains("[CudaDevice(Name = \"mathblocks_", StringComparison.Ordinal)));
+    }
+
+    [Fact]
+    public void Repository_CI_builds_the_direct_CUDA_source_contract()
+    {
+        var root = FindRepositoryRoot();
+        var workflowPath = Path.Combine(root, ".github", "workflows", "ci.yml");
+
+        Assert.True(File.Exists(workflowPath), "The repository CI workflow is missing.");
+        var workflow = File.ReadAllText(workflowPath);
+        Assert.Contains("push:", workflow, StringComparison.Ordinal);
+        Assert.Contains("pull_request:", workflow, StringComparison.Ordinal);
+        Assert.Contains("workflow_dispatch:", workflow, StringComparison.Ordinal);
+        Assert.Contains("dotnet restore", workflow, StringComparison.Ordinal);
+        Assert.Contains("NuGetAuditMode=all", workflow, StringComparison.Ordinal);
+        Assert.Contains("dotnet build", workflow, StringComparison.Ordinal);
+        Assert.Contains("--warnaserror", workflow, StringComparison.Ordinal);
+        Assert.Contains("git diff --check", workflow, StringComparison.Ordinal);
+        Assert.Contains("TranslationUnits", workflow, StringComparison.Ordinal);
+        Assert.Contains("ToDeviceSource", workflow, StringComparison.Ordinal);
     }
 
     [Fact]

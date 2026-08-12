@@ -571,9 +571,6 @@ __device__ void mathblocks_geometry_dispatch(
     MathBlockSlot* output)
 {
     int thread = (int)threadIdx.x;
-    if (false)
-        return;
-
     const MathBlockSlot* first = input_count > 0 ? inputs[0] : nullptr;
     const MathBlockSlot* second = input_count > 1 ? inputs[1] : nullptr;
     if (thread == 0)

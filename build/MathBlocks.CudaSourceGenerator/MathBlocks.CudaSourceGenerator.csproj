@@ -11,4 +11,9 @@
     <PackageReference Include="Supprocom.CSharp2CUDA" Version="[0.2.1]" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="TranslationUnits\**\*.cs" />
+    <None Include="TranslationUnits\**\*.cs" />
+  </ItemGroup>
+
 </Project>

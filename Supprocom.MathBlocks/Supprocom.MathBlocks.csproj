@@ -37,7 +37,6 @@
 
   <ItemGroup>
     <Compile Remove="Blocks\**\*.Tests.cs" />
-    <Compile Remove="Cuda\Blocks\**\*CudaBlockCatalog.cs" />
     <Compile Include="$(IntermediateOutputPath)MathBlockCudaGeneratedSource.g.cs" AutoGen="true" Visible="false" />
     <None Include="..\README.md" Pack="true" PackagePath="README.md" />
     <None Include="..\LICENSE.md" Pack="true" PackagePath="LICENSE.md" />
@@ -53,7 +52,7 @@
   <Target Name="GenerateMathBlocksCudaSource" BeforeTargets="CoreCompile">
     <MakeDir Directories="$(IntermediateOutputPath)" />
     <Exec WorkingDirectory="$(MSBuildProjectDirectory)"
-          Command="dotnet run --project &quot;$(MSBuildProjectDirectory)\..\build\MathBlocks.CudaSourceGenerator\MathBlocks.CudaSourceGenerator.csproj&quot; --configuration $(Configuration) --no-launch-profile -- --source-root &quot;$(MSBuildProjectDirectory)&quot; --golden-root &quot;$(MSBuildProjectDirectory)\..\Supprocom.MathBlocks.Tests\Golden&quot; --generated-source &quot;$(IntermediateOutputPath)MathBlockCudaGeneratedSource.g.cs&quot; --generated-cuda &quot;$(IntermediateOutputPath)MathBlockCudaGeneratedSource.cu&quot;" />
+          Command="dotnet run --project &quot;$(MSBuildProjectDirectory)/../build/MathBlocks.CudaSourceGenerator/MathBlocks.CudaSourceGenerator.csproj&quot; --configuration $(Configuration) --no-launch-profile -- --translation-root &quot;$(MSBuildProjectDirectory)/../build/MathBlocks.CudaSourceGenerator/TranslationUnits&quot; --golden-root &quot;$(MSBuildProjectDirectory)/../Supprocom.MathBlocks.Tests/Golden&quot; --generated-source &quot;$(IntermediateOutputPath)MathBlockCudaGeneratedSource.g.cs&quot; --generated-cuda &quot;$(IntermediateOutputPath)MathBlockCudaGeneratedSource.cu&quot;" />
   </Target>
 
 </Project>

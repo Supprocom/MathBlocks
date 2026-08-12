@@ -6,17 +6,17 @@ internal static class Program
 {
     private static readonly Unit[] Units =
     [
-        new("Scalar", "Cuda/Blocks/Scalar/ScalarCudaBlockCatalog.cs", "mathblocks_scalar"),
-        new("Vector", "Cuda/Blocks/Vector/VectorCudaBlockCatalog.cs", "mathblocks_vector"),
-        new("Complex", "Cuda/Blocks/Complex/ComplexCudaBlockCatalog.cs", "mathblocks_complex"),
-        new("Matrix", "Cuda/Blocks/Matrix/MatrixCudaBlockCatalog.cs", "mathblocks_matrix"),
-        new("Probability", "Cuda/Blocks/Probability/ProbabilityCudaBlockCatalog.cs", "mathblocks_probability"),
-        new("SequencePath", "Cuda/Blocks/SequencePath/SequencePathCudaBlockCatalog.cs", "mathblocks_sequence_path"),
-        new("Statistics", "Cuda/Blocks/Statistics/StatisticsCudaBlockCatalog.cs", "mathblocks_statistics"),
-        new("Geometry", "Cuda/Blocks/Geometry/GeometryCudaBlockCatalog.cs", "mathblocks_geometry"),
-        new("Graph", "Cuda/Blocks/Graph/GraphCudaBlockCatalog.cs", "mathblocks_graph"),
-        new("Advanced", "Cuda/Blocks/Advanced/AdvancedCudaBlockCatalog.cs", "mathblocks_advanced"),
-        new("Transport", "Cuda/Blocks/Transport/TransportCudaBlockCatalog.cs", "mathblocks_transport")
+        new("Scalar", "ScalarModule.cs"),
+        new("Vector", "VectorModule.cs"),
+        new("Complex", "ComplexModule.cs"),
+        new("Matrix", "MatrixModule.cs"),
+        new("Probability", "ProbabilityModule.cs"),
+        new("SequencePath", "SequencePathModule.cs"),
+        new("Statistics", "StatisticsModule.cs"),
+        new("Geometry", "GeometryModule.cs"),
+        new("Graph", "GraphModule.cs"),
+        new("Advanced", "AdvancedModule.cs"),
+        new("Transport", "TransportModule.cs")
     ];
 
     private static int Main(string[] args)
@@ -25,19 +25,10 @@ internal static class Program
         {
             var options = Arguments.Parse(args);
             var generatedUnits = new List<string>(Units.Length);
-            var translationRoot = Path.Combine(
-                Path.GetDirectoryName(options.GeneratedSource)!,
-                "MathBlocks.CudaTranslationUnits");
-            Directory.CreateDirectory(translationRoot);
 
             foreach (var unit in Units)
             {
-                var sourcePath = Path.Combine(options.SourceRoot, unit.SourcePath.Replace('/', Path.DirectorySeparatorChar));
-                var source = ExtractTranslationUnit(sourcePath);
-                var translationPath = WriteTranslationUnit(
-                    translationRoot,
-                    Path.GetFileName(sourcePath),
-                    source);
+                var translationPath = Path.Combine(options.TranslationRoot, unit.SourceFile);
                 var result = CudaTranspiler.TranspileFile(
                     translationPath,
                     options: new CudaTranspilationOptions { NewLine = "\n" });
@@ -47,29 +38,23 @@ internal static class Program
                         $"{unit.Name} CUDA translation failed: {string.Join(Environment.NewLine, result.Diagnostics)}");
                 }
 
-                var deviceSource = ToDeviceSource(result.Source, unit.EntryPoint);
-                var publishedUnit = deviceSource + "\n";
+                var publishedUnit = NormalizeLineEndings(result.Source) + "\n";
                 var goldenPath = Path.Combine(options.GoldenRoot, $"{unit.Name}CudaBlockCatalog.cu");
                 var golden = File.ReadAllText(goldenPath, Encoding.UTF8);
 
-                AssertExact(unit.Name, NormalizeLineEndings(deviceSource), NormalizeLineEndings(golden));
+                WriteUnitEvidence(options.EvidenceRoot, unit, publishedUnit[..^1]);
+                AssertExact(unit.Name, publishedUnit[..^1], NormalizeLineEndings(golden));
                 generatedUnits.Add(publishedUnit);
-                WriteUnitEvidence(options.EvidenceRoot, unit, deviceSource);
                 Console.WriteLine(
                     $"unit={unit.Name} bytes={Encoding.UTF8.GetByteCount(publishedUnit)} " +
                     $"sha256={Hash(publishedUnit)} exact=True diagnostics=0");
             }
 
             var dispatchSourcePath = Path.Combine(
-                options.SourceRoot,
-                "Cuda/Blocks/DeviceDispatch/DeviceDispatchCudaBlockCatalog.cs".Replace('/', Path.DirectorySeparatorChar));
-            var dispatchSource = ExtractTranslationUnit(dispatchSourcePath);
-            var dispatchTranslationPath = WriteTranslationUnit(
-                translationRoot,
-                Path.GetFileName(dispatchSourcePath),
-                dispatchSource);
+                options.TranslationRoot,
+                "DeviceDispatchModule.cs");
             var dispatchResult = CudaTranspiler.TranspileFile(
-                dispatchTranslationPath,
+                dispatchSourcePath,
                 options: new CudaTranspilationOptions { NewLine = "\n" });
             if (!dispatchResult.Succeeded)
             {
@@ -92,7 +77,7 @@ internal static class Program
             var fullBytes = Encoding.UTF8.GetBytes(fullSource);
             var fullHash = Convert.ToHexString(SHA256.HashData(fullBytes));
             const string expectedFullHash =
-                "EEFF3D494A9F8499F66164DAEA5BA8BA7C813D2E37A0357987A4BC46A13DA92A";
+                "60C9CDC39BCA648DF980D6C297661631D7B730D581C4574805394BA17910EC4A";
             if (!string.Equals(fullHash, expectedFullHash, StringComparison.Ordinal))
             {
                 throw new InvalidOperationException(
@@ -115,80 +100,6 @@ internal static class Program
             Console.Error.WriteLine($"error={exception.Message}");
             return 1;
         }
-    }
-
-    private static string ExtractTranslationUnit(string path)
-    {
-        var text = NormalizeLineEndings(File.ReadAllText(path, Encoding.UTF8));
-        const string marker = "private const string TranslationUnitSource = \"\"\"";
-        var start = text.IndexOf(marker, StringComparison.Ordinal);
-        if (start < 0)
-            throw new InvalidOperationException($"Translation unit marker is missing from '{path}'.");
-
-        var bodyStart = text.IndexOf('\n', start + marker.Length);
-        if (bodyStart < 0)
-            throw new InvalidOperationException($"Translation unit body is missing from '{path}'.");
-        bodyStart++;
-
-        var end = text.IndexOf("\n    \"\"\";", bodyStart, StringComparison.Ordinal);
-        if (end < 0)
-            end = text.IndexOf("\n\"\"\";", bodyStart, StringComparison.Ordinal);
-        if (end < 0)
-            throw new InvalidOperationException($"Translation unit terminator is missing from '{path}'.");
-
-        var lines = text[bodyStart..end].Split('\n');
-        for (var index = 0; index < lines.Length; index++)
-        {
-            if (lines[index].Length == 0)
-                continue;
-            if (lines[index].StartsWith("    ", StringComparison.Ordinal))
-                lines[index] = lines[index][4..];
-            else if (string.IsNullOrWhiteSpace(lines[index]))
-                lines[index] = string.Empty;
-        }
-
-        return string.Join('\n', lines);
-    }
-
-    private static string WriteTranslationUnit(string root, string fileName, string source)
-    {
-        var path = Path.Combine(root, fileName);
-        File.WriteAllText(
-            path,
-            "#pragma warning disable CS0078, CS0649\n\n" + source,
-            new UTF8Encoding(false));
-        return path;
-    }
-
-    private static string ToDeviceSource(string source, string entryPoint)
-    {
-        var globalDeclaration = $"extern \"C\" __global__ void {entryPoint}(";
-        var deviceDeclaration = $"__device__ void {entryPoint}_dispatch(";
-        var declarationCount = CountOccurrences(source, globalDeclaration);
-        if (declarationCount != 2)
-        {
-            throw new InvalidOperationException(
-                $"CUDA entry point '{entryPoint}' requires one prototype and one definition. " +
-                $"Actual declaration count={declarationCount}.");
-        }
-
-        var deviceSource = source.Replace(globalDeclaration, deviceDeclaration, StringComparison.Ordinal);
-        return entryPoint == "mathblocks_scalar"
-            ? deviceSource.Replace("blockIdx.x != 0 || ", string.Empty, StringComparison.Ordinal)
-            : deviceSource.Replace("blockIdx.x != 0", "false", StringComparison.Ordinal);
-    }
-
-    private static int CountOccurrences(string source, string value)
-    {
-        var count = 0;
-        var index = 0;
-        while ((index = source.IndexOf(value, index, StringComparison.Ordinal)) >= 0)
-        {
-            count++;
-            index += value.Length;
-        }
-
-        return count;
     }
 
     private static string NormalizeLineEndings(string value) =>
@@ -298,10 +209,10 @@ internal static class Program
 
     private static string Hash(byte[] value) => Convert.ToHexString(SHA256.HashData(value));
 
-    private sealed record Unit(string Name, string SourcePath, string EntryPoint);
+    private sealed record Unit(string Name, string SourceFile);
 
     private sealed record GeneratorOptions(
-        string SourceRoot,
+        string TranslationRoot,
         string GoldenRoot,
         string GeneratedSource,
         string GeneratedCuda,
@@ -320,7 +231,7 @@ internal static class Program
             }
 
             return new GeneratorOptions(
-                Required(values, "--source-root"),
+                Required(values, "--translation-root"),
                 Required(values, "--golden-root"),
                 Required(values, "--generated-source"),
                 Required(values, "--generated-cuda"),
