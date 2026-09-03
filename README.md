@@ -71,6 +71,67 @@ foreach (var operation in imported.Operations)
 var sameNotation = MathBlockOpenMath.Export(imported.Program);
 ```
 
+Direct UTF-8 APIs avoid an intermediate string. Stream APIs leave each
+caller-owned endpoint open. The async forms use async I/O and accept
+cancellation.
+
+```csharp
+var utf8 = MathBlockOpenMath.ExportUtf8(program);
+var fromBytes = MathBlockOpenMath.ImportUtf8(utf8);
+
+await using var output = File.Create("program.openmath.xml");
+await MathBlockOpenMath.WriteUtf8Async(program, output);
+
+await using var input = File.OpenRead("program.openmath.xml");
+var fromStream = await MathBlockOpenMath.ReadUtf8Async(input);
+```
+
+The byte APIs accept UTF-8 only. Import accepts an optional UTF-8 byte-order
+mark, but canonical output never writes one.
+
+Nonthrowing import returns one result or one structured diagnostic. Validation
+also reports whether valid input already has the canonical form.
+
+```csharp
+var untrustedNotation = notation;
+var attempt = MathBlockOpenMath.TryImport(untrustedNotation);
+if (!attempt.Succeeded)
+{
+    Console.WriteLine(attempt.Diagnostic!.Code);
+    Console.WriteLine(attempt.Diagnostic.Message);
+}
+
+var validation = MathBlockOpenMath.Validate(untrustedNotation);
+if (validation.IsValid &&
+    validation.Canonicality == MathBlockOpenMathCanonicality.Noncanonical)
+{
+    var canonicalNotation = MathBlockOpenMath.Normalize(untrustedNotation);
+}
+```
+
+Import options can apply smaller resource limits. They can also require the
+canonical form or capture source locations.
+
+```csharp
+var options = new MathBlockOpenMathImportOptions
+{
+    MaximumNodes = 10_000,
+    MaximumOutputs = 100,
+    MaximumValueElements = 1_000_000,
+    CaptureSourceLocations = true
+};
+
+var detailed = MathBlockOpenMath.Import(notation, options);
+foreach (var occurrence in detailed.OperationOccurrences)
+{
+    Console.WriteLine($"{occurrence.NodeIndex}: {occurrence.Operation.Identity}");
+}
+```
+
+`MathBlockOpenMath.Profile` exposes the 337 exact operation symbols and the
+seven embedded Profile 1 artifacts. Artifact streams are read-only and do not
+use the package installation path.
+
 The profile preserves shared nodes, constants, units, shapes, and named
 outputs. It uses exact hexadecimal binary64 values.
 
@@ -85,6 +146,9 @@ repository [OpenMath directory](https://github.com/Supprocom/MathBlocks/tree/mai
 Import rejects a document that exceeds
 `MathBlockOpenMath.MaximumDocumentCharacters`. Import does not retrieve a
 schema or content dictionary from the network.
+
+The [OpenMath API guide](docs/openmath-api.md) defines every data path, option,
+diagnostic, ownership rule, and security boundary.
 
 This API reads semantic OpenMath XML. It does not read presentation text such
 as `sin(x) + x^2`.
@@ -208,11 +272,11 @@ unrepresentable resource requirement before launch.
 This Git repository contains source text and project metadata only. It does not
 contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
 
-Get MathBlocks version `0.4.0` from NuGet.org with this command after
+Get MathBlocks version `0.4.1` from NuGet.org with this command after
 publication.
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.4.0
+dotnet add package Supprocom.MathBlocks --version 0.4.1
 ```
 
 The package declares three external native-acquisition dependencies. This
