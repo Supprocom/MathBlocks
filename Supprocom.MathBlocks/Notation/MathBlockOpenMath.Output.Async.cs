@@ -6,6 +6,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockOpenMath
 {
+    /// <summary>Writes canonical UTF-8 asynchronously to a caller-owned stream.</summary>
     public static async Task WriteUtf8Async(
         MathBlockProgram program,
         Stream destination,
@@ -24,6 +25,7 @@ public static partial class MathBlockOpenMath
         await writer.FlushAsync().ConfigureAwait(false);
     }
 
+    /// <summary>Writes canonical characters asynchronously to a caller-owned text writer.</summary>
     public static async Task WriteAsync(
         MathBlockProgram program,
         TextWriter destination,

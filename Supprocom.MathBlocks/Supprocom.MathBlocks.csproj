@@ -23,6 +23,8 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType>portable</DebugType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
     <SourceRevisionId Condition="'$(RepositoryCommit)' != ''">$(RepositoryCommit)</SourceRevisionId>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -44,6 +46,20 @@
     <None Include="..\openmath\v1\**\*"
           Pack="true"
           PackagePath="openmath/v1/%(RecursiveDir)%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\openmath\v1\mathblocks_operations1.ocd"
+                      LogicalName="Supprocom.MathBlocks.OpenMath.v1.mathblocks_operations1.ocd" />
+    <EmbeddedResource Include="..\openmath\v1\mathblocks_profile1.cdg"
+                      LogicalName="Supprocom.MathBlocks.OpenMath.v1.mathblocks_profile1.cdg" />
+    <EmbeddedResource Include="..\openmath\v1\mathblocks_profile1.rnc"
+                      LogicalName="Supprocom.MathBlocks.OpenMath.v1.mathblocks_profile1.rnc" />
+    <EmbeddedResource Include="..\openmath\v1\mathblocks_program1.ocd"
+                      LogicalName="Supprocom.MathBlocks.OpenMath.v1.mathblocks_program1.ocd" />
+    <EmbeddedResource Include="..\openmath\v1\mathblocks_types1.ocd"
+                      LogicalName="Supprocom.MathBlocks.OpenMath.v1.mathblocks_types1.ocd" />
+    <EmbeddedResource Include="..\openmath\v1\mathblocks_values1.ocd"
+                      LogicalName="Supprocom.MathBlocks.OpenMath.v1.mathblocks_values1.ocd" />
+    <EmbeddedResource Include="..\openmath\v1\README.md"
+                      LogicalName="Supprocom.MathBlocks.OpenMath.v1.README.md" />
     <AssemblyMetadata Include="RepositoryCommit" Value="$(RepositoryCommit)" Condition="'$(RepositoryCommit)' != ''" />
   </ItemGroup>
 

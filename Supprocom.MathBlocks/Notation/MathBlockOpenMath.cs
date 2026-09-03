@@ -4,30 +4,69 @@ using System.Xml;
 
 namespace Supprocom.MathBlocks;
 
+/// <summary>Contains one imported Profile 1 program and its operation metadata.</summary>
+[System.Diagnostics.DebuggerDisplay("{Program.PlanNodes.Count} nodes, {Operations.Count} operations")]
 public sealed class MathBlockOpenMathImportResult
 {
     internal MathBlockOpenMathImportResult(
         MathBlockProgram program,
-        IReadOnlyList<MathBlockOperation> operations)
+        IReadOnlyList<MathBlockOperation> operations,
+        IReadOnlyList<MathBlockOpenMathOperationOccurrence> operationOccurrences,
+        IReadOnlyDictionary<string, MathBlockOpenMathSourceLocation>? sourceLocations)
     {
         Program = program;
         Operations = Array.AsReadOnly(MathBlockCollectionPrimitives.Copy(operations));
+        OperationOccurrences = Array.AsReadOnly(
+            MathBlockCollectionPrimitives.Copy(operationOccurrences));
+        SourceLocations = sourceLocations is null
+            ? null
+            : new System.Collections.ObjectModel.ReadOnlyDictionary<
+                string,
+                MathBlockOpenMathSourceLocation>(
+                    new Dictionary<string, MathBlockOpenMathSourceLocation>(
+                        sourceLocations,
+                        StringComparer.Ordinal));
     }
 
+    /// <summary>Gets the imported typed program.</summary>
     public MathBlockProgram Program { get; }
+
+    /// <summary>Gets operations in program node order.</summary>
     public IReadOnlyList<MathBlockOperation> Operations { get; }
+
+    /// <summary>Gets operation occurrences in program node order.</summary>
+    public IReadOnlyList<MathBlockOpenMathOperationOccurrence> OperationOccurrences { get; }
+
+    /// <summary>Gets captured source locations when the import requested them.</summary>
+    public IReadOnlyDictionary<string, MathBlockOpenMathSourceLocation>? SourceLocations { get; }
 }
 
+/// <summary>Imports, exports, validates, and describes MathBlocks OpenMath Profile 1.</summary>
 public static partial class MathBlockOpenMath
 {
+    /// <summary>Gets the supported OpenMath standard version.</summary>
     public const string StandardVersion = "2.0";
+
+    /// <summary>Gets the OpenMath XML media type.</summary>
     public const string MediaType = "application/openmath+xml";
+
+    /// <summary>Gets the MathBlocks OpenMath profile version.</summary>
     public const string ProfileVersion = "1";
+
+    /// <summary>Gets the canonical XML algorithm URI.</summary>
     public const string CanonicalizationAlgorithm = "http://www.w3.org/2006/12/xml-c14n11";
+
+    /// <summary>Gets the compatibility maximum for decoded source characters.</summary>
     public const int MaximumDocumentCharacters = 16 * 1024 * 1024;
+
+    /// <summary>Gets the compatibility maximum for UTF-8 source bytes.</summary>
     public const int MaximumDocumentUtf8Bytes = MaximumDocumentCharacters * 3 + 3;
+
+    /// <summary>Gets the fixed Profile 1 content dictionary base URI.</summary>
     public const string ContentDictionaryBase =
         "https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v1";
+
+    /// <summary>Gets the fixed Profile 1 content dictionary group URI.</summary>
     public const string ContentDictionaryGroup =
         ContentDictionaryBase + "/mathblocks_profile1.cdg";
 
@@ -38,6 +77,7 @@ public static partial class MathBlockOpenMath
     private const string ValueDictionary = "mathblocks_values1";
     private static readonly Lazy<ProfileState> StandardProfile = new(CreateStandardProfile);
 
+    /// <summary>Exports a typed program as canonical Profile 1 XML characters.</summary>
     public static string Export(MathBlockProgram program)
     {
         ArgumentNullException.ThrowIfNull(program);
@@ -65,16 +105,9 @@ public static partial class MathBlockOpenMath
         writer.WriteEndElement();
     }
 
+    /// <summary>Imports a Profile 1 character document with compatibility options.</summary>
     public static MathBlockOpenMathImportResult Import(string source)
-    {
-        ArgumentNullException.ThrowIfNull(source);
-        if (source.Length == 0)
-            throw InvalidFormat("The OpenMath source is empty.");
-        if (source.Length > MaximumDocumentCharacters)
-            throw InvalidFormat("The OpenMath source exceeds the character limit.");
-
-        return ImportForward(source);
-    }
+        => Import(source, null);
 
     private static void WriteNodes(XmlWriter writer, MathBlockProgram program)
     {
@@ -552,15 +585,18 @@ public static partial class MathBlockOpenMath
         return settings;
     }
 
-    private static XmlReaderSettings CreateReaderSettings() => new()
+    private static XmlReaderSettings CreateReaderSettings(
+        int maximumDocumentCharacters,
+        bool async = false) => new()
     {
         DtdProcessing = DtdProcessing.Prohibit,
         XmlResolver = null,
-        MaxCharactersInDocument = MaximumDocumentCharacters,
+        MaxCharactersInDocument = maximumDocumentCharacters,
         IgnoreComments = false,
         IgnoreProcessingInstructions = false,
         IgnoreWhitespace = false,
-        CloseInput = true
+        CloseInput = true,
+        Async = async
     };
 
     private static FormatException InvalidFormat(string message) => new(message);

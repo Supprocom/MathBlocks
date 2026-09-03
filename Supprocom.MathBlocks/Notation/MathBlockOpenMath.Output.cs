@@ -8,6 +8,7 @@ public static partial class MathBlockOpenMath
 {
     private static readonly Encoding StrictUtf8 = new UTF8Encoding(false, true);
 
+    /// <summary>Exports a typed program as canonical Profile 1 UTF-8 bytes.</summary>
     public static byte[] ExportUtf8(MathBlockProgram program)
     {
         ArgumentNullException.ThrowIfNull(program);
@@ -21,6 +22,7 @@ public static partial class MathBlockOpenMath
         return result;
     }
 
+    /// <summary>Gets the exact canonical UTF-8 byte count for a typed program.</summary>
     public static int GetUtf8ByteCount(MathBlockProgram program)
     {
         ArgumentNullException.ThrowIfNull(program);
@@ -32,6 +34,7 @@ public static partial class MathBlockOpenMath
         return stream.ByteCount;
     }
 
+    /// <summary>Tries to write canonical UTF-8 into a supplied destination.</summary>
     public static unsafe bool TryWriteUtf8(
         MathBlockProgram program,
         Span<byte> destination,
@@ -62,6 +65,7 @@ public static partial class MathBlockOpenMath
         return true;
     }
 
+    /// <summary>Writes canonical UTF-8 through a caller-owned buffer writer.</summary>
     public static void WriteUtf8(
         MathBlockProgram program,
         IBufferWriter<byte> destination)
@@ -76,6 +80,7 @@ public static partial class MathBlockOpenMath
         writer.Flush();
     }
 
+    /// <summary>Writes canonical UTF-8 to a caller-owned stream.</summary>
     public static void WriteUtf8(MathBlockProgram program, Stream destination)
     {
         ArgumentNullException.ThrowIfNull(program);
@@ -89,6 +94,7 @@ public static partial class MathBlockOpenMath
         writer.Flush();
     }
 
+    /// <summary>Writes canonical characters to a caller-owned text writer.</summary>
     public static void Write(MathBlockProgram program, TextWriter destination)
     {
         ArgumentNullException.ThrowIfNull(program);
