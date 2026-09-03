@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
@@ -35,6 +36,7 @@ public sealed class MathBlockOpenMathTests
         Assert.Equal("1", MathBlockOpenMath.ProfileVersion);
         Assert.Equal("http://www.w3.org/2006/12/xml-c14n11", MathBlockOpenMath.CanonicalizationAlgorithm);
         Assert.Equal(16 * 1024 * 1024, MathBlockOpenMath.MaximumDocumentCharacters);
+        Assert.Equal(50_331_651, MathBlockOpenMath.MaximumDocumentUtf8Bytes);
         Assert.Equal(program.Fingerprint, imported.Program.Fingerprint);
         Assert.Equal(source, MathBlockOpenMath.Export(imported.Program));
         Assert.Equal(
@@ -64,6 +66,7 @@ public sealed class MathBlockOpenMathTests
 
             Assert.Equal(program.Fingerprint, imported.Program.Fingerprint);
             Assert.Equal(source, MathBlockOpenMath.Export(imported.Program));
+            Assert.Equal(Encoding.UTF8.GetBytes(source), MathBlockOpenMath.ExportUtf8(program));
             Assert.Single(imported.Operations);
             Assert.Same(operation, imported.Operations[0]);
         }
@@ -147,6 +150,13 @@ public sealed class MathBlockOpenMathTests
         Assert.Equal(
             "The program contains an operation outside the standard OpenMath profile.",
             exception.Message);
+
+        using var stream = new MemoryStream([1, 2, 3], writable: true);
+        stream.Position = stream.Length;
+        var streamException = Assert.Throws<InvalidOperationException>(
+            () => MathBlockOpenMath.WriteUtf8(program, stream));
+        Assert.Equal(exception.Message, streamException.Message);
+        Assert.Equal([1, 2, 3], stream.ToArray());
     }
 
     [Fact]
@@ -238,6 +248,41 @@ public sealed class MathBlockOpenMathTests
             Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(expected))));
         for (var index = 0; index < 1_000; index++)
             Assert.Equal(expected, MathBlockOpenMath.Export(program));
+    }
+
+    [Fact]
+    public void Synchronous_output_APIs_produce_the_exact_canonical_form()
+    {
+        var program = CreateSampleProgram();
+        var expectedText = MathBlockOpenMath.Export(program);
+        var expectedBytes = Encoding.UTF8.GetBytes(expectedText);
+
+        Assert.Equal(expectedBytes.Length, MathBlockOpenMath.GetUtf8ByteCount(program));
+        Assert.Equal(expectedBytes, MathBlockOpenMath.ExportUtf8(program));
+
+        var exactDestination = new byte[expectedBytes.Length];
+        Assert.True(MathBlockOpenMath.TryWriteUtf8(program, exactDestination, out var bytesWritten));
+        Assert.Equal(expectedBytes.Length, bytesWritten);
+        Assert.Equal(expectedBytes, exactDestination);
+
+        var shortDestination = Enumerable.Repeat((byte)0xA5, expectedBytes.Length - 1).ToArray();
+        var originalShortDestination = shortDestination.ToArray();
+        Assert.False(MathBlockOpenMath.TryWriteUtf8(program, shortDestination, out bytesWritten));
+        Assert.Equal(0, bytesWritten);
+        Assert.Equal(originalShortDestination, shortDestination);
+
+        var buffer = new ArrayBufferWriter<byte>();
+        MathBlockOpenMath.WriteUtf8(program, buffer);
+        Assert.Equal(expectedBytes, buffer.WrittenSpan.ToArray());
+
+        using var stream = new MemoryStream();
+        MathBlockOpenMath.WriteUtf8(program, stream);
+        Assert.True(stream.CanWrite);
+        Assert.Equal(expectedBytes, stream.ToArray());
+
+        using var textWriter = new StringWriter(CultureInfo.InvariantCulture);
+        MathBlockOpenMath.Write(program, textWriter);
+        Assert.Equal(expectedText, textWriter.ToString());
     }
 
     [Fact]

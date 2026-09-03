@@ -19,13 +19,14 @@ public sealed class MathBlockOpenMathImportResult
     public IReadOnlyList<MathBlockOperation> Operations { get; }
 }
 
-public static class MathBlockOpenMath
+public static partial class MathBlockOpenMath
 {
     public const string StandardVersion = "2.0";
     public const string MediaType = "application/openmath+xml";
     public const string ProfileVersion = "1";
     public const string CanonicalizationAlgorithm = "http://www.w3.org/2006/12/xml-c14n11";
     public const int MaximumDocumentCharacters = 16 * 1024 * 1024;
+    public const int MaximumDocumentUtf8Bytes = MaximumDocumentCharacters * 3 + 3;
     public const string ContentDictionaryBase =
         "https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v1";
     public const string ContentDictionaryGroup =
@@ -45,22 +46,25 @@ public static class MathBlockOpenMath
 
         var result = new StringBuilder();
         using (var writer = XmlWriter.Create(result, CreateWriterSettings()))
-        {
-            writer.WriteStartElement("OMOBJ", NamespaceUri);
-            writer.WriteAttributeString("xmlns", NamespaceUri);
-            writer.WriteAttributeString("cdbase", ContentDictionaryBase);
-            writer.WriteAttributeString("cdgroup", ContentDictionaryGroup);
-            writer.WriteAttributeString("version", StandardVersion);
-
-            WriteApplicationStart(writer);
-            WriteSymbol(writer, ProgramDictionary, "program");
-            WriteNodes(writer, program);
-            WriteOutputs(writer, program);
-            writer.WriteEndElement();
-
-            writer.WriteEndElement();
-        }
+            WriteDocument(writer, program);
         return result.ToString();
+    }
+
+    private static void WriteDocument(XmlWriter writer, MathBlockProgram program)
+    {
+        writer.WriteStartElement("OMOBJ", NamespaceUri);
+        writer.WriteAttributeString("xmlns", NamespaceUri);
+        writer.WriteAttributeString("cdbase", ContentDictionaryBase);
+        writer.WriteAttributeString("cdgroup", ContentDictionaryGroup);
+        writer.WriteAttributeString("version", StandardVersion);
+
+        WriteApplicationStart(writer);
+        WriteSymbol(writer, ProgramDictionary, "program");
+        WriteNodes(writer, program);
+        WriteOutputs(writer, program);
+        writer.WriteEndElement();
+
+        writer.WriteEndElement();
     }
 
     public static MathBlockOpenMathImportResult Import(string source)
@@ -1081,14 +1085,24 @@ public static class MathBlockOpenMath
         writer.WriteFullEndElement();
     }
 
-    private static XmlWriterSettings CreateWriterSettings() => new()
+    private static XmlWriterSettings CreateWriterSettings(
+        Encoding? encoding = null,
+        bool async = false)
     {
-        OmitXmlDeclaration = true,
-        Indent = false,
-        NewLineHandling = NewLineHandling.None,
-        NamespaceHandling = NamespaceHandling.OmitDuplicates,
-        CheckCharacters = true
-    };
+        var settings = new XmlWriterSettings
+        {
+            OmitXmlDeclaration = true,
+            Indent = false,
+            NewLineHandling = NewLineHandling.None,
+            NamespaceHandling = NamespaceHandling.OmitDuplicates,
+            CheckCharacters = true,
+            CloseOutput = false,
+            Async = async
+        };
+        if (encoding is not null)
+            settings.Encoding = encoding;
+        return settings;
+    }
 
     private static XmlReaderSettings CreateReaderSettings() => new()
     {
