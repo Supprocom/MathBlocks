@@ -47,7 +47,7 @@ public sealed class MathBlockOpenMathTests
     }
 
     [Fact]
-    public void Export_and_import_cover_every_standard_operation()
+    public async Task Export_and_import_cover_every_standard_operation()
     {
         Assert.Equal(337, MathBlockCatalog.Standard.Operations.Count);
 
@@ -67,13 +67,16 @@ public sealed class MathBlockOpenMathTests
             Assert.Equal(program.Fingerprint, imported.Program.Fingerprint);
             Assert.Equal(source, MathBlockOpenMath.Export(imported.Program));
             Assert.Equal(Encoding.UTF8.GetBytes(source), MathBlockOpenMath.ExportUtf8(program));
+            await using var stream = new MemoryStream();
+            await MathBlockOpenMath.WriteUtf8Async(program, stream);
+            Assert.Equal(Encoding.UTF8.GetBytes(source), stream.ToArray());
             Assert.Single(imported.Operations);
             Assert.Same(operation, imported.Operations[0]);
         }
     }
 
     [Fact]
-    public void Export_and_import_preserve_every_value_kind_and_binary64_bits()
+    public async Task Export_and_import_preserve_every_value_kind_and_binary64_bits()
     {
         var unit = new MathBlockUnit(
             new MathRational(1, 2),
@@ -125,6 +128,9 @@ public sealed class MathBlockOpenMathTests
         Assert.Equal(source, MathBlockOpenMath.Export(imported.Program));
         Assert.Empty(imported.Operations);
         Assert.Equal(values.Length, imported.Program.PlanNodes.Count);
+        await using var stream = new MemoryStream();
+        await MathBlockOpenMath.WriteUtf8Async(program, stream);
+        Assert.Equal(Encoding.UTF8.GetBytes(source), stream.ToArray());
     }
 
     [Fact]
@@ -283,6 +289,35 @@ public sealed class MathBlockOpenMathTests
         using var textWriter = new StringWriter(CultureInfo.InvariantCulture);
         MathBlockOpenMath.Write(program, textWriter);
         Assert.Equal(expectedText, textWriter.ToString());
+    }
+
+    [Fact]
+    public async Task Async_output_APIs_produce_the_exact_canonical_form_and_honor_cancellation()
+    {
+        var program = CreateSampleProgram();
+        var expectedText = MathBlockOpenMath.Export(program);
+        var expectedBytes = Encoding.UTF8.GetBytes(expectedText);
+
+        await using var stream = new MemoryStream();
+        await MathBlockOpenMath.WriteUtf8Async(
+            program,
+            stream);
+        Assert.True(stream.CanWrite);
+        Assert.Equal(expectedBytes, stream.ToArray());
+
+        using var textWriter = new StringWriter(CultureInfo.InvariantCulture);
+        await MathBlockOpenMath.WriteAsync(
+            program,
+            textWriter);
+        Assert.Equal(expectedText, textWriter.ToString());
+
+        await using var cancelledStream = new MemoryStream([1, 2, 3], writable: true);
+        cancelledStream.Position = cancelledStream.Length;
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => MathBlockOpenMath.WriteUtf8Async(program, cancelledStream, cancellation.Token));
+        Assert.Equal([1, 2, 3], cancelledStream.ToArray());
     }
 
     [Fact]
