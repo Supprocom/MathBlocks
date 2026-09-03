@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CD version="2.0" xmlns="http://www.openmath.org/OpenMathCD">
+  <CDName>mathblocks_types1</CDName>
+  <CDBase>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v1</CDBase>
+  <CDURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v1/mathblocks_types1.ocd</CDURL>
+  <CDReviewDate>2031-09-03</CDReviewDate>
+  <CDStatus>private</CDStatus>
+  <CDDate>2026-09-03</CDDate>
+  <CDVersion>1</CDVersion>
+  <CDRevision>0</CDRevision>
+  <Description>This content dictionary defines MathBlocks value types, shapes, units, and rational dimensions.</Description>
+  <CDDefinition>
+    <Name>type</Name>
+    <Role>application</Role>
+    <Description>This application defines one MathBlocks value type, unit, row count, and column count.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>scalar</Name>
+    <Role>constant</Role>
+    <Description>This symbol identifies the scalar value kind.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>boolean</Name>
+    <Role>constant</Role>
+    <Description>This symbol identifies the Boolean value kind.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>complex</Name>
+    <Role>constant</Role>
+    <Description>This symbol identifies the complex value kind.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>vector</Name>
+    <Role>constant</Role>
+    <Description>This symbol identifies the vector value kind.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>matrix</Name>
+    <Role>constant</Role>
+    <Description>This symbol identifies the matrix value kind.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>complex-vector</Name>
+    <Role>constant</Role>
+    <Description>This symbol identifies the complex-vector value kind.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>complex-matrix</Name>
+    <Role>constant</Role>
+    <Description>This symbol identifies the complex-matrix value kind.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>point-set</Name>
+    <Role>constant</Role>
+    <Description>This symbol identifies the point-set value kind.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>graph</Name>
+    <Role>constant</Role>
+    <Description>This symbol identifies the graph value kind.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>run-set</Name>
+    <Role>constant</Role>
+    <Description>This symbol identifies the run-set value kind.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>boolean-vector</Name>
+    <Role>constant</Role>
+    <Description>This symbol identifies the Boolean-vector value kind.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>unit</Name>
+    <Role>application</Role>
+    <Description>This application defines the four rational dimensions of a MathBlocks unit.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>rational</Name>
+    <Role>application</Role>
+    <Description>This application defines a normalized integer numerator and a positive denominator.</Description>
+  </CDDefinition>
+</CD>

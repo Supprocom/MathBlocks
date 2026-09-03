@@ -1,0 +1,4 @@
+openmath/v1/*.ocd text eol=lf
+openmath/v1/*.cdg text eol=lf
+openmath/v1/*.rnc text eol=lf
+openmath/v1/README.md text eol=lf

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CD version="2.0" xmlns="http://www.openmath.org/OpenMathCD">
+  <CDName>mathblocks_values1</CDName>
+  <CDBase>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v1</CDBase>
+  <CDURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v1/mathblocks_values1.ocd</CDURL>
+  <CDReviewDate>2031-09-03</CDReviewDate>
+  <CDStatus>private</CDStatus>
+  <CDDate>2026-09-03</CDDate>
+  <CDVersion>1</CDVersion>
+  <CDRevision>0</CDRevision>
+  <Description>This content dictionary defines exact MathBlocks structured constant values.</Description>
+  <CDDefinition>
+    <Name>vector</Name>
+    <Role>application</Role>
+    <Description>This application defines an ordered vector of binary64 values.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>matrix</Name>
+    <Role>application</Role>
+    <Description>This application defines a row-major matrix of binary64 values.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>complex</Name>
+    <Role>application</Role>
+    <Description>This application defines one complex value from real and imaginary binary64 values.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>complex-vector</Name>
+    <Role>application</Role>
+    <Description>This application defines an ordered vector of complex values.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>complex-matrix</Name>
+    <Role>application</Role>
+    <Description>This application defines a row-major matrix of complex values.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>point-set</Name>
+    <Role>application</Role>
+    <Description>This application defines an ordered set of two-dimensional points.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>point</Name>
+    <Role>application</Role>
+    <Description>This application defines one two-dimensional point.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>graph</Name>
+    <Role>application</Role>
+    <Description>This application defines a graph vertex count and an ordered edge collection.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>edge</Name>
+    <Role>application</Role>
+    <Description>This application defines one directed weighted graph edge.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>run-set</Name>
+    <Role>application</Role>
+    <Description>This application defines an ordered run collection.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>run</Name>
+    <Role>application</Role>
+    <Description>This application defines one run start, length, and binary64 value.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>boolean-vector</Name>
+    <Role>application</Role>
+    <Description>This application defines an ordered vector of Boolean values.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>true</Name>
+    <Role>constant</Role>
+    <Description>This symbol defines the Boolean true value.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>false</Name>
+    <Role>constant</Role>
+    <Description>This symbol defines the Boolean false value.</Description>
+  </CDDefinition>
+</CD>

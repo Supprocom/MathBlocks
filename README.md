@@ -50,8 +50,13 @@ Console.WriteLine(output["area"].AsScalar());
 
 ## OpenMath notation
 
-`MathBlockOpenMath` exports a typed program as OpenMath 2.0 Revision 2 XML.
-The exported node sequence gives one exact operation order.
+`MathBlockOpenMath` exports a typed program with the MathBlocks OpenMath Profile
+1. The profile uses [OpenMath 2.0 Revision 2](https://openmath.org/standard/om20-2019-07-01/omstd20.html)
+XML.
+
+The UTF-8 encoding of each exported string conforms to
+[Canonical XML 1.1](https://www.w3.org/TR/xml-c14n11/) without comments. The
+exported node sequence gives one exact operation order.
 
 The importer rebuilds the typed program and returns its operations in that
 same order. It rejects unknown symbols, forward references, and invalid types.
@@ -68,6 +73,18 @@ var sameNotation = MathBlockOpenMath.Export(imported.Program);
 
 The profile preserves shared nodes, constants, units, shapes, and named
 outputs. It uses exact hexadecimal binary64 values.
+
+Profile 1 contains all 337 operations from `MathBlockCatalog.Standard`.
+Export rejects custom operation implementations. These operations require a
+separate content dictionary identity.
+
+The package contains the four content dictionaries, their content dictionary
+group, and the restricted profile schema. The profile source is in the
+repository [OpenMath directory](https://github.com/Supprocom/MathBlocks/tree/main/openmath/v1).
+
+Import rejects a document that exceeds
+`MathBlockOpenMath.MaximumDocumentCharacters`. Import does not retrieve a
+schema or content dictionary from the network.
 
 This API reads semantic OpenMath XML. It does not read presentation text such
 as `sin(x) + x^2`.

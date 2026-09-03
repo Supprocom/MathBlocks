@@ -41,6 +41,9 @@
     <None Include="..\README.md" Pack="true" PackagePath="README.md" />
     <None Include="..\LICENSE.md" Pack="true" PackagePath="LICENSE.md" />
     <None Include="..\THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="THIRD-PARTY-NOTICES.md" />
+    <None Include="..\openmath\v1\**\*"
+          Pack="true"
+          PackagePath="openmath/v1/%(RecursiveDir)%(Filename)%(Extension)" />
     <AssemblyMetadata Include="RepositoryCommit" Value="$(RepositoryCommit)" Condition="'$(RepositoryCommit)' != ''" />
   </ItemGroup>
 

@@ -115,7 +115,6 @@ public sealed class MathBlockProgram
     private readonly IReadOnlyDictionary<string, MathBlockType> inputTypes;
     private readonly IReadOnlyDictionary<string, MathBlockType> outputTypes;
     private readonly IReadOnlyDictionary<string, int> outputNodeIndexes;
-    private readonly (string Name, int NodeIndex)[] orderedOutputs;
 
     internal MathBlockProgram(
         IReadOnlyList<MathBlockProgramBuilder.NodeDefinition> definitions,
@@ -140,13 +139,11 @@ public sealed class MathBlockProgram
 
         var discoveredOutputTypes = new Dictionary<string, MathBlockType>(StringComparer.Ordinal);
         var discoveredOutputNodes = new Dictionary<string, int>(StringComparer.Ordinal);
-        orderedOutputs = new (string Name, int NodeIndex)[outputs.Length];
         for (var index = 0; index < outputs.Length; index++)
         {
             var output = outputs[index];
             discoveredOutputTypes.Add(output.Name, nodes[output.NodeIndex].Type);
             discoveredOutputNodes.Add(output.Name, output.NodeIndex);
-            orderedOutputs[index] = (output.Name, output.NodeIndex);
         }
         outputTypes = discoveredOutputTypes;
         outputNodeIndexes = discoveredOutputNodes;
@@ -166,7 +163,11 @@ public sealed class MathBlockProgram
 
     internal IReadOnlyList<Node> Nodes => nodes;
     internal IReadOnlyList<int[]> OperationLevels => operationLevels;
-    internal IReadOnlyList<(string Name, int NodeIndex)> OrderedOutputs => orderedOutputs;
+    internal int OutputCount => outputs.Length;
+
+    internal string GetOutputName(int index) => outputs[index].Name;
+
+    internal int GetOutputNodeIndex(int index) => outputs[index].NodeIndex;
 
     internal MathBlockValue[] CreateValueBuffer(IReadOnlyDictionary<string, MathBlockValue> inputs)
     {

@@ -1,0 +1,323 @@
+default namespace = "http://www.openmath.org/OpenMath"
+namespace xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
+
+start = element OMOBJ {
+  attribute cdbase {
+    "https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v1"
+  },
+  attribute cdgroup {
+    "https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v1/mathblocks_profile1.cdg"
+  },
+  attribute version { "2.0" },
+  program
+}
+
+program = element OMA {
+  program-symbol,
+  nodes,
+  outputs
+}
+
+program-symbol = element OMS {
+  attribute cd { "mathblocks_program1" },
+  attribute name { "program" },
+  empty
+}
+
+nodes = element OMA {
+  element OMS {
+    attribute cd { "mathblocks_program1" },
+    attribute name { "nodes" },
+    empty
+  },
+  node*
+}
+
+node = input-node | constant-node | operation-node
+
+input-node = element OMA {
+  node-id,
+  element OMS {
+    attribute cd { "mathblocks_program1" },
+    attribute name { "input" },
+    empty
+  },
+  name,
+  type-value
+}
+
+constant-node = element OMA {
+  node-id,
+  element OMS {
+    attribute cd { "mathblocks_program1" },
+    attribute name { "constant" },
+    empty
+  },
+  type-value,
+  value
+}
+
+operation-node = element OMA {
+  node-id,
+  element OMS {
+    attribute cd { "mathblocks_operations1" },
+    attribute name {
+      xsd:NCName { pattern = "op\..+\.v[1-9][0-9]*" }
+    },
+    empty
+  },
+  reference*
+}
+
+node-id = attribute id {
+  xsd:ID { pattern = "n(0|[1-9][0-9]*)" }
+}
+
+outputs = element OMA {
+  element OMS {
+    attribute cd { "mathblocks_program1" },
+    attribute name { "outputs" },
+    empty
+  },
+  output+
+}
+
+output = element OMA {
+  element OMS {
+    attribute cd { "mathblocks_program1" },
+    attribute name { "output" },
+    empty
+  },
+  name,
+  reference
+}
+
+name = element OMSTR { text }
+
+reference = element OMR {
+  attribute href {
+    xsd:anyURI { pattern = "#n(0|[1-9][0-9]*)" }
+  },
+  empty
+}
+
+type-value = element OMA {
+  element OMS {
+    attribute cd { "mathblocks_types1" },
+    attribute name { "type" },
+    empty
+  },
+  kind-symbol,
+  unit,
+  integer,
+  integer
+}
+
+kind-symbol = element OMS {
+  attribute cd { "mathblocks_types1" },
+  attribute name {
+    "scalar" |
+    "boolean" |
+    "complex" |
+    "vector" |
+    "matrix" |
+    "complex-vector" |
+    "complex-matrix" |
+    "point-set" |
+    "graph" |
+    "run-set" |
+    "boolean-vector"
+  },
+  empty
+}
+
+unit = element OMA {
+  element OMS {
+    attribute cd { "mathblocks_types1" },
+    attribute name { "unit" },
+    empty
+  },
+  rational,
+  rational,
+  rational,
+  rational
+}
+
+rational = element OMA {
+  element OMS {
+    attribute cd { "mathblocks_types1" },
+    attribute name { "rational" },
+    empty
+  },
+  integer,
+  integer
+}
+
+integer = element OMI {
+  xsd:string { pattern = "0|-?[1-9][0-9]*" }
+}
+
+float = element OMF {
+  attribute hex {
+    xsd:string { pattern = "[0-9A-F]{16}" }
+  },
+  empty
+}
+
+boolean = element OMS {
+  attribute cd { "mathblocks_values1" },
+  attribute name { "true" | "false" },
+  empty
+}
+
+value =
+  float |
+  boolean |
+  vector |
+  matrix |
+  complex |
+  complex-vector |
+  complex-matrix |
+  point-set |
+  graph |
+  run-set |
+  boolean-vector
+
+vector = element OMA {
+  value-symbol-vector,
+  float*
+}
+
+matrix = element OMA {
+  value-symbol-matrix,
+  float*
+}
+
+complex = element OMA {
+  value-symbol-complex,
+  float,
+  float
+}
+
+complex-vector = element OMA {
+  value-symbol-complex-vector,
+  complex*
+}
+
+complex-matrix = element OMA {
+  value-symbol-complex-matrix,
+  complex*
+}
+
+point-set = element OMA {
+  value-symbol-point-set,
+  point*
+}
+
+point = element OMA {
+  value-symbol-point,
+  float,
+  float
+}
+
+graph = element OMA {
+  value-symbol-graph,
+  integer,
+  edge*
+}
+
+edge = element OMA {
+  value-symbol-edge,
+  integer,
+  integer,
+  float
+}
+
+run-set = element OMA {
+  value-symbol-run-set,
+  run*
+}
+
+run = element OMA {
+  value-symbol-run,
+  integer,
+  integer,
+  float
+}
+
+boolean-vector = element OMA {
+  value-symbol-boolean-vector,
+  boolean*
+}
+
+value-symbol-vector = element OMS {
+  attribute cd { "mathblocks_values1" },
+  attribute name { "vector" },
+  empty
+}
+
+value-symbol-matrix = element OMS {
+  attribute cd { "mathblocks_values1" },
+  attribute name { "matrix" },
+  empty
+}
+
+value-symbol-complex = element OMS {
+  attribute cd { "mathblocks_values1" },
+  attribute name { "complex" },
+  empty
+}
+
+value-symbol-complex-vector = element OMS {
+  attribute cd { "mathblocks_values1" },
+  attribute name { "complex-vector" },
+  empty
+}
+
+value-symbol-complex-matrix = element OMS {
+  attribute cd { "mathblocks_values1" },
+  attribute name { "complex-matrix" },
+  empty
+}
+
+value-symbol-point-set = element OMS {
+  attribute cd { "mathblocks_values1" },
+  attribute name { "point-set" },
+  empty
+}
+
+value-symbol-point = element OMS {
+  attribute cd { "mathblocks_values1" },
+  attribute name { "point" },
+  empty
+}
+
+value-symbol-graph = element OMS {
+  attribute cd { "mathblocks_values1" },
+  attribute name { "graph" },
+  empty
+}
+
+value-symbol-edge = element OMS {
+  attribute cd { "mathblocks_values1" },
+  attribute name { "edge" },
+  empty
+}
+
+value-symbol-run-set = element OMS {
+  attribute cd { "mathblocks_values1" },
+  attribute name { "run-set" },
+  empty
+}
+
+value-symbol-run = element OMS {
+  attribute cd { "mathblocks_values1" },
+  attribute name { "run" },
+  empty
+}
+
+value-symbol-boolean-vector = element OMS {
+  attribute cd { "mathblocks_values1" },
+  attribute name { "boolean-vector" },
+  empty
+}

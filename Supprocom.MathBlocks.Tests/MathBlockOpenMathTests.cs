@@ -1,5 +1,7 @@
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using System.Xml.Linq;
 using Supprocom.MathBlocks;
 
 namespace Supprocom.MathBlocks.Tests;
@@ -30,6 +32,9 @@ public sealed class MathBlockOpenMathTests
 
         Assert.Equal("2.0", MathBlockOpenMath.StandardVersion);
         Assert.Equal("application/openmath+xml", MathBlockOpenMath.MediaType);
+        Assert.Equal("1", MathBlockOpenMath.ProfileVersion);
+        Assert.Equal("http://www.w3.org/2006/12/xml-c14n11", MathBlockOpenMath.CanonicalizationAlgorithm);
+        Assert.Equal(16 * 1024 * 1024, MathBlockOpenMath.MaximumDocumentCharacters);
         Assert.Equal(program.Fingerprint, imported.Program.Fingerprint);
         Assert.Equal(source, MathBlockOpenMath.Export(imported.Program));
         Assert.Equal(
@@ -120,7 +125,7 @@ public sealed class MathBlockOpenMathTests
     }
 
     [Fact]
-    public void Import_uses_the_supplied_registry()
+    public void Export_rejects_operations_outside_the_standard_profile()
     {
         var operation = new MathBlockOperation(
             "7custom.identity",
@@ -138,15 +143,38 @@ public sealed class MathBlockOpenMathTests
         var input = builder.Input("input", MathBlockType.Scalar());
         var result = builder.Apply(operation.Identifier, operation.Version, input);
         var program = builder.Output("result", result).Build();
-        var source = MathBlockOpenMath.Export(program);
+        var exception = Assert.Throws<InvalidOperationException>(() => MathBlockOpenMath.Export(program));
+        Assert.Equal(
+            "The program contains an operation outside the standard OpenMath profile.",
+            exception.Message);
+    }
 
-        Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(source));
+    [Fact]
+    public void Export_rejects_a_custom_operation_with_a_standard_identity()
+    {
+        var operation = new MathBlockOperation(
+            "scalar.add",
+            1,
+            2,
+            types => types[0],
+            inputs => inputs[0],
+            [new MathBlockRegressionCase(
+                "left",
+                [MathBlockValue.Scalar(1d), MathBlockValue.Scalar(2d)],
+                MathBlockValue.Scalar(1d))],
+            new MathBlockPerformanceCase([MathBlockValue.Scalar(1d), MathBlockValue.Scalar(2d)]));
+        var registry = new MathBlockRegistry([operation]);
+        var builder = new MathBlockProgramBuilder(registry);
+        var left = builder.Input("left", MathBlockType.Scalar());
+        var right = builder.Input("right", MathBlockType.Scalar());
+        var result = builder.Apply(operation.Identifier, operation.Version, left, right);
+        var program = builder.Output("result", result).Build();
 
-        var imported = MathBlockOpenMath.Import(source, registry);
+        var exception = Assert.Throws<InvalidOperationException>(() => MathBlockOpenMath.Export(program));
 
-        Assert.Equal(program.Fingerprint, imported.Program.Fingerprint);
-        Assert.Single(imported.Operations);
-        Assert.Same(operation, imported.Operations[0]);
+        Assert.Equal(
+            "The program contains an operation outside the standard OpenMath profile.",
+            exception.Message);
     }
 
     [Fact]
@@ -171,7 +199,7 @@ public sealed class MathBlockOpenMathTests
     }
 
     [Fact]
-    public void Import_rejects_DTDs_comments_and_noncanonical_floats()
+    public void Import_rejects_DTDs_comments_processing_instructions_and_noncanonical_floats()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var value = builder.Constant(MathBlockValue.Scalar(1.5d));
@@ -180,11 +208,18 @@ public sealed class MathBlockOpenMathTests
             "<!DOCTYPE OMOBJ [<!ENTITY external SYSTEM \"file:///not-read\">]>",
             source);
         var comment = ReplaceFirst(source, ">", "><!--comment-->");
+        var processingInstruction = string.Concat("<?mathblocks test?>", source);
         var lowerCaseFloat = source.Replace("3FF8000000000000", "3ff8000000000000", StringComparison.Ordinal);
+        var wrongGroup = source.Replace(
+            MathBlockOpenMath.ContentDictionaryGroup,
+            string.Concat(MathBlockOpenMath.ContentDictionaryBase, "/other.cdg"),
+            StringComparison.Ordinal);
 
         Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(dtd));
         Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(comment));
+        Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(processingInstruction));
         Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(lowerCaseFloat));
+        Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(wrongGroup));
     }
 
     [Fact]
@@ -199,11 +234,218 @@ public sealed class MathBlockOpenMathTests
         var expected = MathBlockOpenMath.Export(program);
 
         Assert.Equal(
-            "BD8080D04DD34405F64F0A10CC07A6793E8DECB16A73D86779512F819E444E17",
+            "4EFA70505E04938DF3976754D1F00115362F39CCD1ED7FCB1D24E79DB1BE7E85",
             Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(expected))));
         for (var index = 0; index < 1_000; index++)
             Assert.Equal(expected, MathBlockOpenMath.Export(program));
     }
+
+    [Fact]
+    public void Export_uses_the_Canonical_XML_1_1_lexical_form()
+    {
+        var source = MathBlockOpenMath.Export(CreateSampleProgram());
+        var expectedRoot = string.Concat(
+            "<OMOBJ xmlns=\"http://www.openmath.org/OpenMath\" cdbase=\"",
+            MathBlockOpenMath.ContentDictionaryBase,
+            "\" cdgroup=\"",
+            MathBlockOpenMath.ContentDictionaryGroup,
+            "\" version=\"2.0\">");
+
+        Assert.StartsWith(expectedRoot, source, StringComparison.Ordinal);
+        Assert.DoesNotContain("/>", source, StringComparison.Ordinal);
+        Assert.DoesNotContain('\r', source);
+        Assert.EndsWith("</OMOBJ>", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Import_normalizes_valid_noncanonical_XML()
+    {
+        var canonical = MathBlockOpenMath.Export(CreateSampleProgram());
+        var canonicalRoot = string.Concat(
+            "<OMOBJ xmlns=\"http://www.openmath.org/OpenMath\" cdbase=\"",
+            MathBlockOpenMath.ContentDictionaryBase,
+            "\" cdgroup=\"",
+            MathBlockOpenMath.ContentDictionaryGroup,
+            "\" version=\"2.0\">");
+        var noncanonicalRoot = string.Concat(
+            "<OMOBJ version=\"2.0\" cdgroup=\"",
+            MathBlockOpenMath.ContentDictionaryGroup,
+            "\" cdbase=\"",
+            MathBlockOpenMath.ContentDictionaryBase,
+            "\" xmlns=\"http://www.openmath.org/OpenMath\">\n");
+        var noncanonical = canonical
+            .Replace(canonicalRoot, noncanonicalRoot, StringComparison.Ordinal)
+            .Replace(
+                "<OMS cd=\"mathblocks_program1\" name=\"program\"></OMS>",
+                "<OMS name=\"program\" cd=\"mathblocks_program1\"/>",
+                StringComparison.Ordinal);
+
+        var imported = MathBlockOpenMath.Import(noncanonical);
+
+        Assert.NotEqual(canonical, noncanonical);
+        Assert.Equal(canonical, MathBlockOpenMath.Export(imported.Program));
+    }
+
+    [Fact]
+    public void Import_rejects_a_document_above_the_fixed_character_limit()
+    {
+        var source = new string(' ', MathBlockOpenMath.MaximumDocumentCharacters + 1);
+
+        var exception = Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(source));
+
+        Assert.Equal("The OpenMath source exceeds the character limit.", exception.Message);
+    }
+
+    [Fact]
+    public void Export_is_independent_of_the_current_culture()
+    {
+        var program = CreateSampleProgram();
+        var expected = MathBlockOpenMath.Export(program);
+        var originalCulture = CultureInfo.CurrentCulture;
+        var originalUiCulture = CultureInfo.CurrentUICulture;
+        try
+        {
+            foreach (var cultureName in new[] { "ar-SA", "fr-FR", "tr-TR" })
+            {
+                var culture = CultureInfo.GetCultureInfo(cultureName);
+                CultureInfo.CurrentCulture = culture;
+                CultureInfo.CurrentUICulture = culture;
+                Assert.Equal(expected, MathBlockOpenMath.Export(program));
+            }
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+            CultureInfo.CurrentUICulture = originalUiCulture;
+        }
+    }
+
+    [Fact]
+    public void Profile_content_dictionaries_match_the_standard_catalog()
+    {
+        XNamespace dictionaryNamespace = "http://www.openmath.org/OpenMathCD";
+        var expectedDictionaries = new Dictionary<string, string[]>(StringComparer.Ordinal)
+        {
+            ["mathblocks_program1"] =
+                ["constant", "input", "nodes", "output", "outputs", "program"],
+            ["mathblocks_types1"] =
+            [
+                "boolean", "boolean-vector", "complex", "complex-matrix", "complex-vector",
+                "graph", "matrix", "point-set", "rational", "run-set", "scalar", "type",
+                "unit", "vector"
+            ],
+            ["mathblocks_values1"] =
+            [
+                "boolean-vector", "complex", "complex-matrix", "complex-vector", "edge", "false",
+                "graph", "matrix", "point", "point-set", "run", "run-set", "true", "vector"
+            ],
+            ["mathblocks_operations1"] = MathBlockCatalog.Standard.Operations
+                .Select(OperationSymbolName)
+                .OrderBy(name => name, StringComparer.Ordinal)
+                .ToArray()
+        };
+
+        foreach (var expected in expectedDictionaries)
+        {
+            var document = XDocument.Load(ProfilePath(string.Concat(expected.Key, ".ocd")));
+            var root = Assert.IsType<XElement>(document.Root);
+            Assert.Equal(dictionaryNamespace + "CD", root.Name);
+            Assert.Equal("2.0", (string?)root.Attribute("version"));
+            Assert.Equal(expected.Key, root.Element(dictionaryNamespace + "CDName")?.Value);
+            Assert.Equal(
+                MathBlockOpenMath.ContentDictionaryBase,
+                root.Element(dictionaryNamespace + "CDBase")?.Value);
+            Assert.Equal(
+                string.Concat(MathBlockOpenMath.ContentDictionaryBase, "/", expected.Key, ".ocd"),
+                root.Element(dictionaryNamespace + "CDURL")?.Value);
+            Assert.Equal("private", root.Element(dictionaryNamespace + "CDStatus")?.Value);
+            Assert.Equal("1", root.Element(dictionaryNamespace + "CDVersion")?.Value);
+            Assert.Equal(
+                expected.Value,
+                root.Elements(dictionaryNamespace + "CDDefinition")
+                    .Select(element => element.Element(dictionaryNamespace + "Name")?.Value)
+                    .OrderBy(name => name, StringComparer.Ordinal));
+        }
+
+        var operationDocument = XDocument.Load(ProfilePath("mathblocks_operations1.ocd"));
+        var operationDefinitions = operationDocument.Root?
+            .Elements(dictionaryNamespace + "CDDefinition")
+            .ToDictionary(
+                element => element.Element(dictionaryNamespace + "Name")?.Value ?? string.Empty,
+                StringComparer.Ordinal) ?? throw new InvalidDataException("The operation dictionary is empty.");
+        foreach (var operation in MathBlockCatalog.Standard.Operations)
+        {
+            var definition = operationDefinitions[OperationSymbolName(operation)];
+            var description = definition.Element(dictionaryNamespace + "Description")?.Value;
+            Assert.Equal(
+                $"This application identifies MathBlocks operation {operation.Identity}. " +
+                $"It requires {operation.Arity} ordered operand references.",
+                description);
+        }
+    }
+
+    [Fact]
+    public void Profile_group_binds_all_content_dictionaries()
+    {
+        XNamespace groupNamespace = "http://www.openmath.org/OpenMathCDG";
+        var document = XDocument.Load(ProfilePath("mathblocks_profile1.cdg"));
+        var root = Assert.IsType<XElement>(document.Root);
+        var members = root.Elements(groupNamespace + "CDGroupMember").ToArray();
+
+        Assert.Equal(groupNamespace + "CDGroup", root.Name);
+        Assert.Equal("2.0", (string?)root.Attribute("version"));
+        Assert.Equal("mathblocks_profile1", root.Element(groupNamespace + "CDGroupName")?.Value);
+        Assert.Equal("1", root.Element(groupNamespace + "CDGroupVersion")?.Value);
+        Assert.Equal(MathBlockOpenMath.ContentDictionaryGroup, root.Element(groupNamespace + "CDGroupURL")?.Value);
+        Assert.Equal(
+            ["mathblocks_program1", "mathblocks_operations1", "mathblocks_types1", "mathblocks_values1"],
+            members.Select(member => member.Element(groupNamespace + "CDName")?.Value));
+        Assert.All(
+            members,
+            member => Assert.Equal("1", member.Element(groupNamespace + "CDVersion")?.Value));
+        Assert.All(
+            members,
+            member => Assert.Equal(
+                string.Concat(
+                    MathBlockOpenMath.ContentDictionaryBase,
+                    "/",
+                    member.Element(groupNamespace + "CDName")?.Value,
+                    ".ocd"),
+                member.Element(groupNamespace + "CDURL")?.Value));
+    }
+
+    [Fact]
+    public void Profile_schema_binds_the_public_profile_identifiers()
+    {
+        var schema = File.ReadAllText(ProfilePath("mathblocks_profile1.rnc"));
+
+        Assert.Contains(MathBlockOpenMath.ContentDictionaryBase, schema, StringComparison.Ordinal);
+        Assert.Contains(MathBlockOpenMath.ContentDictionaryGroup, schema, StringComparison.Ordinal);
+        Assert.Contains("mathblocks_program1", schema, StringComparison.Ordinal);
+        Assert.Contains("mathblocks_operations1", schema, StringComparison.Ordinal);
+        Assert.Contains("mathblocks_types1", schema, StringComparison.Ordinal);
+        Assert.Contains("mathblocks_values1", schema, StringComparison.Ordinal);
+    }
+
+    private static MathBlockProgram CreateSampleProgram()
+    {
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var left = builder.Input("left", MathBlockType.Scalar());
+        var right = builder.Input("right", MathBlockType.Scalar());
+        var sum = builder.Apply("scalar.add", inputs: [left, right]);
+        var square = builder.Apply("scalar.multiply", inputs: [sum, sum]);
+        return builder.Output("sum", sum).Output("square", square).Build();
+    }
+
+    private static string OperationSymbolName(MathBlockOperation operation) =>
+        string.Concat(
+            "op.",
+            operation.Identifier,
+            ".v",
+            operation.Version.ToString(CultureInfo.InvariantCulture));
+
+    private static string ProfilePath(string fileName) =>
+        Path.Combine(AppContext.BaseDirectory, "openmath", "v1", fileName);
 
     private static string ReplaceFirst(string source, string oldValue, string newValue)
     {

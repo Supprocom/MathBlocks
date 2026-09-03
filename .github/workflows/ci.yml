@@ -16,6 +16,8 @@ jobs:
     env:
       NUGET_PACKAGES: /tmp/mathblocks-nuget-packages
       ARTIFACT_ROOT: /tmp/mathblocks-artifacts
+      TEST_RESULTS: /tmp/mathblocks-test-results
+      OPENMATH_EVIDENCE: /tmp/mathblocks-openmath-evidence
     steps:
       - name: Check out the exact commit
         uses: actions/checkout@v4
@@ -82,5 +84,112 @@ jobs:
           -c Release --no-restore --no-incremental --warnaserror
           --artifacts-path "$ARTIFACT_ROOT/product"
 
+      - name: Restore MathBlocks tests
+        run: >-
+          dotnet restore Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj
+          --force-evaluate -p:NuGetAuditMode=all --artifacts-path "$ARTIFACT_ROOT/tests"
+
+      - name: Build MathBlocks tests
+        run: >-
+          dotnet build Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj
+          -c Release --no-restore --no-incremental --warnaserror
+          --artifacts-path "$ARTIFACT_ROOT/tests"
+
+      - name: Run the portable test gate
+        run: >-
+          dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj
+          -c Release --no-build --no-restore
+          --artifacts-path "$ARTIFACT_ROOT/tests"
+          --filter "FullyQualifiedName!~Cuda&Category!=Performance"
+          --logger "trx;LogFileName=mathblocks-portable.trx"
+          --results-directory "$TEST_RESULTS"
+
+      - name: Restore the OpenMath profile generator
+        run: >-
+          dotnet restore build/MathBlocks.OpenMathProfileGenerator/MathBlocks.OpenMathProfileGenerator.csproj
+          --force-evaluate -p:NuGetAuditMode=all --artifacts-path "$ARTIFACT_ROOT/openmath-generator"
+
+      - name: Build the OpenMath profile generator
+        run: >-
+          dotnet build build/MathBlocks.OpenMathProfileGenerator/MathBlocks.OpenMathProfileGenerator.csproj
+          -c Release --no-restore --no-incremental --warnaserror
+          --artifacts-path "$ARTIFACT_ROOT/openmath-generator"
+
+      - name: Generate OpenMath verification artifacts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path $env:OPENMATH_EVIDENCE -Force | Out-Null
+          $generator = Join-Path `
+            $env:ARTIFACT_ROOT `
+            'openmath-generator/bin/MathBlocks.OpenMathProfileGenerator/release/MathBlocks.OpenMathProfileGenerator.dll'
+          dotnet $generator `
+            --output "$env:OPENMATH_EVIDENCE/generated-profile" `
+            --sample "$env:OPENMATH_EVIDENCE/canonical-sample.xml" `
+            --catalog-sample "$env:OPENMATH_EVIDENCE/catalog-sample.xml"
+
+      - name: Verify generated OpenMath profile artifacts
+        shell: pwsh
+        run: |
+          $generatedRoot = Join-Path $env:OPENMATH_EVIDENCE 'generated-profile'
+          $generatedFiles = @(Get-ChildItem $generatedRoot -File | Sort-Object Name)
+          if ($generatedFiles.Count -ne 5) {
+              throw 'The profile generator did not create five standard artifacts.'
+          }
+
+          foreach ($generated in $generatedFiles) {
+              $tracked = Join-Path 'openmath/v1' $generated.Name
+              $expectedHash = (Get-FileHash $tracked -Algorithm SHA256).Hash
+              $actualHash = (Get-FileHash $generated.FullName -Algorithm SHA256).Hash
+              if ($actualHash -ne $expectedHash) {
+                  throw "The generated OpenMath artifact '$($generated.Name)' differs from source."
+              }
+          }
+
+      - name: Install OpenMath validation tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes jing libxml2-utils
+
+      - name: Download the normative OpenMath schemas
+        run: |
+          mkdir -p "$OPENMATH_EVIDENCE/openmath-2.0r2"
+          curl --fail --location --silent --show-error \
+            --output "$OPENMATH_EVIDENCE/openmath-2.0r2/openmath2.rnc" \
+            https://openmath.org/standard/om20-2019-07-01/openmath2.rnc
+          curl --fail --location --silent --show-error \
+            --output "$OPENMATH_EVIDENCE/openmath-2.0r2/omcd2.rnc" \
+            https://openmath.org/standard/om20-2019-07-01/omcd2.rnc
+          curl --fail --location --silent --show-error \
+            --output "$OPENMATH_EVIDENCE/openmath-2.0r2/omcdgroup2.rnc" \
+            https://openmath.org/standard/om20-2019-07-01/omcdgroup2.rnc
+          cd "$OPENMATH_EVIDENCE/openmath-2.0r2"
+          echo 'F3C8BE33ED29701FF4DC36AAD08E30291487740FCFD801DB971CCCF411724A24  openmath2.rnc' | sha256sum --check
+          echo 'B38F325A4695ADA7B71E786127FA9E4E81564434E0DDF2A66F87F8B303B13157  omcd2.rnc' | sha256sum --check
+          echo '05022254EBEBF3E9FE37AB919C2A8A793EA42373488E62C0E0033C34F9772411  omcdgroup2.rnc' | sha256sum --check
+
+      - name: Validate the OpenMath profile
+        run: |
+          schema_root="$OPENMATH_EVIDENCE/openmath-2.0r2"
+          for document in openmath/v1/*.ocd; do
+            jing -c "$schema_root/omcd2.rnc" "$document"
+          done
+          jing -c "$schema_root/omcdgroup2.rnc" openmath/v1/mathblocks_profile1.cdg
+          for document in canonical-sample.xml catalog-sample.xml; do
+            jing -c "$schema_root/openmath2.rnc" "$OPENMATH_EVIDENCE/$document"
+            jing -c openmath/v1/mathblocks_profile1.rnc "$OPENMATH_EVIDENCE/$document"
+            xmllint --c14n11 "$OPENMATH_EVIDENCE/$document" > "$OPENMATH_EVIDENCE/$document.c14n11"
+            cmp "$OPENMATH_EVIDENCE/$document" "$OPENMATH_EVIDENCE/$document.c14n11"
+          done
+
       - name: Check the tracked diff
         run: git diff --check
+
+      - name: Retain test and OpenMath evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mathblocks-ci-evidence
+          path: |
+            /tmp/mathblocks-test-results
+            /tmp/mathblocks-openmath-evidence
+          if-no-files-found: error

@@ -1,0 +1,1697 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CD version="2.0" xmlns="http://www.openmath.org/OpenMathCD">
+  <CDName>mathblocks_operations1</CDName>
+  <CDBase>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v1</CDBase>
+  <CDURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v1/mathblocks_operations1.ocd</CDURL>
+  <CDReviewDate>2031-09-03</CDReviewDate>
+  <CDStatus>private</CDStatus>
+  <CDDate>2026-09-03</CDDate>
+  <CDVersion>1</CDVersion>
+  <CDRevision>0</CDRevision>
+  <Description>This content dictionary defines the exact operations in the MathBlocks 0.4.0 standard catalog.</Description>
+  <CDDefinition>
+    <Name>op.boolean-vector.all.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation boolean-vector.all@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.boolean-vector.and.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation boolean-vector.and@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.boolean-vector.any.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation boolean-vector.any@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.boolean-vector.not.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation boolean-vector.not@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.boolean-vector.or.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation boolean-vector.or@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.boolean-vector.true-count.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation boolean-vector.true-count@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.boolean-vector.true-indices.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation boolean-vector.true-indices@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.boolean-vector.xor.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation boolean-vector.xor@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.boolean.and.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation boolean.and@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.boolean.not.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation boolean.not@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.boolean.or.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation boolean.or@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.boolean.xor.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation boolean.xor@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.capacity.choquet-integral.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation capacity.choquet-integral@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.capacity.is-submodular.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation capacity.is-submodular@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.capacity.mobius-transform.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation capacity.mobius-transform@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.combinatorics.ballot-count.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation combinatorics.ballot-count@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.combinatorics.binomial-coefficient.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation combinatorics.binomial-coefficient@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.combinatorics.factorial.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation combinatorics.factorial@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.combinatorics.nonempty-subset-sums.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation combinatorics.nonempty-subset-sums@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex-matrix.pick.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex-matrix.pick@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex-vector.create.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex-vector.create@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex-vector.imaginary.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex-vector.imaginary@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex-vector.magnitude.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex-vector.magnitude@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex-vector.real.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex-vector.real@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex.add.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex.add@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex.conjugate.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex.conjugate@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex.create.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex.create@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex.divide.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex.divide@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex.exponential.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex.exponential@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex.from-polar.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex.from-polar@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex.magnitude.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex.magnitude@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex.multiply.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex.multiply@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex.natural-logarithm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex.natural-logarithm@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex.negate.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex.negate@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex.phase.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex.phase@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex.power.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex.power@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex.square-root.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex.square-root@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.complex.subtract.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation complex.subtract@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.cooperative.shapley-values.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation cooperative.shapley-values@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.extension.mcshane.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation extension.mcshane@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.extension.whitney.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation extension.whitney@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.barycentric-coordinates.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.barycentric-coordinates@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.centroid.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.centroid@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.circumradius.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.circumradius@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.contains-point.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.contains-point@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.convex-hull.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.convex-hull@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.delaunay-graph.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.delaunay-graph@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.diameter.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.diameter@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.discrete-frechet-distance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.discrete-frechet-distance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.distance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.distance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.fisher-rao-distance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.fisher-rao-distance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.gabriel-graph.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.gabriel-graph@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.halfspace-depth.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.halfspace-depth@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.hausdorff-distance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.hausdorff-distance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.path-length.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.path-length@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.perimeter.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.perimeter@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.point-to-segment-distance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.point-to-segment-distance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.polygon-area.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.polygon-area@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.signed-polygon-area.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.signed-polygon-area@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.geometry.simplicial-depth.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation geometry.simplicial-depth@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.algebraic-connectivity.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.algebraic-connectivity@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.conductance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.conductance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.connected-component-count.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.connected-component-count@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.degree.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.degree@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.from-directed-adjacency.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.from-directed-adjacency@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.hodge-potential.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.hodge-potential@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.hodge-residual-norm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.hodge-residual-norm@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.is-connected.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.is-connected@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.minimum-spanning-forest.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.minimum-spanning-forest@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.page-rank.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.page-rank@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.to-directed-adjacency.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.to-directed-adjacency@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.triangle-count.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.triangle-count@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.undirected-adjacency-matrix.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.undirected-adjacency-matrix@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.undirected-laplacian.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.undirected-laplacian@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.undirected-shortest-paths.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.undirected-shortest-paths@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.graph.weighted-degree.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation graph.weighted-degree@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.inequality.gini-coefficient.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation inequality.gini-coefficient@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.inequality.lorenz-curve.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation inequality.lorenz-curve@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.information.bhattacharyya-coefficient.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation information.bhattacharyya-coefficient@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.information.binary-shannon-entropy.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation information.binary-shannon-entropy@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.information.conditional-mutual-information.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation information.conditional-mutual-information@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.information.cross-entropy.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation information.cross-entropy@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.information.gini-impurity.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation information.gini-impurity@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.information.hellinger-distance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation information.hellinger-distance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.information.jensen-shannon.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation information.jensen-shannon@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.information.kullback-leibler.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation information.kullback-leibler@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.information.mutual-information.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation information.mutual-information@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.information.renyi-entropy.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation information.renyi-entropy@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.information.shannon-entropy.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation information.shannon-entropy@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.information.total-variation-distance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation information.total-variation-distance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.information.tsallis-entropy.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation information.tsallis-entropy@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.markov.entropy-production.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation markov.entropy-production@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.markov.stationary-distribution.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation markov.stationary-distribution@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.add.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.add@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.append-row.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.append-row@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.column-sums.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.column-sums@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.column.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.column@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.commutator.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.commutator@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.determinant.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.determinant@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.diagonal-from-vector.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.diagonal-from-vector@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.diagonal.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.diagonal@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.exponential.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.exponential@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.flatten.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.flatten@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.frobenius-norm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.frobenius-norm@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.gram.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.gram@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.hadamard-product.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.hadamard-product@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.hankel.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.hankel@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.identity.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.identity@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.integer-power.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.integer-power@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.inverse.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.inverse@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.is-positive-definite.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.is-positive-definite@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.is-symmetric.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.is-symmetric@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.is-totally-nonnegative.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.is-totally-nonnegative@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.kronecker-product.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.kronecker-product@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.largest-symmetric-eigenvalue.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.largest-symmetric-eigenvalue@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.maximal-minors.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.maximal-minors@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.multiply-vector.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.multiply-vector@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.multiply.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.multiply@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.outer-product.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.outer-product@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.perron-value.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.perron-value@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.perron-vector.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.perron-vector@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.principal-minors.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.principal-minors@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.rank.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.rank@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.reshape.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.reshape@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.row-sums.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.row-sums@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.row.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.row@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.scale.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.scale@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.schur-complement.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.schur-complement@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.smallest-symmetric-eigenvalue.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.smallest-symmetric-eigenvalue@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.solve.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.solve@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.spectral-norm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.spectral-norm@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.stack-rows.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.stack-rows@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.subtract.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.subtract@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.symmetric-eigenvalues.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.symmetric-eigenvalues@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.toeplitz.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.toeplitz@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.trace.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.trace@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.matrix.transpose.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation matrix.transpose@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.order.isotonic-regression.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation order.isotonic-regression@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.order.majorizes.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation order.majorizes@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.cumulative-deviation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.cumulative-deviation@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.dynamic-time-warping.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.dynamic-time-warping@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.first-passage-index.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.first-passage-index@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.hysteresis.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.hysteresis@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.lead-lag-transform.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.lead-lag-transform@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.longest-true-run.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.longest-true-run@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.maximum-decline.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.maximum-decline@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.maximum-relative-decline.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.maximum-relative-decline@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.power-variation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.power-variation@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.quadratic-variation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.quadratic-variation@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.recurrence-rate.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.recurrence-rate@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.reflected-cumulative-sum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.reflected-cumulative-sum@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.run-length-encode.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.run-length-encode@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.signature-level-one.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.signature-level-one@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.signature-level-three.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.signature-level-three@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.signature-level-two.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.signature-level-two@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.total-variation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.total-variation@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.turning-point-count.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.turning-point-count@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.path.zero-crossing-count.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation path.zero-crossing-count@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.point-set.from-matrix.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation point-set.from-matrix@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.point-set.to-matrix.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation point-set.to-matrix@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.polynomial.bernstein-evaluate.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation polynomial.bernstein-evaluate@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.polynomial.cubic-roots.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation polynomial.cubic-roots@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.polynomial.derivative.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation polynomial.derivative@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.polynomial.elementary-symmetric.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation polynomial.elementary-symmetric@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.polynomial.evaluate.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation polynomial.evaluate@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.probability.log-sum-exp.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation probability.log-sum-exp@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.probability.normal-cdf.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation probability.normal-cdf@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.probability.normalize.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation probability.normalize@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.probability.poisson-cdf.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation probability.poisson-cdf@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.probability.poisson-pmf.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation probability.poisson-pmf@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.probability.softmax.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation probability.softmax@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.projective.hilbert-distance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation projective.hilbert-distance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.absolute.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.absolute@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.add.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.add@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.arc-cosine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.arc-cosine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.arc-sine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.arc-sine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.arc-tangent-2.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.arc-tangent-2@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.arc-tangent.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.arc-tangent@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.binary-logarithm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.binary-logarithm@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.ceiling.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.ceiling@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.clamp.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.clamp@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.common-logarithm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.common-logarithm@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.cosine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.cosine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.cube-root.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.cube-root@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.cube.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.cube@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.divide.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.divide@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.equal.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.equal@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.exponential.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.exponential@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.floor.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.floor@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.greater-or-equal.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.greater-or-equal@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.greater-than.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.greater-than@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.hyperbolic-cosine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.hyperbolic-cosine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.hyperbolic-sine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.hyperbolic-sine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.hyperbolic-tangent.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.hyperbolic-tangent@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.inverse-hyperbolic-cosine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.inverse-hyperbolic-cosine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.inverse-hyperbolic-sine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.inverse-hyperbolic-sine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.inverse-hyperbolic-tangent.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.inverse-hyperbolic-tangent@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.less-or-equal.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.less-or-equal@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.less-than.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.less-than@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.log-one-plus.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.log-one-plus@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.logistic.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.logistic@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.logit.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.logit@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.maximum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.maximum@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.minimum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.minimum@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.modulo.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.modulo@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.multiply.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.multiply@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.natural-logarithm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.natural-logarithm@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.negate.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.negate@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.not-equal.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.not-equal@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.positive-part.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.positive-part@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.power.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.power@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.reciprocal.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.reciprocal@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.round.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.round@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.select.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.select@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.sign.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.sign@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.sine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.sine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.softplus.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.softplus@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.square-root.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.square-root@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.square.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.square@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.subtract.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.subtract@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.tangent.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.tangent@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.scalar.truncate.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation scalar.truncate@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.convolution.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.convolution@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.difference.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.difference@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.exponential-moving-average.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.exponential-moving-average@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.rolling-maximum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.rolling-maximum@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.rolling-mean.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.rolling-mean@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.rolling-median.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.rolling-median@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.rolling-minimum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.rolling-minimum@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.rolling-quantile.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.rolling-quantile@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.rolling-standard-deviation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.rolling-standard-deviation@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.rolling-sum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.rolling-sum@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.rolling-variance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.rolling-variance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.shape.greatest-convex-minorant.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation shape.greatest-convex-minorant@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.shape.is-completely-monotone.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation shape.is-completely-monotone@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.shape.is-log-concave.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation shape.is-log-concave@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.shape.least-concave-majorant.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation shape.least-concave-majorant@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.special.beta.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation special.beta@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.special.error-function.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation special.error-function@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.special.log-gamma.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation special.log-gamma@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.special.regularized-incomplete-beta.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation special.regularized-incomplete-beta@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.state.transition-counts.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation state.transition-counts@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.autocorrelation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.autocorrelation@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.central-moment.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.central-moment@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.covariance-matrix.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.covariance-matrix@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.distance-correlation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.distance-correlation@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.histogram.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.histogram@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.interquartile-range.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.interquartile-range@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.kendall-tau-b.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.kendall-tau-b@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.linear-intercept.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.linear-intercept@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.linear-r-squared.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.linear-r-squared@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.linear-slope.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.linear-slope@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.median-absolute-deviation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.median-absolute-deviation@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.pearson-correlation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.pearson-correlation@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.population-covariance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.population-covariance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.population-excess-kurtosis.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.population-excess-kurtosis@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.population-skewness.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.population-skewness@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.population-standard-deviation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.population-standard-deviation@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.population-variance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.population-variance@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.pseudomedian.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.pseudomedian@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.raw-moment.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.raw-moment@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.root-mean-square.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.root-mean-square@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.sample-covariance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.sample-covariance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.sample-standard-deviation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.sample-standard-deviation@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.sample-variance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.sample-variance@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.spearman-correlation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.spearman-correlation@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.theil-sen-slope.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.theil-sen-slope@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.weighted-mean.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.weighted-mean@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.statistics.weighted-population-variance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation statistics.weighted-population-variance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.survival.discrete-hazard.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation survival.discrete-hazard@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.survival.product-limit.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation survival.product-limit@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.topology.zero-dimensional-persistence.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation topology.zero-dimensional-persistence@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.transform.discrete-fourier.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation transform.discrete-fourier@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.transform.haar.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation transform.haar@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.transform.inverse-discrete-fourier.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation transform.inverse-discrete-fourier@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.transform.walsh-hadamard.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation transform.walsh-hadamard@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.transport.assignment-cost.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation transport.assignment-cost@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.transport.coupling-cost.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation transport.coupling-cost@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.transport.energy-distance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation transport.energy-distance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.transport.minimum-assignment.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation transport.minimum-assignment@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.transport.monotone-coupling.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation transport.monotone-coupling@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.transport.ordered-earth-mover.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation transport.ordered-earth-mover@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.transport.sinkhorn-coupling.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation transport.sinkhorn-coupling@1. It requires 5 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.transport.uniform-wasserstein.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation transport.uniform-wasserstein@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.transport.weighted-wasserstein-1.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation transport.weighted-wasserstein-1@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.tropical.max-plus-multiply.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation tropical.max-plus-multiply@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.tropical.min-plus-multiply.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation tropical.min-plus-multiply@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.absolute.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.absolute@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.add-scalar.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.add-scalar@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.add.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.add@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.append.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.append@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.arg-maximum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.arg-maximum@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.arg-minimum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.arg-minimum@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.concatenate.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.concatenate@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.cumulative-product.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.cumulative-product@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.cumulative-sum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.cumulative-sum@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.divide.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.divide@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.dot.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.dot@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.equal.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.equal@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.exponential.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.exponential@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.gather.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.gather@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.geometric-mean.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.geometric-mean@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.greater-than.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.greater-than@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.index.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.index@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.l1-norm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.l1-norm@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.l2-norm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.l2-norm@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.length.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.length@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.less-than.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.less-than@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.linspace.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.linspace@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.maximum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.maximum@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.mean.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.mean@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.median.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.median@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.minimum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.minimum@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.multiply.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.multiply@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.natural-logarithm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.natural-logarithm@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.normalize-l1.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.normalize-l1@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.normalize-l2.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.normalize-l2@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.pair.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.pair@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.positive-part.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.positive-part@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.power.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.power@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.prepend.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.prepend@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.product.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.product@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.quantile.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.quantile@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.rank.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.rank@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.repeat.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.repeat@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.reverse.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.reverse@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.scale.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.scale@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.select.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.select@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.sign.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.sign@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.slice.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.slice@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.sort.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.sort@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.square-root.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.square-root@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.square.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.square@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.standardize.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.standardize@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.subtract.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.subtract@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.sum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.sum@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.vector.unique.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation vector.unique@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+</CD>

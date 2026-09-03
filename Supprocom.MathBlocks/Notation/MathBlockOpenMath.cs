@@ -23,8 +23,13 @@ public static class MathBlockOpenMath
 {
     public const string StandardVersion = "2.0";
     public const string MediaType = "application/openmath+xml";
+    public const string ProfileVersion = "1";
+    public const string CanonicalizationAlgorithm = "http://www.w3.org/2006/12/xml-c14n11";
+    public const int MaximumDocumentCharacters = 16 * 1024 * 1024;
     public const string ContentDictionaryBase =
-        "https://github.com/Supprocom/MathBlocks/openmath/v1";
+        "https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v1";
+    public const string ContentDictionaryGroup =
+        ContentDictionaryBase + "/mathblocks_profile1.cdg";
 
     private const string NamespaceUri = "http://www.openmath.org/OpenMath";
     private const string ProgramDictionary = "mathblocks_program1";
@@ -32,6 +37,7 @@ public static class MathBlockOpenMath
     private const string TypeDictionary = "mathblocks_types1";
     private const string ValueDictionary = "mathblocks_values1";
     private static readonly XNamespace OpenMathNamespace = NamespaceUri;
+    private static readonly Lazy<ProfileState> StandardProfile = new(CreateStandardProfile);
 
     public static string Export(MathBlockProgram program)
     {
@@ -41,8 +47,10 @@ public static class MathBlockOpenMath
         using (var writer = XmlWriter.Create(result, CreateWriterSettings()))
         {
             writer.WriteStartElement("OMOBJ", NamespaceUri);
-            writer.WriteAttributeString("version", StandardVersion);
+            writer.WriteAttributeString("xmlns", NamespaceUri);
             writer.WriteAttributeString("cdbase", ContentDictionaryBase);
+            writer.WriteAttributeString("cdgroup", ContentDictionaryGroup);
+            writer.WriteAttributeString("version", StandardVersion);
 
             WriteApplicationStart(writer);
             WriteSymbol(writer, ProgramDictionary, "program");
@@ -55,17 +63,13 @@ public static class MathBlockOpenMath
         return result.ToString();
     }
 
-    public static MathBlockOpenMathImportResult Import(string source) =>
-        Import(source, MathBlockCatalog.Standard);
-
-    public static MathBlockOpenMathImportResult Import(
-        string source,
-        MathBlockRegistry registry)
+    public static MathBlockOpenMathImportResult Import(string source)
     {
         ArgumentNullException.ThrowIfNull(source);
-        ArgumentNullException.ThrowIfNull(registry);
         if (source.Length == 0)
             throw InvalidFormat("The OpenMath source is empty.");
+        if (source.Length > MaximumDocumentCharacters)
+            throw InvalidFormat("The OpenMath source exceeds the character limit.");
 
         XDocument document;
         try
@@ -82,11 +86,13 @@ public static class MathBlockOpenMath
         RequireDocumentContent(document);
         var root = document.Root ?? throw InvalidFormat("The OpenMath root is missing.");
         RequireElement(root, "OMOBJ");
-        RequireOnlyAttributes(root, true, "version", "cdbase");
+        RequireOnlyAttributes(root, true, "version", "cdbase", "cdgroup");
         if (RequireAttribute(root, "version") != StandardVersion)
             throw InvalidFormat("The OpenMath version is not supported.");
         if (RequireAttribute(root, "cdbase") != ContentDictionaryBase)
             throw InvalidFormat("The OpenMath content dictionary base is not supported.");
+        if (RequireAttribute(root, "cdgroup") != ContentDictionaryGroup)
+            throw InvalidFormat("The OpenMath content dictionary group is not supported.");
 
         var rootChildren = ReadChildren(root);
         if (rootChildren.Length != 1)
@@ -98,8 +104,8 @@ public static class MathBlockOpenMath
             throw InvalidFormat("The OpenMath program must contain nodes and outputs.");
         RequireSymbol(programChildren[0], ProgramDictionary, "program");
 
-        var operationSymbols = CreateOperationSymbols(registry);
-        var builder = new MathBlockProgramBuilder(registry);
+        var operationSymbols = StandardProfile.Value.OperationSymbols;
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var operations = new List<MathBlockOperation>();
         var nodeCount = ReadNodes(programChildren[1], builder, operationSymbols, operations);
         ReadOutputs(programChildren[2], builder, nodeCount);
@@ -139,10 +145,25 @@ public static class MathBlockOpenMath
                     WriteValue(writer, node.Value);
                     break;
                 case MathBlockProgramNodeKind.Operation:
+                    if (node.OperationIdentity is null)
+                    {
+                        throw new InvalidOperationException(
+                            "The program contains an operation outside the standard OpenMath profile.");
+                    }
+
+                    var operationSymbol = OperationSymbolName(node.OperationIdentity);
+                    if (!StandardProfile.Value.OperationSymbols.TryGetValue(
+                            operationSymbol,
+                            out var standardOperation) ||
+                        !ReferenceEquals(program.Nodes[index].Operation, standardOperation))
+                    {
+                        throw new InvalidOperationException(
+                            "The program contains an operation outside the standard OpenMath profile.");
+                    }
                     WriteSymbol(
                         writer,
                         OperationDictionary,
-                        OperationSymbolName(node.OperationIdentity));
+                        operationSymbol);
                     for (var inputIndex = 0; inputIndex < node.Inputs.Count; inputIndex++)
                     {
                         var input = node.Inputs[inputIndex];
@@ -164,16 +185,16 @@ public static class MathBlockOpenMath
     {
         WriteApplicationStart(writer);
         WriteSymbol(writer, ProgramDictionary, "outputs");
-        for (var index = 0; index < program.OrderedOutputs.Count; index++)
+        for (var index = 0; index < program.OutputCount; index++)
         {
-            var output = program.OrderedOutputs[index];
-            if (output.NodeIndex < 0 || output.NodeIndex >= program.PlanNodes.Count)
+            var nodeIndex = program.GetOutputNodeIndex(index);
+            if (nodeIndex < 0 || nodeIndex >= program.PlanNodes.Count)
                 throw new InvalidOperationException("A program output has an invalid node.");
 
             WriteApplicationStart(writer);
             WriteSymbol(writer, ProgramDictionary, "output");
-            WriteString(writer, RequireExportName(output.Name, "output"));
-            WriteReference(writer, output.NodeIndex);
+            WriteString(writer, RequireExportName(program.GetOutputName(index), "output"));
+            WriteReference(writer, nodeIndex);
             writer.WriteEndElement();
         }
         writer.WriteEndElement();
@@ -293,18 +314,18 @@ public static class MathBlockOpenMath
         }
     }
 
-    private static Dictionary<string, MathBlockOperation> CreateOperationSymbols(
-        MathBlockRegistry registry)
+    private static ProfileState CreateStandardProfile()
     {
-        var result = new Dictionary<string, MathBlockOperation>(StringComparer.Ordinal);
-        for (var index = 0; index < registry.Operations.Count; index++)
+        var operations = MathBlockCatalog.Standard.Operations;
+        var symbols = new Dictionary<string, MathBlockOperation>(StringComparer.Ordinal);
+        for (var index = 0; index < operations.Count; index++)
         {
-            var operation = registry.Operations[index];
+            var operation = operations[index];
             var symbol = OperationSymbolName(operation.Identity);
-            if (!result.TryAdd(symbol, operation))
-                throw new InvalidOperationException("The registry has duplicate OpenMath symbols.");
+            if (!symbols.TryAdd(symbol, operation))
+                throw new InvalidOperationException("The standard catalog has duplicate OpenMath symbols.");
         }
-        return result;
+        return new ProfileState(symbols);
     }
 
     private static string OperationSymbolName(string? identity)
@@ -743,7 +764,7 @@ public static class MathBlockOpenMath
         writer.WriteAttributeString(
             "hex",
             BitConverter.DoubleToUInt64Bits(value).ToString("X16", CultureInfo.InvariantCulture));
-        writer.WriteEndElement();
+        writer.WriteFullEndElement();
     }
 
     private static double ReadDouble(XElement element)
@@ -822,7 +843,7 @@ public static class MathBlockOpenMath
     {
         writer.WriteStartElement("OMR", NamespaceUri);
         writer.WriteAttributeString("href", string.Concat("#", NodeIdentifier(nodeIndex)));
-        writer.WriteEndElement();
+        writer.WriteFullEndElement();
     }
 
     private static int ReadReference(XElement element, int maximumExclusive)
@@ -1060,7 +1081,7 @@ public static class MathBlockOpenMath
         writer.WriteStartElement("OMS", NamespaceUri);
         writer.WriteAttributeString("cd", dictionary);
         writer.WriteAttributeString("name", name);
-        writer.WriteEndElement();
+        writer.WriteFullEndElement();
     }
 
     private static XmlWriterSettings CreateWriterSettings() => new()
@@ -1076,6 +1097,7 @@ public static class MathBlockOpenMath
     {
         DtdProcessing = DtdProcessing.Prohibit,
         XmlResolver = null,
+        MaxCharactersInDocument = MaximumDocumentCharacters,
         IgnoreComments = false,
         IgnoreProcessingInstructions = false,
         IgnoreWhitespace = false,
@@ -1088,4 +1110,7 @@ public static class MathBlockOpenMath
         new(message, innerException);
 
     private readonly record struct OpenMathSymbol(string Dictionary, string Name);
+
+    private sealed record ProfileState(
+        IReadOnlyDictionary<string, MathBlockOperation> OperationSymbols);
 }
