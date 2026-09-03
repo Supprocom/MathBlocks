@@ -6,8 +6,8 @@
     <RootNamespace>Supprocom.MathBlocks</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>Supprocom.MathBlocks</PackageId>
-    <Version>0.4.0</Version>
-    <AssemblyVersion>0.4.0.0</AssemblyVersion>
+    <Version>0.4.1</Version>
+    <AssemblyVersion>0.4.1.0</AssemblyVersion>
     <Authors>Supprocom</Authors>
     <Company>Supprocom</Company>
     <Copyright>Copyright (C) 2026 mkn8rn</Copyright>
@@ -19,7 +19,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>mathematics;openmath;operation-contract;computation-graph;cpu;cuda;deterministic;numerics</PackageTags>
-    <PackageReleaseNotes>Adds deterministic OpenMath 2.0 Revision 2 import and export for typed MathBlock programs.</PackageReleaseNotes>
+    <PackageReleaseNotes>Adds UTF-8, stream, async, diagnostic, validation, normalization, source-location, and Profile 1 discovery APIs for OpenMath.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType>portable</DebugType>
@@ -43,6 +43,7 @@
     <None Include="..\README.md" Pack="true" PackagePath="README.md" />
     <None Include="..\LICENSE.md" Pack="true" PackagePath="LICENSE.md" />
     <None Include="..\THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="THIRD-PARTY-NOTICES.md" />
+    <None Include="..\docs\openmath-api.md" Pack="true" PackagePath="docs/openmath-api.md" />
     <None Include="..\openmath\v1\**\*"
           Pack="true"
           PackagePath="openmath/v1/%(RecursiveDir)%(Filename)%(Extension)" />

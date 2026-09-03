@@ -151,27 +151,34 @@ public sealed partial class MathBlockIndependenceTests
     }
 
     [Fact]
-    public void Public_release_metadata_declares_the_OpenMath_0_4_0_contract()
+    public void Public_release_metadata_declares_the_OpenMath_0_4_1_contract()
     {
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(root, "Supprocom.MathBlocks", "Supprocom.MathBlocks.csproj");
         var document = XDocument.Load(projectPath);
         var readme = File.ReadAllText(Path.Combine(root, "README.md"));
+        var apiGuide = File.ReadAllText(Path.Combine(root, "docs", "openmath-api.md"));
 
-        Assert.Equal("0.4.0", document.Descendants("Version").Single().Value);
+        Assert.Equal("0.4.1", document.Descendants("Version").Single().Value);
         Assert.Equal("AGPL-3.0-only", document.Descendants("PackageLicenseExpression").Single().Value);
         Assert.Contains(
-            "Adds deterministic OpenMath 2.0 Revision 2 import and export",
+            "Adds UTF-8, stream, async, diagnostic, validation, normalization",
             document.Descendants("PackageReleaseNotes").Single().Value,
             StringComparison.Ordinal);
-        Assert.Equal(new Version(0, 4, 0, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
+        Assert.Equal(new Version(0, 4, 1, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
         Assert.Contains("## Operation contract", readme, StringComparison.Ordinal);
         Assert.Contains("## OpenMath notation", readme, StringComparison.Ordinal);
         Assert.Contains("## CUDA composition", readme, StringComparison.Ordinal);
         Assert.Contains(
-            "dotnet add package Supprocom.MathBlocks --version 0.4.0",
+            "dotnet add package Supprocom.MathBlocks --version 0.4.1",
             readme,
             StringComparison.Ordinal);
+        Assert.Contains("## Diagnostic codes", apiGuide, StringComparison.Ordinal);
+        Assert.Contains("## Security boundary", apiGuide, StringComparison.Ordinal);
+        Assert.Contains(
+            document.Descendants("None"),
+            item => item.Attribute("Include")?.Value == "..\\docs\\openmath-api.md" &&
+                    item.Attribute("PackagePath")?.Value == "docs/openmath-api.md");
         Assert.DoesNotContain("## Resident typed program search", readme, StringComparison.Ordinal);
         Assert.DoesNotContain("## Parallel proposal waves", readme, StringComparison.Ordinal);
     }
