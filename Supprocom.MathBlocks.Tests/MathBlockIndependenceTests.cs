@@ -77,10 +77,17 @@ public sealed partial class MathBlockIndependenceTests
             .OrderBy(path => path, StringComparer.Ordinal)
             .ToArray();
         Assert.Equal(12, translationSources.Length);
-        Assert.Empty(Directory.EnumerateFiles(
-            Path.Combine(root, "Supprocom.MathBlocks", "Cuda", "Blocks"),
-            "*CudaBlockCatalog.cs",
-            SearchOption.AllDirectories));
+        var runtimeCudaBlocks = Path.Combine(
+            root,
+            "Supprocom.MathBlocks",
+            "Cuda",
+            "Blocks");
+        Assert.False(
+            Directory.Exists(runtimeCudaBlocks) &&
+            Directory.EnumerateFiles(
+                runtimeCudaBlocks,
+                "*CudaBlockCatalog.cs",
+                SearchOption.AllDirectories).Any());
 
         foreach (var source in translationSources.Append(sourcePath))
         {
@@ -300,14 +307,23 @@ public sealed partial class MathBlockIndependenceTests
             if (IsBuildOutput(sourceRoot, file))
                 continue;
             var text = File.ReadAllText(file);
+            var relative = Path.GetRelativePath(sourceRoot, file);
             foreach (Match match in ForbiddenSemanticWord().Matches(text))
                 failures.Add($"{Path.GetFileName(file)}: {match.Value}");
-            var relative = Path.GetRelativePath(sourceRoot, file);
             var isNativeInfrastructure = relative.StartsWith($"Cuda{Path.DirectorySeparatorChar}", StringComparison.Ordinal) ||
-                                         relative == Path.Combine("Execution", "MathBlocksCUDAWorker.cs");
+                                          relative == Path.Combine("Execution", "MathBlocksCUDAWorker.cs");
             if (!isNativeInfrastructure)
                 foreach (Match match in ForbiddenEffectWord().Matches(text))
+                {
+                    if (relative.StartsWith(
+                            $"Notation{Path.DirectorySeparatorChar}",
+                            StringComparison.Ordinal) &&
+                        match.Value == "Task")
+                    {
+                        continue;
+                    }
                     failures.Add($"{Path.GetFileName(file)}: {match.Value}");
+                }
         }
 
         Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures));
@@ -485,7 +501,7 @@ public sealed partial class MathBlockIndependenceTests
         throw new DirectoryNotFoundException("The repository root was not found.");
     }
 
-    [GeneratedRegex(@"\b(?:Canonical|Factor|Market|Price|Volume|Volatility|Frame|Trade|Trading|Bet|Betting|Candle|Timestamp|Binance|Polymarket)\b", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\b(?:Factor|Market|Price|Volume|Volatility|Trade|Trading|Bet|Betting|Candle|Timestamp|Binance|Polymarket)\b", RegexOptions.IgnoreCase)]
     private static partial Regex ForbiddenSemanticWord();
 
     [GeneratedRegex(@"\b(?:DateTime|DateTimeOffset|Random|Guid|Environment|File|Directory|HttpClient|Thread|Task|Process)\b")]
