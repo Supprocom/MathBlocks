@@ -287,6 +287,42 @@ public sealed class MathBlockOpenMathTests
     }
 
     [Fact]
+    public void Import_normalizes_a_fully_namespace_prefixed_document()
+    {
+        var canonical = MathBlockOpenMath.Export(CreateSampleProgram());
+        var document = XDocument.Parse(canonical, LoadOptions.PreserveWhitespace);
+        var root = Assert.IsType<XElement>(document.Root);
+        root.Attribute("xmlns")?.Remove();
+        root.Add(new XAttribute(XNamespace.Xmlns + "om", "http://www.openmath.org/OpenMath"));
+        var prefixed = document.ToString(SaveOptions.DisableFormatting);
+        var namespacedAttribute = ReplaceFirst(prefixed, " cd=", " om:cd=");
+        var wrongElementNamespace = prefixed.Replace(
+            "xmlns:om=\"http://www.openmath.org/OpenMath\"",
+            "xmlns:om=\"urn:invalid\"",
+            StringComparison.Ordinal);
+
+        var imported = MathBlockOpenMath.Import(prefixed);
+
+        Assert.StartsWith("<om:OMOBJ", prefixed, StringComparison.Ordinal);
+        Assert.DoesNotContain("<OM", prefixed, StringComparison.Ordinal);
+        Assert.DoesNotContain("</OM", prefixed, StringComparison.Ordinal);
+        Assert.Equal(canonical, MathBlockOpenMath.Export(imported.Program));
+        Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(namespacedAttribute));
+        Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(wrongElementNamespace));
+    }
+
+    [Fact]
+    public void Import_rejects_non_XML_whitespace_in_markup_positions()
+    {
+        var canonical = MathBlockOpenMath.Export(CreateSampleProgram());
+        var betweenElements = ReplaceFirst(canonical, ">", ">\u00A0");
+        var insideEmptyToken = ReplaceFirst(canonical, "></OMS>", ">\u00A0</OMS>");
+
+        Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(betweenElements));
+        Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(insideEmptyToken));
+    }
+
+    [Fact]
     public void Import_rejects_a_document_above_the_fixed_character_limit()
     {
         var source = new string(' ', MathBlockOpenMath.MaximumDocumentCharacters + 1);

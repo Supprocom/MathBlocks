@@ -86,7 +86,7 @@ public static class MathBlockOpenMath
         RequireDocumentContent(document);
         var root = document.Root ?? throw InvalidFormat("The OpenMath root is missing.");
         RequireElement(root, "OMOBJ");
-        RequireOnlyAttributes(root, true, "version", "cdbase", "cdgroup");
+        RequireOnlyAttributes(root, "version", "cdbase", "cdgroup");
         if (RequireAttribute(root, "version") != StandardVersion)
             throw InvalidFormat("The OpenMath version is not supported.");
         if (RequireAttribute(root, "cdbase") != ContentDictionaryBase)
@@ -98,7 +98,7 @@ public static class MathBlockOpenMath
         if (rootChildren.Length != 1)
             throw InvalidFormat("The OpenMath root must contain one object.");
 
-        RequireOnlyAttributes(rootChildren[0], false);
+        RequireOnlyAttributes(rootChildren[0]);
         var programChildren = ReadApplication(rootChildren[0]);
         if (programChildren.Length != 3)
             throw InvalidFormat("The OpenMath program must contain nodes and outputs.");
@@ -206,7 +206,7 @@ public static class MathBlockOpenMath
         IReadOnlyDictionary<string, MathBlockOperation> operationSymbols,
         List<MathBlockOperation> operations)
     {
-        RequireOnlyAttributes(element, false);
+        RequireOnlyAttributes(element);
         var children = ReadApplication(element);
         if (children.Length == 0)
             throw InvalidFormat("The OpenMath node collection is invalid.");
@@ -216,7 +216,7 @@ public static class MathBlockOpenMath
         {
             var elementIndex = nodeIndex + 1;
             var nodeElement = children[elementIndex];
-            RequireOnlyAttributes(nodeElement, false, "id");
+            RequireOnlyAttributes(nodeElement, "id");
             RequireElement(nodeElement, "OMA");
             if (RequireAttribute(nodeElement, "id") != NodeIdentifier(nodeIndex))
                 throw InvalidFormat("An OpenMath node identifier is invalid.");
@@ -288,7 +288,7 @@ public static class MathBlockOpenMath
         MathBlockProgramBuilder builder,
         int nodeCount)
     {
-        RequireOnlyAttributes(element, false);
+        RequireOnlyAttributes(element);
         var children = ReadApplication(element);
         if (children.Length < 2)
             throw InvalidFormat("The OpenMath program requires an output.");
@@ -296,7 +296,7 @@ public static class MathBlockOpenMath
 
         for (var index = 1; index < children.Length; index++)
         {
-            RequireOnlyAttributes(children[index], false);
+            RequireOnlyAttributes(children[index]);
             var outputChildren = ReadApplication(children[index]);
             if (outputChildren.Length != 3)
                 throw InvalidFormat("An OpenMath output is invalid.");
@@ -374,7 +374,7 @@ public static class MathBlockOpenMath
 
     private static MathBlockType ReadType(XElement element)
     {
-        RequireOnlyAttributes(element, false);
+        RequireOnlyAttributes(element);
         var children = ReadApplication(element);
         if (children.Length != 5)
             throw InvalidFormat("An OpenMath type is invalid.");
@@ -404,7 +404,7 @@ public static class MathBlockOpenMath
 
     private static MathBlockUnit ReadUnit(XElement element)
     {
-        RequireOnlyAttributes(element, false);
+        RequireOnlyAttributes(element);
         var children = ReadApplication(element);
         if (children.Length != 5)
             throw InvalidFormat("An OpenMath unit is invalid.");
@@ -427,7 +427,7 @@ public static class MathBlockOpenMath
 
     private static MathRational ReadRational(XElement element)
     {
-        RequireOnlyAttributes(element, false);
+        RequireOnlyAttributes(element);
         var children = ReadApplication(element);
         if (children.Length != 3)
             throw InvalidFormat("An OpenMath rational is invalid.");
@@ -748,7 +748,7 @@ public static class MathBlockOpenMath
 
     private static XElement[] ReadValueApplication(XElement element, string name)
     {
-        RequireOnlyAttributes(element, false);
+        RequireOnlyAttributes(element);
         var children = ReadApplication(element);
         if (children.Length == 0)
             throw InvalidFormat("An OpenMath value application is empty.");
@@ -770,7 +770,7 @@ public static class MathBlockOpenMath
     private static double ReadDouble(XElement element)
     {
         RequireElement(element, "OMF");
-        RequireOnlyAttributes(element, false, "hex");
+        RequireOnlyAttributes(element, "hex");
         RequireNoContent(element);
         var text = RequireAttribute(element, "hex");
         if (text.Length != 16 || text != text.ToUpperInvariant() ||
@@ -810,7 +810,7 @@ public static class MathBlockOpenMath
     private static int ReadInteger(XElement element)
     {
         RequireElement(element, "OMI");
-        RequireOnlyAttributes(element, false);
+        RequireOnlyAttributes(element);
         RequireTextOnly(element);
         var text = element.Value;
         if (!int.TryParse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var value) ||
@@ -824,7 +824,7 @@ public static class MathBlockOpenMath
     private static string ReadName(XElement element, string role)
     {
         RequireElement(element, "OMSTR");
-        RequireOnlyAttributes(element, false);
+        RequireOnlyAttributes(element);
         RequireTextOnly(element);
         var value = element.Value;
         if (string.IsNullOrWhiteSpace(value) || value != value.Trim() || value.Contains('\r'))
@@ -849,7 +849,7 @@ public static class MathBlockOpenMath
     private static int ReadReference(XElement element, int maximumExclusive)
     {
         RequireElement(element, "OMR");
-        RequireOnlyAttributes(element, false, "href");
+        RequireOnlyAttributes(element, "href");
         RequireNoContent(element);
         var href = RequireAttribute(element, "href");
         if (!href.StartsWith("#n", StringComparison.Ordinal) ||
@@ -879,7 +879,7 @@ public static class MathBlockOpenMath
     private static OpenMathSymbol ReadSymbol(XElement element)
     {
         RequireElement(element, "OMS");
-        RequireOnlyAttributes(element, false, "cd", "name");
+        RequireOnlyAttributes(element, "cd", "name");
         RequireNoContent(element);
         return new OpenMathSymbol(
             RequireAttribute(element, "cd"),
@@ -903,7 +903,7 @@ public static class MathBlockOpenMath
                 result.Add(child);
                 continue;
             }
-            if (node is XText text && string.IsNullOrWhiteSpace(text.Value))
+            if (node is XText text && IsXmlWhitespace(text.Value))
                 continue;
             throw InvalidFormat("OpenMath element content is invalid.");
         }
@@ -916,7 +916,7 @@ public static class MathBlockOpenMath
         {
             if (node is XElement)
                 continue;
-            if (node is XText text && string.IsNullOrWhiteSpace(text.Value))
+            if (node is XText text && IsXmlWhitespace(text.Value))
                 continue;
             throw InvalidFormat("The OpenMath document contains unsupported content.");
         }
@@ -925,7 +925,7 @@ public static class MathBlockOpenMath
     private static void RequireNoContent(XElement element)
     {
         foreach (var node in element.Nodes())
-            if (node is not XText text || !string.IsNullOrWhiteSpace(text.Value))
+            if (node is not XText text || !IsXmlWhitespace(text.Value))
                 throw InvalidFormat("An OpenMath token contains unsupported content.");
     }
 
@@ -948,23 +948,12 @@ public static class MathBlockOpenMath
         return attribute?.Value ?? throw InvalidFormat($"The OpenMath {name} attribute is missing.");
     }
 
-    private static void RequireOnlyAttributes(
-        XElement element,
-        bool allowDefaultNamespace,
-        params string[] names)
+    private static void RequireOnlyAttributes(XElement element, params string[] names)
     {
         foreach (var attribute in element.Attributes())
         {
             if (attribute.IsNamespaceDeclaration)
-            {
-                if (allowDefaultNamespace &&
-                    attribute.Name.LocalName == "xmlns" &&
-                    attribute.Value == NamespaceUri)
-                {
-                    continue;
-                }
-                throw InvalidFormat("An OpenMath namespace declaration is invalid.");
-            }
+                continue;
 
             if (attribute.Name.Namespace != XNamespace.None)
                 throw InvalidFormat("An OpenMath attribute namespace is invalid.");
@@ -978,6 +967,14 @@ public static class MathBlockOpenMath
             if (!supported)
                 throw InvalidFormat("An OpenMath attribute is not supported.");
         }
+    }
+
+    private static bool IsXmlWhitespace(string value)
+    {
+        for (var index = 0; index < value.Length; index++)
+            if (value[index] is not (' ' or '\t' or '\r' or '\n'))
+                return false;
+        return true;
     }
 
     private static void RequireSupportedType(MathBlockType type, bool importing)
