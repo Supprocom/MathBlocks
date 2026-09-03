@@ -18,6 +18,7 @@ jobs:
       ARTIFACT_ROOT: /tmp/mathblocks-artifacts
       TEST_RESULTS: /tmp/mathblocks-test-results
       OPENMATH_EVIDENCE: /tmp/mathblocks-openmath-evidence
+      FUZZ_EVIDENCE: /tmp/mathblocks-openmath-fuzz
     steps:
       - name: Check out the exact commit
         uses: actions/checkout@v4
@@ -110,6 +111,62 @@ jobs:
           --logger "trx;LogFileName=mathblocks-portable.trx"
           --results-directory "$TEST_RESULTS"
 
+      - name: Restore the OpenMath fuzz target
+        run: >-
+          dotnet restore fuzz/MathBlocks.OpenMath.Fuzz/MathBlocks.OpenMath.Fuzz.csproj
+          --force-evaluate -p:NuGetAuditMode=all --artifacts-path "$ARTIFACT_ROOT/fuzz"
+
+      - name: Build the OpenMath fuzz target
+        run: >-
+          dotnet build fuzz/MathBlocks.OpenMath.Fuzz/MathBlocks.OpenMath.Fuzz.csproj
+          -c Release --no-restore --no-incremental --warnaserror
+          --artifacts-path "$ARTIFACT_ROOT/fuzz"
+
+      - name: Replay the tracked OpenMath corpus
+        run: >-
+          dotnet "$ARTIFACT_ROOT/fuzz/bin/MathBlocks.OpenMath.Fuzz/release/MathBlocks.OpenMath.Fuzz.dll"
+          --replay fuzz/MathBlocks.OpenMath.Fuzz/Corpus
+
+      - name: Run the OpenMath coverage-guided smoke gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$FUZZ_EVIDENCE/tools" "$FUZZ_EVIDENCE/corpus" "$FUZZ_EVIDENCE/findings"
+          dotnet tool install SharpFuzz.CommandLine \
+            --version 2.3.0 \
+            --tool-path "$FUZZ_EVIDENCE/tools"
+          curl --fail --location --silent --show-error \
+            --output "$FUZZ_EVIDENCE/libfuzzer-dotnet" \
+            https://github.com/Metalnem/libfuzzer-dotnet/releases/download/v2025.05.02.0904/libfuzzer-dotnet-ubuntu
+          echo 'C2C2A90D94C409A4AF339A0D4F244E0442C5A5D249BE0F1252BA07871F285958  /tmp/mathblocks-openmath-fuzz/libfuzzer-dotnet' | sha256sum --check
+          chmod +x "$FUZZ_EVIDENCE/libfuzzer-dotnet"
+          cp fuzz/MathBlocks.OpenMath.Fuzz/Corpus/* "$FUZZ_EVIDENCE/corpus/"
+          target_root="$ARTIFACT_ROOT/fuzz/bin/MathBlocks.OpenMath.Fuzz/release"
+          "$FUZZ_EVIDENCE/tools/sharpfuzz" \
+            "$target_root/Supprocom.MathBlocks.dll" \
+            Supprocom.MathBlocks.MathBlockOpenMath
+          set +e
+          "$FUZZ_EVIDENCE/libfuzzer-dotnet" \
+            -max_total_time=30 \
+            -timeout=5 \
+            -max_len=65536 \
+            -seed=401 \
+            -print_final_stats=1 \
+            -dict=fuzz/MathBlocks.OpenMath.Fuzz/openmath.dict \
+            -artifact_prefix="$FUZZ_EVIDENCE/findings/" \
+            --target_path=dotnet \
+            --target_arg="$target_root/MathBlocks.OpenMath.Fuzz.dll" \
+            "$FUZZ_EVIDENCE/corpus" \
+            > "$FUZZ_EVIDENCE/fuzz.stdout.txt" \
+            2> "$FUZZ_EVIDENCE/fuzz.stderr.txt"
+          exit_code=$?
+          set -e
+          printf '%s\n' "$exit_code" > "$FUZZ_EVIDENCE/fuzz.exit.txt"
+          cat "$FUZZ_EVIDENCE/fuzz.stdout.txt"
+          cat "$FUZZ_EVIDENCE/fuzz.stderr.txt"
+          test "$exit_code" -eq 0
+          test -z "$(find "$FUZZ_EVIDENCE/findings" -type f -print -quit)"
+
       - name: Restore the OpenMath profile generator
         run: >-
           dotnet restore build/MathBlocks.OpenMathProfileGenerator/MathBlocks.OpenMathProfileGenerator.csproj
@@ -198,4 +255,5 @@ jobs:
           path: |
             /tmp/mathblocks-test-results
             /tmp/mathblocks-openmath-evidence
+            /tmp/mathblocks-openmath-fuzz
           if-no-files-found: error
