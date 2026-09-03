@@ -35,7 +35,13 @@ jobs:
               throw "The generator requires exactly 12 direct translation units."
           }
 
-          $legacy = @(Get-ChildItem 'Supprocom.MathBlocks/Cuda/Blocks' -Filter '*CudaBlockCatalog.cs' -Recurse)
+          $runtimeCudaBlocks = 'Supprocom.MathBlocks/Cuda/Blocks'
+          $legacy = if (Test-Path -LiteralPath $runtimeCudaBlocks) {
+              @(Get-ChildItem $runtimeCudaBlocks -Filter '*CudaBlockCatalog.cs' -Recurse)
+          }
+          else {
+              @()
+          }
           if ($legacy.Count -ne 0) {
               throw "Legacy CUDA catalog wrappers are present."
           }
