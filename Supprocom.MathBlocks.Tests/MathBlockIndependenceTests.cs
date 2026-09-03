@@ -144,24 +144,25 @@ public sealed partial class MathBlockIndependenceTests
     }
 
     [Fact]
-    public void Public_release_metadata_declares_the_CUDA_0_3_2_contract()
+    public void Public_release_metadata_declares_the_OpenMath_0_4_0_contract()
     {
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(root, "Supprocom.MathBlocks", "Supprocom.MathBlocks.csproj");
         var document = XDocument.Load(projectPath);
         var readme = File.ReadAllText(Path.Combine(root, "README.md"));
 
-        Assert.Equal("0.3.2", document.Descendants("Version").Single().Value);
+        Assert.Equal("0.4.0", document.Descendants("Version").Single().Value);
         Assert.Equal("AGPL-3.0-only", document.Descendants("PackageLicenseExpression").Single().Value);
         Assert.Contains(
-            "Migrates CUDA source generation to exact Supprocom.CSharp2CUDA 0.2.1",
+            "Adds deterministic OpenMath 2.0 Revision 2 import and export",
             document.Descendants("PackageReleaseNotes").Single().Value,
             StringComparison.Ordinal);
-        Assert.Equal(new Version(0, 3, 0, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
+        Assert.Equal(new Version(0, 4, 0, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
         Assert.Contains("## Operation contract", readme, StringComparison.Ordinal);
+        Assert.Contains("## OpenMath notation", readme, StringComparison.Ordinal);
         Assert.Contains("## CUDA composition", readme, StringComparison.Ordinal);
         Assert.Contains(
-            "dotnet add package Supprocom.MathBlocks --version 0.3.2",
+            "dotnet add package Supprocom.MathBlocks --version 0.4.0",
             readme,
             StringComparison.Ordinal);
         Assert.DoesNotContain("## Resident typed program search", readme, StringComparison.Ordinal);

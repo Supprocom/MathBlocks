@@ -48,6 +48,30 @@ var output = program.Evaluate(new Dictionary<string, MathBlockValue>
 Console.WriteLine(output["area"].AsScalar());
 ```
 
+## OpenMath notation
+
+`MathBlockOpenMath` exports a typed program as OpenMath 2.0 Revision 2 XML.
+The exported node sequence gives one exact operation order.
+
+The importer rebuilds the typed program and returns its operations in that
+same order. It rejects unknown symbols, forward references, and invalid types.
+
+```csharp
+var notation = MathBlockOpenMath.Export(program);
+var imported = MathBlockOpenMath.Import(notation);
+
+foreach (var operation in imported.Operations)
+    Console.WriteLine(operation.Identity);
+
+var sameNotation = MathBlockOpenMath.Export(imported.Program);
+```
+
+The profile preserves shared nodes, constants, units, shapes, and named
+outputs. It uses exact hexadecimal binary64 values.
+
+This API reads semantic OpenMath XML. It does not read presentation text such
+as `sin(x) + x^2`.
+
 ## CUDA composition
 
 `MathBlockCudaDeviceModule` exposes the supported device source, complete
@@ -167,11 +191,11 @@ unrepresentable resource requirement before launch.
 This Git repository contains source text and project metadata only. It does not
 contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
 
-Get MathBlocks version `0.3.2` from NuGet.org with this command after
+Get MathBlocks version `0.4.0` from NuGet.org with this command after
 publication.
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.3.2
+dotnet add package Supprocom.MathBlocks --version 0.4.0
 ```
 
 The package declares three external native-acquisition dependencies. This

@@ -6,8 +6,8 @@
     <RootNamespace>Supprocom.MathBlocks</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>Supprocom.MathBlocks</PackageId>
-    <Version>0.3.2</Version>
-    <AssemblyVersion>0.3.0.0</AssemblyVersion>
+    <Version>0.4.0</Version>
+    <AssemblyVersion>0.4.0.0</AssemblyVersion>
     <Authors>Supprocom</Authors>
     <Company>Supprocom</Company>
     <Copyright>Copyright (C) 2026 mkn8rn</Copyright>
@@ -18,8 +18,8 @@
     <RepositoryUrl>https://github.com/Supprocom/MathBlocks</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>mathematics;operation-contract;computation-graph;cpu;cuda;deterministic;numerics</PackageTags>
-    <PackageReleaseNotes>Migrates CUDA source generation to exact Supprocom.CSharp2CUDA 0.2.1 while preserving the operation-only contract.</PackageReleaseNotes>
+    <PackageTags>mathematics;openmath;operation-contract;computation-graph;cpu;cuda;deterministic;numerics</PackageTags>
+    <PackageReleaseNotes>Adds deterministic OpenMath 2.0 Revision 2 import and export for typed MathBlock programs.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType>portable</DebugType>
