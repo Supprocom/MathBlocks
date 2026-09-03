@@ -271,6 +271,10 @@ public sealed class MathBlockCudaOperationContractTests
         Assert.Equal(
             Enum.GetValues<MathBlockValueKind>().OrderBy(value => value),
             values.Keys.OrderBy(value => value));
+        Assert.Equal(
+            "C863E9903C081FEA2E50ED810A35A8A60FEB3A17EBEFE4BE1FD2A79F31B07EBC",
+            MathBlockCudaValueCodec.SchemaFingerprint);
+        Assert.DoesNotContain("\r", MathBlockCudaValueCodec.SchemaDefinition, StringComparison.Ordinal);
         Assert.Equal(64, MathBlockCudaValueCodec.SchemaFingerprint.Length);
         Assert.Equal(64, MathBlockCudaValueCodec.ImplementationFingerprint.Length);
 
