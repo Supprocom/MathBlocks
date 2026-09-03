@@ -355,6 +355,8 @@ public static partial class MathBlockOpenMath
         }
         catch (XmlException exception)
         {
+            if (sourceIsEmpty?.Invoke() == true)
+                throw InvalidFormat("The OpenMath source is empty.");
             if (FindInnerException<OpenMathCharacterLimitException>(exception) is not null)
                 throw InvalidFormat("The OpenMath source exceeds the character limit.");
             if (FindInnerException<OpenMathByteLimitException>(exception) is not null)
@@ -421,6 +423,8 @@ public static partial class MathBlockOpenMath
         }
         catch (XmlException exception)
         {
+            if (sourceIsEmpty())
+                throw InvalidFormat("The OpenMath source is empty.");
             if (FindInnerException<OperationCanceledException>(exception) is { } cancellation)
                 throw cancellation;
             if (FindInnerException<OpenMathCharacterLimitException>(exception) is not null)

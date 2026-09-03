@@ -97,6 +97,37 @@ public sealed class MathBlockOpenMathRobustnessTests
     }
 
     [Fact]
+    public async Task Empty_streams_and_readers_report_the_empty_source_diagnostic()
+    {
+        AssertCode(
+            MathBlockOpenMath.TryImport(string.Empty),
+            MathBlockOpenMathDiagnosticCode.SourceEmpty);
+        AssertCode(
+            MathBlockOpenMath.TryImportUtf8([]),
+            MathBlockOpenMathDiagnosticCode.SourceEmpty);
+        AssertCode(
+            MathBlockOpenMath.TryImportUtf8(ReadOnlySequence<byte>.Empty),
+            MathBlockOpenMathDiagnosticCode.SourceEmpty);
+
+        using (var stream = new MemoryStream())
+            AssertCode(
+                MathBlockOpenMath.TryReadUtf8(stream),
+                MathBlockOpenMathDiagnosticCode.SourceEmpty);
+        using (var reader = new StringReader(string.Empty))
+            AssertCode(
+                MathBlockOpenMath.TryRead(reader),
+                MathBlockOpenMathDiagnosticCode.SourceEmpty);
+        await using (var stream = new MemoryStream())
+            AssertCode(
+                await MathBlockOpenMath.TryReadUtf8Async(stream),
+                MathBlockOpenMathDiagnosticCode.SourceEmpty);
+        using (var reader = new StringReader(string.Empty))
+            AssertCode(
+                await MathBlockOpenMath.TryReadAsync(reader),
+                MathBlockOpenMathDiagnosticCode.SourceEmpty);
+    }
+
+    [Fact]
     public async Task Async_input_uses_async_IO_beyond_its_prefix_and_preserves_failures()
     {
         var program = CreateSampleProgram(new string('α', 5_000));
