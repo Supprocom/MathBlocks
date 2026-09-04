@@ -221,8 +221,7 @@ another byte encoding or a conflicting declaration.
 
 `InvalidXml` identifies XML well-formedness failure.
 `UnsupportedDocumentContent` identifies a comment, processing instruction,
-DTD, or disallowed content position. `MissingRoot` identifies an absent
-Profile 1 root.
+DTD, or disallowed content position.
 
 `UnexpectedElement` identifies an element with the wrong expanded name.
 `MissingAttribute` identifies a required unqualified attribute.

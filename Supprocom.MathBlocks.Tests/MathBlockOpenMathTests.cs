@@ -231,7 +231,11 @@ public sealed class MathBlockOpenMathTests
             string.Concat(MathBlockOpenMath.ContentDictionaryBase, "/other.cdg"),
             StringComparison.Ordinal);
 
-        Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(dtd));
+        var dtdException = Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(dtd));
+        Assert.Equal(
+            "The OpenMath document contains unsupported content.",
+            dtdException.Message);
+        Assert.Null(dtdException.InnerException);
         Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(comment));
         Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(processingInstruction));
         Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(lowerCaseFloat));

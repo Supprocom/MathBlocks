@@ -297,6 +297,66 @@ public sealed class MathBlockOpenMathInputTests
     }
 
     [Fact]
+    public async Task DTD_inputs_return_the_exact_unsupported_content_diagnostic()
+    {
+        var text = string.Concat(
+            "<!DOCTYPE OMOBJ [<!ENTITY external SYSTEM \"file:///not-read\">]>",
+            MathBlockOpenMath.Export(CreateSampleProgram("left")));
+        var bytes = Encoding.UTF8.GetBytes(text);
+
+        AssertUnsupportedDocumentContent(MathBlockOpenMath.TryImport(text));
+        AssertUnsupportedDocumentContent(MathBlockOpenMath.TryImportUtf8(bytes));
+        AssertUnsupportedDocumentContent(
+            MathBlockOpenMath.TryImportUtf8(CreateSequence(bytes)));
+
+        using var characterReader = new StringReader(text);
+        AssertUnsupportedDocumentContent(MathBlockOpenMath.TryRead(characterReader));
+
+        using var byteStream = new ChunkedReadStream(bytes, 1, false);
+        AssertUnsupportedDocumentContent(MathBlockOpenMath.TryReadUtf8(byteStream));
+
+        using var asynchronousCharacterReader = new AsyncOnlyTextReader(text, 1);
+        AssertUnsupportedDocumentContent(
+            await MathBlockOpenMath.TryReadAsync(asynchronousCharacterReader));
+
+        await using var asynchronousByteStream = new ChunkedReadStream(bytes, 1, true);
+        AssertUnsupportedDocumentContent(
+            await MathBlockOpenMath.TryReadUtf8Async(asynchronousByteStream));
+    }
+
+    [Fact]
+    public async Task DTD_text_inside_CDATA_remains_valid()
+    {
+        var expected = MathBlockOpenMath.Export(CreateSampleProgram("<!DOCTYPE"));
+        var source = expected.Replace(
+            "<OMSTR>&lt;!DOCTYPE</OMSTR>",
+            "<OMSTR><![CDATA[<!DOCTYPE]]></OMSTR>",
+            StringComparison.Ordinal);
+        var bytes = Encoding.UTF8.GetBytes(source);
+
+        Assert.NotEqual(expected, source);
+        Assert.Equal(expected, MathBlockOpenMath.Export(MathBlockOpenMath.Import(source).Program));
+        Assert.Equal(expected, MathBlockOpenMath.Export(MathBlockOpenMath.ImportUtf8(bytes).Program));
+        Assert.Equal(
+            expected,
+            MathBlockOpenMath.Export(MathBlockOpenMath.ImportUtf8(CreateSequence(bytes)).Program));
+
+        using var characterReader = new StringReader(source);
+        Assert.Equal(expected, MathBlockOpenMath.Export(MathBlockOpenMath.Read(characterReader).Program));
+
+        using var byteStream = new ChunkedReadStream(bytes, 1, false);
+        Assert.Equal(expected, MathBlockOpenMath.Export(MathBlockOpenMath.ReadUtf8(byteStream).Program));
+
+        using var asynchronousCharacterReader = new AsyncOnlyTextReader(source, 1);
+        var asynchronousCharacters = await MathBlockOpenMath.ReadAsync(asynchronousCharacterReader);
+        Assert.Equal(expected, MathBlockOpenMath.Export(asynchronousCharacters.Program));
+
+        await using var asynchronousByteStream = new ChunkedReadStream(bytes, 1, true);
+        var asynchronousBytes = await MathBlockOpenMath.ReadUtf8Async(asynchronousByteStream);
+        Assert.Equal(expected, MathBlockOpenMath.Export(asynchronousBytes.Program));
+    }
+
+    [Fact]
     public void Stream_and_character_inputs_leave_their_sources_open_after_failure()
     {
         using var stream = new ChunkedReadStream([0xFF], 1, false);
@@ -336,6 +396,20 @@ public sealed class MathBlockOpenMathInputTests
         var sum = builder.Apply("scalar.add", inputs: [left, right]);
         var square = builder.Apply("scalar.multiply", inputs: [sum, sum]);
         return builder.Output("sum", sum).Output("square", square).Build();
+    }
+
+    private static void AssertUnsupportedDocumentContent(
+        MathBlockOpenMathImportAttempt attempt)
+    {
+        Assert.False(attempt.Succeeded);
+        Assert.Null(attempt.Result);
+        var diagnostic = Assert.IsType<MathBlockOpenMathDiagnostic>(attempt.Diagnostic);
+        Assert.Equal(
+            MathBlockOpenMathDiagnosticCode.UnsupportedDocumentContent,
+            diagnostic.Code);
+        Assert.Equal(
+            "The OpenMath document contains unsupported content.",
+            diagnostic.Message);
     }
 
     private static ReadOnlySequence<byte> CreateSequence(byte[] source)

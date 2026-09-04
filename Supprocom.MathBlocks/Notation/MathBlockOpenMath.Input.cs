@@ -15,6 +15,9 @@ public static partial class MathBlockOpenMath
     private const string DiagnosticOperationKey = "MathBlocks.OpenMath.Operation";
     private const string DiagnosticDictionaryKey = "MathBlocks.OpenMath.Dictionary";
     private const string DiagnosticSymbolKey = "MathBlocks.OpenMath.Symbol";
+    private const string CDataStart = "<![CDATA[";
+    private const string CDataEnd = "]]>";
+    private const string ProhibitedDtdPrefix = "<!D";
 
     /// <summary>Imports a Profile 1 document with the specified options.</summary>
     public static MathBlockOpenMathImportResult Import(
@@ -306,8 +309,14 @@ public static partial class MathBlockOpenMath
         OpenMathImportOptionsSnapshot snapshot)
     {
         using var textReader = new StringReader(source);
-        using var xmlReader = XmlReader.Create(
+        using var limited = new LimitedTextReader(
             textReader,
+            snapshot.MaximumDocumentCharacters,
+            default,
+            false,
+            false);
+        using var xmlReader = XmlReader.Create(
+            limited,
             CreateReaderSettings(snapshot.MaximumDocumentCharacters));
         return ReadForward(xmlReader, snapshot, false);
     }
@@ -363,6 +372,12 @@ public static partial class MathBlockOpenMath
                 throw InvalidFormat("The OpenMath source exceeds the byte limit.");
             if (FindInnerException<DecoderFallbackException>(exception) is { } decoder)
                 throw InvalidFormat("The OpenMath UTF-8 source is invalid.", decoder);
+            if (FindInnerException<FormatException>(exception) is { } format &&
+                format.Data[DiagnosticCodeKey] is
+                    MathBlockOpenMathDiagnosticCode.UnsupportedDocumentContent)
+            {
+                throw UnsupportedDocumentContentFormat(exception);
+            }
             throw InvalidFormat("The OpenMath source is not valid XML.", exception);
         }
     }
@@ -433,6 +448,12 @@ public static partial class MathBlockOpenMath
                 throw InvalidFormat("The OpenMath source exceeds the byte limit.");
             if (FindInnerException<DecoderFallbackException>(exception) is { } decoder)
                 throw InvalidFormat("The OpenMath UTF-8 source is invalid.", decoder);
+            if (FindInnerException<FormatException>(exception) is { } format &&
+                format.Data[DiagnosticCodeKey] is
+                    MathBlockOpenMathDiagnosticCode.UnsupportedDocumentContent)
+            {
+                throw UnsupportedDocumentContentFormat(exception);
+            }
             throw InvalidFormat("The OpenMath source is not valid XML.", exception);
         }
     }
@@ -734,6 +755,19 @@ public static partial class MathBlockOpenMath
             GetDiagnosticReference<string>(exception, DiagnosticSymbolKey));
     }
 
+    private static FormatException UnsupportedDocumentContentFormat(
+        XmlException? exception = null)
+    {
+        var result = InvalidFormat("The OpenMath document contains unsupported content.");
+        result.Data[DiagnosticCodeKey] =
+            MathBlockOpenMathDiagnosticCode.UnsupportedDocumentContent;
+        if (exception?.LineNumber > 0)
+            result.Data[DiagnosticLineKey] = exception.LineNumber;
+        if (exception?.LinePosition > 0)
+            result.Data[DiagnosticColumnKey] = exception.LinePosition;
+        return result;
+    }
+
     private static MathBlockOpenMathDiagnosticCode GetDiagnosticCode(string message) =>
         message switch
         {
@@ -756,7 +790,6 @@ public static partial class MathBlockOpenMath
                 MathBlockOpenMathDiagnosticCode.InvalidXml,
             "The OpenMath document contains unsupported content." =>
                 MathBlockOpenMathDiagnosticCode.UnsupportedDocumentContent,
-            "The OpenMath root is missing." => MathBlockOpenMathDiagnosticCode.MissingRoot,
             "The OpenMath version is not supported." =>
                 MathBlockOpenMathDiagnosticCode.UnsupportedOpenMathVersion,
             "The OpenMath content dictionary base is not supported." =>
@@ -1490,10 +1523,8 @@ public static partial class MathBlockOpenMath
         {
             if (frames.Count != 0)
                 throw InvalidFormat("The OpenMath source is not valid XML.");
-            if (!rootSeen)
+            if (!rootSeen || !rootComplete || result is null)
                 throw InvalidFormat("The OpenMath source is not valid XML.");
-            if (!rootComplete || result is null)
-                throw InvalidFormat("The OpenMath root is missing.");
             return result;
         }
 
@@ -2252,6 +2283,10 @@ public static partial class MathBlockOpenMath
         bool captureSource) : TextReader
     {
         private readonly StringBuilder? captured = captureSource ? new StringBuilder() : null;
+        private int cDataStartMatchLength;
+        private int cDataEndMatchLength;
+        private int prohibitedDtdMatchLength;
+        private bool insideCData;
 
         public long UnitsRead { get; private set; }
         public string? CapturedText => captured?.ToString();
@@ -2272,6 +2307,7 @@ public static partial class MathBlockOpenMath
             {
                 captured?.Append((char)value);
                 AddCount(1);
+                RejectProhibitedDtd((char)value);
             }
             return value;
         }
@@ -2287,6 +2323,7 @@ public static partial class MathBlockOpenMath
             var read = source.Read(buffer[..allowed]);
             captured?.Append(buffer[..read]);
             AddCount(read);
+            RejectProhibitedDtd(buffer[..read]);
             return read;
         }
 
@@ -2305,6 +2342,7 @@ public static partial class MathBlockOpenMath
                 .ConfigureAwait(false);
             captured?.Append(buffer.Span[..read]);
             AddCount(read);
+            RejectProhibitedDtd(buffer.Span[..read]);
             return read;
         }
 
@@ -2323,6 +2361,56 @@ public static partial class MathBlockOpenMath
             UnitsRead += count;
             if (UnitsRead > maximumCharacters)
                 throw new OpenMathCharacterLimitException();
+        }
+
+        private void RejectProhibitedDtd(char value)
+        {
+            if (insideCData)
+            {
+                if (value == CDataEnd[cDataEndMatchLength])
+                {
+                    cDataEndMatchLength++;
+                    if (cDataEndMatchLength == CDataEnd.Length)
+                    {
+                        cDataEndMatchLength = 0;
+                        insideCData = false;
+                    }
+                    return;
+                }
+                cDataEndMatchLength = value == CDataEnd[0] ? 1 : 0;
+                return;
+            }
+
+            if (value == CDataStart[cDataStartMatchLength])
+            {
+                cDataStartMatchLength++;
+                if (cDataStartMatchLength == CDataStart.Length)
+                {
+                    cDataStartMatchLength = 0;
+                    prohibitedDtdMatchLength = 0;
+                    insideCData = true;
+                    return;
+                }
+            }
+            else
+            {
+                cDataStartMatchLength = value == CDataStart[0] ? 1 : 0;
+            }
+
+            if (value == ProhibitedDtdPrefix[prohibitedDtdMatchLength])
+            {
+                prohibitedDtdMatchLength++;
+                if (prohibitedDtdMatchLength == ProhibitedDtdPrefix.Length)
+                    throw UnsupportedDocumentContentFormat();
+                return;
+            }
+            prohibitedDtdMatchLength = value == ProhibitedDtdPrefix[0] ? 1 : 0;
+        }
+
+        private void RejectProhibitedDtd(ReadOnlySpan<char> value)
+        {
+            for (var index = 0; index < value.Length; index++)
+                RejectProhibitedDtd(value[index]);
         }
     }
 

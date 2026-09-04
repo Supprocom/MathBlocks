@@ -17,7 +17,6 @@ public enum MathBlockOpenMathDiagnosticCode
     UnsupportedEncoding,
     InvalidXml,
     UnsupportedDocumentContent,
-    MissingRoot,
     UnexpectedElement,
     MissingAttribute,
     UnsupportedAttribute,
