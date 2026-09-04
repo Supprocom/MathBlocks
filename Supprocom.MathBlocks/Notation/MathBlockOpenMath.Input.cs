@@ -15,8 +15,9 @@ public static partial class MathBlockOpenMath
     private const string DiagnosticOperationKey = "MathBlocks.OpenMath.Operation";
     private const string DiagnosticDictionaryKey = "MathBlocks.OpenMath.Dictionary";
     private const string DiagnosticSymbolKey = "MathBlocks.OpenMath.Symbol";
+    private const string CommentStart = "<!--";
     private const string CDataStart = "<![CDATA[";
-    private const string CDataEnd = "]]>";
+    private const string ProcessingInstructionStart = "<?";
     private const string ProhibitedDtdPrefix = "<!D";
 
     /// <summary>Imports a Profile 1 document with the specified options.</summary>
@@ -2283,10 +2284,16 @@ public static partial class MathBlockOpenMath
         bool captureSource) : TextReader
     {
         private readonly StringBuilder? captured = captureSource ? new StringBuilder() : null;
+        private int commentStartMatchLength;
+        private int commentEndMatchLength;
         private int cDataStartMatchLength;
         private int cDataEndMatchLength;
+        private int processingInstructionStartMatchLength;
+        private int processingInstructionEndMatchLength;
         private int prohibitedDtdMatchLength;
+        private bool insideComment;
         private bool insideCData;
+        private bool insideProcessingInstruction;
 
         public long UnitsRead { get; private set; }
         public string? CapturedText => captured?.ToString();
@@ -2365,52 +2372,120 @@ public static partial class MathBlockOpenMath
 
         private void RejectProhibitedDtd(char value)
         {
+            if (insideComment)
+            {
+                if (AdvanceDelimitedEnd(value, '-', '>', ref commentEndMatchLength))
+                    insideComment = false;
+                return;
+            }
+
             if (insideCData)
             {
-                if (value == CDataEnd[cDataEndMatchLength])
-                {
-                    cDataEndMatchLength++;
-                    if (cDataEndMatchLength == CDataEnd.Length)
-                    {
-                        cDataEndMatchLength = 0;
-                        insideCData = false;
-                    }
-                    return;
-                }
-                cDataEndMatchLength = value == CDataEnd[0] ? 1 : 0;
+                if (AdvanceDelimitedEnd(value, ']', '>', ref cDataEndMatchLength))
+                    insideCData = false;
                 return;
             }
 
-            if (value == CDataStart[cDataStartMatchLength])
+            if (insideProcessingInstruction)
             {
-                cDataStartMatchLength++;
-                if (cDataStartMatchLength == CDataStart.Length)
-                {
-                    cDataStartMatchLength = 0;
-                    prohibitedDtdMatchLength = 0;
-                    insideCData = true;
-                    return;
-                }
-            }
-            else
-            {
-                cDataStartMatchLength = value == CDataStart[0] ? 1 : 0;
-            }
-
-            if (value == ProhibitedDtdPrefix[prohibitedDtdMatchLength])
-            {
-                prohibitedDtdMatchLength++;
-                if (prohibitedDtdMatchLength == ProhibitedDtdPrefix.Length)
-                    throw UnsupportedDocumentContentFormat();
+                if (AdvanceProcessingInstructionEnd(value))
+                    insideProcessingInstruction = false;
                 return;
             }
-            prohibitedDtdMatchLength = value == ProhibitedDtdPrefix[0] ? 1 : 0;
+
+            if (AdvanceStart(value, CommentStart, ref commentStartMatchLength))
+            {
+                ResetStartMatches();
+                insideComment = true;
+                return;
+            }
+
+            if (AdvanceStart(
+                    value,
+                    ProcessingInstructionStart,
+                    ref processingInstructionStartMatchLength))
+            {
+                ResetStartMatches();
+                insideProcessingInstruction = true;
+                return;
+            }
+
+            if (AdvanceStart(value, CDataStart, ref cDataStartMatchLength))
+            {
+                ResetStartMatches();
+                insideCData = true;
+                return;
+            }
+
+            if (AdvanceStart(value, ProhibitedDtdPrefix, ref prohibitedDtdMatchLength))
+                throw UnsupportedDocumentContentFormat();
         }
 
         private void RejectProhibitedDtd(ReadOnlySpan<char> value)
         {
             for (var index = 0; index < value.Length; index++)
                 RejectProhibitedDtd(value[index]);
+        }
+
+        private static bool AdvanceStart(
+            char value,
+            string sequence,
+            ref int matchLength)
+        {
+            if (value == sequence[matchLength])
+            {
+                matchLength++;
+                if (matchLength < sequence.Length)
+                    return false;
+                matchLength = 0;
+                return true;
+            }
+            matchLength = value == sequence[0] ? 1 : 0;
+            return false;
+        }
+
+        private static bool AdvanceDelimitedEnd(
+            char value,
+            char repeated,
+            char terminal,
+            ref int matchLength)
+        {
+            if (value == repeated)
+            {
+                matchLength = Math.Min(matchLength + 1, 2);
+                return false;
+            }
+            if (value == terminal && matchLength == 2)
+            {
+                matchLength = 0;
+                return true;
+            }
+            matchLength = 0;
+            return false;
+        }
+
+        private bool AdvanceProcessingInstructionEnd(char value)
+        {
+            if (value == '?')
+            {
+                processingInstructionEndMatchLength = 1;
+                return false;
+            }
+            if (value == '>' && processingInstructionEndMatchLength == 1)
+            {
+                processingInstructionEndMatchLength = 0;
+                return true;
+            }
+            processingInstructionEndMatchLength = 0;
+            return false;
+        }
+
+        private void ResetStartMatches()
+        {
+            commentStartMatchLength = 0;
+            cDataStartMatchLength = 0;
+            processingInstructionStartMatchLength = 0;
+            prohibitedDtdMatchLength = 0;
         }
     }
 

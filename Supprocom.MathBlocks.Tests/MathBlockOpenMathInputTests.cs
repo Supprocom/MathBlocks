@@ -356,6 +356,34 @@ public sealed class MathBlockOpenMathInputTests
         Assert.Equal(expected, MathBlockOpenMath.Export(asynchronousBytes.Program));
     }
 
+    [Theory]
+    [InlineData("<!-- <![CDATA[ --><!DOCTYPE OMOBJ>")]
+    [InlineData("<?probe <![CDATA[ ?><!DOCTYPE OMOBJ>")]
+    public async Task Lexical_context_markers_do_not_hide_DTD_diagnostics(string prefix)
+    {
+        var text = string.Concat(prefix, MathBlockOpenMath.Export(CreateSampleProgram("left")));
+        var bytes = Encoding.UTF8.GetBytes(text);
+
+        AssertUnsupportedDocumentContent(MathBlockOpenMath.TryImport(text));
+        AssertUnsupportedDocumentContent(MathBlockOpenMath.TryImportUtf8(bytes));
+        AssertUnsupportedDocumentContent(
+            MathBlockOpenMath.TryImportUtf8(CreateSequence(bytes)));
+
+        using var characterReader = new StringReader(text);
+        AssertUnsupportedDocumentContent(MathBlockOpenMath.TryRead(characterReader));
+
+        using var byteStream = new ChunkedReadStream(bytes, 1, false);
+        AssertUnsupportedDocumentContent(MathBlockOpenMath.TryReadUtf8(byteStream));
+
+        using var asynchronousCharacterReader = new AsyncOnlyTextReader(text, 1);
+        AssertUnsupportedDocumentContent(
+            await MathBlockOpenMath.TryReadAsync(asynchronousCharacterReader));
+
+        await using var asynchronousByteStream = new ChunkedReadStream(bytes, 1, true);
+        AssertUnsupportedDocumentContent(
+            await MathBlockOpenMath.TryReadUtf8Async(asynchronousByteStream));
+    }
+
     [Fact]
     public void Stream_and_character_inputs_leave_their_sources_open_after_failure()
     {
