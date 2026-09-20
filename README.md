@@ -9,7 +9,7 @@ through both OpenMath 2.0 and Strict Content MathML 3.0.
 
 Install the `Supprocom.MathBlocks` package from NuGet.org; CUDA execution also
 requires the platform dependencies described in the
-[development guide](docs/development.md).
+[development guide](https://github.com/Supprocom/MathBlocks/blob/d032c8ee68c765e9a41e4f7ee43c89045d15aafb/docs/development.md).
 
 ```text
 dotnet add package Supprocom.MathBlocks --version 0.5.0
@@ -19,7 +19,7 @@ dotnet add package Supprocom.MathBlocks --version 0.5.0
 
 Use `MathBlockProgramBuilder` to create a type-checked directed acyclic graph,
 then evaluate it with named inputs; the
-[programming model](docs/programming-model.md) explains contracts, versions,
+[programming model](https://github.com/Supprocom/MathBlocks/blob/d032c8ee68c765e9a41e4f7ee43c89045d15aafb/docs/programming-model.md) explains contracts, versions,
 values, execution, and ownership boundaries.
 
 ```csharp
@@ -65,10 +65,10 @@ notation, managed execution, or low-level CUDA composition independently.
 
 | Goal | Entry point | Guide |
 | --- | --- | --- |
-| Build and evaluate a typed graph | `MathBlockProgramBuilder`, `MathBlockProgram` | [Programming model](docs/programming-model.md) |
-| Preserve a complete typed program | `MathBlockOpenMath` | [OpenMath API](docs/openmath-api.md) |
-| Exchange one standard formula | `MathBlockFormulaInterchange` | [Formula interchange API](docs/formula-interchange-api.md) |
-| Compose or run CUDA work | `MathBlockCudaDeviceModule`, `MathBlocksCUDAWorker` | [CUDA integration](docs/cuda-integration.md) |
+| Build and evaluate a typed graph | `MathBlockProgramBuilder`, `MathBlockProgram` | [Programming model](https://github.com/Supprocom/MathBlocks/blob/d032c8ee68c765e9a41e4f7ee43c89045d15aafb/docs/programming-model.md) |
+| Preserve a complete typed program | `MathBlockOpenMath` | [OpenMath API](https://github.com/Supprocom/MathBlocks/blob/d032c8ee68c765e9a41e4f7ee43c89045d15aafb/docs/openmath-api.md) |
+| Exchange one standard formula | `MathBlockFormulaInterchange` | [Formula interchange API](https://github.com/Supprocom/MathBlocks/blob/d032c8ee68c765e9a41e4f7ee43c89045d15aafb/docs/formula-interchange-api.md) |
+| Compose or run CUDA work | `MathBlockCudaDeviceModule`, `MathBlocksCUDAWorker` | [CUDA integration](https://github.com/Supprocom/MathBlocks/blob/d032c8ee68c765e9a41e4f7ee43c89045d15aafb/docs/cuda-integration.md) |
 
 ## Documentation
 
@@ -78,17 +78,17 @@ guides below.
 
 | Topic | Document |
 | --- | --- |
-| Operations, values, programs, and CPU execution | [Programming model](docs/programming-model.md) |
-| Canonical full-program OpenMath | [OpenMath API](docs/openmath-api.md) |
-| OpenMath and Content MathML formula exchange | [Formula interchange API](docs/formula-interchange-api.md) |
-| Device dispatch, managed CUDA, ABI, and performance | [CUDA integration](docs/cuda-integration.md) |
-| Prerequisites, dependencies, build, test, and packaging | [Development guide](docs/development.md) |
+| Operations, values, programs, and CPU execution | [Programming model](https://github.com/Supprocom/MathBlocks/blob/d032c8ee68c765e9a41e4f7ee43c89045d15aafb/docs/programming-model.md) |
+| Canonical full-program OpenMath | [OpenMath API](https://github.com/Supprocom/MathBlocks/blob/d032c8ee68c765e9a41e4f7ee43c89045d15aafb/docs/openmath-api.md) |
+| OpenMath and Content MathML formula exchange | [Formula interchange API](https://github.com/Supprocom/MathBlocks/blob/d032c8ee68c765e9a41e4f7ee43c89045d15aafb/docs/formula-interchange-api.md) |
+| Device dispatch, managed CUDA, ABI, and performance | [CUDA integration](https://github.com/Supprocom/MathBlocks/blob/d032c8ee68c765e9a41e4f7ee43c89045d15aafb/docs/cuda-integration.md) |
+| Prerequisites, dependencies, build, test, and packaging | [Development guide](https://github.com/Supprocom/MathBlocks/blob/d032c8ee68c765e9a41e4f7ee43c89045d15aafb/docs/development.md) |
 
 ## Build from source
 
 Install the .NET 10 SDK before restoring the repository; CUDA tests additionally
 require a compatible NVIDIA driver and CUDA toolkit, as detailed in the
-[development guide](docs/development.md).
+[development guide](https://github.com/Supprocom/MathBlocks/blob/d032c8ee68c765e9a41e4f7ee43c89045d15aafb/docs/development.md).
 
 ```text
 dotnet restore Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj
@@ -98,6 +98,6 @@ dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj --confi
 
 ## License
 
-MathBlocks is licensed under [AGPL-3.0-only](LICENSE.md); dependency notices and
+MathBlocks is licensed under [AGPL-3.0-only](https://github.com/Supprocom/MathBlocks/blob/d032c8ee68c765e9a41e4f7ee43c89045d15aafb/LICENSE.md); dependency notices and
 their separate license terms are recorded in
-[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+[THIRD-PARTY-NOTICES.md](https://github.com/Supprocom/MathBlocks/blob/d032c8ee68c765e9a41e4f7ee43c89045d15aafb/THIRD-PARTY-NOTICES.md).
