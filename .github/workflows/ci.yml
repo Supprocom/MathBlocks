@@ -18,6 +18,7 @@ jobs:
       ARTIFACT_ROOT: /tmp/mathblocks-artifacts
       TEST_RESULTS: /tmp/mathblocks-test-results
       OPENMATH_EVIDENCE: /tmp/mathblocks-openmath-evidence
+      FORMULA_EVIDENCE: /tmp/mathblocks-formula-evidence
       FUZZ_EVIDENCE: /tmp/mathblocks-openmath-fuzz
     steps:
       - name: Check out the exact commit
@@ -217,10 +218,51 @@ jobs:
               }
           }
 
-      - name: Install OpenMath validation tools
+      - name: Restore the formula profile generator
+        run: >-
+          dotnet restore build/MathBlocks.FormulaProfileGenerator/MathBlocks.FormulaProfileGenerator.csproj
+          --force-evaluate -p:NuGetAuditMode=all --artifacts-path "$ARTIFACT_ROOT/formula-generator"
+
+      - name: Build the formula profile generator
+        run: >-
+          dotnet build build/MathBlocks.FormulaProfileGenerator/MathBlocks.FormulaProfileGenerator.csproj
+          -c Release --no-restore --no-incremental --warnaserror
+          --artifacts-path "$ARTIFACT_ROOT/formula-generator"
+
+      - name: Generate formula verification artifacts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path $env:FORMULA_EVIDENCE -Force | Out-Null
+          $generator = Join-Path `
+            $env:ARTIFACT_ROOT `
+            'formula-generator/bin/MathBlocks.FormulaProfileGenerator/release/MathBlocks.FormulaProfileGenerator.dll'
+          dotnet $generator `
+            --output "$env:FORMULA_EVIDENCE/generated-profile" `
+            --openmath-sample "$env:FORMULA_EVIDENCE/sample.openmath.xml" `
+            --mathml-sample "$env:FORMULA_EVIDENCE/sample.mathml"
+
+      - name: Verify generated formula profile artifacts
+        shell: pwsh
+        run: |
+          $generatedRoot = Join-Path $env:FORMULA_EVIDENCE 'generated-profile'
+          $generatedFiles = @(Get-ChildItem $generatedRoot -File | Sort-Object Name)
+          if ($generatedFiles.Count -ne 5) {
+              throw 'The formula profile generator did not create five generated artifacts.'
+          }
+
+          foreach ($generated in $generatedFiles) {
+              $tracked = Join-Path 'formula/v1' $generated.Name
+              $expectedHash = (Get-FileHash $tracked -Algorithm SHA256).Hash
+              $actualHash = (Get-FileHash $generated.FullName -Algorithm SHA256).Hash
+              if ($actualHash -ne $expectedHash) {
+                  throw "The generated formula artifact '$($generated.Name)' differs from source."
+              }
+          }
+
+      - name: Install formula validation tools
         run: |
           sudo apt-get update
-          sudo apt-get install --yes jing libxml2-utils
+          sudo apt-get install --yes jing libxml2-utils unzip
 
       - name: Download the normative OpenMath schemas
         run: |
@@ -239,6 +281,16 @@ jobs:
           echo 'B38F325A4695ADA7B71E786127FA9E4E81564434E0DDF2A66F87F8B303B13157  omcd2.rnc' | sha256sum --check
           echo '05022254EBEBF3E9FE37AB919C2A8A793EA42373488E62C0E0033C34F9772411  omcdgroup2.rnc' | sha256sum --check
 
+      - name: Download the normative MathML 3 schema
+        run: |
+          curl --fail --location --silent --show-error \
+            --output "$FORMULA_EVIDENCE/mathml3-relaxng.zip" \
+            https://www.w3.org/Math/RelaxNG/mathml3-relaxng.zip
+          cd "$FORMULA_EVIDENCE"
+          echo '1EA59A8D772702F88A6E7D3ADF4F15128BB1AE184D4E93CD6846F3675DDC28A4  mathml3-relaxng.zip' | sha256sum --check
+          unzip -q "$FORMULA_EVIDENCE/mathml3-relaxng.zip" \
+            -d "$FORMULA_EVIDENCE/w3c-mathml3"
+
       - name: Validate the OpenMath profile
         run: |
           schema_root="$OPENMATH_EVIDENCE/openmath-2.0r2"
@@ -253,6 +305,30 @@ jobs:
             cmp "$OPENMATH_EVIDENCE/$document" "$OPENMATH_EVIDENCE/$document.c14n11"
           done
 
+      - name: Validate the formula interchange profile
+        run: |
+          schema_root="$OPENMATH_EVIDENCE/openmath-2.0r2"
+          for document in formula/v1/*.ocd; do
+            jing -c "$schema_root/omcd2.rnc" "$document"
+          done
+          jing -c "$schema_root/omcdgroup2.rnc" formula/v1/mathblocks_formula_profile1.cdg
+          jing -c "$schema_root/openmath2.rnc" "$FORMULA_EVIDENCE/sample.openmath.xml"
+          jing -c formula/v1/mathblocks_formula_openmath1.rnc "$FORMULA_EVIDENCE/sample.openmath.xml"
+          jing "$FORMULA_EVIDENCE/w3c-mathml3/mathml3/mathml3.rng" \
+            "$FORMULA_EVIDENCE/sample.mathml"
+          jing -c formula/v1/mathblocks_formula_mathml1.rnc "$FORMULA_EVIDENCE/sample.mathml"
+          jing -c formula/v1/mathblocks_formula_mappings1.rnc \
+            formula/v1/mathblocks_formula_mappings1.xml
+          xmllint --noout formula/v1/mathblocks_formula_mappings1.xml
+          test "$(grep -c '<operation ' formula/v1/mathblocks_formula_mappings1.xml)" -eq 337
+          test "$(grep -c 'classification="direct-mapping"' formula/v1/mathblocks_formula_mappings1.xml)" -eq 337
+          test "$(grep -c 'classification="canonical-pattern-mapping"' formula/v1/mathblocks_formula_mappings1.xml || true)" -eq 0
+          test "$(grep -c 'classification="unsupported"' formula/v1/mathblocks_formula_mappings1.xml || true)" -eq 0
+          for document in sample.openmath.xml sample.mathml; do
+            xmllint --c14n11 "$FORMULA_EVIDENCE/$document" > "$FORMULA_EVIDENCE/$document.c14n11"
+            cmp "$FORMULA_EVIDENCE/$document" "$FORMULA_EVIDENCE/$document.c14n11"
+          done
+
       - name: Check the tracked diff
         run: git diff --check
 
@@ -264,5 +340,6 @@ jobs:
           path: |
             /tmp/mathblocks-test-results
             /tmp/mathblocks-openmath-evidence
+            /tmp/mathblocks-formula-evidence
             /tmp/mathblocks-openmath-fuzz
           if-no-files-found: error

@@ -6,20 +6,20 @@
     <RootNamespace>Supprocom.MathBlocks</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>Supprocom.MathBlocks</PackageId>
-    <Version>0.4.1</Version>
-    <AssemblyVersion>0.4.1.0</AssemblyVersion>
+    <Version>0.5.0</Version>
+    <AssemblyVersion>0.5.0.0</AssemblyVersion>
     <Authors>Supprocom</Authors>
     <Company>Supprocom</Company>
     <Copyright>Copyright (C) 2026 mkn8rn</Copyright>
-    <Description>Immutable mathematical-operation contracts for deterministic CPU and CUDA composition.</Description>
-    <PackageDescription>Immutable mathematical-operation contracts for deterministic CPU and CUDA composition.</PackageDescription>
+    <Description>Typed mathematical-operation contracts with exhaustive OpenMath and Content MathML formula interchange, deterministic CPU execution, and CUDA composition.</Description>
+    <PackageDescription>Typed mathematical-operation contracts with exhaustive OpenMath and Content MathML formula interchange, deterministic CPU execution, and CUDA composition.</PackageDescription>
     <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Supprocom/MathBlocks</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Supprocom/MathBlocks</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>mathematics;openmath;operation-contract;computation-graph;cpu;cuda;deterministic;numerics</PackageTags>
-    <PackageReleaseNotes>Adds UTF-8, stream, async, diagnostic, validation, normalization, source-location, and Profile 1 discovery APIs for OpenMath.</PackageReleaseNotes>
+    <PackageTags>mathematics;openmath;mathml;content-mathml;operation-contract;computation-graph;cpu;cuda;deterministic;numerics</PackageTags>
+    <PackageReleaseNotes>Adds exhaustive standard formula interchange for all 337 operations in OpenMath 2.0 and Strict Content MathML 3.0, with explicit mapping classifications, exact annotations, and external-expression import.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType>portable</DebugType>
@@ -44,9 +44,13 @@
     <None Include="..\LICENSE.md" Pack="true" PackagePath="LICENSE.md" />
     <None Include="..\THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="THIRD-PARTY-NOTICES.md" />
     <None Include="..\docs\openmath-api.md" Pack="true" PackagePath="docs/openmath-api.md" />
+    <None Include="..\docs\formula-interchange-api.md" Pack="true" PackagePath="docs/formula-interchange-api.md" />
     <None Include="..\openmath\v1\**\*"
           Pack="true"
           PackagePath="openmath/v1/%(RecursiveDir)%(Filename)%(Extension)" />
+    <None Include="..\formula\v1\**\*"
+          Pack="true"
+          PackagePath="formula/v1/%(RecursiveDir)%(Filename)%(Extension)" />
     <EmbeddedResource Include="..\openmath\v1\mathblocks_operations1.ocd"
                       LogicalName="Supprocom.MathBlocks.OpenMath.v1.mathblocks_operations1.ocd" />
     <EmbeddedResource Include="..\openmath\v1\mathblocks_profile1.cdg"
@@ -61,6 +65,8 @@
                       LogicalName="Supprocom.MathBlocks.OpenMath.v1.mathblocks_values1.ocd" />
     <EmbeddedResource Include="..\openmath\v1\README.md"
                       LogicalName="Supprocom.MathBlocks.OpenMath.v1.README.md" />
+    <EmbeddedResource Include="..\formula\v1\*.*"
+                      LogicalName="Supprocom.MathBlocks.Formula.v1.%(Filename)%(Extension)" />
     <AssemblyMetadata Include="RepositoryCommit" Value="$(RepositoryCommit)" Condition="'$(RepositoryCommit)' != ''" />
   </ItemGroup>
 

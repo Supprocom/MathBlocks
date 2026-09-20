@@ -153,6 +153,50 @@ diagnostic, ownership rule, and security boundary.
 This API reads semantic OpenMath XML. It does not read presentation text such
 as `sin(x) + x^2`.
 
+## Standard formula interchange
+
+MathBlocks 0.5.0 adds `MathBlockFormulaInterchange` for exchanging one selected
+program output as a conventional expression graph. It supports
+[OpenMath 2.0 Revision 2](https://openmath.org/standard/) and
+[Strict Content MathML 3.0](https://www.w3.org/TR/MathML3/chapter4.html).
+
+Every one of the 337 standard operations is mapped in both vocabularies. Common
+operators use established OpenMath content dictionaries. Operations without an
+exact established symbol use the versioned
+`mathblocks_formula_operations1` dictionary; no operation has an unsupported
+mapping. The manifest classifies every entry explicitly as a direct mapping,
+canonical-pattern mapping, or unsupported; Profile 1 contains 337 direct
+mappings and zero entries in the other two classes.
+
+```csharp
+var contentMathMl = MathBlockFormulaInterchange.Export(
+    program,
+    "area",
+    MathBlockFormulaFormat.ContentMathMl);
+
+var importedFormula = MathBlockFormulaInterchange.Import(
+    contentMathMl,
+    MathBlockFormulaFormat.ContentMathMl);
+```
+
+An overload with explicit free-variable types and an output name imports the
+visible expression from independent OpenMath or Content MathML producers,
+without requiring a MathBlocks annotation.
+
+The visible expression uses `apply`, `csymbol`, `ci`, `cn`, and `share` in
+Content MathML, or their one-to-one OpenMath equivalents. Exact MathBlocks
+types, units, shapes, binary64 behavior, operation versions, and the output name
+are carried by a verified Profile 1 semantic annotation.
+
+Formula interchange selects only nodes reachable from the named output. It
+does not simplify, reorder, evaluate, or infer expressions. Existing OpenMath
+Profile 1 remains unchanged and remains the complete multi-output program
+format.
+
+`MathBlockFormulaInterchange.Profile` exposes the total operation mapping and
+its fingerprint. The [formula interchange guide](docs/formula-interchange-api.md)
+defines the wire contract, exact-annotation rule, and security boundary.
+
 ## CUDA composition
 
 `MathBlockCudaDeviceModule` exposes the supported device source, complete
@@ -272,11 +316,11 @@ unrepresentable resource requirement before launch.
 This Git repository contains source text and project metadata only. It does not
 contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
 
-Get MathBlocks version `0.4.1` from NuGet.org with this command after
+Get MathBlocks version `0.5.0` from NuGet.org with this command after
 publication.
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.4.1
+dotnet add package Supprocom.MathBlocks --version 0.5.0
 ```
 
 The package declares three external native-acquisition dependencies. This

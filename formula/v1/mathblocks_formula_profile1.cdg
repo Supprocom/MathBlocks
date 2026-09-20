@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CDGroup version="2.0" xmlns="http://www.openmath.org/OpenMathCDG">
+  <CDGroupName>mathblocks_formula_profile1</CDGroupName>
+  <CDGroupVersion>1</CDGroupVersion>
+  <CDGroupRevision>0</CDGroupRevision>
+  <CDGroupURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/formula/v1/mathblocks_formula_profile1.cdg</CDGroupURL>
+  <CDGroupDescription>This group defines lossless MathBlocks formula expressions in OpenMath and Strict Content MathML.</CDGroupDescription>
+  <CDGroupMember>
+    <CDName>mathblocks_formula1</CDName>
+    <CDVersion>1</CDVersion>
+    <CDURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/formula/v1/mathblocks_formula1.ocd</CDURL>
+  </CDGroupMember>
+  <CDGroupMember>
+    <CDName>mathblocks_formula_operations1</CDName>
+    <CDVersion>1</CDVersion>
+    <CDURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/formula/v1/mathblocks_formula_operations1.ocd</CDURL>
+  </CDGroupMember>
+  <CDGroupMember>
+    <CDName>mathblocks_formula_values1</CDName>
+    <CDVersion>1</CDVersion>
+    <CDURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/formula/v1/mathblocks_formula_values1.ocd</CDURL>
+  </CDGroupMember>
+  <CDGroupMember>
+    <CDName>arith1</CDName>
+    <CDVersion>3</CDVersion>
+    <CDURL>http://www.openmath.org/cd/arith1.ocd</CDURL>
+  </CDGroupMember>
+  <CDGroupMember>
+    <CDName>complex1</CDName>
+    <CDVersion>3</CDVersion>
+    <CDURL>http://www.openmath.org/cd/complex1.ocd</CDURL>
+  </CDGroupMember>
+  <CDGroupMember>
+    <CDName>logic1</CDName>
+    <CDVersion>4</CDVersion>
+    <CDURL>http://www.openmath.org/cd/logic1.ocd</CDURL>
+  </CDGroupMember>
+  <CDGroupMember>
+    <CDName>relation1</CDName>
+    <CDVersion>3</CDVersion>
+    <CDURL>http://www.openmath.org/cd/relation1.ocd</CDURL>
+  </CDGroupMember>
+  <CDGroupMember>
+    <CDName>rounding1</CDName>
+    <CDVersion>3</CDVersion>
+    <CDURL>http://www.openmath.org/cd/rounding1.ocd</CDURL>
+  </CDGroupMember>
+  <CDGroupMember>
+    <CDName>transc1</CDName>
+    <CDVersion>3</CDVersion>
+    <CDURL>http://www.openmath.org/cd/transc1.ocd</CDURL>
+  </CDGroupMember>
+</CDGroup>

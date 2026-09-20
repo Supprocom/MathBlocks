@@ -1,0 +1,49 @@
+default namespace = "http://www.w3.org/1998/Math/MathML"
+namespace xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
+
+start = element math {
+  attribute cdgroup {
+    "https://raw.githubusercontent.com/Supprocom/MathBlocks/main/formula/v1/mathblocks_formula_profile1.cdg"
+  },
+  element semantics {
+    expression,
+    element annotation {
+      attribute encoding {
+        "application/vnd.supprocom.mathblocks.openmath-profile1+xml"
+      },
+      text
+    }
+  }
+}
+
+expression = application | variable | number | symbol | reference
+
+application = element apply {
+  id?,
+  symbol,
+  expression*
+}
+
+variable = element ci {
+  id,
+  text
+}
+
+number = element cn {
+  id?,
+  attribute type { "integer" | "hexdouble" },
+  text
+}
+
+symbol = element csymbol {
+  id?,
+  attribute cd { xsd:NCName },
+  text
+}
+
+reference = element share {
+  attribute src { xsd:anyURI { pattern = "#n(0|[1-9][0-9]*)" } },
+  empty
+}
+
+id = attribute id { xsd:ID { pattern = "n(0|[1-9][0-9]*)" } }

@@ -1,6 +1,6 @@
 # MathBlocks OpenMath API
 
-This guide applies to MathBlocks 0.4.1 and OpenMath Profile 1.
+This guide applies to MathBlocks 0.5.0 and OpenMath Profile 1.
 
 Profile 1 represents a complete typed `MathBlockProgram`. It preserves node
 order, operand order, shared nodes, constants, units, shapes, and outputs.
@@ -315,7 +315,7 @@ and profile README. Each entry includes its path, length, SHA-256, and normative
 state.
 
 The embedded profile README still identifies version 0.4.0. Profile 1 became
-immutable in that release, so version 0.4.1 does not rewrite the artifact.
+immutable in that release, so later package versions do not rewrite the artifact.
 
 `OpenRead` returns a new read-only stream at position zero. It reads embedded
 bytes and does not use an installation path or network request.

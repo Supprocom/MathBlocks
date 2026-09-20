@@ -1,0 +1,62 @@
+default namespace = "http://www.openmath.org/OpenMath"
+namespace xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
+
+start = element OMOBJ {
+  attribute cdbase {
+    "https://raw.githubusercontent.com/Supprocom/MathBlocks/main/formula/v1"
+  },
+  attribute cdgroup {
+    "https://raw.githubusercontent.com/Supprocom/MathBlocks/main/formula/v1/mathblocks_formula_profile1.cdg"
+  },
+  attribute version { "2.0" },
+  element OMATTR {
+    element OMATP {
+      element OMS {
+        attribute cd { "mathblocks_formula1" },
+        attribute name { "profile1" },
+        empty
+      },
+      element OMSTR { text }
+    },
+    expression
+  }
+}
+
+expression = application | variable | float | integer | symbol | reference
+
+application = element OMA {
+  id?,
+  symbol,
+  expression*
+}
+
+variable = element OMV {
+  id,
+  attribute name { text },
+  empty
+}
+
+float = element OMF {
+  id?,
+  attribute hex { xsd:string { pattern = "[0-9A-F]{16}" } },
+  empty
+}
+
+integer = element OMI {
+  xsd:string { pattern = "0|-?[1-9][0-9]*" }
+}
+
+symbol = element OMS {
+  id?,
+  attribute cdbase { xsd:anyURI }?,
+  attribute cd { xsd:NCName },
+  attribute name { xsd:NCName },
+  empty
+}
+
+reference = element OMR {
+  attribute href { xsd:anyURI { pattern = "#n(0|[1-9][0-9]*)" } },
+  empty
+}
+
+id = attribute id { xsd:ID { pattern = "n(0|[1-9][0-9]*)" } }

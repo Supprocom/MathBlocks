@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CD version="2.0" xmlns="http://www.openmath.org/OpenMathCD">
+  <CDName>mathblocks_formula_values1</CDName>
+  <CDBase>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/formula/v1</CDBase>
+  <CDURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/formula/v1/mathblocks_formula_values1.ocd</CDURL>
+  <CDReviewDate>2031-09-20</CDReviewDate>
+  <CDStatus>private</CDStatus>
+  <CDDate>2026-09-20</CDDate>
+  <CDVersion>1</CDVersion>
+  <CDRevision>0</CDRevision>
+  <Description>This content dictionary defines exact structured constants in MathBlocks formula expressions.</Description>
+  <CDDefinition>
+    <Name>vector</Name>
+    <Role>application</Role>
+    <Description>An ordered vector of binary64 values.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>matrix</Name>
+    <Role>application</Role>
+    <Description>A row count, column count, and row-major binary64 matrix values.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>complex</Name>
+    <Role>application</Role>
+    <Description>Real and imaginary binary64 components.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>complex-vector</Name>
+    <Role>application</Role>
+    <Description>An ordered vector of complex values.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>complex-matrix</Name>
+    <Role>application</Role>
+    <Description>A row count, column count, and row-major complex matrix values.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>point-set</Name>
+    <Role>application</Role>
+    <Description>An ordered collection of two-dimensional points.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>point</Name>
+    <Role>application</Role>
+    <Description>Two binary64 coordinates.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>graph</Name>
+    <Role>application</Role>
+    <Description>A vertex count and ordered directed weighted edges.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>edge</Name>
+    <Role>application</Role>
+    <Description>Source, target, and binary64 edge weight.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>run-set</Name>
+    <Role>application</Role>
+    <Description>An ordered collection of runs.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>run</Name>
+    <Role>application</Role>
+    <Description>Start, length, and binary64 run value.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>boolean-vector</Name>
+    <Role>application</Role>
+    <Description>An ordered vector of Boolean values.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>true</Name>
+    <Role>constant</Role>
+    <Description>The Boolean true value.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>false</Name>
+    <Role>constant</Role>
+    <Description>The Boolean false value.</Description>
+  </CDDefinition>
+</CD>

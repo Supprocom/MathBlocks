@@ -1,0 +1,22 @@
+default namespace = "https://supprocom.github.io/MathBlocks/formula-mapping/1"
+namespace xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
+
+start = element operation-mappings {
+  attribute profile { "1" },
+  attribute openmath { "2.0" },
+  attribute content-mathml { "3.0" },
+  attribute count { "337" },
+  attribute fingerprint { xsd:string { pattern = "[0-9A-F]{64}" } },
+  element operation {
+    attribute identity { xsd:string { pattern = "[^@]+@[1-9][0-9]*" } },
+    attribute arity { xsd:nonNegativeInteger },
+    attribute classification {
+      "direct-mapping" | "canonical-pattern-mapping" | "unsupported"
+    },
+    attribute kind { "official" | "mathblocks-extension" },
+    attribute cdbase { xsd:anyURI },
+    attribute cd { xsd:NCName },
+    attribute name { xsd:NCName },
+    empty
+  }+
+}
