@@ -314,6 +314,79 @@ public sealed class MathBlockFormulaInterchangeTests
     }
 
     [Fact]
+    public void Visible_expression_import_rejects_foreign_dictionary_groups_without_an_accepted_base()
+    {
+        const string foreignGroup = "https://example.invalid/foreign.cdg";
+        var openMath =
+            $"<OMOBJ xmlns=\"http://www.openmath.org/OpenMath\" cdgroup=\"{foreignGroup}\"><OMA><OMS cd=\"arith1\" name=\"plus\"/><OMI>1</OMI><OMI>2</OMI></OMA></OMOBJ>";
+        var mathMl =
+            $"<math xmlns=\"http://www.w3.org/1998/Math/MathML\" cdgroup=\"{foreignGroup}\"><apply><csymbol cd=\"arith1\">plus</csymbol><cn>1</cn><cn>2</cn></apply></math>";
+
+        Assert.Throws<FormatException>(() => MathBlockFormulaInterchange.Import(
+            openMath,
+            MathBlockFormulaFormat.OpenMath,
+            new Dictionary<string, MathBlockType>(),
+            "result"));
+        Assert.Throws<FormatException>(() => MathBlockFormulaInterchange.Import(
+            mathMl,
+            MathBlockFormulaFormat.ContentMathMl,
+            new Dictionary<string, MathBlockType>(),
+            "result"));
+
+        var openMathWithBase = openMath.Replace(
+            "cd=\"arith1\"",
+            "cd=\"arith1\" cdbase=\"http://www.openmath.org/cd\"",
+            StringComparison.Ordinal);
+        var mathMlWithBase = mathMl.Replace(
+            "cd=\"arith1\"",
+            "cd=\"arith1\" cdbase=\"http://www.openmath.org/cd\"",
+            StringComparison.Ordinal);
+        foreach (var item in new[]
+                 {
+                     (Source: openMathWithBase, Format: MathBlockFormulaFormat.OpenMath),
+                     (Source: mathMlWithBase, Format: MathBlockFormulaFormat.ContentMathMl)
+                 })
+        {
+            var imported = MathBlockFormulaInterchange.Import(
+                item.Source,
+                item.Format,
+                new Dictionary<string, MathBlockType>(),
+                "result");
+            Assert.Equal(
+                3d,
+                imported.Program.Evaluate(new Dictionary<string, MathBlockValue>())["result"]
+                    .AsScalar());
+        }
+    }
+
+    [Theory]
+    [InlineData(MathBlockFormulaFormat.OpenMath)]
+    [InlineData(MathBlockFormulaFormat.ContentMathMl)]
+    public void Visible_expression_import_bounds_element_and_nesting_amplification(
+        MathBlockFormulaFormat format)
+    {
+        var elementException = Assert.Throws<FormatException>(() =>
+            MathBlockFormulaInterchange.Import(
+                CreateWideFormula(format),
+                format,
+                new Dictionary<string, MathBlockType>(),
+                "result"));
+        Assert.Equal(
+            "The formula expression exceeds the element limit.",
+            elementException.Message);
+
+        var nestingException = Assert.Throws<FormatException>(() =>
+            MathBlockFormulaInterchange.Import(
+                CreateDeepFormula(format),
+                format,
+                new Dictionary<string, MathBlockType>(),
+                "result"));
+        Assert.Equal(
+            "The formula expression exceeds the nesting limit.",
+            nestingException.Message);
+    }
+
+    [Fact]
     public void Official_and_extension_symbols_are_visible_in_both_vocabularies()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
@@ -589,6 +662,55 @@ public sealed class MathBlockFormulaInterchangeTests
         var sum = builder.Apply("scalar.add", inputs: [left, right]);
         var square = builder.Apply("scalar.multiply", inputs: [sum, sum]);
         return builder.Output("square", square).Build();
+    }
+
+    private static string CreateWideFormula(MathBlockFormulaFormat format)
+    {
+        var result = new StringBuilder();
+        if (format == MathBlockFormulaFormat.OpenMath)
+        {
+            result.Append("<OMOBJ xmlns=\"http://www.openmath.org/OpenMath\"><OMA><OMS cd=\"arith1\" cdbase=\"http://www.openmath.org/cd\" name=\"plus\"/>");
+            for (var index = 0; index < MathBlockFormulaInterchange.MaximumExpressionElements;
+                 index++)
+            {
+                result.Append("<OMI>1</OMI>");
+            }
+            return result.Append("</OMA></OMOBJ>").ToString();
+        }
+
+        result.Append("<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><apply><plus/>");
+        for (var index = 0; index < MathBlockFormulaInterchange.MaximumExpressionElements;
+             index++)
+        {
+            result.Append("<cn>1</cn>");
+        }
+        return result.Append("</apply></math>").ToString();
+    }
+
+    private static string CreateDeepFormula(MathBlockFormulaFormat format)
+    {
+        var result = new StringBuilder();
+        var levels = MathBlockFormulaInterchange.MaximumExpressionDepth + 2;
+        if (format == MathBlockFormulaFormat.OpenMath)
+        {
+            result.Append("<OMOBJ xmlns=\"http://www.openmath.org/OpenMath\">");
+            for (var index = 0; index < levels; index++)
+            {
+                result.Append("<OMA><OMS cd=\"arith1\" cdbase=\"http://www.openmath.org/cd\" name=\"plus\"/>");
+            }
+            result.Append("<OMI>1</OMI>");
+            for (var index = 0; index < levels; index++)
+                result.Append("<OMI>1</OMI></OMA>");
+            return result.Append("</OMOBJ>").ToString();
+        }
+
+        result.Append("<math xmlns=\"http://www.w3.org/1998/Math/MathML\">");
+        for (var index = 0; index < levels; index++)
+            result.Append("<apply><plus/>");
+        result.Append("<cn>1</cn>");
+        for (var index = 0; index < levels; index++)
+            result.Append("<cn>1</cn></apply>");
+        return result.Append("</math>").ToString();
     }
 
     private static string ReplaceFirst(string source, string oldValue, string newValue)

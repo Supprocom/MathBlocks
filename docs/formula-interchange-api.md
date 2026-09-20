@@ -28,7 +28,10 @@ one-to-one Content MathML vocabulary for OpenMath objects:
 
 The Content MathML root references the profile content-dictionary group with
 `cdgroup`. Strict `csymbol` elements use `cd` names from that group, and shared
-nodes use the standard `share src` form.
+nodes use the standard `share src` form. The local resolver recognizes the
+published profile group and does not retrieve arbitrary groups. A symbol under
+an unknown group is undefined unless an explicit supported `cdbase` resolves it
+on compatibility input.
 
 MathML 4 is not the normative target for Profile 1. Documents remain within
 the compatible Strict Content MathML core.
@@ -173,13 +176,16 @@ returns the same canonical representation; `NormalizeUtf8` provides the
 corresponding byte path. The explicit-binding `Import` overload is the
 compatibility path for independent standards-compliant expressions.
 
-Both import paths have fixed character and byte limits. XML parsing prohibits
-DTDs and external entity resolution, and performs no content-dictionary,
-schema, or network retrieval. Both reject comments, processing instructions,
-unknown operations, and custom operation implementations. The annotation-based
-path additionally rejects missing or duplicate annotations and every
-noncanonical document. The explicit-binding path accepts compatible external
-serialization but still requires one supported, type-correct expression.
+Both import paths have fixed character and byte limits. Visible-expression
+import additionally buffers at most 16,384 XML elements and accepts at most 256
+expression levels. XML parsing prohibits DTDs and external entity resolution,
+and performs no content-dictionary, schema, or network retrieval. Unknown
+dictionary groups are never treated as the official OpenMath base. Both paths
+reject comments, processing instructions, unknown operations, and custom
+operation implementations. The annotation-based path additionally rejects
+missing or duplicate annotations and every noncanonical document. The
+explicit-binding path accepts compatible external serialization but still
+requires one supported, type-correct expression.
 
 The API is notation only. It does not own file access, network transport,
 computer-algebra execution, formula search, or document management.

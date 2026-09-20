@@ -61,13 +61,17 @@ count. Units and exact MathBlocks types remain in the authoritative annotation.
 
 Import is local and deterministic. It does not retrieve content dictionaries,
 schemas, or other resources. DTD processing and external entity resolution are
-disabled. Comments and processing instructions are unsupported.
+disabled. Comments and processing instructions are unsupported. Only the
+published profile group is resolved locally; an unknown `cdgroup` cannot change
+an official symbol's identity unless an explicit supported `cdbase` resolves
+that symbol.
 
 The annotation-based Profile 1 importer accepts canonical profile documents
 only. Canonical output has no XML declaration, byte-order mark, comments, or
 final newline. The explicit-binding compatibility importer accepts independent
 serialization while retaining the same document limits, local-only processing,
-and supported-expression boundary.
+and supported-expression boundary. Visible expressions are bounded to 16,384
+XML elements and 256 expression levels.
 
 ## Artifacts
 

@@ -23,6 +23,9 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType>portable</DebugType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <SourceRevisionId Condition="'$(RepositoryCommit)' != ''">$(RepositoryCommit)</SourceRevisionId>
@@ -68,11 +71,18 @@
     <EmbeddedResource Include="..\formula\v1\*.*"
                       LogicalName="Supprocom.MathBlocks.Formula.v1.%(Filename)%(Extension)" />
     <AssemblyMetadata Include="RepositoryCommit" Value="$(RepositoryCommit)" Condition="'$(RepositoryCommit)' != ''" />
+    <AssemblyMetadata Include="RepositoryBranch" Value="$(RepositoryBranch)" Condition="'$(RepositoryBranch)' != ''" />
   </ItemGroup>
 
   <Target Name="ValidatePackageProvenance" BeforeTargets="_IntermediatePack">
     <Error Condition="'$(RepositoryCommit)' == ''" Text="RepositoryCommit is required for package creation." />
     <Error Condition="'$(RepositoryBranch)' == ''" Text="RepositoryBranch is required for package creation." />
+    <Error Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('$(RepositoryCommit)', '^[0-9a-fA-F]{40}$')) != 'True'"
+           Text="RepositoryCommit must be one exact 40-character Git object name." />
+    <Error Condition="'$(ExpectedRepositoryCommit)' != '' and '$(RepositoryCommit)' != '$(ExpectedRepositoryCommit)'"
+           Text="RepositoryCommit does not match ExpectedRepositoryCommit." />
+    <Error Condition="'$(ExpectedRepositoryBranch)' != '' and '$(RepositoryBranch)' != '$(ExpectedRepositoryBranch)'"
+           Text="RepositoryBranch does not match ExpectedRepositoryBranch." />
   </Target>
 
   <Target Name="GenerateMathBlocksCudaSource" BeforeTargets="CoreCompile">

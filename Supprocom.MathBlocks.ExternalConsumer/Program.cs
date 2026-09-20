@@ -11,8 +11,20 @@ internal static class Program
     private const int Alignment = 16;
     private const int MaximumArity = 8;
 
-    private static unsafe int Main()
+    private static unsafe int Main(string[] args)
     {
+        if (args.Length != 0)
+        {
+            if (args.Length == 1 &&
+                string.Equals(args[0], "--formula-smoke", StringComparison.Ordinal))
+            {
+                return RunFormulaSmoke();
+            }
+
+            Console.Error.WriteLine("Use --formula-smoke or no arguments.");
+            return 2;
+        }
+
         var contracts = MathBlockCudaDeviceModule.Operations;
         Require(contracts.Count == 337, "The external contract must contain 337 operations.");
         Require(
@@ -145,6 +157,59 @@ internal static class Program
             if (deviceArena != 0ul)
                 _ = CudaDriver.cuMemFree(deviceArena);
             Marshal.FreeHGlobal(hostArena);
+        }
+    }
+
+    private static int RunFormulaSmoke()
+    {
+        try
+        {
+            var profile = MathBlockFormulaInterchange.Profile;
+            Require(profile.Operations.Count == 337, "The formula profile must map 337 operations.");
+            Require(profile.Artifacts.Count == 9, "The formula profile must expose nine artifacts.");
+            Require(
+                profile.Operations.All(mapping =>
+                    mapping.Classification == MathBlockFormulaMappingClassification.DirectMapping),
+                "Every formula operation must have a direct mapping.");
+
+            var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+            var left = builder.Constant(MathBlockValue.Scalar(1d));
+            var right = builder.Constant(MathBlockValue.Scalar(2d));
+            var sum = builder.Apply("scalar.add", inputs: [left, right]);
+            var program = builder.Output("result", sum).Build();
+            var emptyInputs = new Dictionary<string, MathBlockValue>();
+            var emptyBindings = new Dictionary<string, MathBlockType>();
+            foreach (var format in new[]
+                     {
+                         MathBlockFormulaFormat.OpenMath,
+                         MathBlockFormulaFormat.ContentMathMl
+                     })
+            {
+                var source = MathBlockFormulaInterchange.Export(program, "result", format);
+                var exact = MathBlockFormulaInterchange.Import(source, format);
+                var visible = MathBlockFormulaInterchange.Import(
+                    source,
+                    format,
+                    emptyBindings,
+                    "result");
+                Require(
+                    exact.Program.Fingerprint == program.Fingerprint,
+                    "The exact formula package round trip changed the program.");
+                Require(
+                    visible.Program.Evaluate(emptyInputs)["result"].AsScalar() == 3d,
+                    "The visible formula package round trip changed the result.");
+            }
+
+            Console.WriteLine("formula-operations=337");
+            Console.WriteLine("formula-artifacts=9");
+            Console.WriteLine("formula-formats=2");
+            Console.WriteLine("status=passed");
+            return 0;
+        }
+        catch (Exception exception)
+        {
+            Console.Error.WriteLine(exception);
+            return 1;
         }
     }
 

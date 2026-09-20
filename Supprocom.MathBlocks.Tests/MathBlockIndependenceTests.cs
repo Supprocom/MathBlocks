@@ -151,6 +151,16 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Contains("mathml3-relaxng.zip", workflow, StringComparison.Ordinal);
         Assert.Contains("mathblocks_formula_mappings1.rnc", workflow, StringComparison.Ordinal);
         Assert.Contains("classification=\"direct-mapping\"", workflow, StringComparison.Ordinal);
+        Assert.Contains("Run the notation coverage-guided smoke gate", workflow, StringComparison.Ordinal);
+        Assert.Contains("MathBlockFormulaInterchange", workflow, StringComparison.Ordinal);
+        Assert.Contains("dotnet pack", workflow, StringComparison.Ordinal);
+        Assert.Contains("ExpectedRepositoryCommit", workflow, StringComparison.Ordinal);
+        Assert.Contains("Supprocom.MathBlocks.ExternalConsumer", workflow, StringComparison.Ordinal);
+        Assert.Contains("SHA256SUMS", workflow, StringComparison.Ordinal);
+        Assert.Contains("windows-latest", workflow, StringComparison.Ordinal);
+
+        var attributes = File.ReadAllText(Path.Combine(root, ".gitattributes"));
+        Assert.Contains("formula/v1/* text eol=lf", attributes, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -166,6 +176,11 @@ public sealed partial class MathBlockIndependenceTests
 
         Assert.Equal("0.5.0", document.Descendants("Version").Single().Value);
         Assert.Equal("AGPL-3.0-only", document.Descendants("PackageLicenseExpression").Single().Value);
+        Assert.Equal("true", document.Descendants("PublishRepositoryUrl").Single().Value);
+        Assert.Contains(
+            "ExpectedRepositoryCommit",
+            File.ReadAllText(projectPath),
+            StringComparison.Ordinal);
         Assert.Contains(
             "all 337 operations in OpenMath 2.0 and Strict Content MathML 3.0",
             document.Descendants("PackageReleaseNotes").Single().Value,
@@ -258,6 +273,8 @@ public sealed partial class MathBlockIndependenceTests
         Assert.DoesNotContain("System.Reflection", source, StringComparison.Ordinal);
         Assert.DoesNotContain("InternalsVisibleTo", source, StringComparison.Ordinal);
         Assert.DoesNotContain("MathBlocksCUDAProgram", source, StringComparison.Ordinal);
+        Assert.Contains("--formula-smoke", source, StringComparison.Ordinal);
+        Assert.Contains("MathBlockFormulaInterchange.Profile", source, StringComparison.Ordinal);
     }
 
     [Fact]

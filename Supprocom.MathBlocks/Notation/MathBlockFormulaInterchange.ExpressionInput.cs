@@ -229,7 +229,6 @@ public static partial class MathBlockFormulaInterchange
 
     private static FormulaXmlElement BufferCurrentElement(XmlReader reader)
     {
-        const int maximumElements = 1_000_000;
         using var subtree = reader.ReadSubtree();
         var frames = new Stack<FormulaXmlFrame>();
         FormulaXmlElement? root = null;
@@ -240,7 +239,7 @@ public static partial class MathBlockFormulaInterchange
             {
                 case XmlNodeType.Element:
                     elementCount++;
-                    if (elementCount > maximumElements)
+                    if (elementCount > MaximumExpressionElements)
                         throw new FormatException("The formula expression exceeds the element limit.");
                     var frame = new FormulaXmlFrame(
                         subtree,
@@ -308,7 +307,7 @@ public static partial class MathBlockFormulaInterchange
         MathBlockFormulaFormat format,
         int depth)
     {
-        if (depth > 1024)
+        if (depth > MaximumExpressionDepth)
             throw new FormatException("The formula expression exceeds the nesting limit.");
 
         if (IsFormulaElement(element, "OMATTR", OpenMathNamespace))
@@ -532,15 +531,23 @@ public static partial class MathBlockFormulaInterchange
     {
         if (element.ContentDictionaryBase is not null)
             return element.ContentDictionaryBase;
-        if (dictionary == FormulaOperationDictionary ||
+
+        var isMathBlocksDictionary =
+            dictionary == FormulaOperationDictionary ||
             dictionary == FormulaValueDictionary ||
-            dictionary == FormulaDictionary)
+            dictionary == FormulaDictionary;
+        if (element.ContentDictionaryGroup is not null)
         {
-            return element.ContentDictionaryGroup == ContentDictionaryGroup
+            if (element.ContentDictionaryGroup != ContentDictionaryGroup)
+                return string.Empty;
+            return isMathBlocksDictionary
                 ? ContentDictionaryBase
-                : string.Empty;
+                : OfficialContentDictionaryBase;
         }
-        return OfficialContentDictionaryBase;
+
+        return element.NamespaceName == OpenMathNamespace && !isMathBlocksDictionary
+            ? OfficialContentDictionaryBase
+            : string.Empty;
     }
 
     private static bool TryGetPredefinedSymbol(

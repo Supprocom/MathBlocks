@@ -20,6 +20,8 @@ jobs:
       OPENMATH_EVIDENCE: /tmp/mathblocks-openmath-evidence
       FORMULA_EVIDENCE: /tmp/mathblocks-formula-evidence
       FUZZ_EVIDENCE: /tmp/mathblocks-openmath-fuzz
+      PACKAGE_EVIDENCE: /tmp/mathblocks-package-evidence
+      MATHBLOCKS_LOCAL_FEED: /tmp/mathblocks-package-evidence
     steps:
       - name: Check out the exact commit
         uses: actions/checkout@v4
@@ -28,6 +30,11 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+
+      - name: Verify the exact source identity
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain)"
 
       - name: Verify the direct source boundary
         shell: pwsh
@@ -121,23 +128,23 @@ jobs:
           --logger "trx;LogFileName=mathblocks-portable-codec-fingerprint.trx"
           --results-directory "$TEST_RESULTS"
 
-      - name: Restore the OpenMath fuzz target
+      - name: Restore the notation fuzz target
         run: >-
           dotnet restore fuzz/MathBlocks.OpenMath.Fuzz/MathBlocks.OpenMath.Fuzz.csproj
           --force-evaluate -p:NuGetAuditMode=all --artifacts-path "$ARTIFACT_ROOT/fuzz"
 
-      - name: Build the OpenMath fuzz target
+      - name: Build the notation fuzz target
         run: >-
           dotnet build fuzz/MathBlocks.OpenMath.Fuzz/MathBlocks.OpenMath.Fuzz.csproj
           -c Release --no-restore --no-incremental --warnaserror
           --artifacts-path "$ARTIFACT_ROOT/fuzz"
 
-      - name: Replay the tracked OpenMath corpus
+      - name: Replay the tracked notation corpus
         run: >-
           dotnet "$ARTIFACT_ROOT/fuzz/bin/MathBlocks.OpenMath.Fuzz/release/MathBlocks.OpenMath.Fuzz.dll"
           --replay fuzz/MathBlocks.OpenMath.Fuzz/Corpus
 
-      - name: Run the OpenMath coverage-guided smoke gate
+      - name: Run the notation coverage-guided smoke gate
         shell: bash
         run: |
           set -euo pipefail
@@ -154,12 +161,13 @@ jobs:
           target_root="$ARTIFACT_ROOT/fuzz/bin/MathBlocks.OpenMath.Fuzz/release"
           "$FUZZ_EVIDENCE/tools/sharpfuzz" \
             "$target_root/Supprocom.MathBlocks.dll" \
-            Supprocom.MathBlocks.MathBlockOpenMath
+            Supprocom.MathBlocks.MathBlockOpenMath \
+            Supprocom.MathBlocks.MathBlockFormulaInterchange
           set +e
           "$FUZZ_EVIDENCE/libfuzzer-dotnet" \
             -max_total_time=30 \
             -timeout=5 \
-            -max_len=65536 \
+            -max_len=262144 \
             -seed=401 \
             -print_final_stats=1 \
             -dict=fuzz/MathBlocks.OpenMath.Fuzz/openmath.dict \
@@ -329,6 +337,101 @@ jobs:
             cmp "$FORMULA_EVIDENCE/$document" "$FORMULA_EVIDENCE/$document.c14n11"
           done
 
+      - name: Restore the exact package candidate
+        run: >-
+          dotnet restore Supprocom.MathBlocks/Supprocom.MathBlocks.csproj
+          --force-evaluate -p:NuGetAuditMode=all --artifacts-path "$ARTIFACT_ROOT/package"
+
+      - name: Pack the exact source candidate
+        run: >-
+          dotnet pack Supprocom.MathBlocks/Supprocom.MathBlocks.csproj
+          -c Release --no-restore --warnaserror
+          --artifacts-path "$ARTIFACT_ROOT/package"
+          --output "$PACKAGE_EVIDENCE"
+          -p:RepositoryCommit="$GITHUB_SHA"
+          -p:RepositoryBranch="$GITHUB_REF_NAME"
+          -p:ExpectedRepositoryCommit="$GITHUB_SHA"
+          -p:ExpectedRepositoryBranch="$GITHUB_REF_NAME"
+
+      - name: Verify package provenance, symbols, Source Link, and contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t nupkgs < <(find "$PACKAGE_EVIDENCE" -maxdepth 1 -type f \
+            -name 'Supprocom.MathBlocks.0.5.0.nupkg' -print)
+          mapfile -t snupkgs < <(find "$PACKAGE_EVIDENCE" -maxdepth 1 -type f \
+            -name 'Supprocom.MathBlocks.0.5.0.snupkg' -print)
+          test "${#nupkgs[@]}" -eq 1
+          test "${#snupkgs[@]}" -eq 1
+          nupkg="${nupkgs[0]}"
+          snupkg="${snupkgs[0]}"
+
+          unzip -Z1 "$nupkg" | sort > "$PACKAGE_EVIDENCE/nupkg-contents.txt"
+          for required in \
+            README.md \
+            LICENSE.md \
+            THIRD-PARTY-NOTICES.md \
+            docs/openmath-api.md \
+            docs/formula-interchange-api.md \
+            lib/net10.0/Supprocom.MathBlocks.dll \
+            lib/net10.0/Supprocom.MathBlocks.xml \
+            formula/v1/README.md \
+            formula/v1/mathblocks_formula1.ocd \
+            formula/v1/mathblocks_formula_mappings1.rnc \
+            formula/v1/mathblocks_formula_mappings1.xml \
+            formula/v1/mathblocks_formula_mathml1.rnc \
+            formula/v1/mathblocks_formula_openmath1.rnc \
+            formula/v1/mathblocks_formula_operations1.ocd \
+            formula/v1/mathblocks_formula_profile1.cdg \
+            formula/v1/mathblocks_formula_values1.ocd; do
+            grep -Fx "$required" "$PACKAGE_EVIDENCE/nupkg-contents.txt"
+          done
+          test "$(grep -c '^formula/v1/' "$PACKAGE_EVIDENCE/nupkg-contents.txt")" -eq 9
+
+          unzip -p "$nupkg" Supprocom.MathBlocks.nuspec \
+            > "$PACKAGE_EVIDENCE/Supprocom.MathBlocks.nuspec"
+          grep -F "branch=\"$GITHUB_REF_NAME\"" "$PACKAGE_EVIDENCE/Supprocom.MathBlocks.nuspec"
+          grep -F "commit=\"$GITHUB_SHA\"" "$PACKAGE_EVIDENCE/Supprocom.MathBlocks.nuspec"
+          unzip -p "$nupkg" lib/net10.0/Supprocom.MathBlocks.dll \
+            > "$PACKAGE_EVIDENCE/Supprocom.MathBlocks.dll"
+          grep -aFq "$GITHUB_SHA" "$PACKAGE_EVIDENCE/Supprocom.MathBlocks.dll"
+
+          unzip -Z1 "$snupkg" | sort > "$PACKAGE_EVIDENCE/snupkg-contents.txt"
+          grep -Fx 'lib/net10.0/Supprocom.MathBlocks.pdb' \
+            "$PACKAGE_EVIDENCE/snupkg-contents.txt"
+          test "$(grep -c '\.pdb$' "$PACKAGE_EVIDENCE/snupkg-contents.txt")" -eq 1
+          unzip -p "$snupkg" lib/net10.0/Supprocom.MathBlocks.pdb \
+            > "$PACKAGE_EVIDENCE/Supprocom.MathBlocks.pdb"
+          grep -aFq "https://raw.githubusercontent.com/Supprocom/MathBlocks/$GITHUB_SHA/*" \
+            "$PACKAGE_EVIDENCE/Supprocom.MathBlocks.pdb"
+
+          cd "$PACKAGE_EVIDENCE"
+          sha256sum ./*.nupkg ./*.snupkg > SHA256SUMS
+          sha256sum --check SHA256SUMS
+
+      - name: Restore the exact-package consumer
+        run: >-
+          dotnet restore
+          Supprocom.MathBlocks.ExternalConsumer/Supprocom.MathBlocks.ExternalConsumer.csproj
+          --configfile Supprocom.MathBlocks.ExternalConsumer/NuGet.config
+          --force-evaluate -p:NuGetAuditMode=all -p:MathBlocksVersion=0.5.0
+          --artifacts-path "$ARTIFACT_ROOT/package-consumer"
+
+      - name: Build and run the exact-package formula consumer
+        run: |
+          dotnet build \
+            Supprocom.MathBlocks.ExternalConsumer/Supprocom.MathBlocks.ExternalConsumer.csproj \
+            -c Release --no-restore --no-incremental --warnaserror \
+            -p:MathBlocksVersion=0.5.0 \
+            -p:CopyLocalLockFileAssemblies=false \
+            --artifacts-path "$ARTIFACT_ROOT/package-consumer"
+          cp \
+            "$PACKAGE_EVIDENCE/Supprocom.MathBlocks.dll" \
+            "$ARTIFACT_ROOT/package-consumer/bin/Supprocom.MathBlocks.ExternalConsumer/release/Supprocom.MathBlocks.dll"
+          dotnet \
+            "$ARTIFACT_ROOT/package-consumer/bin/Supprocom.MathBlocks.ExternalConsumer/release/Supprocom.MathBlocks.ExternalConsumer.dll" \
+            --formula-smoke
+
       - name: Check the tracked diff
         run: git diff --check
 
@@ -342,4 +445,65 @@ jobs:
             /tmp/mathblocks-openmath-evidence
             /tmp/mathblocks-formula-evidence
             /tmp/mathblocks-openmath-fuzz
+            /tmp/mathblocks-package-evidence
           if-no-files-found: error
+
+  formula-artifact-byte-identity:
+    name: Formula artifact bytes (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Check out the exact commit
+        uses: actions/checkout@v4
+
+      - name: Verify a clean autocrlf checkout against the embedded authority
+        shell: pwsh
+        run: |
+          $clone = Join-Path $env:RUNNER_TEMP 'mathblocks-autocrlf-checkout'
+          git -c core.autocrlf=true clone --no-hardlinks --no-tags --quiet . $clone
+          if ($LASTEXITCODE -ne 0) {
+              throw 'The clean autocrlf checkout failed.'
+          }
+          $clonedCommit = git -C $clone rev-parse HEAD
+          if ($LASTEXITCODE -ne 0 -or $clonedCommit -ne $env:GITHUB_SHA) {
+              throw 'The clean autocrlf checkout is not the exact candidate commit.'
+          }
+
+          $authorityPath = Join-Path `
+            $clone `
+            'Supprocom.MathBlocks/Notation/MathBlockFormulaInterchange.Profile.cs'
+          $authoritySource = Get-Content $authorityPath -Raw
+          $matches = [regex]::Matches(
+            $authoritySource,
+            'new\("(?<name>[^\"]+)", (?<length>[0-9]+), "(?<sha>[0-9A-F]{64})", (?:true|false)\)')
+          if ($matches.Count -ne 9) {
+              throw 'The embedded formula artifact authority is incomplete.'
+          }
+
+          $formulaRoot = Join-Path $clone 'formula/v1'
+          $tracked = @(Get-ChildItem $formulaRoot -File)
+          if ($tracked.Count -ne $matches.Count) {
+              throw 'The formula artifact set differs from the embedded authority.'
+          }
+
+          foreach ($match in $matches) {
+              $path = Join-Path $formulaRoot $match.Groups['name'].Value
+              if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+                  throw "The formula artifact '$path' is missing."
+              }
+              $bytes = [IO.File]::ReadAllBytes($path)
+              if ($bytes.Length -ne [int]$match.Groups['length'].Value) {
+                  throw "The formula artifact '$path' has the wrong byte length."
+              }
+              if ($bytes -contains 13) {
+                  throw "The formula artifact '$path' contains a carriage return."
+              }
+              $hash = (Get-FileHash $path -Algorithm SHA256).Hash
+              if ($hash -ne $match.Groups['sha'].Value) {
+                  throw "The formula artifact '$path' has the wrong SHA-256."
+              }
+          }

@@ -3,7 +3,7 @@ using System.Text;
 using SharpFuzz;
 using Supprocom.MathBlocks;
 
-const int MaximumInputBytes = 65_536;
+const int MaximumInputBytes = 262_144;
 
 if (args.Length != 0)
 {
@@ -25,6 +25,12 @@ Fuzzer.LibFuzzer.Run(source =>
 });
 
 static void Exercise(byte[] source)
+{
+    ExerciseOpenMath(source);
+    ExerciseFormulaInterchange(source);
+}
+
+static void ExerciseOpenMath(byte[] source)
 {
     var options = CreateOptions();
     var contiguous = MathBlockOpenMath.TryImportUtf8(source, options);
@@ -78,6 +84,109 @@ static void Exercise(byte[] source)
     }
 }
 
+static void ExerciseFormulaInterchange(byte[] source)
+{
+    foreach (var format in new[]
+             {
+                 MathBlockFormulaFormat.OpenMath,
+                 MathBlockFormulaFormat.ContentMathMl
+             })
+    {
+        var contiguous = MathBlockFormulaInterchange.TryImportUtf8(source, format);
+        CheckFormulaAttempt(contiguous);
+
+        var sequence = CreateSequence(source, source.Length == 0 ? 1 : source[0] % 31 + 1);
+        var segmented = MathBlockFormulaInterchange.TryImportUtf8(sequence, format);
+        CheckFormulaEquivalent(contiguous, segmented);
+
+        using var stream = new MemoryStream(source, false);
+        var streamed = MathBlockFormulaInterchange.TryReadUtf8(stream, format);
+        CheckFormulaEquivalent(contiguous, streamed);
+        Require(
+            contiguous.Succeeded ==
+            MathBlockFormulaInterchange.ValidateUtf8(source, format).IsValid);
+
+        ExerciseVisibleFormulaUtf8(source, format);
+
+        string text;
+        try
+        {
+            text = new UTF8Encoding(false, true).GetString(source);
+        }
+        catch (DecoderFallbackException)
+        {
+            continue;
+        }
+
+        var characters = MathBlockFormulaInterchange.TryImport(text, format);
+        CheckFormulaAttempt(characters);
+        using var reader = new StringReader(text);
+        var characterStream = MathBlockFormulaInterchange.TryRead(reader, format);
+        CheckFormulaEquivalent(characters, characterStream);
+        Require(
+            characters.Succeeded ==
+            MathBlockFormulaInterchange.Validate(text, format).IsValid);
+        ExerciseVisibleFormulaText(text, format);
+
+        if (contiguous.Succeeded)
+        {
+            var result = contiguous.Result!;
+            var canonical = MathBlockFormulaInterchange.ExportUtf8(
+                result.Program,
+                result.OutputName,
+                format);
+            Require(canonical.AsSpan().SequenceEqual(source));
+            Require(
+                MathBlockFormulaInterchange.ImportUtf8(canonical, format).Program.Fingerprint ==
+                result.Program.Fingerprint);
+        }
+    }
+}
+
+static void ExerciseVisibleFormulaUtf8(byte[] source, MathBlockFormulaFormat format)
+{
+    try
+    {
+        var result = MathBlockFormulaInterchange.ImportUtf8(
+            source,
+            format,
+            new Dictionary<string, MathBlockType>(),
+            "result");
+        CheckVisibleFormulaResult(result, format);
+    }
+    catch (FormatException)
+    {
+    }
+}
+
+static void ExerciseVisibleFormulaText(string source, MathBlockFormulaFormat format)
+{
+    try
+    {
+        var result = MathBlockFormulaInterchange.Import(
+            source,
+            format,
+            new Dictionary<string, MathBlockType>(),
+            "result");
+        CheckVisibleFormulaResult(result, format);
+    }
+    catch (FormatException)
+    {
+    }
+}
+
+static void CheckVisibleFormulaResult(
+    MathBlockFormulaImportResult result,
+    MathBlockFormulaFormat format)
+{
+    var canonical = MathBlockFormulaInterchange.Export(
+        result.Program,
+        result.OutputName,
+        format);
+    var exact = MathBlockFormulaInterchange.Import(canonical, format);
+    Require(exact.Program.Fingerprint == result.Program.Fingerprint);
+}
+
 static MathBlockOpenMathImportOptions CreateOptions() => new()
 {
     MaximumDocumentCharacters = MaximumInputBytes,
@@ -89,6 +198,12 @@ static MathBlockOpenMathImportOptions CreateOptions() => new()
 };
 
 static void CheckAttempt(MathBlockOpenMathImportAttempt attempt)
+{
+    Require(attempt.Succeeded == (attempt.Result is not null));
+    Require(attempt.Succeeded == (attempt.Diagnostic is null));
+}
+
+static void CheckFormulaAttempt(MathBlockFormulaImportAttempt attempt)
 {
     Require(attempt.Succeeded == (attempt.Result is not null));
     Require(attempt.Succeeded == (attempt.Diagnostic is null));
@@ -107,6 +222,24 @@ static void CheckEquivalent(
         Require(
             expected.Result.OperationOccurrences.Count ==
             actual.Result.OperationOccurrences.Count);
+    }
+    else
+    {
+        Require(expected.Diagnostic!.Code == actual.Diagnostic!.Code);
+    }
+}
+
+static void CheckFormulaEquivalent(
+    MathBlockFormulaImportAttempt expected,
+    MathBlockFormulaImportAttempt actual)
+{
+    CheckFormulaAttempt(actual);
+    Require(expected.Succeeded == actual.Succeeded);
+    if (expected.Succeeded)
+    {
+        Require(expected.Result!.Program.Fingerprint == actual.Result!.Program.Fingerprint);
+        Require(expected.Result.OutputName == actual.Result.OutputName);
+        Require(expected.Result.Format == actual.Result.Format);
     }
     else
     {
@@ -147,7 +280,7 @@ static ReadOnlySequence<byte> CreateSequence(byte[] source, int maximumSegment)
 static void Require(bool condition)
 {
     if (!condition)
-        throw new InvalidOperationException("An OpenMath fuzz invariant failed.");
+        throw new InvalidOperationException("A notation fuzz invariant failed.");
 }
 
 sealed class ByteSegment : ReadOnlySequenceSegment<byte>

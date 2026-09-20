@@ -48,6 +48,12 @@ public static partial class MathBlockFormulaInterchange
     /// <summary>Gets the maximum accepted UTF-8 formula-document byte count.</summary>
     public const int MaximumDocumentUtf8Bytes = MaximumDocumentCharacters * 3 + 3;
 
+    /// <summary>Gets the maximum number of buffered visible-expression elements.</summary>
+    public const int MaximumExpressionElements = 16 * 1024;
+
+    /// <summary>Gets the maximum visible-expression nesting depth.</summary>
+    public const int MaximumExpressionDepth = 256;
+
     private const string OpenMathNamespace = "http://www.openmath.org/OpenMath";
     private const string MathMlNamespace = "http://www.w3.org/1998/Math/MathML";
     private static readonly Encoding StrictUtf8 = new UTF8Encoding(false, true);

@@ -293,11 +293,11 @@ public static partial class MathBlockFormulaInterchange
             new("mathblocks_formula_mappings1.xml", 88249, "3694DD971BBB0953D5826286CE8B52BC359367EAF8F7338089B159A7DD5ECDED", true),
             new("mathblocks_formula_mappings1.rnc", 807, "44FAFAD207FF04CADC90A240965F6FFAB1932FA67AAA106095ECA3A94663C96D", true),
             new("mathblocks_formula_mathml1.rnc", 968, "10F0A5D854EF32265D8DE103F38B0FF3B9943D02D656D7133A38A1AE274591AC", true),
-            new("mathblocks_formula_openmath1.rnc", 1326, "50B0E18396CC1B837D80310E300F8B7DC23A656827527C2BFB22D5F5DED472F3", true),
+            new("mathblocks_formula_openmath1.rnc", 1325, "8B8C176E4F71C1DB8B592841F7C9072E33FF064C89133A029CA0134D29128C6B", true),
             new("mathblocks_formula_operations1.ocd", 85903, "DCF91AE2200F69A8FEB88D33724DAEB3AB2A42F68698F9ABB99B771CE72916F6", true),
             new("mathblocks_formula_profile1.cdg", 2144, "D9AC30323EEEAD7252EE3AFE91444A11A6B8C43AE7F38AE515600F999F070824", true),
             new("mathblocks_formula_values1.ocd", 2891, "FE73F951A443B3B2694D3C56C25D34B23F2F80D11DEE2FCC88A5B72D70E059CB", true),
-            new("README.md", 4027, "74047DCEC5EACF3211B47D66BDD5A640563DB622CA28D807C9B0DC256D39488B", false)
+            new("README.md", 4288, "1D9815FDA4765250000526099F5F03C82448961C594FACBBBD76BCC2AB23DA20", false)
         ];
         var artifacts = new MathBlockFormulaProfileArtifact[authority.Length];
         var assembly = typeof(MathBlockFormulaInterchange).Assembly;
