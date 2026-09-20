@@ -390,6 +390,8 @@ jobs:
             grep -Fx "$required" "$PACKAGE_EVIDENCE/nupkg-contents.txt"
           done
           test "$(grep -c '^formula/v1/' "$PACKAGE_EVIDENCE/nupkg-contents.txt")" -eq 9
+          unzip -p "$nupkg" README.md > "$PACKAGE_EVIDENCE/README.md"
+          cmp README.md "$PACKAGE_EVIDENCE/README.md"
 
           unzip -p "$nupkg" Supprocom.MathBlocks.nuspec \
             > "$PACKAGE_EVIDENCE/Supprocom.MathBlocks.nuspec"

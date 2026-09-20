@@ -1,7 +1,7 @@
 # Third-party dependency notices
 
-This document records the dependency identities reviewed for MathBlocks on
-August 12, 2026. It does not replace the applicable license text.
+This document records the dependency identities reviewed for MathBlocks through
+September 20, 2026. It does not replace the applicable license text.
 
 The `AGPL-3.0-only` license applies to MathBlocks source. It does not change any
 third-party license.
@@ -59,6 +59,11 @@ SharpZipLib, SkiaSharp, and System.Memory use MIT terms. SkiaSharp and its nativ
 components retain their package notices.
 
 ## Test project
+
+[`Markdig` 1.4.0](https://www.nuget.org/packages/Markdig/1.4.0) is a direct
+test-only dependency used to parse the package README as CommonMark. Its NuGet
+metadata uses the BSD-2-Clause expression. It is not included in the MathBlocks
+runtime package.
 
 Microsoft.NET.Test.Sdk 17.14.1 resolves Microsoft.CodeCoverage,
 Microsoft.TestPlatform.ObjectModel, and Microsoft.TestPlatform.TestHost at

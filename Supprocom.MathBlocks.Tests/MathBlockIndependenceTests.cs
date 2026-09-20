@@ -4,12 +4,19 @@ using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using Markdig;
+using Markdig.Extensions.Tables;
+using Markdig.Syntax;
+using Markdig.Syntax.Inlines;
 using Supprocom.MathBlocks;
 
 namespace Supprocom.MathBlocks.Tests;
 
 public sealed partial class MathBlockIndependenceTests
 {
+    private static readonly MarkdownPipeline ReadmePipeline =
+        new MarkdownPipelineBuilder().UsePipeTables().Build();
+
     [Fact]
     public void Production_project_has_no_project_reference_or_unapproved_managed_dependencies()
     {
@@ -202,6 +209,12 @@ public sealed partial class MathBlockIndependenceTests
             readme,
             StringComparison.Ordinal);
         AssertReadmeUsesOneParagraphAndOneSupplementPerSection(readme);
+        AssertPackageReadmeUsesImmutableLinks(readme);
+        Assert.Equal("README.md", document.Descendants("PackageReadmeFile").Single().Value);
+        Assert.Contains(
+            document.Descendants("None"),
+            item => item.Attribute("Include")?.Value == "..\\README.md" &&
+                    item.Attribute("PackagePath")?.Value == "README.md");
         Assert.Contains("## Diagnostic codes", apiGuide, StringComparison.Ordinal);
         Assert.Contains("## Security boundary", apiGuide, StringComparison.Ordinal);
         Assert.Contains("## Total operation mapping", formulaGuide, StringComparison.Ordinal);
@@ -234,6 +247,32 @@ public sealed partial class MathBlockIndependenceTests
                     item.Attribute("PackagePath")?.Value == "docs/development.md");
         Assert.DoesNotContain("## Resident typed program search", readme, StringComparison.Ordinal);
         Assert.DoesNotContain("## Parallel proposal waves", readme, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("# Example\n\n## Section\n\n1) ordered item")]
+    [InlineData("# Example\n\n## Section\n\n~~~text\nfirst\n~~~\n\n| Value |\n| --- |\n| second |")]
+    [InlineData("# Example\n\n## Section\n\n    first\n\n| Value |\n| --- |\n| second |")]
+    public void README_structure_policy_rejects_CommonMark_bypasses(string source)
+    {
+        Assert.NotEmpty(GetReadmeStructureErrors(source));
+    }
+
+    [Theory]
+    [InlineData("# Example\n\n## Section\n\n~~~text\nvalue\n~~~")]
+    [InlineData("# Example\n\n## Section\n\n    value")]
+    public void README_structure_policy_accepts_one_CommonMark_code_supplement(string source)
+    {
+        Assert.Empty(GetReadmeStructureErrors(source));
+    }
+
+    [Theory]
+    [InlineData("[guide](docs/development.md)")]
+    [InlineData("[guide](../docs/development.md)")]
+    [InlineData("[guide](http://github.com/Supprocom/MathBlocks)")]
+    public void Package_README_link_policy_rejects_nonimmutable_targets(string source)
+    {
+        Assert.NotEmpty(GetPackageReadmeLinkErrors(source));
     }
 
     [Fact]
@@ -534,63 +573,93 @@ public sealed partial class MathBlockIndependenceTests
     private static void AssertReadmeUsesOneParagraphAndOneSupplementPerSection(
         string source)
     {
-        var sections = Regex.Split(
-                source.Replace("\r\n", "\n", StringComparison.Ordinal),
-                @"(?m)(?=^#{1,2} )")
-            .Where(section => !string.IsNullOrWhiteSpace(section));
-        foreach (var section in sections)
+        Assert.Empty(GetReadmeStructureErrors(source));
+    }
+
+    private static IReadOnlyList<string> GetReadmeStructureErrors(string source)
+    {
+        var errors = new List<string>();
+        var document = Markdown.Parse(source, ReadmePipeline);
+        var section = "document preamble";
+        var paragraphCount = 0;
+        var supplementCount = 0;
+
+        void FinishSection()
         {
-            var lines = section.Split('\n');
-            var heading = lines[0];
-            var paragraphCount = 0;
-            var codeBlockCount = 0;
-            var tableCount = 0;
-            var inCodeBlock = false;
-            var inParagraph = false;
-            var inTable = false;
-            foreach (var line in lines.Skip(1))
-            {
-                if (line.StartsWith("```", StringComparison.Ordinal))
-                {
-                    if (!inCodeBlock)
-                        codeBlockCount++;
-                    inCodeBlock = !inCodeBlock;
-                    inParagraph = false;
-                    inTable = false;
-                    continue;
-                }
-                if (inCodeBlock)
-                    continue;
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    inParagraph = false;
-                    inTable = false;
-                    continue;
-                }
-                Assert.False(
-                    Regex.IsMatch(line, @"^\s*(?:[-*+]|\d+\.)\s", RegexOptions.CultureInvariant),
-                    $"README section '{heading}' contains a list instead of one concise paragraph and one supplement.");
-                if (line.StartsWith('|'))
-                {
-                    if (!inTable)
-                        tableCount++;
-                    inTable = true;
-                    inParagraph = false;
-                    continue;
-                }
-                if (!inParagraph)
-                    paragraphCount++;
-                inParagraph = true;
-                inTable = false;
-            }
-            Assert.False(inCodeBlock, $"README section '{heading}' has an unclosed code block.");
-            Assert.True(
-                paragraphCount <= 1,
-                $"README section '{heading}' contains {paragraphCount} prose paragraphs.");
-            Assert.True(
-                codeBlockCount + tableCount <= 1,
-                $"README section '{heading}' contains more than one code, table, or graph supplement.");
+            if (paragraphCount > 1)
+                errors.Add($"README section '{section}' contains {paragraphCount} prose paragraphs.");
+            if (supplementCount > 1)
+                errors.Add($"README section '{section}' contains {supplementCount} code, table, or graph supplements.");
+            paragraphCount = 0;
+            supplementCount = 0;
         }
+
+        foreach (var block in document)
+        {
+            if (block is HeadingBlock heading)
+            {
+                FinishSection();
+                if (heading.Level > 2)
+                    errors.Add($"README heading at line {heading.Line + 1} is deeper than level two.");
+                section = $"heading at line {heading.Line + 1}";
+                continue;
+            }
+
+            switch (block)
+            {
+                case ParagraphBlock:
+                    paragraphCount++;
+                    break;
+                case CodeBlock:
+                case Table:
+                    supplementCount++;
+                    break;
+                case ListBlock:
+                    errors.Add($"README section '{section}' contains a list.");
+                    break;
+                default:
+                    errors.Add(
+                        $"README section '{section}' contains unsupported CommonMark block '{block.GetType().Name}'.");
+                    break;
+            }
+        }
+        FinishSection();
+        return errors;
+    }
+
+    private static void AssertPackageReadmeUsesImmutableLinks(string source)
+    {
+        Assert.Empty(GetPackageReadmeLinkErrors(source));
+    }
+
+    private static IReadOnlyList<string> GetPackageReadmeLinkErrors(string source)
+    {
+        var errors = new List<string>();
+        var links = Markdown.Parse(source, ReadmePipeline)
+            .Descendants<LinkInline>()
+            .Where(link => !link.IsImage)
+            .ToArray();
+        if (links.Length == 0)
+            errors.Add("The package README contains no documentation links.");
+        foreach (var link in links)
+        {
+            var target = link.Url ?? string.Empty;
+            if (!Uri.TryCreate(target, UriKind.Absolute, out var uri) ||
+                uri.Scheme != Uri.UriSchemeHttps ||
+                uri.Host != "github.com")
+            {
+                errors.Add($"Package README link '{target}' is not an absolute GitHub HTTPS URL.");
+                continue;
+            }
+
+            var match = Regex.Match(
+                uri.AbsolutePath,
+                @"^/Supprocom/MathBlocks/blob/(?<commit>[0-9a-f]{40})/(?<path>(?:docs/[a-z0-9-]+\.md|LICENSE\.md|THIRD-PARTY-NOTICES\.md))$",
+                RegexOptions.CultureInvariant);
+            if (!match.Success)
+                errors.Add($"Package README link '{target}' is not pinned to an immutable project document.");
+        }
+        return errors;
     }
 
     private static Type Unwrap(Type type)
