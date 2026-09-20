@@ -373,6 +373,9 @@ jobs:
             THIRD-PARTY-NOTICES.md \
             docs/openmath-api.md \
             docs/formula-interchange-api.md \
+            docs/programming-model.md \
+            docs/cuda-integration.md \
+            docs/development.md \
             lib/net10.0/Supprocom.MathBlocks.dll \
             lib/net10.0/Supprocom.MathBlocks.xml \
             formula/v1/README.md \

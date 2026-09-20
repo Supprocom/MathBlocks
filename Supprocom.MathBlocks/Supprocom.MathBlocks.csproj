@@ -48,6 +48,9 @@
     <None Include="..\THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="THIRD-PARTY-NOTICES.md" />
     <None Include="..\docs\openmath-api.md" Pack="true" PackagePath="docs/openmath-api.md" />
     <None Include="..\docs\formula-interchange-api.md" Pack="true" PackagePath="docs/formula-interchange-api.md" />
+    <None Include="..\docs\programming-model.md" Pack="true" PackagePath="docs/programming-model.md" />
+    <None Include="..\docs\cuda-integration.md" Pack="true" PackagePath="docs/cuda-integration.md" />
+    <None Include="..\docs\development.md" Pack="true" PackagePath="docs/development.md" />
     <None Include="..\openmath\v1\**\*"
           Pack="true"
           PackagePath="openmath/v1/%(RecursiveDir)%(Filename)%(Extension)" />

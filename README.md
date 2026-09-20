@@ -1,34 +1,26 @@
 # MathBlocks
 
-MathBlocks is an immutable mathematical-operation contract for deterministic CPU
-and CUDA execution. It provides versioned operations, typed values, and
-composable computation programs.
+MathBlocks is a .NET 10 library for immutable, typed computation graphs with
+deterministic CPU and CUDA execution. Its standard catalog contains 337
+versioned mathematical operations, and every operation can be exchanged
+through both OpenMath 2.0 and Strict Content MathML 3.0.
 
-## Operation contract
+## Install
 
-Each operation has an identifier and a positive version. Its version binds
-operand rules, output rules, units, shapes, capacity, scratch, validity, and
-execution behavior.
+Install the `Supprocom.MathBlocks` package from NuGet.org; CUDA execution also
+requires the platform dependencies described in the
+[development guide](docs/development.md).
 
-The standard catalog contains 337 operations. Each operation has CPU regression
-evidence, CUDA regression evidence, and a contract-shape performance target.
+```text
+dotnet add package Supprocom.MathBlocks --version 0.5.0
+```
 
-A caller can combine compatible operations in any directed acyclic graph.
-Unknown versions and incompatible types fail before execution.
+## Build a program
 
-CPU and CUDA code stays in the single `Supprocom.MathBlocks` production
-assembly. `Supprocom.MathBlocks.Cuda` is only a namespace in that assembly.
-
-MathBlocks does not propose formulas. It does not own mutation, crossover,
-selection, archives, cursors, or checkpoints.
-
-## CPU composition
-
-`MathBlockProgramBuilder` creates a typed program without reflection or internal
-type names. `MathBlocksCPUWorker` executes independent nodes in parallel by
-graph level.
-
-This program calculates the area of a rectangle.
+Use `MathBlockProgramBuilder` to create a type-checked directed acyclic graph,
+then evaluate it with named inputs; the
+[programming model](docs/programming-model.md) explains contracts, versions,
+values, execution, and ownership boundaries.
 
 ```csharp
 using Supprocom.MathBlocks;
@@ -39,335 +31,73 @@ var height = builder.Input("height", MathBlockType.Scalar());
 var area = builder.Apply("scalar.multiply", inputs: [width, height]);
 var program = builder.Output("area", area).Build();
 
-var output = program.Evaluate(new Dictionary<string, MathBlockValue>
+var result = program.Evaluate(new Dictionary<string, MathBlockValue>
 {
     ["width"] = MathBlockValue.Scalar(6d),
     ["height"] = MathBlockValue.Scalar(4d)
 });
 
-Console.WriteLine(output["area"].AsScalar());
+Console.WriteLine(result["area"].AsScalar());
 ```
 
-## OpenMath notation
+## Exchange formulas
 
-`MathBlockOpenMath` exports a typed program with the MathBlocks OpenMath Profile
-1. The profile uses [OpenMath 2.0 Revision 2](https://openmath.org/standard/om20-2019-07-01/omstd20.html)
-XML.
-
-The UTF-8 encoding of each exported string conforms to
-[Canonical XML 1.1](https://www.w3.org/TR/xml-c14n11/) without comments. The
-exported node sequence gives one exact operation order.
-
-The importer rebuilds the typed program and returns its operations in that
-same order. It rejects unknown symbols, forward references, and invalid types.
+`MathBlockOpenMath` preserves a complete typed program, while
+`MathBlockFormulaInterchange` projects one selected output as conventional
+OpenMath or Content MathML with an exact semantic annotation; all 337 standard
+operations have direct mappings.
 
 ```csharp
-var notation = MathBlockOpenMath.Export(program);
-var imported = MathBlockOpenMath.Import(notation);
-
-foreach (var operation in imported.Operations)
-    Console.WriteLine(operation.Identity);
-
-var sameNotation = MathBlockOpenMath.Export(imported.Program);
-```
-
-Direct UTF-8 APIs avoid an intermediate string. Stream APIs leave each
-caller-owned endpoint open. The async forms use async I/O and accept
-cancellation.
-
-```csharp
-var utf8 = MathBlockOpenMath.ExportUtf8(program);
-var fromBytes = MathBlockOpenMath.ImportUtf8(utf8);
-
-await using var output = File.Create("program.openmath.xml");
-await MathBlockOpenMath.WriteUtf8Async(program, output);
-
-await using var input = File.OpenRead("program.openmath.xml");
-var fromStream = await MathBlockOpenMath.ReadUtf8Async(input);
-```
-
-The byte APIs accept UTF-8 only. Import accepts an optional UTF-8 byte-order
-mark, but canonical output never writes one.
-
-Nonthrowing import returns one result or one structured diagnostic. Validation
-also reports whether valid input already has the canonical form.
-
-```csharp
-var untrustedNotation = notation;
-var attempt = MathBlockOpenMath.TryImport(untrustedNotation);
-if (!attempt.Succeeded)
-{
-    Console.WriteLine(attempt.Diagnostic!.Code);
-    Console.WriteLine(attempt.Diagnostic.Message);
-}
-
-var validation = MathBlockOpenMath.Validate(untrustedNotation);
-if (validation.IsValid &&
-    validation.Canonicality == MathBlockOpenMathCanonicality.Noncanonical)
-{
-    var canonicalNotation = MathBlockOpenMath.Normalize(untrustedNotation);
-}
-```
-
-Import options can apply smaller resource limits. They can also require the
-canonical form or capture source locations.
-
-```csharp
-var options = new MathBlockOpenMathImportOptions
-{
-    MaximumNodes = 10_000,
-    MaximumOutputs = 100,
-    MaximumValueElements = 1_000_000,
-    CaptureSourceLocations = true
-};
-
-var detailed = MathBlockOpenMath.Import(notation, options);
-foreach (var occurrence in detailed.OperationOccurrences)
-{
-    Console.WriteLine($"{occurrence.NodeIndex}: {occurrence.Operation.Identity}");
-}
-```
-
-`MathBlockOpenMath.Profile` exposes the 337 exact operation symbols and the
-seven embedded Profile 1 artifacts. Artifact streams are read-only and do not
-use the package installation path.
-
-The profile preserves shared nodes, constants, units, shapes, and named
-outputs. It uses exact hexadecimal binary64 values.
-
-Profile 1 contains all 337 operations from `MathBlockCatalog.Standard`.
-Export rejects custom operation implementations. These operations require a
-separate content dictionary identity.
-
-The package contains the four content dictionaries, their content dictionary
-group, and the restricted profile schema. The profile source is in the
-repository [OpenMath directory](https://github.com/Supprocom/MathBlocks/tree/main/openmath/v1).
-
-Import rejects a document that exceeds
-`MathBlockOpenMath.MaximumDocumentCharacters`. Import does not retrieve a
-schema or content dictionary from the network.
-
-The [OpenMath API guide](docs/openmath-api.md) defines every data path, option,
-diagnostic, ownership rule, and security boundary.
-
-This API reads semantic OpenMath XML. It does not read presentation text such
-as `sin(x) + x^2`.
-
-## Standard formula interchange
-
-MathBlocks 0.5.0 adds `MathBlockFormulaInterchange` for exchanging one selected
-program output as a conventional expression graph. It supports
-[OpenMath 2.0 Revision 2](https://openmath.org/standard/) and
-[Strict Content MathML 3.0](https://www.w3.org/TR/MathML3/chapter4.html).
-
-Every one of the 337 standard operations is mapped in both vocabularies. Common
-operators use established OpenMath content dictionaries. Operations without an
-exact established symbol use the versioned
-`mathblocks_formula_operations1` dictionary; no operation has an unsupported
-mapping. The manifest classifies every entry explicitly as a direct mapping,
-canonical-pattern mapping, or unsupported; Profile 1 contains 337 direct
-mappings and zero entries in the other two classes.
-
-```csharp
-var contentMathMl = MathBlockFormulaInterchange.Export(
+var mathMl = MathBlockFormulaInterchange.Export(
     program,
     "area",
     MathBlockFormulaFormat.ContentMathMl);
 
-var importedFormula = MathBlockFormulaInterchange.Import(
-    contentMathMl,
+var imported = MathBlockFormulaInterchange.Import(
+    mathMl,
     MathBlockFormulaFormat.ContentMathMl);
 ```
 
-An overload with explicit free-variable types and an output name imports the
-visible expression from independent OpenMath or Content MathML producers,
-without requiring a MathBlocks annotation.
+## Choose an API
 
-The visible expression uses `apply`, `csymbol`, `ci`, `cn`, and `share` in
-Content MathML, or their one-to-one OpenMath equivalents. Exact MathBlocks
-types, units, shapes, binary64 behavior, operation versions, and the output name
-are carried by a verified Profile 1 semantic annotation.
+Each public entry point has one focused responsibility, so consumers can use
+notation, managed execution, or low-level CUDA composition independently.
 
-Formula interchange selects only nodes reachable from the named output. It
-does not simplify, reorder, evaluate, or infer expressions. Existing OpenMath
-Profile 1 remains unchanged and remains the complete multi-output program
-format.
+| Goal | Entry point | Guide |
+| --- | --- | --- |
+| Build and evaluate a typed graph | `MathBlockProgramBuilder`, `MathBlockProgram` | [Programming model](docs/programming-model.md) |
+| Preserve a complete typed program | `MathBlockOpenMath` | [OpenMath API](docs/openmath-api.md) |
+| Exchange one standard formula | `MathBlockFormulaInterchange` | [Formula interchange API](docs/formula-interchange-api.md) |
+| Compose or run CUDA work | `MathBlockCudaDeviceModule`, `MathBlocksCUDAWorker` | [CUDA integration](docs/cuda-integration.md) |
 
-`MathBlockFormulaInterchange.Profile` exposes the total operation mapping and
-its fingerprint. The [formula interchange guide](docs/formula-interchange-api.md)
-defines the wire contract, exact-annotation rule, and security boundary.
+## Documentation
 
-## CUDA composition
+The README is intentionally brief; detailed contracts, limits, dependencies,
+security rules, performance targets, and contributor commands live in the
+guides below.
 
-`MathBlockCudaDeviceModule` exposes the supported device source, complete
-dispatch table, source fingerprint, and ABI fingerprint.
+| Topic | Document |
+| --- | --- |
+| Operations, values, programs, and CPU execution | [Programming model](docs/programming-model.md) |
+| Canonical full-program OpenMath | [OpenMath API](docs/openmath-api.md) |
+| OpenMath and Content MathML formula exchange | [Formula interchange API](docs/formula-interchange-api.md) |
+| Device dispatch, managed CUDA, ABI, and performance | [CUDA integration](docs/cuda-integration.md) |
+| Prerequisites, dependencies, build, test, and packaging | [Development guide](docs/development.md) |
 
-`MathBlockCudaDeviceModule.Operations` contains one public contract for each
-standard operation. Each contract exposes its family, opcode, arity, rules,
-execution behavior, and immutable fingerprint.
+## Build from source
 
-`ResolveOutputType` applies the CPU type contract. `PlanCUDA` applies the same
-checked shape, capacity, and scratch authority as CUDA execution.
-
-`MathBlockCudaSlotDescriptor` defines the 48-byte host and device slot.
-`MathBlockCudaValueCodec` writes and reads every supported value kind without
-internal types.
-
-A consumer appends its CUDA kernel with `ComposeSource`. It can also compile the
-complete source with `CompilePtx`.
-
-The device function has this supported signature.
-
-```text
-__device__ void mathblocks_operation_dispatch(
-    int family,
-    int opcode,
-    const MathBlockSlot* const* inputs,
-    int input_count,
-    MathBlockSlot* output)
-```
-
-All threads in one 128-thread block must call the dispatcher uniformly. The
-dispatcher completes one operation before the consumer calls the next operation.
-
-This CUDA fragment composes addition and multiplication inside a consumer-owned
-kernel.
-
-```cuda
-extern "C" __global__ void rectangle_area(MathBlockSlot* slots)
-{
-    if (blockIdx.x != 0)
-        return;
-
-    const MathBlockSlot* sum_inputs[2] = { &slots[0], &slots[1] };
-    mathblocks_operation_dispatch(ADD_FAMILY, ADD_OPCODE, sum_inputs, 2, &slots[2]);
-
-    const MathBlockSlot* area_inputs[2] = { &slots[2], &slots[3] };
-    mathblocks_operation_dispatch(
-        MULTIPLY_FAMILY,
-        MULTIPLY_OPCODE,
-        area_inputs,
-        2,
-        &slots[4]);
-}
-```
-
-The host generates the four constants from
-`MathBlockCudaDeviceModule.GetOperation`. Do not hardcode family or opcode
-values in production code.
-
-The external package gate compiles a consumer-owned CUDA kernel. It executes all
-337 operation identities and one nested DAG in one launch.
-
-The gate performs one immutable arena upload, one launch, one synchronization,
-and one download. MathBlocks does not control that transaction.
-
-## Managed CUDA programs
-
-`MathBlocksCUDAWorker` compiles a typed program into one resident CUDA graph. It
-remains a stateless operation utility.
-
-The first input update performs one upload. A resident execution performs one
-graph launch, one synchronization, and one output download.
-
-Callers can queue resident executions before synchronization. The compiled
-program serializes state changes for safe concurrent calls.
-
-The exact parity policy requires CUDA results to match CPU results. Parity
-includes data bits, shape, type, unit, and invalid state.
-
-## Contract fingerprints
-
-Each operation fingerprint binds its identity, version, family, opcode, arity,
-rule identities, execution behavior, and device-source fingerprint.
-
-It also binds every regression case and every performance-case input. The
-performance iteration count and maximum warm latency are part of the same
-identity.
-
-The source fingerprint binds the exact CUDA definitions and dispatch
-implementation. The ABI fingerprint binds the exact dispatcher signature, slot
-layout, graph-edge layout, run layout, versioned value-codec schema, codec
-implementation, source, and complete operation table.
-
-A consumer must reject a stored ABI fingerprint that differs from the loaded
-package. A package version change does not replace this check.
-
-## Performance contract
-
-Each operation has a sub-millisecond target on its contract shape. The CPU gate
-measures warm p95 latency. The CUDA gate measures warm median latency.
-
-These targets are test contracts. Results depend on hardware, input shape,
-operating-system scheduling, percentile, and measurement method.
-
-Rolling median and rolling quantile use exact order statistics without a
-semantic window limit. General probabilities use linear radix preparation and
-indexed sliding heaps.
-
-The general work bound is `O(N log W)`. Quantile probabilities zero and one use
-a linear monotonic deque and do not sort.
-
-A width of one uses a parallel copy. Checked scratch arithmetic rejects an
-unrepresentable resource requirement before launch.
-
-## Source-only repository
-
-This Git repository contains source text and project metadata only. It does not
-contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
-
-Get MathBlocks version `0.5.0` from NuGet.org with this command after
-publication.
-
-```text
-dotnet add package Supprocom.MathBlocks --version 0.5.0
-```
-
-The package declares three external native-acquisition dependencies. This
-dependency graph is the same on all pack hosts.
-
-Install the .NET 10 SDK before project restore. Install a compatible NVIDIA
-driver before CUDA execution.
-
-Windows CUDA execution requires x64 Windows. It requires
-`libtorch-cuda-12.8-win-x64-part1` and `libtorch-cuda-12.8-win-x64-part8`
-version 2.10.0.
-
-Linux CUDA execution requires x64 Linux and `TorchSharp-cuda-linux` version
-0.107.0. That package supplies its declared Linux dependencies.
-
-NuGet downloads all declared packages during restore. It stores them outside
-this Git repository in the user package cache.
-
-Use this command to restore the source tests.
+Install the .NET 10 SDK before restoring the repository; CUDA tests additionally
+require a compatible NVIDIA driver and CUDA toolkit, as detailed in the
+[development guide](docs/development.md).
 
 ```text
 dotnet restore Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj
-```
-
-The build can copy runtime assets into ignored output directories. Do not commit
-or redistribute those output directories.
-
-Review each third-party license before package use. See
-[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for the recorded identities.
-
-## Build and test
-
-MathBlocks targets .NET 10. CUDA tests require a compatible NVIDIA driver and
-CUDA toolkit.
-
-```text
 dotnet build Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj --configuration Release
 dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj --configuration Release
 ```
 
-The external consumer project restores only the packed public package. It has no
-project reference to the production project.
-
 ## License
 
-MathBlocks uses the GNU Affero General Public License version 3 only. The SPDX
-expression is `AGPL-3.0-only`.
-
-The AGPL does not change third-party licenses for CUDA, TorchSharp, LibTorch, or
-test packages. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+MathBlocks is licensed under [AGPL-3.0-only](LICENSE.md); dependency notices and
+their separate license terms are recorded in
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

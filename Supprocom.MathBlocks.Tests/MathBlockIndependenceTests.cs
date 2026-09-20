@@ -173,6 +173,12 @@ public sealed partial class MathBlockIndependenceTests
         var apiGuide = File.ReadAllText(Path.Combine(root, "docs", "openmath-api.md"));
         var formulaGuide = File.ReadAllText(
             Path.Combine(root, "docs", "formula-interchange-api.md"));
+        var programmingGuide = File.ReadAllText(
+            Path.Combine(root, "docs", "programming-model.md"));
+        var cudaGuide = File.ReadAllText(
+            Path.Combine(root, "docs", "cuda-integration.md"));
+        var developmentGuide = File.ReadAllText(
+            Path.Combine(root, "docs", "development.md"));
 
         Assert.Equal("0.5.0", document.Descendants("Version").Single().Value);
         Assert.Equal("AGPL-3.0-only", document.Descendants("PackageLicenseExpression").Single().Value);
@@ -186,18 +192,26 @@ public sealed partial class MathBlockIndependenceTests
             document.Descendants("PackageReleaseNotes").Single().Value,
             StringComparison.Ordinal);
         Assert.Equal(new Version(0, 5, 0, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
-        Assert.Contains("## Operation contract", readme, StringComparison.Ordinal);
-        Assert.Contains("## OpenMath notation", readme, StringComparison.Ordinal);
-        Assert.Contains("## Standard formula interchange", readme, StringComparison.Ordinal);
-        Assert.Contains("## CUDA composition", readme, StringComparison.Ordinal);
+        Assert.Contains("## Build a program", readme, StringComparison.Ordinal);
+        Assert.Contains("## Exchange formulas", readme, StringComparison.Ordinal);
+        Assert.Contains("## Choose an API", readme, StringComparison.Ordinal);
+        Assert.Contains("## Documentation", readme, StringComparison.Ordinal);
+        Assert.Contains("## Build from source", readme, StringComparison.Ordinal);
         Assert.Contains(
             "dotnet add package Supprocom.MathBlocks --version 0.5.0",
             readme,
             StringComparison.Ordinal);
+        AssertReadmeUsesOneParagraphAndOneSupplementPerSection(readme);
         Assert.Contains("## Diagnostic codes", apiGuide, StringComparison.Ordinal);
         Assert.Contains("## Security boundary", apiGuide, StringComparison.Ordinal);
         Assert.Contains("## Total operation mapping", formulaGuide, StringComparison.Ordinal);
         Assert.Contains("## Canonical and security boundary", formulaGuide, StringComparison.Ordinal);
+        Assert.Contains("## Operation contracts", programmingGuide, StringComparison.Ordinal);
+        Assert.Contains("## CPU execution", programmingGuide, StringComparison.Ordinal);
+        Assert.Contains("## Consumer-owned kernels", cudaGuide, StringComparison.Ordinal);
+        Assert.Contains("## Performance contract", cudaGuide, StringComparison.Ordinal);
+        Assert.Contains("## Build and test", developmentGuide, StringComparison.Ordinal);
+        Assert.Contains("## Package validation", developmentGuide, StringComparison.Ordinal);
         Assert.Contains(
             document.Descendants("None"),
             item => item.Attribute("Include")?.Value == "..\\docs\\openmath-api.md" &&
@@ -206,6 +220,18 @@ public sealed partial class MathBlockIndependenceTests
             document.Descendants("None"),
             item => item.Attribute("Include")?.Value == "..\\docs\\formula-interchange-api.md" &&
                     item.Attribute("PackagePath")?.Value == "docs/formula-interchange-api.md");
+        Assert.Contains(
+            document.Descendants("None"),
+            item => item.Attribute("Include")?.Value == "..\\docs\\programming-model.md" &&
+                    item.Attribute("PackagePath")?.Value == "docs/programming-model.md");
+        Assert.Contains(
+            document.Descendants("None"),
+            item => item.Attribute("Include")?.Value == "..\\docs\\cuda-integration.md" &&
+                    item.Attribute("PackagePath")?.Value == "docs/cuda-integration.md");
+        Assert.Contains(
+            document.Descendants("None"),
+            item => item.Attribute("Include")?.Value == "..\\docs\\development.md" &&
+                    item.Attribute("PackagePath")?.Value == "docs/development.md");
         Assert.DoesNotContain("## Resident typed program search", readme, StringComparison.Ordinal);
         Assert.DoesNotContain("## Parallel proposal waves", readme, StringComparison.Ordinal);
     }
@@ -504,6 +530,68 @@ public sealed partial class MathBlockIndependenceTests
         FieldInfo field => [Unwrap(field.FieldType)],
         _ => []
     };
+
+    private static void AssertReadmeUsesOneParagraphAndOneSupplementPerSection(
+        string source)
+    {
+        var sections = Regex.Split(
+                source.Replace("\r\n", "\n", StringComparison.Ordinal),
+                @"(?m)(?=^#{1,2} )")
+            .Where(section => !string.IsNullOrWhiteSpace(section));
+        foreach (var section in sections)
+        {
+            var lines = section.Split('\n');
+            var heading = lines[0];
+            var paragraphCount = 0;
+            var codeBlockCount = 0;
+            var tableCount = 0;
+            var inCodeBlock = false;
+            var inParagraph = false;
+            var inTable = false;
+            foreach (var line in lines.Skip(1))
+            {
+                if (line.StartsWith("```", StringComparison.Ordinal))
+                {
+                    if (!inCodeBlock)
+                        codeBlockCount++;
+                    inCodeBlock = !inCodeBlock;
+                    inParagraph = false;
+                    inTable = false;
+                    continue;
+                }
+                if (inCodeBlock)
+                    continue;
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    inParagraph = false;
+                    inTable = false;
+                    continue;
+                }
+                Assert.False(
+                    Regex.IsMatch(line, @"^\s*(?:[-*+]|\d+\.)\s", RegexOptions.CultureInvariant),
+                    $"README section '{heading}' contains a list instead of one concise paragraph and one supplement.");
+                if (line.StartsWith('|'))
+                {
+                    if (!inTable)
+                        tableCount++;
+                    inTable = true;
+                    inParagraph = false;
+                    continue;
+                }
+                if (!inParagraph)
+                    paragraphCount++;
+                inParagraph = true;
+                inTable = false;
+            }
+            Assert.False(inCodeBlock, $"README section '{heading}' has an unclosed code block.");
+            Assert.True(
+                paragraphCount <= 1,
+                $"README section '{heading}' contains {paragraphCount} prose paragraphs.");
+            Assert.True(
+                codeBlockCount + tableCount <= 1,
+                $"README section '{heading}' contains more than one code, table, or graph supplement.");
+        }
+    }
 
     private static Type Unwrap(Type type)
     {
