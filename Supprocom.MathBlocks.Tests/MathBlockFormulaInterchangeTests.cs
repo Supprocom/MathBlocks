@@ -314,6 +314,24 @@ public sealed class MathBlockFormulaInterchangeTests
     }
 
     [Fact]
+    public void Visible_expression_import_uses_the_official_base_for_ungrouped_mathml_symbols()
+    {
+        const string source =
+            "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><apply><csymbol cd=\"arith1\">plus</csymbol><cn>1</cn><cn>2</cn></apply></math>";
+
+        var imported = MathBlockFormulaInterchange.Import(
+            source,
+            MathBlockFormulaFormat.ContentMathMl,
+            new Dictionary<string, MathBlockType>(),
+            "result");
+
+        Assert.Equal(
+            3d,
+            imported.Program.Evaluate(new Dictionary<string, MathBlockValue>())["result"]
+                .AsScalar());
+    }
+
+    [Fact]
     public void Visible_expression_import_rejects_foreign_dictionary_groups_without_an_accepted_base()
     {
         const string foreignGroup = "https://example.invalid/foreign.cdg";

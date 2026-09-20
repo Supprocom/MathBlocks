@@ -545,9 +545,9 @@ public static partial class MathBlockFormulaInterchange
                 : OfficialContentDictionaryBase;
         }
 
-        return element.NamespaceName == OpenMathNamespace && !isMathBlocksDictionary
-            ? OfficialContentDictionaryBase
-            : string.Empty;
+        return isMathBlocksDictionary
+            ? string.Empty
+            : OfficialContentDictionaryBase;
     }
 
     private static bool TryGetPredefinedSymbol(
