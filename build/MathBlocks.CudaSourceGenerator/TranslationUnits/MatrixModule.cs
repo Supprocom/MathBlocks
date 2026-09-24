@@ -436,7 +436,7 @@ internal static unsafe class MatrixModule
     [CudaDevice(Name = "mathblocks_matrix_dispatch")]
     private static void mathblocks_matrix(
         int opcode,
-        [CudaReadOnly] MathBlockSlot** inputs,
+        MathBlockSlot** inputs,
         int input_count,
         MathBlockSlot* output)
     {

@@ -1,7 +1,7 @@
 # MathBlocks Programming Model
 
 This guide describes the standard operation catalog, typed program model, CPU
-execution path, and ownership boundary of MathBlocks 0.5.0.
+execution path, and ownership boundary of MathBlocks 0.5.1.
 
 ## Operation contracts
 

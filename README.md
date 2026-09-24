@@ -12,7 +12,7 @@ requires the platform dependencies described in the
 [development guide](https://github.com/Supprocom/MathBlocks/blob/d032c8ee68c765e9a41e4f7ee43c89045d15aafb/docs/development.md).
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.5.0
+dotnet add package Supprocom.MathBlocks --version 0.5.1
 ```
 
 ## Build a program

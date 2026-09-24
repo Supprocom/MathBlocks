@@ -128,7 +128,7 @@ internal static unsafe class AdvancedModule
     [CudaDevice(Name = "mathblocks_advanced_dispatch")]
     private static void mathblocks_advanced(
         int opcode,
-        [CudaReadOnly] MathBlockSlot** inputs,
+        MathBlockSlot** inputs,
         int input_count,
         MathBlockSlot* output)
     {

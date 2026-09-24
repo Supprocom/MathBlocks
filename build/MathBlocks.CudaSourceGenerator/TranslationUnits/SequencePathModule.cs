@@ -429,7 +429,7 @@ internal static unsafe class SequencePathModule
     [CudaDevice(Name = "mathblocks_sequence_path_dispatch")]
     private static void mathblocks_sequence_path(
         int opcode,
-        [CudaReadOnly] MathBlockSlot** inputs,
+        MathBlockSlot** inputs,
         int input_count,
         MathBlockSlot* output)
     {

@@ -197,7 +197,7 @@ internal static unsafe class StatisticsModule
     [CudaDevice(Name = "mathblocks_statistics_dispatch")]
     private static void mathblocks_statistics(
         int opcode,
-        [CudaReadOnly] MathBlockSlot** inputs,
+        MathBlockSlot** inputs,
         int input_count,
         MathBlockSlot* output)
     {

@@ -1,6 +1,6 @@
 # MathBlocks OpenMath API
 
-This guide applies to MathBlocks 0.5.0 and OpenMath Profile 1.
+This guide applies to MathBlocks 0.5.1 and OpenMath Profile 1.
 
 Profile 1 represents a complete typed `MathBlockProgram`. It preserves node
 order, operand order, shared nodes, constants, units, shapes, and outputs.

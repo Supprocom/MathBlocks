@@ -103,7 +103,7 @@ internal static unsafe class TransportModule
     [CudaDevice(Name = "mathblocks_transport_dispatch")]
     private static void mathblocks_transport(
         int opcode,
-        [CudaReadOnly] MathBlockSlot** inputs,
+        MathBlockSlot** inputs,
         int input_count,
         MathBlockSlot* output)
     {

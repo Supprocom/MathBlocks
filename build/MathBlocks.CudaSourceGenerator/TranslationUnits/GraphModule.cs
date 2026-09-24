@@ -120,7 +120,7 @@ internal static unsafe class GraphModule
     [CudaDevice(Name = "mathblocks_graph_dispatch")]
     private static void mathblocks_graph(
         int opcode,
-        [CudaReadOnly] MathBlockSlot** inputs,
+        MathBlockSlot** inputs,
         int input_count,
         MathBlockSlot* output)
     {

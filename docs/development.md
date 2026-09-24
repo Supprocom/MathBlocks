@@ -1,7 +1,7 @@
 # MathBlocks Development Guide
 
 This guide covers prerequisites, native dependencies, source builds, tests,
-package boundaries, and repository hygiene for MathBlocks 0.5.0.
+package boundaries, and repository hygiene for MathBlocks 0.5.1.
 
 ## Source-only repository
 
@@ -74,6 +74,10 @@ provenance, Source Link, symbols, embedded profile artifacts, and SHA-256
 evidence. It then restores
 `Supprocom.MathBlocks.ExternalConsumer` from the packed package rather than a
 project reference.
+
+CI also compiles the generated CUDA source and a consumer kernel with NVRTC,
+without requiring a GPU. This catches CUDA compiler errors that a byte-for-byte
+golden comparison cannot detect.
 
 The external consumer validates public package use, formula mappings, embedded
 artifacts, OpenMath and Content MathML round trips, and consumer-owned CUDA

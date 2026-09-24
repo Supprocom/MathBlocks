@@ -24,6 +24,11 @@ internal static class Program
         try
         {
             var options = Arguments.Parse(args);
+            var transpilationOptions = new CudaTranspilationOptions
+            {
+                NewLine = "\n",
+                SourceRoot = Path.GetFullPath(options.TranslationRoot)
+            };
             var generatedUnits = new List<string>(Units.Length);
 
             foreach (var unit in Units)
@@ -31,7 +36,7 @@ internal static class Program
                 var translationPath = Path.Combine(options.TranslationRoot, unit.SourceFile);
                 var result = CudaTranspiler.TranspileFile(
                     translationPath,
-                    options: new CudaTranspilationOptions { NewLine = "\n" });
+                    options: transpilationOptions);
                 if (!result.Succeeded)
                 {
                     throw new InvalidOperationException(
@@ -55,7 +60,7 @@ internal static class Program
                 "DeviceDispatchModule.cs");
             var dispatchResult = CudaTranspiler.TranspileFile(
                 dispatchSourcePath,
-                options: new CudaTranspilationOptions { NewLine = "\n" });
+                options: transpilationOptions);
             if (!dispatchResult.Succeeded)
             {
                 throw new InvalidOperationException(
@@ -77,7 +82,7 @@ internal static class Program
             var fullBytes = Encoding.UTF8.GetBytes(fullSource);
             var fullHash = Convert.ToHexString(SHA256.HashData(fullBytes));
             const string expectedFullHash =
-                "60C9CDC39BCA648DF980D6C297661631D7B730D581C4574805394BA17910EC4A";
+                "6A6E8A49FD4DAD50A7B9007069A0D81A5957D7D6EE2C14FFB8DAE27BF18DCF84";
             if (!string.Equals(fullHash, expectedFullHash, StringComparison.Ordinal))
             {
                 throw new InvalidOperationException(

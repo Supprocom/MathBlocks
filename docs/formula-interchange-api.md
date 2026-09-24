@@ -1,6 +1,6 @@
 # MathBlocks Formula Interchange API
 
-This guide applies to MathBlocks 0.5.0 and Formula Interchange Profile 1.
+This guide applies to MathBlocks 0.5.1 and Formula Interchange Profile 1.
 
 The formula API projects one named `MathBlockProgram` output. It includes only
 nodes reachable from that output and preserves operand order and shared nodes.

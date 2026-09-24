@@ -21,60 +21,60 @@ public sealed class MathBlockCudaTranspilationTests
     ];
 
     [Fact]
-    public void CUDA_scalar_unit_matches_the_CSharp2CUDA_0_2_1_golden()
+    public void CUDA_scalar_unit_matches_the_CSharp2CUDA_0_3_1_golden()
     {
         AssertGeneratedUnit("Scalar", 0);
         Assert.Equal(CreateExpectedSource(), MathBlockCudaDeviceModule.Source);
         Assert.Equal(
-            "60C9CDC39BCA648DF980D6C297661631D7B730D581C4574805394BA17910EC4A",
+            "6A6E8A49FD4DAD50A7B9007069A0D81A5957D7D6EE2C14FFB8DAE27BF18DCF84",
             MathBlockCudaDeviceModule.SourceFingerprint);
         Assert.Equal(
-            "85C18BF76EEBF62E2EB3DC12EBA1D1EFFE6315BE4F8109FD279FCFC1AA1D82B4",
+            "0179049D172FD0E7F7C514BB4AD3F6258054D3CD899B52E21AB5BDE05CD3A695",
             MathBlockCudaDeviceModule.Abi.OperationTableFingerprint);
     }
 
     [Fact]
-    public void CUDA_vector_unit_matches_the_CSharp2CUDA_0_2_1_golden() =>
+    public void CUDA_vector_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
         AssertGeneratedUnit("Vector", 1);
 
     [Fact]
-    public void CUDA_complex_unit_matches_the_CSharp2CUDA_0_2_1_golden() =>
+    public void CUDA_complex_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
         AssertGeneratedUnit("Complex", 2);
 
     [Fact]
-    public void CUDA_matrix_unit_matches_the_CSharp2CUDA_0_2_1_golden() =>
+    public void CUDA_matrix_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
         AssertGeneratedUnit("Matrix", 3);
 
     [Fact]
-    public void CUDA_probability_unit_matches_the_CSharp2CUDA_0_2_1_golden() =>
+    public void CUDA_probability_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
         AssertGeneratedUnit("Probability", 4);
 
     [Fact]
-    public void CUDA_sequence_path_unit_matches_the_CSharp2CUDA_0_2_1_golden() =>
+    public void CUDA_sequence_path_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
         AssertGeneratedUnit("SequencePath", 5);
 
     [Fact]
-    public void CUDA_statistics_unit_matches_the_CSharp2CUDA_0_2_1_golden() =>
+    public void CUDA_statistics_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
         AssertGeneratedUnit("Statistics", 6);
 
     [Fact]
-    public void CUDA_geometry_unit_matches_the_CSharp2CUDA_0_2_1_golden() =>
+    public void CUDA_geometry_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
         AssertGeneratedUnit("Geometry", 7);
 
     [Fact]
-    public void CUDA_graph_unit_matches_the_CSharp2CUDA_0_2_1_golden() =>
+    public void CUDA_graph_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
         AssertGeneratedUnit("Graph", 8);
 
     [Fact]
-    public void CUDA_advanced_unit_matches_the_CSharp2CUDA_0_2_1_golden() =>
+    public void CUDA_advanced_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
         AssertGeneratedUnit("Advanced", 9);
 
     [Fact]
-    public void CUDA_transport_unit_matches_the_CSharp2CUDA_0_2_1_golden() =>
+    public void CUDA_transport_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
         AssertGeneratedUnit("Transport", 10);
 
     [Fact]
-    public void CUDA_device_dispatch_unit_matches_the_CSharp2CUDA_0_2_1_golden()
+    public void CUDA_device_dispatch_unit_matches_the_CSharp2CUDA_0_3_1_golden()
     {
         var source = MathBlockCudaDeviceModule.Source;
         var start = OperationCatalogs.Sum(catalog => ReadGolden(catalog).Length + 1) + 1;

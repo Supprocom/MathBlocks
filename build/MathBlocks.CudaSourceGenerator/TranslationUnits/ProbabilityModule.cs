@@ -265,7 +265,7 @@ internal static unsafe class ProbabilityModule
     [CudaDevice(Name = "mathblocks_probability_dispatch")]
     private static void mathblocks_probability(
         int opcode,
-        [CudaReadOnly] MathBlockSlot** inputs,
+        MathBlockSlot** inputs,
         int input_count,
         MathBlockSlot* output)
     {

@@ -68,7 +68,7 @@ public sealed partial class MathBlockIndependenceTests
 
         Assert.Empty(document.Descendants("ProjectReference"));
         Assert.Equal("Supprocom.CSharp2CUDA", package.Attribute("Include")!.Value);
-        Assert.Equal("[0.2.1]", package.Attribute("Version")!.Value);
+        Assert.Equal("[0.3.1]", package.Attribute("Version")!.Value);
         Assert.Null(package.Attribute("Condition"));
         Assert.Null(package.Parent!.Attribute("Condition"));
 
@@ -159,6 +159,7 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Contains("mathblocks_formula_mappings1.rnc", workflow, StringComparison.Ordinal);
         Assert.Contains("classification=\"direct-mapping\"", workflow, StringComparison.Ordinal);
         Assert.Contains("Run the notation coverage-guided smoke gate", workflow, StringComparison.Ordinal);
+        Assert.Contains("Compile generated CUDA source with NVRTC", workflow, StringComparison.Ordinal);
         Assert.Contains("MathBlockFormulaInterchange", workflow, StringComparison.Ordinal);
         Assert.Contains("dotnet pack", workflow, StringComparison.Ordinal);
         Assert.Contains("ExpectedRepositoryCommit", workflow, StringComparison.Ordinal);
@@ -171,7 +172,7 @@ public sealed partial class MathBlockIndependenceTests
     }
 
     [Fact]
-    public void Public_release_metadata_declares_the_formula_interchange_0_5_0_contract()
+    public void Public_release_metadata_declares_the_0_5_1_contract()
     {
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(root, "Supprocom.MathBlocks", "Supprocom.MathBlocks.csproj");
@@ -187,7 +188,7 @@ public sealed partial class MathBlockIndependenceTests
         var developmentGuide = File.ReadAllText(
             Path.Combine(root, "docs", "development.md"));
 
-        Assert.Equal("0.5.0", document.Descendants("Version").Single().Value);
+        Assert.Equal("0.5.1", document.Descendants("Version").Single().Value);
         Assert.Equal("AGPL-3.0-only", document.Descendants("PackageLicenseExpression").Single().Value);
         Assert.Equal("true", document.Descendants("PublishRepositoryUrl").Single().Value);
         Assert.Contains(
@@ -195,17 +196,17 @@ public sealed partial class MathBlockIndependenceTests
             File.ReadAllText(projectPath),
             StringComparison.Ordinal);
         Assert.Contains(
-            "all 337 operations in OpenMath 2.0 and Strict Content MathML 3.0",
+            "337-operation OpenMath and Content MathML interchange",
             document.Descendants("PackageReleaseNotes").Single().Value,
             StringComparison.Ordinal);
-        Assert.Equal(new Version(0, 5, 0, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
+        Assert.Equal(new Version(0, 5, 1, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
         Assert.Contains("## Build a program", readme, StringComparison.Ordinal);
         Assert.Contains("## Exchange formulas", readme, StringComparison.Ordinal);
         Assert.Contains("## Choose an API", readme, StringComparison.Ordinal);
         Assert.Contains("## Documentation", readme, StringComparison.Ordinal);
         Assert.Contains("## Build from source", readme, StringComparison.Ordinal);
         Assert.Contains(
-            "dotnet add package Supprocom.MathBlocks --version 0.5.0",
+            "dotnet add package Supprocom.MathBlocks --version 0.5.1",
             readme,
             StringComparison.Ordinal);
         AssertReadmeUsesOneParagraphAndOneSupplementPerSection(readme);

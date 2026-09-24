@@ -6,8 +6,8 @@
     <RootNamespace>Supprocom.MathBlocks</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>Supprocom.MathBlocks</PackageId>
-    <Version>0.5.0</Version>
-    <AssemblyVersion>0.5.0.0</AssemblyVersion>
+    <Version>0.5.1</Version>
+    <AssemblyVersion>0.5.1.0</AssemblyVersion>
     <Authors>Supprocom</Authors>
     <Company>Supprocom</Company>
     <Copyright>Copyright (C) 2026 mkn8rn</Copyright>
@@ -19,7 +19,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>mathematics;openmath;mathml;content-mathml;operation-contract;computation-graph;cpu;cuda;deterministic;numerics</PackageTags>
-    <PackageReleaseNotes>Adds exhaustive standard formula interchange for all 337 operations in OpenMath 2.0 and Strict Content MathML 3.0, with explicit mapping classifications, exact annotations, and external-expression import.</PackageReleaseNotes>
+    <PackageReleaseNotes>Updates the build-time CUDA translator to Supprocom.CSharp2CUDA 0.3.1 and refreshes the checked CUDA source and operation-table fingerprints. The 337-operation OpenMath and Content MathML interchange remains available.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType>portable</DebugType>

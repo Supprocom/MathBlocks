@@ -176,7 +176,7 @@ internal static unsafe class VectorModule
     [CudaDevice(Name = "mathblocks_vector_dispatch")]
     private static void mathblocks_vector(
         int opcode,
-        [CudaReadOnly] MathBlockSlot** inputs,
+        MathBlockSlot** inputs,
         int input_count,
         MathBlockSlot* output)
     {

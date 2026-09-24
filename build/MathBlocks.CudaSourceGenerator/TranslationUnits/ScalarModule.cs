@@ -363,7 +363,7 @@ internal static unsafe class ScalarModule
     [CudaDevice(Name = "mathblocks_scalar_dispatch")]
     private static void mathblocks_scalar(
         int opcode,
-        [CudaReadOnly] MathBlockSlot** inputs,
+        MathBlockSlot** inputs,
         int input_count,
         MathBlockSlot* output)
     {

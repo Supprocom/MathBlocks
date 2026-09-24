@@ -238,7 +238,7 @@ internal static unsafe class GeometryModule
     [CudaDevice(Name = "mathblocks_geometry_dispatch")]
     private static void mathblocks_geometry(
         int opcode,
-        [CudaReadOnly] MathBlockSlot** inputs,
+        MathBlockSlot** inputs,
         int input_count,
         MathBlockSlot* output)
     {

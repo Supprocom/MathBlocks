@@ -21,6 +21,7 @@ jobs:
       FORMULA_EVIDENCE: /tmp/mathblocks-formula-evidence
       FUZZ_EVIDENCE: /tmp/mathblocks-openmath-fuzz
       PACKAGE_EVIDENCE: /tmp/mathblocks-package-evidence
+      NVRTC_EVIDENCE: /tmp/mathblocks-nvrtc-evidence
       MATHBLOCKS_LOCAL_FEED: /tmp/mathblocks-package-evidence
     steps:
       - name: Check out the exact commit
@@ -98,6 +99,26 @@ jobs:
           dotnet build Supprocom.MathBlocks/Supprocom.MathBlocks.csproj
           -c Release --no-restore --no-incremental --warnaserror
           --artifacts-path "$ARTIFACT_ROOT/product"
+
+      - name: Compile generated CUDA source with NVRTC
+        shell: bash
+        run: |
+          set -euo pipefail
+          native_root="$NUGET_PACKAGES/libtorch-cuda-12.8-linux-x64-part6/2.10.0/runtimes/linux-x64/native"
+          test -f "$native_root/libnvrtc-builtins.so"
+          mapfile -t nvrtc_libraries < <(find "$native_root" -maxdepth 1 -type f -name 'libnvrtc-*.so.12' -print)
+          test "${#nvrtc_libraries[@]}" -eq 1
+          mkdir -p "$NVRTC_EVIDENCE"
+          ln -s "${nvrtc_libraries[0]}" "$NVRTC_EVIDENCE/libnvrtc.so.12"
+          ln -s "$native_root/libnvrtc-builtins.so" "$NVRTC_EVIDENCE/libnvrtc-builtins.so.12.8"
+          cc -Wall -Wextra -Werror \
+            build/MathBlocks.CudaSourceGenerator/Validation/NvrtcSmoke.c \
+            "${nvrtc_libraries[0]}" \
+            -o "$NVRTC_EVIDENCE/nvrtc-smoke"
+          LD_LIBRARY_PATH="$NVRTC_EVIDENCE:$native_root" \
+            "$NVRTC_EVIDENCE/nvrtc-smoke" \
+            "$ARTIFACT_ROOT/product/obj/Supprocom.MathBlocks/release/MathBlockCudaGeneratedSource.cu" \
+            | tee "$NVRTC_EVIDENCE/result.txt"
 
       - name: Restore MathBlocks tests
         run: >-
@@ -358,9 +379,9 @@ jobs:
         run: |
           set -euo pipefail
           mapfile -t nupkgs < <(find "$PACKAGE_EVIDENCE" -maxdepth 1 -type f \
-            -name 'Supprocom.MathBlocks.0.5.0.nupkg' -print)
+            -name 'Supprocom.MathBlocks.0.5.1.nupkg' -print)
           mapfile -t snupkgs < <(find "$PACKAGE_EVIDENCE" -maxdepth 1 -type f \
-            -name 'Supprocom.MathBlocks.0.5.0.snupkg' -print)
+            -name 'Supprocom.MathBlocks.0.5.1.snupkg' -print)
           test "${#nupkgs[@]}" -eq 1
           test "${#snupkgs[@]}" -eq 1
           nupkg="${nupkgs[0]}"
@@ -419,7 +440,7 @@ jobs:
           dotnet restore
           Supprocom.MathBlocks.ExternalConsumer/Supprocom.MathBlocks.ExternalConsumer.csproj
           --configfile Supprocom.MathBlocks.ExternalConsumer/NuGet.config
-          --force-evaluate -p:NuGetAuditMode=all -p:MathBlocksVersion=0.5.0
+          --force-evaluate -p:NuGetAuditMode=all -p:MathBlocksVersion=0.5.1
           --artifacts-path "$ARTIFACT_ROOT/package-consumer"
 
       - name: Build and run the exact-package formula consumer
@@ -427,7 +448,7 @@ jobs:
           dotnet build \
             Supprocom.MathBlocks.ExternalConsumer/Supprocom.MathBlocks.ExternalConsumer.csproj \
             -c Release --no-restore --no-incremental --warnaserror \
-            -p:MathBlocksVersion=0.5.0 \
+            -p:MathBlocksVersion=0.5.1 \
             -p:CopyLocalLockFileAssemblies=false \
             --artifacts-path "$ARTIFACT_ROOT/package-consumer"
           cp \
@@ -451,6 +472,7 @@ jobs:
             /tmp/mathblocks-formula-evidence
             /tmp/mathblocks-openmath-fuzz
             /tmp/mathblocks-package-evidence
+            /tmp/mathblocks-nvrtc-evidence
           if-no-files-found: error
 
   formula-artifact-byte-identity:

@@ -183,7 +183,7 @@ internal static unsafe class ComplexModule
     [CudaDevice(Name = "mathblocks_complex_dispatch")]
     private static void mathblocks_complex(
         int opcode,
-        [CudaReadOnly] MathBlockSlot** inputs,
+        MathBlockSlot** inputs,
         int input_count,
         MathBlockSlot* output)
     {
