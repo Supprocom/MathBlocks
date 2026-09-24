@@ -7,6 +7,7 @@ namespace Supprocom.MathBlocks.Tests;
 public sealed class MathBlockCudaWorkerTests
 {
     [Fact]
+    [Trait("Category", "CudaSourceContract")]
     public void CUDA_catalog_contains_each_scalar_vector_boolean_and_complex_block()
     {
         var expected = MathBlockCatalog.Standard.Operations
@@ -97,6 +98,7 @@ public sealed class MathBlockCudaWorkerTests
     }
 
     [Fact]
+    [Trait("Category", "CudaSourceContract")]
     public void CUDA_worker_exposes_only_one_graph_upload_and_one_graph_download_path()
     {
         var root = FindRepositoryRoot();
@@ -122,7 +124,8 @@ public sealed class MathBlockCudaWorkerTests
     }
 
     [Fact]
-    public void CUDA_kernel_ABI_uses_resident_input_pointer_arrays()
+    [Trait("Category", "CudaSourceContract")]
+    public void CUDA_kernel_ABI_preserves_readonly_inputs_across_the_dispatch_bridge()
     {
         var root = FindRepositoryRoot();
         var workerSource = File.ReadAllText(Path.Combine(
@@ -130,6 +133,12 @@ public sealed class MathBlockCudaWorkerTests
             "Supprocom.MathBlocks",
             "Execution",
             "MathBlocksCUDAWorker.cs"));
+        var dispatchSource = File.ReadAllText(Path.Combine(
+            root,
+            "build",
+            "MathBlocks.CudaSourceGenerator",
+            "TranslationUnits",
+            "DeviceDispatchModule.cs"));
         foreach (var family in new[]
                  {
                      "Scalar", "Vector", "Complex", "Matrix", "Probability", "SequencePath", "Statistics",
@@ -142,9 +151,18 @@ public sealed class MathBlockCudaWorkerTests
                 "MathBlocks.CudaSourceGenerator",
                 "TranslationUnits",
                 $"{family}Module.cs"));
-            Assert.Contains("[CudaReadOnly] MathBlockSlot** inputs", source, StringComparison.Ordinal);
+            // CSharp2CUDA 0.3.1 needs mutable pointer-array temporaries here, but
+            // every input slot remains read-only after the dispatcher boundary.
+            Assert.Contains("MathBlockSlot** inputs", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("[CudaReadOnly] MathBlockSlot** inputs", source, StringComparison.Ordinal);
+            Assert.Contains(
+                "MathBlockSlot* first = Cuda.ReadOnly(input_count > 0 ? inputs[0] : null);",
+                source,
+                StringComparison.Ordinal);
         }
 
+        Assert.Contains("[CudaReadOnly] MathBlockSlot** inputs", dispatchSource, StringComparison.Ordinal);
+        Assert.Contains("mathblocks_dispatch_inputs(", dispatchSource, StringComparison.Ordinal);
         Assert.Contains(
             "const MathBlockSlot* const* inputs",
             MathBlockCudaDeviceModule.Source,
