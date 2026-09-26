@@ -98,6 +98,6 @@ dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj --confi
 
 ## License
 
-MathBlocks is licensed under [AGPL-3.0-only](https://github.com/Supprocom/MathBlocks/blob/9d0938ed88c8580652d38dbe9f4a5a63a7f44585/LICENSE.md); dependency notices and
-their separate license terms are recorded in
-[THIRD-PARTY-NOTICES.md](https://github.com/Supprocom/MathBlocks/blob/9d0938ed88c8580652d38dbe9f4a5a63a7f44585/THIRD-PARTY-NOTICES.md).
+MathBlocks is licensed under [AGPL-3.0-only](LICENSE). The [NOTICE](NOTICE)
+file contains the project notice and source offer. Dependency notices and
+separate license terms are in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

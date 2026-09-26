@@ -399,7 +399,8 @@ jobs:
           unzip -Z1 "$nupkg" | sort > "$PACKAGE_EVIDENCE/nupkg-contents.txt"
           for required in \
             README.md \
-            LICENSE.md \
+            LICENSE \
+            NOTICE \
             THIRD-PARTY-NOTICES.md \
             docs/openmath-api.md \
             docs/formula-interchange-api.md \

@@ -44,7 +44,8 @@
     <Compile Remove="Blocks\**\*.Tests.cs" />
     <Compile Include="$(IntermediateOutputPath)MathBlockCudaGeneratedSource.g.cs" AutoGen="true" Visible="false" />
     <None Include="..\README.md" Pack="true" PackagePath="README.md" />
-    <None Include="..\LICENSE.md" Pack="true" PackagePath="LICENSE.md" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="LICENSE" />
+    <None Include="..\NOTICE" Pack="true" PackagePath="NOTICE" />
     <None Include="..\THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="THIRD-PARTY-NOTICES.md" />
     <None Include="..\docs\openmath-api.md" Pack="true" PackagePath="docs/openmath-api.md" />
     <None Include="..\docs\formula-interchange-api.md" Pack="true" PackagePath="docs/formula-interchange-api.md" />
