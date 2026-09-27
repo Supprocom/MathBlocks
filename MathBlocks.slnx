@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="MathBlocks.CudaSourceGenerator/MathBlocks.CudaSourceGenerator.csproj" />
+  <Project Path="MathBlocks.FormulaProfileGenerator/MathBlocks.FormulaProfileGenerator.csproj" />
+  <Project Path="MathBlocks.OpenMathProfileGenerator/MathBlocks.OpenMathProfileGenerator.csproj" />
+  <Project Path="MathBlocks.OpenMath.Fuzz/MathBlocks.OpenMath.Fuzz.csproj" />
+  <Project Path="Supprocom.MathBlocks/Supprocom.MathBlocks.csproj" />
+  <Project Path="Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj" />
+</Solution>

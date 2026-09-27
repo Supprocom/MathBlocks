@@ -12,7 +12,7 @@ foreign dictionary groups, and nested applications. Corpus replay checks every
 seed without a fuzzing engine.
 
 ```powershell
-dotnet run --project fuzz/MathBlocks.OpenMath.Fuzz -- --replay fuzz/MathBlocks.OpenMath.Fuzz/Corpus
+dotnet run --project MathBlocks.OpenMath.Fuzz -- --replay MathBlocks.OpenMath.Fuzz/Corpus
 ```
 
 Use SharpFuzz 2.3.0 to instrument both `MathBlockOpenMath` and

@@ -135,7 +135,6 @@ public sealed class MathBlockCudaWorkerTests
             "MathBlocksCUDAWorker.cs"));
         var dispatchSource = File.ReadAllText(Path.Combine(
             root,
-            "build",
             "MathBlocks.CudaSourceGenerator",
             "TranslationUnits",
             "DeviceDispatchModule.cs"));
@@ -147,8 +146,7 @@ public sealed class MathBlockCudaWorkerTests
         {
             var source = File.ReadAllText(Path.Combine(
                 root,
-                "build",
-                "MathBlocks.CudaSourceGenerator",
+                    "MathBlocks.CudaSourceGenerator",
                 "TranslationUnits",
                 $"{family}Module.cs"));
             // CSharp2CUDA 0.3.1 needs mutable pointer-array temporaries here, but

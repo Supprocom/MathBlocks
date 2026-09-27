@@ -40,7 +40,7 @@ jobs:
       - name: Verify the direct source boundary
         shell: pwsh
         run: |
-          $units = @(Get-ChildItem 'build/MathBlocks.CudaSourceGenerator/TranslationUnits' -Filter '*Module.cs')
+          $units = @(Get-ChildItem 'MathBlocks.CudaSourceGenerator/TranslationUnits' -Filter '*Module.cs')
           if ($units.Count -ne 12) {
               throw "The generator requires exactly 12 direct translation units."
           }
@@ -56,7 +56,7 @@ jobs:
               throw "Legacy CUDA catalog wrappers are present."
           }
 
-          $generator = Get-Content 'build/MathBlocks.CudaSourceGenerator/Program.cs' -Raw
+          $generator = Get-Content 'MathBlocks.CudaSourceGenerator/Program.cs' -Raw
           foreach ($token in @('ToDeviceSource', 'ExtractTranslationUnit', 'TranslationUnitSource', 'extern "C" __global__', 'blockIdx.x')) {
               if ($generator.IndexOf($token, [StringComparison]::Ordinal) -ge 0) {
                   throw "The generator contains the forbidden CUDA rewrite token '$token'."
@@ -80,12 +80,12 @@ jobs:
 
       - name: Restore the source generator
         run: >-
-          dotnet restore build/MathBlocks.CudaSourceGenerator/MathBlocks.CudaSourceGenerator.csproj
+          dotnet restore MathBlocks.CudaSourceGenerator/MathBlocks.CudaSourceGenerator.csproj
           --force-evaluate -p:NuGetAuditMode=all --artifacts-path "$ARTIFACT_ROOT/generator"
 
       - name: Build the source generator
         run: >-
-          dotnet build build/MathBlocks.CudaSourceGenerator/MathBlocks.CudaSourceGenerator.csproj
+          dotnet build MathBlocks.CudaSourceGenerator/MathBlocks.CudaSourceGenerator.csproj
           -c Release --no-restore --no-incremental --warnaserror
           --artifacts-path "$ARTIFACT_ROOT/generator"
 
@@ -112,7 +112,7 @@ jobs:
           ln -s "${nvrtc_libraries[0]}" "$NVRTC_EVIDENCE/libnvrtc.so.12"
           ln -s "$native_root/libnvrtc-builtins.so" "$NVRTC_EVIDENCE/libnvrtc-builtins.so.12.8"
           cc -Wall -Wextra -Werror \
-            build/MathBlocks.CudaSourceGenerator/Validation/NvrtcSmoke.c \
+            MathBlocks.CudaSourceGenerator/Validation/NvrtcSmoke.c \
             "${nvrtc_libraries[0]}" \
             -o "$NVRTC_EVIDENCE/nvrtc-smoke"
           LD_LIBRARY_PATH="$NVRTC_EVIDENCE:$native_root" \
@@ -160,19 +160,19 @@ jobs:
 
       - name: Restore the notation fuzz target
         run: >-
-          dotnet restore fuzz/MathBlocks.OpenMath.Fuzz/MathBlocks.OpenMath.Fuzz.csproj
+          dotnet restore MathBlocks.OpenMath.Fuzz/MathBlocks.OpenMath.Fuzz.csproj
           --force-evaluate -p:NuGetAuditMode=all --artifacts-path "$ARTIFACT_ROOT/fuzz"
 
       - name: Build the notation fuzz target
         run: >-
-          dotnet build fuzz/MathBlocks.OpenMath.Fuzz/MathBlocks.OpenMath.Fuzz.csproj
+          dotnet build MathBlocks.OpenMath.Fuzz/MathBlocks.OpenMath.Fuzz.csproj
           -c Release --no-restore --no-incremental --warnaserror
           --artifacts-path "$ARTIFACT_ROOT/fuzz"
 
       - name: Replay the tracked notation corpus
         run: >-
           dotnet "$ARTIFACT_ROOT/fuzz/bin/MathBlocks.OpenMath.Fuzz/release/MathBlocks.OpenMath.Fuzz.dll"
-          --replay fuzz/MathBlocks.OpenMath.Fuzz/Corpus
+          --replay MathBlocks.OpenMath.Fuzz/Corpus
 
       - name: Run the notation coverage-guided smoke gate
         shell: bash
@@ -187,7 +187,7 @@ jobs:
             https://github.com/Metalnem/libfuzzer-dotnet/releases/download/v2025.05.02.0904/libfuzzer-dotnet-ubuntu
           echo 'C2C2A90D94C409A4AF339A0D4F244E0442C5A5D249BE0F1252BA07871F285958  /tmp/mathblocks-openmath-fuzz/libfuzzer-dotnet' | sha256sum --check
           chmod +x "$FUZZ_EVIDENCE/libfuzzer-dotnet"
-          cp fuzz/MathBlocks.OpenMath.Fuzz/Corpus/* "$FUZZ_EVIDENCE/corpus/"
+          cp MathBlocks.OpenMath.Fuzz/Corpus/* "$FUZZ_EVIDENCE/corpus/"
           target_root="$ARTIFACT_ROOT/fuzz/bin/MathBlocks.OpenMath.Fuzz/release"
           "$FUZZ_EVIDENCE/tools/sharpfuzz" \
             "$target_root/Supprocom.MathBlocks.dll" \
@@ -200,7 +200,7 @@ jobs:
             -max_len=262144 \
             -seed=401 \
             -print_final_stats=1 \
-            -dict=fuzz/MathBlocks.OpenMath.Fuzz/openmath.dict \
+            -dict=MathBlocks.OpenMath.Fuzz/openmath.dict \
             -artifact_prefix="$FUZZ_EVIDENCE/findings/" \
             --target_path=dotnet \
             --target_arg="$target_root/MathBlocks.OpenMath.Fuzz.dll" \
@@ -217,12 +217,12 @@ jobs:
 
       - name: Restore the OpenMath profile generator
         run: >-
-          dotnet restore build/MathBlocks.OpenMathProfileGenerator/MathBlocks.OpenMathProfileGenerator.csproj
+          dotnet restore MathBlocks.OpenMathProfileGenerator/MathBlocks.OpenMathProfileGenerator.csproj
           --force-evaluate -p:NuGetAuditMode=all --artifacts-path "$ARTIFACT_ROOT/openmath-generator"
 
       - name: Build the OpenMath profile generator
         run: >-
-          dotnet build build/MathBlocks.OpenMathProfileGenerator/MathBlocks.OpenMathProfileGenerator.csproj
+          dotnet build MathBlocks.OpenMathProfileGenerator/MathBlocks.OpenMathProfileGenerator.csproj
           -c Release --no-restore --no-incremental --warnaserror
           --artifacts-path "$ARTIFACT_ROOT/openmath-generator"
 
@@ -258,12 +258,12 @@ jobs:
 
       - name: Restore the formula profile generator
         run: >-
-          dotnet restore build/MathBlocks.FormulaProfileGenerator/MathBlocks.FormulaProfileGenerator.csproj
+          dotnet restore MathBlocks.FormulaProfileGenerator/MathBlocks.FormulaProfileGenerator.csproj
           --force-evaluate -p:NuGetAuditMode=all --artifacts-path "$ARTIFACT_ROOT/formula-generator"
 
       - name: Build the formula profile generator
         run: >-
-          dotnet build build/MathBlocks.FormulaProfileGenerator/MathBlocks.FormulaProfileGenerator.csproj
+          dotnet build MathBlocks.FormulaProfileGenerator/MathBlocks.FormulaProfileGenerator.csproj
           -c Release --no-restore --no-incremental --warnaserror
           --artifacts-path "$ARTIFACT_ROOT/formula-generator"
 

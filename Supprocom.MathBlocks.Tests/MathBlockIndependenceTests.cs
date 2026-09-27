@@ -55,12 +55,10 @@ public sealed partial class MathBlockIndependenceTests
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(
             root,
-            "build",
             "MathBlocks.CudaSourceGenerator",
             "MathBlocks.CudaSourceGenerator.csproj");
         var sourcePath = Path.Combine(
             root,
-            "build",
             "MathBlocks.CudaSourceGenerator",
             "Program.cs");
         var document = XDocument.Load(projectPath);
@@ -74,7 +72,6 @@ public sealed partial class MathBlockIndependenceTests
 
         var translationRoot = Path.Combine(
             root,
-            "build",
             "MathBlocks.CudaSourceGenerator",
             "TranslationUnits");
         var translationSources = Directory.EnumerateFiles(
@@ -655,7 +652,7 @@ public sealed partial class MathBlockIndependenceTests
 
             var match = Regex.Match(
                 uri.AbsolutePath,
-                @"^/Supprocom/MathBlocks/blob/(?<commit>[0-9a-f]{40})/(?<path>(?:docs/[a-z0-9-]+\.md|LICENSE\.md|THIRD-PARTY-NOTICES\.md))$",
+                @"^/Supprocom/MathBlocks/blob/(?<commit>[0-9a-f]{40})/(?<path>(?:docs/[a-z0-9-]+\.md|LICENSE(?:\.md)?|NOTICE|THIRD-PARTY-NOTICES\.md))$",
                 RegexOptions.CultureInvariant);
             if (!match.Success)
                 errors.Add($"Package README link '{target}' is not pinned to an immutable project document.");
