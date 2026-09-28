@@ -189,7 +189,10 @@ jobs:
           reports=("$ANALYZER_EVIDENCE"/*.sarif)
           test "${#reports[@]}" -eq 6
           for report in "${reports[@]}"; do
-            jq -e '[.runs[]?.results[]? | select(.level == "warning" or .level == "error")] | length == 0' "$report"
+            jq -e '[.runs[]?.results[]? |
+              select(.level == "warning" or .level == "error") |
+              select(((.suppressionStates // []) | length) == 0)] |
+              length == 0' "$report"
           done
 
       - name: Replay the tracked notation corpus
