@@ -485,8 +485,15 @@ jobs:
             Supprocom.MathBlocks.ExternalConsumer/Supprocom.MathBlocks.ExternalConsumer.csproj \
             -c Release --no-restore --no-incremental --warnaserror \
             -p:MathBlocksVersion=0.5.2 \
+            -p:MathBlocksAnalyzerEvidence="$ANALYZER_EVIDENCE" \
             -p:CopyLocalLockFileAssemblies=false \
             --artifacts-path "$ARTIFACT_ROOT/package-consumer"
+          consumer_report="$ANALYZER_EVIDENCE/Supprocom.MathBlocks.ExternalConsumer.sarif"
+          test -f "$consumer_report"
+          jq -e '[.runs[]?.results[]? |
+            select(.level == "warning" or .level == "error") |
+            select(((.suppressionStates // []) | length) == 0)] |
+            length == 0' "$consumer_report"
           cp \
             "$PACKAGE_EVIDENCE/Supprocom.MathBlocks.dll" \
             "$ARTIFACT_ROOT/package-consumer/bin/Supprocom.MathBlocks.ExternalConsumer/release/Supprocom.MathBlocks.dll"

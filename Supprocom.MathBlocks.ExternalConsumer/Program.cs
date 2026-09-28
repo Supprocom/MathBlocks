@@ -1,8 +1,9 @@
 using System.Runtime.InteropServices;
-using System.Text;
-using Supprocom.MathBlocks;
 using Supprocom.MathBlocks.Cuda;
 using Complex = Supprocom.MathBlocks.MathBlockComplexValue;
+
+// The package-only consumer probes system and trusted application CUDA paths.
+[assembly: DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
 
 namespace Supprocom.MathBlocks.ExternalConsumer;
 
@@ -11,6 +12,8 @@ internal static class Program
     private const int Alignment = 16;
     private const int MaximumArity = 8;
 
+    // Keep the end-to-end launch and resource lifetime visible in one test path.
+#pragma warning disable MA0051
     private static unsafe int Main(string[] args)
     {
         if (args.Length != 0)
@@ -29,7 +32,8 @@ internal static class Program
         Require(contracts.Count == 337, "The external contract must contain 337 operations.");
         Require(
             contracts.Select(contract => contract.Identity).SequenceEqual(
-                MathBlockCatalog.Standard.Operations.Select(operation => operation.Identity)),
+                MathBlockCatalog.Standard.Operations.Select(operation => operation.Identity),
+                StringComparer.Ordinal),
             "The CPU and CUDA operation identities differ.");
         Require(
             contracts.All(contract => contract.Arity <= MaximumArity),
@@ -86,7 +90,7 @@ internal static class Program
                     new UIntPtr(checked((uint)arenaBytes))),
                 "cuMemcpyHtoD(external arena)");
 
-            var source = CreateKernelSource(cases.Length, nested);
+            var source = CreateKernelSource(nested);
             var ptx = MathBlockCudaDeviceModule.CompilePtx(source, "mathblocks-external-consumer.cu");
             CudaDriver.Require(CudaDriver.cuModuleLoadData(out module, ptx), "cuModuleLoadData");
             CudaDriver.Require(
@@ -130,19 +134,25 @@ internal static class Program
             Console.WriteLine($"families={Enum.GetValues<MathBlockCudaOperationFamily>().Length}");
             Console.WriteLine($"abi={MathBlockCudaDeviceModule.AbiFingerprint}");
             Console.WriteLine($"arena-bytes={arenaBytes}");
+            // These fixed tokens are CI evidence, not localized user-facing text.
+#pragma warning disable CA1303
             Console.WriteLine("uploads=1");
             Console.WriteLine("launches=1");
             Console.WriteLine("synchronizations=1");
             Console.WriteLine("downloads=1");
             Console.WriteLine("search-orchestration=0");
             Console.WriteLine("status=passed");
+#pragma warning restore CA1303
             return 0;
         }
+        // This executable reports any package/device failure through its exit code.
+#pragma warning disable CA1031
         catch (Exception exception)
         {
             Console.Error.WriteLine(exception);
             return 1;
         }
+#pragma warning restore CA1031
         finally
         {
             foreach (var value in argumentValues)
@@ -159,6 +169,7 @@ internal static class Program
             Marshal.FreeHGlobal(hostArena);
         }
     }
+#pragma warning restore MA0051
 
     private static int RunFormulaSmoke()
     {
@@ -177,8 +188,8 @@ internal static class Program
             var right = builder.Constant(MathBlockValue.Scalar(2d));
             var sum = builder.Apply("scalar.add", inputs: [left, right]);
             var program = builder.Output("result", sum).Build();
-            var emptyInputs = new Dictionary<string, MathBlockValue>();
-            var emptyBindings = new Dictionary<string, MathBlockType>();
+            var emptyInputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal);
+            var emptyBindings = new Dictionary<string, MathBlockType>(StringComparer.Ordinal);
             foreach (var format in new[]
                      {
                          MathBlockFormulaFormat.OpenMath,
@@ -193,24 +204,30 @@ internal static class Program
                     emptyBindings,
                     "result");
                 Require(
-                    exact.Program.Fingerprint == program.Fingerprint,
+                    string.Equals(exact.Program.Fingerprint, program.Fingerprint, StringComparison.Ordinal),
                     "The exact formula package round trip changed the program.");
                 Require(
                     visible.Program.Evaluate(emptyInputs)["result"].AsScalar() == 3d,
                     "The visible formula package round trip changed the result.");
             }
 
+            // These fixed tokens are CI evidence, not localized user-facing text.
+#pragma warning disable CA1303
             Console.WriteLine("formula-operations=337");
             Console.WriteLine("formula-artifacts=9");
             Console.WriteLine("formula-formats=2");
             Console.WriteLine("status=passed");
+#pragma warning restore CA1303
             return 0;
         }
+        // This executable reports any formula-import failure through its exit code.
+#pragma warning disable CA1031
         catch (Exception exception)
         {
             Console.Error.WriteLine(exception);
             return 1;
         }
+#pragma warning restore CA1031
     }
 
     private static OperationCase CreateCase(MathBlockCudaOperationContract contract)
@@ -363,8 +380,10 @@ internal static class Program
     private static int SlotOffset(int slotBaseOffset, int slot) =>
         checked(slotBaseOffset + slot * MathBlockCudaSlotLayout.Size);
 
-    private static string CreateKernelSource(int operationCount, NestedLayout nested)
+    private static string CreateKernelSource(NestedLayout nested)
     {
+        // NVRTC ignores source line endings; this is not a fingerprinted fixture.
+#pragma warning disable MA0136
         return $$"""
             struct ExternalOperationDescriptor
             {
@@ -422,6 +441,7 @@ internal static class Program
                     &slots[{{nested.OutputSlot}}]);
             }
             """;
+#pragma warning restore MA0136
     }
 
     private static (IntPtr PointerArray, IntPtr[] Values) CreateKernelArguments(
@@ -525,7 +545,7 @@ internal static class Program
         expected.Count == actual.Count &&
         Enumerable.Range(0, expected.Count).All(index => ExactDouble(expected[index], actual[index]));
 
-    private static bool ExactBooleans(IReadOnlyList<bool> expected, IReadOnlyList<bool> actual) =>
+    private static bool ExactBooleans(MathBlockBooleanVector expected, MathBlockBooleanVector actual) =>
         expected.Count == actual.Count &&
         Enumerable.Range(0, expected.Count).All(index => expected[index] == actual[index]);
 
@@ -537,7 +557,7 @@ internal static class Program
         expected.Count == actual.Count &&
         Enumerable.Range(0, expected.Count).All(index => ExactComplex(expected[index], actual[index]));
 
-    private static bool ExactPoints(IReadOnlyList<MathBlockPoint> expected, IReadOnlyList<MathBlockPoint> actual) =>
+    private static bool ExactPoints(MathBlockPointSet expected, MathBlockPointSet actual) =>
         expected.Count == actual.Count &&
         Enumerable.Range(0, expected.Count).All(index =>
             ExactDouble(expected[index].X, actual[index].X) &&
@@ -551,7 +571,7 @@ internal static class Program
             expected[index].To == actual[index].To &&
             ExactDouble(expected[index].Weight, actual[index].Weight));
 
-    private static bool ExactRuns(IReadOnlyList<MathBlockRun> expected, IReadOnlyList<MathBlockRun> actual) =>
+    private static bool ExactRuns(MathBlockRunSet expected, MathBlockRunSet actual) =>
         expected.Count == actual.Count &&
         Enumerable.Range(0, expected.Count).All(index =>
             expected[index].Start == actual[index].Start &&
@@ -571,9 +591,9 @@ internal static class Program
                 $"{value.AsScalar():R}/0x{BitConverter.DoubleToInt64Bits(value.AsScalar()):x16}",
             MathBlockValueKind.Boolean => value.AsBoolean().ToString(),
             MathBlockValueKind.Vector =>
-                $"[{string.Join(",", value.AsVector().Select(item =>
+                $"[{string.Join(',', value.AsVector().Select(item =>
                     $"{item:R}/0x{BitConverter.DoubleToInt64Bits(item):x16}"))}]",
-            MathBlockValueKind.BooleanVector => $"[{string.Join(",", value.AsBooleanVector())}]",
+            MathBlockValueKind.BooleanVector => $"[{string.Join(',', value.AsBooleanVector())}]",
             _ => value.Type.ToString()
         };
     }
@@ -677,8 +697,12 @@ internal static class Program
         [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int cuModuleLoadData(out IntPtr module, byte[] image);
 
-        [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern int cuModuleGetFunction(out IntPtr function, IntPtr module, string name);
+        [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi,
+            BestFitMapping = false, ThrowOnUnmappableChar = true)]
+        public static extern int cuModuleGetFunction(
+            out IntPtr function,
+            IntPtr module,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
 
         [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int cuModuleUnload(IntPtr module);
