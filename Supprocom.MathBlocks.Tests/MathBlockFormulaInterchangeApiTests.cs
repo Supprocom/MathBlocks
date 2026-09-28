@@ -1,13 +1,14 @@
 using System.Buffers;
 using System.Reflection;
-using Supprocom.MathBlocks;
 
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Formula Interchange Api Tests.</summary>
 public sealed class MathBlockFormulaInterchangeApiTests
 {
+    /// <summary>Verifies public apicontains the reviewed 050 surface.</summary>
     [Fact]
-    public void Public_API_contains_the_reviewed_0_5_0_surface()
+    public void PublicAPIContainsTheReviewed050Surface()
     {
         var methods = typeof(MathBlockFormulaInterchange)
             .GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
@@ -105,15 +106,16 @@ public sealed class MathBlockFormulaInterchangeApiTests
             typeof(MathBlockFormulaFormat));
     }
 
+    /// <summary>Verifies public formula types are the reviewed set.</summary>
     [Fact]
-    public void Public_formula_types_are_the_reviewed_set()
+    public void PublicFormulaTypesAreTheReviewedSet()
     {
         var names = typeof(MathBlockFormulaInterchange).Assembly
             .GetExportedTypes()
-            .Where(type => type.Namespace == typeof(MathBlockFormulaInterchange).Namespace)
+            .Where(type => string.Equals(type.Namespace, typeof(MathBlockFormulaInterchange).Namespace, StringComparison.Ordinal))
             .Select(type => type.Name)
             .Where(name => name.StartsWith("MathBlockFormula", StringComparison.Ordinal))
-            .OrderBy(name => name, StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
             .ToArray();
 
         Assert.Equal(

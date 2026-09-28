@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>markov.stationary-distribution@1</c> mathematical operation.</summary>
     public static double[] StationaryDistribution(MathBlockMatrix transition, int iterations)
     {
+        ArgumentNullException.ThrowIfNull(transition);
         var distribution = MathBlockCollectionPrimitives.Repeat(
             1d / transition.Rows,
             transition.Rows);

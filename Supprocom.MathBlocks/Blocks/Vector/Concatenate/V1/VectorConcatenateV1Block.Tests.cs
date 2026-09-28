@@ -1,13 +1,16 @@
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Verifies the <c>vector.concatenate@1</c> operation contract.</summary>
 public sealed class VectorConcatenateV1BlockTests
 {
+    /// <summary>Checks the <c>vector.concatenate@1</c> operation contract.</summary>
     [Fact]
     [Trait("Category", "BlockContract")]
-    public void Contract_is_valid() => MathBlockFeatureContractAssertions.Verify("vector.concatenate@1");
+    public void ContractIsValid() => MathBlockFeatureContractAssertions.Verify("vector.concatenate@1");
 
+    /// <summary>Checks the <c>vector.concatenate@1</c> operation contract.</summary>
     [Fact]
-    public void CPU_worker_concatenates_unequal_vector_lengths()
+    public void CPUWorkerConcatenatesUnequalVectorLengths()
     {
         var leftValue = MathBlockValue.Vector([1d, 2d, 3d]);
         var rightValue = MathBlockValue.Vector([4d]);

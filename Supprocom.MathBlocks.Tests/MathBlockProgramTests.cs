@@ -1,11 +1,11 @@
-using Supprocom.MathBlocks;
-
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Program Tests.</summary>
 public sealed class MathBlockProgramTests
 {
+    /// <summary>Verifies program composes generic inputs without input semantics.</summary>
     [Fact]
-    public void Program_composes_generic_inputs_without_input_semantics()
+    public void ProgramComposesGenericInputsWithoutInputSemantics()
     {
         var unit = MathBlockUnit.Basis2;
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
@@ -16,7 +16,7 @@ public sealed class MathBlockProgramTests
         var magnitude = builder.Apply("scalar.absolute", inputs: [ratio]);
         var program = builder.Output("result", magnitude).Build();
 
-        var output = program.Evaluate(new Dictionary<string, MathBlockValue>
+        var output = program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
             ["left"] = MathBlockValue.Scalar(12d, unit),
             ["right"] = MathBlockValue.Scalar(10d, unit)
@@ -26,20 +26,22 @@ public sealed class MathBlockProgramTests
         Assert.True(output["result"].Type.Unit.IsDimensionless);
     }
 
+    /// <summary>Verifies fingerprint is stable and covers constants and topology.</summary>
     [Fact]
-    public void Fingerprint_is_stable_and_covers_constants_and_topology()
+    public void FingerprintIsStableAndCoversConstantsAndTopology()
     {
         var first = BuildAffineProgram(2d);
         var same = BuildAffineProgram(2d);
         var changed = BuildAffineProgram(3d);
 
         Assert.Equal(first.Fingerprint, same.Fingerprint);
-        Assert.NotEqual(first.Fingerprint, changed.Fingerprint);
+        Assert.NotEqual(first.Fingerprint, changed.Fingerprint, StringComparer.Ordinal);
         Assert.Equal(64, first.Fingerprint.Length);
     }
 
+    /// <summary>Verifies program propagates domain invalidity.</summary>
     [Fact]
-    public void Program_propagates_domain_invalidity()
+    public void ProgramPropagatesDomainInvalidity()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var numerator = builder.Input("numerator", MathBlockType.Scalar());
@@ -47,7 +49,7 @@ public sealed class MathBlockProgramTests
         var quotient = builder.Apply("scalar.divide", inputs: [numerator, denominator]);
         var program = builder.Output("quotient", quotient).Build();
 
-        var result = program.Evaluate(new Dictionary<string, MathBlockValue>
+        var result = program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
             ["numerator"] = MathBlockValue.Scalar(1d),
             ["denominator"] = MathBlockValue.Scalar(0d)
@@ -57,8 +59,9 @@ public sealed class MathBlockProgramTests
         Assert.NotEmpty(result.InvalidReason!);
     }
 
+    /// <summary>Verifies program rejects incompatible units before execution.</summary>
     [Fact]
-    public void Program_rejects_incompatible_units_before_execution()
+    public void ProgramRejectsIncompatibleUnitsBeforeExecution()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var left = builder.Input("left", MathBlockType.Scalar(MathBlockUnit.Basis0));
@@ -68,14 +71,16 @@ public sealed class MathBlockProgramTests
             builder.Apply("scalar.add", inputs: [left, right]));
     }
 
+    /// <summary>Verifies unknown operation version fails closed.</summary>
     [Fact]
-    public void Unknown_operation_version_fails_closed()
+    public void UnknownOperationVersionFailsClosed()
     {
         Assert.Throws<KeyNotFoundException>(() => MathBlockCatalog.Standard.Get("scalar.add", 2));
     }
 
+    /// <summary>Verifies formula builder accepts blocks before their dependencies.</summary>
     [Fact]
-    public void Formula_builder_accepts_blocks_before_their_dependencies()
+    public void FormulaBuilderAcceptsBlocksBeforeTheirDependencies()
     {
         var formula = new MathBlockFormulaBuilder(MathBlockCatalog.Standard)
             .Block("quotient", "scalar.divide", inputs: ["left-side", "right-side"])
@@ -88,7 +93,7 @@ public sealed class MathBlockProgramTests
             .Output("result", "quotient")
             .Build();
 
-        var result = new MathBlocksCPUWorker().Execute(formula, new Dictionary<string, MathBlockValue>
+        var result = new MathBlocksCPUWorker().Execute(formula, new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
             ["first"] = MathBlockValue.Scalar(6d),
             ["second"] = MathBlockValue.Scalar(2d),
@@ -99,8 +104,9 @@ public sealed class MathBlockProgramTests
         Assert.Equal(8d, result["result"].AsScalar());
     }
 
+    /// <summary>Verifies cpuworker runs independent formula branches in parallel async.</summary>
     [Fact]
-    public async Task CPU_worker_runs_independent_formula_branches_in_parallel()
+    public async Task CPUWorkerRunsIndependentFormulaBranchesInParallelAsync()
     {
         using var entered = new CountdownEvent(2);
         using var release = new ManualResetEventSlim();
@@ -134,7 +140,7 @@ public sealed class MathBlockProgramTests
 
         var execution = System.Threading.Tasks.Task.Run(() => worker.Execute(
             program,
-            new Dictionary<string, MathBlockValue> { ["input"] = MathBlockValue.Scalar(3d) }));
+            new Dictionary<string, MathBlockValue>(StringComparer.Ordinal) { ["input"] = MathBlockValue.Scalar(3d) }));
 
         var branchesEntered = entered.Wait(TimeSpan.FromSeconds(5));
         release.Set();
@@ -142,15 +148,16 @@ public sealed class MathBlockProgramTests
         Assert.Equal(6d, (await execution)["sum"].AsScalar());
     }
 
+    /// <summary>Verifies cpuworker is safe for concurrent executions.</summary>
     [Fact]
-    public void CPU_worker_is_safe_for_concurrent_executions()
+    public void CPUWorkerIsSafeForConcurrentExecutions()
     {
         var program = BuildAffineProgram(2d);
         var worker = new MathBlocksCPUWorker();
 
         Parallel.For(0, 1_000, index =>
         {
-            var result = worker.Execute(program, new Dictionary<string, MathBlockValue>
+            var result = worker.Execute(program, new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
             {
                 ["input"] = MathBlockValue.Scalar(index)
             });

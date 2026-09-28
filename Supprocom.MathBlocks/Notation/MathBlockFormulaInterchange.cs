@@ -5,37 +5,6 @@ using System.Xml;
 
 namespace Supprocom.MathBlocks;
 
-/// <summary>Contains one exact formula imported from a supported XML vocabulary.</summary>
-public sealed class MathBlockFormulaImportResult
-{
-    internal MathBlockFormulaImportResult(
-        MathBlockOpenMathImportResult exactResult,
-        string outputName,
-        MathBlockFormulaFormat format)
-    {
-        Program = exactResult.Program;
-        OutputName = outputName;
-        Format = format;
-        Operations = exactResult.Operations;
-        OperationOccurrences = exactResult.OperationOccurrences;
-    }
-
-    /// <summary>Gets the imported single-output typed program.</summary>
-    public MathBlockProgram Program { get; }
-
-    /// <summary>Gets the selected output name.</summary>
-    public string OutputName { get; }
-
-    /// <summary>Gets the XML vocabulary used by the source.</summary>
-    public MathBlockFormulaFormat Format { get; }
-
-    /// <summary>Gets operation uses in program order.</summary>
-    public IReadOnlyList<MathBlockOperation> Operations { get; }
-
-    /// <summary>Gets operation occurrences in program order.</summary>
-    public IReadOnlyList<MathBlockOpenMathOperationOccurrence> OperationOccurrences { get; }
-}
-
 /// <summary>
 /// Imports and exports exact single-output formulas as OpenMath or Strict Content MathML.
 /// </summary>
@@ -460,9 +429,8 @@ public static partial class MathBlockFormulaInterchange
         }
         catch (InvalidOperationException exception)
         {
-            var code = exception.Message ==
-                "The formula contains an operation outside the standard catalog."
-                ? MathBlockFormulaDiagnosticCode.OperationOutsideProfile
+            var code = string.Equals(exception.Message, "The formula contains an operation outside the standard catalog."
+, StringComparison.Ordinal) ? MathBlockFormulaDiagnosticCode.OperationOutsideProfile
                 : MathBlockFormulaDiagnosticCode.InvalidProgram;
             return new MathBlockFormulaValidationResult(
                 false,
@@ -571,19 +539,19 @@ public static partial class MathBlockFormulaInterchange
         string outputName)
     {
         ArgumentNullException.ThrowIfNull(program);
-        if (string.IsNullOrWhiteSpace(outputName) || outputName != outputName.Trim())
+        if (string.IsNullOrWhiteSpace(outputName) || !string.Equals(outputName, outputName.Trim(), StringComparison.Ordinal))
             throw new ArgumentException("A canonical output name is required.", nameof(outputName));
         if (!program.OutputNodeIndexes.TryGetValue(outputName, out var rootNode))
             throw new KeyNotFoundException($"Program output '{outputName}' is missing.");
 
         var nodes = program.Nodes;
-        var reachable = new bool[nodes.Count];
+        var reachable = new bool[nodes.Length];
         var pending = new Stack<int>();
         pending.Push(rootNode);
         while (pending.Count != 0)
         {
             var index = pending.Pop();
-            if ((uint)index >= (uint)nodes.Count)
+            if ((uint)index >= (uint)nodes.Length)
                 throw new InvalidOperationException("The formula output has an invalid node.");
             if (reachable[index])
                 continue;
@@ -602,11 +570,11 @@ public static partial class MathBlockFormulaInterchange
         }
 
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
-        var indexes = new int[nodes.Count];
+        var indexes = new int[nodes.Length];
         for (var index = 0; index < indexes.Length; index++)
             indexes[index] = -1;
 
-        for (var index = 0; index < nodes.Count; index++)
+        for (var index = 0; index < nodes.Length; index++)
         {
             if (!reachable[index])
                 continue;
@@ -635,7 +603,7 @@ public static partial class MathBlockFormulaInterchange
     private static int CopyOperation(
         MathBlockProgramBuilder builder,
         MathBlockProgram.Node node,
-        IReadOnlyList<int> indexes)
+        int[] indexes)
     {
         var mapping = RequireMapping(node.Operation);
         var inputs = new int[node.Inputs.Length];
@@ -716,7 +684,7 @@ public static partial class MathBlockFormulaInterchange
         MathBlockFormulaFormat format)
     {
         var nodes = selection.Program.Nodes;
-        var emitted = new bool[nodes.Count];
+        var emitted = new bool[nodes.Length];
         var frames = new Stack<ExpressionFrame>();
         frames.Push(new ExpressionFrame(selection.RootNode, false));
         while (frames.Count != 0)
@@ -869,7 +837,7 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteVector(
         XmlWriter writer,
-        IReadOnlyList<double> values,
+        Supprocom.MathBlocks.MathBlockVector values,
         string id,
         MathBlockFormulaFormat format)
     {
@@ -908,7 +876,7 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteComplexVector(
         XmlWriter writer,
-        IReadOnlyList<MathBlockComplexValue> values,
+        Supprocom.MathBlocks.MathBlockComplexVector values,
         string id,
         MathBlockFormulaFormat format)
     {
@@ -935,7 +903,7 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WritePointSet(
         XmlWriter writer,
-        IReadOnlyList<MathBlockPoint> values,
+        Supprocom.MathBlocks.MathBlockPointSet values,
         string id,
         MathBlockFormulaFormat format)
     {
@@ -972,7 +940,7 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteRunSet(
         XmlWriter writer,
-        IReadOnlyList<MathBlockRun> values,
+        Supprocom.MathBlocks.MathBlockRunSet values,
         string id,
         MathBlockFormulaFormat format)
     {
@@ -990,7 +958,7 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteBooleanVector(
         XmlWriter writer,
-        IReadOnlyList<bool> values,
+        Supprocom.MathBlocks.MathBlockBooleanVector values,
         string id,
         MathBlockFormulaFormat format)
     {
@@ -1094,7 +1062,7 @@ public static partial class MathBlockFormulaInterchange
     {
         writer.WriteStartElement("OMS", OpenMathNamespace);
         writer.WriteAttributeString("cd", dictionary);
-        if (dictionaryBase is not null && dictionaryBase != ContentDictionaryBase)
+        if (dictionaryBase is not null && !string.Equals(dictionaryBase, ContentDictionaryBase, StringComparison.Ordinal))
             writer.WriteAttributeString("cdbase", dictionaryBase);
         if (id is not null)
             writer.WriteAttributeString("id", id);
@@ -1157,8 +1125,8 @@ public static partial class MathBlockFormulaInterchange
                     var expectedNamespace = format == MathBlockFormulaFormat.OpenMath
                         ? OpenMathNamespace
                         : MathMlNamespace;
-                    if (reader.LocalName != expectedName ||
-                        reader.NamespaceURI != expectedNamespace)
+                    if (!string.Equals(reader.LocalName, expectedName, StringComparison.Ordinal) ||
+!string.Equals(reader.NamespaceURI, expectedNamespace, StringComparison.Ordinal))
                     {
                         throw new FormatException(
                             "The formula document root does not match its format.");
@@ -1168,8 +1136,8 @@ public static partial class MathBlockFormulaInterchange
                 if (format == MathBlockFormulaFormat.OpenMath)
                 {
                     if (awaitingOpenMathValue &&
-                        reader.LocalName == "OMSTR" &&
-                        reader.NamespaceURI == OpenMathNamespace)
+string.Equals(reader.LocalName, "OMSTR", StringComparison.Ordinal) &&
+string.Equals(reader.NamespaceURI, OpenMathNamespace, StringComparison.Ordinal))
                     {
                         if (exact is not null)
                             throw new FormatException("The formula has duplicate exact annotations.");
@@ -1178,16 +1146,16 @@ public static partial class MathBlockFormulaInterchange
                         continue;
                     }
                     awaitingOpenMathValue =
-                        reader.LocalName == "OMS" &&
-                        reader.NamespaceURI == OpenMathNamespace &&
-                        reader.GetAttribute("cd") == FormulaDictionary &&
-                        reader.GetAttribute("name") == "profile1";
+string.Equals(reader.LocalName, "OMS", StringComparison.Ordinal) &&
+string.Equals(reader.NamespaceURI, OpenMathNamespace, StringComparison.Ordinal) &&
+string.Equals(reader.GetAttribute("cd"), FormulaDictionary, StringComparison.Ordinal) &&
+string.Equals(reader.GetAttribute("name"), "profile1", StringComparison.Ordinal);
                     continue;
                 }
 
-                if (reader.LocalName == "annotation" &&
-                    reader.NamespaceURI == MathMlNamespace &&
-                    reader.GetAttribute("encoding") == ExactAnnotationMediaType)
+                if (string.Equals(reader.LocalName, "annotation", StringComparison.Ordinal) &&
+string.Equals(reader.NamespaceURI, MathMlNamespace, StringComparison.Ordinal) &&
+string.Equals(reader.GetAttribute("encoding"), ExactAnnotationMediaType, StringComparison.Ordinal))
                 {
                     if (exact is not null)
                         throw new FormatException("The formula has duplicate exact annotations.");

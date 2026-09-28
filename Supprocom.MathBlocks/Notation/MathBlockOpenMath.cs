@@ -4,43 +4,6 @@ using System.Xml;
 
 namespace Supprocom.MathBlocks;
 
-/// <summary>Contains one imported Profile 1 program and its operation metadata.</summary>
-[System.Diagnostics.DebuggerDisplay("{Program.PlanNodes.Count} nodes, {Operations.Count} operations")]
-public sealed class MathBlockOpenMathImportResult
-{
-    internal MathBlockOpenMathImportResult(
-        MathBlockProgram program,
-        IReadOnlyList<MathBlockOperation> operations,
-        IReadOnlyList<MathBlockOpenMathOperationOccurrence> operationOccurrences,
-        IReadOnlyDictionary<string, MathBlockOpenMathSourceLocation>? sourceLocations)
-    {
-        Program = program;
-        Operations = Array.AsReadOnly(MathBlockCollectionPrimitives.Copy(operations));
-        OperationOccurrences = Array.AsReadOnly(
-            MathBlockCollectionPrimitives.Copy(operationOccurrences));
-        SourceLocations = sourceLocations is null
-            ? null
-            : new System.Collections.ObjectModel.ReadOnlyDictionary<
-                string,
-                MathBlockOpenMathSourceLocation>(
-                    new Dictionary<string, MathBlockOpenMathSourceLocation>(
-                        sourceLocations,
-                        StringComparer.Ordinal));
-    }
-
-    /// <summary>Gets the imported typed program.</summary>
-    public MathBlockProgram Program { get; }
-
-    /// <summary>Gets operations in program node order.</summary>
-    public IReadOnlyList<MathBlockOperation> Operations { get; }
-
-    /// <summary>Gets operation occurrences in program node order.</summary>
-    public IReadOnlyList<MathBlockOpenMathOperationOccurrence> OperationOccurrences { get; }
-
-    /// <summary>Gets captured source locations when the import requested them.</summary>
-    public IReadOnlyDictionary<string, MathBlockOpenMathSourceLocation>? SourceLocations { get; }
-}
-
 /// <summary>Imports, exports, validates, and describes MathBlocks OpenMath Profile 1.</summary>
 public static partial class MathBlockOpenMath
 {
@@ -312,7 +275,7 @@ public static partial class MathBlockOpenMath
         }
     }
 
-    private static void WriteVector(XmlWriter writer, IReadOnlyList<double> values)
+    private static void WriteVector(XmlWriter writer, Supprocom.MathBlocks.MathBlockVector values)
     {
         WriteApplicationStart(writer);
         WriteSymbol(writer, ValueDictionary, "vector");
@@ -342,7 +305,7 @@ public static partial class MathBlockOpenMath
 
     private static void WriteComplexVector(
         XmlWriter writer,
-        IReadOnlyList<MathBlockComplexValue> values)
+        Supprocom.MathBlocks.MathBlockComplexVector values)
     {
         WriteApplicationStart(writer);
         WriteSymbol(writer, ValueDictionary, "complex-vector");
@@ -361,7 +324,7 @@ public static partial class MathBlockOpenMath
         writer.WriteEndElement();
     }
 
-    private static void WritePointSet(XmlWriter writer, IReadOnlyList<MathBlockPoint> values)
+    private static void WritePointSet(XmlWriter writer, Supprocom.MathBlocks.MathBlockPointSet values)
     {
         WriteApplicationStart(writer);
         WriteSymbol(writer, ValueDictionary, "point-set");
@@ -394,7 +357,7 @@ public static partial class MathBlockOpenMath
         writer.WriteEndElement();
     }
 
-    private static void WriteRunSet(XmlWriter writer, IReadOnlyList<MathBlockRun> values)
+    private static void WriteRunSet(XmlWriter writer, Supprocom.MathBlocks.MathBlockRunSet values)
     {
         WriteApplicationStart(writer);
         WriteSymbol(writer, ValueDictionary, "run-set");
@@ -410,7 +373,7 @@ public static partial class MathBlockOpenMath
         writer.WriteEndElement();
     }
 
-    private static void WriteBooleanVector(XmlWriter writer, IReadOnlyList<bool> values)
+    private static void WriteBooleanVector(XmlWriter writer, Supprocom.MathBlocks.MathBlockBooleanVector values)
     {
         WriteApplicationStart(writer);
         WriteSymbol(writer, ValueDictionary, "boolean-vector");
@@ -537,7 +500,7 @@ public static partial class MathBlockOpenMath
 
     private static string RequireExportName(string? value, string role)
     {
-        if (string.IsNullOrWhiteSpace(value) || value != value.Trim() || value.Contains('\r'))
+        if (string.IsNullOrWhiteSpace(value) || !string.Equals(value, value.Trim(), StringComparison.Ordinal) || value.Contains('\r', StringComparison.Ordinal))
             throw new InvalidOperationException($"A program {role} name is not supported by OpenMath.");
         try
         {
@@ -588,16 +551,16 @@ public static partial class MathBlockOpenMath
     private static XmlReaderSettings CreateReaderSettings(
         int maximumDocumentCharacters,
         bool async = false) => new()
-    {
-        DtdProcessing = DtdProcessing.Prohibit,
-        XmlResolver = null,
-        MaxCharactersInDocument = maximumDocumentCharacters,
-        IgnoreComments = false,
-        IgnoreProcessingInstructions = false,
-        IgnoreWhitespace = false,
-        CloseInput = true,
-        Async = async
-    };
+        {
+            DtdProcessing = DtdProcessing.Prohibit,
+            XmlResolver = null,
+            MaxCharactersInDocument = maximumDocumentCharacters,
+            IgnoreComments = false,
+            IgnoreProcessingInstructions = false,
+            IgnoreWhitespace = false,
+            CloseInput = true,
+            Async = async
+        };
 
     private static FormatException InvalidFormat(string message) => new(message);
 

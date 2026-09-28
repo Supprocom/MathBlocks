@@ -2,6 +2,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockVectorMath
 {
+    /// <summary>Computes the <c>vector.linspace@1</c> mathematical operation.</summary>
     public static double[] Linspace(double start, double end, int count)
     {
         var result = new double[count];

@@ -1,6 +1,7 @@
 
 namespace Supprocom.MathBlocks;
 
+/// <summary>Represents a typed result, including an explicit invalid-result state.</summary>
 public readonly struct MathBlockValue
 {
     private readonly double scalar;
@@ -26,26 +27,34 @@ public readonly struct MathBlockValue
         this.reference = reference;
     }
 
+    /// <summary>Gets the value kind, unit, and shape.</summary>
     public MathBlockType Type { get; }
+    /// <summary>Gets whether the result contains a valid payload.</summary>
     public bool IsValid { get; }
+    /// <summary>Gets the reason for an invalid result, if any.</summary>
     public string? InvalidReason { get; }
 
+    /// <summary>Creates an invalid result with its expected type and reason.</summary>
     public static MathBlockValue Invalid(MathBlockType type, string reason) =>
         new(type, false, RequireReason(reason));
 
+    /// <summary>Creates a finite scalar value with the specified unit.</summary>
     public static MathBlockValue Scalar(double value, MathBlockUnit unit = default) =>
         Math.IsFinite(value)
             ? new(MathBlockType.Scalar(unit), true, null, scalar: value)
             : Invalid(MathBlockType.Scalar(unit), "The scalar result is not finite.");
 
+    /// <summary>Creates a Boolean value.</summary>
     public static MathBlockValue Boolean(bool value) =>
         new(MathBlockType.Boolean, true, null, boolean: value);
 
+    /// <summary>Creates a finite complex value with the specified unit.</summary>
     public static MathBlockValue Complex(Complex value, MathBlockUnit unit = default) =>
         MathBlockDataValidation.IsFinite(value)
             ? new(MathBlockType.Complex(unit), true, null, complex: value)
             : Invalid(MathBlockType.Complex(unit), "The complex result is not finite.");
 
+    /// <summary>Copies finite numbers into a typed vector value.</summary>
     public static MathBlockValue Vector(IEnumerable<double> values, MathBlockUnit unit = default)
     {
         var vector = new MathBlockVector(values);
@@ -58,10 +67,11 @@ public readonly struct MathBlockValue
                 reference: new MathBlockVector(values, takeOwnership))
             : Invalid(MathBlockType.Vector(unit, values.Length), "The vector result contains a nonfinite value.");
 
+    /// <summary>Wraps a finite matrix in a typed value.</summary>
     public static MathBlockValue Matrix(MathBlockMatrix value, MathBlockUnit unit = default)
     {
         ArgumentNullException.ThrowIfNull(value);
-        foreach (var item in value.Span)
+        foreach (ref readonly var item in value.Span)
             if (!Math.IsFinite(item))
                 return Invalid(MathBlockType.Matrix(unit, value.Rows, value.Columns),
                     "The matrix result contains a nonfinite value.");
@@ -69,6 +79,7 @@ public readonly struct MathBlockValue
             MathBlockType.Matrix(unit, value.Rows, value.Columns), true, null, reference: value);
     }
 
+    /// <summary>Copies finite complex numbers into a typed vector value.</summary>
     public static MathBlockValue ComplexVector(IEnumerable<Complex> values, MathBlockUnit unit = default)
     {
         var vector = new MathBlockComplexVector(values);
@@ -81,6 +92,7 @@ public readonly struct MathBlockValue
                 reference: new MathBlockComplexVector(values, takeOwnership))
             : Invalid(MathBlockType.ComplexVector(unit, values.Length), "The complex vector result contains a nonfinite value.");
 
+    /// <summary>Copies Boolean values into a typed vector value.</summary>
     public static MathBlockValue BooleanVector(IEnumerable<bool> values)
     {
         var vector = new MathBlockBooleanVector(values);
@@ -91,10 +103,11 @@ public readonly struct MathBlockValue
         new(MathBlockType.BooleanVector(values.Length), true, null,
             reference: new MathBlockBooleanVector(values, takeOwnership));
 
+    /// <summary>Wraps a finite complex matrix in a typed value.</summary>
     public static MathBlockValue ComplexMatrix(MathBlockComplexMatrix value, MathBlockUnit unit = default)
     {
         ArgumentNullException.ThrowIfNull(value);
-        foreach (var item in value.Span)
+        foreach (ref readonly var item in value.Span)
             if (!MathBlockDataValidation.IsFinite(item))
                 return Invalid(MathBlockType.ComplexMatrix(unit, value.Rows, value.Columns),
                     "The complex matrix result contains a nonfinite value.");
@@ -102,36 +115,51 @@ public readonly struct MathBlockValue
             MathBlockType.ComplexMatrix(unit, value.Rows, value.Columns), true, null, reference: value);
     }
 
+    /// <summary>Wraps a point set in a typed value.</summary>
     public static MathBlockValue PointSet(MathBlockPointSet value, MathBlockUnit unit = default)
     {
         ArgumentNullException.ThrowIfNull(value);
         return new MathBlockValue(MathBlockType.PointSet(unit, value.Count), true, null, reference: value);
     }
 
+    /// <summary>Wraps a graph in a typed value.</summary>
     public static MathBlockValue Graph(MathBlockGraph value, MathBlockUnit unit = default)
     {
         ArgumentNullException.ThrowIfNull(value);
         return new MathBlockValue(MathBlockType.Graph(unit, value.VertexCount), true, null, reference: value);
     }
 
+    /// <summary>Wraps a run set in a typed value.</summary>
     public static MathBlockValue RunSet(MathBlockRunSet value, MathBlockUnit unit = default)
     {
         ArgumentNullException.ThrowIfNull(value);
         return new MathBlockValue(MathBlockType.RunSet(unit, value.Count), true, null, reference: value);
     }
 
+    /// <summary>Gets the scalar payload, requiring a valid scalar type.</summary>
     public double AsScalar() => Require<double>(MathBlockValueKind.Scalar, scalar);
+    /// <summary>Gets the Boolean payload, requiring a valid Boolean type.</summary>
     public bool AsBoolean() => Require<bool>(MathBlockValueKind.Boolean, boolean);
+    /// <summary>Gets the complex payload, requiring a valid complex type.</summary>
     public Complex AsComplex() => Require<Complex>(MathBlockValueKind.Complex, complex);
+    /// <summary>Gets the vector payload, requiring a valid vector type.</summary>
     public MathBlockVector AsVector() => RequireReference<MathBlockVector>(MathBlockValueKind.Vector);
+    /// <summary>Gets the matrix payload, requiring a valid matrix type.</summary>
     public MathBlockMatrix AsMatrix() => RequireReference<MathBlockMatrix>(MathBlockValueKind.Matrix);
+    /// <summary>Gets the complex-vector payload, requiring a valid type.</summary>
     public MathBlockComplexVector AsComplexVector() => RequireReference<MathBlockComplexVector>(MathBlockValueKind.ComplexVector);
+    /// <summary>Gets the Boolean-vector payload, requiring a valid type.</summary>
     public MathBlockBooleanVector AsBooleanVector() => RequireReference<MathBlockBooleanVector>(MathBlockValueKind.BooleanVector);
+    /// <summary>Gets the complex-matrix payload, requiring a valid type.</summary>
     public MathBlockComplexMatrix AsComplexMatrix() => RequireReference<MathBlockComplexMatrix>(MathBlockValueKind.ComplexMatrix);
+    /// <summary>Gets the point-set payload, requiring a valid type.</summary>
     public MathBlockPointSet AsPointSet() => RequireReference<MathBlockPointSet>(MathBlockValueKind.PointSet);
+    /// <summary>Gets the graph payload, requiring a valid graph type.</summary>
     public MathBlockGraph AsGraph() => RequireReference<MathBlockGraph>(MathBlockValueKind.Graph);
+    /// <summary>Gets the run-set payload, requiring a valid type.</summary>
     public MathBlockRunSet AsRunSet() => RequireReference<MathBlockRunSet>(MathBlockValueKind.RunSet);
 
+    /// <summary>Compares valid numeric payloads within a relative tolerance.</summary>
     public bool ApproximatelyEquals(MathBlockValue other, double tolerance = 1e-12)
     {
         if (Type != other.Type || IsValid != other.IsValid)
@@ -185,7 +213,7 @@ public readonly struct MathBlockValue
     private static bool Near(double left, double right, double tolerance) =>
         Math.Abs(left - right) <= tolerance * Math.Max(1d, Math.Max(Math.Abs(left), Math.Abs(right)));
 
-    private static bool SequenceNear(IReadOnlyList<double> left, IReadOnlyList<double> right, double tolerance)
+    private static bool SequenceNear(Supprocom.MathBlocks.MathBlockVector left, Supprocom.MathBlocks.MathBlockVector right, double tolerance)
     {
         if (left.Count != right.Count)
             return false;
@@ -207,8 +235,8 @@ public readonly struct MathBlockValue
     }
 
     private static bool ComplexSequenceNear(
-        IReadOnlyList<Complex> left,
-        IReadOnlyList<Complex> right,
+        Supprocom.MathBlocks.MathBlockComplexVector left,
+        Supprocom.MathBlocks.MathBlockComplexVector right,
         double tolerance)
     {
         if (left.Count != right.Count)
@@ -268,7 +296,7 @@ public readonly struct MathBlockValue
         return true;
     }
 
-    private static bool BooleanSequenceEqual(IReadOnlyList<bool> left, IReadOnlyList<bool> right)
+    private static bool BooleanSequenceEqual(Supprocom.MathBlocks.MathBlockBooleanVector left, Supprocom.MathBlocks.MathBlockBooleanVector right)
     {
         if (left.Count != right.Count)
             return false;

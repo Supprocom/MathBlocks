@@ -1,4 +1,5 @@
 namespace Supprocom.MathBlocks;
+
 internal static partial class ProbabilityMathBlocks
 {
     internal static class InformationConditionalMutualInformationV1Block

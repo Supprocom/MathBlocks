@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>matrix.exponential@1</c> mathematical operation.</summary>
     public static MathBlockMatrix MatrixExponential(MathBlockMatrix matrix)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         var norm = 0d;
         for (var row = 0; row < matrix.Rows; row++)
         {

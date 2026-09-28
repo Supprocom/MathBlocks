@@ -1,4 +1,5 @@
 namespace Supprocom.MathBlocks;
+
 internal static partial class StructuralMathBlocks
 {
     internal static class GraphFromDirectedAdjacencyV1Block

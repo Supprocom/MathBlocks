@@ -1,10 +1,10 @@
 using System.Buffers;
 using System.Text;
 using System.Xml.Linq;
-using Supprocom.MathBlocks;
 
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Formula Interchange Tests.</summary>
 public sealed class MathBlockFormulaInterchangeTests
 {
     private static readonly MathBlockFormulaFormat[] Formats =
@@ -13,8 +13,9 @@ public sealed class MathBlockFormulaInterchangeTests
         MathBlockFormulaFormat.ContentMathMl
     ];
 
+    /// <summary>Verifies profile maps every operation without an unsupported class.</summary>
     [Fact]
-    public void Profile_maps_every_operation_without_an_unsupported_class()
+    public void ProfileMapsEveryOperationWithoutAnUnsupportedClass()
     {
         var profile = MathBlockFormulaInterchange.Profile;
 
@@ -44,7 +45,7 @@ public sealed class MathBlockFormulaInterchangeTests
                 MathBlockFormulaMappingClassification.Unsupported);
         Assert.Equal(
             MathBlockCatalog.Standard.Operations.Select(operation => operation.Identity),
-            profile.Operations.Select(mapping => mapping.Identity));
+            profile.Operations.Select(mapping => mapping.Identity), StringComparer.Ordinal);
         Assert.Equal(
             337,
             profile.Operations.Select(mapping => mapping.Symbol).Distinct().Count());
@@ -71,8 +72,7 @@ public sealed class MathBlockFormulaInterchangeTests
             Assert.False(stream.CanWrite);
         }
 
-        var manifest = profile.Artifacts.Single(artifact =>
-            artifact.Name == "mathblocks_formula_mappings1.xml");
+        var manifest = profile.Artifacts.Single(artifact => string.Equals(artifact.Name, "mathblocks_formula_mappings1.xml", StringComparison.Ordinal));
         using (var stream = manifest.OpenRead())
         {
             var document = XDocument.Load(stream);
@@ -85,16 +85,14 @@ public sealed class MathBlockFormulaInterchangeTests
             Assert.Equal(337, entries.Length);
             Assert.Equal(
                 profile.Operations.Select(mapping => mapping.Identity),
-                entries.Select(entry => entry.Attribute("identity")?.Value));
-            Assert.DoesNotContain(entries, entry =>
-                entry.Attribute("classification")?.Value == "unsupported");
+                entries.Select(entry => entry.Attribute("identity")?.Value), StringComparer.Ordinal);
+            Assert.DoesNotContain(entries, entry => string.Equals(entry.Attribute("classification")?.Value, "unsupported", StringComparison.Ordinal));
             Assert.All(entries, entry => Assert.Equal(
                 "direct-mapping",
                 entry.Attribute("classification")?.Value));
         }
 
-        var operationDictionary = profile.Artifacts.Single(artifact =>
-            artifact.Name == "mathblocks_formula_operations1.ocd");
+        var operationDictionary = profile.Artifacts.Single(artifact => string.Equals(artifact.Name, "mathblocks_formula_operations1.ocd", StringComparison.Ordinal));
         using (var stream = operationDictionary.OpenRead())
         {
             XNamespace contentDictionaryNamespace = "http://www.openmath.org/OpenMathCD";
@@ -107,12 +105,11 @@ public sealed class MathBlockFormulaInterchangeTests
             Assert.Equal(
                 MathBlockCatalog.Standard.Operations
                     .Select(operation => $"op.{operation.Identifier}.v{operation.Version}")
-                    .OrderBy(name => name, StringComparer.Ordinal),
-                names);
+                    .Order(StringComparer.Ordinal),
+                names, StringComparer.Ordinal);
         }
 
-        var dictionaryGroup = profile.Artifacts.Single(artifact =>
-            artifact.Name == "mathblocks_formula_profile1.cdg");
+        var dictionaryGroup = profile.Artifacts.Single(artifact => string.Equals(artifact.Name, "mathblocks_formula_profile1.cdg", StringComparison.Ordinal));
         using (var stream = dictionaryGroup.OpenRead())
         {
             XNamespace groupNamespace = "http://www.openmath.org/OpenMathCDG";
@@ -131,12 +128,13 @@ public sealed class MathBlockFormulaInterchangeTests
                 ],
                 document
                     .Descendants(groupNamespace + "CDGroupMember")
-                    .Select(member => member.Element(groupNamespace + "CDName")?.Value));
+                    .Select(member => member.Element(groupNamespace + "CDName")?.Value), StringComparer.Ordinal);
         }
     }
 
+    /// <summary>Verifies every operation round trips through every supported format.</summary>
     [Fact]
-    public void Every_operation_round_trips_through_every_supported_format()
+    public void EveryOperationRoundTripsThroughEverySupportedFormat()
     {
         Assert.Equal(337, MathBlockCatalog.Standard.Operations.Count);
         foreach (var operation in MathBlockCatalog.Standard.Operations)
@@ -156,7 +154,7 @@ public sealed class MathBlockFormulaInterchangeTests
                 var visibleImported = MathBlockFormulaInterchange.Import(
                     source,
                     format,
-                    new Dictionary<string, MathBlockType>(),
+                    new Dictionary<string, MathBlockType>(StringComparer.Ordinal),
                     "result");
 
                 Assert.Equal(program.Fingerprint, imported.Program.Fingerprint);
@@ -174,14 +172,15 @@ public sealed class MathBlockFormulaInterchangeTests
         }
     }
 
+    /// <summary>Verifies visible expression import accepts standard external formulas.</summary>
     [Fact]
-    public void Visible_expression_import_accepts_standard_external_formulas()
+    public void VisibleExpressionImportAcceptsStandardExternalFormulas()
     {
         const string mathMl =
             "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><apply><plus/><ci>x</ci><cn type=\"real\">2</cn></apply></math>";
         const string openMath =
             "<OMOBJ xmlns=\"http://www.openmath.org/OpenMath\"><OMA><OMS cd=\"arith1\" cdbase=\"http://www.openmath.org/cd\" name=\"plus\"/><OMV name=\"x\"/><OMF dec=\"2.0\"/></OMA></OMOBJ>";
-        var bindings = new Dictionary<string, MathBlockType>
+        var bindings = new Dictionary<string, MathBlockType>(StringComparer.Ordinal)
         {
             ["x"] = MathBlockType.Scalar()
         };
@@ -199,7 +198,7 @@ public sealed class MathBlockFormulaInterchangeTests
 
         foreach (var imported in new[] { fromMathMl, fromOpenMath })
         {
-            var result = imported.Program.Evaluate(new Dictionary<string, MathBlockValue>
+            var result = imported.Program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
             {
                 ["x"] = MathBlockValue.Scalar(3d)
             });
@@ -208,15 +207,16 @@ public sealed class MathBlockFormulaInterchangeTests
         }
     }
 
+    /// <summary>Verifies visible expression import folds standard associative applications.</summary>
     [Fact]
-    public void Visible_expression_import_folds_standard_associative_applications()
+    public void VisibleExpressionImportFoldsStandardAssociativeApplications()
     {
         const string mathMl =
             "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><apply><plus/><ci>x</ci><cn type=\"integer\">2</cn><cn type=\"double\">4.0</cn></apply></math>";
         var imported = MathBlockFormulaInterchange.Import(
             mathMl,
             MathBlockFormulaFormat.ContentMathMl,
-            new Dictionary<string, MathBlockType>
+            new Dictionary<string, MathBlockType>(StringComparer.Ordinal)
             {
                 ["x"] = MathBlockType.Scalar()
             },
@@ -224,23 +224,24 @@ public sealed class MathBlockFormulaInterchangeTests
 
         Assert.Equal(
             ["scalar.add@1", "scalar.add@1"],
-            imported.Operations.Select(operation => operation.Identity));
-        var result = imported.Program.Evaluate(new Dictionary<string, MathBlockValue>
+            imported.Operations.Select(operation => operation.Identity), StringComparer.Ordinal);
+        var result = imported.Program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
             ["x"] = MathBlockValue.Scalar(3d)
         });
         Assert.Equal(9d, result["result"].AsScalar());
     }
 
+    /// <summary>Verifies visible expression import accepts extensions sharing and encoded names.</summary>
     [Fact]
-    public void Visible_expression_import_accepts_extensions_sharing_and_encoded_names()
+    public void VisibleExpressionImportAcceptsExtensionsSharingAndEncodedNames()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var value = builder.Input("input value", MathBlockType.Scalar());
         var stable = builder.Apply("scalar.softplus", inputs: [value]);
         var sum = builder.Apply("scalar.add", inputs: [stable, stable]);
         var program = builder.Output("source", sum).Build();
-        var bindings = new Dictionary<string, MathBlockType>
+        var bindings = new Dictionary<string, MathBlockType>(StringComparer.Ordinal)
         {
             ["input value"] = MathBlockType.Scalar()
         };
@@ -257,10 +258,10 @@ public sealed class MathBlockFormulaInterchangeTests
             Assert.Equal("external result", imported.OutputName);
             Assert.Equal(
                 ["scalar.softplus@1", "scalar.add@1"],
-                imported.Operations.Select(operation => operation.Identity));
+                imported.Operations.Select(operation => operation.Identity), StringComparer.Ordinal);
             Assert.Equal(3, imported.Program.PlanNodes.Count);
             var expected = 2d * Math.Log(2d);
-            var result = imported.Program.Evaluate(new Dictionary<string, MathBlockValue>
+            var result = imported.Program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
             {
                 ["input value"] = MathBlockValue.Scalar(0d)
             });
@@ -268,8 +269,9 @@ public sealed class MathBlockFormulaInterchangeTests
         }
     }
 
+    /// <summary>Verifies visible expression import rejects missing bindings unknown symbols and mixed vocabularies.</summary>
     [Fact]
-    public void Visible_expression_import_rejects_missing_bindings_unknown_symbols_and_mixed_vocabularies()
+    public void VisibleExpressionImportRejectsMissingBindingsUnknownSymbolsAndMixedVocabularies()
     {
         const string missingBinding =
             "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><ci>x</ci></math>";
@@ -281,17 +283,17 @@ public sealed class MathBlockFormulaInterchangeTests
         Assert.Throws<FormatException>(() => MathBlockFormulaInterchange.Import(
             missingBinding,
             MathBlockFormulaFormat.ContentMathMl,
-            new Dictionary<string, MathBlockType>(),
+            new Dictionary<string, MathBlockType>(StringComparer.Ordinal),
             "result"));
         Assert.Throws<FormatException>(() => MathBlockFormulaInterchange.Import(
             unknownSymbol,
             MathBlockFormulaFormat.ContentMathMl,
-            new Dictionary<string, MathBlockType>(),
+            new Dictionary<string, MathBlockType>(StringComparer.Ordinal),
             "result"));
         Assert.Throws<FormatException>(() => MathBlockFormulaInterchange.Import(
             mixedVocabulary,
             MathBlockFormulaFormat.ContentMathMl,
-            new Dictionary<string, MathBlockType>(),
+            new Dictionary<string, MathBlockType>(StringComparer.Ordinal),
             "result"));
 
         var extensionBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
@@ -309,12 +311,13 @@ public sealed class MathBlockFormulaInterchangeTests
         Assert.Throws<FormatException>(() => MathBlockFormulaInterchange.Import(
             withoutDictionaryGroup,
             MathBlockFormulaFormat.ContentMathMl,
-            new Dictionary<string, MathBlockType>(),
+            new Dictionary<string, MathBlockType>(StringComparer.Ordinal),
             "result"));
     }
 
+    /// <summary>Verifies visible expression import uses the official base for ungrouped mathml symbols.</summary>
     [Fact]
-    public void Visible_expression_import_uses_the_official_base_for_ungrouped_mathml_symbols()
+    public void VisibleExpressionImportUsesTheOfficialBaseForUngroupedMathmlSymbols()
     {
         const string source =
             "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><apply><csymbol cd=\"arith1\">plus</csymbol><cn>1</cn><cn>2</cn></apply></math>";
@@ -322,17 +325,18 @@ public sealed class MathBlockFormulaInterchangeTests
         var imported = MathBlockFormulaInterchange.Import(
             source,
             MathBlockFormulaFormat.ContentMathMl,
-            new Dictionary<string, MathBlockType>(),
+            new Dictionary<string, MathBlockType>(StringComparer.Ordinal),
             "result");
 
         Assert.Equal(
             3d,
-            imported.Program.Evaluate(new Dictionary<string, MathBlockValue>())["result"]
+            imported.Program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal))["result"]
                 .AsScalar());
     }
 
+    /// <summary>Verifies visible expression import rejects foreign dictionary groups without an accepted base.</summary>
     [Fact]
-    public void Visible_expression_import_rejects_foreign_dictionary_groups_without_an_accepted_base()
+    public void VisibleExpressionImportRejectsForeignDictionaryGroupsWithoutAnAcceptedBase()
     {
         const string foreignGroup = "https://example.invalid/foreign.cdg";
         var openMath =
@@ -343,12 +347,12 @@ public sealed class MathBlockFormulaInterchangeTests
         Assert.Throws<FormatException>(() => MathBlockFormulaInterchange.Import(
             openMath,
             MathBlockFormulaFormat.OpenMath,
-            new Dictionary<string, MathBlockType>(),
+            new Dictionary<string, MathBlockType>(StringComparer.Ordinal),
             "result"));
         Assert.Throws<FormatException>(() => MathBlockFormulaInterchange.Import(
             mathMl,
             MathBlockFormulaFormat.ContentMathMl,
-            new Dictionary<string, MathBlockType>(),
+            new Dictionary<string, MathBlockType>(StringComparer.Ordinal),
             "result"));
 
         var openMathWithBase = openMath.Replace(
@@ -368,26 +372,27 @@ public sealed class MathBlockFormulaInterchangeTests
             var imported = MathBlockFormulaInterchange.Import(
                 item.Source,
                 item.Format,
-                new Dictionary<string, MathBlockType>(),
+                new Dictionary<string, MathBlockType>(StringComparer.Ordinal),
                 "result");
             Assert.Equal(
                 3d,
-                imported.Program.Evaluate(new Dictionary<string, MathBlockValue>())["result"]
+                imported.Program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal))["result"]
                     .AsScalar());
         }
     }
 
+    /// <summary>Verifies visible expression import bounds element and nesting amplification.</summary>
     [Theory]
     [InlineData(MathBlockFormulaFormat.OpenMath)]
     [InlineData(MathBlockFormulaFormat.ContentMathMl)]
-    public void Visible_expression_import_bounds_element_and_nesting_amplification(
+    public void VisibleExpressionImportBoundsElementAndNestingAmplification(
         MathBlockFormulaFormat format)
     {
         var elementException = Assert.Throws<FormatException>(() =>
             MathBlockFormulaInterchange.Import(
                 CreateWideFormula(format),
                 format,
-                new Dictionary<string, MathBlockType>(),
+                new Dictionary<string, MathBlockType>(StringComparer.Ordinal),
                 "result"));
         Assert.Equal(
             "The formula expression exceeds the element limit.",
@@ -397,15 +402,16 @@ public sealed class MathBlockFormulaInterchangeTests
             MathBlockFormulaInterchange.Import(
                 CreateDeepFormula(format),
                 format,
-                new Dictionary<string, MathBlockType>(),
+                new Dictionary<string, MathBlockType>(StringComparer.Ordinal),
                 "result"));
         Assert.Equal(
             "The formula expression exceeds the nesting limit.",
             nestingException.Message);
     }
 
+    /// <summary>Verifies official and extension symbols are visible in both vocabularies.</summary>
     [Fact]
-    public void Official_and_extension_symbols_are_visible_in_both_vocabularies()
+    public void OfficialAndExtensionSymbolsAreVisibleInBothVocabularies()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var left = builder.Input("left", MathBlockType.Scalar());
@@ -445,8 +451,9 @@ public sealed class MathBlockFormulaInterchangeTests
             StringComparison.Ordinal);
     }
 
+    /// <summary>Verifies selected output excludes unreachable nodes and preserves sharing.</summary>
     [Fact]
-    public void Selected_output_excludes_unreachable_nodes_and_preserves_sharing()
+    public void SelectedOutputExcludesUnreachableNodesAndPreservesSharing()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         _ = builder.Constant(MathBlockValue.Scalar(99d));
@@ -475,11 +482,12 @@ public sealed class MathBlockFormulaInterchangeTests
         Assert.Contains("<share src=\"#n2\"></share>", mathMl, StringComparison.Ordinal);
         Assert.DoesNotContain("4058C00000000000", mathMl, StringComparison.Ordinal);
         Assert.Equal(4, imported.Program.PlanNodes.Count);
-        Assert.Equal(["square"], imported.Program.Outputs.Keys);
+        Assert.Equal(["square"], imported.Program.Outputs.Keys, StringComparer.Ordinal);
     }
 
+    /// <summary>Verifies every value kind and binary 64 bits round trip in both formats.</summary>
     [Fact]
-    public void Every_value_kind_and_binary64_bits_round_trip_in_both_formats()
+    public void EveryValueKindAndBinary64BitsRoundTripInBothFormats()
     {
         var unit = new MathBlockUnit(
             new MathRational(1, 2),
@@ -544,8 +552,9 @@ public sealed class MathBlockFormulaInterchangeTests
             StringComparison.Ordinal);
     }
 
+    /// <summary>Verifies utf 8 buffer stream and async apis return the canonical document async.</summary>
     [Fact]
-    public async Task UTF8_buffer_stream_and_async_APIs_return_the_canonical_document()
+    public async Task UTF8BufferStreamAndAsyncAPIsReturnTheCanonicalDocumentAsync()
     {
         var program = CreateSampleProgram();
         foreach (var format in Formats)
@@ -611,8 +620,9 @@ public sealed class MathBlockFormulaInterchangeTests
         }
     }
 
+    /// <summary>Verifies import rejects visible annotation disagreement and dtds.</summary>
     [Fact]
-    public void Import_rejects_visible_annotation_disagreement_and_DTDs()
+    public void ImportRejectsVisibleAnnotationDisagreementAndDTDs()
     {
         var program = CreateSampleProgram();
         foreach (var format in Formats)
@@ -636,8 +646,9 @@ public sealed class MathBlockFormulaInterchangeTests
         }
     }
 
+    /// <summary>Verifies export rejects custom operations even when the identity is copied.</summary>
     [Fact]
-    public void Export_rejects_custom_operations_even_when_the_identity_is_copied()
+    public void ExportRejectsCustomOperationsEvenWhenTheIdentityIsCopied()
     {
         var operation = new MathBlockOperation(
             "scalar.add",

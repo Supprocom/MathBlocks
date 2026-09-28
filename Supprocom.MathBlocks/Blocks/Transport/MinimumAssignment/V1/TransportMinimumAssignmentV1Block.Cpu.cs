@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockTransport
 {
+    /// <summary>Computes the <c>transport.minimum-assignment@1</c> mathematical operation.</summary>
     public static double[] MinimumAssignment(MathBlockMatrix cost)
     {
+        ArgumentNullException.ThrowIfNull(cost);
         var size = cost.Rows;
         var stateCount = 1 << size;
         var values = MathBlockCollectionPrimitives.Repeat(Math.PositiveInfinity, stateCount);

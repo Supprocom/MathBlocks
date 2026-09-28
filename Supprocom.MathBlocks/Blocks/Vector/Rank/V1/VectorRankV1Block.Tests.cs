@@ -1,8 +1,10 @@
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Verifies the <c>vector.rank@1</c> operation contract.</summary>
 public sealed class VectorRankV1BlockTests
 {
+    /// <summary>Checks the <c>vector.rank@1</c> operation contract.</summary>
     [Fact]
     [Trait("Category", "BlockContract")]
-    public void Contract_is_valid() => MathBlockFeatureContractAssertions.Verify("vector.rank@1");
+    public void ContractIsValid() => MathBlockFeatureContractAssertions.Verify("vector.rank@1");
 }

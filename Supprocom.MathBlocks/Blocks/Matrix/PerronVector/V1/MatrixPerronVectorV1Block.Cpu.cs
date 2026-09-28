@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>matrix.perron-vector@1</c> mathematical operation.</summary>
     public static double[] PerronVector(MathBlockMatrix matrix, int iterations)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         var vector = MathBlockCollectionPrimitives.Repeat(1d / matrix.Rows, matrix.Rows);
         for (var iteration = 0; iteration < iterations; iteration++)
         {

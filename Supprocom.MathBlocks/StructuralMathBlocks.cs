@@ -4,8 +4,10 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockStructure
 {
 
+    /// <summary>Returns a copy of the sequence with a value appended.</summary>
     public static double[] Append(IReadOnlyList<double> values, double value)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var result = new double[values.Count + 1];
         for (var index = 0; index < values.Count; index++)
             result[index] = values[index];
@@ -13,8 +15,10 @@ public static partial class MathBlockStructure
         return result;
     }
 
+    /// <summary>Returns a copy of the sequence with a value prepended.</summary>
     public static double[] Prepend(double value, IReadOnlyList<double> values)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var result = new double[values.Count + 1];
         result[0] = value;
         for (var index = 0; index < values.Count; index++)
@@ -22,16 +26,20 @@ public static partial class MathBlockStructure
         return result;
     }
 
+    /// <summary>Copies one row from a matrix.</summary>
     public static double[] Row(MathBlockMatrix matrix, int row)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         var result = new double[matrix.Columns];
         for (var column = 0; column < matrix.Columns; column++)
             result[column] = matrix[row, column];
         return result;
     }
 
+    /// <summary>Copies one column from a matrix.</summary>
     public static double[] Column(MathBlockMatrix matrix, int column)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         var result = new double[matrix.Rows];
         for (var row = 0; row < matrix.Rows; row++)
             result[row] = matrix[row, column];

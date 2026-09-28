@@ -299,7 +299,3 @@ static void WriteSample(string sourcePath, string source)
     Directory.CreateDirectory(directory);
     File.WriteAllText(path, source, new UTF8Encoding(false));
 }
-
-internal sealed record SymbolDefinition(string Name, string Role, string Description);
-
-internal sealed record OfficialDictionaryMember(string Name, string Version);

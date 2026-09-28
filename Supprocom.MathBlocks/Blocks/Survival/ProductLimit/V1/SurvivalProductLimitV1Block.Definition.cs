@@ -1,4 +1,5 @@
 namespace Supprocom.MathBlocks;
+
 internal static partial class AdvancedMathBlocks
 {
     internal static class SurvivalProductLimitV1Block
@@ -20,8 +21,8 @@ internal static partial class AdvancedMathBlocks
             performanceIterations: 8);
 
         private static bool AreProductLimitInputsValid(
-            IReadOnlyList<double> events,
-            IReadOnlyList<double> atRisk)
+            Supprocom.MathBlocks.MathBlockVector events,
+            Supprocom.MathBlocks.MathBlockVector atRisk)
         {
             if (events.Count != atRisk.Count)
                 return false;

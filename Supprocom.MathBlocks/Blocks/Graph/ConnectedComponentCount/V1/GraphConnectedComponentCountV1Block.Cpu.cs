@@ -1,9 +1,13 @@
+using System.Runtime.InteropServices;
+
 namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockGraphMath
 {
+    /// <summary>Computes the <c>graph.connected-component-count@1</c> mathematical operation.</summary>
     public static int ConnectedComponentCount(MathBlockGraph graph)
     {
+        ArgumentNullException.ThrowIfNull(graph);
         var adjacency = CreateUndirectedAdjacency(graph);
         var visited = new bool[graph.VertexCount];
         var components = 0;
@@ -20,7 +24,7 @@ public static partial class MathBlockGraphMath
             while (head < tail)
             {
                 var vertex = queue[head++];
-                foreach (var neighbor in adjacency[vertex])
+                foreach (ref readonly var neighbor in CollectionsMarshal.AsSpan(adjacency[vertex]))
                 {
                     if (visited[neighbor])
                         continue;

@@ -1,8 +1,10 @@
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Verifies the <c>matrix.gram@1</c> operation contract.</summary>
 public sealed class MatrixGramV1BlockTests
 {
+    /// <summary>Checks the <c>matrix.gram@1</c> operation contract.</summary>
     [Fact]
     [Trait("Category", "BlockContract")]
-    public void Contract_is_valid() => MathBlockFeatureContractAssertions.Verify("matrix.gram@1");
+    public void ContractIsValid() => MathBlockFeatureContractAssertions.Verify("matrix.gram@1");
 }

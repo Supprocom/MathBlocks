@@ -3,6 +3,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>inequality.lorenz-curve@1</c> mathematical operation.</summary>
     public static double[] LorenzCurve(IReadOnlyList<double> values)
     {
         var sorted = MathBlockCollectionPrimitives.SortedCopy(

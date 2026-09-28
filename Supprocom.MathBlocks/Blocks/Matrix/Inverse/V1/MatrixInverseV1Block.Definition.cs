@@ -1,4 +1,5 @@
 namespace Supprocom.MathBlocks;
+
 internal static partial class MatrixMathBlocks
 {
     internal static class MatrixInverseV1Block

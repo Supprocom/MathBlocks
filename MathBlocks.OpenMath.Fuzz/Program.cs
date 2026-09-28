@@ -137,8 +137,7 @@ static void ExerciseFormulaInterchange(byte[] source)
                 format);
             Require(canonical.AsSpan().SequenceEqual(source));
             Require(
-                MathBlockFormulaInterchange.ImportUtf8(canonical, format).Program.Fingerprint ==
-                result.Program.Fingerprint);
+string.Equals(MathBlockFormulaInterchange.ImportUtf8(canonical, format).Program.Fingerprint, result.Program.Fingerprint, StringComparison.Ordinal));
         }
     }
 }
@@ -150,7 +149,7 @@ static void ExerciseVisibleFormulaUtf8(byte[] source, MathBlockFormulaFormat for
         var result = MathBlockFormulaInterchange.ImportUtf8(
             source,
             format,
-            new Dictionary<string, MathBlockType>(),
+            new Dictionary<string, MathBlockType>(StringComparer.Ordinal),
             "result");
         CheckVisibleFormulaResult(result, format);
     }
@@ -166,7 +165,7 @@ static void ExerciseVisibleFormulaText(string source, MathBlockFormulaFormat for
         var result = MathBlockFormulaInterchange.Import(
             source,
             format,
-            new Dictionary<string, MathBlockType>(),
+            new Dictionary<string, MathBlockType>(StringComparer.Ordinal),
             "result");
         CheckVisibleFormulaResult(result, format);
     }
@@ -184,7 +183,7 @@ static void CheckVisibleFormulaResult(
         result.OutputName,
         format);
     var exact = MathBlockFormulaInterchange.Import(canonical, format);
-    Require(exact.Program.Fingerprint == result.Program.Fingerprint);
+    Require(string.Equals(exact.Program.Fingerprint, result.Program.Fingerprint, StringComparison.Ordinal));
 }
 
 static MathBlockOpenMathImportOptions CreateOptions() => new()
@@ -217,7 +216,7 @@ static void CheckEquivalent(
     Require(expected.Succeeded == actual.Succeeded);
     if (expected.Succeeded)
     {
-        Require(expected.Result!.Program.Fingerprint == actual.Result!.Program.Fingerprint);
+        Require(string.Equals(expected.Result!.Program.Fingerprint, actual.Result!.Program.Fingerprint, StringComparison.Ordinal));
         Require(expected.Result.Operations.Count == actual.Result.Operations.Count);
         Require(
             expected.Result.OperationOccurrences.Count ==
@@ -237,8 +236,8 @@ static void CheckFormulaEquivalent(
     Require(expected.Succeeded == actual.Succeeded);
     if (expected.Succeeded)
     {
-        Require(expected.Result!.Program.Fingerprint == actual.Result!.Program.Fingerprint);
-        Require(expected.Result.OutputName == actual.Result.OutputName);
+        Require(string.Equals(expected.Result!.Program.Fingerprint, actual.Result!.Program.Fingerprint, StringComparison.Ordinal));
+        Require(string.Equals(expected.Result.OutputName, actual.Result.OutputName, StringComparison.Ordinal));
         Require(expected.Result.Format == actual.Result.Format);
     }
     else
@@ -281,15 +280,4 @@ static void Require(bool condition)
 {
     if (!condition)
         throw new InvalidOperationException("A notation fuzz invariant failed.");
-}
-
-sealed class ByteSegment : ReadOnlySequenceSegment<byte>
-{
-    public ByteSegment(ReadOnlyMemory<byte> memory) => Memory = memory;
-
-    public void Append(ByteSegment segment)
-    {
-        segment.RunningIndex = RunningIndex + Memory.Length;
-        Next = segment;
-    }
 }

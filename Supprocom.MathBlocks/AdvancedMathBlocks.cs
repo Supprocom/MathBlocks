@@ -1,6 +1,7 @@
 
 namespace Supprocom.MathBlocks;
 
+/// <summary>Defines the Math Block Advanced contract.</summary>
 public static partial class MathBlockAdvanced
 {
 
@@ -55,13 +56,13 @@ public static partial class MathBlockAdvanced
 
     private static MathBlockMatrix Submatrix(
         MathBlockMatrix matrix,
-        IReadOnlyList<int> rows,
-        IReadOnlyList<int> columns)
+        int[] rows,
+        int[] columns)
     {
-        var values = new double[rows.Count * columns.Count];
-        for (var row = 0; row < rows.Count; row++)
-            for (var column = 0; column < columns.Count; column++)
-                values[row * columns.Count + column] = matrix[rows[row], columns[column]];
-        return new MathBlockMatrix(rows.Count, columns.Count, values, true);
+        var values = new double[rows.Length * columns.Length];
+        for (var row = 0; row < rows.Length; row++)
+            for (var column = 0; column < columns.Length; column++)
+                values[row * columns.Length + column] = matrix[rows[row], columns[column]];
+        return new MathBlockMatrix(rows.Length, columns.Length, values, true);
     }
 }

@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockVectorMath
 {
+    /// <summary>Computes the <c>vector.rank@1</c> mathematical operation.</summary>
     public static double[] Rank(IReadOnlyList<double> values)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var indexed = MathBlockCollectionPrimitives.SortedIndices(
             values,
             MathBlockCollectionPrimitives.CompareDoubleAscending);

@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>order.isotonic-regression@1</c> mathematical operation.</summary>
     public static double[] IsotonicRegression(IReadOnlyList<double> values)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var means = new double[values.Count];
         var weights = new int[values.Count];
         var starts = new int[values.Count];

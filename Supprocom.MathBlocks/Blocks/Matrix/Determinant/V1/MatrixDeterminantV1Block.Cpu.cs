@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockLinearAlgebra
 {
+    /// <summary>Computes the <c>matrix.determinant@1</c> mathematical operation.</summary>
     public static double Determinant(MathBlockMatrix matrix)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         var values = matrix.ToArray();
         var size = matrix.Rows;
         var determinant = 1d;

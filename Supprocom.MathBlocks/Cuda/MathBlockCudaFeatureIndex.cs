@@ -1,22 +1,5 @@
 namespace Supprocom.MathBlocks.Cuda;
 
-internal enum MathBlockCudaFamily
-{
-    Advanced,
-    Complex,
-    Geometry,
-    Graph,
-    Matrix,
-    Probability,
-    Scalar,
-    SequencePath,
-    Statistics,
-    Transport,
-    Vector,
-}
-
-internal readonly record struct MathBlockCudaFeature(string Identity, MathBlockCudaFamily Family, int Opcode);
-
 internal static class MathBlockCudaFeatureIndex
 {
     internal static IReadOnlyCollection<string> SupportedIdentities { get; } =

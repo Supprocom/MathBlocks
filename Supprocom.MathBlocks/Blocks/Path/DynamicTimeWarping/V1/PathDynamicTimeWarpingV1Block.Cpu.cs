@@ -3,8 +3,11 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockPath
 {
+    /// <summary>Computes the <c>path.dynamic-time-warping@1</c> mathematical operation.</summary>
     public static double DynamicTimeWarpingDistance(IReadOnlyList<double> left, IReadOnlyList<double> right)
     {
+        ArgumentNullException.ThrowIfNull(left);
+        ArgumentNullException.ThrowIfNull(right);
         var previous = MathBlockCollectionPrimitives.Repeat(
             Math.PositiveInfinity,
             right.Count + 1);

@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockVectorMath
 {
+    /// <summary>Computes the <c>vector.cumulative-product@1</c> mathematical operation.</summary>
     public static double[] CumulativeProduct(IReadOnlyList<double> values)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var result = new double[values.Count];
         var product = 1d;
         for (var index = 0; index < values.Count; index++)

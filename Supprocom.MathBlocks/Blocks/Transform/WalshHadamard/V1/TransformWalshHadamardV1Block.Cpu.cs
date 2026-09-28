@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>transform.walsh-hadamard@1</c> mathematical operation.</summary>
     public static double[] WalshHadamard(IReadOnlyList<double> values)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var result = MathBlockCollectionPrimitives.Copy(values);
         for (var width = 1; width < result.Length; width *= 2)
         {

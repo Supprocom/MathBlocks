@@ -17,7 +17,7 @@ internal static class MathBlockFeatureContractAssertions
         Assert.NotEmpty(operation.PerformanceCase.Inputs);
         Assert.InRange(operation.PerformanceCase.MaximumWarmLatencyMicroseconds, double.Epsilon, 1_000d);
         Assert.Equal(operation.Arity, operation.PerformanceCase.Inputs.Count);
-        Assert.Contains(identity, Cuda.MathBlocksCUDAWorker.SupportedBlockIdentities);
+        Assert.Contains(identity, Cuda.MathBlocksCUDAWorker.SupportedBlockIdentities, StringComparer.Ordinal);
 
         foreach (var regression in operation.RegressionCases)
         {

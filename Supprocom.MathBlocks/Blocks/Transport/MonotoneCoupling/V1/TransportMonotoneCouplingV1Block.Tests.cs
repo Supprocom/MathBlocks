@@ -1,8 +1,10 @@
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Verifies the <c>transport.monotone-coupling@1</c> operation contract.</summary>
 public sealed class TransportMonotoneCouplingV1BlockTests
 {
+    /// <summary>Checks the <c>transport.monotone-coupling@1</c> operation contract.</summary>
     [Fact]
     [Trait("Category", "BlockContract")]
-    public void Contract_is_valid() => MathBlockFeatureContractAssertions.Verify("transport.monotone-coupling@1");
+    public void ContractIsValid() => MathBlockFeatureContractAssertions.Verify("transport.monotone-coupling@1");
 }

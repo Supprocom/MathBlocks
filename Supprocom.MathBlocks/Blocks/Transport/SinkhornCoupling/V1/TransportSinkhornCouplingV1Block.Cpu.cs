@@ -2,8 +2,12 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockTransport
 {
+    /// <summary>Computes the <c>transport.sinkhorn-coupling@1</c> mathematical operation.</summary>
     public static MathBlockMatrix SinkhornCoupling(MathBlockMatrix cost, IReadOnlyList<double> leftMass, IReadOnlyList<double> rightMass, double regularization, int iterations)
     {
+        ArgumentNullException.ThrowIfNull(cost);
+        ArgumentNullException.ThrowIfNull(leftMass);
+        ArgumentNullException.ThrowIfNull(rightMass);
         var rows = cost.Rows;
         var columns = cost.Columns;
         var kernel = new double[rows * columns];

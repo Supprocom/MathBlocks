@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockGeometry
 {
+    /// <summary>Computes the <c>geometry.contains-point@1</c> mathematical operation.</summary>
     public static bool ContainsPoint(IReadOnlyList<MathBlockPoint> polygon, MathBlockPoint point)
     {
+        ArgumentNullException.ThrowIfNull(polygon);
         var inside = false;
         for (var current = 0; current < polygon.Count; current++)
         {

@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockPath
 {
+    /// <summary>Computes the <c>path.run-length-encode@1</c> mathematical operation.</summary>
     public static MathBlockRunSet RunLengthEncode(IReadOnlyList<double> values)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var runs = new List<MathBlockRun>();
         if (values.Count == 0)
             return new MathBlockRunSet(runs);

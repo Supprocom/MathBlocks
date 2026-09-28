@@ -2,6 +2,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockScalar
 {
+    /// <summary>Computes the <c>scalar.cube-root@1</c> mathematical operation.</summary>
     public static double CubeRoot(double value)
     {
         if (value == 0d)

@@ -1,4 +1,5 @@
 namespace Supprocom.MathBlocks;
+
 internal static partial class GraphMathBlocks
 {
     internal static class GraphHodgePotentialV1Block

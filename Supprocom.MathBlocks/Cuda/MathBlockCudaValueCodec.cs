@@ -1,20 +1,11 @@
-using System.Runtime.InteropServices;
-
 namespace Supprocom.MathBlocks.Cuda;
 
-public readonly record struct MathBlockCudaValueCodecSchema(
-    int Version,
-    string Definition)
-{
-    public string Fingerprint => MathBlockCudaContractHash.Create(
-        "mathblocks-cuda-value-codec-schema\n" +
-        Version.ToString(System.Globalization.CultureInfo.InvariantCulture) + "\n" +
-        Definition + "\n");
-}
-
+/// <summary>Defines the Math Block Cuda Value Codec contract.</summary>
 public static class MathBlockCudaValueCodec
 {
+    /// <summary>Gets the schema version value.</summary>
     public const int SchemaVersion = 1;
+    /// <summary>Gets the schema definition value.</summary>
     public const string SchemaDefinition = """
         byte-order=little-endian
         slot=scalar:f64,data:u64,scratch:u64,boolean:i32,valid:i32,rows:i32,columns:i32,count:i32,capacity:i32
@@ -35,18 +26,21 @@ public static class MathBlockCudaValueCodec
         capacity=count-must-not-exceed-capacity
         """;
 
+    /// <summary>Gets the schema value.</summary>
     public static MathBlockCudaValueCodecSchema Schema { get; } =
         new(SchemaVersion, SchemaDefinition);
 
+    /// <summary>Gets the schema fingerprint value.</summary>
     public static string SchemaFingerprint => Schema.Fingerprint;
 
+    /// <summary>Gets the implementation fingerprint value.</summary>
     public static string ImplementationFingerprint { get; } =
         MathBlockCudaContractHash.CreateImplementation(typeof(MathBlockCudaValueCodec));
 
+    /// <summary>Computes the device payload size for a value kind and capacity.</summary>
     public static unsafe int GetPayloadByteCount(MathBlockValueKind kind, int capacity)
     {
-        if (capacity < 0)
-            throw new ArgumentOutOfRangeException(nameof(capacity));
+        ArgumentOutOfRangeException.ThrowIfNegative(capacity);
         return kind switch
         {
             MathBlockValueKind.Scalar or MathBlockValueKind.Boolean => 0,
@@ -64,6 +58,7 @@ public static class MathBlockCudaValueCodec
         };
     }
 
+    /// <summary>Gets the number of elements encoded by a typed value.</summary>
     public static int GetElementCount(MathBlockValue value) => value.Type.Kind switch
     {
         MathBlockValueKind.Scalar or MathBlockValueKind.Boolean => 0,
@@ -81,6 +76,7 @@ public static class MathBlockCudaValueCodec
             $"The CUDA value ABI does not support '{value.Type.Kind}'.")
     };
 
+    /// <summary>Writes a formula or typed MathBlocks program in the selected interchange format.</summary>
     public static unsafe void WriteHeader(
         IntPtr arena,
         int slotOffset,
@@ -92,8 +88,7 @@ public static class MathBlockCudaValueCodec
     {
         RequireArena(arena);
         RequireOffset(slotOffset, nameof(slotOffset));
-        if (capacity < 0)
-            throw new ArgumentOutOfRangeException(nameof(capacity));
+        ArgumentOutOfRangeException.ThrowIfNegative(capacity);
         var slot = new MathBlockCudaSlotDescriptor
         {
             DataPointer = payloadPointer,
@@ -113,6 +108,7 @@ public static class MathBlockCudaValueCodec
         *(MathBlockCudaSlotDescriptor*)((byte*)arena + slotOffset) = slot;
     }
 
+    /// <summary>Writes a formula or typed MathBlocks program in the selected interchange format.</summary>
     public static unsafe void WriteValue(
         IntPtr arena,
         int slotOffset,
@@ -124,8 +120,7 @@ public static class MathBlockCudaValueCodec
     {
         RequireArena(arena);
         RequireOffset(slotOffset, nameof(slotOffset));
-        if (capacity < 0)
-            throw new ArgumentOutOfRangeException(nameof(capacity));
+        ArgumentOutOfRangeException.ThrowIfNegative(capacity);
         var count = value.IsValid ? GetElementCount(value) : 0;
         if (count > capacity)
         {
@@ -157,6 +152,7 @@ public static class MathBlockCudaValueCodec
         *(MathBlockCudaSlotDescriptor*)((byte*)arena + slotOffset) = slot;
     }
 
+    /// <summary>Reads a formula or typed MathBlocks program from the supplied document.</summary>
     public static unsafe MathBlockValue ReadValue(
         IntPtr arena,
         int slotOffset,
@@ -232,8 +228,8 @@ public static class MathBlockCudaValueCodec
                 var source = value.AsMatrix();
                 var index = 0;
                 for (var row = 0; row < source.Rows; row++)
-                for (var column = 0; column < source.Columns; column++)
-                    destination[index++] = source[row, column];
+                    for (var column = 0; column < source.Columns; column++)
+                        destination[index++] = source[row, column];
             }
         }
         else if (value.Type.Kind == MathBlockValueKind.BooleanVector)
@@ -268,13 +264,13 @@ public static class MathBlockCudaValueCodec
                 var source = value.AsComplexMatrix();
                 var index = 0;
                 for (var row = 0; row < source.Rows; row++)
-                for (var column = 0; column < source.Columns; column++)
-                {
-                    var item = source[row, column];
-                    destination[index * 2] = item.Real;
-                    destination[index * 2 + 1] = item.Imaginary;
-                    index++;
-                }
+                    for (var column = 0; column < source.Columns; column++)
+                    {
+                        var item = source[row, column];
+                        destination[index * 2] = item.Real;
+                        destination[index * 2 + 1] = item.Imaginary;
+                        index++;
+                    }
             }
         }
         else if (value.Type.Kind == MathBlockValueKind.PointSet)

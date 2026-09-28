@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockGraphMath
 {
+    /// <summary>Computes the <c>graph.hodge-potential@1</c> mathematical operation.</summary>
     public static bool TryHodgePotential(MathBlockGraph graph, out double[] potential)
     {
+        ArgumentNullException.ThrowIfNull(graph);
         potential = new double[graph.VertexCount];
         if (graph.VertexCount == 1)
             return true;

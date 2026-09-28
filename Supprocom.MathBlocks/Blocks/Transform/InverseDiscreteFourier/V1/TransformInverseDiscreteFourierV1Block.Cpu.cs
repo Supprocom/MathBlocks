@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockPath
 {
+    /// <summary>Computes the <c>transform.inverse-discrete-fourier@1</c> mathematical operation.</summary>
     public static Complex[] InverseDiscreteFourierTransform(IReadOnlyList<Complex> values)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var result = new Complex[values.Count];
         for (var index = 0; index < values.Count; index++)
         {

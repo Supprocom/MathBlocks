@@ -1,116 +1,7 @@
-using System.Diagnostics;
 using System.Reflection;
 using System.Security.Cryptography;
 
 namespace Supprocom.MathBlocks;
-
-/// <summary>Describes one standard operation in OpenMath Profile 1.</summary>
-[DebuggerDisplay("{Operation.Identity}: {Symbol.Dictionary}:{Symbol.Name}")]
-public sealed class MathBlockOpenMathOperationDefinition
-{
-    internal MathBlockOpenMathOperationDefinition(
-        MathBlockOperation operation,
-        MathBlockOpenMathOperationSymbol symbol)
-    {
-        Operation = operation;
-        Symbol = symbol;
-    }
-
-    /// <summary>Gets the exact standard operation instance.</summary>
-    public MathBlockOperation Operation { get; }
-
-    /// <summary>Gets the operation identity.</summary>
-    public string Identity => Operation.Identity;
-
-    /// <summary>Gets the operation arity.</summary>
-    public int Arity => Operation.Arity;
-
-    /// <summary>Gets the Profile 1 symbol.</summary>
-    public MathBlockOpenMathOperationSymbol Symbol { get; }
-}
-
-/// <summary>Describes one embedded Profile 1 artifact.</summary>
-[DebuggerDisplay("{PackagePath}, {Length} bytes")]
-public sealed class MathBlockOpenMathProfileArtifact
-{
-    private readonly byte[] content;
-
-    internal MathBlockOpenMathProfileArtifact(
-        string name,
-        int length,
-        string sha256,
-        bool isNormative,
-        byte[] content)
-    {
-        Name = name;
-        PackagePath = string.Concat("openmath/v1/", name);
-        Length = length;
-        Sha256 = sha256;
-        IsNormative = isNormative;
-        this.content = content;
-    }
-
-    /// <summary>Gets the artifact file name.</summary>
-    public string Name { get; }
-
-    /// <summary>Gets the package-relative artifact path.</summary>
-    public string PackagePath { get; }
-
-    /// <summary>Gets the exact byte length.</summary>
-    public int Length { get; }
-
-    /// <summary>Gets the uppercase SHA-256 value.</summary>
-    public string Sha256 { get; }
-
-    /// <summary>Gets a value that identifies a normative artifact.</summary>
-    public bool IsNormative { get; }
-
-    /// <summary>Opens a new read-only stream for the exact artifact bytes.</summary>
-    public Stream OpenRead() => new MemoryStream(content, 0, content.Length, false, false);
-}
-
-/// <summary>Describes the immutable MathBlocks OpenMath Profile 1.</summary>
-[DebuggerDisplay("Profile {ProfileVersion}, {Operations.Count} operations")]
-public sealed class MathBlockOpenMathProfileDescriptor
-{
-    internal MathBlockOpenMathProfileDescriptor(
-        IReadOnlyList<MathBlockOpenMathOperationDefinition> operations,
-        IReadOnlyList<MathBlockOpenMathProfileArtifact> artifacts)
-    {
-        StandardVersion = MathBlockOpenMath.StandardVersion;
-        ProfileVersion = MathBlockOpenMath.ProfileVersion;
-        MediaType = MathBlockOpenMath.MediaType;
-        CanonicalizationAlgorithm = MathBlockOpenMath.CanonicalizationAlgorithm;
-        ContentDictionaryBase = MathBlockOpenMath.ContentDictionaryBase;
-        ContentDictionaryGroup = MathBlockOpenMath.ContentDictionaryGroup;
-        Operations = Array.AsReadOnly(MathBlockCollectionPrimitives.Copy(operations));
-        Artifacts = Array.AsReadOnly(MathBlockCollectionPrimitives.Copy(artifacts));
-    }
-
-    /// <summary>Gets the OpenMath standard version.</summary>
-    public string StandardVersion { get; }
-
-    /// <summary>Gets the MathBlocks profile version.</summary>
-    public string ProfileVersion { get; }
-
-    /// <summary>Gets the OpenMath XML media type.</summary>
-    public string MediaType { get; }
-
-    /// <summary>Gets the canonicalization algorithm URI.</summary>
-    public string CanonicalizationAlgorithm { get; }
-
-    /// <summary>Gets the fixed content dictionary base URI.</summary>
-    public string ContentDictionaryBase { get; }
-
-    /// <summary>Gets the fixed content dictionary group URI.</summary>
-    public string ContentDictionaryGroup { get; }
-
-    /// <summary>Gets operation definitions in standard catalog order.</summary>
-    public IReadOnlyList<MathBlockOpenMathOperationDefinition> Operations { get; }
-
-    /// <summary>Gets all embedded Profile 1 artifacts.</summary>
-    public IReadOnlyList<MathBlockOpenMathProfileArtifact> Artifacts { get; }
-}
 
 public static partial class MathBlockOpenMath
 {
@@ -140,7 +31,7 @@ public static partial class MathBlockOpenMath
         out MathBlockOperation? operation)
     {
         operation = null;
-        if (symbol.Dictionary != OperationDictionary || string.IsNullOrEmpty(symbol.Name))
+        if (!string.Equals(symbol.Dictionary, OperationDictionary, StringComparison.Ordinal) || string.IsNullOrEmpty(symbol.Name))
             return false;
         return StandardProfile.Value.OperationSymbols.TryGetValue(symbol.Name, out operation);
     }
@@ -192,7 +83,7 @@ public static partial class MathBlockOpenMath
         var content = new byte[authority.Length];
         stream.ReadExactly(content);
         if (stream.ReadByte() != -1 ||
-            Convert.ToHexString(SHA256.HashData(content)) != authority.Sha256)
+!string.Equals(Convert.ToHexString(SHA256.HashData(content)), authority.Sha256, StringComparison.Ordinal))
         {
             throw new InvalidOperationException("An embedded OpenMath profile artifact is invalid.");
         }

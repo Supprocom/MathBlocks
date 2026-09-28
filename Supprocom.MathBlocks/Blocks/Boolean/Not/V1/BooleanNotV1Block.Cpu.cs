@@ -1,4 +1,5 @@
 namespace Supprocom.MathBlocks;
+
 internal static partial class ScalarMathBlocks
 {
     internal static class BooleanNotV1BlockCpu

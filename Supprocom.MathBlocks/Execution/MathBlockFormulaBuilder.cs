@@ -1,20 +1,24 @@
 namespace Supprocom.MathBlocks;
 
+/// <summary>Defines the Math Block Formula Builder contract.</summary>
 public sealed class MathBlockFormulaBuilder
 {
     private readonly MathBlockRegistry registry;
     private readonly Dictionary<string, FormulaNode> nodes = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> outputs = new(StringComparer.Ordinal);
 
+    /// <summary>Creates a named-node formula builder using the supplied registry.</summary>
     public MathBlockFormulaBuilder(MathBlockRegistry registry) =>
         this.registry = registry ?? throw new ArgumentNullException(nameof(registry));
 
+    /// <summary>Adds a typed named input node.</summary>
     public MathBlockFormulaBuilder Input(string nodeName, MathBlockType type)
     {
         AddNode(FormulaNode.Input(RequireName(nodeName, nameof(nodeName)), type));
         return this;
     }
 
+    /// <summary>Adds a named constant node.</summary>
     public MathBlockFormulaBuilder Constant(string nodeName, MathBlockValue value)
     {
         if (!value.IsValid)
@@ -23,6 +27,7 @@ public sealed class MathBlockFormulaBuilder
         return this;
     }
 
+    /// <summary>Adds a named operation node over existing nodes.</summary>
     public MathBlockFormulaBuilder Block(
         string nodeName,
         string identifier,
@@ -37,6 +42,7 @@ public sealed class MathBlockFormulaBuilder
         return this;
     }
 
+    /// <summary>Exposes an existing node as a named output.</summary>
     public MathBlockFormulaBuilder Output(string outputName, string nodeName)
     {
         outputName = RequireName(outputName, nameof(outputName));
@@ -46,6 +52,7 @@ public sealed class MathBlockFormulaBuilder
         return this;
     }
 
+    /// <summary>Validates and freezes the named-node formula.</summary>
     public MathBlockProgram Build()
     {
         if (outputs.Count == 0)

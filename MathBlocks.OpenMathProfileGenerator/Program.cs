@@ -264,5 +264,3 @@ static void WriteSample(string sourcePath, MathBlockProgram program)
     Directory.CreateDirectory(directory);
     File.WriteAllText(path, MathBlockOpenMath.Export(program), new UTF8Encoding(false));
 }
-
-internal sealed record SymbolDefinition(string Name, string Role, string Description);

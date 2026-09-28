@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockVectorMath
 {
+    /// <summary>Computes the <c>vector.standardize@1</c> mathematical operation.</summary>
     public static double[] Standardize(IReadOnlyList<double> values)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var mean = Mean(values);
         var variance = 0d;
         for (var index = 0; index < values.Count; index++)

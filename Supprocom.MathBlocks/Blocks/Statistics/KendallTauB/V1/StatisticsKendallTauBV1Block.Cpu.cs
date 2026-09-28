@@ -2,8 +2,11 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockStatistics
 {
+    /// <summary>Computes the <c>statistics.kendall-tau-b@1</c> mathematical operation.</summary>
     public static double KendallTauB(IReadOnlyList<double> left, IReadOnlyList<double> right)
     {
+        ArgumentNullException.ThrowIfNull(left);
+        ArgumentNullException.ThrowIfNull(right);
         long concordant = 0;
         long discordant = 0;
         long leftTies = 0;

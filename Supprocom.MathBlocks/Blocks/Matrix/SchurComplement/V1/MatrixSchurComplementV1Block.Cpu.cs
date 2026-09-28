@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>matrix.schur-complement@1</c> mathematical operation.</summary>
     public static MathBlockMatrix SchurComplement(MathBlockMatrix matrix, int retainedSize)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         var eliminatedSize = matrix.Rows - retainedSize;
         var leading = new double[retainedSize * retainedSize];
         var upper = new double[retainedSize * eliminatedSize];

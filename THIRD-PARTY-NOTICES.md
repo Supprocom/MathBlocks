@@ -1,7 +1,7 @@
 # Third-party dependency notices
 
 This document records the dependency identities reviewed for MathBlocks through
-September 24, 2026. It does not replace the applicable license text.
+September 28, 2026. It does not replace the applicable license text.
 
 The `AGPL-3.0-only` license applies to MathBlocks source. It does not change any
 third-party license.
@@ -19,6 +19,20 @@ That package and its Microsoft.CodeAnalysis dependency use MIT terms.
 The MathBlocks build invokes the translator before production compilation. The
 MathBlocks runtime package does not contain or depend on the translator or
 Roslyn assemblies.
+
+## Build-only analyzer packages
+
+The repository pins [Meziantou.Analyzer 3.0.290](https://www.nuget.org/packages/Meziantou.Analyzer/3.0.290),
+[Microsoft.VisualStudio.Threading.Analyzers 18.7.23](https://www.nuget.org/packages/Microsoft.VisualStudio.Threading.Analyzers/18.7.23),
+[Microsoft.CodeAnalysis.BannedApiAnalyzers 5.6.0](https://www.nuget.org/packages/Microsoft.CodeAnalysis.BannedApiAnalyzers/5.6.0),
+[Microsoft.CodeAnalysis.PublicApiAnalyzers 5.6.0](https://www.nuget.org/packages/Microsoft.CodeAnalysis.PublicApiAnalyzers/5.6.0),
+and [NetFabric.Hyperlinq.Analyzer 2.3.0](https://www.nuget.org/packages/NetFabric.Hyperlinq.Analyzer/2.3.0)
+under MIT terms. The Hyperlinq package carries an MIT `LICENSE` file.
+
+[Roslynator.Analyzers 5.0.0](https://www.nuget.org/packages/Roslynator.Analyzers/5.0.0)
+and test-only [xunit.analyzers 2.1.0](https://www.nuget.org/packages/xunit.analyzers/2.1.0)
+use Apache-2.0 terms. All seven are build/test-only analyzer references with
+`PrivateAssets=all`; none is a MathBlocks runtime package dependency.
 
 ## Production project on Windows
 

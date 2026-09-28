@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>polynomial.bernstein-evaluate@1</c> mathematical operation.</summary>
     public static double BernsteinEvaluate(IReadOnlyList<double> coefficients, double parameter)
     {
+        ArgumentNullException.ThrowIfNull(coefficients);
         var degree = coefficients.Count - 1;
         var result = 0d;
         for (var index = 0; index <= degree; index++)

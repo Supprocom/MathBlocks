@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockGeometry
 {
+    /// <summary>Computes the <c>geometry.halfspace-depth@1</c> mathematical operation.</summary>
     public static double HalfspaceDepth(IReadOnlyList<MathBlockPoint> sample, MathBlockPoint point)
     {
+        ArgumentNullException.ThrowIfNull(sample);
         if (sample.Count == 0)
             return Math.NaN;
         var coincident = 0;

@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockLinearAlgebra
 {
+    /// <summary>Computes the <c>matrix.rank@1</c> mathematical operation.</summary>
     public static int Rank(MathBlockMatrix matrix)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         var values = matrix.ToArray();
         var rank = 0;
         var pivotColumn = 0;

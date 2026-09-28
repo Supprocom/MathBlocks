@@ -3,6 +3,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockComplex
 {
+    /// <summary>Computes the <c>complex.square-root@1</c> mathematical operation.</summary>
     public static Complex SquareRoot(Complex value)
     {
         if (value.Real == 0d && value.Imaginary == 0d)

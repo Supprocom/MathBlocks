@@ -2,6 +2,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockScalar
 {
+    /// <summary>Computes the <c>special.error-function@1</c> mathematical operation.</summary>
     public static double ErrorFunction(double value)
     {
         if (value == 0d)

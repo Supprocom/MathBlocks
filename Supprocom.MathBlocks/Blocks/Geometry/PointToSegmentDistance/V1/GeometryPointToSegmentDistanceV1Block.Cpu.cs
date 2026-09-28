@@ -2,6 +2,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockGeometry
 {
+    /// <summary>Computes the <c>geometry.point-to-segment-distance@1</c> mathematical operation.</summary>
     public static double PointToSegmentDistance(MathBlockPoint point, MathBlockPoint start, MathBlockPoint end)
     {
         var x = end.X - start.X;

@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockPath
 {
+    /// <summary>Computes the <c>path.lead-lag-transform@1</c> mathematical operation.</summary>
     public static MathBlockMatrix LeadLagTransform(IReadOnlyList<double> values)
     {
+        ArgumentNullException.ThrowIfNull(values);
         if (values.Count == 1)
             return new MathBlockMatrix(1, 2, [values[0], values[0]]);
         var result = new double[(2 * values.Count - 1) * 2];

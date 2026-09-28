@@ -2,5 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockVectorMath
 {
-    public static double[] SquareRoot(IReadOnlyList<double> values) => Map(values, Math.Sqrt);
+    /// <summary>Computes the <c>vector.square-root@1</c> mathematical operation.</summary>
+    public static double[] SquareRoot(IReadOnlyList<double> values)
+    {
+        ArgumentNullException.ThrowIfNull(values);
+        return Map(values, Math.Sqrt);
+    }
 }

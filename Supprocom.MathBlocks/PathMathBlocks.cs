@@ -4,8 +4,10 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockPath
 {
 
+    /// <summary>Sums powered absolute increments along a sampled path.</summary>
     public static double PowerVariation(IReadOnlyList<double> values, double order)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var result = 0d;
         for (var index = 1; index < values.Count; index++)
             result += Math.Pow(Math.Abs(values[index] - values[index - 1]), order);

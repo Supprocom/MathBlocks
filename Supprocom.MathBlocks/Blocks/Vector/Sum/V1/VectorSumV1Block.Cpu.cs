@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockVectorMath
 {
+    /// <summary>Computes the <c>vector.sum@1</c> mathematical operation.</summary>
     public static double Sum(IReadOnlyList<double> values)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var sum = 0d;
         var correction = 0d;
         for (var index = 0; index < values.Count; index++)

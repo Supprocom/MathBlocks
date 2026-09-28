@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>geometry.simplicial-depth@1</c> mathematical operation.</summary>
     public static double SimplicialDepth(IReadOnlyList<MathBlockPoint> sample, MathBlockPoint point)
     {
+        ArgumentNullException.ThrowIfNull(sample);
         var containing = 0;
         var total = 0;
         for (var first = 0; first < sample.Count; first++)

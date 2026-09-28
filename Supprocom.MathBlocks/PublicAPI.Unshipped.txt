@@ -1,0 +1,5 @@
+#nullable enable
+Supprocom.MathBlocks.MathBlockFormulaMappingKind.None = 0 -> Supprocom.MathBlocks.MathBlockFormulaMappingKind
+static Supprocom.MathBlocks.MathRational.Add(Supprocom.MathBlocks.MathRational left, Supprocom.MathBlocks.MathRational right) -> Supprocom.MathBlocks.MathRational
+static Supprocom.MathBlocks.MathRational.Multiply(Supprocom.MathBlocks.MathRational left, Supprocom.MathBlocks.MathRational right) -> Supprocom.MathBlocks.MathRational
+static Supprocom.MathBlocks.MathRational.Subtract(Supprocom.MathBlocks.MathRational left, Supprocom.MathBlocks.MathRational right) -> Supprocom.MathBlocks.MathRational

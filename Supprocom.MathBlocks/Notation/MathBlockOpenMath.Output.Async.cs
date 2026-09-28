@@ -19,7 +19,8 @@ public static partial class MathBlockOpenMath
 
         cancellationToken.ThrowIfCancellationRequested();
         await ValidateOutputAsync(program, cancellationToken).ConfigureAwait(false);
-        await using var output = new CancellationWriteStream(destination, cancellationToken);
+        var output = new CancellationWriteStream(destination, cancellationToken);
+        await using var configuredOutput = output.ConfigureAwait(false);
         using var writer = XmlWriter.Create(output, CreateWriterSettings(StrictUtf8, true));
         await WriteDocumentAsync(writer, program, cancellationToken).ConfigureAwait(false);
         await writer.FlushAsync().ConfigureAwait(false);
@@ -36,7 +37,8 @@ public static partial class MathBlockOpenMath
 
         cancellationToken.ThrowIfCancellationRequested();
         await ValidateOutputAsync(program, cancellationToken).ConfigureAwait(false);
-        await using var output = new CancellationTextWriter(destination, cancellationToken);
+        var output = new CancellationTextWriter(destination, cancellationToken);
+        await using var configuredOutput = output.ConfigureAwait(false);
         using var writer = XmlWriter.Create(output, CreateWriterSettings(async: true));
         await WriteDocumentAsync(writer, program, cancellationToken).ConfigureAwait(false);
         await writer.FlushAsync().ConfigureAwait(false);
@@ -278,7 +280,7 @@ public static partial class MathBlockOpenMath
 
     private static async Task WriteVectorAsync(
         XmlWriter writer,
-        IReadOnlyList<double> values,
+        Supprocom.MathBlocks.MathBlockVector values,
         CancellationToken cancellationToken)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
@@ -320,7 +322,7 @@ public static partial class MathBlockOpenMath
 
     private static async Task WriteComplexVectorAsync(
         XmlWriter writer,
-        IReadOnlyList<MathBlockComplexValue> values,
+        Supprocom.MathBlocks.MathBlockComplexVector values,
         CancellationToken cancellationToken)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
@@ -353,7 +355,7 @@ public static partial class MathBlockOpenMath
 
     private static async Task WritePointSetAsync(
         XmlWriter writer,
-        IReadOnlyList<MathBlockPoint> values,
+        Supprocom.MathBlocks.MathBlockPointSet values,
         CancellationToken cancellationToken)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
@@ -394,7 +396,7 @@ public static partial class MathBlockOpenMath
 
     private static async Task WriteRunSetAsync(
         XmlWriter writer,
-        IReadOnlyList<MathBlockRun> values,
+        Supprocom.MathBlocks.MathBlockRunSet values,
         CancellationToken cancellationToken)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
@@ -414,7 +416,7 @@ public static partial class MathBlockOpenMath
 
     private static async Task WriteBooleanVectorAsync(
         XmlWriter writer,
-        IReadOnlyList<bool> values,
+        Supprocom.MathBlocks.MathBlockBooleanVector values,
         CancellationToken cancellationToken)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);

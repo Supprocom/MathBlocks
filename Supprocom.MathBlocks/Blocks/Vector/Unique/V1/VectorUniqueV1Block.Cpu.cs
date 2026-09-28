@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockStructure
 {
+    /// <summary>Computes the <c>vector.unique@1</c> mathematical operation.</summary>
     public static double[] Unique(IReadOnlyList<double> values)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var result = new double[values.Count];
         var count = 0;
         for (var index = 0; index < values.Count; index++)

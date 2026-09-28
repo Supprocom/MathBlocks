@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>matrix.integer-power@1</c> mathematical operation.</summary>
     public static MathBlockMatrix MatrixPower(MathBlockMatrix matrix, int exponent)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         var result = MathBlockLinearAlgebra.Identity(matrix.Rows);
         var power = matrix;
         while (exponent > 0)

@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockGraphMath
 {
+    /// <summary>Computes the <c>graph.minimum-spanning-forest@1</c> mathematical operation.</summary>
     public static MathBlockGraph MinimumSpanningForest(MathBlockGraph graph)
     {
+        ArgumentNullException.ThrowIfNull(graph);
         var parent = MathBlockCollectionPrimitives.Range(graph.VertexCount);
         var rank = new byte[graph.VertexCount];
         var selected = new List<MathBlockGraphEdge>();

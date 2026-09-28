@@ -6,7 +6,7 @@ namespace Supprocom.MathBlocks.Cuda;
 
 internal static class MathBlocksCudaNative
 {
-    private static readonly object contextLock = new();
+    private static readonly Lock contextLock = new();
     private static IntPtr primaryContext;
 
     static MathBlocksCudaNative()
@@ -27,10 +27,13 @@ internal static class MathBlocksCudaNative
             EnsureContext();
             return true;
         }
+        // Availability is a non-throwing probe across driver/load/runtime failures.
+#pragma warning disable CA1031
         catch
         {
             return false;
         }
+#pragma warning restore CA1031
     }
 
     public static IntPtr CurrentContext
@@ -256,8 +259,12 @@ internal static class MathBlocksCudaNative
     [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int cuModuleLoadData(out IntPtr module, byte[] image);
 
-    [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    internal static extern int cuModuleGetFunction(out IntPtr function, IntPtr module, string name);
+    [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi,
+        BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    internal static extern int cuModuleGetFunction(
+        out IntPtr function,
+        IntPtr module,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
 
     [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int cuModuleUnload(IntPtr module);
@@ -318,20 +325,22 @@ internal static class MathBlocksCudaNative
     [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int cuGraphDestroy(IntPtr graph);
 
-    [DllImport("nvrtc64_120_0.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("nvrtc64_120_0.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi,
+        BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private static extern NvrtcResult nvrtcCreateProgram(
         out IntPtr program,
-        string source,
-        string name,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string source,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
         int headerCount,
-        string[]? headers,
-        string[]? includeNames);
+        [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPUTF8Str)] string[]? headers,
+        [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPUTF8Str)] string[]? includeNames);
 
-    [DllImport("nvrtc64_120_0.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("nvrtc64_120_0.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi,
+        BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private static extern NvrtcResult nvrtcCompileProgram(
         IntPtr program,
         int optionCount,
-        [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr)] string[] options);
+        [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPUTF8Str)] string[] options);
 
     [DllImport("nvrtc64_120_0.dll", CallingConvention = CallingConvention.Cdecl)]
     private static extern NvrtcResult nvrtcGetPTXSize(IntPtr program, out UIntPtr size);

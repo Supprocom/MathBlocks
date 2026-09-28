@@ -8,17 +8,18 @@ using Markdig;
 using Markdig.Extensions.Tables;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
-using Supprocom.MathBlocks;
 
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Independence Tests.</summary>
 public sealed partial class MathBlockIndependenceTests
 {
     private static readonly MarkdownPipeline ReadmePipeline =
         new MarkdownPipelineBuilder().UsePipeTables().Build();
 
+    /// <summary>Verifies production project has no project reference or unapproved managed dependencies.</summary>
     [Fact]
-    public void Production_project_has_no_project_reference_or_unapproved_managed_dependencies()
+    public void ProductionProjectHasNoProjectReferenceOrUnapprovedManagedDependencies()
     {
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(root, "Supprocom.MathBlocks", "Supprocom.MathBlocks.csproj");
@@ -34,7 +35,7 @@ public sealed partial class MathBlockIndependenceTests
             document.Descendants("PackageReference")
                 .Select(reference =>
                     $"{reference.Attribute("Include")!.Value}@{reference.Attribute("Version")!.Value}")
-                .OrderBy(value => value, StringComparer.Ordinal));
+                .Order(StringComparer.Ordinal), StringComparer.Ordinal);
         Assert.All(document.Descendants("PackageReference"), reference =>
         {
             Assert.Null(reference.Attribute("Condition"));
@@ -49,8 +50,9 @@ public sealed partial class MathBlockIndependenceTests
         });
     }
 
+    /// <summary>Verifies cudasource generator uses exact public csharp 2 cudadependency.</summary>
     [Fact]
-    public void CUDA_source_generator_uses_exact_public_CSharp2CUDA_dependency()
+    public void CUDASourceGeneratorUsesExactPublicCSharp2CUDADependency()
     {
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(
@@ -78,7 +80,7 @@ public sealed partial class MathBlockIndependenceTests
                 translationRoot,
                 "*Module.cs",
                 SearchOption.TopDirectoryOnly)
-            .OrderBy(path => path, StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
             .ToArray();
         Assert.Equal(12, translationSources.Length);
         var runtimeCudaBlocks = Path.Combine(
@@ -134,8 +136,9 @@ public sealed partial class MathBlockIndependenceTests
                 File.ReadAllText(path).Contains("[CudaDevice(Name = \"mathblocks_", StringComparison.Ordinal)));
     }
 
+    /// <summary>Verifies repository cibuilds the direct cudasource contract.</summary>
     [Fact]
-    public void Repository_CI_builds_the_direct_CUDA_source_contract()
+    public void RepositoryCIBuildsTheDirectCUDASourceContract()
     {
         var root = FindRepositoryRoot();
         var workflowPath = Path.Combine(root, ".github", "workflows", "ci.yml");
@@ -168,8 +171,9 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Contains("formula/v1/* text eol=lf", attributes, StringComparison.Ordinal);
     }
 
+    /// <summary>Verifies public release metadata declares the 051 contract.</summary>
     [Fact]
-    public void Public_release_metadata_declares_the_0_5_1_contract()
+    public void PublicReleaseMetadataDeclaresThe052Contract()
     {
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(root, "Supprocom.MathBlocks", "Supprocom.MathBlocks.csproj");
@@ -185,7 +189,7 @@ public sealed partial class MathBlockIndependenceTests
         var developmentGuide = File.ReadAllText(
             Path.Combine(root, "docs", "development.md"));
 
-        Assert.Equal("0.5.1", document.Descendants("Version").Single().Value);
+        Assert.Equal("0.5.2", document.Descendants("Version").Single().Value);
         Assert.Equal("AGPL-3.0-only", document.Descendants("PackageLicenseExpression").Single().Value);
         Assert.Equal("true", document.Descendants("PublishRepositoryUrl").Single().Value);
         Assert.Contains(
@@ -196,14 +200,14 @@ public sealed partial class MathBlockIndependenceTests
             "337-operation OpenMath and Content MathML interchange",
             document.Descendants("PackageReleaseNotes").Single().Value,
             StringComparison.Ordinal);
-        Assert.Equal(new Version(0, 5, 1, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
+        Assert.Equal(new Version(0, 5, 2, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
         Assert.Contains("## Build a program", readme, StringComparison.Ordinal);
         Assert.Contains("## Exchange formulas", readme, StringComparison.Ordinal);
         Assert.Contains("## Choose an API", readme, StringComparison.Ordinal);
         Assert.Contains("## Documentation", readme, StringComparison.Ordinal);
         Assert.Contains("## Build from source", readme, StringComparison.Ordinal);
         Assert.Contains(
-            "dotnet add package Supprocom.MathBlocks --version 0.5.1",
+            "dotnet add package Supprocom.MathBlocks --version 0.5.2",
             readme,
             StringComparison.Ordinal);
         AssertReadmeUsesOneParagraphAndOneSupplementPerSection(readme);
@@ -211,8 +215,8 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Equal("README.md", document.Descendants("PackageReadmeFile").Single().Value);
         Assert.Contains(
             document.Descendants("None"),
-            item => item.Attribute("Include")?.Value == "..\\README.md" &&
-                    item.Attribute("PackagePath")?.Value == "README.md");
+            item => string.Equals(item.Attribute("Include")?.Value, "..\\README.md", StringComparison.Ordinal) &&
+string.Equals(item.Attribute("PackagePath")?.Value, "README.md", StringComparison.Ordinal));
         Assert.Contains("## Diagnostic codes", apiGuide, StringComparison.Ordinal);
         Assert.Contains("## Security boundary", apiGuide, StringComparison.Ordinal);
         Assert.Contains("## Total operation mapping", formulaGuide, StringComparison.Ordinal);
@@ -225,56 +229,60 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Contains("## Package validation", developmentGuide, StringComparison.Ordinal);
         Assert.Contains(
             document.Descendants("None"),
-            item => item.Attribute("Include")?.Value == "..\\docs\\openmath-api.md" &&
-                    item.Attribute("PackagePath")?.Value == "docs/openmath-api.md");
+            item => string.Equals(item.Attribute("Include")?.Value, "..\\docs\\openmath-api.md", StringComparison.Ordinal) &&
+string.Equals(item.Attribute("PackagePath")?.Value, "docs/openmath-api.md", StringComparison.Ordinal));
         Assert.Contains(
             document.Descendants("None"),
-            item => item.Attribute("Include")?.Value == "..\\docs\\formula-interchange-api.md" &&
-                    item.Attribute("PackagePath")?.Value == "docs/formula-interchange-api.md");
+            item => string.Equals(item.Attribute("Include")?.Value, "..\\docs\\formula-interchange-api.md", StringComparison.Ordinal) &&
+string.Equals(item.Attribute("PackagePath")?.Value, "docs/formula-interchange-api.md", StringComparison.Ordinal));
         Assert.Contains(
             document.Descendants("None"),
-            item => item.Attribute("Include")?.Value == "..\\docs\\programming-model.md" &&
-                    item.Attribute("PackagePath")?.Value == "docs/programming-model.md");
+            item => string.Equals(item.Attribute("Include")?.Value, "..\\docs\\programming-model.md", StringComparison.Ordinal) &&
+string.Equals(item.Attribute("PackagePath")?.Value, "docs/programming-model.md", StringComparison.Ordinal));
         Assert.Contains(
             document.Descendants("None"),
-            item => item.Attribute("Include")?.Value == "..\\docs\\cuda-integration.md" &&
-                    item.Attribute("PackagePath")?.Value == "docs/cuda-integration.md");
+            item => string.Equals(item.Attribute("Include")?.Value, "..\\docs\\cuda-integration.md", StringComparison.Ordinal) &&
+string.Equals(item.Attribute("PackagePath")?.Value, "docs/cuda-integration.md", StringComparison.Ordinal));
         Assert.Contains(
             document.Descendants("None"),
-            item => item.Attribute("Include")?.Value == "..\\docs\\development.md" &&
-                    item.Attribute("PackagePath")?.Value == "docs/development.md");
+            item => string.Equals(item.Attribute("Include")?.Value, "..\\docs\\development.md", StringComparison.Ordinal) &&
+string.Equals(item.Attribute("PackagePath")?.Value, "docs/development.md", StringComparison.Ordinal));
         Assert.DoesNotContain("## Resident typed program search", readme, StringComparison.Ordinal);
         Assert.DoesNotContain("## Parallel proposal waves", readme, StringComparison.Ordinal);
     }
 
+    /// <summary>Verifies readmestructure policy rejects common mark bypasses.</summary>
     [Theory]
     [InlineData("# Example\n\n## Section\n\n1) ordered item")]
     [InlineData("# Example\n\n## Section\n\n~~~text\nfirst\n~~~\n\n| Value |\n| --- |\n| second |")]
     [InlineData("# Example\n\n## Section\n\n    first\n\n| Value |\n| --- |\n| second |")]
-    public void README_structure_policy_rejects_CommonMark_bypasses(string source)
+    public void READMEStructurePolicyRejectsCommonMarkBypasses(string source)
     {
         Assert.NotEmpty(GetReadmeStructureErrors(source));
     }
 
+    /// <summary>Verifies readmestructure policy accepts one common mark code supplement.</summary>
     [Theory]
     [InlineData("# Example\n\n## Section\n\n~~~text\nvalue\n~~~")]
     [InlineData("# Example\n\n## Section\n\n    value")]
-    public void README_structure_policy_accepts_one_CommonMark_code_supplement(string source)
+    public void READMEStructurePolicyAcceptsOneCommonMarkCodeSupplement(string source)
     {
         Assert.Empty(GetReadmeStructureErrors(source));
     }
 
+    /// <summary>Verifies package readmelink policy rejects nonimmutable targets.</summary>
     [Theory]
     [InlineData("[guide](docs/development.md)")]
     [InlineData("[guide](../docs/development.md)")]
     [InlineData("[guide](http://github.com/Supprocom/MathBlocks)")]
-    public void Package_README_link_policy_rejects_nonimmutable_targets(string source)
+    public void PackageREADMELinkPolicyRejectsNonimmutableTargets(string source)
     {
         Assert.NotEmpty(GetPackageReadmeLinkErrors(source));
     }
 
+    /// <summary>Verifies production and public contract contain no formula search ownership.</summary>
     [Fact]
-    public void Production_and_public_contract_contain_no_formula_search_ownership()
+    public void ProductionAndPublicContractContainNoFormulaSearchOwnership()
     {
         var forbidden = new[]
         {
@@ -314,12 +322,13 @@ public sealed partial class MathBlockIndependenceTests
 
         Assert.DoesNotContain(
             assembly.GetCustomAttributesData(),
-            attribute => attribute.AttributeType.FullName == "System.Runtime.CompilerServices.InternalsVisibleToAttribute");
+            attribute => string.Equals(attribute.AttributeType.FullName, "System.Runtime.CompilerServices.InternalsVisibleToAttribute", StringComparison.Ordinal));
         Assert.Empty(failures);
     }
 
+    /// <summary>Verifies external consumer uses only the packed public package.</summary>
     [Fact]
-    public void External_consumer_uses_only_the_packed_public_package()
+    public void ExternalConsumerUsesOnlyThePackedPublicPackage()
     {
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(
@@ -340,8 +349,9 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Contains("MathBlockFormulaInterchange.Profile", source, StringComparison.Ordinal);
     }
 
+    /// <summary>Verifies public tree uses only cudaaccelerator identity.</summary>
     [Fact]
-    public void Public_tree_uses_only_CUDA_accelerator_identity()
+    public void PublicTreeUsesOnlyCUDAAcceleratorIdentity()
     {
         var root = FindRepositoryRoot();
         var legacyToken = string.Concat('g', 'p', 'u');
@@ -395,8 +405,9 @@ public sealed partial class MathBlockIndependenceTests
         }
     }
 
+    /// <summary>Verifies production source contains no input or factor semantics.</summary>
     [Fact]
-    public void Production_source_contains_no_input_or_factor_semantics()
+    public void ProductionSourceContainsNoInputOrFactorSemantics()
     {
         var root = FindRepositoryRoot();
         var sourceRoot = Path.Combine(root, "Supprocom.MathBlocks");
@@ -410,14 +421,15 @@ public sealed partial class MathBlockIndependenceTests
             foreach (Match match in ForbiddenSemanticWord().Matches(text))
                 failures.Add($"{Path.GetFileName(file)}: {match.Value}");
             var isNativeInfrastructure = relative.StartsWith($"Cuda{Path.DirectorySeparatorChar}", StringComparison.Ordinal) ||
-                                          relative == Path.Combine("Execution", "MathBlocksCUDAWorker.cs");
+string.Equals(relative, Path.Combine("Execution", "MathBlocksCUDAWorker.cs"), StringComparison.Ordinal) ||
+string.Equals(relative, Path.Combine("Execution", "MathBlocksCUDAProgram.cs"), StringComparison.Ordinal);
             if (!isNativeInfrastructure)
                 foreach (Match match in ForbiddenEffectWord().Matches(text))
                 {
                     if (relative.StartsWith(
                             $"Notation{Path.DirectorySeparatorChar}",
                             StringComparison.Ordinal) &&
-                        match.Value == "Task")
+string.Equals(match.Value, "Task", StringComparison.Ordinal))
                     {
                         continue;
                     }
@@ -428,8 +440,9 @@ public sealed partial class MathBlockIndependenceTests
         Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures));
     }
 
+    /// <summary>Verifies public contract exposes only mathblock and system types.</summary>
     [Fact]
-    public void Public_contract_exposes_only_mathblock_and_system_types()
+    public void PublicContractExposesOnlyMathblockAndSystemTypes()
     {
         var assembly = typeof(MathBlockCatalog).Assembly;
         var foreignTypes = assembly.ExportedTypes
@@ -446,8 +459,9 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Empty(foreignTypes);
     }
 
+    /// <summary>Verifies production math calls resolve to owned low level primitives.</summary>
     [Fact]
-    public void Production_math_calls_resolve_to_owned_low_level_primitives()
+    public void ProductionMathCallsResolveToOwnedLowLevelPrimitives()
     {
         var root = FindRepositoryRoot();
         var sourceRoot = Path.Combine(root, "Supprocom.MathBlocks");
@@ -459,7 +473,7 @@ public sealed partial class MathBlockIndependenceTests
             if (IsBuildOutput(sourceRoot, file))
                 continue;
             var source = File.ReadAllText(file);
-            if (Regex.IsMatch(source, @"\bSystem\.Math\b", RegexOptions.CultureInvariant))
+            if (SystemMathReference().IsMatch(source))
                 systemMathReferences.Add(Path.GetRelativePath(sourceRoot, file));
         }
 
@@ -470,8 +484,9 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Empty(systemMathReferences);
     }
 
+    /// <summary>Verifies production binary has no system math member reference.</summary>
     [Fact]
-    public void Production_binary_has_no_System_Math_member_reference()
+    public void ProductionBinaryHasNoSystemMathMemberReference()
     {
         using var stream = File.OpenRead(typeof(MathBlockCatalog).Assembly.Location);
         using var executable = new PEReader(stream);
@@ -483,15 +498,16 @@ public sealed partial class MathBlockIndependenceTests
             if (member.Parent.Kind != HandleKind.TypeReference)
                 continue;
             var type = metadata.GetTypeReference((TypeReferenceHandle)member.Parent);
-            if (metadata.GetString(type.Namespace) == "System" && metadata.GetString(type.Name) == "Math")
+            if (string.Equals(metadata.GetString(type.Namespace), "System", StringComparison.Ordinal) && string.Equals(metadata.GetString(type.Name), "Math", StringComparison.Ordinal))
                 references.Add(metadata.GetString(member.Name));
         }
 
         Assert.Empty(references);
     }
 
+    /// <summary>Verifies production binary has no system linq enumerable member reference.</summary>
     [Fact]
-    public void Production_binary_has_no_System_Linq_Enumerable_member_reference()
+    public void ProductionBinaryHasNoSystemLinqEnumerableMemberReference()
     {
         using var stream = File.OpenRead(typeof(MathBlockCatalog).Assembly.Location);
         using var executable = new PEReader(stream);
@@ -503,8 +519,8 @@ public sealed partial class MathBlockIndependenceTests
             if (member.Parent.Kind != HandleKind.TypeReference)
                 continue;
             var type = metadata.GetTypeReference((TypeReferenceHandle)member.Parent);
-            if (metadata.GetString(type.Namespace) == "System.Linq" &&
-                metadata.GetString(type.Name) == "Enumerable")
+            if (string.Equals(metadata.GetString(type.Namespace), "System.Linq", StringComparison.Ordinal) &&
+string.Equals(metadata.GetString(type.Name), "Enumerable", StringComparison.Ordinal))
             {
                 references.Add(metadata.GetString(member.Name));
             }
@@ -513,8 +529,9 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Empty(references);
     }
 
+    /// <summary>Verifies production source has no library collection algorithms.</summary>
     [Fact]
-    public void Production_source_has_no_library_collection_algorithms()
+    public void ProductionSourceHasNoLibraryCollectionAlgorithms()
     {
         var root = FindRepositoryRoot();
         var sourceRoot = Path.Combine(root, "Supprocom.MathBlocks");
@@ -541,8 +558,9 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Empty(failures);
     }
 
+    /// <summary>Verifies production binary has no system numerics type reference.</summary>
     [Fact]
-    public void Production_binary_has_no_System_Numerics_type_reference()
+    public void ProductionBinaryHasNoSystemNumericsTypeReference()
     {
         using var stream = File.OpenRead(typeof(MathBlockCatalog).Assembly.Location);
         using var executable = new PEReader(stream);
@@ -574,7 +592,7 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Empty(GetReadmeStructureErrors(source));
     }
 
-    private static IReadOnlyList<string> GetReadmeStructureErrors(string source)
+    private static List<string> GetReadmeStructureErrors(string source)
     {
         var errors = new List<string>();
         var document = Markdown.Parse(source, ReadmePipeline);
@@ -630,7 +648,7 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Empty(GetPackageReadmeLinkErrors(source));
     }
 
-    private static IReadOnlyList<string> GetPackageReadmeLinkErrors(string source)
+    private static List<string> GetPackageReadmeLinkErrors(string source)
     {
         var errors = new List<string>();
         var links = Markdown.Parse(source, ReadmePipeline)
@@ -643,17 +661,14 @@ public sealed partial class MathBlockIndependenceTests
         {
             var target = link.Url ?? string.Empty;
             if (!Uri.TryCreate(target, UriKind.Absolute, out var uri) ||
-                uri.Scheme != Uri.UriSchemeHttps ||
-                uri.Host != "github.com")
+!string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.Ordinal) ||
+!string.Equals(uri.Host, "github.com", StringComparison.Ordinal))
             {
                 errors.Add($"Package README link '{target}' is not an absolute GitHub HTTPS URL.");
                 continue;
             }
 
-            var match = Regex.Match(
-                uri.AbsolutePath,
-                @"^/Supprocom/MathBlocks/blob/(?<commit>[0-9a-f]{40})/(?<path>(?:docs/[a-z0-9-]+\.md|LICENSE(?:\.md)?|NOTICE|THIRD-PARTY-NOTICES\.md))$",
-                RegexOptions.CultureInvariant);
+            var match = PackageReadmeLink().Match(uri.AbsolutePath);
             if (!match.Success)
                 errors.Add($"Package README link '{target}' is not pinned to an immutable project document.");
         }
@@ -692,9 +707,15 @@ public sealed partial class MathBlockIndependenceTests
         throw new DirectoryNotFoundException("The repository root was not found.");
     }
 
-    [GeneratedRegex(@"\b(?:Factor|Market|Price|Volume|Volatility|Trade|Trading|Bet|Betting|Candle|Timestamp|Binance|Polymarket)\b", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\b(?:Factor|Market|Price|Volume|Volatility|Trade|Trading|Bet|Betting|Candle|Timestamp|Binance|Polymarket)\b", RegexOptions.IgnoreCase, 1000)]
     private static partial Regex ForbiddenSemanticWord();
 
-    [GeneratedRegex(@"\b(?:DateTime|DateTimeOffset|Random|Guid|Environment|File|Directory|HttpClient|Thread|Task|Process)\b")]
+    [GeneratedRegex(@"\b(?:DateTime|DateTimeOffset|Random|Guid|Environment|File|Directory|HttpClient|Thread|Task|Process)\b", RegexOptions.None, 1000)]
     private static partial Regex ForbiddenEffectWord();
+
+    [GeneratedRegex(@"\bSystem\.Math\b", RegexOptions.CultureInvariant, 1000)]
+    private static partial Regex SystemMathReference();
+
+    [GeneratedRegex(@"^/Supprocom/MathBlocks/blob/(?<commit>[0-9a-f]{40})/(?<path>(?:docs/[a-z0-9-]+\.md|LICENSE(?:\.md)?|NOTICE|THIRD-PARTY-NOTICES\.md))$", RegexOptions.CultureInvariant, 1000)]
+    private static partial Regex PackageReadmeLink();
 }

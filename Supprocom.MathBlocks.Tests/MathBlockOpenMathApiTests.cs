@@ -1,13 +1,14 @@
 using System.Buffers;
 using System.Reflection;
-using Supprocom.MathBlocks;
 
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Open Math Api Tests.</summary>
 public sealed class MathBlockOpenMathApiTests
 {
+    /// <summary>Verifies public apicontains the reviewed additive surface.</summary>
     [Fact]
-    public void Public_API_contains_the_reviewed_additive_surface()
+    public void PublicAPIContainsTheReviewedAdditiveSurface()
     {
         var methods = typeof(MathBlockOpenMath)
             .GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
@@ -144,15 +145,16 @@ public sealed class MathBlockOpenMathApiTests
         Assert.Throws<ArgumentNullException>(() => MathBlockOpenMath.Import(null!));
     }
 
+    /// <summary>Verifies public open math types are the reviewed set.</summary>
     [Fact]
-    public void Public_OpenMath_types_are_the_reviewed_set()
+    public void PublicOpenMathTypesAreTheReviewedSet()
     {
         var names = typeof(MathBlockOpenMath).Assembly
             .GetExportedTypes()
-            .Where(type => type.Namespace == typeof(MathBlockOpenMath).Namespace)
+            .Where(type => string.Equals(type.Namespace, typeof(MathBlockOpenMath).Namespace, StringComparison.Ordinal))
             .Select(type => type.Name)
             .Where(name => name.StartsWith("MathBlockOpenMath", StringComparison.Ordinal))
-            .OrderBy(name => name, StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
             .ToArray();
 
         Assert.Equal(

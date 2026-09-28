@@ -173,7 +173,12 @@ internal static partial class ProbabilityMathBlocks
         return MathBlockType.Scalar();
     }
 
-    private static bool IsDistribution(IReadOnlyList<double> values) =>
+    // Both vector values and flattened matrix arrays are valid distribution inputs.
+    private static bool IsDistribution(MathBlockVector values) => IsDistributionCore(values);
+
+    private static bool IsDistribution(double[] values) => IsDistributionCore(values);
+
+    private static bool IsDistributionCore(IReadOnlyList<double> values) =>
         values.Count > 0 && MathBlockCollectionPrimitives.All(values, value => value >= 0d) &&
         Math.Abs(MathBlockVectorMath.Sum(values) - 1d) <= 1e-10;
 

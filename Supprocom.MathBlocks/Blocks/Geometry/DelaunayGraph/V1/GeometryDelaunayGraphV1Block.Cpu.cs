@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockGeometry
 {
+    /// <summary>Computes the <c>geometry.delaunay-graph@1</c> mathematical operation.</summary>
     public static MathBlockGraph DelaunayGraph(IReadOnlyList<MathBlockPoint> points)
     {
+        ArgumentNullException.ThrowIfNull(points);
         var edges = new List<(int Left, int Right)>();
         for (var first = 0; first < points.Count; first++)
         {

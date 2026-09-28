@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockPath
 {
+    /// <summary>Computes the <c>transform.haar@1</c> mathematical operation.</summary>
     public static double[] HaarTransform(IReadOnlyList<double> values)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var result = MathBlockCollectionPrimitives.Copy(values);
         var work = new double[values.Count];
         var length = values.Count;

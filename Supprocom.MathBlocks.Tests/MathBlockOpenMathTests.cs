@@ -3,14 +3,15 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Linq;
-using Supprocom.MathBlocks;
 
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Open Math Tests.</summary>
 public sealed class MathBlockOpenMathTests
 {
+    /// <summary>Verifies export and import preserve program topology and operation order.</summary>
     [Fact]
-    public void Export_and_import_preserve_program_topology_and_operation_order()
+    public void ExportAndImportPreserveProgramTopologyAndOperationOrder()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var width = builder.Input("width", MathBlockType.Scalar(MathBlockUnit.Basis0));
@@ -25,7 +26,7 @@ public sealed class MathBlockOpenMathTests
 
         var source = MathBlockOpenMath.Export(program);
         var imported = MathBlockOpenMath.Import(source);
-        var output = imported.Program.Evaluate(new Dictionary<string, MathBlockValue>
+        var output = imported.Program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
             ["width"] = MathBlockValue.Scalar(6d, MathBlockUnit.Basis0),
             ["height"] = MathBlockValue.Scalar(4d, MathBlockUnit.Basis0)
@@ -41,13 +42,14 @@ public sealed class MathBlockOpenMathTests
         Assert.Equal(source, MathBlockOpenMath.Export(imported.Program));
         Assert.Equal(
             ["scalar.add@1", "scalar.multiply@1"],
-            imported.Operations.Select(operation => operation.Identity));
+            imported.Operations.Select(operation => operation.Identity), StringComparer.Ordinal);
         Assert.Equal(8d, output["adjusted width"].AsScalar());
         Assert.Equal(32d, output["area"].AsScalar());
     }
 
+    /// <summary>Verifies export and import cover every standard operation async.</summary>
     [Fact]
-    public async Task Export_and_import_cover_every_standard_operation()
+    public async Task ExportAndImportCoverEveryStandardOperationAsync()
     {
         Assert.Equal(337, MathBlockCatalog.Standard.Operations.Count);
 
@@ -75,8 +77,9 @@ public sealed class MathBlockOpenMathTests
         }
     }
 
+    /// <summary>Verifies export and import preserve every value kind and binary 64 bits async.</summary>
     [Fact]
-    public async Task Export_and_import_preserve_every_value_kind_and_binary64_bits()
+    public async Task ExportAndImportPreserveEveryValueKindAndBinary64BitsAsync()
     {
         var unit = new MathBlockUnit(
             new MathRational(1, 2),
@@ -133,8 +136,9 @@ public sealed class MathBlockOpenMathTests
         Assert.Equal(Encoding.UTF8.GetBytes(source), stream.ToArray());
     }
 
+    /// <summary>Verifies export rejects operations outside the standard profile.</summary>
     [Fact]
-    public void Export_rejects_operations_outside_the_standard_profile()
+    public void ExportRejectsOperationsOutsideTheStandardProfile()
     {
         var operation = new MathBlockOperation(
             "7custom.identity",
@@ -165,8 +169,9 @@ public sealed class MathBlockOpenMathTests
         Assert.Equal([1, 2, 3], stream.ToArray());
     }
 
+    /// <summary>Verifies export rejects acustom operation with astandard identity.</summary>
     [Fact]
-    public void Export_rejects_a_custom_operation_with_a_standard_identity()
+    public void ExportRejectsACustomOperationWithAStandardIdentity()
     {
         var operation = new MathBlockOperation(
             "scalar.add",
@@ -193,8 +198,9 @@ public sealed class MathBlockOpenMathTests
             exception.Message);
     }
 
+    /// <summary>Verifies import rejects nonprofile symbols and forward references.</summary>
     [Fact]
-    public void Import_rejects_nonprofile_symbols_and_forward_references()
+    public void ImportRejectsNonprofileSymbolsAndForwardReferences()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var left = builder.Input("left", MathBlockType.Scalar());
@@ -214,8 +220,9 @@ public sealed class MathBlockOpenMathTests
         Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(forwardReference));
     }
 
+    /// <summary>Verifies import rejects dtds comments processing instructions and noncanonical floats.</summary>
     [Fact]
-    public void Import_rejects_DTDs_comments_processing_instructions_and_noncanonical_floats()
+    public void ImportRejectsDTDsCommentsProcessingInstructionsAndNoncanonicalFloats()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var value = builder.Constant(MathBlockValue.Scalar(1.5d));
@@ -242,8 +249,9 @@ public sealed class MathBlockOpenMathTests
         Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(wrongGroup));
     }
 
+    /// <summary>Verifies export is stable across repeated calls.</summary>
     [Fact]
-    public void Export_is_stable_across_repeated_calls()
+    public void ExportIsStableAcrossRepeatedCalls()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var left = builder.Input("left", MathBlockType.Scalar());
@@ -260,8 +268,9 @@ public sealed class MathBlockOpenMathTests
             Assert.Equal(expected, MathBlockOpenMath.Export(program));
     }
 
+    /// <summary>Verifies synchronous output apis produce the exact canonical form.</summary>
     [Fact]
-    public void Synchronous_output_APIs_produce_the_exact_canonical_form()
+    public void SynchronousOutputAPIsProduceTheExactCanonicalForm()
     {
         var program = CreateSampleProgram();
         var expectedText = MathBlockOpenMath.Export(program);
@@ -295,8 +304,9 @@ public sealed class MathBlockOpenMathTests
         Assert.Equal(expectedText, textWriter.ToString());
     }
 
+    /// <summary>Verifies async output apis produce the exact canonical form and honor cancellation async.</summary>
     [Fact]
-    public async Task Async_output_APIs_produce_the_exact_canonical_form_and_honor_cancellation()
+    public async Task AsyncOutputAPIsProduceTheExactCanonicalFormAndHonorCancellationAsync()
     {
         var program = CreateSampleProgram();
         var expectedText = MathBlockOpenMath.Export(program);
@@ -324,8 +334,9 @@ public sealed class MathBlockOpenMathTests
         Assert.Equal([1, 2, 3], cancelledStream.ToArray());
     }
 
+    /// <summary>Verifies export uses the canonical xml 11 lexical form.</summary>
     [Fact]
-    public void Export_uses_the_Canonical_XML_1_1_lexical_form()
+    public void ExportUsesTheCanonicalXML11LexicalForm()
     {
         var source = MathBlockOpenMath.Export(CreateSampleProgram());
         var expectedRoot = string.Concat(
@@ -341,8 +352,9 @@ public sealed class MathBlockOpenMathTests
         Assert.EndsWith("</OMOBJ>", source, StringComparison.Ordinal);
     }
 
+    /// <summary>Verifies import normalizes valid noncanonical xml.</summary>
     [Fact]
-    public void Import_normalizes_valid_noncanonical_XML()
+    public void ImportNormalizesValidNoncanonicalXML()
     {
         var canonical = MathBlockOpenMath.Export(CreateSampleProgram());
         var canonicalRoot = string.Concat(
@@ -366,12 +378,13 @@ public sealed class MathBlockOpenMathTests
 
         var imported = MathBlockOpenMath.Import(noncanonical);
 
-        Assert.NotEqual(canonical, noncanonical);
+        Assert.NotEqual(canonical, noncanonical, StringComparer.Ordinal);
         Assert.Equal(canonical, MathBlockOpenMath.Export(imported.Program));
     }
 
+    /// <summary>Verifies import normalizes afully namespace prefixed document.</summary>
     [Fact]
-    public void Import_normalizes_a_fully_namespace_prefixed_document()
+    public void ImportNormalizesAFullyNamespacePrefixedDocument()
     {
         var canonical = MathBlockOpenMath.Export(CreateSampleProgram());
         var document = XDocument.Parse(canonical, LoadOptions.PreserveWhitespace);
@@ -395,8 +408,9 @@ public sealed class MathBlockOpenMathTests
         Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(wrongElementNamespace));
     }
 
+    /// <summary>Verifies import rejects non xmlwhitespace in markup positions.</summary>
     [Fact]
-    public void Import_rejects_non_XML_whitespace_in_markup_positions()
+    public void ImportRejectsNonXMLWhitespaceInMarkupPositions()
     {
         var canonical = MathBlockOpenMath.Export(CreateSampleProgram());
         var betweenElements = ReplaceFirst(canonical, ">", ">\u00A0");
@@ -406,8 +420,9 @@ public sealed class MathBlockOpenMathTests
         Assert.Throws<FormatException>(() => MathBlockOpenMath.Import(insideEmptyToken));
     }
 
+    /// <summary>Verifies import rejects adocument above the fixed character limit.</summary>
     [Fact]
-    public void Import_rejects_a_document_above_the_fixed_character_limit()
+    public void ImportRejectsADocumentAboveTheFixedCharacterLimit()
     {
         var source = new string(' ', MathBlockOpenMath.MaximumDocumentCharacters + 1);
 
@@ -416,8 +431,9 @@ public sealed class MathBlockOpenMathTests
         Assert.Equal("The OpenMath source exceeds the character limit.", exception.Message);
     }
 
+    /// <summary>Verifies export is independent of the current culture.</summary>
     [Fact]
-    public void Export_is_independent_of_the_current_culture()
+    public void ExportIsIndependentOfTheCurrentCulture()
     {
         var program = CreateSampleProgram();
         var expected = MathBlockOpenMath.Export(program);
@@ -440,8 +456,9 @@ public sealed class MathBlockOpenMathTests
         }
     }
 
+    /// <summary>Verifies profile content dictionaries match the standard catalog.</summary>
     [Fact]
-    public void Profile_content_dictionaries_match_the_standard_catalog()
+    public void ProfileContentDictionariesMatchTheStandardCatalog()
     {
         XNamespace dictionaryNamespace = "http://www.openmath.org/OpenMathCD";
         var expectedDictionaries = new Dictionary<string, string[]>(StringComparer.Ordinal)
@@ -461,7 +478,7 @@ public sealed class MathBlockOpenMathTests
             ],
             ["mathblocks_operations1"] = MathBlockCatalog.Standard.Operations
                 .Select(OperationSymbolName)
-                .OrderBy(name => name, StringComparer.Ordinal)
+                .Order(StringComparer.Ordinal)
                 .ToArray()
         };
 
@@ -484,7 +501,7 @@ public sealed class MathBlockOpenMathTests
                 expected.Value,
                 root.Elements(dictionaryNamespace + "CDDefinition")
                     .Select(element => element.Element(dictionaryNamespace + "Name")?.Value)
-                    .OrderBy(name => name, StringComparer.Ordinal));
+                    .Order(StringComparer.Ordinal), StringComparer.Ordinal);
         }
 
         var operationDocument = XDocument.Load(ProfilePath("mathblocks_operations1.ocd"));
@@ -504,8 +521,9 @@ public sealed class MathBlockOpenMathTests
         }
     }
 
+    /// <summary>Verifies profile group binds all content dictionaries.</summary>
     [Fact]
-    public void Profile_group_binds_all_content_dictionaries()
+    public void ProfileGroupBindsAllContentDictionaries()
     {
         XNamespace groupNamespace = "http://www.openmath.org/OpenMathCDG";
         var document = XDocument.Load(ProfilePath("mathblocks_profile1.cdg"));
@@ -519,7 +537,7 @@ public sealed class MathBlockOpenMathTests
         Assert.Equal(MathBlockOpenMath.ContentDictionaryGroup, root.Element(groupNamespace + "CDGroupURL")?.Value);
         Assert.Equal(
             ["mathblocks_program1", "mathblocks_operations1", "mathblocks_types1", "mathblocks_values1"],
-            members.Select(member => member.Element(groupNamespace + "CDName")?.Value));
+            members.Select(member => member.Element(groupNamespace + "CDName")?.Value), StringComparer.Ordinal);
         Assert.All(
             members,
             member => Assert.Equal("1", member.Element(groupNamespace + "CDVersion")?.Value));
@@ -534,8 +552,9 @@ public sealed class MathBlockOpenMathTests
                 member.Element(groupNamespace + "CDURL")?.Value));
     }
 
+    /// <summary>Verifies profile schema binds the public profile identifiers.</summary>
     [Fact]
-    public void Profile_schema_binds_the_public_profile_identifiers()
+    public void ProfileSchemaBindsThePublicProfileIdentifiers()
     {
         var schema = File.ReadAllText(ProfilePath("mathblocks_profile1.rnc"));
 

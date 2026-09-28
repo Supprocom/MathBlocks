@@ -1,4 +1,5 @@
 namespace Supprocom.MathBlocks;
+
 internal static partial class PathMathBlocks
 {
     internal static class PathLongestTrueRunV1Block
@@ -9,6 +10,6 @@ internal static partial class PathMathBlocks
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.BooleanVector);
             return MathBlockType.Scalar();
-        }, inputs => MathBlockValue.Scalar(MathBlockPath.LongestTrueRun(inputs[0].AsBooleanVector())), [MathBlockValue.BooleanVector([true, true, false, true ])], MathBlockValue.Scalar(2d), performanceIterations: 16);
+        }, inputs => MathBlockValue.Scalar(MathBlockPath.LongestTrueRun(inputs[0].AsBooleanVector())), [MathBlockValue.BooleanVector([true, true, false, true])], MathBlockValue.Scalar(2d), performanceIterations: 16);
     }
 }

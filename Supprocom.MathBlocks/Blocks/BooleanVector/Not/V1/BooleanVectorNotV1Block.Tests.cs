@@ -1,8 +1,10 @@
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Verifies the <c>boolean-vector.not@1</c> operation contract.</summary>
 public sealed class BooleanVectorNotV1BlockTests
 {
+    /// <summary>Checks the <c>boolean-vector.not@1</c> operation contract.</summary>
     [Fact]
     [Trait("Category", "BlockContract")]
-    public void Contract_is_valid() => MathBlockFeatureContractAssertions.Verify("boolean-vector.not@1");
+    public void ContractIsValid() => MathBlockFeatureContractAssertions.Verify("boolean-vector.not@1");
 }

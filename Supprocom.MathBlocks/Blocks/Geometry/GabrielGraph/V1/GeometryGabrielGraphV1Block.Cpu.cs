@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>geometry.gabriel-graph@1</c> mathematical operation.</summary>
     public static MathBlockGraph GabrielGraph(IReadOnlyList<MathBlockPoint> points)
     {
+        ArgumentNullException.ThrowIfNull(points);
         var edges = new List<MathBlockGraphEdge>();
         for (var left = 0; left < points.Count; left++)
         {

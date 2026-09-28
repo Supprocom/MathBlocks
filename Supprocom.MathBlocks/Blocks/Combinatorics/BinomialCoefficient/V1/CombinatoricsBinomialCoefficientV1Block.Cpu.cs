@@ -1,7 +1,9 @@
 namespace Supprocom.MathBlocks;
 
+/// <summary>Defines the Math Block Probability contract.</summary>
 public static partial class MathBlockProbability
 {
+    /// <summary>Computes the <c>combinatorics.binomial-coefficient@1</c> mathematical operation.</summary>
     public static double BinomialCoefficient(int n, int k)
     {
         if (k < 0 || k > n)

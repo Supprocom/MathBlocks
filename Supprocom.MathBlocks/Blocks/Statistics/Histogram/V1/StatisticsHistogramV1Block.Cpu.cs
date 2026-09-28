@@ -2,8 +2,11 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockStatistics
 {
+    /// <summary>Computes the <c>statistics.histogram@1</c> mathematical operation.</summary>
     public static double[] Histogram(IReadOnlyList<double> values, IReadOnlyList<double> boundaries)
     {
+        ArgumentNullException.ThrowIfNull(boundaries);
+        ArgumentNullException.ThrowIfNull(values);
         var counts = new double[boundaries.Count + 1];
         for (var valueIndex = 0; valueIndex < values.Count; valueIndex++)
         {

@@ -4,11 +4,13 @@ using Supprocom.MathBlocks.Cuda;
 
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Cuda Worker Tests.</summary>
 public sealed class MathBlockCudaWorkerTests
 {
+    /// <summary>Verifies cudacatalog contains each scalar vector boolean and complex block.</summary>
     [Fact]
     [Trait("Category", "CudaSourceContract")]
-    public void CUDA_catalog_contains_each_scalar_vector_boolean_and_complex_block()
+    public void CUDACatalogContainsEachScalarVectorBooleanAndComplexBlock()
     {
         var expected = MathBlockCatalog.Standard.Operations
             .Where(operation =>
@@ -19,11 +21,10 @@ public sealed class MathBlockCudaWorkerTests
                 operation.Identifier.StartsWith("complex.", StringComparison.Ordinal) ||
                 operation.Identifier.StartsWith("complex-vector.", StringComparison.Ordinal) ||
                 operation.Identifier.StartsWith("complex-matrix.", StringComparison.Ordinal) ||
-                operation.Identifier is "transform.discrete-fourier" or
-                    "transform.inverse-discrete-fourier" ||
-                operation.Identifier == "special.error-function")
+                (string.Equals(operation.Identifier, "transform.discrete-fourier", StringComparison.Ordinal) || string.Equals(operation.Identifier, "transform.inverse-discrete-fourier", StringComparison.Ordinal)) ||
+string.Equals(operation.Identifier, "special.error-function", StringComparison.Ordinal))
             .Select(operation => operation.Identity)
-            .OrderBy(identity => identity, StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
             .ToArray();
 
         var supported = MathBlocksCUDAWorker.SupportedBlockIdentities.ToHashSet(StringComparer.Ordinal);
@@ -34,13 +35,14 @@ public sealed class MathBlockCudaWorkerTests
         Assert.All(supported, identity => Assert.Contains(identity, registered));
     }
 
+    /// <summary>Verifies cudaformula replays one resident graph with parallel branches.</summary>
     [Fact]
-    public void CUDA_formula_replays_one_resident_graph_with_parallel_branches()
+    public void CUDAFormulaReplaysOneResidentGraphWithParallelBranches()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var program = CreateParallelFormula();
         using var compiled = new MathBlocksCUDAWorker().Compile(program);
-        compiled.UploadInputs(new Dictionary<string, MathBlockValue>
+        compiled.UploadInputs(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
             ["first"] = MathBlockValue.Scalar(6d),
             ["second"] = MathBlockValue.Scalar(2d),
@@ -62,7 +64,7 @@ public sealed class MathBlockCudaWorkerTests
         Assert.Equal(2, compiled.MaximumParallelWidth);
 
         var cuda = compiled.ReadOutputs()["result"];
-        var cpu = program.Evaluate(new Dictionary<string, MathBlockValue>
+        var cpu = program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
             ["first"] = MathBlockValue.Scalar(6d),
             ["second"] = MathBlockValue.Scalar(2d),
@@ -73,12 +75,13 @@ public sealed class MathBlockCudaWorkerTests
         AssertExact(cpu, cuda);
     }
 
+    /// <summary>Verifies cudaprogram queues resident replays before one synchronization.</summary>
     [Fact]
-    public void CUDA_program_queues_resident_replays_before_one_synchronization()
+    public void CUDAProgramQueuesResidentReplaysBeforeOneSynchronization()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         using var compiled = new MathBlocksCUDAWorker().Compile(CreateParallelFormula());
-        compiled.UploadInputs(new Dictionary<string, MathBlockValue>
+        compiled.UploadInputs(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
             ["first"] = MathBlockValue.Scalar(6d),
             ["second"] = MathBlockValue.Scalar(2d),
@@ -97,9 +100,10 @@ public sealed class MathBlockCudaWorkerTests
         AssertExact(MathBlockValue.Scalar(8d), compiled.ReadOutputs()["result"]);
     }
 
+    /// <summary>Verifies cudaworker exposes only one graph upload and one graph download path.</summary>
     [Fact]
     [Trait("Category", "CudaSourceContract")]
-    public void CUDA_worker_exposes_only_one_graph_upload_and_one_graph_download_path()
+    public void CUDAWorkerExposesOnlyOneGraphUploadAndOneGraphDownloadPath()
     {
         var root = FindRepositoryRoot();
         var nativeSource = File.ReadAllText(Path.Combine(
@@ -112,7 +116,7 @@ public sealed class MathBlockCudaWorkerTests
             root,
             "Supprocom.MathBlocks",
             "Execution",
-            "MathBlocksCUDAWorker.cs"));
+            "MathBlocksCUDAProgram.cs"));
 
         Assert.DoesNotContain("cuMemcpyHostToDevice", nativeSource, StringComparison.Ordinal);
         Assert.DoesNotContain("cuMemcpyDeviceToHost", nativeSource, StringComparison.Ordinal);
@@ -123,16 +127,17 @@ public sealed class MathBlockCudaWorkerTests
                 StringSplitOptions.None).Length - 1);
     }
 
+    /// <summary>Verifies cudakernel abipreserves readonly inputs across the dispatch bridge.</summary>
     [Fact]
     [Trait("Category", "CudaSourceContract")]
-    public void CUDA_kernel_ABI_preserves_readonly_inputs_across_the_dispatch_bridge()
+    public void CUDAKernelABIPreservesReadonlyInputsAcrossTheDispatchBridge()
     {
         var root = FindRepositoryRoot();
         var workerSource = File.ReadAllText(Path.Combine(
             root,
             "Supprocom.MathBlocks",
             "Execution",
-            "MathBlocksCUDAWorker.cs"));
+            "MathBlocksCUDAProgram.cs"));
         var dispatchSource = File.ReadAllText(Path.Combine(
             root,
             "MathBlocks.CudaSourceGenerator",
@@ -169,8 +174,9 @@ public sealed class MathBlockCudaWorkerTests
         Assert.Contains("WriteInputPointers(", workerSource, StringComparison.Ordinal);
     }
 
+    /// <summary>Verifies cudaarena round trips every value kind with one upload and one download.</summary>
     [Fact]
-    public void CUDA_arena_round_trips_every_value_kind_with_one_upload_and_one_download()
+    public void CUDAArenaRoundTripsEveryValueKindWithOneUploadAndOneDownload()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var unit = MathBlockUnit.Basis0;
@@ -242,8 +248,9 @@ public sealed class MathBlockCudaWorkerTests
             AssertExact(item.Value, outputs[item.Key]);
     }
 
+    /// <summary>Verifies cudascalar reduction scratch remains outside the download region.</summary>
     [Fact]
-    public void CUDA_scalar_reduction_scratch_remains_outside_the_download_region()
+    public void CUDAScalarReductionScratchRemainsOutsideTheDownloadRegion()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var values = MathBlockValue.Vector([4d, 1d, 3d, 2d]);
@@ -253,8 +260,8 @@ public sealed class MathBlockCudaWorkerTests
         var program = builder.Output("median", median).Build();
         using var compiled = new MathBlocksCUDAWorker().Compile(
             program,
-            new Dictionary<string, MathBlockValue> { ["values"] = values });
-        compiled.UploadInputs(new Dictionary<string, MathBlockValue> { ["values"] = values });
+            new Dictionary<string, MathBlockValue>(StringComparer.Ordinal) { ["values"] = values });
+        compiled.UploadInputs(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal) { ["values"] = values });
 
         compiled.ExecuteResident();
         var output = compiled.ReadOutputs()["median"];
@@ -266,8 +273,9 @@ public sealed class MathBlockCudaWorkerTests
         Assert.Equal(0, compiled.CpuNodeDispatchCount);
     }
 
+    /// <summary>Verifies cudaconditional mutual information scratch preserves the following output slot.</summary>
     [Fact]
-    public void CUDA_conditional_mutual_information_scratch_preserves_the_following_output_slot()
+    public void CUDAConditionalMutualInformationScratchPreservesTheFollowingOutputSlot()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
@@ -304,8 +312,9 @@ public sealed class MathBlockCudaWorkerTests
         AssertResidentExecutionContract(compiled);
     }
 
+    /// <summary>Verifies cudadynamic repeat capacity propagates through boolean nodes.</summary>
     [Fact]
-    public void CUDA_dynamic_repeat_capacity_propagates_through_boolean_nodes()
+    public void CUDADynamicRepeatCapacityPropagatesThroughBooleanNodes()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
@@ -344,8 +353,9 @@ public sealed class MathBlockCudaWorkerTests
         AssertResidentExecutionContract(compiled);
     }
 
+    /// <summary>Verifies cudadynamic slice capacity propagates through concatenate and reduction.</summary>
     [Fact]
-    public void CUDA_dynamic_slice_capacity_propagates_through_concatenate_and_reduction()
+    public void CUDADynamicSliceCapacityPropagatesThroughConcatenateAndReduction()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
@@ -406,8 +416,9 @@ public sealed class MathBlockCudaWorkerTests
         AssertResidentExecutionContract(compiled);
     }
 
+    /// <summary>Verifies cudarolling order statistics preserve signed zero bits.</summary>
     [Fact]
-    public void CUDA_rolling_order_statistics_preserve_signed_zero_bits()
+    public void CUDARollingOrderStatisticsPreserveSignedZeroBits()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var negativeZero = BitConverter.Int64BitsToDouble(long.MinValue);
@@ -479,9 +490,10 @@ public sealed class MathBlockCudaWorkerTests
         }
     }
 
+    /// <summary>Verifies cudarolling order statistics are exact and scale subquadratically.</summary>
     [Fact]
     [Trait("Category", "Performance")]
-    public void CUDA_rolling_order_statistics_are_exact_and_scale_subquadratically()
+    public void CUDARollingOrderStatisticsAreExactAndScaleSubquadratically()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var measurements = new List<double>();
@@ -549,9 +561,10 @@ public sealed class MathBlockCudaWorkerTests
             $"4096={measurements[1]:F3} us, 8192={measurements[2]:F3} us.");
     }
 
+    /// <summary>Verifies cudafull history order statistics are exact and finish under one second.</summary>
     [Fact]
     [Trait("Category", "Performance")]
-    public void CUDA_full_history_order_statistics_are_exact_and_finish_under_one_second()
+    public void CUDAFullHistoryOrderStatisticsAreExactAndFinishUnderOneSecond()
     {
         const int count = 305_581;
         var values = MathBlockValue.Vector(
@@ -625,9 +638,10 @@ public sealed class MathBlockCudaWorkerTests
         }
     }
 
+    /// <summary>Verifies cudarolling order statistics cover full scale windows and adversarial inputs.</summary>
     [Fact]
     [Trait("Category", "Performance")]
-    public void CUDA_rolling_order_statistics_cover_full_scale_windows_and_adversarial_inputs()
+    public void CUDARollingOrderStatisticsCoverFullScaleWindowsAndAdversarialInputs()
     {
         const int count = 305_581;
         var widths = new[] { 1, 100, 2_048, count / 2, count };
@@ -713,8 +727,9 @@ public sealed class MathBlockCudaWorkerTests
         }
     }
 
+    /// <summary>Verifies cudaprogram is safe for concurrent atomic executions.</summary>
     [Fact]
-    public void CUDA_program_is_safe_for_concurrent_atomic_executions()
+    public void CUDAProgramIsSafeForConcurrentAtomicExecutions()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var program = new MathBlockFormulaBuilder(MathBlockCatalog.Standard)
@@ -728,7 +743,7 @@ public sealed class MathBlockCudaWorkerTests
 
         Parallel.For(0, results.Length, index =>
         {
-            var outputs = compiled.Execute(new Dictionary<string, MathBlockValue>
+            var outputs = compiled.Execute(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
             {
                 ["left"] = MathBlockValue.Scalar(index + 0.25d),
                 ["right"] = MathBlockValue.Scalar(index * 2d + 0.5d)
@@ -743,8 +758,9 @@ public sealed class MathBlockCudaWorkerTests
         Assert.Equal(results.Length, compiled.DeviceToHostTransferCount);
     }
 
+    /// <summary>Verifies every supported cudablock matches its cpuregression output exactly.</summary>
     [Fact]
-    public void Every_supported_CUDA_block_matches_its_CPU_regression_output_exactly()
+    public void EverySupportedCUDABlockMatchesItsCPURegressionOutputExactly()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var failures = new List<string>();
@@ -785,9 +801,10 @@ public sealed class MathBlockCudaWorkerTests
         Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures));
     }
 
+    /// <summary>Verifies every cudablock has sub millisecond warm latency on its contract shape.</summary>
     [Fact]
     [Trait("Category", "Performance")]
-    public void Every_CUDA_block_has_sub_millisecond_warm_latency_on_its_contract_shape()
+    public void EveryCUDABlockHasSubMillisecondWarmLatencyOnItsContractShape()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         const int batchCount = 21;
@@ -838,13 +855,14 @@ public sealed class MathBlockCudaWorkerTests
         Assert.Empty(failures);
     }
 
+    /// <summary>Verifies resident cudaformula has sub millisecond warm latency.</summary>
     [Fact]
     [Trait("Category", "Performance")]
-    public void Resident_CUDA_formula_has_sub_millisecond_warm_latency()
+    public void ResidentCUDAFormulaHasSubMillisecondWarmLatency()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         using var compiled = new MathBlocksCUDAWorker().Compile(CreateParallelFormula());
-        compiled.UploadInputs(new Dictionary<string, MathBlockValue>
+        compiled.UploadInputs(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
             ["first"] = MathBlockValue.Scalar(6d),
             ["second"] = MathBlockValue.Scalar(2d),
@@ -911,7 +929,7 @@ public sealed class MathBlockCudaWorkerTests
 
         if (!operation.Identifier.StartsWith("scalar.", StringComparison.Ordinal) &&
             !operation.Identifier.StartsWith("boolean.", StringComparison.Ordinal) &&
-            operation.Identifier != "special.error-function")
+!string.Equals(operation.Identifier, "special.error-function", StringComparison.Ordinal))
         {
             yield break;
         }
@@ -928,13 +946,13 @@ public sealed class MathBlockCudaWorkerTests
                 : [MathBlockValue.Boolean(true), MathBlockValue.Boolean(true)]);
             yield break;
         }
-        if (operation.Identifier == "scalar.select")
+        if (string.Equals(operation.Identifier, "scalar.select", StringComparison.Ordinal))
         {
             yield return Case("select-false", [MathBlockValue.Boolean(false), Scalar(1, 1.25d), Scalar(2, -2.5d)]);
             yield return Case("select-true", [MathBlockValue.Boolean(true), Scalar(1, -0.75d), Scalar(2, 2.5d)]);
             yield break;
         }
-        if (operation.Identifier == "scalar.clamp")
+        if (string.Equals(operation.Identifier, "scalar.clamp", StringComparison.Ordinal))
         {
             yield return Case("clamp-middle", [Scalar(0, 0.375d), Scalar(1, -1.25d), Scalar(2, 0.875d)]);
             yield return Case("clamp-low", [Scalar(0, -2.5d), Scalar(1, -1.25d), Scalar(2, 0.875d)]);
@@ -1019,7 +1037,7 @@ public sealed class MathBlockCudaWorkerTests
         expected.Count == actual.Count && Enumerable.Range(0, expected.Count).All(index =>
             BitConverter.DoubleToInt64Bits(expected[index]) == BitConverter.DoubleToInt64Bits(actual[index]));
 
-    private static bool ExactBooleans(IReadOnlyList<bool> expected, IReadOnlyList<bool> actual) =>
+    private static bool ExactBooleans(MathBlockBooleanVector expected, MathBlockBooleanVector actual) =>
         expected.Count == actual.Count && Enumerable.Range(0, expected.Count).All(index =>
             expected[index] == actual[index]);
 
@@ -1030,7 +1048,7 @@ public sealed class MathBlockCudaWorkerTests
         expected.Count == actual.Count && Enumerable.Range(0, expected.Count).All(index =>
             ExactComplex(expected[index], actual[index]));
 
-    private static bool ExactPoints(IReadOnlyList<MathBlockPoint> expected, IReadOnlyList<MathBlockPoint> actual) =>
+    private static bool ExactPoints(MathBlockPointSet expected, MathBlockPointSet actual) =>
         expected.Count == actual.Count && Enumerable.Range(0, expected.Count).All(index =>
             ExactDouble(expected[index].X, actual[index].X) &&
             ExactDouble(expected[index].Y, actual[index].Y));
@@ -1043,7 +1061,7 @@ public sealed class MathBlockCudaWorkerTests
             expected[index].To == actual[index].To &&
             ExactDouble(expected[index].Weight, actual[index].Weight));
 
-    private static bool ExactRuns(IReadOnlyList<MathBlockRun> expected, IReadOnlyList<MathBlockRun> actual) =>
+    private static bool ExactRuns(MathBlockRunSet expected, MathBlockRunSet actual) =>
         expected.Count == actual.Count && Enumerable.Range(0, expected.Count).All(index =>
             expected[index].Start == actual[index].Start &&
             expected[index].Length == actual[index].Length &&
@@ -1061,9 +1079,9 @@ public sealed class MathBlockCudaWorkerTests
             MathBlockValueKind.Scalar =>
                 $"{value.AsScalar():R}/0x{BitConverter.DoubleToInt64Bits(value.AsScalar()):x16}",
             MathBlockValueKind.Boolean => value.AsBoolean().ToString(),
-            MathBlockValueKind.Vector => $"[{string.Join(",", value.AsVector().Select(item =>
+            MathBlockValueKind.Vector => $"[{string.Join(',', value.AsVector().Select(item =>
                 $"{item:R}/0x{BitConverter.DoubleToInt64Bits(item):x16}"))}]",
-            MathBlockValueKind.BooleanVector => $"[{string.Join(",", value.AsBooleanVector())}]",
+            MathBlockValueKind.BooleanVector => $"[{string.Join(',', value.AsBooleanVector())}]",
             _ => value.Type.ToString()
         };
     }

@@ -1,13 +1,14 @@
 using System.Buffers;
 using System.Text;
-using Supprocom.MathBlocks;
 
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Open Math Validation Tests.</summary>
 public sealed class MathBlockOpenMathValidationTests
 {
+    /// <summary>Verifies validation reports validity canonicality and first difference.</summary>
     [Fact]
-    public void Validation_reports_validity_canonicality_and_first_difference()
+    public void ValidationReportsValidityCanonicalityAndFirstDifference()
     {
         var canonical = MathBlockOpenMath.Export(CreateSampleProgram());
         var canonicalResult = MathBlockOpenMath.Validate(canonical);
@@ -35,8 +36,9 @@ public sealed class MathBlockOpenMathValidationTests
         Assert.Equal(MathBlockOpenMathDiagnosticCode.SourceNull, nullResult.Diagnostic?.Code);
     }
 
+    /// <summary>Verifies utf 8 validation detects abomfor contiguous and segmented input.</summary>
     [Fact]
-    public void UTF8_validation_detects_a_BOM_for_contiguous_and_segmented_input()
+    public void UTF8ValidationDetectsABOMForContiguousAndSegmentedInput()
     {
         var canonical = MathBlockOpenMath.ExportUtf8(CreateSampleProgram());
         var withBom = new byte[canonical.Length + 3];
@@ -55,8 +57,9 @@ public sealed class MathBlockOpenMathValidationTests
         Assert.Equal(contiguous.DifferenceIndex, segmented.DifferenceIndex);
     }
 
+    /// <summary>Verifies normalization is exact and idempotent for all memory forms.</summary>
     [Fact]
-    public void Normalization_is_exact_and_idempotent_for_all_memory_forms()
+    public void NormalizationIsExactAndIdempotentForAllMemoryForms()
     {
         var canonical = MathBlockOpenMath.Export(CreateSampleProgram());
         var noncanonical = string.Concat("\n", canonical);
@@ -70,8 +73,9 @@ public sealed class MathBlockOpenMathValidationTests
             MathBlockOpenMath.NormalizeUtf8(CreateSequence(bytes, 3)));
     }
 
+    /// <summary>Verifies stream normalization preserves endpoints and invalid destinations async.</summary>
     [Fact]
-    public async Task Stream_normalization_preserves_endpoints_and_invalid_destinations()
+    public async Task StreamNormalizationPreservesEndpointsAndInvalidDestinationsAsync()
     {
         var canonical = MathBlockOpenMath.Export(CreateSampleProgram());
         var noncanonical = string.Concat("\n", canonical);
@@ -113,8 +117,9 @@ public sealed class MathBlockOpenMathValidationTests
         Assert.Equal(position, sameStream.Position);
     }
 
+    /// <summary>Verifies program validation reports profile export failures.</summary>
     [Fact]
-    public void Program_validation_reports_profile_export_failures()
+    public void ProgramValidationReportsProfileExportFailures()
     {
         var valid = MathBlockOpenMath.ValidateProgram(CreateSampleProgram());
         var missing = MathBlockOpenMath.ValidateProgram(null);

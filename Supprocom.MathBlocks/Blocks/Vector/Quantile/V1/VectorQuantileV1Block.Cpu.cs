@@ -2,6 +2,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockVectorMath
 {
+    /// <summary>Computes the <c>vector.quantile@1</c> mathematical operation.</summary>
     public static double Quantile(IReadOnlyList<double> values, double probability)
     {
         var sorted = MathBlockCollectionPrimitives.SortedCopy(

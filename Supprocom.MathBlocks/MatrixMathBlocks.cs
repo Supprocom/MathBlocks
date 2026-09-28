@@ -4,8 +4,11 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockLinearAlgebra
 {
 
+    /// <summary>Multiplies two compatible matrices.</summary>
     public static MathBlockMatrix Multiply(MathBlockMatrix left, MathBlockMatrix right)
     {
+        ArgumentNullException.ThrowIfNull(left);
+        ArgumentNullException.ThrowIfNull(right);
         var result = new double[left.Rows * right.Columns];
         for (var row = 0; row < left.Rows; row++)
         {
@@ -19,8 +22,11 @@ public static partial class MathBlockLinearAlgebra
         return new MathBlockMatrix(left.Rows, right.Columns, result, true);
     }
 
+    /// <summary>Multiplies a matrix by a compatible vector.</summary>
     public static double[] Multiply(MathBlockMatrix matrix, IReadOnlyList<double> vector)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
+        ArgumentNullException.ThrowIfNull(vector);
         var result = new double[matrix.Rows];
         for (var row = 0; row < matrix.Rows; row++)
         {
@@ -32,8 +38,10 @@ public static partial class MathBlockLinearAlgebra
         return result;
     }
 
+    /// <summary>Tests whether a square matrix is symmetric.</summary>
     public static bool IsSymmetric(MathBlockMatrix matrix)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         if (matrix.Rows != matrix.Columns)
             return false;
         for (var row = 0; row < matrix.Rows; row++)
@@ -43,8 +51,10 @@ public static partial class MathBlockLinearAlgebra
         return true;
     }
 
+    /// <summary>Computes eigenvalues of a symmetric matrix.</summary>
     public static double[] SymmetricEigenvalues(MathBlockMatrix matrix)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         var size = matrix.Rows;
         var values = matrix.ToArray();
         for (var iteration = 0; iteration < 64 * size * size; iteration++)

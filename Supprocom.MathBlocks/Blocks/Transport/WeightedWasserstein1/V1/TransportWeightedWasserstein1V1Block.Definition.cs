@@ -1,4 +1,5 @@
 namespace Supprocom.MathBlocks;
+
 internal static partial class TransportMathBlocks
 {
     internal static class TransportWeightedWasserstein1V1Block

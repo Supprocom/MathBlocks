@@ -3,8 +3,11 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>matrix.toeplitz@1</c> mathematical operation.</summary>
     public static MathBlockMatrix Toeplitz(IReadOnlyList<double> firstColumn, IReadOnlyList<double> firstRow)
     {
+        ArgumentNullException.ThrowIfNull(firstColumn);
+        ArgumentNullException.ThrowIfNull(firstRow);
         var result = new double[firstColumn.Count * firstRow.Count];
         for (var row = 0; row < firstColumn.Count; row++)
         {

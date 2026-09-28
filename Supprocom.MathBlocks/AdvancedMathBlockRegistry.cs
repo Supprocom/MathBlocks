@@ -53,8 +53,8 @@ internal static partial class AdvancedMathBlocks
             return MathBlockType.Matrix(types[0].Unit, types[0].Rows, types[1].Rows);
         },
         inputs => inputs[0].AsVector().Count > 0 && inputs[1].AsVector().Count > 0 &&
-                  (identifier == "matrix.hankel"
-                      ? inputs[0].AsVector()[^1] == inputs[1].AsVector()[0]
+                  (string.Equals(identifier, "matrix.hankel"
+, StringComparison.Ordinal) ? inputs[0].AsVector()[^1] == inputs[1].AsVector()[0]
                       : inputs[0].AsVector()[0] == inputs[1].AsVector()[0])
             ? MathBlockValue.Matrix(function(inputs[0].AsVector(), inputs[1].AsVector()), inputs[0].Type.Unit)
             : MathBlockValue.Invalid(MathBlockType.Matrix(inputs[0].Type.Unit), "The boundary vectors are incompatible."),
@@ -255,8 +255,8 @@ internal static partial class AdvancedMathBlocks
     }
 
     private static bool IsPositivePair(
-        IReadOnlyList<double> left,
-        IReadOnlyList<double> right,
+        Supprocom.MathBlocks.MathBlockVector left,
+        Supprocom.MathBlocks.MathBlockVector right,
         bool distribution)
     {
         if (left.Count == 0 || left.Count != right.Count)
@@ -267,7 +267,7 @@ internal static partial class AdvancedMathBlocks
                MathBlockCollectionPrimitives.All(right, value => value > 0d);
     }
 
-    private static bool IsDistribution(IReadOnlyList<double> values) =>
+    private static bool IsDistribution(MathBlockVector values) =>
         values.Count > 0 && MathBlockCollectionPrimitives.All(values, value => value >= 0d) &&
         Math.Abs(MathBlockVectorMath.Sum(values) - 1d) <= 1e-10;
 

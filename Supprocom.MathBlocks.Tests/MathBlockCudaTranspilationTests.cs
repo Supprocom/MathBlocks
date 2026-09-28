@@ -3,6 +3,7 @@ using Supprocom.MathBlocks.Cuda;
 
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Cuda Transpilation Tests.</summary>
 public sealed class MathBlockCudaTranspilationTests
 {
     private static readonly string[] OperationCatalogs =
@@ -20,8 +21,9 @@ public sealed class MathBlockCudaTranspilationTests
         "Transport"
     ];
 
+    /// <summary>Verifies cudascalar unit matches the csharp 2 cuda 031 golden.</summary>
     [Fact]
-    public void CUDA_scalar_unit_matches_the_CSharp2CUDA_0_3_1_golden()
+    public void CUDAScalarUnitMatchesTheCSharp2CUDA031Golden()
     {
         AssertGeneratedUnit("Scalar", 0);
         Assert.Equal(CreateExpectedSource(), MathBlockCudaDeviceModule.Source);
@@ -33,48 +35,59 @@ public sealed class MathBlockCudaTranspilationTests
             MathBlockCudaDeviceModule.Abi.OperationTableFingerprint);
     }
 
+    /// <summary>Verifies cudavector unit matches the csharp 2 cuda 031 golden.</summary>
     [Fact]
-    public void CUDA_vector_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
+    public void CUDAVectorUnitMatchesTheCSharp2CUDA031Golden() =>
         AssertGeneratedUnit("Vector", 1);
 
+    /// <summary>Verifies cudacomplex unit matches the csharp 2 cuda 031 golden.</summary>
     [Fact]
-    public void CUDA_complex_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
+    public void CUDAComplexUnitMatchesTheCSharp2CUDA031Golden() =>
         AssertGeneratedUnit("Complex", 2);
 
+    /// <summary>Verifies cudamatrix unit matches the csharp 2 cuda 031 golden.</summary>
     [Fact]
-    public void CUDA_matrix_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
+    public void CUDAMatrixUnitMatchesTheCSharp2CUDA031Golden() =>
         AssertGeneratedUnit("Matrix", 3);
 
+    /// <summary>Verifies cudaprobability unit matches the csharp 2 cuda 031 golden.</summary>
     [Fact]
-    public void CUDA_probability_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
+    public void CUDAProbabilityUnitMatchesTheCSharp2CUDA031Golden() =>
         AssertGeneratedUnit("Probability", 4);
 
+    /// <summary>Verifies cudasequence path unit matches the csharp 2 cuda 031 golden.</summary>
     [Fact]
-    public void CUDA_sequence_path_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
+    public void CUDASequencePathUnitMatchesTheCSharp2CUDA031Golden() =>
         AssertGeneratedUnit("SequencePath", 5);
 
+    /// <summary>Verifies cudastatistics unit matches the csharp 2 cuda 031 golden.</summary>
     [Fact]
-    public void CUDA_statistics_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
+    public void CUDAStatisticsUnitMatchesTheCSharp2CUDA031Golden() =>
         AssertGeneratedUnit("Statistics", 6);
 
+    /// <summary>Verifies cudageometry unit matches the csharp 2 cuda 031 golden.</summary>
     [Fact]
-    public void CUDA_geometry_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
+    public void CUDAGeometryUnitMatchesTheCSharp2CUDA031Golden() =>
         AssertGeneratedUnit("Geometry", 7);
 
+    /// <summary>Verifies cudagraph unit matches the csharp 2 cuda 031 golden.</summary>
     [Fact]
-    public void CUDA_graph_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
+    public void CUDAGraphUnitMatchesTheCSharp2CUDA031Golden() =>
         AssertGeneratedUnit("Graph", 8);
 
+    /// <summary>Verifies cudaadvanced unit matches the csharp 2 cuda 031 golden.</summary>
     [Fact]
-    public void CUDA_advanced_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
+    public void CUDAAdvancedUnitMatchesTheCSharp2CUDA031Golden() =>
         AssertGeneratedUnit("Advanced", 9);
 
+    /// <summary>Verifies cudatransport unit matches the csharp 2 cuda 031 golden.</summary>
     [Fact]
-    public void CUDA_transport_unit_matches_the_CSharp2CUDA_0_3_1_golden() =>
+    public void CUDATransportUnitMatchesTheCSharp2CUDA031Golden() =>
         AssertGeneratedUnit("Transport", 10);
 
+    /// <summary>Verifies cudadevice dispatch unit matches the csharp 2 cuda 031 golden.</summary>
     [Fact]
-    public void CUDA_device_dispatch_unit_matches_the_CSharp2CUDA_0_3_1_golden()
+    public void CUDADeviceDispatchUnitMatchesTheCSharp2CUDA031Golden()
     {
         var source = MathBlockCudaDeviceModule.Source;
         var start = OperationCatalogs.Sum(catalog => ReadGolden(catalog).Length + 1) + 1;

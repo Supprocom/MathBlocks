@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>cooperative.shapley-values@1</c> mathematical operation.</summary>
     public static double[] ShapleyValues(IReadOnlyList<double> coalitionValues)
     {
+        ArgumentNullException.ThrowIfNull(coalitionValues);
         var playerCount = Math.FloorLog2((uint)coalitionValues.Count);
         var result = new double[playerCount];
         var denominator = MathBlockProbability.Factorial(playerCount);

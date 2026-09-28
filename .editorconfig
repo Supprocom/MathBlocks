@@ -1,0 +1,212 @@
+root = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+insert_final_newline = true
+dotnet_diagnostic.IDE0005.severity = warning
+dotnet_diagnostic.IDE0044.severity = warning
+dotnet_diagnostic.IDE0051.severity = warning
+dotnet_diagnostic.IDE0055.severity = warning
+dotnet_diagnostic.IDE0059.severity = warning
+dotnet_diagnostic.IDE0060.severity = warning
+dotnet_code_quality_unused_parameters = non_public
+dotnet_analyzer_diagnostic.category-Security.severity = warning
+dotnet_analyzer_diagnostic.category-Reliability.severity = warning
+dotnet_analyzer_diagnostic.category-Performance.severity = warning
+dotnet_analyzer_diagnostic.category-Usage.severity = warning
+# Keep the published 0.5.x API signatures stable while requiring concrete
+# types in implementation details where the performance rule can be applied.
+dotnet_code_quality.CA1859.api_surface = private, internal
+dotnet_code_quality.CA1822.api_surface = private, internal
+# HLQ013 does not account for the index as a mathematical coordinate or a
+# destination offset. Every observed hit needs that index; foreach would
+# require reintroducing a counter and would not improve enumeration.
+dotnet_diagnostic.HLQ013.severity = none
+# Numerical kernels and canonical parsers need somewhat more cohesive local
+# context than the analyzer's 60-line default; flag genuinely larger methods.
+MA0051.maximum_lines_per_method = 100
+MA0051.maximum_statements_per_method = 60
+
+# Exact equivalent rules documented by Meziantou.Analyzer: prefer SDK CA rules.
+# https://github.com/meziantou/Meziantou.Analyzer/blob/main/docs/comparison-with-other-analyzers.md
+# Duplicate of CA1018.
+dotnet_diagnostic.MA0010.severity = none
+# Duplicate of CA1036.
+dotnet_diagnostic.MA0097.severity = none
+# Duplicate of CA1041.
+dotnet_diagnostic.MA0070.severity = none
+# Duplicate of CA1050.
+dotnet_diagnostic.MA0047.severity = none
+# Duplicate of CA1058.
+dotnet_diagnostic.MA0013.severity = none
+# Duplicate of CA1065.
+dotnet_diagnostic.MA0086.severity = none
+# Duplicate of CA1067.
+dotnet_diagnostic.MA0095.severity = none
+# Duplicate of CA1304, CA1305.
+dotnet_diagnostic.MA0011.severity = none
+# Duplicate of CA1307, CA1309, CA1310.
+dotnet_diagnostic.MA0001.severity = none
+# Duplicate of CA1307, CA1309.
+dotnet_diagnostic.MA0074.severity = none
+# Duplicate of CA1507.
+dotnet_diagnostic.MA0043.severity = none
+# Duplicate of CA1710.
+dotnet_diagnostic.MA0057.severity = none
+# Duplicate of CA1710.
+dotnet_diagnostic.MA0058.severity = none
+# Duplicate of CA1710.
+dotnet_diagnostic.MA0059.severity = none
+# Duplicate of CA1724.
+dotnet_diagnostic.MA0049.severity = none
+# Duplicate of CA1825.
+dotnet_diagnostic.MA0005.severity = none
+# Duplicate of CA2200.
+dotnet_diagnostic.MA0027.severity = none
+# Duplicate of CA2201.
+dotnet_diagnostic.MA0012.severity = none
+# Duplicate of CA2201.
+dotnet_diagnostic.MA0014.severity = none
+# Duplicate of CA2208.
+dotnet_diagnostic.MA0015.severity = none
+# Duplicate of CA2211.
+dotnet_diagnostic.MA0069.severity = none
+# Duplicate of CA2217.
+dotnet_diagnostic.MA0062.severity = none
+# Duplicate of CA2219.
+dotnet_diagnostic.MA0072.severity = none
+# Duplicate of CA2242.
+dotnet_diagnostic.MA0082.severity = none
+# Duplicate of CA2259.
+dotnet_diagnostic.MA0033.severity = none
+# Duplicate of CA2264.
+dotnet_diagnostic.MA0131.severity = none
+# Duplicate of CA5359.
+dotnet_diagnostic.MA0039.severity = none
+
+# A versioned block file is named for its operation, while its host-side partial
+# family type is shared across operations. Exempt those exact partial types only;
+# unrelated co-located types still have to satisfy MA0048.
+dotnet_diagnostic.MA0048.excluded_symbol_names = T:Supprocom.MathBlocks.AdvancedMathBlocks|T:Supprocom.MathBlocks.ComplexMathBlocks|T:Supprocom.MathBlocks.GeometryMathBlocks|T:Supprocom.MathBlocks.GraphMathBlocks|T:Supprocom.MathBlocks.MatrixMathBlocks|T:Supprocom.MathBlocks.PathMathBlocks|T:Supprocom.MathBlocks.ProbabilityMathBlocks|T:Supprocom.MathBlocks.ScalarMathBlocks|T:Supprocom.MathBlocks.StatisticalMathBlocks|T:Supprocom.MathBlocks.StructuralMathBlocks|T:Supprocom.MathBlocks.TransportMathBlocks|T:Supprocom.MathBlocks.VectorMathBlocks|T:Supprocom.MathBlocks.MathBlockAdvanced|T:Supprocom.MathBlocks.MathBlockComplex|T:Supprocom.MathBlocks.MathBlockGeometry|T:Supprocom.MathBlocks.MathBlockGraphMath|T:Supprocom.MathBlocks.MathBlockLinearAlgebra|T:Supprocom.MathBlocks.MathBlockPath|T:Supprocom.MathBlocks.MathBlockPolynomial|T:Supprocom.MathBlocks.MathBlockProbability|T:Supprocom.MathBlocks.MathBlockScalar|T:Supprocom.MathBlocks.MathBlockStatistics|T:Supprocom.MathBlocks.MathBlockStructure|T:Supprocom.MathBlocks.MathBlockTransport|T:Supprocom.MathBlocks.MathBlockVectorMath
+
+# In feature folders the suffix names a source role, not a different type.
+[Supprocom.MathBlocks/Blocks/**/*.Cuda.cs]
+MA0048.excluded_file_name_parts = .
+
+[Supprocom.MathBlocks/Blocks/**/*.Tests.cs]
+MA0048.excluded_file_name_parts = .
+dotnet_diagnostic.CA1515.severity = none
+
+# xUnit v2 discovers these test classes only when they are public; CA1515's
+# application-type recommendation is incompatible with test discovery.
+[Supprocom.MathBlocks.Tests/**/*.cs]
+dotnet_diagnostic.CA1515.severity = none
+# xUnit1030 requires captured context for bounded test parallelism; xUnit's
+# own rule takes precedence over library ConfigureAwait recommendations.
+dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.VSTHRD111.severity = none
+dotnet_diagnostic.MA0004.severity = none
+# Async test cases also exercise the synchronous API intentionally; replacing
+# those calls with async variants would remove the sync regression coverage.
+dotnet_diagnostic.CA1849.severity = none
+dotnet_diagnostic.VSTHRD103.severity = none
+# Literal sample arrays in one-shot tests are deliberate fresh inputs, not hot
+# path allocations or shared mutable fixtures.
+dotnet_diagnostic.CA1861.severity = none
+# Fixed-seed Random instances are regression-data generators, never security
+# randomness; retaining seeds is required for reproducible test failures.
+dotnet_diagnostic.CA5394.severity = none
+# Single() asserts uniqueness in tests; replacing it with First() would remove
+# a tested invariant merely to save a negligible test-only enumeration cost.
+dotnet_diagnostic.HLQ005.severity = none
+# End-to-end test scenarios intentionally exercise several boundary cases in
+# one setup; keep the limit active, but use a test-specific 150-line ceiling.
+MA0051.maximum_lines_per_method = 150
+MA0051.maximum_statements_per_method = 60
+
+# The current test project keeps its test sources directly at its root.
+[Supprocom.MathBlocks.Tests/*.cs]
+dotnet_diagnostic.CA1515.severity = none
+dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.VSTHRD111.severity = none
+dotnet_diagnostic.MA0004.severity = none
+dotnet_diagnostic.CA1849.severity = none
+dotnet_diagnostic.VSTHRD103.severity = none
+dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.CA5394.severity = none
+dotnet_diagnostic.HLQ005.severity = none
+MA0051.maximum_lines_per_method = 150
+MA0051.maximum_statements_per_method = 60
+
+# These established enum values already use zero for a meaningful state;
+# introducing a second "None" name for zero would misrepresent the wire/API value.
+[Supprocom.MathBlocks/MathBlockValueKind.cs]
+dotnet_diagnostic.CA1008.severity = none
+
+[Supprocom.MathBlocks/Notation/MathBlockFormulaFormat.cs]
+dotnet_diagnostic.CA1008.severity = none
+
+[Supprocom.MathBlocks/Notation/MathBlockFormulaMappingClassification.cs]
+dotnet_diagnostic.CA1008.severity = none
+
+# MathBlockValue is a discriminated value with reference-backed payloads; the
+# three CUDA descriptors contain device pointers. None has universal value
+# equality semantics, so an automatically generated equality operator is unsafe.
+[Supprocom.MathBlocks/MathBlockValue.cs]
+dotnet_diagnostic.CA1815.severity = none
+
+# These generated-style indexes intentionally keep all 337 registrations in a
+# single ordered expression so coverage and ABI fingerprints are auditable.
+[Supprocom.MathBlocks/MathBlockFeatureIndex.cs]
+dotnet_diagnostic.MA0051.severity = none
+
+[Supprocom.MathBlocks/Cuda/MathBlockCudaFeatureIndex.cs]
+dotnet_diagnostic.MA0051.severity = none
+
+[Supprocom.MathBlocks/Cuda/MathBlockCudaGraphEdgeDescriptor.cs]
+dotnet_diagnostic.CA1815.severity = none
+
+[Supprocom.MathBlocks/Cuda/MathBlockCudaRunDescriptor.cs]
+dotnet_diagnostic.CA1815.severity = none
+
+[Supprocom.MathBlocks/Cuda/MathBlockCudaSlotDescriptor.cs]
+dotnet_diagnostic.CA1815.severity = none
+
+# These raw literals define byte-sensitive codec/CUDA contract fixtures; their
+# line endings are covered by exact fingerprints and must not be rewritten.
+[Supprocom.MathBlocks/Cuda/MathBlockCudaValueCodec.cs]
+dotnet_diagnostic.MA0136.severity = none
+
+[Supprocom.MathBlocks.Tests/MathBlockCudaOperationContractTests.cs]
+dotnet_diagnostic.MA0136.severity = none
+
+# This is a machine-readable fuzz-harness status token, not user-facing copy.
+[MathBlocks.OpenMath.Fuzz/Program.cs]
+dotnet_diagnostic.CA1303.severity = none
+
+# The six published enumerator signatures return IEnumerator<T>; changing the
+# return type to a struct would break existing 0.5.x binaries and named APIs.
+[Supprocom.MathBlocks/MathBlockBooleanVector.cs]
+dotnet_diagnostic.HLQ006.severity = none
+
+[Supprocom.MathBlocks/MathBlockComplexVector.cs]
+dotnet_diagnostic.HLQ006.severity = none
+
+[Supprocom.MathBlocks/MathBlockGraph.cs]
+dotnet_diagnostic.HLQ006.severity = none
+
+[Supprocom.MathBlocks/MathBlockPointSet.cs]
+dotnet_diagnostic.HLQ006.severity = none
+
+[Supprocom.MathBlocks/MathBlockRunSet.cs]
+dotnet_diagnostic.HLQ006.severity = none
+
+[Supprocom.MathBlocks/MathBlockVector.cs]
+dotnet_diagnostic.HLQ006.severity = none
+
+# These generic collection primitives intentionally accept arbitrary
+# IReadOnlyList<T> implementations; current callers are not a type contract.
+[Supprocom.MathBlocks/Primitives/MathBlockCollectionPrimitives.cs]
+dotnet_diagnostic.CA1859.severity = suggestion

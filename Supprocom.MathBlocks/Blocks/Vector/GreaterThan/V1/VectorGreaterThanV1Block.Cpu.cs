@@ -2,5 +2,11 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockVectorMath
 {
-    public static bool[] GreaterThan(IReadOnlyList<double> left, IReadOnlyList<double> right) => Compare(left, right, (a, b) => a > b);
+    /// <summary>Computes the <c>vector.greater-than@1</c> mathematical operation.</summary>
+    public static bool[] GreaterThan(IReadOnlyList<double> left, IReadOnlyList<double> right)
+    {
+        ArgumentNullException.ThrowIfNull(left);
+        ArgumentNullException.ThrowIfNull(right);
+        return Compare(left, right, (a, b) => a > b);
+    }
 }

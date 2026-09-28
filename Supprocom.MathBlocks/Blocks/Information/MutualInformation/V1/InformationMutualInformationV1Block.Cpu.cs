@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockProbability
 {
+    /// <summary>Computes the <c>information.mutual-information@1</c> mathematical operation.</summary>
     public static double MutualInformation(MathBlockMatrix jointProbabilities)
     {
+        ArgumentNullException.ThrowIfNull(jointProbabilities);
         var rowTotals = new double[jointProbabilities.Rows];
         var columnTotals = new double[jointProbabilities.Columns];
         for (var row = 0; row < jointProbabilities.Rows; row++)

@@ -2,14 +2,15 @@ using System.Buffers;
 using System.Globalization;
 using System.Text;
 using System.Xml.Linq;
-using Supprocom.MathBlocks;
 
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Open Math Robustness Tests.</summary>
 public sealed class MathBlockOpenMathRobustnessTests
 {
+    /// <summary>Verifies every character and utf 8 truncation fails safely.</summary>
     [Fact]
-    public void Every_character_and_UTF8_truncation_fails_safely()
+    public void EveryCharacterAndUTF8TruncationFailsSafely()
     {
         var text = MathBlockOpenMath.Export(CreateSampleProgram("left-α"));
         var bytes = Encoding.UTF8.GetBytes(text);
@@ -31,8 +32,9 @@ public sealed class MathBlockOpenMathRobustnessTests
         Assert.True(MathBlockOpenMath.TryImportUtf8(bytes).Succeeded);
     }
 
+    /// <summary>Verifies utf 8 reader rejects each malformed sequence class.</summary>
     [Fact]
-    public void UTF8_reader_rejects_each_malformed_sequence_class()
+    public void UTF8ReaderRejectsEachMalformedSequenceClass()
     {
         byte[][] malformed =
         [
@@ -64,8 +66,9 @@ public sealed class MathBlockOpenMathRobustnessTests
             MathBlockOpenMath.Export(MathBlockOpenMath.ImportUtf8(declared).Program));
     }
 
+    /// <summary>Verifies stream reader honors position trailing content and transport failures.</summary>
     [Fact]
-    public void Stream_reader_honors_position_trailing_content_and_transport_failures()
+    public void StreamReaderHonorsPositionTrailingContentAndTransportFailures()
     {
         var text = MathBlockOpenMath.Export(CreateSampleProgram("left"));
         var bytes = Encoding.UTF8.GetBytes(text);
@@ -96,8 +99,9 @@ public sealed class MathBlockOpenMathRobustnessTests
         Assert.Equal("The test transport failed.", exception.Message);
     }
 
+    /// <summary>Verifies empty streams and readers report the empty source diagnostic async.</summary>
     [Fact]
-    public async Task Empty_streams_and_readers_report_the_empty_source_diagnostic()
+    public async Task EmptyStreamsAndReadersReportTheEmptySourceDiagnosticAsync()
     {
         AssertCode(
             MathBlockOpenMath.TryImport(string.Empty),
@@ -117,18 +121,22 @@ public sealed class MathBlockOpenMathRobustnessTests
             AssertCode(
                 MathBlockOpenMath.TryRead(reader),
                 MathBlockOpenMathDiagnosticCode.SourceEmpty);
-        await using (var stream = new MemoryStream())
-            AssertCode(
-                await MathBlockOpenMath.TryReadUtf8Async(stream),
-                MathBlockOpenMathDiagnosticCode.SourceEmpty);
+        {
+            var stream = new MemoryStream();
+            await using (stream)
+                AssertCode(
+                    await MathBlockOpenMath.TryReadUtf8Async(stream),
+                    MathBlockOpenMathDiagnosticCode.SourceEmpty);
+        }
         using (var reader = new StringReader(string.Empty))
             AssertCode(
                 await MathBlockOpenMath.TryReadAsync(reader),
                 MathBlockOpenMathDiagnosticCode.SourceEmpty);
     }
 
+    /// <summary>Verifies async input uses async iobeyond its prefix and preserves failures async.</summary>
     [Fact]
-    public async Task Async_input_uses_async_IO_beyond_its_prefix_and_preserves_failures()
+    public async Task AsyncInputUsesAsyncIOBeyondItsPrefixAndPreservesFailuresAsync()
     {
         var program = CreateSampleProgram(new string('α', 5_000));
         var text = MathBlockOpenMath.Export(program);
@@ -160,8 +168,9 @@ public sealed class MathBlockOpenMathRobustnessTests
                 cancellationToken: cancellation.Token));
     }
 
+    /// <summary>Verifies resource limits accept exact counts and reject the next unit.</summary>
     [Fact]
-    public void Resource_limits_accept_exact_counts_and_reject_the_next_unit()
+    public void ResourceLimitsAcceptExactCountsAndRejectTheNextUnit()
     {
         var program = CreateSampleProgram("left");
         var text = MathBlockOpenMath.Export(program);
@@ -231,8 +240,9 @@ public sealed class MathBlockOpenMathRobustnessTests
             MathBlockOpenMathDiagnosticCode.InvalidShape);
     }
 
+    /// <summary>Verifies normalization accepts equivalent xmlforms and is idempotent.</summary>
     [Fact]
-    public void Normalization_accepts_equivalent_XML_forms_and_is_idempotent()
+    public void NormalizationAcceptsEquivalentXMLFormsAndIsIdempotent()
     {
         var canonical = MathBlockOpenMath.Export(CreateSampleProgram("left"));
         var document = XDocument.Parse(canonical, LoadOptions.PreserveWhitespace);
@@ -267,8 +277,9 @@ public sealed class MathBlockOpenMathRobustnessTests
         Assert.Equal(bytes, MathBlockOpenMath.NormalizeUtf8(withBom));
     }
 
+    /// <summary>Verifies output handles every span capacity and true async ioasync.</summary>
     [Fact]
-    public async Task Output_handles_every_span_capacity_and_true_async_IO()
+    public async Task OutputHandlesEverySpanCapacityAndTrueAsyncIOAsync()
     {
         var program = CreateSampleProgram("left-α");
         var expectedText = MathBlockOpenMath.Export(program);
@@ -307,13 +318,17 @@ public sealed class MathBlockOpenMathRobustnessTests
                 cancellation.Token));
 
         await using var failing = new FaultingWriteStream(true);
+        // This case must observe the transport failure, not the earlier cancellation.
+#pragma warning disable MA0040
         var exception = await Assert.ThrowsAsync<IOException>(
             () => MathBlockOpenMath.WriteUtf8Async(program, failing));
+#pragma warning restore MA0040
         Assert.Equal("The test transport failed.", exception.Message);
     }
 
+    /// <summary>Verifies full catalog program uses every public data path async.</summary>
     [Fact]
-    public async Task Full_catalog_program_uses_every_public_data_path()
+    public async Task FullCatalogProgramUsesEveryPublicDataPathAsync()
     {
         var program = CreateCatalogProgram();
         var text = MathBlockOpenMath.Export(program);
@@ -355,8 +370,11 @@ public sealed class MathBlockOpenMathRobustnessTests
             imports.Add(MathBlockOpenMath.ReadUtf8(stream));
         using (var reader = new StringReader(text))
             imports.Add(MathBlockOpenMath.Read(reader));
-        await using (var stream = new MemoryStream(bytes))
-            imports.Add(await MathBlockOpenMath.ReadUtf8Async(stream));
+        {
+            var stream = new MemoryStream(bytes);
+            await using (stream)
+                imports.Add(await MathBlockOpenMath.ReadUtf8Async(stream));
+        }
         using (var reader = new StringReader(text))
             imports.Add(await MathBlockOpenMath.ReadAsync(reader));
 
@@ -367,10 +385,10 @@ public sealed class MathBlockOpenMathRobustnessTests
             Assert.Equal(337, result.OperationOccurrences.Count);
             Assert.Equal(
                 MathBlockCatalog.Standard.Operations.Select(operation => operation.Identity),
-                result.Operations.Select(operation => operation.Identity));
+                result.Operations.Select(operation => operation.Identity), StringComparer.Ordinal);
             Assert.Equal(
                 result.Operations.Select(operation => operation.Identity),
-                result.OperationOccurrences.Select(occurrence => occurrence.Operation.Identity));
+                result.OperationOccurrences.Select(occurrence => occurrence.Operation.Identity), StringComparer.Ordinal);
         });
 
         Assert.True(MathBlockOpenMath.TryImport(text).Succeeded);
@@ -379,8 +397,11 @@ public sealed class MathBlockOpenMathRobustnessTests
             Assert.True(MathBlockOpenMath.TryReadUtf8(stream).Succeeded);
         using (var reader = new StringReader(text))
             Assert.True(MathBlockOpenMath.TryRead(reader).Succeeded);
-        await using (var stream = new MemoryStream(bytes))
-            Assert.True((await MathBlockOpenMath.TryReadUtf8Async(stream)).Succeeded);
+        {
+            var stream = new MemoryStream(bytes);
+            await using (stream)
+                Assert.True((await MathBlockOpenMath.TryReadUtf8Async(stream)).Succeeded);
+        }
         using (var reader = new StringReader(text))
             Assert.True((await MathBlockOpenMath.TryReadAsync(reader)).Succeeded);
 
@@ -393,8 +414,9 @@ public sealed class MathBlockOpenMathRobustnessTests
         Assert.True(MathBlockOpenMath.ValidateProgram(program).IsValid);
     }
 
+    /// <summary>Verifies deep and deterministically mutated xmlfails without implementation errors.</summary>
     [Fact]
-    public void Deep_and_deterministically_mutated_XML_fails_without_implementation_errors()
+    public void DeepAndDeterministicallyMutatedXMLFailsWithoutImplementationErrors()
     {
         var canonical = MathBlockOpenMath.Export(CreateSampleProgram("left"));
         var random = new Random(401);
@@ -408,7 +430,7 @@ public sealed class MathBlockOpenMathRobustnessTests
             Assert.NotEqual(attempt.Result is null, attempt.Diagnostic is null);
         }
 
-        var rootStart = canonical[..(canonical.IndexOf('>') + 1)];
+        var rootStart = canonical[..(canonical.IndexOf('>', StringComparison.Ordinal) + 1)];
         var deep = string.Concat(
             rootStart,
             string.Concat(Enumerable.Repeat("<OMA>", 4_096)),
@@ -424,8 +446,9 @@ public sealed class MathBlockOpenMathRobustnessTests
         Assert.NotNull(deepAttempt.Diagnostic);
     }
 
+    /// <summary>Verifies concurrent calls share no mutable notation state async.</summary>
     [Fact]
-    public async Task Concurrent_calls_share_no_mutable_notation_state()
+    public async Task ConcurrentCallsShareNoMutableNotationStateAsync()
     {
         var program = CreateSampleProgram("left-α");
         var text = MathBlockOpenMath.Export(program);

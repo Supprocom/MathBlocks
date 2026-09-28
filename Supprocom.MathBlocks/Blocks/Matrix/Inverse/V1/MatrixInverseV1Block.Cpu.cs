@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockLinearAlgebra
 {
+    /// <summary>Computes the <c>matrix.inverse@1</c> mathematical operation.</summary>
     public static bool TryInverse(MathBlockMatrix matrix, out MathBlockMatrix? inverse)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         var size = matrix.Rows;
         var values = new double[size * size];
         var right = new double[size];

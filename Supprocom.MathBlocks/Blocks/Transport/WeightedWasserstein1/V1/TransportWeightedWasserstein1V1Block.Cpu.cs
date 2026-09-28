@@ -2,8 +2,13 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockTransport
 {
+    /// <summary>Computes the <c>transport.weighted-wasserstein-1@1</c> mathematical operation.</summary>
     public static double WeightedWasserstein1(IReadOnlyList<double> leftLocations, IReadOnlyList<double> leftWeights, IReadOnlyList<double> rightLocations, IReadOnlyList<double> rightWeights)
     {
+        ArgumentNullException.ThrowIfNull(leftLocations);
+        ArgumentNullException.ThrowIfNull(leftWeights);
+        ArgumentNullException.ThrowIfNull(rightLocations);
+        ArgumentNullException.ThrowIfNull(rightWeights);
         var left = MathBlockCollectionPrimitives.SortedIndices(
             leftLocations,
             MathBlockCollectionPrimitives.CompareDoubleAscending);

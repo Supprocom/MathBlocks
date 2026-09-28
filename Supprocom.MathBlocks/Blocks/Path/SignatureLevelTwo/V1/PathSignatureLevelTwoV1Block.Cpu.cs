@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockPath
 {
+    /// <summary>Computes the <c>path.signature-level-two@1</c> mathematical operation.</summary>
     public static MathBlockMatrix SignatureLevelTwo(MathBlockMatrix path)
     {
+        ArgumentNullException.ThrowIfNull(path);
         var dimension = path.Columns;
         var result = new double[dimension * dimension];
         var cumulative = new double[dimension];

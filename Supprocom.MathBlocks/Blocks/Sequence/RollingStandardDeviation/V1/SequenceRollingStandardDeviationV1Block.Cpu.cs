@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockVectorMath
 {
+    /// <summary>Computes the <c>sequence.rolling-standard-deviation@1</c> mathematical operation.</summary>
     public static double[] RollingStandardDeviation(IReadOnlyList<double> values, int width)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var result = new double[values.Count - width + 1];
         for (var start = 0; start < result.Length; start++)
         {

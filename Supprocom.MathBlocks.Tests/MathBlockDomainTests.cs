@@ -1,12 +1,13 @@
 using System.Diagnostics;
-using Supprocom.MathBlocks;
 
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Domain Tests.</summary>
 public sealed class MathBlockDomainTests
 {
+    /// <summary>Verifies jensen shannon accepts disjoint support.</summary>
     [Fact]
-    public void Jensen_shannon_accepts_disjoint_support()
+    public void JensenShannonAcceptsDisjointSupport()
     {
         var result = MathBlockCatalog.Standard.Get("information.jensen-shannon").Evaluate(
             MathBlockValue.Vector([1d, 0d]),
@@ -16,8 +17,9 @@ public sealed class MathBlockDomainTests
         Assert.Equal(Math.Log(2d), result.AsScalar(), 12);
     }
 
+    /// <summary>Verifies invalid discrete domains fail closed without throwing.</summary>
     [Fact]
-    public void Invalid_discrete_domains_fail_closed_without_throwing()
+    public void InvalidDiscreteDomainsFailClosedWithoutThrowing()
     {
         var identity = MathBlockCatalog.Standard.Get("matrix.identity").Evaluate(MathBlockValue.Scalar(2.5d));
         var median = MathBlockCatalog.Standard.Get("vector.median").Evaluate(MathBlockValue.Vector([]));
@@ -29,8 +31,9 @@ public sealed class MathBlockDomainTests
         Assert.False(lag.IsValid);
     }
 
+    /// <summary>Verifies generic dimensions follow mathematical algebra.</summary>
     [Fact]
-    public void Generic_dimensions_follow_mathematical_algebra()
+    public void GenericDimensionsFollowMathematicalAlgebra()
     {
         var unit = MathBlockUnit.Basis1;
         var product = MathBlockCatalog.Standard.Get("vector.product").Evaluate(
@@ -44,8 +47,9 @@ public sealed class MathBlockDomainTests
         Assert.Equal(3d, squareRoot.AsScalar());
     }
 
+    /// <summary>Verifies operations reject dimensionally invalid transcendental inputs.</summary>
     [Fact]
-    public void Operations_reject_dimensionally_invalid_transcendental_inputs()
+    public void OperationsRejectDimensionallyInvalidTranscendentalInputs()
     {
         var operation = MathBlockCatalog.Standard.Get("probability.softmax");
 
@@ -53,8 +57,9 @@ public sealed class MathBlockDomainTests
             operation.ResolveOutputType([MathBlockType.Vector(MathBlockUnit.Basis0, 3)]));
     }
 
+    /// <summary>Verifies generic graph supports empty graphs self loops and signed spanning edges.</summary>
     [Fact]
-    public void Generic_graph_supports_empty_graphs_self_loops_and_signed_spanning_edges()
+    public void GenericGraphSupportsEmptyGraphsSelfLoopsAndSignedSpanningEdges()
     {
         var empty = new MathBlockGraph(0, []);
         var loop = new MathBlockGraph(1, [new MathBlockGraphEdge(0, 0, -2d)]);
@@ -71,9 +76,10 @@ public sealed class MathBlockDomainTests
             MathBlockGraphMath.MinimumSpanningForest(signed).Select(edge => edge.Weight));
     }
 
+    /// <summary>Verifies complex operation families complete scale probes.</summary>
     [Fact]
     [Trait("Category", "Performance")]
-    public void Complex_operation_families_complete_scale_probes()
+    public void ComplexOperationFamiliesCompleteScaleProbes()
     {
         var watch = Stopwatch.StartNew();
 

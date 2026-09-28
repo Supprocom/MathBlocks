@@ -2,6 +2,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockProbability
 {
+    /// <summary>Computes the <c>special.log-gamma@1</c> mathematical operation.</summary>
     public static double LogGamma(double value)
     {
         if (value < 0.5d)

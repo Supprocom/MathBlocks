@@ -3,8 +3,11 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>capacity.choquet-integral@1</c> mathematical operation.</summary>
     public static double ChoquetIntegral(IReadOnlyList<double> values, IReadOnlyList<double> capacity)
     {
+        ArgumentNullException.ThrowIfNull(capacity);
+        ArgumentNullException.ThrowIfNull(values);
         var order = MathBlockCollectionPrimitives.SortedIndices(
             values,
             (left, right) => left < right ? -1 : left > right ? 1 : 0);

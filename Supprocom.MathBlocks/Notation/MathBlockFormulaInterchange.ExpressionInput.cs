@@ -22,7 +22,7 @@ public static partial class MathBlockFormulaInterchange
             throw new FormatException("The formula source is empty.");
         if (source.Length > MaximumDocumentCharacters)
             throw new FormatException("The formula source exceeds the character limit.");
-        if (string.IsNullOrWhiteSpace(outputName) || outputName != outputName.Trim())
+        if (string.IsNullOrWhiteSpace(outputName) || !string.Equals(outputName, outputName.Trim(), StringComparison.Ordinal))
             throw new ArgumentException("A canonical output name is required.", nameof(outputName));
 
         var bindings = CopyBindings(inputTypes);
@@ -81,7 +81,7 @@ public static partial class MathBlockFormulaInterchange
         var result = new Dictionary<string, MathBlockType>(source.Count, StringComparer.Ordinal);
         foreach (var item in source)
         {
-            if (string.IsNullOrWhiteSpace(item.Key) || item.Key != item.Key.Trim())
+            if (string.IsNullOrWhiteSpace(item.Key) || !string.Equals(item.Key, item.Key.Trim(), StringComparison.Ordinal))
                 throw new ArgumentException("An input binding name is invalid.", nameof(source));
             result.Add(item.Key, item.Value);
         }
@@ -186,7 +186,7 @@ public static partial class MathBlockFormulaInterchange
         while (pending.Count != 0)
         {
             var element = pending.Pop();
-            if (element.NamespaceName != expectedNamespace)
+            if (!string.Equals(element.NamespaceName, expectedNamespace, StringComparison.Ordinal))
                 throw new FormatException("The formula expression mixes XML vocabularies.");
             if (format == MathBlockFormulaFormat.ContentMathMl &&
                 IsFormulaElement(element, "semantics", MathMlNamespace))
@@ -218,7 +218,7 @@ public static partial class MathBlockFormulaInterchange
         for (var index = 1; index < element.Children.Length; index++)
         {
             var annotation = element.Children[index];
-            if (annotation.NamespaceName != MathMlNamespace ||
+            if (!string.Equals(annotation.NamespaceName, MathMlNamespace, StringComparison.Ordinal) ||
                 annotation.LocalName is not ("annotation" or "annotation-xml"))
             {
                 throw new FormatException("A Content MathML semantics element is invalid.");
@@ -423,8 +423,8 @@ public static partial class MathBlockFormulaInterchange
             element.Children[0],
             element.Children.Length - 1,
             true);
-        if (symbol.Dictionary == FormulaValueDictionary &&
-            symbol.ContentDictionaryBase == ContentDictionaryBase)
+        if (string.Equals(symbol.Dictionary, FormulaValueDictionary, StringComparison.Ordinal) &&
+string.Equals(symbol.ContentDictionaryBase, ContentDictionaryBase, StringComparison.Ordinal))
         {
             var value = ParseStructuredFormulaValue(element, symbol.Name);
             var constant = state.Builder.Constant(value);
@@ -479,8 +479,7 @@ public static partial class MathBlockFormulaInterchange
 
     private static bool IsAssociativeFormulaOperation(
         MathBlockFormulaSymbol symbol,
-        MathBlockOperation operation) =>
-        symbol.ContentDictionaryBase == OfficialContentDictionaryBase &&
+        MathBlockOperation operation) => string.Equals(symbol.ContentDictionaryBase, OfficialContentDictionaryBase, StringComparison.Ordinal) &&
         (symbol.Dictionary, symbol.Name, operation.Identifier) is
             ("arith1", "plus", "scalar.add") or
             ("arith1", "times", "scalar.multiply") or
@@ -516,7 +515,7 @@ public static partial class MathBlockFormulaInterchange
                 dictionary,
                 name);
         }
-        if (allowPredefined && element.NamespaceName == MathMlNamespace &&
+        if (allowPredefined && string.Equals(element.NamespaceName, MathMlNamespace, StringComparison.Ordinal) &&
             element.Children.Length == 0 && IsFormulaWhitespace(element.Text) &&
             TryGetPredefinedSymbol(element.LocalName, applicationArity, out var symbol))
         {
@@ -532,13 +531,12 @@ public static partial class MathBlockFormulaInterchange
         if (element.ContentDictionaryBase is not null)
             return element.ContentDictionaryBase;
 
-        var isMathBlocksDictionary =
-            dictionary == FormulaOperationDictionary ||
-            dictionary == FormulaValueDictionary ||
-            dictionary == FormulaDictionary;
+        var isMathBlocksDictionary = string.Equals(dictionary, FormulaOperationDictionary, StringComparison.Ordinal) ||
+string.Equals(dictionary, FormulaValueDictionary, StringComparison.Ordinal) ||
+string.Equals(dictionary, FormulaDictionary, StringComparison.Ordinal);
         if (element.ContentDictionaryGroup is not null)
         {
-            if (element.ContentDictionaryGroup != ContentDictionaryGroup)
+            if (!string.Equals(element.ContentDictionaryGroup, ContentDictionaryGroup, StringComparison.Ordinal))
                 return string.Empty;
             return isMathBlocksDictionary
                 ? ContentDictionaryBase
@@ -671,9 +669,9 @@ public static partial class MathBlockFormulaInterchange
             throw new FormatException("A formula complex value is invalid.");
         RequireFormulaWhitespace(element);
         var symbol = ParseFormulaSymbol(children[0], children.Length - 1, false);
-        if (symbol.ContentDictionaryBase != ContentDictionaryBase ||
-            symbol.Dictionary != FormulaValueDictionary ||
-            symbol.Name != "complex")
+        if (!string.Equals(symbol.ContentDictionaryBase, ContentDictionaryBase, StringComparison.Ordinal) ||
+!string.Equals(symbol.Dictionary, FormulaValueDictionary, StringComparison.Ordinal) ||
+!string.Equals(symbol.Name, "complex", StringComparison.Ordinal))
         {
             throw new FormatException("A formula complex value is invalid.");
         }
@@ -717,8 +715,8 @@ public static partial class MathBlockFormulaInterchange
                 throw new FormatException("A formula point is invalid.");
             RequireFormulaWhitespace(point);
             var symbol = ParseFormulaSymbol(point.Children[0], point.Children.Length - 1, false);
-            if (symbol.ContentDictionaryBase != ContentDictionaryBase ||
-                symbol.Dictionary != FormulaValueDictionary || symbol.Name != "point")
+            if (!string.Equals(symbol.ContentDictionaryBase, ContentDictionaryBase, StringComparison.Ordinal) ||
+!string.Equals(symbol.Dictionary, FormulaValueDictionary, StringComparison.Ordinal) || !string.Equals(symbol.Name, "point", StringComparison.Ordinal))
             {
                 throw new FormatException("A formula point is invalid.");
             }
@@ -742,8 +740,8 @@ public static partial class MathBlockFormulaInterchange
                 throw new FormatException("A formula graph edge is invalid.");
             RequireFormulaWhitespace(edge);
             var symbol = ParseFormulaSymbol(edge.Children[0], edge.Children.Length - 1, false);
-            if (symbol.ContentDictionaryBase != ContentDictionaryBase ||
-                symbol.Dictionary != FormulaValueDictionary || symbol.Name != "edge")
+            if (!string.Equals(symbol.ContentDictionaryBase, ContentDictionaryBase, StringComparison.Ordinal) ||
+!string.Equals(symbol.Dictionary, FormulaValueDictionary, StringComparison.Ordinal) || !string.Equals(symbol.Name, "edge", StringComparison.Ordinal))
             {
                 throw new FormatException("A formula graph edge is invalid.");
             }
@@ -765,8 +763,8 @@ public static partial class MathBlockFormulaInterchange
                 throw new FormatException("A formula run is invalid.");
             RequireFormulaWhitespace(run);
             var symbol = ParseFormulaSymbol(run.Children[0], run.Children.Length - 1, false);
-            if (symbol.ContentDictionaryBase != ContentDictionaryBase ||
-                symbol.Dictionary != FormulaValueDictionary || symbol.Name != "run")
+            if (!string.Equals(symbol.ContentDictionaryBase, ContentDictionaryBase, StringComparison.Ordinal) ||
+!string.Equals(symbol.Dictionary, FormulaValueDictionary, StringComparison.Ordinal) || !string.Equals(symbol.Name, "run", StringComparison.Ordinal))
             {
                 throw new FormatException("A formula run is invalid.");
             }
@@ -794,11 +792,11 @@ public static partial class MathBlockFormulaInterchange
         out bool value)
     {
         value = false;
-        if (element.NamespaceName == MathMlNamespace &&
+        if (string.Equals(element.NamespaceName, MathMlNamespace, StringComparison.Ordinal) &&
             element.Children.Length == 0 && IsFormulaWhitespace(element.Text) &&
-            element.LocalName is "true" or "false")
+            (string.Equals(element.LocalName, "true", StringComparison.Ordinal) || string.Equals(element.LocalName, "false", StringComparison.Ordinal)))
         {
-            value = element.LocalName == "true";
+            value = string.Equals(element.LocalName, "true", StringComparison.Ordinal);
             return true;
         }
         MathBlockFormulaSymbol symbol;
@@ -810,17 +808,17 @@ public static partial class MathBlockFormulaInterchange
         {
             return false;
         }
-        if ((symbol.Dictionary == "logic1" &&
-             symbol.ContentDictionaryBase == OfficialContentDictionaryBase) ||
-            (symbol.Dictionary == FormulaValueDictionary &&
-             symbol.ContentDictionaryBase == ContentDictionaryBase))
+        if ((string.Equals(symbol.Dictionary, "logic1", StringComparison.Ordinal) &&
+string.Equals(symbol.ContentDictionaryBase, OfficialContentDictionaryBase, StringComparison.Ordinal)) ||
+            (string.Equals(symbol.Dictionary, FormulaValueDictionary, StringComparison.Ordinal) &&
+string.Equals(symbol.ContentDictionaryBase, ContentDictionaryBase, StringComparison.Ordinal)))
         {
-            if (symbol.Name == "true")
+            if (string.Equals(symbol.Name, "true", StringComparison.Ordinal))
             {
                 value = true;
                 return true;
             }
-            if (symbol.Name == "false")
+            if (string.Equals(symbol.Name, "false", StringComparison.Ordinal))
                 return true;
         }
         return false;
@@ -861,9 +859,9 @@ public static partial class MathBlockFormulaInterchange
         if (!IsFormulaElement(element, "cn", MathMlNamespace))
             throw new FormatException("A formula number is invalid.");
         var type = GetFormulaAttribute(element, "type") ?? "real";
-        if (type == "hexdouble")
+        if (string.Equals(type, "hexdouble", StringComparison.Ordinal))
             return ParseFormulaHexDouble(text);
-        if (type == "integer")
+        if (string.Equals(type, "integer", StringComparison.Ordinal))
             return ParseFormulaArbitraryInteger(text, "A Content MathML integer is invalid.");
         if (type is not ("real" or "double") ||
             !double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value) ||
@@ -898,7 +896,7 @@ public static partial class MathBlockFormulaInterchange
 
     private static double ParseFormulaHexDouble(string text)
     {
-        if (text.Length != 16 || text != text.ToUpperInvariant() ||
+        if (text.Length != 16 || !string.Equals(text, text.ToUpperInvariant(), StringComparison.Ordinal) ||
             !ulong.TryParse(
                 text,
                 NumberStyles.AllowHexSpecifier,
@@ -920,14 +918,14 @@ public static partial class MathBlockFormulaInterchange
         var text = element.Text.Trim();
         if (IsFormulaElement(element, "OMI", OpenMathNamespace) ||
             (IsFormulaElement(element, "cn", MathMlNamespace) &&
-             GetFormulaAttribute(element, "type") == "integer"))
+string.Equals(GetFormulaAttribute(element, "type"), "integer", StringComparison.Ordinal)))
         {
             if (int.TryParse(
                     text,
                     NumberStyles.AllowLeadingSign,
                     CultureInfo.InvariantCulture,
                     out var value) &&
-                text == value.ToString(CultureInfo.InvariantCulture))
+string.Equals(text, value.ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal))
             {
                 return value;
             }
@@ -966,7 +964,7 @@ public static partial class MathBlockFormulaInterchange
             var attribute = element.Attributes[index];
             if (!attribute.IsNamespaceDeclaration &&
                 attribute.NamespaceName.Length == 0 &&
-                attribute.LocalName == name)
+string.Equals(attribute.LocalName, name, StringComparison.Ordinal))
             {
                 return attribute.Value;
             }
@@ -997,8 +995,7 @@ public static partial class MathBlockFormulaInterchange
     private static bool IsFormulaElement(
         FormulaXmlElement element,
         string localName,
-        string namespaceName) =>
-        element.LocalName == localName && element.NamespaceName == namespaceName;
+        string namespaceName) => string.Equals(element.LocalName, localName, StringComparison.Ordinal) && string.Equals(element.NamespaceName, namespaceName, StringComparison.Ordinal);
 
     private sealed class VisibleExpressionState(
         IReadOnlyDictionary<string, MathBlockType> bindings)
@@ -1029,9 +1026,8 @@ public static partial class MathBlockFormulaInterchange
             {
                 do
                 {
-                    var namespaceDeclaration =
-                        reader.Prefix == "xmlns" ||
-                        (reader.Prefix.Length == 0 && reader.LocalName == "xmlns");
+                    var namespaceDeclaration = string.Equals(reader.Prefix, "xmlns", StringComparison.Ordinal) ||
+                        (reader.Prefix.Length == 0 && string.Equals(reader.LocalName, "xmlns", StringComparison.Ordinal));
                     attributes[index++] = new FormulaXmlAttribute(
                         reader.LocalName,
                         reader.NamespaceURI,

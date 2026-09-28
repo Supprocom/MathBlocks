@@ -20,6 +20,7 @@ jobs:
       OPENMATH_EVIDENCE: /tmp/mathblocks-openmath-evidence
       FORMULA_EVIDENCE: /tmp/mathblocks-formula-evidence
       FUZZ_EVIDENCE: /tmp/mathblocks-openmath-fuzz
+      ANALYZER_EVIDENCE: /tmp/mathblocks-analyzer-evidence
       PACKAGE_EVIDENCE: /tmp/mathblocks-package-evidence
       NVRTC_EVIDENCE: /tmp/mathblocks-nvrtc-evidence
       MATHBLOCKS_LOCAL_FEED: /tmp/mathblocks-package-evidence
@@ -154,7 +155,7 @@ jobs:
           dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj
           -c Release --no-build --no-restore
           --artifacts-path "$ARTIFACT_ROOT/tests"
-          --filter "FullyQualifiedName=Supprocom.MathBlocks.Tests.MathBlockCudaOperationContractTests.CUDA_value_codec_round_trips_every_public_value_kind"
+          --filter "FullyQualifiedName=Supprocom.MathBlocks.Tests.MathBlockCudaOperationContractTests.CUDAValueCodecRoundTripsEveryPublicValueKind"
           --logger "trx;LogFileName=mathblocks-portable-codec-fingerprint.trx"
           --results-directory "$TEST_RESULTS"
 
@@ -168,6 +169,28 @@ jobs:
           dotnet build MathBlocks.OpenMath.Fuzz/MathBlocks.OpenMath.Fuzz.csproj
           -c Release --no-restore --no-incremental --warnaserror
           --artifacts-path "$ARTIFACT_ROOT/fuzz"
+
+      - name: Restore the full analyzer solution
+        run: >-
+          dotnet restore MathBlocks.slnx
+          --force-evaluate -p:NuGetAuditMode=all
+          --artifacts-path "$ARTIFACT_ROOT/analyzers"
+
+      - name: Enforce the full analyzer gate and retain SARIF
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$ANALYZER_EVIDENCE"
+          dotnet build MathBlocks.slnx \
+            -c Release --no-restore --no-incremental --warnaserror \
+            --artifacts-path "$ARTIFACT_ROOT/analyzers" \
+            -p:MathBlocksAnalyzerEvidence="$ANALYZER_EVIDENCE"
+          shopt -s nullglob
+          reports=("$ANALYZER_EVIDENCE"/*.sarif)
+          test "${#reports[@]}" -eq 6
+          for report in "${reports[@]}"; do
+            jq -e '[.runs[]?.results[]? | select(.level == "warning" or .level == "error")] | length == 0' "$report"
+          done
 
       - name: Replay the tracked notation corpus
         run: >-
@@ -388,9 +411,9 @@ jobs:
         run: |
           set -euo pipefail
           mapfile -t nupkgs < <(find "$PACKAGE_EVIDENCE" -maxdepth 1 -type f \
-            -name 'Supprocom.MathBlocks.0.5.1.nupkg' -print)
+            -name 'Supprocom.MathBlocks.0.5.2.nupkg' -print)
           mapfile -t snupkgs < <(find "$PACKAGE_EVIDENCE" -maxdepth 1 -type f \
-            -name 'Supprocom.MathBlocks.0.5.1.snupkg' -print)
+            -name 'Supprocom.MathBlocks.0.5.2.snupkg' -print)
           test "${#nupkgs[@]}" -eq 1
           test "${#snupkgs[@]}" -eq 1
           nupkg="${nupkgs[0]}"
@@ -450,7 +473,7 @@ jobs:
           dotnet restore
           Supprocom.MathBlocks.ExternalConsumer/Supprocom.MathBlocks.ExternalConsumer.csproj
           --configfile Supprocom.MathBlocks.ExternalConsumer/NuGet.config
-          --force-evaluate -p:NuGetAuditMode=all -p:MathBlocksVersion=0.5.1
+          --force-evaluate -p:NuGetAuditMode=all -p:MathBlocksVersion=0.5.2
           --artifacts-path "$ARTIFACT_ROOT/package-consumer"
 
       - name: Build and run the exact-package formula consumer
@@ -458,7 +481,7 @@ jobs:
           dotnet build \
             Supprocom.MathBlocks.ExternalConsumer/Supprocom.MathBlocks.ExternalConsumer.csproj \
             -c Release --no-restore --no-incremental --warnaserror \
-            -p:MathBlocksVersion=0.5.1 \
+            -p:MathBlocksVersion=0.5.2 \
             -p:CopyLocalLockFileAssemblies=false \
             --artifacts-path "$ARTIFACT_ROOT/package-consumer"
           cp \
@@ -471,7 +494,7 @@ jobs:
       - name: Check the tracked diff
         run: git diff --check
 
-      - name: Retain test and OpenMath evidence
+      - name: Retain CI evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -481,6 +504,7 @@ jobs:
             /tmp/mathblocks-openmath-evidence
             /tmp/mathblocks-formula-evidence
             /tmp/mathblocks-openmath-fuzz
+            /tmp/mathblocks-analyzer-evidence
             /tmp/mathblocks-package-evidence
             /tmp/mathblocks-nvrtc-evidence
           if-no-files-found: error

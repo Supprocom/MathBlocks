@@ -2,6 +2,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockGeometry
 {
+    /// <summary>Computes the <c>geometry.circumradius@1</c> mathematical operation.</summary>
     public static double Circumradius(MathBlockPoint first, MathBlockPoint second, MathBlockPoint third)
     {
         var firstLength = Distance(second, third);

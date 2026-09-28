@@ -2,6 +2,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockScalar
 {
+    /// <summary>Computes the <c>scalar.power@1</c> mathematical operation.</summary>
     public static double Power(double value, double exponent)
     {
         if (exponent == Math.Truncate(exponent) && Math.Abs(exponent) <= long.MaxValue)

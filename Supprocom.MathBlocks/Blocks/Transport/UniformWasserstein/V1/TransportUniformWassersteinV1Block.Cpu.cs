@@ -2,6 +2,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockTransport
 {
+    /// <summary>Computes the <c>transport.uniform-wasserstein@1</c> mathematical operation.</summary>
     public static double UniformWasserstein(IReadOnlyList<double> left, IReadOnlyList<double> right, double order)
     {
         var leftSorted = MathBlockCollectionPrimitives.SortedCopy(

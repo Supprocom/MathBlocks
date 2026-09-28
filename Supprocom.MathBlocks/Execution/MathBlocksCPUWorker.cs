@@ -1,5 +1,6 @@
 namespace Supprocom.MathBlocks;
 
+/// <summary>Defines the Math Blocks CPUWorker contract.</summary>
 public sealed class MathBlocksCPUWorker
 {
     private static readonly Lazy<MathBlocksCPUWorker> shared = new(
@@ -8,6 +9,7 @@ public sealed class MathBlocksCPUWorker
 
     private readonly ParallelOptions parallelOptions;
 
+    /// <summary>Creates a CPU executor with an optional concurrency limit.</summary>
     public MathBlocksCPUWorker(int maximumConcurrency = -1)
     {
         if (maximumConcurrency == 0 || maximumConcurrency < -1)
@@ -17,9 +19,12 @@ public sealed class MathBlocksCPUWorker
         parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = maximumConcurrency };
     }
 
+    /// <summary>Gets the shared value.</summary>
     public static MathBlocksCPUWorker Shared => shared.Value;
+    /// <summary>Gets the maximum concurrency value.</summary>
     public int MaximumConcurrency { get; }
 
+    /// <summary>Executes a program over named inputs on the CPU.</summary>
     public IReadOnlyDictionary<string, MathBlockValue> Execute(
         MathBlockProgram program,
         IReadOnlyDictionary<string, MathBlockValue> inputs)

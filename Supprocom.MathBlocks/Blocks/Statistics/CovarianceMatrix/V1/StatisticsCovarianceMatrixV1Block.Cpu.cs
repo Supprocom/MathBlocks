@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockLinearAlgebra
 {
+    /// <summary>Computes the <c>statistics.covariance-matrix@1</c> mathematical operation.</summary>
     public static MathBlockMatrix CovarianceMatrix(MathBlockMatrix observations)
     {
+        ArgumentNullException.ThrowIfNull(observations);
         var means = new double[observations.Columns];
         for (var column = 0; column < observations.Columns; column++)
             for (var row = 0; row < observations.Rows; row++)

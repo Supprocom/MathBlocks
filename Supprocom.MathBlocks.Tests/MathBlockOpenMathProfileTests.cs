@@ -1,12 +1,13 @@
 using System.Security.Cryptography;
-using Supprocom.MathBlocks;
 
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Open Math Profile Tests.</summary>
 public sealed class MathBlockOpenMathProfileTests
 {
+    /// <summary>Verifies profile descriptor binds every standard operation in order.</summary>
     [Fact]
-    public void Profile_descriptor_binds_every_standard_operation_in_order()
+    public void ProfileDescriptorBindsEveryStandardOperationInOrder()
     {
         var profile = MathBlockOpenMath.Profile;
 
@@ -32,8 +33,9 @@ public sealed class MathBlockOpenMathProfileTests
         }
     }
 
+    /// <summary>Verifies operation lookup requires the exact standard instance.</summary>
     [Fact]
-    public void Operation_lookup_requires_the_exact_standard_instance()
+    public void OperationLookupRequiresTheExactStandardInstance()
     {
         var standard = MathBlockCatalog.Standard.Operations[0];
         var copied = new MathBlockOperation(
@@ -55,8 +57,9 @@ public sealed class MathBlockOpenMathProfileTests
         Assert.Null(missing);
     }
 
+    /// <summary>Verifies embedded profile artifacts match the tracked profile.</summary>
     [Fact]
-    public void Embedded_profile_artifacts_match_the_tracked_profile()
+    public void EmbeddedProfileArtifactsMatchTheTrackedProfile()
     {
         var artifacts = MathBlockOpenMath.Profile.Artifacts;
         Assert.Equal(7, artifacts.Count);
@@ -70,7 +73,7 @@ public sealed class MathBlockOpenMathProfileTests
                 "mathblocks_values1.ocd",
                 "README.md"
             ],
-            artifacts.Select(artifact => artifact.Name));
+            artifacts.Select(artifact => artifact.Name), StringComparer.Ordinal);
 
         foreach (var artifact in artifacts)
         {
@@ -94,8 +97,9 @@ public sealed class MathBlockOpenMathProfileTests
         }
     }
 
+    /// <summary>Verifies profile collections are read only.</summary>
     [Fact]
-    public void Profile_collections_are_read_only()
+    public void ProfileCollectionsAreReadOnly()
     {
         var operations = Assert.IsAssignableFrom<IList<MathBlockOpenMathOperationDefinition>>(
             MathBlockOpenMath.Profile.Operations);

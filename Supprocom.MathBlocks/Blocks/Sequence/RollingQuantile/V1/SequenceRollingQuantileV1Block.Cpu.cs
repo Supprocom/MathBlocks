@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockVectorMath
 {
+    /// <summary>Computes the <c>sequence.rolling-quantile@1</c> mathematical operation.</summary>
     public static double[] RollingQuantile(IReadOnlyList<double> values, int width, double probability)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var result = new double[values.Count - width + 1];
         if (width == 1)
         {

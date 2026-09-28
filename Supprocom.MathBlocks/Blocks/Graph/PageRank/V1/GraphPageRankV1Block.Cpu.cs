@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockGraphMath
 {
+    /// <summary>Computes the <c>graph.page-rank@1</c> mathematical operation.</summary>
     public static double[] PageRank(MathBlockGraph graph, double damping, int iterations)
     {
+        ArgumentNullException.ThrowIfNull(graph);
         var rank = MathBlockCollectionPrimitives.Repeat(1d / graph.VertexCount, graph.VertexCount);
         var outgoing = new double[graph.VertexCount];
         foreach (var edge in graph)

@@ -3,8 +3,11 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockLinearAlgebra
 {
+    /// <summary>Computes the <c>matrix.solve@1</c> mathematical operation.</summary>
     public static bool TrySolve(MathBlockMatrix matrix, IReadOnlyList<double> right, out double[] solution)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
+        ArgumentNullException.ThrowIfNull(right);
         var size = matrix.Rows;
         var augmented = new double[size * (size + 1)];
         for (var row = 0; row < size; row++)

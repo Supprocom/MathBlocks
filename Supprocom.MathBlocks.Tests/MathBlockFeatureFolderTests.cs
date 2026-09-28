@@ -3,10 +3,12 @@ using System.Runtime.CompilerServices;
 
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Feature Folder Tests.</summary>
 public sealed class MathBlockFeatureFolderTests
 {
+    /// <summary>Verifies every block owns one definition cpucudaand test file.</summary>
     [Fact]
-    public void Every_block_owns_one_definition_CPU_CUDA_and_test_file()
+    public void EveryBlockOwnsOneDefinitionCPUCUDAAndTestFile()
     {
         var root = FindRepositoryRoot();
         var blocksRoot = Path.Combine(root, "Supprocom.MathBlocks", "Blocks");
@@ -41,12 +43,13 @@ public sealed class MathBlockFeatureFolderTests
         }
 
         Assert.Equal(
-            registered.OrderBy(identity => identity, StringComparer.Ordinal),
-            MathBlocksCUDAWorker.SupportedBlockIdentities.OrderBy(identity => identity, StringComparer.Ordinal));
+            registered.Order(StringComparer.Ordinal),
+            MathBlocksCUDAWorker.SupportedBlockIdentities.Order(StringComparer.Ordinal));
     }
 
+    /// <summary>Verifies grouped registries and cudaidentity tables are absent.</summary>
     [Fact]
-    public void Grouped_registries_and_CUDA_identity_tables_are_absent()
+    public void GroupedRegistriesAndCUDAIdentityTablesAreAbsent()
     {
         var root = FindRepositoryRoot();
         var cpuRoot = Path.Combine(root, "Supprocom.MathBlocks");
@@ -63,8 +66,9 @@ public sealed class MathBlockFeatureFolderTests
         }
     }
 
+    /// <summary>Verifies cpuand cudaworkers are in one production assembly.</summary>
     [Fact]
-    public void CPU_and_CUDA_workers_are_in_one_production_assembly()
+    public void CPUAndCUDAWorkersAreInOneProductionAssembly()
     {
         var root = FindRepositoryRoot();
 

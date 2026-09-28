@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockProbability
 {
+    /// <summary>Computes the <c>information.tsallis-entropy@1</c> mathematical operation.</summary>
     public static double TsallisEntropy(IReadOnlyList<double> probabilities, double order)
     {
+        ArgumentNullException.ThrowIfNull(probabilities);
         if (order == 1d)
             return ShannonEntropy(probabilities);
         var sum = 0d;

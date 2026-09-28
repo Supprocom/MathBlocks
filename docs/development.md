@@ -1,7 +1,7 @@
 # MathBlocks Development Guide
 
 This guide covers prerequisites, native dependencies, source builds, tests,
-package boundaries, and repository hygiene for MathBlocks 0.5.1.
+package boundaries, and repository hygiene for MathBlocks 0.5.2.
 
 ## Source-only repository
 
@@ -30,11 +30,11 @@ terms are in [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md).
 
 ## Restore
 
-Restore the test project to acquire the production, test, generator, and native
-package graph.
+Restore the root solution to acquire the production, test, generator, analyzer,
+and native package graph.
 
 ```text
-dotnet restore Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj
+dotnet restore MathBlocks.slnx --force-evaluate -p:NuGetAuditMode=all
 ```
 
 Security-sensitive CI restores use `NuGetAuditMode=all` and isolated artifact
@@ -45,13 +45,31 @@ paths.
 Build warnings are treated as errors. The standard local commands are:
 
 ```text
-dotnet build Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj --configuration Release
-dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj --configuration Release
+dotnet build MathBlocks.slnx --configuration Release --no-restore --no-incremental --warnaserror
+dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj --configuration Release --no-build --no-restore
 ```
 
 Portable tests do not require a CUDA device. CUDA execution and performance
 tests require a compatible NVIDIA driver, CUDA toolkit, and supported x64
 platform.
+
+## Analyzer policy
+
+The solution build runs the .NET SDK `latest-all` rules, enforced code style,
+Meziantou, Roslynator, Visual Studio Threading, Banned API, Hyperlinq, the
+library Public API analyzer, and xUnit's test analyzer. Analyzer packages are
+build-only (`PrivateAssets=all`) and are not runtime package dependencies.
+
+`.editorconfig` records narrow exceptions where a rule conflicts with the
+published 0.5.x API, versioned ABI or fingerprint bytes, or intentional test
+semantics. The checked `BannedSymbols.txt` rejects obsolete crypto and unsafe
+deserialization. `PublicAPI.Shipped.txt` freezes the previously published API;
+new public members belong in `PublicAPI.Unshipped.txt` until a release baseline
+is accepted. New warnings must be resolved before a candidate is packed.
+
+To retain machine-readable diagnostic evidence, set
+`-p:MathBlocksAnalyzerEvidence=/absolute/output/directory` on the solution
+build. It writes one SARIF file per project.
 
 ## Generated CUDA source
 

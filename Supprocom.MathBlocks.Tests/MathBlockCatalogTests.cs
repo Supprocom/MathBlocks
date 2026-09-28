@@ -1,11 +1,11 @@
-using Supprocom.MathBlocks;
-
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Catalog Tests.</summary>
 public sealed class MathBlockCatalogTests
 {
+    /// <summary>Verifies every registered operation has regression and performance evidence.</summary>
     [Fact]
-    public void Every_registered_operation_has_regression_and_performance_evidence()
+    public void EveryRegisteredOperationHasRegressionAndPerformanceEvidence()
     {
         var operations = MathBlockCatalog.Standard.Operations;
         Assert.True(operations.Count >= 337, $"Only {operations.Count} operations are registered.");
@@ -22,8 +22,9 @@ public sealed class MathBlockCatalogTests
             operations.Select(operation => operation.Identity).Distinct(StringComparer.Ordinal).Count());
     }
 
+    /// <summary>Verifies every registered operation is deterministic and preserves inputs.</summary>
     [Fact]
-    public void Every_registered_operation_is_deterministic_and_preserves_inputs()
+    public void EveryRegisteredOperationIsDeterministicAndPreservesInputs()
     {
         var failures = new List<string>();
         foreach (var operation in MathBlockCatalog.Standard.Operations)
@@ -40,17 +41,21 @@ public sealed class MathBlockCatalogTests
                     if (!inputs[index].ApproximatelyEquals(copies[index], 0d))
                         failures.Add($"{operation.Identity}: input {index} changed");
             }
+            // Keep evaluating the remaining operations and report all failures.
+#pragma warning disable CA1031
             catch (Exception exception)
             {
                 failures.Add($"{operation.Identity}: {exception.GetType().Name}: {exception.Message}");
             }
+#pragma warning restore CA1031
         }
 
         Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures));
     }
 
+    /// <summary>Verifies catalog contains each required mathematical family.</summary>
     [Fact]
-    public void Catalog_contains_each_required_mathematical_family()
+    public void CatalogContainsEachRequiredMathematicalFamily()
     {
         var prefixes = MathBlockCatalog.Standard.Operations
             .Select(operation => operation.Identifier.Split('.')[0])

@@ -2,6 +2,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockGeometry
 {
+    /// <summary>Computes the <c>geometry.convex-hull@1</c> mathematical operation.</summary>
     public static MathBlockPoint[] ConvexHull(IReadOnlyList<MathBlockPoint> points)
     {
         var sorted = MathBlockCollectionPrimitives.DistinctSortedCopy(

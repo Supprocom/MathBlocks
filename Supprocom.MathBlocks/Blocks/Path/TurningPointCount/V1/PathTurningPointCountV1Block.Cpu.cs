@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockPath
 {
+    /// <summary>Computes the <c>path.turning-point-count@1</c> mathematical operation.</summary>
     public static int TurningPointCount(IReadOnlyList<double> values)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var count = 0;
         var previousDirection = 0;
         for (var index = 1; index < values.Count; index++)

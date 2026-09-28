@@ -1,4 +1,5 @@
 namespace Supprocom.MathBlocks;
+
 internal static partial class AdvancedMathBlocks
 {
     internal static class GeometrySimplicialDepthV1Block

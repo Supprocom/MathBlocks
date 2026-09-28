@@ -1,0 +1,19 @@
+<Project>
+  <PropertyGroup>
+    <AnalysisLevel>latest-all</AnalysisLevel>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <ErrorLog Condition="'$(MathBlocksAnalyzerEvidence)' != ''">$(MathBlocksAnalyzerEvidence)/$(MSBuildProjectName).sarif</ErrorLog>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Meziantou.Analyzer" Version="[3.0.290]" PrivateAssets="all" />
+    <PackageReference Include="Roslynator.Analyzers" Version="[5.0.0]" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="[18.7.23]" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="[5.6.0]" PrivateAssets="all" />
+    <PackageReference Include="NetFabric.Hyperlinq.Analyzer" Version="[2.3.0]" PrivateAssets="all" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+  </ItemGroup>
+</Project>

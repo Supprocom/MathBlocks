@@ -3,6 +3,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>matrix.perron-value@1</c> mathematical operation.</summary>
     public static double PerronValue(MathBlockMatrix matrix, int iterations)
     {
         var vector = PerronVector(matrix, iterations);

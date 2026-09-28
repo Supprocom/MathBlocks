@@ -3,6 +3,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockComplex
 {
+    /// <summary>Computes the magnitude of a finite complex number.</summary>
     public static double Magnitude(Complex value)
     {
         var real = Math.Abs(value.Real);

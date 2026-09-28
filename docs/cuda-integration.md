@@ -2,7 +2,7 @@
 
 This guide describes the public device module, consumer-owned kernel
 composition, managed resident programs, fingerprints, parity rules, and
-performance contracts in MathBlocks 0.5.1.
+performance contracts in MathBlocks 0.5.2.
 
 ## Device module
 
@@ -107,9 +107,10 @@ The source fingerprint binds the exact CUDA definitions and dispatch
 implementation. A package version check does not replace source or ABI
 fingerprint validation.
 
-MathBlocks 0.5.1 regenerates this source with CSharp2CUDA 0.3.1. Its source,
-operation-table, and ABI fingerprints differ from 0.5.0, so consumers with
-cached PTX or device state must rebuild it against the loaded package.
+MathBlocks 0.5.2 retains the source generated with CSharp2CUDA 0.3.1 in 0.5.1.
+Its source, operation-table, and ABI fingerprints differ from 0.5.0, so consumers
+with cached PTX or device state from 0.5.0 must rebuild them against the loaded
+package.
 
 ## Performance contract
 

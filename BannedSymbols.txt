@@ -1,0 +1,7 @@
+# Security and reliability policy: use modern cryptography and cooperative cancellation.
+T:System.Runtime.Serialization.Formatters.Binary.BinaryFormatter; Unsafe deserialization must not be used.
+T:System.Security.Cryptography.MD5; Use SHA256 for fingerprints, not MD5.
+T:System.Security.Cryptography.SHA1; Use SHA256 for fingerprints, not SHA1.
+T:System.Security.Cryptography.DES; Use authenticated modern encryption instead of DES.
+T:System.Security.Cryptography.TripleDES; Use authenticated modern encryption instead of TripleDES.
+M:System.Threading.Thread.Abort; Use cooperative cancellation instead of aborting a thread.

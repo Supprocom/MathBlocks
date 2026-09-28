@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockProbability
 {
+    /// <summary>Computes the <c>information.conditional-mutual-information@1</c> mathematical operation.</summary>
     public static double ConditionalMutualInformation(IReadOnlyList<double> jointProbabilities, int firstCount, int secondCount, int conditionCount)
     {
+        ArgumentNullException.ThrowIfNull(jointProbabilities);
         var firstCondition = new double[firstCount * conditionCount];
         var secondCondition = new double[secondCount * conditionCount];
         var condition = new double[conditionCount];

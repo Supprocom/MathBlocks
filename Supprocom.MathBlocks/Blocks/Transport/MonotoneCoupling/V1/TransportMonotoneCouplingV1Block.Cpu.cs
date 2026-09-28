@@ -2,8 +2,11 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockTransport
 {
+    /// <summary>Computes the <c>transport.monotone-coupling@1</c> mathematical operation.</summary>
     public static MathBlockMatrix MonotoneCoupling(IReadOnlyList<double> leftWeights, IReadOnlyList<double> rightWeights)
     {
+        ArgumentNullException.ThrowIfNull(leftWeights);
+        ArgumentNullException.ThrowIfNull(rightWeights);
         var result = new double[leftWeights.Count * rightWeights.Count];
         var leftIndex = 0;
         var rightIndex = 0;

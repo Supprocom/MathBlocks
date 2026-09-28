@@ -1,8 +1,10 @@
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Verifies the <c>statistics.raw-moment@1</c> operation contract.</summary>
 public sealed class StatisticsRawMomentV1BlockTests
 {
+    /// <summary>Checks the <c>statistics.raw-moment@1</c> operation contract.</summary>
     [Fact]
     [Trait("Category", "BlockContract")]
-    public void Contract_is_valid() => MathBlockFeatureContractAssertions.Verify("statistics.raw-moment@1");
+    public void ContractIsValid() => MathBlockFeatureContractAssertions.Verify("statistics.raw-moment@1");
 }

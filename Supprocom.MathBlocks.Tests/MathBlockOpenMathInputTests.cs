@@ -1,13 +1,14 @@
 using System.Buffers;
 using System.Text;
-using Supprocom.MathBlocks;
 
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Open Math Input Tests.</summary>
 public sealed class MathBlockOpenMathInputTests
 {
+    /// <summary>Verifies character and utf 8 inputs share the string result.</summary>
     [Fact]
-    public void Character_and_UTF8_inputs_share_the_string_result()
+    public void CharacterAndUTF8InputsShareTheStringResult()
     {
         var program = CreateSampleProgram("left-α");
         var text = MathBlockOpenMath.Export(program);
@@ -34,8 +35,9 @@ public sealed class MathBlockOpenMathInputTests
         Assert.Equal(bytes.Length, stream.Position);
     }
 
+    /// <summary>Verifies utf 8 inputs accept abomand reject other encodings.</summary>
     [Fact]
-    public void UTF8_inputs_accept_a_BOM_and_reject_other_encodings()
+    public void UTF8InputsAcceptABOMAndRejectOtherEncodings()
     {
         var text = MathBlockOpenMath.Export(CreateSampleProgram("left"));
         var bytes = Encoding.UTF8.GetBytes(text);
@@ -83,8 +85,9 @@ public sealed class MathBlockOpenMathInputTests
                 new MathBlockOpenMathImportOptions { RequireCanonicalSource = true })).Message);
     }
 
+    /// <summary>Verifies input options enforce each resource limit.</summary>
     [Fact]
-    public void Input_options_enforce_each_resource_limit()
+    public void InputOptionsEnforceEachResourceLimit()
     {
         var program = CreateSampleProgram("left");
         var text = MathBlockOpenMath.Export(program);
@@ -147,8 +150,9 @@ public sealed class MathBlockOpenMathInputTests
         Assert.Equal(0, unread.Position);
     }
 
+    /// <summary>Verifies canonical source options reject valid noncanonical input.</summary>
     [Fact]
-    public void Canonical_source_options_reject_valid_noncanonical_input()
+    public void CanonicalSourceOptionsRejectValidNoncanonicalInput()
     {
         var text = MathBlockOpenMath.Export(CreateSampleProgram("left"));
         var noncanonical = string.Concat("\n", text);
@@ -174,8 +178,9 @@ public sealed class MathBlockOpenMathInputTests
             MathBlockOpenMath.Export(MathBlockOpenMath.Import(text, options).Program));
     }
 
+    /// <summary>Verifies import reports operation occurrences and optional source locations.</summary>
     [Fact]
-    public void Import_reports_operation_occurrences_and_optional_source_locations()
+    public void ImportReportsOperationOccurrencesAndOptionalSourceLocations()
     {
         var text = MathBlockOpenMath.Export(CreateSampleProgram("left"));
         var withoutLocations = MathBlockOpenMath.Import(text);
@@ -206,8 +211,9 @@ public sealed class MathBlockOpenMathInputTests
         Assert.Equal(1, locations["/program/outputs/0"].Line);
     }
 
+    /// <summary>Verifies async inputs use async ioand honor cancellation async.</summary>
     [Fact]
-    public async Task Async_inputs_use_async_IO_and_honor_cancellation()
+    public async Task AsyncInputsUseAsyncIOAndHonorCancellationAsync()
     {
         var text = MathBlockOpenMath.Export(CreateSampleProgram("left-α"));
         var bytes = Encoding.UTF8.GetBytes(text);
@@ -233,8 +239,9 @@ public sealed class MathBlockOpenMathInputTests
                 cancellationToken: cancellation.Token));
     }
 
+    /// <summary>Verifies nonthrowing inputs return one stable diagnostic async.</summary>
     [Fact]
-    public async Task Nonthrowing_inputs_return_one_stable_diagnostic()
+    public async Task NonthrowingInputsReturnOneStableDiagnosticAsync()
     {
         var nullAttempt = MathBlockOpenMath.TryImport(null);
         Assert.False(nullAttempt.Succeeded);
@@ -290,14 +297,18 @@ public sealed class MathBlockOpenMathInputTests
         var malformedBytes = Encoding.UTF8.GetBytes(text);
         malformedBytes[10] = 0xFF;
         await using var malformedStream = new ChunkedReadStream(malformedBytes, 1, true);
+        // The malformed-byte result must be independent of the earlier canceled probe.
+#pragma warning disable MA0040
         var malformedAttempt = await MathBlockOpenMath.TryReadUtf8Async(malformedStream);
+#pragma warning restore MA0040
         Assert.Equal(
             MathBlockOpenMathDiagnosticCode.InvalidUtf8,
             malformedAttempt.Diagnostic?.Code);
     }
 
+    /// <summary>Verifies dtdinputs return the exact unsupported content diagnostic async.</summary>
     [Fact]
-    public async Task DTD_inputs_return_the_exact_unsupported_content_diagnostic()
+    public async Task DTDInputsReturnTheExactUnsupportedContentDiagnosticAsync()
     {
         var text = string.Concat(
             "<!DOCTYPE OMOBJ [<!ENTITY external SYSTEM \"file:///not-read\">]>",
@@ -324,8 +335,9 @@ public sealed class MathBlockOpenMathInputTests
             await MathBlockOpenMath.TryReadUtf8Async(asynchronousByteStream));
     }
 
+    /// <summary>Verifies dtdtext inside cdataremains valid async.</summary>
     [Fact]
-    public async Task DTD_text_inside_CDATA_remains_valid()
+    public async Task DTDTextInsideCDATARemainsValidAsync()
     {
         var expected = MathBlockOpenMath.Export(CreateSampleProgram("<!DOCTYPE"));
         var source = expected.Replace(
@@ -334,7 +346,7 @@ public sealed class MathBlockOpenMathInputTests
             StringComparison.Ordinal);
         var bytes = Encoding.UTF8.GetBytes(source);
 
-        Assert.NotEqual(expected, source);
+        Assert.NotEqual(expected, source, StringComparer.Ordinal);
         Assert.Equal(expected, MathBlockOpenMath.Export(MathBlockOpenMath.Import(source).Program));
         Assert.Equal(expected, MathBlockOpenMath.Export(MathBlockOpenMath.ImportUtf8(bytes).Program));
         Assert.Equal(
@@ -356,10 +368,11 @@ public sealed class MathBlockOpenMathInputTests
         Assert.Equal(expected, MathBlockOpenMath.Export(asynchronousBytes.Program));
     }
 
+    /// <summary>Verifies lexical context markers do not hide dtddiagnostics async.</summary>
     [Theory]
     [InlineData("<!-- <![CDATA[ --><!DOCTYPE OMOBJ>")]
     [InlineData("<?probe <![CDATA[ ?><!DOCTYPE OMOBJ>")]
-    public async Task Lexical_context_markers_do_not_hide_DTD_diagnostics(string prefix)
+    public async Task LexicalContextMarkersDoNotHideDTDDiagnosticsAsync(string prefix)
     {
         var text = string.Concat(prefix, MathBlockOpenMath.Export(CreateSampleProgram("left")));
         var bytes = Encoding.UTF8.GetBytes(text);
@@ -384,8 +397,9 @@ public sealed class MathBlockOpenMathInputTests
             await MathBlockOpenMath.TryReadUtf8Async(asynchronousByteStream));
     }
 
+    /// <summary>Verifies stream and character inputs leave their sources open after failure.</summary>
     [Fact]
-    public void Stream_and_character_inputs_leave_their_sources_open_after_failure()
+    public void StreamAndCharacterInputsLeaveTheirSourcesOpenAfterFailure()
     {
         using var stream = new ChunkedReadStream([0xFF], 1, false);
         Assert.Throws<FormatException>(() => MathBlockOpenMath.ReadUtf8(stream));
@@ -396,8 +410,9 @@ public sealed class MathBlockOpenMathInputTests
         Assert.Equal(-1, reader.Peek());
     }
 
+    /// <summary>Verifies every operation round trips through contiguous utf 8 input.</summary>
     [Fact]
-    public void Every_operation_round_trips_through_contiguous_UTF8_input()
+    public void EveryOperationRoundTripsThroughContiguousUTF8Input()
     {
         Assert.Equal(337, MathBlockCatalog.Standard.Operations.Count);
         foreach (var operation in MathBlockCatalog.Standard.Operations)

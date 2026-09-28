@@ -2,8 +2,11 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockStatistics
 {
+    /// <summary>Computes the <c>statistics.theil-sen-slope@1</c> mathematical operation.</summary>
     public static double TheilSenSlope(IReadOnlyList<double> x, IReadOnlyList<double> y)
     {
+        ArgumentNullException.ThrowIfNull(x);
+        ArgumentNullException.ThrowIfNull(y);
         var slopes = new List<double>(x.Count * (x.Count - 1) / 2);
         for (var first = 0; first < x.Count; first++)
         {

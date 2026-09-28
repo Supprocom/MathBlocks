@@ -3,6 +3,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockGeometry
 {
 
+    /// <summary>Computes the signed two-dimensional cross product around an origin.</summary>
     public static double Cross(MathBlockPoint origin, MathBlockPoint left, MathBlockPoint right) =>
         (left.X - origin.X) * (right.Y - origin.Y) -
         (left.Y - origin.Y) * (right.X - origin.X);
@@ -14,7 +15,7 @@ public static partial class MathBlockGeometry
         var maximum = 0d;
         for (var leftIndex = 0; leftIndex < left.Count; leftIndex++)
         {
-        var minimum = Math.PositiveInfinity;
+            var minimum = Math.PositiveInfinity;
             for (var rightIndex = 0; rightIndex < right.Count; rightIndex++)
                 minimum = Math.Min(minimum, Distance(left[leftIndex], right[rightIndex]));
             maximum = Math.Max(maximum, minimum);

@@ -3,8 +3,11 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>tropical.min-plus-multiply@1</c> mathematical operation.</summary>
     public static MathBlockMatrix MinPlusMultiply(MathBlockMatrix left, MathBlockMatrix right)
     {
+        ArgumentNullException.ThrowIfNull(left);
+        ArgumentNullException.ThrowIfNull(right);
         var result = MathBlockCollectionPrimitives.Repeat(
             Math.PositiveInfinity,
             left.Rows * right.Columns);

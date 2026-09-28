@@ -2,5 +2,11 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockGeometry
 {
-    public static double HausdorffDistance(IReadOnlyList<MathBlockPoint> left, IReadOnlyList<MathBlockPoint> right) => Math.Max(DirectedHausdorff(left, right), DirectedHausdorff(right, left));
+    /// <summary>Computes the <c>geometry.hausdorff-distance@1</c> mathematical operation.</summary>
+    public static double HausdorffDistance(IReadOnlyList<MathBlockPoint> left, IReadOnlyList<MathBlockPoint> right)
+    {
+        ArgumentNullException.ThrowIfNull(left);
+        ArgumentNullException.ThrowIfNull(right);
+        return Math.Max(DirectedHausdorff(left, right), DirectedHausdorff(right, left));
+    }
 }

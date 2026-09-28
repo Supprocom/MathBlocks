@@ -3,8 +3,11 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockStructure
 {
+    /// <summary>Computes the <c>matrix.kronecker-product@1</c> mathematical operation.</summary>
     public static MathBlockMatrix KroneckerProduct(MathBlockMatrix left, MathBlockMatrix right)
     {
+        ArgumentNullException.ThrowIfNull(left);
+        ArgumentNullException.ThrowIfNull(right);
         var rows = left.Rows * right.Rows;
         var columns = left.Columns * right.Columns;
         var result = new double[rows * columns];

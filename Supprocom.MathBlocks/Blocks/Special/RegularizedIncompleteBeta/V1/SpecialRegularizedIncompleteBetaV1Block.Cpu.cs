@@ -2,6 +2,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockProbability
 {
+    /// <summary>Computes the <c>special.regularized-incomplete-beta@1</c> mathematical operation.</summary>
     public static double RegularizedIncompleteBeta(double x, double left, double right)
     {
         if (x == 0d)

@@ -200,8 +200,7 @@ internal static class MathBlockPrimitives
 
     public static int FloorLog2(uint value)
     {
-        if (value == 0u)
-            throw new ArgumentOutOfRangeException(nameof(value));
+        ArgumentOutOfRangeException.ThrowIfEqual(value, 0u);
         var result = 0;
         while ((value >>= 1) != 0u)
             result++;

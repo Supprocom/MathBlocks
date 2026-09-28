@@ -1,4 +1,5 @@
 namespace Supprocom.MathBlocks;
+
 internal static partial class StatisticalMathBlocks
 {
     internal static class StatisticsWeightedPopulationVarianceV1Block

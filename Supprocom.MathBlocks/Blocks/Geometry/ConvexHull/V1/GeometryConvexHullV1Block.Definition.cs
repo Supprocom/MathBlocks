@@ -1,4 +1,5 @@
 namespace Supprocom.MathBlocks;
+
 internal static partial class GeometryMathBlocks
 {
     internal static class GeometryConvexHullV1Block

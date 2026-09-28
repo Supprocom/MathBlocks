@@ -3,8 +3,11 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>markov.entropy-production@1</c> mathematical operation.</summary>
     public static double EntropyProduction(MathBlockMatrix transition, IReadOnlyList<double> stationary)
     {
+        ArgumentNullException.ThrowIfNull(stationary);
+        ArgumentNullException.ThrowIfNull(transition);
         var result = 0d;
         for (var row = 0; row < transition.Rows; row++)
         {

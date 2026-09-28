@@ -1,4 +1,5 @@
 namespace Supprocom.MathBlocks;
+
 internal static partial class PathMathBlocks
 {
     internal static class ComplexVectorImaginaryV1BlockCpu

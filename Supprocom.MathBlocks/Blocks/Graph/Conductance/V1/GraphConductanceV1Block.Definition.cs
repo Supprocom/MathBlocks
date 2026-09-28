@@ -1,4 +1,5 @@
 namespace Supprocom.MathBlocks;
+
 internal static partial class GraphMathBlocks
 {
     internal static class GraphConductanceV1Block
@@ -22,6 +23,6 @@ internal static partial class GraphMathBlocks
                     MathBlockType.Scalar(),
                     "The graph or subset is outside the operation domain.")
                 : MathBlockValue.Scalar(MathBlockGraphMath.Conductance(graph, subset));
-        }, [path, MathBlockValue.BooleanVector([true, false, false ])], MathBlockValue.Scalar(1d), performanceIterations: 4);
+        }, [path, MathBlockValue.BooleanVector([true, false, false])], MathBlockValue.Scalar(1d), performanceIterations: 4);
     }
 }

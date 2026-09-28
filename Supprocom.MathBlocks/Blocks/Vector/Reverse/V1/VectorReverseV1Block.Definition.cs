@@ -1,4 +1,5 @@
 namespace Supprocom.MathBlocks;
+
 internal static partial class VectorMathBlocks
 {
     internal static class VectorReverseV1Block

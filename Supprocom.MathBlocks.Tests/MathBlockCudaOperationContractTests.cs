@@ -6,23 +6,25 @@ using Supprocom.MathBlocks.Cuda;
 
 namespace Supprocom.MathBlocks.Tests;
 
+/// <summary>Contains regression tests for Math Block Cuda Operation Contract Tests.</summary>
 public sealed class MathBlockCudaOperationContractTests
 {
+    /// <summary>Verifies cudaoperation contract covers the complete catalog and slot abi.</summary>
     [Fact]
-    public void CUDA_operation_contract_covers_the_complete_catalog_and_slot_ABI()
+    public void CUDAOperationContractCoversTheCompleteCatalogAndSlotABI()
     {
         var expectedIdentities = MathBlockCatalog.Standard.Operations
             .Select(operation => operation.Identity)
-            .OrderBy(identity => identity, StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
             .ToArray();
         var contracts = MathBlockCudaDeviceModule.Operations;
 
         Assert.Equal(337, contracts.Count);
-        Assert.Equal(expectedIdentities, contracts.Select(contract => contract.Identity));
+        Assert.Equal(expectedIdentities, contracts.Select(contract => contract.Identity), StringComparer.Ordinal);
         Assert.Equal(337, contracts.Select(contract => (contract.Family, contract.Opcode)).Distinct().Count());
         Assert.Equal(
-            Enum.GetValues<MathBlockCudaOperationFamily>().OrderBy(value => value),
-            contracts.Select(contract => contract.Family).Distinct().OrderBy(value => value));
+            Enum.GetValues<MathBlockCudaOperationFamily>().Order(),
+            contracts.Select(contract => contract.Family).Distinct().Order());
         Assert.Equal(MathBlockCudaSlotLayout.Size, Marshal.SizeOf<MathBlockCudaSlotDescriptor>());
         Assert.Equal(
             MathBlockCudaSlotLayout.ScalarValueOffset,
@@ -110,8 +112,9 @@ public sealed class MathBlockCudaOperationContractTests
         }
     }
 
+    /// <summary>Verifies cudadevice module compiles aconsumer owned nested kernel.</summary>
     [Fact]
-    public void CUDA_device_module_compiles_a_consumer_owned_nested_kernel()
+    public void CUDADeviceModuleCompilesAConsumerOwnedNestedKernel()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var add = MathBlockCudaDeviceModule.GetOperation("scalar.add@1");
@@ -139,8 +142,9 @@ public sealed class MathBlockCudaOperationContractTests
             StringComparison.Ordinal);
     }
 
+    /// <summary>Verifies cudaoperation fingerprint changes for each performance field group.</summary>
     [Fact]
-    public void CUDA_operation_fingerprint_changes_for_each_performance_field_group()
+    public void CUDAOperationFingerprintChangesForEachPerformanceFieldGroup()
     {
         var operation = MathBlockCatalog.Standard.Get("scalar.add", 1);
         var contract = MathBlockCudaDeviceModule.GetOperation(operation.Identity);
@@ -196,18 +200,19 @@ public sealed class MathBlockCudaOperationContractTests
                 performance.Iterations,
                 performance.MaximumWarmLatencyMicroseconds));
 
-        Assert.NotEqual(baseline.PerformanceEvidenceFingerprint, inputChange.PerformanceEvidenceFingerprint);
-        Assert.NotEqual(baseline.PerformanceEvidenceFingerprint, iterationChange.PerformanceEvidenceFingerprint);
-        Assert.NotEqual(baseline.PerformanceEvidenceFingerprint, latencyChange.PerformanceEvidenceFingerprint);
-        Assert.NotEqual(invalidReasonA.PerformanceEvidenceFingerprint, invalidReasonB.PerformanceEvidenceFingerprint);
-        Assert.NotEqual(baseline.Fingerprint, inputChange.Fingerprint);
-        Assert.NotEqual(baseline.Fingerprint, iterationChange.Fingerprint);
-        Assert.NotEqual(baseline.Fingerprint, latencyChange.Fingerprint);
-        Assert.NotEqual(invalidReasonA.Fingerprint, invalidReasonB.Fingerprint);
+        Assert.NotEqual(baseline.PerformanceEvidenceFingerprint, inputChange.PerformanceEvidenceFingerprint, StringComparer.Ordinal);
+        Assert.NotEqual(baseline.PerformanceEvidenceFingerprint, iterationChange.PerformanceEvidenceFingerprint, StringComparer.Ordinal);
+        Assert.NotEqual(baseline.PerformanceEvidenceFingerprint, latencyChange.PerformanceEvidenceFingerprint, StringComparer.Ordinal);
+        Assert.NotEqual(invalidReasonA.PerformanceEvidenceFingerprint, invalidReasonB.PerformanceEvidenceFingerprint, StringComparer.Ordinal);
+        Assert.NotEqual(baseline.Fingerprint, inputChange.Fingerprint, StringComparer.Ordinal);
+        Assert.NotEqual(baseline.Fingerprint, iterationChange.Fingerprint, StringComparer.Ordinal);
+        Assert.NotEqual(baseline.Fingerprint, latencyChange.Fingerprint, StringComparer.Ordinal);
+        Assert.NotEqual(invalidReasonA.Fingerprint, invalidReasonB.Fingerprint, StringComparer.Ordinal);
     }
 
+    /// <summary>Verifies cudadevice abifingerprint changes for each public field group.</summary>
     [Fact]
-    public void CUDA_device_ABI_fingerprint_changes_for_each_public_field_group()
+    public void CUDADeviceABIFingerprintChangesForEachPublicFieldGroup()
     {
         var abi = MathBlockCudaDeviceModule.Abi;
 
@@ -255,11 +260,12 @@ public sealed class MathBlockCudaOperationContractTests
         });
 
         void AssertChanged(MathBlockCudaDeviceAbi changed) =>
-            Assert.NotEqual(abi.Fingerprint, changed.Fingerprint);
+            Assert.NotEqual(abi.Fingerprint, changed.Fingerprint, StringComparer.Ordinal);
     }
 
+    /// <summary>Verifies cudavalue codec round trips every public value kind.</summary>
     [Fact]
-    public void CUDA_value_codec_round_trips_every_public_value_kind()
+    public void CUDAValueCodecRoundTripsEveryPublicValueKind()
     {
         var values = MathBlockCatalog.Standard.Operations
             .SelectMany(operation => operation.RegressionCases)
@@ -269,8 +275,8 @@ public sealed class MathBlockCudaOperationContractTests
             .ToDictionary(group => group.Key, group => group.First());
 
         Assert.Equal(
-            Enum.GetValues<MathBlockValueKind>().OrderBy(value => value),
-            values.Keys.OrderBy(value => value));
+            Enum.GetValues<MathBlockValueKind>().Order(),
+            values.Keys.Order());
         Assert.Equal(
             "C863E9903C081FEA2E50ED810A35A8A60FEB3A17EBEFE4BE1FD2A79F31B07EBC",
             MathBlockCudaValueCodec.SchemaFingerprint);
@@ -310,8 +316,9 @@ public sealed class MathBlockCudaOperationContractTests
         }
     }
 
+    /// <summary>Verifies cudadevice abifingerprint binds the exact source and dispatch table.</summary>
     [Fact]
-    public void CUDA_device_ABI_fingerprint_binds_the_exact_source_and_dispatch_table()
+    public void CUDADeviceABIFingerprintBindsTheExactSourceAndDispatchTable()
     {
         var expectedSourceFingerprint = Convert.ToHexString(
             SHA256.HashData(Encoding.UTF8.GetBytes(MathBlockCudaDeviceModule.Source)));
@@ -320,7 +327,7 @@ public sealed class MathBlockCudaOperationContractTests
         Assert.Equal(64, MathBlockCudaDeviceModule.AbiFingerprint.Length);
         Assert.Equal(
             MathBlockCudaDeviceModule.Operations.Count,
-            MathBlockCudaDeviceModule.Operations.Select(contract => contract.Fingerprint).Distinct().Count());
+            MathBlockCudaDeviceModule.Operations.Select(contract => contract.Fingerprint).Distinct(StringComparer.Ordinal).Count());
         Assert.Contains(
             $"__device__ void {MathBlockCudaDeviceModule.DispatchFunctionName}",
             MathBlockCudaDeviceModule.Source,

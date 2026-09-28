@@ -3,118 +3,16 @@ using System.Text;
 
 namespace Supprocom.MathBlocks;
 
-public sealed class MathBlockProgramBuilder
-{
-    private readonly MathBlockRegistry registry;
-    private readonly List<NodeDefinition> nodes = [];
-    private readonly List<(string Name, int Node)> outputs = [];
-    private readonly HashSet<string> inputNames = new(StringComparer.Ordinal);
-    private readonly HashSet<string> outputNames = new(StringComparer.Ordinal);
-
-    public MathBlockProgramBuilder(MathBlockRegistry registry) =>
-        this.registry = registry ?? throw new ArgumentNullException(nameof(registry));
-
-    public int Input(string name, MathBlockType type)
-    {
-        name = RequireName(name, nameof(name));
-        if (!inputNames.Add(name))
-            throw new ArgumentException($"Input '{name}' already exists.", nameof(name));
-        nodes.Add(NodeDefinition.Input(name, type));
-        return nodes.Count - 1;
-    }
-
-    public int Constant(MathBlockValue value)
-    {
-        if (!value.IsValid)
-            throw new ArgumentException("A program constant must be valid.", nameof(value));
-        nodes.Add(NodeDefinition.Constant(value));
-        return nodes.Count - 1;
-    }
-
-    public int Apply(string identifier, int version = 1, params int[] inputs)
-    {
-        ArgumentNullException.ThrowIfNull(inputs);
-        var operation = registry.Get(identifier, version);
-        for (var index = 0; index < inputs.Length; index++)
-            if (inputs[index] < 0 || inputs[index] >= nodes.Count)
-                throw new ArgumentOutOfRangeException(nameof(inputs), "An operation input must reference an earlier node.");
-        var inputTypes = MathBlockCollectionPrimitives.Map(inputs, index => nodes[index].Type);
-        var outputType = operation.ResolveOutputType(inputTypes);
-        nodes.Add(NodeDefinition.CreateOperation(operation, inputs, outputType));
-        return nodes.Count - 1;
-    }
-
-    public MathBlockProgramBuilder Output(string name, int node)
-    {
-        name = RequireName(name, nameof(name));
-        if ((uint)node >= (uint)nodes.Count)
-            throw new ArgumentOutOfRangeException(nameof(node));
-        if (!outputNames.Add(name))
-            throw new ArgumentException($"Output '{name}' already exists.", nameof(name));
-        outputs.Add((name, node));
-        return this;
-    }
-
-    public MathBlockProgram Build()
-    {
-        if (outputs.Count == 0)
-            throw new InvalidOperationException("A program requires an output.");
-        return new MathBlockProgram(nodes, outputs);
-    }
-
-    private static string RequireName(string value, string parameterName) =>
-        string.IsNullOrWhiteSpace(value)
-            ? throw new ArgumentException("A nonempty name is required.", parameterName)
-            : value.Trim();
-
-    internal enum NodeKind
-    {
-        Input,
-        Constant,
-        Operation
-    }
-
-    internal sealed class NodeDefinition
-    {
-        private NodeDefinition(
-            NodeKind kind,
-            MathBlockType type,
-            string? name = null,
-            MathBlockValue value = default,
-            MathBlockOperation? operation = null,
-            int[]? inputs = null)
-        {
-            Kind = kind;
-            Type = type;
-            Name = name;
-            Value = value;
-            Operation = operation;
-            Inputs = inputs ?? [];
-        }
-
-        public NodeKind Kind { get; }
-        public MathBlockType Type { get; }
-        public string? Name { get; }
-        public MathBlockValue Value { get; }
-        public MathBlockOperation? Operation { get; }
-        public int[] Inputs { get; }
-
-        public static NodeDefinition Input(string name, MathBlockType type) => new(NodeKind.Input, type, name);
-        public static NodeDefinition Constant(MathBlockValue value) => new(NodeKind.Constant, value.Type, value: value);
-        public static NodeDefinition CreateOperation(MathBlockOperation operation, int[] inputs, MathBlockType type) =>
-            new(NodeKind.Operation, type, operation: operation, inputs: MathBlockCollectionPrimitives.Copy(inputs));
-    }
-}
-
+/// <summary>Defines the Math Block Program contract.</summary>
 public sealed class MathBlockProgram
 {
     private readonly Node[] nodes;
     private readonly int[][] operationLevels;
     private readonly Output[] outputs;
     private readonly IReadOnlyList<MathBlockProgramNode> planNodes;
-    private readonly IReadOnlyDictionary<string, MathBlockType> inputTypes;
-    private readonly IReadOnlyDictionary<string, MathBlockType> outputTypes;
-    private readonly IReadOnlyDictionary<string, int> outputNodeIndexes;
+    private readonly Dictionary<string, MathBlockType> inputTypes;
+    private readonly Dictionary<string, MathBlockType> outputTypes;
+    private readonly Dictionary<string, int> outputNodeIndexes;
 
     internal MathBlockProgram(
         IReadOnlyList<MathBlockProgramBuilder.NodeDefinition> definitions,
@@ -151,17 +49,23 @@ public sealed class MathBlockProgram
         Fingerprint = CreateFingerprint(nodes, outputs);
     }
 
+    /// <summary>Gets the fingerprint value.</summary>
     public string Fingerprint { get; }
+    /// <summary>Gets the string value.</summary>
     public IReadOnlyDictionary<string, MathBlockType> Inputs => inputTypes;
+    /// <summary>Gets the string value.</summary>
     public IReadOnlyDictionary<string, MathBlockType> Outputs => outputTypes;
+    /// <summary>Gets the plan nodes value.</summary>
     public IReadOnlyList<MathBlockProgramNode> PlanNodes => planNodes;
+    /// <summary>Gets the string value.</summary>
     public IReadOnlyDictionary<string, int> OutputNodeIndexes => outputNodeIndexes;
 
+    /// <summary>Evaluates the typed graph with named input values.</summary>
     public IReadOnlyDictionary<string, MathBlockValue> Evaluate(
         IReadOnlyDictionary<string, MathBlockValue> inputs) =>
         MathBlocksCPUWorker.Shared.Execute(this, inputs);
 
-    internal IReadOnlyList<Node> Nodes => nodes;
+    internal Node[] Nodes => nodes;
     internal IReadOnlyList<int[]> OperationLevels => operationLevels;
     internal int OutputCount => outputs.Length;
 
@@ -198,7 +102,7 @@ public sealed class MathBlockProgram
         return values;
     }
 
-    internal IReadOnlyDictionary<string, MathBlockValue> CreateOutputs(MathBlockValue[] values)
+    internal Dictionary<string, MathBlockValue> CreateOutputs(MathBlockValue[] values)
     {
         var result = new Dictionary<string, MathBlockValue>(outputs.Length, StringComparer.Ordinal);
         for (var index = 0; index < outputs.Length; index++)
@@ -209,12 +113,12 @@ public sealed class MathBlockProgram
         return result;
     }
 
-    private static int[][] CreateOperationLevels(IReadOnlyList<Node> source)
+    private static int[][] CreateOperationLevels(Node[] source)
     {
-        var depths = new int[source.Count];
-        var levels = new List<int>?[source.Count + 1];
+        var depths = new int[source.Length];
+        var levels = new List<int>?[source.Length + 1];
         var maximumDepth = 0;
-        for (var nodeIndex = 0; nodeIndex < source.Count; nodeIndex++)
+        for (var nodeIndex = 0; nodeIndex < source.Length; nodeIndex++)
         {
             var node = source[nodeIndex];
             if (node.Kind != MathBlockProgramBuilder.NodeKind.Operation)
@@ -240,11 +144,11 @@ public sealed class MathBlockProgram
         return result;
     }
 
-    private static string CreateFingerprint(IReadOnlyList<Node> nodes, IReadOnlyList<Output> outputs)
+    private static string CreateFingerprint(Node[] nodes, IReadOnlyList<Output> outputs)
     {
         var builder = new StringBuilder();
         builder.Append("mathblock-program-v1\n");
-        for (var index = 0; index < nodes.Count; index++)
+        for (var index = 0; index < nodes.Length; index++)
         {
             var node = nodes[index];
             builder.Append(index).Append('|').Append((int)node.Kind).Append('|');
@@ -310,7 +214,7 @@ public sealed class MathBlockProgram
                     AppendDouble(builder, item);
                 break;
             case MathBlockValueKind.Matrix:
-                foreach (var item in value.AsMatrix().Span)
+                foreach (ref readonly var item in value.AsMatrix().Span)
                     AppendDouble(builder, item);
                 break;
             case MathBlockValueKind.ComplexVector:
@@ -321,7 +225,7 @@ public sealed class MathBlockProgram
                 }
                 break;
             case MathBlockValueKind.ComplexMatrix:
-                foreach (var item in value.AsComplexMatrix().Span)
+                foreach (ref readonly var item in value.AsComplexMatrix().Span)
                 {
                     AppendDouble(builder, item.Real);
                     AppendDouble(builder, item.Imaginary);
@@ -388,33 +292,4 @@ public sealed class MathBlockProgram
     }
 
     private sealed record Output(string Name, int NodeIndex);
-}
-
-public enum MathBlockProgramNodeKind
-{
-    Input,
-    Constant,
-    Operation
-}
-
-public sealed class MathBlockProgramNode
-{
-    internal MathBlockProgramNode(int index, MathBlockProgram.Node node)
-    {
-        Index = index;
-        Kind = (MathBlockProgramNodeKind)node.Kind;
-        Type = node.Type;
-        Name = node.Name;
-        Value = node.Value;
-        OperationIdentity = node.Operation?.Identity;
-        Inputs = Array.AsReadOnly(MathBlockCollectionPrimitives.Copy(node.Inputs));
-    }
-
-    public int Index { get; }
-    public MathBlockProgramNodeKind Kind { get; }
-    public MathBlockType Type { get; }
-    public string? Name { get; }
-    public MathBlockValue Value { get; }
-    public string? OperationIdentity { get; }
-    public IReadOnlyList<int> Inputs { get; }
 }

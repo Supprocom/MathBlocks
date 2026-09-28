@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockLinearAlgebra
 {
+    /// <summary>Computes the <c>matrix.is-positive-definite@1</c> mathematical operation.</summary>
     public static bool IsPositiveDefinite(MathBlockMatrix matrix)
     {
+        ArgumentNullException.ThrowIfNull(matrix);
         if (!IsSymmetric(matrix))
             return false;
         var size = matrix.Rows;

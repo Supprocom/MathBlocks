@@ -1,4 +1,5 @@
 namespace Supprocom.MathBlocks;
+
 internal static partial class ComplexMathBlocks
 {
     internal static class ComplexPowerV1Block

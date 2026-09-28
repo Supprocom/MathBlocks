@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>order.majorizes@1</c> mathematical operation.</summary>
     public static bool Majorizes(IReadOnlyList<double> left, IReadOnlyList<double> right)
     {
+        ArgumentNullException.ThrowIfNull(left);
         var leftSorted = MathBlockCollectionPrimitives.SortedCopy(
             left,
             MathBlockCollectionPrimitives.CompareDoubleDescending);

@@ -2,8 +2,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockStatistics
 {
+    /// <summary>Computes the <c>statistics.population-excess-kurtosis@1</c> mathematical operation.</summary>
     public static double PopulationExcessKurtosis(IReadOnlyList<double> values)
     {
+        ArgumentNullException.ThrowIfNull(values);
         var mean = MathBlockVectorMath.Mean(values);
         var second = 0d;
         var fourth = 0d;

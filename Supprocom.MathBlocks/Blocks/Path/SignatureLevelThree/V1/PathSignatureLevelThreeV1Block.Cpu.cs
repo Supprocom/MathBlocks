@@ -3,8 +3,10 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockAdvanced
 {
+    /// <summary>Computes the <c>path.signature-level-three@1</c> mathematical operation.</summary>
     public static double[] SignatureLevelThree(MathBlockMatrix path)
     {
+        ArgumentNullException.ThrowIfNull(path);
         var dimension = path.Columns;
         var first = new double[dimension];
         var second = new double[dimension * dimension];
