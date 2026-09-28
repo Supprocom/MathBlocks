@@ -217,6 +217,15 @@ public sealed partial class MathBlockIndependenceTests
             document.Descendants("None"),
             item => string.Equals(item.Attribute("Include")?.Value, "..\\README.md", StringComparison.Ordinal) &&
 string.Equals(item.Attribute("PackagePath")?.Value, "README.md", StringComparison.Ordinal));
+        // NuGet interprets extensionless PackagePath values as directories.
+        // An empty package path keeps these two source files at the nupkg root.
+        foreach (var fileName in new[] { "LICENSE", "NOTICE" })
+        {
+            Assert.Contains(
+                document.Descendants("None"),
+                item => string.Equals(item.Attribute("Include")?.Value, $"..\\{fileName}", StringComparison.Ordinal) &&
+                    item.Attribute("PackagePath") is { Value.Length: 0 });
+        }
         Assert.Contains("## Diagnostic codes", apiGuide, StringComparison.Ordinal);
         Assert.Contains("## Security boundary", apiGuide, StringComparison.Ordinal);
         Assert.Contains("## Total operation mapping", formulaGuide, StringComparison.Ordinal);
