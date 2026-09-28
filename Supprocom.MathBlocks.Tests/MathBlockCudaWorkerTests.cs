@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Supprocom.MathBlocks.Cuda;
 
@@ -7,6 +8,24 @@ namespace Supprocom.MathBlocks.Tests;
 /// <summary>Contains regression tests for Math Block Cuda Worker Tests.</summary>
 public sealed class MathBlockCudaWorkerTests
 {
+    /// <summary>Verifies the NVRTC P/Invoke path compiles UTF-8 options without a CUDA device.</summary>
+    [Fact]
+    [Trait("Category", "NvrtcInteropContract")]
+    public void NVRTCInteropCompilesWithoutADevice()
+    {
+        var nativeType = typeof(MathBlocksCUDAWorker).Assembly.GetType(
+            "Supprocom.MathBlocks.Cuda.MathBlocksCudaNative",
+            throwOnError: true);
+        Assert.NotNull(nativeType);
+        var compile = nativeType.GetMethod("CompilePtxForArchitecture", BindingFlags.NonPublic | BindingFlags.Static);
+        Assert.NotNull(compile);
+
+        var ptx = Assert.IsType<byte[]>(compile.Invoke(
+            null,
+            ["extern \"C\" __global__ void mathblocks_interop() {}", "mathblocks-interop.cu", "compute_86"]));
+        Assert.NotEmpty(ptx);
+    }
+
     /// <summary>Verifies cudacatalog contains each scalar vector boolean and complex block.</summary>
     [Fact]
     [Trait("Category", "CudaSourceContract")]

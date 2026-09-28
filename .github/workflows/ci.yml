@@ -150,6 +150,19 @@ jobs:
           --logger "trx;LogFileName=mathblocks-cuda-source-contract.trx"
           --results-directory "$TEST_RESULTS"
 
+      - name: Run the NVRTC managed-interop gate without a device
+        shell: bash
+        run: |
+          set -euo pipefail
+          native_root="$NUGET_PACKAGES/libtorch-cuda-12.8-linux-x64-part6/2.10.0/runtimes/linux-x64/native"
+          LD_LIBRARY_PATH="$NVRTC_EVIDENCE:$native_root" \
+            dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj \
+            -c Release --no-build --no-restore \
+            --artifacts-path "$ARTIFACT_ROOT/tests" \
+            --filter "Category=NvrtcInteropContract" \
+            --logger "trx;LogFileName=mathblocks-nvrtc-interop.trx" \
+            --results-directory "$TEST_RESULTS"
+
       - name: Run the portable codec fingerprint gate
         run: >-
           dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj

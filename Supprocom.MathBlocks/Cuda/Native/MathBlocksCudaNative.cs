@@ -65,17 +65,22 @@ internal static class MathBlocksCudaNative
     public static byte[] CompilePtx(string source, string name)
     {
         EnsureContext();
-        ThrowIfFailed(nvrtcCreateProgram(out var program, source, name, 0, null, null), "nvrtcCreateProgram");
+        return CompilePtxForArchitecture(source, name, ResolvePtxArchitecture());
+    }
+
+    private static byte[] CompilePtxForArchitecture(string source, string name, string architecture)
+    {
+        ThrowIfFailed(nvrtcCreateProgram(out var program, source, name, 0, IntPtr.Zero, IntPtr.Zero), "nvrtcCreateProgram");
         try
         {
             var options = new[]
             {
-                $"--gpu-architecture={ResolvePtxArchitecture()}",
+                $"--gpu-architecture={architecture}",
                 "--fmad=false",
                 "--prec-div=true",
                 "--prec-sqrt=true"
             };
-            var result = nvrtcCompileProgram(program, options.Length, options);
+            var result = CompileWithUtf8Options(program, options);
             if (result != NvrtcResult.Success)
                 throw new InvalidOperationException($"NVRTC failed: {result}. {GetProgramLog(program)}");
 
@@ -87,6 +92,25 @@ internal static class MathBlocksCudaNative
         finally
         {
             _ = nvrtcDestroyProgram(ref program);
+        }
+    }
+
+    private static NvrtcResult CompileWithUtf8Options(IntPtr program, string[] options)
+    {
+        // The runtime cannot marshal string[] with an LPUTF8Str array subtype.
+        // NVRTC consumes these UTF-8 pointers synchronously during compilation.
+        var pointers = new IntPtr[options.Length];
+        try
+        {
+            for (var index = 0; index < options.Length; index++)
+                pointers[index] = Marshal.StringToCoTaskMemUTF8(options[index]);
+            return nvrtcCompileProgram(program, pointers.Length, pointers);
+        }
+        finally
+        {
+            foreach (var pointer in pointers)
+                if (pointer != IntPtr.Zero)
+                    Marshal.FreeCoTaskMem(pointer);
         }
     }
 
@@ -332,15 +356,15 @@ internal static class MathBlocksCudaNative
         [MarshalAs(UnmanagedType.LPUTF8Str)] string source,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string name,
         int headerCount,
-        [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPUTF8Str)] string[]? headers,
-        [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPUTF8Str)] string[]? includeNames);
+        IntPtr headers,
+        IntPtr includeNames);
 
     [DllImport("nvrtc64_120_0.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi,
         BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private static extern NvrtcResult nvrtcCompileProgram(
         IntPtr program,
         int optionCount,
-        [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPUTF8Str)] string[] options);
+        [In, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] IntPtr[] options);
 
     [DllImport("nvrtc64_120_0.dll", CallingConvention = CallingConvention.Cdecl)]
     private static extern NvrtcResult nvrtcGetPTXSize(IntPtr program, out UIntPtr size);

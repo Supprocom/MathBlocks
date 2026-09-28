@@ -19,7 +19,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>mathematics;openmath;mathml;content-mathml;operation-contract;computation-graph;cpu;cuda;deterministic;numerics</PackageTags>
-    <PackageReleaseNotes>Clears enabled SDK and specialist analyzer warnings with a tracked public API baseline and strengthened native-loading and interop checks. The 337-operation OpenMath and Content MathML interchange and CUDA source fingerprint remain unchanged.</PackageReleaseNotes>
+    <PackageReleaseNotes>Clears enabled SDK and specialist analyzer warnings with a tracked public API baseline, strengthens native loading, and fixes .NET 10 NVRTC UTF-8 option marshaling. The 337-operation OpenMath and Content MathML interchange and CUDA source fingerprint remain unchanged.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType>portable</DebugType>
