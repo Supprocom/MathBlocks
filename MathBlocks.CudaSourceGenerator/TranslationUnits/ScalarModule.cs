@@ -315,14 +315,15 @@ internal static unsafe class ScalarModule
         if (x > 0.0)
             return mathblocks_arc_tangent(y / x);
         if (x < 0.0)
-            return y >= 0.0
+            return !Cuda.SignBit(y)
                 ? mathblocks_arc_tangent(y / x) + pi
                 : mathblocks_arc_tangent(y / x) - pi;
         if (y > 0.0)
             return pi / 2.0;
         if (y < 0.0)
             return -pi / 2.0;
-        return 0.0;
+        // Both are zeros (IEEE 754, C99 Annex F): atan2(±0, +0) = ±0 and atan2(±0, -0) = ±pi.
+        return Cuda.SignBit(x) ? Math.CopySign(pi, y) : y;
     }
 
     [CudaDevice]
