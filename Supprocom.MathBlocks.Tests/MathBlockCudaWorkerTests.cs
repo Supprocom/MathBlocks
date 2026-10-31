@@ -845,6 +845,87 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures));
     }
 
+    /// <summary>
+    /// Verifies the inverse sine and cosine give the CoreCLR bits on CUDA across [-1, 1]: a dense dyadic grid,
+    /// fixed pseudo-random points, the 512 doubles next to each of -1 and 1, every power of two down to the
+    /// smallest subnormal, and both zeros.
+    /// </summary>
+    [Theory]
+    [InlineData("scalar.arc-sine")]
+    [InlineData("scalar.arc-cosine")]
+    public void CUDAInverseSineAndCosineMatchCoreCLRBitForBitAcrossTheDomain(string identifier)
+    {
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        var operation = MathBlockCatalog.Standard.Get(identifier, 1);
+        var unit = operation.RegressionCases[0].Inputs[0].Type.Unit;
+        var values = CreateUnitIntervalInputs();
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var input = builder.Input("input-0", MathBlockValue.Scalar(0d, unit).Type);
+        var program = builder.Output("result", builder.Apply(operation.Identifier, operation.Version, input)).Build();
+        using var compiled = new MathBlocksCUDAWorker().Compile(
+            program,
+            new Dictionary<string, MathBlockValue>(StringComparer.Ordinal) { ["input-0"] = MathBlockValue.Scalar(0d, unit) });
+        var failures = new List<string>();
+        foreach (var value in values)
+        {
+            MathBlockValue[] inputs = [MathBlockValue.Scalar(value, unit)];
+            compiled.UploadInputs(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal) { ["input-0"] = inputs[0] });
+            compiled.ExecuteResident();
+            var cuda = compiled.ReadOutputs()["result"];
+            var coreclr = operation.Evaluate(inputs);
+            if (!IsExact(coreclr, cuda))
+            {
+                failures.Add(string.Create(
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    $"x={value:R} (0x{BitConverter.DoubleToInt64Bits(value):X16}): CoreCLR={Describe(coreclr)}, CUDA={Describe(cuda)}"));
+            }
+        }
+
+        Assert.True(values.Length > 20_000, $"Only {values.Length} inputs were generated.");
+        Assert.True(
+            failures.Count == 0,
+            $"{identifier}: {failures.Count} of {values.Length} inputs differ. First 20:{Environment.NewLine}" +
+            string.Join(Environment.NewLine, failures.Take(20)));
+    }
+
+    private static double[] CreateUnitIntervalInputs()
+    {
+        var values = new List<double> { 0d, -0d, 1d, -1d };
+        for (var index = 0; index <= 16_384; index++)
+            values.Add(-1d + (index / 8_192d));
+        // SplitMix64 with a fixed seed, mapped to [-1, 1).
+        var state = 0x9E37_79B9_7F4A_7C15ul;
+        for (var index = 0; index < 4_096; index++)
+        {
+            state += 0x9E37_79B9_7F4A_7C15ul;
+            var bits = state;
+            bits = (bits ^ (bits >> 30)) * 0xBF58_476D_1CE4_E5B9ul;
+            bits = (bits ^ (bits >> 27)) * 0x94D0_49BB_1331_11EBul;
+            bits ^= bits >> 31;
+            values.Add(((bits >> 11) * (1d / (1ul << 53)) * 2d) - 1d);
+        }
+        var nearOne = 1d;
+        for (var step = 0; step < 512; step++)
+        {
+            nearOne = Math.BitDecrement(nearOne);
+            values.Add(nearOne);
+            values.Add(-nearOne);
+        }
+        for (var exponent = 1; exponent <= 1_074; exponent++)
+        {
+            var power = Math.ScaleB(1d, -exponent);
+            values.Add(power);
+            values.Add(-power);
+            values.Add(1d - power);
+            values.Add(power - 1d);
+        }
+        values.Add(double.Epsilon * 3d);
+        values.Add(-double.Epsilon * 3d);
+        values.Add(BitConverter.Int64BitsToDouble(0x000F_FFFF_FFFF_FFFFL));
+        values.Add(-BitConverter.Int64BitsToDouble(0x000F_FFFF_FFFF_FFFFL));
+        return [.. values];
+    }
+
     /// <summary>Verifies every cudablock has sub millisecond warm latency on its contract shape.</summary>
     [Fact]
     [Trait("Category", "Performance")]
