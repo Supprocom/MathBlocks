@@ -8,7 +8,10 @@ public sealed class MathBlockWindowCudaPlanTests
 {
     private const double Fill = -1d;
 
-    /// <summary>Verifies each window form and sibling has a family 11 contract with opcode 2 * source + sibling.</summary>
+    /// <summary>
+    /// Verifies each window form and sibling has a family 11 contract with opcode 2 * source + sibling, the six
+    /// window-accurate forms following the 53 window sources.
+    /// </summary>
     [Fact]
     public void WindowCUDAContractsUseFamilyElevenWithOpcodeTwiceTheSourcePlusSibling()
     {
@@ -26,10 +29,23 @@ public sealed class MathBlockWindowCudaPlanTests
             Assert.Equal(Validity(SourceIdentifiers[index]).Arity, sibling.Arity);
         }
 
+        for (var index = 0; index < MathBlockWindowM2TestSupport.AccurateNames.Length; index++)
+        {
+            var name = MathBlockWindowM2TestSupport.AccurateNames[index];
+            var form = MathBlockCudaDeviceModule.GetOperation($"window-accurate.{name}@1");
+            var sibling = MathBlockCudaDeviceModule.GetOperation($"window-accurate-valid.{name}@1");
+            Assert.Equal(MathBlockCudaOperationFamily.Window, form.Family);
+            Assert.Equal(MathBlockCudaOperationFamily.Window, sibling.Family);
+            Assert.Equal(2 * (SourceIdentifiers.Length + index), form.Opcode);
+            Assert.Equal(2 * (SourceIdentifiers.Length + index) + 1, sibling.Opcode);
+            Assert.Equal(MathBlockWindowM2TestSupport.AccurateForm(name).Arity, form.Arity);
+            Assert.Equal(MathBlockWindowM2TestSupport.AccurateValidity(name).Arity, sibling.Arity);
+        }
+
         Assert.Equal(
-            106,
+            118,
             MathBlockCudaDeviceModule.Operations.Count(contract => contract.Family == MathBlockCudaOperationFamily.Window));
-        Assert.Equal(443, MathBlocksCUDAWorker.SupportedBlockIdentities.Count);
+        Assert.Equal(455, MathBlocksCUDAWorker.SupportedBlockIdentities.Count);
         Assert.DoesNotContain(
             MathBlockCatalog.Standard.Operations,
             operation => operation.Identifier.StartsWith("window", StringComparison.Ordinal));
@@ -73,6 +89,37 @@ public sealed class MathBlockWindowCudaPlanTests
         Assert.Equal(MathBlockValueKind.Vector, formPlan.OutputType.Kind);
         Assert.Equal(MathBlockValueKind.BooleanVector, siblingPlan.OutputType.Kind);
         Assert.Equal(count, siblingPlan.OutputRows);
+    }
+
+    /// <summary>
+    /// Verifies the window-accurate plans give each thread one exact accumulator (285 words) for the sum and mean
+    /// and two for the variances and deviations, whatever the width, with one thread per block of max(2w, 32) rows.
+    /// </summary>
+    [Theory]
+    [InlineData("sum", 302_893, 96, 13 * 128 * 285 * 8)]
+    [InlineData("mean", 302_893, 2, 74 * 128 * 285 * 8)]
+    [InlineData("population-variance", 302_893, 96, 13 * 128 * 570 * 8)]
+    [InlineData("sample-standard-deviation", 302_893, 17, 70 * 128 * 570 * 8)]
+    [InlineData("sample-variance", 6, 3, 128 * 570 * 8)]
+    public void WindowAccurateCUDAPlanGivesEachThreadAConstantAccumulatorScratch(
+        string name,
+        int count,
+        int width,
+        int expectedScratchBytes)
+    {
+        var x = MathBlockValue.Vector(Enumerable.Range(0, count).Select(row => (row % 7) * 0.5d).ToArray());
+        var form = MathBlockWindowM2TestSupport.AccurateForm(name);
+        var unit = form.ResolveOutputType([x.Type, MathBlockType.Scalar(), MathBlockType.Scalar()]).Unit;
+        MathBlockValue[] formInputs = [x, MathBlockValue.Scalar(width), MathBlockValue.Scalar(Fill, unit)];
+        MathBlockValue[] siblingInputs = [x, MathBlockValue.Scalar(width)];
+        var formPlan = MathBlockCudaDeviceModule.GetOperation($"window-accurate.{name}@1").PlanCUDA(formInputs);
+        var siblingPlan = MathBlockCudaDeviceModule.GetOperation($"window-accurate-valid.{name}@1").PlanCUDA(siblingInputs);
+
+        Assert.Equal(expectedScratchBytes, formPlan.ScratchBytes);
+        Assert.Equal(expectedScratchBytes, siblingPlan.ScratchBytes);
+        Assert.Equal(count, formPlan.OutputCapacity);
+        Assert.Equal(MathBlockValueKind.Vector, formPlan.OutputType.Kind);
+        Assert.Equal(MathBlockValueKind.BooleanVector, siblingPlan.OutputType.Kind);
     }
 
     /// <summary>Verifies an exact width outside 1 .. n is rejected by the static window authority.</summary>

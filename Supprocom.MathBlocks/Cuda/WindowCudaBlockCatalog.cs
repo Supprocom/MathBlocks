@@ -1,8 +1,10 @@
 namespace Supprocom.MathBlocks.Cuda;
 
-// The window.* forms and window-valid.* siblings run in one kernel that stripes rows across the grid. Opcode
-// 2 * source + sibling, with source the index in the window source list (WindowMathBlocks); the source index
-// selects the per-thread function and the scratch rule below, which mirrors mathblocks_window_scratch_count.
+// The window.* forms and window-valid.* siblings run in one kernel that spreads rows across the grid. Opcode
+// 2 * source + sibling, with source the index in the window source list (WindowMathBlocks), or 53 .. 58 for
+// the window-accurate.* forms and window-accurate-valid.* siblings (sum, mean, population variance, sample variance,
+// population and sample standard deviation); the source index selects the per-thread function and the scratch
+// rule below, which mirrors mathblocks_window_scratch_count.
 internal static class WindowCudaBlockCatalog
 {
     // Each thread's scratch slice is planned so that every slice of the grid fits this budget.
@@ -119,7 +121,19 @@ internal static class WindowCudaBlockCatalog
         new("window.vector.rank@1", MathBlockCudaFamily.Window, 102),
         new("window-valid.vector.rank@1", MathBlockCudaFamily.Window, 103),
         new("window.vector.standardize@1", MathBlockCudaFamily.Window, 104),
-        new("window-valid.vector.standardize@1", MathBlockCudaFamily.Window, 105)
+        new("window-valid.vector.standardize@1", MathBlockCudaFamily.Window, 105),
+        new("window-accurate.sum@1", MathBlockCudaFamily.Window, 106),
+        new("window-accurate-valid.sum@1", MathBlockCudaFamily.Window, 107),
+        new("window-accurate.mean@1", MathBlockCudaFamily.Window, 108),
+        new("window-accurate-valid.mean@1", MathBlockCudaFamily.Window, 109),
+        new("window-accurate.population-variance@1", MathBlockCudaFamily.Window, 110),
+        new("window-accurate-valid.population-variance@1", MathBlockCudaFamily.Window, 111),
+        new("window-accurate.sample-variance@1", MathBlockCudaFamily.Window, 112),
+        new("window-accurate-valid.sample-variance@1", MathBlockCudaFamily.Window, 113),
+        new("window-accurate.population-standard-deviation@1", MathBlockCudaFamily.Window, 114),
+        new("window-accurate-valid.population-standard-deviation@1", MathBlockCudaFamily.Window, 115),
+        new("window-accurate.sample-standard-deviation@1", MathBlockCudaFamily.Window, 116),
+        new("window-accurate-valid.sample-standard-deviation@1", MathBlockCudaFamily.Window, 117)
     ];
 
     private static readonly Dictionary<string, MathBlockCudaFeature> featuresByIdentity = CreateIndex();
@@ -138,15 +152,31 @@ internal static class WindowCudaBlockCatalog
     // Scratch doubles one thread needs for one window: the sorted copy (interquartile range, median, quantile),
     // the logarithms (geometric mean), two rows of means (distance correlation), the sorted copy and deviations
     // (median absolute deviation), two rank vectors (Spearman), or the pair values and a merge buffer of equal
-    // size (Theil-Sen, pseudomedian).
+    // size (Theil-Sen, pseudomedian). The window-accurate sources (53 .. 58) need one exact accumulator of 285
+    // 64-bit words for the sum and mean, two for the variances and deviations, whatever the width.
     internal static long ScratchDoubles(int source, long width) => source switch
     {
         3 or 44 or 47 or 48 => width,
         2 or 8 or 21 => width * 2,
         22 => width * (width - 1),
         15 => width * (width + 1),
+        53 or 54 => 285,
+        55 or 56 or 57 or 58 => 570,
         _ => 0
     };
+
+    // Rows each thread evaluates. The window-accurate sources slide their state over a block of consecutive rows
+    // after adding the width - 1 rows before it, so a block of twice the width (at least 32 rows) keeps that
+    // start-up below half of the work; without a plan-time width the block is 256 rows. The other sources evaluate
+    // one row per thread. The block size changes only the speed: every row's bits are those of the sequential pass.
+    internal static long RowsPerThread(int source, long? width)
+    {
+        if (source < 53)
+            return 1;
+        if (width is not { } planned)
+            return 256;
+        return planned * 2 < 32 ? 32 : planned * 2;
+    }
 
     // Theil-Sen and the pseudomedian need w^2 scratch per thread, so their plan needs the width itself rather
     // than the series length as a bound.
