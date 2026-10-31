@@ -899,8 +899,10 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
             var data = new TheoryData<string>();
             foreach (var operation in MathBlockCatalog.Standard.Operations)
             {
+                // M4-CUDA owns clamp's ±0 behaviour and its parity test.
                 if ((operation.Identifier.StartsWith("scalar.", StringComparison.Ordinal) ||
                      operation.Identifier.StartsWith("special.", StringComparison.Ordinal)) &&
+                    !string.Equals(operation.Identifier, "scalar.clamp", StringComparison.Ordinal) &&
                     operation.RegressionCases[0].Inputs.All(input => input.Type.Kind == MathBlockValueKind.Scalar))
                 {
                     data.Add(operation.Identifier);
@@ -940,9 +942,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         var operation = MathBlockCatalog.Standard.Get(identifier);
         var cases = CreateSignedZeroCases(operation);
         // Compile from a case with a finite CoreCLR result: MathBlocksCUDAProgram constant-folds the prototype.
-        var prototype = Array.Find(
-            cases,
-            inputs => !IsRejectedClampCase(operation, inputs) && operation.Evaluate(inputs).IsValid);
+        var prototype = Array.Find(cases, inputs => operation.Evaluate(inputs).IsValid);
         Assert.True(
             prototype is not null && operation.Evaluate(prototype).IsValid,
             $"{identifier}: no case has a finite CoreCLR result to compile from.");
@@ -951,14 +951,8 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         var program = builder.Output("result", builder.Apply(operation.Identifier, operation.Version, inputNodes)).Build();
         using var compiled = new MathBlocksCUDAWorker().Compile(program, Named(prototype));
         var failures = new List<string>();
-        var skipped = 0;
         foreach (var inputs in cases)
         {
-            if (IsRejectedClampCase(operation, inputs))
-            {
-                skipped++;
-                continue;
-            }
             var coreclr = operation.Evaluate(inputs);
             compiled.UploadInputs(Named(inputs));
             compiled.ExecuteResident();
@@ -969,19 +963,13 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
         Assert.True(
             failures.Count == 0,
-            $"{identifier}: {failures.Count} of {cases.Length - skipped} cases differ ({skipped} clamp cases with lower > upper skipped): " +
+            $"{identifier}: {failures.Count} of {cases.Length} cases differ: " +
             string.Join("; ", failures));
 
         static Dictionary<string, MathBlockValue> Named(MathBlockValue[] inputs) =>
             inputs.Select((input, index) => (Name: $"input-{index}", Input: input))
                 .ToDictionary(item => item.Name, item => item.Input, StringComparer.Ordinal);
     }
-
-    // CoreCLR clamp throws ArgumentException when lower > upper, so those cases have no result to match. This skip
-    // goes once M4-CUDA makes clamp return an invalid value on both sides. Any other exception fails the test.
-    private static bool IsRejectedClampCase(MathBlockOperation operation, MathBlockValue[] inputs) =>
-        string.Equals(operation.Identifier, "scalar.clamp", StringComparison.Ordinal) &&
-        inputs[1].AsScalar() > inputs[2].AsScalar();
 
     private static string DescribeBits(MathBlockValue value)
     {
