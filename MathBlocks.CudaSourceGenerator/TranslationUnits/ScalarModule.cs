@@ -417,7 +417,7 @@ internal static unsafe class ScalarModule
             case 21: output->scalar_value = mathblocks_sine(a); break;
             case 22: output->scalar_value = mathblocks_cosine(a); break;
             case 23: output->scalar_value = mathblocks_sine(a) / mathblocks_cosine(a); break;
-            case 24: output->scalar_value = Math.Asin(a); break;
+            case 24: output->scalar_value = mathblocks_arc_sine(a); break;
             case 25: output->scalar_value = mathblocks_arc_cosine(a); break;
             case 26: output->scalar_value = mathblocks_arc_tangent(a); break;
             case 27: output->scalar_value = mathblocks_arc_tangent_2(a, b); break;
@@ -497,5 +497,16 @@ internal static unsafe class ScalarModule
 
         if (scalar_output && !double.IsFinite(output->scalar_value))
             output->valid = 0;
+    }
+
+    // Mirrors MathBlockPrimitives.Asin, so CoreCLR and CUDA use the same algorithm.
+    [CudaDevice]
+    private static double mathblocks_arc_sine(double value)
+    {
+        if (value < -1.0 || value > 1.0 || double.IsNaN(value))
+            return mathblocks_quiet_nan();
+        return mathblocks_arc_tangent_2(
+            value,
+            mathblocks_square_root((1.0 - value) * (1.0 + value)));
     }
 }

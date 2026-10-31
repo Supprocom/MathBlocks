@@ -657,6 +657,9 @@ struct MathBlockSlot
 #line 322 "ScalarModule.cs"
 __device__ double mathblocks_arc_cosine(double value);
 
+#line 503 "ScalarModule.cs"
+__device__ double mathblocks_arc_sine(double value);
+
 #line 276 "ScalarModule.cs"
 __device__ double mathblocks_arc_tangent(double value);
 
@@ -737,6 +740,46 @@ __device__ double mathblocks_arc_cosine(double value)
     }
 #line 327 "ScalarModule.cs"
     return mathblocks_arc_tangent_2(mathblocks_square_root(__dmul_rn(__dsub_rn(1.0, value), __dadd_rn(1.0, value))), value);
+}
+
+#line 503 "ScalarModule.cs"
+__device__ double mathblocks_arc_sine(double value)
+#line 505 "ScalarModule.cs"
+{
+#line 506 "ScalarModule.cs"
+#line 506 "ScalarModule.cs"
+    bool csharp2cuda_temp_0;
+#line 506 "ScalarModule.cs"
+    if (!(((value) < ((-(1.0))))))
+    {
+#line 506 "ScalarModule.cs"
+        csharp2cuda_temp_0 = ((value) > (1.0));
+    }
+    else
+    {
+#line 506 "ScalarModule.cs"
+        csharp2cuda_temp_0 = true;
+    }
+#line 506 "ScalarModule.cs"
+    bool csharp2cuda_temp_1;
+#line 506 "ScalarModule.cs"
+    if (!(csharp2cuda_temp_0))
+    {
+#line 506 "ScalarModule.cs"
+        csharp2cuda_temp_1 = isnan(value);
+    }
+    else
+    {
+#line 506 "ScalarModule.cs"
+        csharp2cuda_temp_1 = true;
+    }
+    if (csharp2cuda_temp_1)
+    {
+#line 507 "ScalarModule.cs"
+        return mathblocks_quiet_nan();
+    }
+#line 508 "ScalarModule.cs"
+    return mathblocks_arc_tangent_2(value, mathblocks_square_root(__dmul_rn(__dsub_rn(1.0, value), __dadd_rn(1.0, value))));
 }
 
 #line 276 "ScalarModule.cs"
@@ -1787,7 +1830,7 @@ __device__ void mathblocks_scalar_dispatch(
 #line 420 "ScalarModule.cs"
 #line 420 "ScalarModule.cs"
             double* csharp2cuda_temp_46 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_46) = asin(a));
+            (*(csharp2cuda_temp_46) = mathblocks_arc_sine(a));
 #line 420 "ScalarModule.cs"
             break;
 #line 421 "ScalarModule.cs"
