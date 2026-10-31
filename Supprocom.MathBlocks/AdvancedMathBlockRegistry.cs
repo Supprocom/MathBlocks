@@ -44,21 +44,23 @@ internal static partial class AdvancedMathBlocks
         MathBlockValue second,
         MathBlockMatrix expected) => MathBlockOperationFactory.Create(
         identifier, 2,
-        types =>
-        {
-            MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Vector);
-            MathBlockTypeRules.RequireKind(types[1], MathBlockValueKind.Vector);
-            if (types[0].Unit != types[1].Unit)
-                throw new InvalidOperationException("The input units must be equal.");
-            return MathBlockType.Matrix(types[0].Unit, types[0].Rows, types[1].Rows);
-        },
+        StructuredMatrixType,
         inputs => inputs[0].AsVector().Count > 0 && inputs[1].AsVector().Count > 0 &&
                   (string.Equals(identifier, "matrix.hankel"
 , StringComparison.Ordinal) ? inputs[0].AsVector()[^1] == inputs[1].AsVector()[0]
                       : inputs[0].AsVector()[0] == inputs[1].AsVector()[0])
             ? MathBlockValue.Matrix(function(inputs[0].AsVector(), inputs[1].AsVector()), inputs[0].Type.Unit)
-            : MathBlockValue.Invalid(MathBlockType.Matrix(inputs[0].Type.Unit), "The boundary vectors are incompatible."),
+            : MathBlockOperationFactory.Invalid(StructuredMatrixType, inputs, "The boundary vectors are incompatible."),
         [first, second], MathBlockValue.Matrix(expected), 1e-9, 8);
+
+    private static MathBlockType StructuredMatrixType(IReadOnlyList<MathBlockType> types)
+    {
+        MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Vector);
+        MathBlockTypeRules.RequireKind(types[1], MathBlockValueKind.Vector);
+        if (types[0].Unit != types[1].Unit)
+            throw new InvalidOperationException("The input units must be equal.");
+        return MathBlockType.Matrix(types[0].Unit, types[0].Rows, types[1].Rows);
+    }
 
     private static MathBlockOperation CreateSemiringMultiply(
         string identifier,
@@ -89,7 +91,7 @@ internal static partial class AdvancedMathBlocks
                       inputs[3].AsScalar() >= 0d
                 ? MathBlockValue.Vector(function(inputs[0].AsVector(), inputs[1].AsVector(), inputs[2].AsVector(),
                     inputs[3].AsScalar()), inputs[1].Type.Unit, true)
-                : MathBlockValue.Invalid(MathBlockType.Vector(inputs[1].Type.Unit), "The inputs are outside the operation domain."),
+                : MathBlockOperationFactory.Invalid(LipschitzType, inputs, "The inputs are outside the operation domain."),
             [MathBlockValue.Vector([0d, 2d]), MathBlockValue.Vector([0d, 2d]),
              MathBlockValue.Vector([1d]), MathBlockValue.Scalar(1d)],
             MathBlockValue.Vector([1d]), performanceIterations: 8);

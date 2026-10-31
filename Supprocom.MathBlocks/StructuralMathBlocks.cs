@@ -70,26 +70,30 @@ internal static partial class StructuralMathBlocks
         [MathBlockValue.Vector([1d, 2d]), MathBlockValue.Scalar(3d)],
         MathBlockValue.Vector(prepend ? [3d, 1d, 2d] : [1d, 2d, 3d]), performanceIterations: 32);
 
-    private static MathBlockOperation CreateMatrixIndex(string identifier, bool row) => MathBlockOperationFactory.Create(
-        identifier, 2,
-        types =>
+    private static MathBlockOperation CreateMatrixIndex(string identifier, bool row)
+    {
+        MathBlockTypeResolver resolver = types =>
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Matrix);
             RequireDimensionlessScalar(types[1]);
             return MathBlockType.Vector(types[0].Unit, row ? types[0].Columns : types[0].Rows);
-        },
-        inputs =>
-        {
-            var selected = inputs[1].AsScalar();
-            var source = inputs[0].AsMatrix();
-            var limit = row ? source.Rows : source.Columns;
-            if (!TryNonnegativeInteger(selected, out var index) || index >= limit)
-                return MathBlockValue.Invalid(MathBlockType.Vector(inputs[0].Type.Unit), "The index is outside the matrix domain.");
-            return MathBlockValue.Vector(row ? MathBlockStructure.Row(source, index) : MathBlockStructure.Column(source, index),
-                inputs[0].Type.Unit, true);
-        },
-        [matrix, MathBlockValue.Scalar(1d)], MathBlockValue.Vector(row ? [3d, 4d] : [2d, 4d]),
-        performanceIterations: 32);
+        };
+        return MathBlockOperationFactory.Create(
+            identifier, 2,
+            resolver,
+            inputs =>
+            {
+                var selected = inputs[1].AsScalar();
+                var source = inputs[0].AsMatrix();
+                var limit = row ? source.Rows : source.Columns;
+                if (!TryNonnegativeInteger(selected, out var index) || index >= limit)
+                    return MathBlockOperationFactory.Invalid(resolver, inputs, "The index is outside the matrix domain.");
+                return MathBlockValue.Vector(row ? MathBlockStructure.Row(source, index) : MathBlockStructure.Column(source, index),
+                    inputs[0].Type.Unit, true);
+            },
+            [matrix, MathBlockValue.Scalar(1d)], MathBlockValue.Vector(row ? [3d, 4d] : [2d, 4d]),
+            performanceIterations: 32);
+    }
 
     private static MathBlockOperation CreateMatrixReduction(
         string identifier,

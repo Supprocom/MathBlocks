@@ -80,4 +80,14 @@ internal static class MathBlockOperationFactory
             [MathBlockValue.Scalar(left), MathBlockValue.Scalar(right)],
             MathBlockValue.Boolean(expected),
             performanceIterations: 512);
+
+    // An invalid result carries the type the operation declares for these inputs, so the declared-type check in
+    // MathBlockOperation.Evaluate accepts it. A bare kind such as MathBlockType.Vector() has no length, and is
+    // rejected whenever the declared type knows the length.
+    public static MathBlockValue Invalid(
+        MathBlockTypeResolver resolver,
+        IReadOnlyList<MathBlockValue> inputs,
+        string reason) =>
+        MathBlockValue.Invalid(resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type)), reason);
+
 }
