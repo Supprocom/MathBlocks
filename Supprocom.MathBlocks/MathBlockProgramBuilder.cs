@@ -42,6 +42,13 @@ public sealed class MathBlockProgramBuilder
                 throw new ArgumentOutOfRangeException(nameof(inputs), "An operation input must reference an earlier node.");
         var inputTypes = MathBlockCollectionPrimitives.Map(inputs, index => nodes[index].Type);
         var outputType = operation.ResolveOutputType(inputTypes);
+        if (operation.ConstantRefinement is { } refinement)
+        {
+            var constants = MathBlockCollectionPrimitives.Map(
+                inputs,
+                index => nodes[index].Kind == NodeKind.Constant ? (MathBlockValue?)nodes[index].Value : null);
+            outputType = refinement(outputType, inputTypes, constants);
+        }
         nodes.Add(NodeDefinition.CreateOperation(operation, inputs, outputType));
         return nodes.Count - 1;
     }

@@ -205,6 +205,68 @@ public sealed class MathBlockProgramTests
         }
     }
 
+    /// <summary>
+    /// Verifies a rolling operation or difference over a known length with a constant width declares its output
+    /// length, so a binary vector operation with the input rejects the mismatch at build time.
+    /// </summary>
+    [Theory]
+    [InlineData("sequence.rolling-sum", 3d, 8)]
+    [InlineData("sequence.rolling-mean", 3d, 8)]
+    [InlineData("sequence.rolling-maximum", 3d, 8)]
+    [InlineData("sequence.rolling-minimum", 3d, 8)]
+    [InlineData("sequence.rolling-median", 3d, 8)]
+    [InlineData("sequence.rolling-standard-deviation", 3d, 8)]
+    [InlineData("sequence.rolling-variance", 3d, 8)]
+    [InlineData("sequence.rolling-quantile", 3d, 8)]
+    [InlineData("sequence.difference", 3d, 7)]
+    public void ConstantWidthDeclaresTheOutputLength(string identifier, double width, int expectedRows)
+    {
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var values = builder.Input("values", MathBlockType.Vector(length: 10));
+        int[] arguments = string.Equals(identifier, "sequence.rolling-quantile", StringComparison.Ordinal)
+            ? [values, builder.Constant(MathBlockValue.Scalar(width)), builder.Constant(MathBlockValue.Scalar(0.5d))]
+            : [values, builder.Constant(MathBlockValue.Scalar(width))];
+        var rolled = builder.Apply(identifier, inputs: arguments);
+        var program = builder.Output("rolled", rolled).Build();
+
+        Assert.Equal(expectedRows, program.Outputs["rolled"].Rows);
+        var output = program.Evaluate(
+            new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
+            {
+                ["values"] = MathBlockValue.Vector([1d, 4d, 2d, 8d, 5d, 7d, 3d, 6d, 9d, 0d])
+            })["rolled"];
+        Assert.True(output.IsValid);
+        Assert.Equal(expectedRows, output.AsVector().Count);
+
+        var error = Assert.Throws<InvalidOperationException>(() => builder.Apply("vector.add", inputs: [rolled, values]));
+        Assert.Equal("The input row counts must be equal.", error.Message);
+    }
+
+    /// <summary>
+    /// Verifies the output length stays unknown when the width is not a constant, or is outside the domain, so the
+    /// evaluator decides at run time.
+    /// </summary>
+    [Fact]
+    public void WidthOutsideTheDomainOrNotConstantLeavesTheLengthUnknown()
+    {
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var values = builder.Input("values", MathBlockType.Vector(length: 4));
+        var width = builder.Input("width", MathBlockType.Scalar());
+        Assert.Equal(0, ApplyRows(builder, values, width));
+        Assert.Equal(0, ApplyRows(builder, values, builder.Constant(MathBlockValue.Scalar(5d))));
+        Assert.Equal(0, ApplyRows(builder, values, builder.Constant(MathBlockValue.Scalar(0d))));
+        Assert.Equal(0, ApplyRows(builder, values, builder.Constant(MathBlockValue.Scalar(1.5d))));
+        Assert.Equal(1, ApplyRows(builder, values, builder.Constant(MathBlockValue.Scalar(4d))));
+        var unknown = builder.Input("unknown", MathBlockType.Vector());
+        Assert.Equal(0, ApplyRows(builder, unknown, builder.Constant(MathBlockValue.Scalar(2d))));
+
+        static int ApplyRows(MathBlockProgramBuilder builder, int values, int width)
+        {
+            var node = builder.Apply("sequence.rolling-sum", inputs: [values, width]);
+            return builder.Output($"node-{node}", node).Build().Outputs[$"node-{node}"].Rows;
+        }
+    }
+
     private static MathBlockProgram BuildAffineProgram(double constant)
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);

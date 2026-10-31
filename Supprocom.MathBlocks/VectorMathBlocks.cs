@@ -128,7 +128,7 @@ internal static partial class VectorMathBlocks
         bool squaredOutput)
     {
         MathBlockTypeResolver resolver = squaredOutput ? VectorScalarSquaredVectorType : VectorScalarVectorType;
-        return MathBlockOperationFactory.Create(
+        return WithConstantWindowLength(MathBlockOperationFactory.Create(
             identifier, 2, resolver,
             inputs =>
             {
@@ -139,7 +139,27 @@ internal static partial class VectorMathBlocks
                     ? MathBlockValue.Vector(function(values, width), unit, true)
                     : MathBlockOperationFactory.Invalid(resolver, inputs, "The width is outside the sequence domain.");
             },
-            [sampleVector, MathBlockValue.Scalar(2d)], MathBlockValue.Vector(expected), 1e-9, 32);
+            [sampleVector, MathBlockValue.Scalar(2d)], MathBlockValue.Vector(expected), 1e-9, 32), retainedRows: 1);
+    }
+
+    // A rolling operation over n rows with width w returns n - w + 1 rows, and a difference with lag w returns
+    // n - w. When input 0's length and a constant input 1 are known at build time and in the domain, the program
+    // builder declares that length, so a binary vector operation rejects a mismatched length at build time. Any
+    // other width keeps the length unknown, and the evaluator returns an invalid value for it.
+    internal static MathBlockOperation WithConstantWindowLength(MathBlockOperation operation, int retainedRows)
+    {
+        operation.ConstantRefinement = (type, types, constants) =>
+        {
+            var count = types[0].Rows;
+            if (count <= 0 || constants[1] is not { } constant)
+                return type;
+            var width = constant.AsScalar();
+            if (width < 1d || width > count || width != Math.Truncate(width))
+                return type;
+            var rows = count - (int)width + retainedRows;
+            return rows > 0 ? type with { Rows = rows } : type;
+        };
+        return operation;
     }
 
     private static MathBlockOperation CreateVectorComparison(
