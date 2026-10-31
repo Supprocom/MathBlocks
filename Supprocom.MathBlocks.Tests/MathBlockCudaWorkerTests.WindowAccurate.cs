@@ -26,22 +26,27 @@ public sealed partial class MathBlockCudaWorkerTests
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var worker = new MathBlocksCUDAWorker();
         var failures = new List<string>();
+        var cases = CreateAccurateCases().ToArray();
         var caseCount = 0;
-        var computedRows = 0L;
-        foreach (var windowCase in CreateAccurateCases())
+        var computedFamilies = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var windowCase in cases)
         {
             caseCount++;
             var coreclr = windowCase.Operation.Evaluate(windowCase.Inputs);
-            if (coreclr.IsValid && coreclr.Type.Kind == MathBlockValueKind.BooleanVector)
-                computedRows += coreclr.AsBooleanVector().Count(value => value);
+            if (coreclr.IsValid && coreclr.Type.Kind == MathBlockValueKind.BooleanVector &&
+                coreclr.AsBooleanVector().Any(value => value))
+                computedFamilies.Add(windowCase.Name.Split(' ')[0]);
             var cuda = ExecuteWindowCase(worker, windowCase.Operation, windowCase.Prototype, windowCase.Inputs);
             if (DescribeWindowDifference(coreclr, cuda) is { } difference)
                 failures.Add($"{windowCase.Operation.Identity}/{windowCase.Name}: {difference}");
         }
 
         Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures.Take(60)));
-        Assert.True(caseCount >= 1_600, $"Only {caseCount} cases ran.");
-        Assert.True(computedRows > 100_000, $"Only {computedRows} sibling rows were computed.");
+        // Every generated case ran, and every family computed sibling rows on CoreCLR, so the parity above covered
+        // computed rows of each family and not only filled ones.
+        Assert.Equal(cases.Length, caseCount);
+        var uncomputed = WindowAccurateFamilies.Cast<object[]>().Select(row => (string)row[0]).Where(family => !computedFamilies.Contains(family)).ToArray();
+        Assert.True(uncomputed.Length == 0, $"No sibling row was computed for: {string.Join(", ", uncomputed)}");
     }
 
     /// <summary>
@@ -73,6 +78,7 @@ public sealed partial class MathBlockCudaWorkerTests
         }
 
         Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures.Take(60)));
+        // The parity above covered computed rows, not only filled ones.
         Assert.True(computed > 0, $"{family}: no sibling computed a row.");
     }
 
@@ -95,12 +101,14 @@ public sealed partial class MathBlockCudaWorkerTests
             values[row] = row is >= 100 and < 220 ? 7d : random.Next(5) == 0 ? -0d : random.NextDouble() * 50d;
         var series = MathBlockValue.Vector(values);
         var checkedResults = 0;
+        var expectedResults = 0;
         foreach (var identity in MathBlocksWindowBatchTests.Identities.Cast<object[]>().Select(row => (string)row[0]))
         {
             var operation = MathBlocksWindowBatchTests.Resolve(identity);
             var sibling = Windowed.Get(MathBlocksWindowBatchTests.SiblingIdentifier(identity));
             foreach (var parameters in MathBlocksWindowBatchTests.Parameters(identity))
             {
+                expectedResults += widths.Length;
                 var batch = parameters.Length == 0
                     ? MathBlocksWindowBatch.EvaluateCUDA(worker, series, identity, widths, WindowSentinel)
                     : MathBlocksWindowBatch.EvaluateCUDA(worker, series, identity, parameters, widths, WindowSentinel);
@@ -125,7 +133,10 @@ public sealed partial class MathBlockCudaWorkerTests
         }
 
         Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures.Take(60)));
-        Assert.True(checkedResults >= 12 * widths.Length, $"Only {checkedResults} batch results were checked.");
+        // One result per width for every supported form and parameter set the batch tests define: 12 forms, the
+        // quantile with three probabilities.
+        Assert.Equal(expectedResults, checkedResults);
+        Assert.Equal((MathBlocksWindowBatchTests.Identities.Cast<object[]>().Count() + 2) * widths.Length, checkedResults);
     }
 
     // The families of MathBlockWindowAccurateTests, runs of 60 equal full-significand values (and of signed zeros)
