@@ -172,7 +172,9 @@ internal static unsafe class ProbabilityModule
         double sum = 0.99999999999980993;
         for (int index = 0; index < 8; index++)
             sum += coefficients[index] / (value + index + 1.0);
-        double t = value + 7.5;
+        // CoreCLR computes value + lanczosCoefficients.Length - 0.5: (value + 8) - 0.5, two roundings.
+        double shifted = value + 8.0;
+        double t = shifted - 0.5;
         return 0.5 * mathblocks_natural_logarithm(
                    2.0 * 3.141592653589793238462643383279502884) +
                (value + 0.5) * mathblocks_natural_logarithm(t) - t +
