@@ -24,5 +24,7 @@ public enum MathBlockCudaOperationFamily
     /// <summary>Identifies the <c>Transport</c> value.</summary>
     Transport,
     /// <summary>Identifies the <c>Vector</c> value.</summary>
-    Vector
+    Vector,
+    /// <summary>Identifies the <c>Window</c> value.</summary>
+    Window
 }

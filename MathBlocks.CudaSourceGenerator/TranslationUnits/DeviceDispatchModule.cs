@@ -53,6 +53,12 @@ internal static unsafe class DeviceDispatchModule
     [CudaExternal]
     private static void mathblocks_vector_dispatch(int opcode, MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
 
+    [CudaExternal]
+    private static void mathblocks_window_dispatch(int opcode, MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
+
+    [CudaExternal]
+    private static void mathblocks_window_run(int opcode, MathBlockSlot** inputs, int input_count, MathBlockSlot* output, int scratch_capacity) => throw new NotSupportedException();
+
     [CudaDevice]
     private static MathBlockSlot** mathblocks_dispatch_inputs(
         [CudaReadOnly] MathBlockSlot** inputs)
@@ -85,6 +91,7 @@ internal static unsafe class DeviceDispatchModule
             case 8: mathblocks_statistics_dispatch(opcode, dispatchInputs, input_count, output); break;
             case 9: mathblocks_transport_dispatch(opcode, dispatchInputs, input_count, output); break;
             case 10: mathblocks_vector_dispatch(opcode, dispatchInputs, input_count, output); break;
+            case 11: mathblocks_window_dispatch(opcode, dispatchInputs, input_count, output); break;
             default:
                 if (Cuda.ThreadIdx.X == 0)
                 {
@@ -204,5 +211,17 @@ internal static unsafe class DeviceDispatchModule
         MathBlockSlot* output)
     {
         mathblocks_transport_dispatch(opcode, mathblocks_dispatch_inputs(inputs), input_count, output);
+    }
+
+    // The window kernel stripes rows across the grid; scratch_capacity is the planned scratch doubles per thread.
+    [CudaGlobal]
+    private static void mathblocks_window(
+        int opcode,
+        [CudaReadOnly] MathBlockSlot** inputs,
+        int input_count,
+        MathBlockSlot* output,
+        int scratch_capacity)
+    {
+        mathblocks_window_run(opcode, mathblocks_dispatch_inputs(inputs), input_count, output, scratch_capacity);
     }
 }

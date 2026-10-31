@@ -18,7 +18,8 @@ public sealed class MathBlockCudaTranspilationTests
         "Geometry",
         "Graph",
         "Advanced",
-        "Transport"
+        "Transport",
+        "Window"
     ];
 
     /// <summary>Verifies cudascalar unit matches the csharp 2 cuda 031 golden.</summary>
@@ -28,10 +29,10 @@ public sealed class MathBlockCudaTranspilationTests
         AssertGeneratedUnit("Scalar", 0);
         Assert.Equal(CreateExpectedSource(), MathBlockCudaDeviceModule.Source);
         Assert.Equal(
-            "7F4D34AE1A9C35B792A30E211227D04F5B91F554C9802EDD400C1237007A179D",
+            "0B8267CC87D3B43A22ACE8B4E30D647C9B4C64F033E291E07C0EB5B1D5567C48",
             MathBlockCudaDeviceModule.SourceFingerprint);
         Assert.Equal(
-            "EACB5030A3F50556C485A7A67673CBAE1FAE501FB06930A7EA5A2D1ECB629D77",
+            "E3B35C832A08CB957B11345B07A2B7227A6FCD0FB30E2FBA35A5C8DFF3A614A3",
             MathBlockCudaDeviceModule.Abi.OperationTableFingerprint);
     }
 
@@ -84,6 +85,11 @@ public sealed class MathBlockCudaTranspilationTests
     [Fact]
     public void CUDATransportUnitMatchesTheCSharp2CUDA031Golden() =>
         AssertGeneratedUnit("Transport", 10);
+
+    /// <summary>Verifies the CUDA window unit matches the CSharp2CUDA 0.3.1 golden.</summary>
+    [Fact]
+    public void CUDAWindowUnitMatchesTheCSharp2CUDA031Golden() =>
+        AssertGeneratedUnit("Window", 11);
 
     /// <summary>Verifies cudadevice dispatch unit matches the csharp 2 cuda 031 golden.</summary>
     [Fact]

@@ -13,4 +13,5 @@ internal enum MathBlockCudaFamily
     Statistics,
     Transport,
     Vector,
+    Window,
 }

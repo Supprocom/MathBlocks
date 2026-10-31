@@ -262,19 +262,23 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 if (node.Kind != MathBlockProgramNodeKind.Operation)
                     continue;
                 var kernel = MathBlocksCudaKernelModule.Resolve(node.OperationIdentity!);
+                var launch = kernel.RowStriped
+                    ? ResolveWindowLaunch(node, payloadLayout)
+                    : new WindowLaunch(1, 0, 0);
                 var inputPointers = checked(allocatedDeviceArena + (ulong)plannedInputPointerOffsets[node.Index]);
                 var output = checked(allocatedDeviceArena + (ulong)plannedSlotOffsets[node.Index]);
                 var storage = new KernelArgumentStorage(
                     kernel.Opcode,
                     inputPointers,
                     node.Inputs.Count,
-                    output);
+                    output,
+                    kernel.RowStriped ? launch.ScratchCapacity : null);
                 arguments.Add(storage);
                 var dependencies = CreateKernelDependencies(node.Inputs, plannedGraphNodes, uploadNode);
                 var parameters = new MathBlocksCudaNative.KernelNodeParameters
                 {
                     Function = kernel.Function,
-                    GridX = 1,
+                    GridX = (uint)launch.GridX,
                     GridY = 1,
                     GridZ = 1,
                     BlockX = kernel.BlockX,
@@ -623,6 +627,12 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 prototypeInputs,
                 inputShapeOverrides,
                 inputExactValues);
+            if (node.Kind == MathBlockProgramNodeKind.Operation &&
+                WindowCudaBlockCatalog.IsWindowIdentity(node.OperationIdentity) &&
+                WindowSeriesLengthsDiffer(inputTypes, inputShapeRows))
+            {
+                shape = default;
+            }
             resolvedType = new MathBlockType(
                 resolvedType.Kind,
                 resolvedType.Unit,
@@ -797,7 +807,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         {
             throw new InvalidOperationException($"CUDA operation identity '{identity}' is invalid.");
         }
-        return MathBlockCatalog.Standard.Get(identity[..separator], version);
+        return MathBlockCatalog.Cuda.Get(identity[..separator], version);
     }
 
     // Keep all static-domain checks together to compare every family consistently.
@@ -820,6 +830,12 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         {
             var count = RequireInputShapeRows(node, 0, inputShapeRows);
             RequireDomain(width > 0 && width <= count, node, "rolling window");
+        }
+        if (WindowCudaBlockCatalog.IsWindowIdentity(identity) &&
+            TryGetExactInteger(inputExactValues, ResolveWindowWidthInput(node), out var windowWidth))
+        {
+            var count = RequireInputShapeRows(node, 0, inputShapeRows);
+            RequireDomain(windowWidth > 0 && windowWidth <= count, node, "window");
         }
         if (string.Equals(identity, "sequence.rolling-quantile@1", StringComparison.Ordinal) &&
             TryGetExactScalar(inputExactValues, 2, out var rollingProbability))
@@ -1306,6 +1322,14 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 return ResolveExactCount(node, 2, inputExactValues, nodes, prototypeInputs);
             if (string.Equals(identity, "vector.gather@1", StringComparison.Ordinal))
                 return inputCapacities[1];
+            if (WindowCudaBlockCatalog.IsWindowIdentity(identity))
+            {
+                var rows = 0;
+                for (var inputIndex = 0; inputIndex < inputCapacities.Length; inputIndex++)
+                    if (inputCapacities[inputIndex] > rows)
+                        rows = inputCapacities[inputIndex];
+                return rows;
+            }
             if (node.Inputs.Count != 0)
             {
                 var maximum = 0;
@@ -1617,6 +1641,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     {
         if (node.Kind != MathBlockProgramNodeKind.Operation)
             return 0;
+        if (WindowCudaBlockCatalog.IsWindowIdentity(node.OperationIdentity))
+            return ResolveWindowLaunch(node, payloadLayout).ScratchBytes;
         var inputTypes = new MathBlockType[node.Inputs.Count];
         var inputCapacities = new int[node.Inputs.Count];
         var inputShapeRows = new int[node.Inputs.Count];
@@ -1790,6 +1816,76 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         return checked(2 * (1 << size));
     }
 
+    // A window kernel runs GridX blocks of 128 threads striped over the rows. Each thread owns ScratchCapacity
+    // doubles for the planned width, so ScratchBytes = ScratchCapacity * 8 * threads. The width is the exact
+    // width input (a constant or prototype); without one, the series length bounds the width of the O(w)
+    // sources. The grid is the smaller of the blocks the rows need and the blocks whose slices fit the scratch
+    // budget, and at least one block.
+    internal static WindowLaunch ResolveWindowLaunch(
+        MathBlockProgramNode node,
+        MathBlockCudaPayloadLayout payloadLayout)
+    {
+        var identity = node.OperationIdentity!;
+        var source = WindowCudaBlockCatalog.Resolve(identity).Opcode / 2;
+        var rows = (long)payloadLayout.Capacities[node.Index];
+        long width;
+        if (payloadLayout.ExactValues[node.Inputs[ResolveWindowWidthInput(node)]] is { } widthValue &&
+            widthValue.Type.Kind == MathBlockValueKind.Scalar)
+        {
+            var exact = widthValue.AsScalar();
+            width = exact >= 1d && exact <= int.MaxValue && exact == Math.Truncate(exact) ? (long)exact : 0L;
+        }
+        else if (WindowCudaBlockCatalog.RequiresPlanTimeWidth(source))
+        {
+            throw new InvalidOperationException($"CUDA window scratch for {identity} needs a plan-time width.");
+        }
+        else
+        {
+            width = rows;
+        }
+        var blockSize = (long)WindowCudaBlockCatalog.BlockSize;
+        var rowBlocks = rows <= blockSize ? 1L : (rows + blockSize - 1L) / blockSize;
+        if (rowBlocks > WindowCudaBlockCatalog.MaximumGridX)
+            rowBlocks = WindowCudaBlockCatalog.MaximumGridX;
+        var perThread = WindowCudaBlockCatalog.ScratchDoubles(source, width);
+        if (perThread == 0L)
+            return new WindowLaunch((int)rowBlocks, 0, 0);
+        var blockBytes = checked(perThread * sizeof(double) * blockSize);
+        var budgetBlocks = WindowCudaBlockCatalog.ScratchBudgetBytes / blockBytes;
+        var gridX = budgetBlocks < 1L ? 1L : budgetBlocks < rowBlocks ? budgetBlocks : rowBlocks;
+        var bytes = checked(blockBytes * gridX);
+        if (perThread > int.MaxValue || bytes > int.MaxValue)
+        {
+            throw new InvalidOperationException(
+                $"CUDA window scratch for {identity} exceeds the supported resource range.");
+        }
+        return new WindowLaunch((int)gridX, (int)perThread, (int)bytes);
+    }
+
+    // The width follows the source inputs: second to last for a form (fill is last), last for a sibling.
+    private static int ResolveWindowWidthInput(MathBlockProgramNode node) =>
+        node.Inputs.Count - (WindowCudaBlockCatalog.Resolve(node.OperationIdentity!).Opcode % 2 != 0 ? 1 : 2);
+
+    private static bool WindowSeriesLengthsDiffer(
+        MathBlockType[] inputTypes,
+        int[] inputShapeRows)
+    {
+        var rows = -1;
+        for (var index = 0; index < inputTypes.Length; index++)
+        {
+            if (inputTypes[index].Kind is not (MathBlockValueKind.Vector or MathBlockValueKind.BooleanVector))
+                continue;
+            if (rows < 0)
+                rows = inputShapeRows[index];
+            else if (rows != inputShapeRows[index])
+                return true;
+        }
+        return false;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal readonly record struct WindowLaunch(int GridX, int ScratchCapacity, int ScratchBytes);
+
     internal static int ResolveRollingOrderStatisticScratchBytes(int inputCount, int windowWidth)
     {
         if (inputCount <= 0 || windowWidth <= 1)
@@ -1852,15 +1948,24 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         private readonly IntPtr[] values;
         private bool disposed;
 
-        public KernelArgumentStorage(int opcode, ulong inputs, int inputCount, ulong output)
+        public KernelArgumentStorage(int opcode, ulong inputs, int inputCount, ulong output, int? scratchCapacity)
         {
-            values =
-            [
-                AllocateInt32(opcode),
-                AllocatePointer(inputs),
-                AllocateInt32(inputCount),
-                AllocatePointer(output)
-            ];
+            values = scratchCapacity is { } capacity
+                ?
+                [
+                    AllocateInt32(opcode),
+                    AllocatePointer(inputs),
+                    AllocateInt32(inputCount),
+                    AllocatePointer(output),
+                    AllocateInt32(capacity)
+                ]
+                :
+                [
+                    AllocateInt32(opcode),
+                    AllocatePointer(inputs),
+                    AllocateInt32(inputCount),
+                    AllocatePointer(output)
+                ];
             PointerArray = Marshal.AllocHGlobal(IntPtr.Size * values.Length);
             for (var index = 0; index < values.Length; index++)
                 Marshal.WriteIntPtr(PointerArray, index * IntPtr.Size, values[index]);

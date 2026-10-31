@@ -49,6 +49,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         var supported = MathBlocksCUDAWorker.SupportedBlockIdentities.ToHashSet(StringComparer.Ordinal);
         Assert.All(expected, identity => Assert.Contains(identity, supported));
         var registered = MathBlockCatalog.Standard.Operations
+            .Concat(MathBlockWindowTestSupport.Windowed.Operations)
             .Select(operation => operation.Identity)
             .ToHashSet(StringComparer.Ordinal);
         Assert.All(supported, identity => Assert.Contains(identity, registered));
@@ -165,7 +166,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         foreach (var family in new[]
                  {
                      "Scalar", "Vector", "Complex", "Matrix", "Probability", "SequencePath", "Statistics",
-                     "Geometry", "Graph", "Advanced", "Transport"
+                     "Geometry", "Graph", "Advanced", "Transport", "Window"
                  })
         {
             var source = File.ReadAllText(Path.Combine(
@@ -788,11 +789,12 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         foreach (var identity in MathBlocksCUDAWorker.SupportedBlockIdentities)
         {
             var separator = identity.LastIndexOf('@');
-            var operation = MathBlockCatalog.Standard.Get(
+            var registry = ResolveSupportedRegistry(identity);
+            var operation = registry.Get(
                 identity[..separator],
                 int.Parse(identity[(separator + 1)..], System.Globalization.CultureInfo.InvariantCulture));
             var cases = CreateParityCases(operation).ToArray();
-            var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+            var builder = new MathBlockProgramBuilder(registry);
             var inputNodes = cases[0].Inputs
                 .Select((input, index) => builder.Input($"input-{index}", input.Type))
                 .ToArray();
@@ -833,11 +835,12 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         foreach (var identity in MathBlocksCUDAWorker.SupportedBlockIdentities)
         {
             var separator = identity.LastIndexOf('@');
-            var operation = MathBlockCatalog.Standard.Get(
+            var registry = ResolveSupportedRegistry(identity);
+            var operation = registry.Get(
                 identity[..separator],
                 int.Parse(identity[(separator + 1)..], System.Globalization.CultureInfo.InvariantCulture));
             var inputs = operation.PerformanceCase.Inputs;
-            var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+            var builder = new MathBlockProgramBuilder(registry);
             var inputNodes = inputs
                 .Select((input, index) => builder.Input($"input-{index}", input.Type))
                 .ToArray();
@@ -912,6 +915,12 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
         Assert.True(warmP99 < 1_000d, $"CUDA warm p99 was {warmP99:F3} microseconds.");
     }
+
+    // The window forms have CUDA support but are kept outside Standard.
+    private static MathBlockRegistry ResolveSupportedRegistry(string identity) =>
+        identity.StartsWith("window", StringComparison.Ordinal)
+            ? MathBlockWindowTestSupport.Windowed
+            : MathBlockCatalog.Standard;
 
     private static MathBlockProgram CreateParallelFormula() =>
         new MathBlockFormulaBuilder(MathBlockCatalog.Standard)

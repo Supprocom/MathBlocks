@@ -14,14 +14,15 @@ public sealed class MathBlockCudaOperationContractTests
     public void CUDAOperationContractCoversTheCompleteCatalogAndSlotABI()
     {
         var expectedIdentities = MathBlockCatalog.Standard.Operations
+            .Concat(MathBlockWindowTestSupport.Windowed.Operations)
             .Select(operation => operation.Identity)
             .Order(StringComparer.Ordinal)
             .ToArray();
         var contracts = MathBlockCudaDeviceModule.Operations;
 
-        Assert.Equal(337, contracts.Count);
+        Assert.Equal(443, contracts.Count);
         Assert.Equal(expectedIdentities, contracts.Select(contract => contract.Identity), StringComparer.Ordinal);
-        Assert.Equal(337, contracts.Select(contract => (contract.Family, contract.Opcode)).Distinct().Count());
+        Assert.Equal(443, contracts.Select(contract => (contract.Family, contract.Opcode)).Distinct().Count());
         Assert.Equal(
             Enum.GetValues<MathBlockCudaOperationFamily>().Order(),
             contracts.Select(contract => contract.Family).Distinct().Order());
