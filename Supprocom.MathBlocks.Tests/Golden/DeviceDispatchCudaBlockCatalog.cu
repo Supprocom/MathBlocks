@@ -638,46 +638,53 @@ static __device__ __forceinline__ short csharp2cuda_i16_pre_decrement(short& tar
 static __device__ __forceinline__ short csharp2cuda_i16_post_decrement(short& target) { short result = target; target = csharp2cuda_i16_from_bits((unsigned int)(int)target - 1u); return result; }
 #endif
 
-#line 196 "DeviceDispatchModule.cs"
+#line 203 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_advanced(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output);
 
-#line 126 "DeviceDispatchModule.cs"
+#line 133 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_complex(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output);
 
-#line 62 "DeviceDispatchModule.cs"
+#line 68 "DeviceDispatchModule.cs"
 __device__ MathBlockSlot** mathblocks_dispatch_inputs(
     const MathBlockSlot* const* inputs);
 
-#line 176 "DeviceDispatchModule.cs"
+#line 244 "DeviceDispatchModule.cs"
+extern "C" __global__ void mathblocks_elementwise(
+    int opcode,
+    const MathBlockSlot* const* inputs,
+    int input_count,
+    MathBlockSlot* output);
+
+#line 183 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_geometry(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output);
 
-#line 186 "DeviceDispatchModule.cs"
+#line 193 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_graph(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output);
 
-#line 136 "DeviceDispatchModule.cs"
+#line 143 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_matrix(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output);
 
-#line 72 "DeviceDispatchModule.cs"
+#line 78 "DeviceDispatchModule.cs"
 __device__ void mathblocks_operation_dispatch(
     int family,
     int opcode,
@@ -685,49 +692,49 @@ __device__ void mathblocks_operation_dispatch(
     int input_count,
     MathBlockSlot* output);
 
-#line 146 "DeviceDispatchModule.cs"
+#line 153 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_probability(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output);
 
-#line 106 "DeviceDispatchModule.cs"
+#line 113 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_scalar(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output);
 
-#line 156 "DeviceDispatchModule.cs"
+#line 163 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_sequence_path(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output);
 
-#line 166 "DeviceDispatchModule.cs"
+#line 173 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_statistics(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output);
 
-#line 206 "DeviceDispatchModule.cs"
+#line 213 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_transport(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output);
 
-#line 116 "DeviceDispatchModule.cs"
+#line 123 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_vector(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output);
 
-#line 218 "DeviceDispatchModule.cs"
+#line 225 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_window(
     int opcode,
     const MathBlockSlot* const* inputs,
@@ -735,288 +742,308 @@ extern "C" __global__ void mathblocks_window(
     MathBlockSlot* output,
     int scratch_capacity);
 
-#line 196 "DeviceDispatchModule.cs"
+#line 203 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_advanced(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output)
-#line 202 "DeviceDispatchModule.cs"
+#line 209 "DeviceDispatchModule.cs"
 {
-#line 203 "DeviceDispatchModule.cs"
-#line 203 "DeviceDispatchModule.cs"
+#line 210 "DeviceDispatchModule.cs"
+#line 210 "DeviceDispatchModule.cs"
     MathBlockSlot** csharp2cuda_temp_0 = mathblocks_dispatch_inputs(inputs);
     mathblocks_advanced_dispatch(opcode, csharp2cuda_temp_0, input_count, output);
 }
 
-#line 126 "DeviceDispatchModule.cs"
+#line 133 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_complex(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output)
-#line 132 "DeviceDispatchModule.cs"
+#line 139 "DeviceDispatchModule.cs"
 {
-#line 133 "DeviceDispatchModule.cs"
-#line 133 "DeviceDispatchModule.cs"
+#line 140 "DeviceDispatchModule.cs"
+#line 140 "DeviceDispatchModule.cs"
     MathBlockSlot** csharp2cuda_temp_0 = mathblocks_dispatch_inputs(inputs);
     mathblocks_complex_dispatch(opcode, csharp2cuda_temp_0, input_count, output);
 }
 
-#line 62 "DeviceDispatchModule.cs"
+#line 68 "DeviceDispatchModule.cs"
 __device__ MathBlockSlot** mathblocks_dispatch_inputs(
     const MathBlockSlot* const* inputs)
-#line 65 "DeviceDispatchModule.cs"
+#line 71 "DeviceDispatchModule.cs"
 {
-#line 69 "DeviceDispatchModule.cs"
+#line 75 "DeviceDispatchModule.cs"
     return ((MathBlockSlot**)(((unsigned long long)(inputs))));
 }
 
-#line 176 "DeviceDispatchModule.cs"
+#line 244 "DeviceDispatchModule.cs"
+extern "C" __global__ void mathblocks_elementwise(
+    int opcode,
+    const MathBlockSlot* const* inputs,
+    int input_count,
+    MathBlockSlot* output)
+#line 250 "DeviceDispatchModule.cs"
+{
+#line 251 "DeviceDispatchModule.cs"
+#line 253 "DeviceDispatchModule.cs"
+    MathBlockSlot** csharp2cuda_temp_0 = mathblocks_dispatch_inputs(inputs);
+    mathblocks_elementwise_run(opcode, csharp2cuda_temp_0, input_count, output, csharp2cuda_i32_add(csharp2cuda_i32_mul(blockIdx.x, blockDim.x), threadIdx.x), csharp2cuda_i32_mul(gridDim.x, blockDim.x));
+}
+
+#line 183 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_geometry(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output)
-#line 182 "DeviceDispatchModule.cs"
+#line 189 "DeviceDispatchModule.cs"
 {
-#line 183 "DeviceDispatchModule.cs"
-#line 183 "DeviceDispatchModule.cs"
+#line 190 "DeviceDispatchModule.cs"
+#line 190 "DeviceDispatchModule.cs"
     MathBlockSlot** csharp2cuda_temp_0 = mathblocks_dispatch_inputs(inputs);
     mathblocks_geometry_dispatch(opcode, csharp2cuda_temp_0, input_count, output);
 }
 
-#line 186 "DeviceDispatchModule.cs"
+#line 193 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_graph(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output)
-#line 192 "DeviceDispatchModule.cs"
+#line 199 "DeviceDispatchModule.cs"
 {
-#line 193 "DeviceDispatchModule.cs"
-#line 193 "DeviceDispatchModule.cs"
+#line 200 "DeviceDispatchModule.cs"
+#line 200 "DeviceDispatchModule.cs"
     MathBlockSlot** csharp2cuda_temp_0 = mathblocks_dispatch_inputs(inputs);
     mathblocks_graph_dispatch(opcode, csharp2cuda_temp_0, input_count, output);
 }
 
-#line 136 "DeviceDispatchModule.cs"
+#line 143 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_matrix(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output)
-#line 142 "DeviceDispatchModule.cs"
+#line 149 "DeviceDispatchModule.cs"
 {
-#line 143 "DeviceDispatchModule.cs"
-#line 143 "DeviceDispatchModule.cs"
+#line 150 "DeviceDispatchModule.cs"
+#line 150 "DeviceDispatchModule.cs"
     MathBlockSlot** csharp2cuda_temp_0 = mathblocks_dispatch_inputs(inputs);
     mathblocks_matrix_dispatch(opcode, csharp2cuda_temp_0, input_count, output);
 }
 
-#line 72 "DeviceDispatchModule.cs"
+#line 78 "DeviceDispatchModule.cs"
 __device__ void mathblocks_operation_dispatch(
     int family,
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output)
-#line 79 "DeviceDispatchModule.cs"
+#line 85 "DeviceDispatchModule.cs"
 {
-#line 80 "DeviceDispatchModule.cs"
+#line 86 "DeviceDispatchModule.cs"
     MathBlockSlot** dispatchInputs = mathblocks_dispatch_inputs(inputs);
-#line 81 "DeviceDispatchModule.cs"
+#line 87 "DeviceDispatchModule.cs"
     switch (family)
     {
-#line 83 "DeviceDispatchModule.cs"
+#line 89 "DeviceDispatchModule.cs"
         case 0:
-#line 83 "DeviceDispatchModule.cs"
+#line 89 "DeviceDispatchModule.cs"
             mathblocks_advanced_dispatch(opcode, dispatchInputs, input_count, output);
-#line 83 "DeviceDispatchModule.cs"
+#line 89 "DeviceDispatchModule.cs"
             break;
-#line 84 "DeviceDispatchModule.cs"
+#line 90 "DeviceDispatchModule.cs"
         case 1:
-#line 84 "DeviceDispatchModule.cs"
+#line 90 "DeviceDispatchModule.cs"
             mathblocks_complex_dispatch(opcode, dispatchInputs, input_count, output);
-#line 84 "DeviceDispatchModule.cs"
+#line 90 "DeviceDispatchModule.cs"
             break;
-#line 85 "DeviceDispatchModule.cs"
+#line 91 "DeviceDispatchModule.cs"
         case 2:
-#line 85 "DeviceDispatchModule.cs"
+#line 91 "DeviceDispatchModule.cs"
             mathblocks_geometry_dispatch(opcode, dispatchInputs, input_count, output);
-#line 85 "DeviceDispatchModule.cs"
+#line 91 "DeviceDispatchModule.cs"
             break;
-#line 86 "DeviceDispatchModule.cs"
+#line 92 "DeviceDispatchModule.cs"
         case 3:
-#line 86 "DeviceDispatchModule.cs"
+#line 92 "DeviceDispatchModule.cs"
             mathblocks_graph_dispatch(opcode, dispatchInputs, input_count, output);
-#line 86 "DeviceDispatchModule.cs"
+#line 92 "DeviceDispatchModule.cs"
             break;
-#line 87 "DeviceDispatchModule.cs"
+#line 93 "DeviceDispatchModule.cs"
         case 4:
-#line 87 "DeviceDispatchModule.cs"
+#line 93 "DeviceDispatchModule.cs"
             mathblocks_matrix_dispatch(opcode, dispatchInputs, input_count, output);
-#line 87 "DeviceDispatchModule.cs"
+#line 93 "DeviceDispatchModule.cs"
             break;
-#line 88 "DeviceDispatchModule.cs"
+#line 94 "DeviceDispatchModule.cs"
         case 5:
-#line 88 "DeviceDispatchModule.cs"
+#line 94 "DeviceDispatchModule.cs"
             mathblocks_probability_dispatch(opcode, dispatchInputs, input_count, output);
-#line 88 "DeviceDispatchModule.cs"
-            break;
-#line 89 "DeviceDispatchModule.cs"
-        case 6:
-#line 89 "DeviceDispatchModule.cs"
-            mathblocks_scalar_dispatch(opcode, dispatchInputs, input_count, output);
-#line 89 "DeviceDispatchModule.cs"
-            break;
-#line 90 "DeviceDispatchModule.cs"
-        case 7:
-#line 90 "DeviceDispatchModule.cs"
-            mathblocks_sequence_path_dispatch(opcode, dispatchInputs, input_count, output);
-#line 90 "DeviceDispatchModule.cs"
-            break;
-#line 91 "DeviceDispatchModule.cs"
-        case 8:
-#line 91 "DeviceDispatchModule.cs"
-            mathblocks_statistics_dispatch(opcode, dispatchInputs, input_count, output);
-#line 91 "DeviceDispatchModule.cs"
-            break;
-#line 92 "DeviceDispatchModule.cs"
-        case 9:
-#line 92 "DeviceDispatchModule.cs"
-            mathblocks_transport_dispatch(opcode, dispatchInputs, input_count, output);
-#line 92 "DeviceDispatchModule.cs"
-            break;
-#line 93 "DeviceDispatchModule.cs"
-        case 10:
-#line 93 "DeviceDispatchModule.cs"
-            mathblocks_vector_dispatch(opcode, dispatchInputs, input_count, output);
-#line 93 "DeviceDispatchModule.cs"
-            break;
-#line 94 "DeviceDispatchModule.cs"
-        case 11:
-#line 94 "DeviceDispatchModule.cs"
-            mathblocks_window_dispatch(opcode, dispatchInputs, input_count, output);
 #line 94 "DeviceDispatchModule.cs"
             break;
 #line 95 "DeviceDispatchModule.cs"
-        default:
+        case 6:
+#line 95 "DeviceDispatchModule.cs"
+            mathblocks_scalar_dispatch(opcode, dispatchInputs, input_count, output);
+#line 95 "DeviceDispatchModule.cs"
+            break;
 #line 96 "DeviceDispatchModule.cs"
-            if (((threadIdx.x) == (0)))
+        case 7:
+#line 96 "DeviceDispatchModule.cs"
+            mathblocks_sequence_path_dispatch(opcode, dispatchInputs, input_count, output);
+#line 96 "DeviceDispatchModule.cs"
+            break;
 #line 97 "DeviceDispatchModule.cs"
+        case 8:
+#line 97 "DeviceDispatchModule.cs"
+            mathblocks_statistics_dispatch(opcode, dispatchInputs, input_count, output);
+#line 97 "DeviceDispatchModule.cs"
+            break;
+#line 98 "DeviceDispatchModule.cs"
+        case 9:
+#line 98 "DeviceDispatchModule.cs"
+            mathblocks_transport_dispatch(opcode, dispatchInputs, input_count, output);
+#line 98 "DeviceDispatchModule.cs"
+            break;
+#line 99 "DeviceDispatchModule.cs"
+        case 10:
+#line 99 "DeviceDispatchModule.cs"
+            mathblocks_vector_dispatch(opcode, dispatchInputs, input_count, output);
+#line 99 "DeviceDispatchModule.cs"
+            break;
+#line 100 "DeviceDispatchModule.cs"
+        case 11:
+#line 100 "DeviceDispatchModule.cs"
+            mathblocks_window_dispatch(opcode, dispatchInputs, input_count, output);
+#line 100 "DeviceDispatchModule.cs"
+            break;
+#line 101 "DeviceDispatchModule.cs"
+        case 12:
+#line 101 "DeviceDispatchModule.cs"
+            mathblocks_elementwise_dispatch(opcode, dispatchInputs, input_count, output);
+#line 101 "DeviceDispatchModule.cs"
+            break;
+#line 102 "DeviceDispatchModule.cs"
+        default:
+#line 103 "DeviceDispatchModule.cs"
+            if (((threadIdx.x) == (0)))
+#line 104 "DeviceDispatchModule.cs"
             {
-#line 98 "DeviceDispatchModule.cs"
-#line 98 "DeviceDispatchModule.cs"
+#line 105 "DeviceDispatchModule.cs"
+#line 105 "DeviceDispatchModule.cs"
                 int* csharp2cuda_temp_0 = &((output)->valid);
                 (*(csharp2cuda_temp_0) = 0);
-#line 99 "DeviceDispatchModule.cs"
-#line 99 "DeviceDispatchModule.cs"
+#line 106 "DeviceDispatchModule.cs"
+#line 106 "DeviceDispatchModule.cs"
                 int* csharp2cuda_temp_1 = &((output)->count);
                 (*(csharp2cuda_temp_1) = 0);
             }
-#line 101 "DeviceDispatchModule.cs"
+#line 108 "DeviceDispatchModule.cs"
             break;
     }
-#line 103 "DeviceDispatchModule.cs"
+#line 110 "DeviceDispatchModule.cs"
     __syncthreads();
 }
 
-#line 146 "DeviceDispatchModule.cs"
+#line 153 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_probability(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output)
-#line 152 "DeviceDispatchModule.cs"
+#line 159 "DeviceDispatchModule.cs"
 {
-#line 153 "DeviceDispatchModule.cs"
-#line 153 "DeviceDispatchModule.cs"
+#line 160 "DeviceDispatchModule.cs"
+#line 160 "DeviceDispatchModule.cs"
     MathBlockSlot** csharp2cuda_temp_0 = mathblocks_dispatch_inputs(inputs);
     mathblocks_probability_dispatch(opcode, csharp2cuda_temp_0, input_count, output);
 }
 
-#line 106 "DeviceDispatchModule.cs"
+#line 113 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_scalar(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output)
-#line 112 "DeviceDispatchModule.cs"
+#line 119 "DeviceDispatchModule.cs"
 {
-#line 113 "DeviceDispatchModule.cs"
-#line 113 "DeviceDispatchModule.cs"
+#line 120 "DeviceDispatchModule.cs"
+#line 120 "DeviceDispatchModule.cs"
     MathBlockSlot** csharp2cuda_temp_0 = mathblocks_dispatch_inputs(inputs);
     mathblocks_scalar_dispatch(opcode, csharp2cuda_temp_0, input_count, output);
 }
 
-#line 156 "DeviceDispatchModule.cs"
+#line 163 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_sequence_path(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output)
-#line 162 "DeviceDispatchModule.cs"
+#line 169 "DeviceDispatchModule.cs"
 {
-#line 163 "DeviceDispatchModule.cs"
-#line 163 "DeviceDispatchModule.cs"
+#line 170 "DeviceDispatchModule.cs"
+#line 170 "DeviceDispatchModule.cs"
     MathBlockSlot** csharp2cuda_temp_0 = mathblocks_dispatch_inputs(inputs);
     mathblocks_sequence_path_dispatch(opcode, csharp2cuda_temp_0, input_count, output);
 }
 
-#line 166 "DeviceDispatchModule.cs"
+#line 173 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_statistics(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output)
-#line 172 "DeviceDispatchModule.cs"
+#line 179 "DeviceDispatchModule.cs"
 {
-#line 173 "DeviceDispatchModule.cs"
-#line 173 "DeviceDispatchModule.cs"
+#line 180 "DeviceDispatchModule.cs"
+#line 180 "DeviceDispatchModule.cs"
     MathBlockSlot** csharp2cuda_temp_0 = mathblocks_dispatch_inputs(inputs);
     mathblocks_statistics_dispatch(opcode, csharp2cuda_temp_0, input_count, output);
 }
 
-#line 206 "DeviceDispatchModule.cs"
+#line 213 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_transport(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output)
-#line 212 "DeviceDispatchModule.cs"
+#line 219 "DeviceDispatchModule.cs"
 {
-#line 213 "DeviceDispatchModule.cs"
-#line 213 "DeviceDispatchModule.cs"
+#line 220 "DeviceDispatchModule.cs"
+#line 220 "DeviceDispatchModule.cs"
     MathBlockSlot** csharp2cuda_temp_0 = mathblocks_dispatch_inputs(inputs);
     mathblocks_transport_dispatch(opcode, csharp2cuda_temp_0, input_count, output);
 }
 
-#line 116 "DeviceDispatchModule.cs"
+#line 123 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_vector(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output)
-#line 122 "DeviceDispatchModule.cs"
+#line 129 "DeviceDispatchModule.cs"
 {
-#line 123 "DeviceDispatchModule.cs"
-#line 123 "DeviceDispatchModule.cs"
+#line 130 "DeviceDispatchModule.cs"
+#line 130 "DeviceDispatchModule.cs"
     MathBlockSlot** csharp2cuda_temp_0 = mathblocks_dispatch_inputs(inputs);
     mathblocks_vector_dispatch(opcode, csharp2cuda_temp_0, input_count, output);
 }
 
-#line 218 "DeviceDispatchModule.cs"
+#line 225 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_window(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output,
     int scratch_capacity)
-#line 225 "DeviceDispatchModule.cs"
+#line 232 "DeviceDispatchModule.cs"
 {
-#line 226 "DeviceDispatchModule.cs"
-#line 228 "DeviceDispatchModule.cs"
+#line 233 "DeviceDispatchModule.cs"
+#line 235 "DeviceDispatchModule.cs"
     MathBlockSlot** csharp2cuda_temp_0 = mathblocks_dispatch_inputs(inputs);
     mathblocks_window_run(opcode, csharp2cuda_temp_0, input_count, output, csharp2cuda_i32_add(csharp2cuda_i32_mul(blockIdx.x, blockDim.x), threadIdx.x), csharp2cuda_i32_mul(gridDim.x, blockDim.x), scratch_capacity);
 }

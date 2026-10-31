@@ -342,6 +342,7 @@ internal static class MathBlockCudaFeatureIndex
         VectorSumV1BlockCuda.Identity,
         VectorUniqueV1BlockCuda.Identity,
         .. WindowCudaBlockCatalog.Identities,
+        .. ElementwiseCudaBlockCatalog.Identities,
     ];
 
     internal static MathBlockCudaFeature Resolve(string identity) => identity switch
@@ -683,6 +684,8 @@ internal static class MathBlockCudaFeatureIndex
         VectorSubtractV1BlockCuda.Identity => VectorSubtractV1BlockCuda.Feature,
         VectorSumV1BlockCuda.Identity => VectorSumV1BlockCuda.Feature,
         VectorUniqueV1BlockCuda.Identity => VectorUniqueV1BlockCuda.Feature,
-        _ => WindowCudaBlockCatalog.Resolve(identity)
+        _ => ElementwiseCudaBlockCatalog.TryResolve(identity, out var elementwise)
+            ? elementwise
+            : WindowCudaBlockCatalog.Resolve(identity)
     };
 }

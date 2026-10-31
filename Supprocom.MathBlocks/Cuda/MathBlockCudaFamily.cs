@@ -14,4 +14,5 @@ internal enum MathBlockCudaFamily
     Transport,
     Vector,
     Window,
+    Elementwise,
 }

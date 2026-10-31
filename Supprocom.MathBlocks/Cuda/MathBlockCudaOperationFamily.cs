@@ -26,5 +26,10 @@ public enum MathBlockCudaOperationFamily
     /// <summary>Identifies the <c>Vector</c> value.</summary>
     Vector,
     /// <summary>Identifies the <c>Window</c> value.</summary>
-    Window
+    Window,
+    /// <summary>
+    /// Identifies the <c>Elementwise</c> value. Its dispatched opcode is the contract opcode plus 128 times the
+    /// mask of vector arguments (bit k set when argument k is a vector).
+    /// </summary>
+    Elementwise
 }

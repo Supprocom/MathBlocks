@@ -57,6 +57,12 @@ internal static unsafe class DeviceDispatchModule
     private static void mathblocks_window_dispatch(int opcode, MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
 
     [CudaExternal]
+    private static void mathblocks_elementwise_dispatch(int opcode, MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
+
+    [CudaExternal]
+    private static void mathblocks_elementwise_run(int opcode, MathBlockSlot** inputs, int input_count, MathBlockSlot* output, int thread, int threads) => throw new NotSupportedException();
+
+    [CudaExternal]
     private static void mathblocks_window_run(int opcode, MathBlockSlot** inputs, int input_count, MathBlockSlot* output, int thread, int threads, int scratch_capacity) => throw new NotSupportedException();
 
     [CudaDevice]
@@ -92,6 +98,7 @@ internal static unsafe class DeviceDispatchModule
             case 9: mathblocks_transport_dispatch(opcode, dispatchInputs, input_count, output); break;
             case 10: mathblocks_vector_dispatch(opcode, dispatchInputs, input_count, output); break;
             case 11: mathblocks_window_dispatch(opcode, dispatchInputs, input_count, output); break;
+            case 12: mathblocks_elementwise_dispatch(opcode, dispatchInputs, input_count, output); break;
             default:
                 if (Cuda.ThreadIdx.X == 0)
                 {
@@ -231,5 +238,22 @@ internal static unsafe class DeviceDispatchModule
             (int)Cuda.BlockIdx.X * (int)Cuda.BlockDim.X + (int)Cuda.ThreadIdx.X,
             (int)Cuda.GridDim.X * (int)Cuda.BlockDim.X,
             scratch_capacity);
+    }
+
+    // The elementwise kernel stripes rows across the whole grid.
+    [CudaGlobal]
+    private static void mathblocks_elementwise(
+        int opcode,
+        [CudaReadOnly] MathBlockSlot** inputs,
+        int input_count,
+        MathBlockSlot* output)
+    {
+        mathblocks_elementwise_run(
+            opcode,
+            mathblocks_dispatch_inputs(inputs),
+            input_count,
+            output,
+            (int)Cuda.BlockIdx.X * (int)Cuda.BlockDim.X + (int)Cuda.ThreadIdx.X,
+            (int)Cuda.GridDim.X * (int)Cuda.BlockDim.X);
     }
 }

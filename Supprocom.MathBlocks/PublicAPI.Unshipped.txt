@@ -58,6 +58,7 @@ static Supprocom.MathBlocks.MathBlockCausalityInfo.Pointwise.get -> Supprocom.Ma
 static Supprocom.MathBlocks.MathBlockCausalityInfo.Trailing(int widthInputIndex) -> Supprocom.MathBlocks.MathBlockCausalityInfo!
 static Supprocom.MathBlocks.MathBlockCausalityInfo.WholeSeries.get -> Supprocom.MathBlocks.MathBlockCausalityInfo!
 Supprocom.MathBlocks.Cuda.MathBlockCudaOperationFamily.Window = 11 -> Supprocom.MathBlocks.Cuda.MathBlockCudaOperationFamily
+Supprocom.MathBlocks.Cuda.MathBlockCudaOperationFamily.Elementwise = 12 -> Supprocom.MathBlocks.Cuda.MathBlockCudaOperationFamily
 Supprocom.MathBlocks.MathBlockFusedExpression
 Supprocom.MathBlocks.MathBlockFusedExpression.CreateCudaResult(System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>? validity, System.Collections.Generic.IReadOnlyList<System.Array!>! outputs, System.Collections.Generic.IReadOnlyList<int[]!>! validityOutputs, ulong invalidMask) -> Supprocom.MathBlocks.MathBlockFusedResult!
 Supprocom.MathBlocks.MathBlockFusedExpression.CudaFunctionName.get -> string!
