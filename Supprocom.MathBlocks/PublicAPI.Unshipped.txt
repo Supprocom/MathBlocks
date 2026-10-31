@@ -25,3 +25,10 @@ static Supprocom.MathBlocks.MathBlockCausalityInfo.NotSeries.get -> Supprocom.Ma
 static Supprocom.MathBlocks.MathBlockCausalityInfo.Pointwise.get -> Supprocom.MathBlocks.MathBlockCausalityInfo!
 static Supprocom.MathBlocks.MathBlockCausalityInfo.Trailing(int widthInputIndex) -> Supprocom.MathBlocks.MathBlockCausalityInfo!
 static Supprocom.MathBlocks.MathBlockCausalityInfo.WholeSeries.get -> Supprocom.MathBlocks.MathBlockCausalityInfo!
+Supprocom.MathBlocks.MathBlocksWindowBatch
+Supprocom.MathBlocks.MathBlockWindowBatchResult
+Supprocom.MathBlocks.MathBlockWindowBatchResult.Validity.get -> Supprocom.MathBlocks.MathBlockValue
+Supprocom.MathBlocks.MathBlockWindowBatchResult.Values.get -> Supprocom.MathBlocks.MathBlockValue
+static Supprocom.MathBlocks.MathBlocksWindowBatch.Evaluate(Supprocom.MathBlocks.MathBlockValue series, string! formIdentity, System.Collections.Generic.IReadOnlyList<int>! widths, double fill) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
+static Supprocom.MathBlocks.MathBlocksWindowBatch.Evaluate(Supprocom.MathBlocks.MathBlockValue series, string! formIdentity, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! parameters, System.Collections.Generic.IReadOnlyList<int>! widths, double fill) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
+static Supprocom.MathBlocks.MathBlocksWindowBatch.EvaluateWithValidity(string! formIdentity, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! inputs) -> Supprocom.MathBlocks.MathBlockWindowBatchResult!

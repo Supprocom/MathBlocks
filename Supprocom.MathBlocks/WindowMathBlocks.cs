@@ -149,6 +149,23 @@ internal static class WindowMathBlocks
         return result;
     }
 
+    // The forms the window batch accepts: those whose rows come from a kernel.
+    internal static bool TryGetBatchEntry(string formIdentity, out MathBlockWindowEntry entry)
+    {
+        var all = Entries;
+        for (var index = 0; index < all.Count; index++)
+        {
+            if (all[index].Form.Kernel is not null &&
+                string.Equals(all[index].FormOperation.Identity, formIdentity, StringComparison.Ordinal))
+            {
+                entry = all[index];
+                return true;
+            }
+        }
+        entry = null!;
+        return false;
+    }
+
     private static MathBlockWindowEntry[] CreateEntries()
     {
         var sources = Sources;

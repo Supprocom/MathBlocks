@@ -101,7 +101,12 @@ public sealed class MathBlockOperation
     public MathBlockValue Evaluate(params MathBlockValue[] inputs) => Evaluate((IReadOnlyList<MathBlockValue>)inputs);
 
     /// <summary>Evaluates the operation with a read-only input list.</summary>
-    public MathBlockValue Evaluate(IReadOnlyList<MathBlockValue> inputs)
+    public MathBlockValue Evaluate(IReadOnlyList<MathBlockValue> inputs) => EvaluateWith(inputs, evaluator);
+
+    // Runs the public evaluation contract (arity, type resolution, invalid inputs, caught domain exceptions and the
+    // declared-type check) around another evaluator for the same operation. The window batch uses it to share
+    // width-independent work across widths while each result goes through the same checks as Evaluate.
+    internal MathBlockValue EvaluateWith(IReadOnlyList<MathBlockValue> inputs, MathBlockEvaluator replacement)
     {
         ArgumentNullException.ThrowIfNull(inputs);
         RequireArity(inputs.Count);
@@ -124,7 +129,7 @@ public sealed class MathBlockOperation
         MathBlockValue result;
         try
         {
-            result = evaluator(inputs);
+            result = replacement(inputs);
         }
         catch (ArithmeticException exception)
         {

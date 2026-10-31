@@ -65,23 +65,36 @@ internal sealed class MathBlockWindowForm
         return MathBlockType.BooleanVector(rows);
     }
 
-    internal MathBlockValue EvaluateForm(IReadOnlyList<MathBlockValue> inputs)
+    internal MathBlockValue EvaluateForm(IReadOnlyList<MathBlockValue> inputs) => EvaluateForm(inputs, null, null);
+
+    internal MathBlockValue EvaluateValidity(IReadOnlyList<MathBlockValue> inputs) => EvaluateValidity(inputs, null);
+
+    // With a capture, the same pass also computes the validity rows and leaves them in the capture.
+    internal MathBlockValue EvaluateForm(
+        IReadOnlyList<MathBlockValue> inputs,
+        MathBlockWindowPreparation? preparation,
+        MathBlockWindowValidityCapture? capture)
     {
         var type = FormTypeResolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
         if (!TryResolveExtent(inputs, type, out var count, out var width, out var invalid))
             return invalid;
         var values = new double[count];
-        Run(inputs, count, width, inputs[source.Arity + 1].AsScalar(), values, null);
+        var valid = capture is null ? null : new bool[count];
+        Run(inputs, count, width, inputs[source.Arity + 1].AsScalar(), values, valid, preparation);
+        if (capture is not null)
+            capture.Valid = valid;
         return MathBlockValue.Vector(values, type.Unit, true);
     }
 
-    internal MathBlockValue EvaluateValidity(IReadOnlyList<MathBlockValue> inputs)
+    internal MathBlockValue EvaluateValidity(
+        IReadOnlyList<MathBlockValue> inputs,
+        MathBlockWindowPreparation? preparation)
     {
         var type = ValidityTypeResolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
         if (!TryResolveExtent(inputs, type, out var count, out var width, out var invalid))
             return invalid;
         var valid = new bool[count];
-        Run(inputs, count, width, 0d, null, valid);
+        Run(inputs, count, width, 0d, null, valid, preparation);
         return MathBlockValue.BooleanVector(valid, true);
     }
 
@@ -175,11 +188,13 @@ internal sealed class MathBlockWindowForm
         int width,
         double fill,
         double[]? values,
-        bool[]? valid)
+        bool[]? valid,
+        MathBlockWindowPreparation? preparation)
     {
         if (kernel is not null)
         {
-            kernel.Run(kernel.Prepare(inputs), inputs, count, width, fill, values, valid);
+            var prepared = preparation is null ? kernel.Prepare(inputs) : preparation.Get(kernel, inputs);
+            kernel.Run(prepared, inputs, count, width, fill, values, valid);
             return;
         }
 
