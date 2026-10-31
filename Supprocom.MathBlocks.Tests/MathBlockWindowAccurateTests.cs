@@ -158,6 +158,47 @@ public sealed class MathBlockWindowAccurateTests(ITestOutputHelper output)
     }
 
     /// <summary>
+    /// Verifies squares of the smallest doubles fit the accumulator: subnormal and near-subnormal values, whose
+    /// scaled square or Dekker error term has significand bits below 2^-2176, give a valid result. The sums and means
+    /// are the exact values correctly rounded, which double addition and one division give here because every value
+    /// is a multiple of 2^-1074 below 2^-1000; the variance and deviation rows hold the fill or a value of at least
+    /// +0.
+    /// </summary>
+    [Fact]
+    public void SquaresOfTheSmallestValuesStayInsideTheAccumulator()
+    {
+        double[] values = [5e-324d, -5e-324d, 1e-310d, 2.5e-308d, -1e-320d, 0d, double.Epsilon, 3e-320d, -2.2e-308d, 7e-315d];
+        var x = MathBlockValue.Vector(values);
+        foreach (var width in new[] { 1, 2, 3, values.Length })
+        {
+            var w = MathBlockValue.Scalar(width);
+            foreach (var name in AccurateNames)
+            {
+                var result = AccurateForm(name).Evaluate(x, w, MathBlockValue.Scalar(Sentinel));
+                var valid = AccurateValidity(name).Evaluate(x, w);
+                Assert.True(result.IsValid, $"{name} w={width}: {result.InvalidReason}");
+                Assert.True(valid.IsValid, $"{name} sibling w={width}: {valid.InvalidReason}");
+                var rows = result.AsVector().ToArray();
+                for (var row = width - 1; row < values.Length; row++)
+                {
+                    var sum = 0d;
+                    for (var index = row - width + 1; index <= row; index++)
+                        sum += values[index];
+                    if (name is not ("sum" or "mean"))
+                    {
+                        Assert.True(rows[row] == Sentinel || rows[row] >= 0d, $"{name} w={width} row {row}: {rows[row]:R}");
+                        continue;
+                    }
+                    var expected = string.Equals(name, "sum", StringComparison.Ordinal) ? sum : sum / width;
+                    Assert.True(
+                        BitConverter.DoubleToInt64Bits(expected) == BitConverter.DoubleToInt64Bits(rows[row]),
+                        $"{name} w={width} row {row}: {rows[row]:R}, expected {expected:R}");
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Verifies every form's and sibling's rows depend only on the window: changing every row before row n/2 (also
     /// row 0) leaves every row whose window starts at n/2 or later bit-identical, on the spike, random-walk and
     /// near-constant families.

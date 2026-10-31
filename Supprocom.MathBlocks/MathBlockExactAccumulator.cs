@@ -6,19 +6,22 @@ namespace Supprocom.MathBlocks;
 // most three) chunks under its bits, in pieces below 2^33, so no addition rounds and no carry is propagated until
 // a value is read. The 31 spare bits per chunk absorb 2^27 additions before an in-place carry pass is needed.
 //
-// The range covers every double and every exact square of one (2^-2148 .. 2^2048) with room for 2^31 terms, so
-// sums of x and of x^2 use the same layout. The accumulated value is exact and does not depend on the order or
-// history of the additions; only its chunk representation does, and every read first carries the chunks into the
-// canonical form, so a read depends only on the value.
+// The range covers every double and every exact square of one (2^-2148 .. 2^2048), the significand bits of the
+// smallest terms down to 2^-2200, and room for 2^31 terms, so sums of x and of x^2 use the same layout. The
+// accumulated value is exact and does not depend on the order or history of the additions; only its chunk
+// representation does, and every read first carries the chunks into the canonical form, so a read depends only on
+// the value.
 //
 // The code is plain loops over a fixed array with no allocation after construction, so a per-thread CUDA struct can
 // mirror it.
 internal sealed class MathBlockExactAccumulator
 {
-    internal const int ChunkCount = 140;
+    internal const int ChunkCount = 141;
 
-    // Bit 0 of chunk 0 has the weight 2^BaseExponent; it is below 2^-2148, the lowest bit of a square.
-    internal const int BaseExponent = -2176;
+    // Bit 0 of chunk 0 has the weight 2^BaseExponent. Every nonzero term is at least 2^-2148 in magnitude (a square
+    // of a multiple of 2^-1074, or its error term), so the lowest bit of its 53-bit significand weighs at least
+    // 2^-2200, and 2^-2208 is the chunk boundary below that.
+    internal const int BaseExponent = -2208;
 
     private const long ChunkMask = 0xFFFF_FFFFL;
     private const int CarryInterval = 1 << 27;
