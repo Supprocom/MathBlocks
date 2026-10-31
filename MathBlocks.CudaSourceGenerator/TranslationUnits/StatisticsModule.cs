@@ -194,6 +194,157 @@ internal static unsafe class StatisticsModule
                     row_means[row] + row_means[column] - total_mean;
     }
 
+    [CudaDevice]
+    private static bool mathblocks_statistics_moment_value(
+        [CudaReadOnly] double* values,
+        int count,
+        double order_value,
+        bool central,
+        double* value)
+    {
+        int order = 0;
+        if (count <= 0 ||
+            !mathblocks_nonnegative_integer(order_value, &order))
+            return false;
+        double mean = central ? mathblocks_statistics_mean(values, count) : 0.0;
+        double sum = 0.0;
+        for (int index = 0; index < count; index++)
+            sum += mathblocks_power(values[index] - mean, (double)order);
+        *value = sum / count;
+        return double.IsFinite(*value);
+    }
+
+    [CudaDevice]
+    private static bool mathblocks_statistics_kendall_value(
+        [CudaReadOnly] double* left_values,
+        [CudaReadOnly] double* right_values,
+        int count,
+        double* value)
+    {
+        long concordant = 0;
+        long discordant = 0;
+        long left_ties = 0;
+        long right_ties = 0;
+        for (int left = 0; left < count; left++)
+        {
+            for (int right = left + 1; right < count; right++)
+            {
+                double left_difference = left_values[left] - left_values[right];
+                double right_difference = right_values[left] - right_values[right];
+                int left_sign = left_difference > 0.0 ? 1 : left_difference < 0.0 ? -1 : 0;
+                int right_sign = right_difference > 0.0 ? 1 : right_difference < 0.0 ? -1 : 0;
+                if (left_sign == 0 && right_sign == 0)
+                    continue;
+                if (left_sign == 0)
+                    left_ties++;
+                else if (right_sign == 0)
+                    right_ties++;
+                else if (left_sign == right_sign)
+                    concordant++;
+                else
+                    discordant++;
+            }
+        }
+        *value = (double)(concordant - discordant) /
+            mathblocks_square_root(
+                (double)(concordant + discordant + left_ties) *
+                (concordant + discordant + right_ties));
+        return double.IsFinite(*value);
+    }
+
+    [CudaDevice]
+    private static bool mathblocks_statistics_shape_moment_value(
+        [CudaReadOnly] double* values,
+        int count,
+        bool kurtosis,
+        double* value)
+    {
+        if (count <= 0)
+            return false;
+        double mean = mathblocks_statistics_mean(values, count);
+        double second_moment = 0.0;
+        double higher_moment = 0.0;
+        for (int index = 0; index < count; index++)
+        {
+            double difference = values[index] - mean;
+            double square = difference * difference;
+            second_moment += square;
+            higher_moment += kurtosis ? square * square : square * difference;
+        }
+        second_moment /= count;
+        higher_moment /= count;
+        *value = kurtosis
+            ? higher_moment / (second_moment * second_moment) - 3.0
+            : higher_moment / mathblocks_power(second_moment, 1.5);
+        return double.IsFinite(*value);
+    }
+
+    [CudaDevice]
+    private static bool mathblocks_statistics_weighted_value(
+        [CudaReadOnly] double* values,
+        [CudaReadOnly] double* weights,
+        int count,
+        bool variance,
+        double* value)
+    {
+        if (count <= 0)
+            return false;
+        double weight_sum = mathblocks_compensated_sum(weights, count);
+        double mean = mathblocks_compensated_product_sum(values, weights, count) / weight_sum;
+        if (!variance)
+        {
+            *value = mean;
+        }
+        else
+        {
+            double numerator = 0.0;
+            for (int index = 0; index < count; index++)
+            {
+                double difference = values[index] - mean;
+                numerator += weights[index] * difference * difference;
+            }
+            *value = numerator / weight_sum;
+        }
+        return double.IsFinite(*value);
+    }
+
+    // Writes the pair averages (values[left] + values[right]) / 2 for left <= right in row order and returns
+    // their count.
+    [CudaDevice]
+    private static int mathblocks_statistics_pair_averages(
+        [CudaReadOnly] double* values,
+        int count,
+        double* averages)
+    {
+        int average_count = 0;
+        for (int left = 0; left < count; left++)
+            for (int right = left; right < count; right++)
+                averages[average_count++] = (values[left] + values[right]) / 2.0;
+        return average_count;
+    }
+
+    // Writes the pair slopes of the Theil-Sen estimator for left < right with distinct x in row order and
+    // returns their count.
+    [CudaDevice]
+    private static int mathblocks_statistics_pair_slopes(
+        [CudaReadOnly] double* x,
+        [CudaReadOnly] double* y,
+        int count,
+        double* slopes)
+    {
+        int slope_count = 0;
+        for (int left = 0; left < count; left++)
+        {
+            for (int right = left + 1; right < count; right++)
+            {
+                double difference = x[right] - x[left];
+                if (difference != 0.0)
+                    slopes[slope_count++] = (y[right] - y[left]) / difference;
+            }
+        }
+        return slope_count;
+    }
+
     [CudaDevice(Name = "mathblocks_statistics_dispatch")]
     private static void mathblocks_statistics(
         int opcode,
@@ -242,21 +393,14 @@ internal static unsafe class StatisticsModule
                 }
                 case 1:
                 case 18:
-                {
-                    int order = 0;
-                    if (first->count <= 0 ||
-                        !mathblocks_nonnegative_integer(second->scalar_value, &order))
-                    {
+                    if (!mathblocks_statistics_moment_value(
+                            a,
+                            first->count,
+                            second->scalar_value,
+                            opcode == 1,
+                            &output->scalar_value))
                         output->valid = 0;
-                        break;
-                    }
-                    double mean = opcode == 1 ? mathblocks_statistics_mean(a, first->count) : 0.0;
-                    double sum = 0.0;
-                    for (int index = 0; index < first->count; index++)
-                        sum += mathblocks_power(a[index] - mean, (double)order);
-                    output->scalar_value = sum / first->count;
                     break;
-                }
                 case 2:
                 {
                     int rows = first->rows;
@@ -363,42 +507,10 @@ internal static unsafe class StatisticsModule
                     break;
                 }
                 case 6:
-                {
-                    if (first->count != second->count)
-                    {
+                    if (first->count != second->count ||
+                        !mathblocks_statistics_kendall_value(a, b, first->count, &output->scalar_value))
                         output->valid = 0;
-                        break;
-                    }
-                    long concordant = 0;
-                    long discordant = 0;
-                    long left_ties = 0;
-                    long right_ties = 0;
-                    for (int left = 0; left < first->count; left++)
-                    {
-                        for (int right = left + 1; right < first->count; right++)
-                        {
-                            double left_difference = a[left] - a[right];
-                            double right_difference = b[left] - b[right];
-                            int left_sign = left_difference > 0.0 ? 1 : left_difference < 0.0 ? -1 : 0;
-                            int right_sign = right_difference > 0.0 ? 1 : right_difference < 0.0 ? -1 : 0;
-                            if (left_sign == 0 && right_sign == 0)
-                                continue;
-                            if (left_sign == 0)
-                                left_ties++;
-                            else if (right_sign == 0)
-                                right_ties++;
-                            else if (left_sign == right_sign)
-                                concordant++;
-                            else
-                                discordant++;
-                        }
-                    }
-                    output->scalar_value = (double)(concordant - discordant) /
-                        mathblocks_square_root(
-                            (double)(concordant + discordant + left_ties) *
-                            (concordant + discordant + right_ties));
                     break;
-                }
                 case 7:
                 case 8:
                 case 9:
@@ -458,29 +570,13 @@ internal static unsafe class StatisticsModule
                 }
                 case 13:
                 case 14:
-                {
-                    if (first->count <= 0)
-                    {
+                    if (!mathblocks_statistics_shape_moment_value(
+                            a,
+                            first->count,
+                            opcode == 13,
+                            &output->scalar_value))
                         output->valid = 0;
-                        break;
-                    }
-                    double mean = mathblocks_statistics_mean(a, first->count);
-                    double second_moment = 0.0;
-                    double higher_moment = 0.0;
-                    for (int index = 0; index < first->count; index++)
-                    {
-                        double difference = a[index] - mean;
-                        double square = difference * difference;
-                        second_moment += square;
-                        higher_moment += opcode == 13 ? square * square : square * difference;
-                    }
-                    second_moment /= first->count;
-                    higher_moment /= first->count;
-                    output->scalar_value = opcode == 13
-                        ? higher_moment / (second_moment * second_moment) - 3.0
-                        : higher_moment / mathblocks_power(second_moment, 1.5);
                     break;
-                }
                 case 15:
                 case 16:
                 case 21:
@@ -506,10 +602,7 @@ internal static unsafe class StatisticsModule
                         output->valid = 0;
                         break;
                     }
-                    int count = 0;
-                    for (int left = 0; left < first->count; left++)
-                        for (int right = left; right < first->count; right++)
-                            scratch[count++] = (a[left] + a[right]) / 2.0;
+                    int count = mathblocks_statistics_pair_averages(a, first->count, scratch);
                     output->scalar_value = mathblocks_statistics_median(scratch, count);
                     break;
                 }
@@ -541,16 +634,7 @@ internal static unsafe class StatisticsModule
                         output->valid = 0;
                         break;
                     }
-                    int count = 0;
-                    for (int left = 0; left < first->count; left++)
-                    {
-                        for (int right = left + 1; right < first->count; right++)
-                        {
-                            double difference = a[right] - a[left];
-                            if (difference != 0.0)
-                                scratch[count++] = (b[right] - b[left]) / difference;
-                        }
-                    }
+                    int count = mathblocks_statistics_pair_slopes(a, b, first->count, scratch);
                     if (count == 0)
                         output->valid = 0;
                     else
@@ -559,30 +643,15 @@ internal static unsafe class StatisticsModule
                 }
                 case 25:
                 case 26:
-                {
-                    if (first->count <= 0 || first->count != second->count)
-                    {
+                    if (first->count != second->count ||
+                        !mathblocks_statistics_weighted_value(
+                            a,
+                            b,
+                            first->count,
+                            opcode == 26,
+                            &output->scalar_value))
                         output->valid = 0;
-                        break;
-                    }
-                    double weight_sum = mathblocks_compensated_sum(b, first->count);
-                    double mean = mathblocks_compensated_product_sum(a, b, first->count) / weight_sum;
-                    if (opcode == 25)
-                    {
-                        output->scalar_value = mean;
-                    }
-                    else
-                    {
-                        double numerator = 0.0;
-                        for (int index = 0; index < first->count; index++)
-                        {
-                            double difference = a[index] - mean;
-                            numerator += b[index] * difference * difference;
-                        }
-                        output->scalar_value = numerator / weight_sum;
-                    }
                     break;
-                }
             }
             if (output->valid && opcode != 2 && opcode != 4 && !double.IsFinite(output->scalar_value))
                 output->valid = 0;

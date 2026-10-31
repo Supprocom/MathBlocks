@@ -426,6 +426,128 @@ internal static unsafe class SequencePathModule
         }
     }
 
+    [CudaDevice]
+    private static double mathblocks_sequence_first_passage_value(
+        [CudaReadOnly] double* values,
+        int count,
+        double threshold,
+        bool at_or_above)
+    {
+        int result_index = -1;
+        for (int index = 0; index < count; index++)
+        {
+            if (at_or_above ? values[index] >= threshold : values[index] <= threshold)
+            {
+                result_index = index;
+                break;
+            }
+        }
+        return (double)result_index;
+    }
+
+    [CudaDevice]
+    private static double mathblocks_sequence_longest_run_value(
+        [CudaReadOnly] CudaInt32* values,
+        int count)
+    {
+        int maximum = 0;
+        int current = 0;
+        for (int index = 0; index < count; index++)
+        {
+            current = values[index] ? current + 1 : 0;
+            maximum = maximum > current ? maximum : current;
+        }
+        return (double)maximum;
+    }
+
+    [CudaDevice]
+    private static bool mathblocks_sequence_decline_value(
+        [CudaReadOnly] double* values,
+        int count,
+        bool relative,
+        double* value)
+    {
+        if (count <= 0)
+            return false;
+        double maximum = values[0];
+        double decline = 0.0;
+        for (int index = 1; index < count; index++)
+        {
+            maximum = maximum > values[index] ? maximum : values[index];
+            double candidate = !relative
+                ? maximum - values[index]
+                : (maximum - values[index]) / maximum;
+            decline = decline > candidate ? decline : candidate;
+        }
+        *value = decline;
+        return double.IsFinite(decline);
+    }
+
+    // Sums |x[i] - x[i - 1]| (absolute) or its power of the given order.
+    [CudaDevice]
+    private static bool mathblocks_sequence_variation_value(
+        [CudaReadOnly] double* values,
+        int count,
+        double order,
+        bool absolute,
+        double* value)
+    {
+        if (count <= 0)
+            return false;
+        if (!(order > 0.0))
+            return false;
+        double total = 0.0;
+        for (int index = 1; index < count; index++)
+        {
+            double change = Math.Abs(values[index] - values[index - 1]);
+            total += absolute ? change : mathblocks_power(change, order);
+        }
+        *value = total;
+        return double.IsFinite(total);
+    }
+
+    [CudaDevice]
+    private static bool mathblocks_sequence_recurrence_value(
+        [CudaReadOnly] double* values,
+        int count,
+        double threshold,
+        double* value)
+    {
+        if (count <= 0 || threshold < 0.0)
+            return false;
+        long recurrent = 0;
+        long total = (long)count * count;
+        for (int left = 0; left < count; left++)
+            for (int right = 0; right < count; right++)
+                if (Math.Abs(values[left] - values[right]) <= threshold)
+                    recurrent++;
+        *value = (double)recurrent / total;
+        return true;
+    }
+
+    // Counts sign changes of the values, or of their first differences, skipping zeros.
+    [CudaDevice]
+    private static double mathblocks_sequence_sign_change_value(
+        [CudaReadOnly] double* values,
+        int count,
+        bool differenced)
+    {
+        int changes = 0;
+        int previous = 0;
+        int start = differenced ? 1 : 0;
+        for (int index = start; index < count; index++)
+        {
+            double difference = differenced ? values[index] - values[index - 1] : values[index];
+            int current = difference > 0.0 ? 1 : difference < 0.0 ? -1 : 0;
+            if (current == 0)
+                continue;
+            if (previous != 0 && current != previous)
+                changes++;
+            previous = current;
+        }
+        return (double)changes;
+    }
+
     [CudaDevice(Name = "mathblocks_sequence_path_dispatch")]
     private static void mathblocks_sequence_path(
         int opcode,
@@ -983,18 +1105,11 @@ internal static unsafe class SequencePathModule
             case 15:
                 if (thread == 0)
                 {
-                    int result_index = -1;
-                    double threshold = second->scalar_value;
-                    bool at_or_above = third->boolean_value != 0;
-                    for (int index = 0; index < first->count; index++)
-                    {
-                        if (at_or_above ? a[index] >= threshold : a[index] <= threshold)
-                        {
-                            result_index = index;
-                            break;
-                        }
-                    }
-                    output->scalar_value = (double)result_index;
+                    output->scalar_value = mathblocks_sequence_first_passage_value(
+                        a,
+                        first->count,
+                        second->scalar_value,
+                        third->boolean_value != 0);
                 }
                 break;
             case 16:
@@ -1049,93 +1164,34 @@ internal static unsafe class SequencePathModule
                 break;
             case 18:
                 if (thread == 0)
-                {
-                    int maximum = 0;
-                    int current = 0;
-                    for (int index = 0; index < first->count; index++)
-                    {
-                        current = boolean_a[index] ? current + 1 : 0;
-                        maximum = maximum > current ? maximum : current;
-                    }
-                    output->scalar_value = (double)maximum;
-                }
+                    output->scalar_value = mathblocks_sequence_longest_run_value(boolean_a, first->count);
                 break;
             case 19:
             case 20:
-                if (thread == 0)
-                {
-                    if (first->count <= 0)
-                    {
-                        output->valid = 0;
-                    }
-                    else
-                    {
-                        double maximum = a[0];
-                        double decline = 0.0;
-                        for (int index = 1; index < first->count; index++)
-                        {
-                            maximum = maximum > a[index] ? maximum : a[index];
-                            double candidate = opcode == 19
-                                ? maximum - a[index]
-                                : (maximum - a[index]) / maximum;
-                            decline = decline > candidate ? decline : candidate;
-                        }
-                        output->scalar_value = decline;
-                        if (!double.IsFinite(decline))
-                            output->valid = 0;
-                    }
-                }
+                if (thread == 0 &&
+                    !mathblocks_sequence_decline_value(a, first->count, opcode == 20, &output->scalar_value))
+                    output->valid = 0;
                 break;
             case 21:
             case 22:
             case 29:
-                if (thread == 0)
-                {
-                    if (first->count <= 0)
-                    {
-                        output->valid = 0;
-                    }
-                    else
-                    {
-                        double order = opcode == 22 ? 2.0 : second == null ? 1.0 : second->scalar_value;
-                        if (!(order > 0.0))
-                        {
-                            output->valid = 0;
-                        }
-                        else
-                        {
-                            double total = 0.0;
-                            for (int index = 1; index < first->count; index++)
-                            {
-                                double change = Math.Abs(a[index] - a[index - 1]);
-                                total += opcode == 29 ? change : mathblocks_power(change, order);
-                            }
-                            output->scalar_value = total;
-                            if (!double.IsFinite(total))
-                                output->valid = 0;
-                        }
-                    }
-                }
+                if (thread == 0 &&
+                    !mathblocks_sequence_variation_value(
+                        a,
+                        first->count,
+                        opcode == 22 ? 2.0 : second == null ? 1.0 : second->scalar_value,
+                        opcode == 29,
+                        &output->scalar_value))
+                    output->valid = 0;
                 break;
             case 23:
-                if (thread == 0)
-                {
-                    double threshold = second->scalar_value;
-                    if (first->count <= 0 || threshold < 0.0)
-                    {
-                        output->valid = 0;
-                    }
-                    else
-                    {
-                        long recurrent = 0;
-                        long total = (long)first->count * first->count;
-                        for (int left = 0; left < first->count; left++)
-                            for (int right = 0; right < first->count; right++)
-                                if (Math.Abs(a[left] - a[right]) <= threshold)
-                                    recurrent++;
-                        output->scalar_value = (double)recurrent / total;
-                    }
-                }
+                if (thread == 0 &&
+                    !mathblocks_sequence_recurrence_value(
+                        a,
+                        first->count,
+                        second->scalar_value,
+                        &output->scalar_value))
+                    output->valid = 0;
                 break;
             case 24:
                 if (thread == 0)
@@ -1301,22 +1357,7 @@ internal static unsafe class SequencePathModule
             case 30:
             case 31:
                 if (thread == 0)
-                {
-                    int count = 0;
-                    int previous = 0;
-                    int start = opcode == 30 ? 1 : 0;
-                    for (int index = start; index < first->count; index++)
-                    {
-                        double difference = opcode == 30 ? a[index] - a[index - 1] : a[index];
-                        int current = difference > 0.0 ? 1 : difference < 0.0 ? -1 : 0;
-                        if (current == 0)
-                            continue;
-                        if (previous != 0 && current != previous)
-                            count++;
-                        previous = current;
-                    }
-                    output->scalar_value = (double)count;
-                }
+                    output->scalar_value = mathblocks_sequence_sign_change_value(a, first->count, opcode == 30);
                 break;
             case 32:
                 if (thread == 0)
