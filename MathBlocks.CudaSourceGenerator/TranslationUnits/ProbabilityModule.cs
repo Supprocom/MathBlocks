@@ -290,6 +290,96 @@ internal static unsafe class ProbabilityModule
         return true;
     }
 
+    // The scalar-valued opcodes on scalar arguments: ballot count (0), binomial coefficient (1), factorial (2),
+    // normal CDF (23), Poisson CDF and PMF (25, 26), beta (28), log-gamma (29) and the regularized incomplete beta
+    // (30). Writes the result to value and returns whether it is valid: in the source's domain and finite. The
+    // probability dispatcher and the elementwise forms both evaluate their rows here.
+    [CudaDevice]
+    private static bool mathblocks_probability_scalar_value(int opcode, double a, double b, double c, double* value)
+    {
+        *value = 0.0;
+        if (opcode == 0 || opcode == 1 || opcode == 2)
+        {
+            int first_integer = 0;
+            int second_integer = 0;
+            if (!mathblocks_probability_integer(a, &first_integer) || first_integer < 0 ||
+                (opcode != 2 && !mathblocks_probability_integer(b, &second_integer)) ||
+                (opcode == 2 && first_integer > 170) ||
+                (opcode == 0 && (first_integer <= second_integer || second_integer < 0)))
+            {
+                return false;
+            }
+            if (opcode == 0)
+            {
+                *value = (double)(first_integer - second_integer) /
+                    (first_integer + second_integer) *
+                    mathblocks_probability_binomial(first_integer + second_integer, second_integer);
+            }
+            else if (opcode == 1)
+            {
+                *value = mathblocks_probability_binomial(first_integer, second_integer);
+            }
+            else
+            {
+                double factorial = 1.0;
+                for (int index = 2; index <= first_integer; index++) factorial *= index;
+                *value = factorial;
+            }
+            return double.IsFinite(*value);
+        }
+
+        if (opcode == 23)
+        {
+            *value = 0.5 * (1.0 + mathblocks_error_function(a / mathblocks_square_root(2.0)));
+            return double.IsFinite(*value);
+        }
+
+        if (opcode == 25 || opcode == 26)
+        {
+            int count = 0;
+            double rate = a;
+            if (!mathblocks_probability_integer(b, &count) || count < 0 || rate < 0.0)
+                return false;
+            double sum = 0.0;
+            int start = opcode == 25 ? 0 : count;
+            int end = count;
+            for (int index = start; index <= end; index++)
+            {
+                double probability = rate == 0.0
+                    ? (index == 0 ? 1.0 : 0.0)
+                    : mathblocks_exponential(
+                        -rate + index * mathblocks_natural_logarithm(rate) -
+                        mathblocks_probability_log_gamma(index + 1.0));
+                sum += probability;
+            }
+            *value = sum;
+            return double.IsFinite(sum);
+        }
+
+        if (opcode == 28)
+        {
+            *value = mathblocks_exponential(
+                mathblocks_probability_log_gamma(a) +
+                mathblocks_probability_log_gamma(b) -
+                mathblocks_probability_log_gamma(a + b));
+        }
+        else if (opcode == 29)
+        {
+            *value = mathblocks_probability_log_gamma(a);
+        }
+        else if (opcode == 30)
+        {
+            if (a < 0.0 || a > 1.0 || b <= 0.0 || c <= 0.0)
+                return false;
+            *value = mathblocks_probability_incomplete_beta(a, b, c);
+        }
+        else
+        {
+            return false;
+        }
+        return double.IsFinite(*value);
+    }
+
     [CudaDevice(Name = "mathblocks_probability_dispatch")]
     private static void mathblocks_probability(
         int opcode,
@@ -400,35 +490,18 @@ internal static unsafe class ProbabilityModule
         if (thread != 0)
             return;
 
-        if (opcode == 0 || opcode == 1 || opcode == 2)
+        if (opcode == 0 || opcode == 1 || opcode == 2 || opcode == 23 || opcode == 25 || opcode == 26 ||
+            opcode == 28 || opcode == 29 || opcode == 30)
         {
-            int first_integer = 0;
-            int second_integer = 0;
-            if (!mathblocks_probability_integer(first->scalar_value, &first_integer) || first_integer < 0 ||
-                (opcode != 2 && !mathblocks_probability_integer(second->scalar_value, &second_integer)) ||
-                (opcode == 2 && first_integer > 170) ||
-                (opcode == 0 && (first_integer <= second_integer || second_integer < 0)))
-            {
-                output->valid = 0;
-                return;
-            }
-            if (opcode == 0)
-            {
-                output->scalar_value = (double)(first_integer - second_integer) /
-                    (first_integer + second_integer) *
-                    mathblocks_probability_binomial(first_integer + second_integer, second_integer);
-            }
-            else if (opcode == 1)
-            {
-                output->scalar_value = mathblocks_probability_binomial(first_integer, second_integer);
-            }
-            else
-            {
-                double factorial = 1.0;
-                for (int index = 2; index <= first_integer; index++) factorial *= index;
-                output->scalar_value = factorial;
-            }
-            if (!double.IsFinite(output->scalar_value)) output->valid = 0;
+            double value = 0.0;
+            bool valid = mathblocks_probability_scalar_value(
+                opcode,
+                first == null ? 0.0 : first->scalar_value,
+                second == null ? 0.0 : second->scalar_value,
+                third == null ? 0.0 : third->scalar_value,
+                &value);
+            output->scalar_value = value;
+            if (!valid) output->valid = 0;
             return;
         }
 
@@ -726,63 +799,6 @@ internal static unsafe class ProbabilityModule
             return;
         }
 
-        if (opcode == 23)
-        {
-            output->scalar_value = 0.5 * (1.0 + mathblocks_error_function(
-                first->scalar_value / mathblocks_square_root(2.0)));
-            if (!double.IsFinite(output->scalar_value)) output->valid = 0;
-            return;
-        }
-
-        if (opcode == 25 || opcode == 26)
-        {
-            int count = 0;
-            double rate = first->scalar_value;
-            if (!mathblocks_probability_integer(second->scalar_value, &count) || count < 0 || rate < 0.0)
-            {
-                output->valid = 0;
-                return;
-            }
-            double value = 0.0;
-            int start = opcode == 25 ? 0 : count;
-            int end = count;
-            for (int index = start; index <= end; index++)
-            {
-                double probability = rate == 0.0
-                    ? (index == 0 ? 1.0 : 0.0)
-                    : mathblocks_exponential(
-                        -rate + index * mathblocks_natural_logarithm(rate) -
-                        mathblocks_probability_log_gamma(index + 1.0));
-                value += probability;
-            }
-            output->scalar_value = value;
-            if (!double.IsFinite(value)) output->valid = 0;
-            return;
-        }
-
-        if (opcode == 28)
-        {
-            output->scalar_value = mathblocks_exponential(
-                mathblocks_probability_log_gamma(first->scalar_value) +
-                mathblocks_probability_log_gamma(second->scalar_value) -
-                mathblocks_probability_log_gamma(first->scalar_value + second->scalar_value));
-        }
-        else if (opcode == 29)
-        {
-            output->scalar_value = mathblocks_probability_log_gamma(first->scalar_value);
-        }
-        else if (opcode == 30)
-        {
-            double x = first->scalar_value;
-            double left = second->scalar_value;
-            double right = third->scalar_value;
-            if (x < 0.0 || x > 1.0 || left <= 0.0 || right <= 0.0)
-            {
-                output->valid = 0;
-                return;
-            }
-            output->scalar_value = mathblocks_probability_incomplete_beta(x, left, right);
-        }
-        if (!double.IsFinite(output->scalar_value)) output->valid = 0;
+        output->valid = 0;
     }
 }
