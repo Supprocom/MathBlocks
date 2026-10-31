@@ -330,7 +330,7 @@ internal static partial class VectorMathBlocks
     private static int MergedLength(MathBlockType left, MathBlockType right) =>
         left.Rows == 0 ? right.Rows : left.Rows;
 
-    private static int RequirePositiveInteger(double value)
+    internal static int RequirePositiveInteger(double value)
     {
         var integer = RequireNonnegativeInteger(value);
         return integer > 0 ? integer : throw new ArgumentOutOfRangeException(nameof(value));
