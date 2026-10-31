@@ -120,6 +120,23 @@ internal static class ElementwiseCudaBlockCatalog
         return checked(opcode + ArgumentMaskMultiplier * mask);
     }
 
+    // Two non-empty vector arguments of different lengths give the result no row authority, as the CoreCLR type
+    // resolver does; an empty vector next to a non-empty one keeps the non-empty length.
+    internal static bool VectorLengthsDiffer(MathBlockType[] inputTypes, int[] inputShapeRows)
+    {
+        var rows = 0;
+        for (var index = 0; index < inputTypes.Length; index++)
+        {
+            if (inputTypes[index].Kind != MathBlockValueKind.Vector || inputShapeRows[index] <= 0)
+                continue;
+            if (rows == 0)
+                rows = inputShapeRows[index];
+            else if (rows != inputShapeRows[index])
+                return true;
+        }
+        return false;
+    }
+
     // One thread per row, in blocks of 128, at least one block and at most MaximumGridX; the rows stripe over the
     // grid when there are more.
     internal static int GridX(int rows)

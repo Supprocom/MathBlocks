@@ -628,9 +628,10 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 inputShapeOverrides,
                 inputExactValues);
             if (node.Kind == MathBlockProgramNodeKind.Operation &&
-                (WindowCudaBlockCatalog.IsWindowIdentity(node.OperationIdentity) ||
-                    ElementwiseCudaBlockCatalog.IsElementwiseIdentity(node.OperationIdentity)) &&
-                WindowSeriesLengthsDiffer(inputTypes, inputShapeRows))
+                ((WindowCudaBlockCatalog.IsWindowIdentity(node.OperationIdentity) &&
+                    WindowSeriesLengthsDiffer(inputTypes, inputShapeRows)) ||
+                 (ElementwiseCudaBlockCatalog.IsElementwiseIdentity(node.OperationIdentity) &&
+                    ElementwiseCudaBlockCatalog.VectorLengthsDiffer(inputTypes, inputShapeRows))))
             {
                 shape = default;
             }
