@@ -5,6 +5,7 @@ public static class MathBlockCatalog
 {
     private static readonly Lazy<MathBlockRegistry> standard = new(CreateStandard);
     private static readonly Lazy<MathBlockRegistry> windowed = new(CreateWindowed);
+    private static readonly Lazy<MathBlockRegistry> elementwise = new(CreateElementwise);
 
     /// <summary>Gets the standard value.</summary>
     public static MathBlockRegistry Standard => standard.Value;
@@ -13,9 +14,16 @@ public static class MathBlockCatalog
     // requires a CUDA implementation for every operation.
     internal static MathBlockRegistry Windowed => windowed.Value;
 
+    // The elementwise.* and elementwise-valid.* forms have CoreCLR evaluators only, so they stay outside Standard
+    // for the same reason.
+    internal static MathBlockRegistry Elementwise => elementwise.Value;
+
     private static MathBlockRegistry CreateStandard()
         => new(MathBlockFeatureIndex.CreateOperations());
 
     private static MathBlockRegistry CreateWindowed()
         => new(WindowMathBlocks.CreateOperations());
+
+    private static MathBlockRegistry CreateElementwise()
+        => new(ElementwiseMathBlocks.CreateOperations());
 }
