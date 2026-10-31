@@ -57,7 +57,7 @@ internal static unsafe class DeviceDispatchModule
     private static void mathblocks_window_dispatch(int opcode, MathBlockSlot** inputs, int input_count, MathBlockSlot* output) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static void mathblocks_window_run(int opcode, MathBlockSlot** inputs, int input_count, MathBlockSlot* output, int scratch_capacity) => throw new NotSupportedException();
+    private static void mathblocks_window_run(int opcode, MathBlockSlot** inputs, int input_count, MathBlockSlot* output, int thread, int threads, int scratch_capacity) => throw new NotSupportedException();
 
     [CudaDevice]
     private static MathBlockSlot** mathblocks_dispatch_inputs(
@@ -213,7 +213,8 @@ internal static unsafe class DeviceDispatchModule
         mathblocks_transport_dispatch(opcode, mathblocks_dispatch_inputs(inputs), input_count, output);
     }
 
-    // The window kernel stripes rows across the grid; scratch_capacity is the planned scratch doubles per thread.
+    // The window kernel stripes rows across the whole grid; scratch_capacity is the planned scratch doubles per
+    // thread.
     [CudaGlobal]
     private static void mathblocks_window(
         int opcode,
@@ -222,6 +223,13 @@ internal static unsafe class DeviceDispatchModule
         MathBlockSlot* output,
         int scratch_capacity)
     {
-        mathblocks_window_run(opcode, mathblocks_dispatch_inputs(inputs), input_count, output, scratch_capacity);
+        mathblocks_window_run(
+            opcode,
+            mathblocks_dispatch_inputs(inputs),
+            input_count,
+            output,
+            (int)Cuda.BlockIdx.X * (int)Cuda.BlockDim.X + (int)Cuda.ThreadIdx.X,
+            (int)Cuda.GridDim.X * (int)Cuda.BlockDim.X,
+            scratch_capacity);
     }
 }

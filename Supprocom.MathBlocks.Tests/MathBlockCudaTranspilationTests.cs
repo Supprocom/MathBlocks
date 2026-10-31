@@ -29,10 +29,10 @@ public sealed class MathBlockCudaTranspilationTests
         AssertGeneratedUnit("Scalar", 0);
         Assert.Equal(CreateExpectedSource(), MathBlockCudaDeviceModule.Source);
         Assert.Equal(
-            "0B8267CC87D3B43A22ACE8B4E30D647C9B4C64F033E291E07C0EB5B1D5567C48",
+            "17F3081CA03EDC3A780EF5AE0F6FB999D10060C2D8CD8A5BCD802918850DC217",
             MathBlockCudaDeviceModule.SourceFingerprint);
         Assert.Equal(
-            "E3B35C832A08CB957B11345B07A2B7227A6FCD0FB30E2FBA35A5C8DFF3A614A3",
+            "33C300635AF5480D442076C50ED136B10C412E1D1BC711760B2855E7B476869E",
             MathBlockCudaDeviceModule.Abi.OperationTableFingerprint);
     }
 

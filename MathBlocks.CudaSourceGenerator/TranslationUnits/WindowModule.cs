@@ -4,7 +4,8 @@ using System;
 using Supprocom.CSharp2CUDA;
 
 // Trailing-window forms. Opcode 2 * source + sibling, with source the index in the window source list. Every
-// thread checks the inputs itself and then evaluates the rows end = thread, thread + threads, ... of the grid.
+// thread checks the inputs itself and then evaluates the rows end = thread, thread + threads, ...: the window
+// kernel passes the grid-wide thread index and count, the device dispatch path the thread index in the block.
 // Row end >= width - 1 calls the source's per-thread function on rows end - width + 1 .. end of each series;
 // warm-up rows and rows whose source result is invalid hold the fill (form) or false (sibling).
 [TranspileToCUDA]
@@ -587,11 +588,11 @@ internal static unsafe class WindowModule
         return double.IsFinite(*value);
     }
 
-    // Block 0 thread 0 writes the output header; the other threads only write rows.
+    // Thread 0 writes the output header; the other threads only write rows.
     [CudaDevice]
-    private static void mathblocks_window_publish(MathBlockSlot* output, bool valid, int count)
+    private static void mathblocks_window_publish(MathBlockSlot* output, bool valid, int count, int thread)
     {
-        if (Cuda.BlockIdx.X != 0 || Cuda.ThreadIdx.X != 0)
+        if (thread != 0)
             return;
         output->scalar_value = 0.0;
         output->boolean_value = 0;
@@ -601,14 +602,17 @@ internal static unsafe class WindowModule
         output->valid = valid;
     }
 
-    // scratch_capacity is the planned scratch doubles per thread; a negative capacity (the device dispatch path)
-    // takes the run-time requirement of the width.
+    // thread is this thread's index among the threads that evaluate rows; scratch_capacity is the planned
+    // scratch doubles per thread, and a negative capacity (the device dispatch path) takes the run-time
+    // requirement of the width.
     [CudaDevice]
     private static void mathblocks_window_run(
         int opcode,
         MathBlockSlot** inputs,
         int input_count,
         MathBlockSlot* output,
+        int thread,
+        int threads,
         int scratch_capacity)
     {
         int source = opcode / 2;
@@ -621,7 +625,7 @@ internal static unsafe class WindowModule
                 valid = false;
         if (!valid)
         {
-            mathblocks_window_publish(output, false, 0);
+            mathblocks_window_publish(output, false, 0, thread);
             return;
         }
 
@@ -643,7 +647,7 @@ internal static unsafe class WindowModule
         long capacity = scratch_capacity < 0 ? required : scratch_capacity;
         if (required > capacity || (required > 0 && output->scratch_pointer == 0))
             valid = false;
-        mathblocks_window_publish(output, valid, count);
+        mathblocks_window_publish(output, valid, count, thread);
         if (!valid)
             return;
 
@@ -653,8 +657,6 @@ internal static unsafe class WindowModule
         double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
         double* result = (double*)output->data_pointer;
         CudaInt32* boolean_result = (CudaInt32*)output->data_pointer;
-        int thread = (int)Cuda.BlockIdx.X * (int)Cuda.BlockDim.X + (int)Cuda.ThreadIdx.X;
-        int threads = (int)Cuda.GridDim.X * (int)Cuda.BlockDim.X;
         double* scratch = (double*)output->scratch_pointer + thread * (int)capacity;
         for (int end = thread; end < count; end += threads)
         {
@@ -689,6 +691,13 @@ internal static unsafe class WindowModule
         int input_count,
         MathBlockSlot* output)
     {
-        mathblocks_window_run(opcode, inputs, input_count, output, -1);
+        mathblocks_window_run(
+            opcode,
+            inputs,
+            input_count,
+            output,
+            (int)Cuda.ThreadIdx.X,
+            (int)Cuda.BlockDim.X,
+            -1);
     }
 }

@@ -727,7 +727,7 @@ extern "C" __global__ void mathblocks_vector(
     int input_count,
     MathBlockSlot* output);
 
-#line 217 "DeviceDispatchModule.cs"
+#line 218 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_window(
     int opcode,
     const MathBlockSlot* const* inputs,
@@ -1006,17 +1006,17 @@ extern "C" __global__ void mathblocks_vector(
     mathblocks_vector_dispatch(opcode, csharp2cuda_temp_0, input_count, output);
 }
 
-#line 217 "DeviceDispatchModule.cs"
+#line 218 "DeviceDispatchModule.cs"
 extern "C" __global__ void mathblocks_window(
     int opcode,
     const MathBlockSlot* const* inputs,
     int input_count,
     MathBlockSlot* output,
     int scratch_capacity)
-#line 224 "DeviceDispatchModule.cs"
+#line 225 "DeviceDispatchModule.cs"
 {
-#line 225 "DeviceDispatchModule.cs"
-#line 225 "DeviceDispatchModule.cs"
+#line 226 "DeviceDispatchModule.cs"
+#line 228 "DeviceDispatchModule.cs"
     MathBlockSlot** csharp2cuda_temp_0 = mathblocks_dispatch_inputs(inputs);
-    mathblocks_window_run(opcode, csharp2cuda_temp_0, input_count, output, scratch_capacity);
+    mathblocks_window_run(opcode, csharp2cuda_temp_0, input_count, output, csharp2cuda_i32_add(csharp2cuda_i32_mul(blockIdx.x, blockDim.x), threadIdx.x), csharp2cuda_i32_mul(gridDim.x, blockDim.x), scratch_capacity);
 }
