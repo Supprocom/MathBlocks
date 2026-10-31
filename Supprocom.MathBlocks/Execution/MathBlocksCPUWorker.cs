@@ -37,7 +37,8 @@ public sealed class MathBlocksCPUWorker
         {
             if (level.Length == 1 || MaximumConcurrency == 1)
             {
-                ExecuteNode(program.Nodes[level[0]], values, level[0]);
+                foreach (var nodeIndex in level)
+                    ExecuteNode(program.Nodes[nodeIndex], values, nodeIndex);
                 continue;
             }
 
