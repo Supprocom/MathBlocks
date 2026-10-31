@@ -25,3 +25,9 @@ static Supprocom.MathBlocks.MathBlockCausalityInfo.NotSeries.get -> Supprocom.Ma
 static Supprocom.MathBlocks.MathBlockCausalityInfo.Pointwise.get -> Supprocom.MathBlocks.MathBlockCausalityInfo!
 static Supprocom.MathBlocks.MathBlockCausalityInfo.Trailing(int widthInputIndex) -> Supprocom.MathBlocks.MathBlockCausalityInfo!
 static Supprocom.MathBlocks.MathBlockCausalityInfo.WholeSeries.get -> Supprocom.MathBlocks.MathBlockCausalityInfo!
+Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary
+Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary.Path.get -> string!
+Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary.Major.get -> int
+Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary.Minor.get -> int
+override Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary.ToString() -> string!
+static Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary.Current.get -> Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary!

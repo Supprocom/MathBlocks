@@ -133,6 +133,7 @@ internal static class Program
             Console.WriteLine($"operations={cases.Length}");
             Console.WriteLine($"families={Enum.GetValues<MathBlockCudaOperationFamily>().Length}");
             Console.WriteLine($"abi={MathBlockCudaDeviceModule.AbiFingerprint}");
+            Console.WriteLine($"nvrtc={MathBlockCudaNvrtcLibrary.Current}");
             Console.WriteLine($"arena-bytes={arenaBytes}");
             // These fixed tokens are CI evidence, not localized user-facing text.
 #pragma warning disable CA1303

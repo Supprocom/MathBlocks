@@ -26,6 +26,23 @@ public sealed class MathBlockCudaWorkerTests
         Assert.NotEmpty(ptx);
     }
 
+    /// <summary>Verifies the installed NVRTC reports a supported version and the file it was loaded from.</summary>
+    [Fact]
+    [Trait("Category", "NvrtcInteropContract")]
+    public void NVRTCLibraryReportsItsVersionAndFile()
+    {
+        var library = MathBlockCudaNvrtcLibrary.Current;
+
+        Assert.True(library.Major >= 12, library.ToString());
+        Assert.True(Path.IsPathFullyQualified(library.Path), library.ToString());
+        Assert.True(File.Exists(library.Path), library.ToString());
+        Assert.StartsWith(
+            OperatingSystem.IsWindows() ? "nvrtc64_" : "libnvrtc",
+            Path.GetFileName(library.Path),
+            StringComparison.Ordinal);
+        Assert.Same(library, MathBlockCudaNvrtcLibrary.Current);
+    }
+
     /// <summary>Verifies cudacatalog contains each scalar vector boolean and complex block.</summary>
     [Fact]
     [Trait("Category", "CudaSourceContract")]
