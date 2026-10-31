@@ -82,7 +82,7 @@ public sealed partial class MathBlockIndependenceTests
                 SearchOption.TopDirectoryOnly)
             .Order(StringComparer.Ordinal)
             .ToArray();
-        Assert.Equal(12, translationSources.Length);
+        Assert.Equal(13, translationSources.Length);
         var runtimeCudaBlocks = Path.Combine(
             root,
             "Supprocom.MathBlocks",
