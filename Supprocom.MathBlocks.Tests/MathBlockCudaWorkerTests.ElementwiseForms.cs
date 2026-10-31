@@ -140,6 +140,69 @@ public sealed partial class MathBlockCudaWorkerTests
         Assert.Equal(3, invalid);
     }
 
+    /// <summary>
+    /// Verifies the scalar operations built on the Lanczos log-gamma give the CoreCLR bits on CUDA on dense grids of
+    /// non-integer arguments: log-gamma on (0, 10] in steps of 1/64 and on the reflection branch (-3, 0.5),
+    /// beta on a 40 x 40 grid of (0, 10] and pairs with one argument in (-3, 0.5), and the regularized
+    /// incomplete beta on a grid of x in (0, 1) and parameters in (0, 10].
+    /// </summary>
+    [Theory]
+    [InlineData("special.log-gamma")]
+    [InlineData("special.beta")]
+    [InlineData("special.regularized-incomplete-beta")]
+    public void CUDALogGammaOperationsMatchCoreCLRBitForBitAtNonIntegerArguments(string identifier)
+    {
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        var operation = MathBlockCatalog.Standard.Get(identifier, 1);
+        var cases = new List<MathBlockValue[]>();
+        static MathBlockValue Scalar(double value) => MathBlockValue.Scalar(value);
+        switch (operation.Arity)
+        {
+            case 1:
+                for (var index = 0; index < 640; index++)
+                    cases.Add([Scalar(index / 64d + 1d / 1024d)]);
+                for (var index = 0; index < 224; index++)
+                    cases.Add([Scalar(-3d + (index + 0.5d) / 64d)]);
+                break;
+            case 2:
+                for (var left = 0; left < 40; left++)
+                    for (var right = 0; right < 40; right++)
+                        cases.Add([Scalar((left + 0.5d) / 4d), Scalar((right + 0.3d) / 4d)]);
+                for (var index = 0; index < 224; index++)
+                    cases.Add([Scalar(-3d + (index + 0.5d) / 64d), Scalar(1.7d + index / 32d)]);
+                break;
+            default:
+                for (var x = 0; x < 10; x++)
+                    for (var left = 0; left < 15; left++)
+                        for (var right = 0; right < 15; right++)
+                            cases.Add([Scalar((x + 0.5d) / 10d), Scalar((left + 0.5d) / 1.5d), Scalar((right + 0.3d) / 1.5d)]);
+                break;
+        }
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var nodes = cases[0].Select((input, index) => builder.Input($"input-{index}", input.Type)).ToArray();
+        var program = builder.Output("result", builder.Apply(operation.Identifier, operation.Version, nodes)).Build();
+        using var compiled = new MathBlocksCUDAWorker().Compile(program, NameWindowInputs(cases[0]));
+        var failures = new List<string>();
+        var valid = 0;
+        for (var index = 0; index < cases.Count; index++)
+        {
+            var inputs = cases[index];
+            var coreclr = operation.Evaluate(inputs);
+            compiled.UploadInputs(NameWindowInputs(inputs));
+            compiled.ExecuteResident();
+            var cuda = compiled.ReadOutputs()["result"];
+            if (coreclr.IsValid)
+                valid++;
+            if (!IsExact(coreclr, cuda))
+                failures.Add($"({string.Join(", ", inputs.Select(DescribeBits))}): CoreCLR={DescribeBits(coreclr)}, CUDA={DescribeBits(cuda)}");
+        }
+
+        Assert.True(
+            failures.Count == 0,
+            $"{identifier}: {failures.Count} of {cases.Count} cases differ. First 10: {string.Join("; ", failures.Take(10))}");
+        Assert.True(valid > 600, $"{identifier}: only {valid} cases were valid.");
+    }
+
     private static IEnumerable<ElementwiseCase> CreateElementwiseCases(string source)
     {
         var form = Form(source);
