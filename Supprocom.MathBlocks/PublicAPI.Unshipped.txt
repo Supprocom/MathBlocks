@@ -78,3 +78,10 @@ const Supprocom.MathBlocks.MathBlockFusedExpression.MaximumOperationNodes = 64 -
 const Supprocom.MathBlocks.MathBlockFusedExpression.MaximumOutputs = 4 -> int
 const Supprocom.MathBlocks.MathBlockFusedExpression.MaximumVectorInputs = 16 -> int
 static Supprocom.MathBlocks.MathBlockFusedExpression.Create(Supprocom.MathBlocks.MathBlockProgram! program) -> Supprocom.MathBlocks.MathBlockFusedExpression!
+Supprocom.MathBlocks.MathBlocksWindowBatch
+Supprocom.MathBlocks.MathBlockWindowBatchResult
+Supprocom.MathBlocks.MathBlockWindowBatchResult.Validity.get -> Supprocom.MathBlocks.MathBlockValue
+Supprocom.MathBlocks.MathBlockWindowBatchResult.Values.get -> Supprocom.MathBlocks.MathBlockValue
+static Supprocom.MathBlocks.MathBlocksWindowBatch.Evaluate(Supprocom.MathBlocks.MathBlockValue series, string! formIdentity, System.Collections.Generic.IReadOnlyList<int>! widths, double fill) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
+static Supprocom.MathBlocks.MathBlocksWindowBatch.Evaluate(Supprocom.MathBlocks.MathBlockValue series, string! formIdentity, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! parameters, System.Collections.Generic.IReadOnlyList<int>! widths, double fill) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
+static Supprocom.MathBlocks.MathBlocksWindowBatch.EvaluateWithValidity(string! formIdentity, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! inputs) -> Supprocom.MathBlocks.MathBlockWindowBatchResult!
