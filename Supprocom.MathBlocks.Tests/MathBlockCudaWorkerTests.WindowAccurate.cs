@@ -76,6 +76,58 @@ public sealed partial class MathBlockCudaWorkerTests
         Assert.True(computed > 0, $"{family}: no sibling computed a row.");
     }
 
+    /// <summary>
+    /// Verifies the CUDA window batch: each width's result (widths 1, 2, 3, 17, 96 and 400) is bit-identical to the
+    /// form evaluated alone on CUDA and on CoreCLR, and the paired entry point equals the form and its sibling
+    /// evaluated alone, for every form the batch supports.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "WindowCuda")]
+    public void CUDAWindowBatchEqualsEachFormEvaluatedAlone()
+    {
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        var worker = new MathBlocksCUDAWorker();
+        var failures = new List<string>();
+        int[] widths = [1, 2, 3, 17, 96, 400];
+        var random = new Random(47);
+        var values = new double[400];
+        for (var row = 0; row < values.Length; row++)
+            values[row] = row is >= 100 and < 220 ? 7d : random.Next(5) == 0 ? -0d : random.NextDouble() * 50d;
+        var series = MathBlockValue.Vector(values);
+        var checkedResults = 0;
+        foreach (var identity in MathBlocksWindowBatchTests.Identities.Cast<object[]>().Select(row => (string)row[0]))
+        {
+            var operation = MathBlocksWindowBatchTests.Resolve(identity);
+            var sibling = Windowed.Get(MathBlocksWindowBatchTests.SiblingIdentifier(identity));
+            foreach (var parameters in MathBlocksWindowBatchTests.Parameters(identity))
+            {
+                var batch = parameters.Length == 0
+                    ? MathBlocksWindowBatch.EvaluateCUDA(worker, series, identity, widths, WindowSentinel)
+                    : MathBlocksWindowBatch.EvaluateCUDA(worker, series, identity, parameters, widths, WindowSentinel);
+                for (var index = 0; index < widths.Length; index++)
+                {
+                    MathBlockValue[] inputs = [series, .. parameters, MathBlockValue.Scalar(widths[index]), MathBlockValue.Scalar(WindowSentinel)];
+                    var coreclr = operation.Evaluate(inputs);
+                    var alone = ExecuteWindowCase(worker, operation, inputs, inputs);
+                    if (DescribeWindowDifference(coreclr, batch[index]) is { } coreclrDifference)
+                        failures.Add($"{identity} w={widths[index]} batch against CoreCLR: {coreclrDifference}");
+                    if (DescribeWindowDifference(alone, batch[index]) is { } cudaDifference)
+                        failures.Add($"{identity} w={widths[index]} batch against CUDA alone: {cudaDifference}");
+                    checkedResults++;
+                }
+                MathBlockValue[] paired = [series, .. parameters, MathBlockValue.Scalar(17d), MathBlockValue.Scalar(WindowSentinel)];
+                var result = MathBlocksWindowBatch.EvaluateWithValidityCUDA(worker, identity, paired);
+                if (DescribeWindowDifference(operation.Evaluate(paired), result.Values) is { } valuesDifference)
+                    failures.Add($"{identity} paired values: {valuesDifference}");
+                if (DescribeWindowDifference(sibling.Evaluate(paired[..^1]), result.Validity) is { } validityDifference)
+                    failures.Add($"{identity} paired validity: {validityDifference}");
+            }
+        }
+
+        Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures.Take(60)));
+        Assert.True(checkedResults >= 12 * widths.Length, $"Only {checkedResults} batch results were checked.");
+    }
+
     // The families of MathBlockWindowAccurateTests, runs of 60 equal full-significand values (and of signed zeros)
     // between varied rows, and segments outside the double-double range (tiny, large, huge, overflowing values
     // between normal ones).
