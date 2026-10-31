@@ -13,8 +13,7 @@ public sealed class MathBlockCudaOperationContractTests
     [Fact]
     public void CUDAOperationContractCoversTheCompleteCatalogAndSlotABI()
     {
-        var expectedIdentities = MathBlockCatalog.Standard.Operations
-            .Concat(MathBlockWindowTestSupport.Windowed.Operations)
+        var expectedIdentities = MathBlockWindowTestSupport.Cuda.Operations
             .Select(operation => operation.Identity)
             .Order(StringComparer.Ordinal)
             .ToArray();

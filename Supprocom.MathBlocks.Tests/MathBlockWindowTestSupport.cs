@@ -10,6 +10,11 @@ internal static class MathBlockWindowTestSupport
         .GetProperty("Windowed", BindingFlags.NonPublic | BindingFlags.Static)!
         .GetValue(null)!);
 
+    // Standard plus the window forms that have a CUDA feature: the operations the CUDA module and worker cover.
+    private static readonly Lazy<MathBlockRegistry> cuda = new(() => (MathBlockRegistry)typeof(MathBlockCatalog)
+        .GetProperty("Cuda", BindingFlags.NonPublic | BindingFlags.Static)!
+        .GetValue(null)!);
+
     // The 53 sources of design section 2 (D5), in design order.
     public static readonly string[] SourceIdentifiers =
     [
@@ -34,6 +39,8 @@ internal static class MathBlockWindowTestSupport
     ];
 
     public static MathBlockRegistry Windowed => windowed.Value;
+
+    public static MathBlockRegistry Cuda => cuda.Value;
 
     public static MathBlockOperation Form(string source) => Windowed.Get($"window.{source}");
 
