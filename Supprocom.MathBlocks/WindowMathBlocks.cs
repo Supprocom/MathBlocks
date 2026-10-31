@@ -126,16 +126,57 @@ internal static class WindowMathBlocks
             [double.NaN, double.NaN, double.NaN, 1.4142135623730951d, -0.98058067569092d, 0.392232270276368d])
     ];
 
+    private static readonly Lazy<MathBlockWindowEntry[]> entries = new(CreateEntries);
+    private static readonly Lazy<MathBlockRegistry> directReference = new(CreateDirectReference);
+
+    // Every window.* and window-valid.* operation with its form. The operations are the instances registered in
+    // MathBlockCatalog.Windowed.
+    internal static IReadOnlyList<MathBlockWindowEntry> Entries => entries.Value;
+
+    // The window.* and window-valid.* forms evaluated by the direct lift on every row, including the forms that have
+    // a kernel. It is the reference the kernels are tested against.
+    internal static MathBlockRegistry DirectReference => directReference.Value;
+
     internal static MathBlockOperation[] CreateOperations()
+    {
+        var all = Entries;
+        var result = new MathBlockOperation[all.Count * 2];
+        for (var index = 0; index < all.Count; index++)
+        {
+            result[index * 2] = all[index].FormOperation;
+            result[index * 2 + 1] = all[index].ValidityOperation;
+        }
+        return result;
+    }
+
+    private static MathBlockWindowEntry[] CreateEntries()
+    {
+        var sources = Sources;
+        var result = new MathBlockWindowEntry[sources.Length];
+        for (var index = 0; index < sources.Length; index++)
+            result[index] = CreateEntry(sources[index], direct: false);
+        return result;
+    }
+
+    private static MathBlockRegistry CreateDirectReference()
     {
         var sources = Sources;
         var result = new MathBlockOperation[sources.Length * 2];
         for (var index = 0; index < sources.Length; index++)
         {
-            result[index * 2] = CreateForm(sources[index]);
-            result[index * 2 + 1] = CreateValidity(sources[index]);
+            var entry = CreateEntry(sources[index], direct: true);
+            result[index * 2] = entry.FormOperation;
+            result[index * 2 + 1] = entry.ValidityOperation;
         }
-        return result;
+        return new MathBlockRegistry(result);
+    }
+
+    private static MathBlockWindowEntry CreateEntry(WindowSource definition, bool direct)
+    {
+        var form = CreateLift(definition);
+        if (direct)
+            form = form.WithoutKernel();
+        return new MathBlockWindowEntry(form, CreateForm(definition, form), CreateValidity(definition, form));
     }
 
     private static MathBlockWindowForm CreateLift(WindowSource definition)
@@ -145,12 +186,23 @@ internal static class WindowMathBlocks
         for (var index = 0; index < series.Length; index++)
             series[index] = definition.Sample[index].Type.Kind is
                 MathBlockValueKind.Vector or MathBlockValueKind.BooleanVector;
-        return new MathBlockWindowForm(source, definition.Lift, series);
+        return new MathBlockWindowForm(source, definition.Lift, series, CreateKernel(source.Identifier));
     }
 
-    private static MathBlockOperation CreateForm(WindowSource definition)
+    // The M2 fast paths behind M1 identities. Each kernel gives the bits of the direct lift on every row.
+    private static MathBlockWindowKernel? CreateKernel(string sourceIdentifier) => sourceIdentifier switch
     {
-        var form = CreateLift(definition);
+        "vector.minimum" => new MathBlockWindowExtremeKernel(maximum: false, position: false),
+        "vector.maximum" => new MathBlockWindowExtremeKernel(maximum: true, position: false),
+        "vector.arg-minimum" => new MathBlockWindowExtremeKernel(maximum: false, position: true),
+        "vector.arg-maximum" => new MathBlockWindowExtremeKernel(maximum: true, position: true),
+        "vector.median" => new MathBlockWindowQuantileKernel(median: true),
+        "vector.quantile" => new MathBlockWindowQuantileKernel(median: false),
+        _ => null
+    };
+
+    private static MathBlockOperation CreateForm(WindowSource definition, MathBlockWindowForm form)
+    {
         var sample = new MathBlockValue[form.FormArity];
         for (var index = 0; index < definition.Sample.Length; index++)
             sample[index] = definition.Sample[index];
@@ -174,9 +226,8 @@ internal static class WindowMathBlocks
             MathBlockCausalityInfo.Trailing(form.FormArity - 2));
     }
 
-    private static MathBlockOperation CreateValidity(WindowSource definition)
+    private static MathBlockOperation CreateValidity(WindowSource definition, MathBlockWindowForm form)
     {
-        var form = CreateLift(definition);
         var sample = new MathBlockValue[form.ValidityArity];
         for (var index = 0; index < definition.Sample.Length; index++)
             sample[index] = definition.Sample[index];

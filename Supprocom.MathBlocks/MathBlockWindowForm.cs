@@ -4,24 +4,40 @@ namespace Supprocom.MathBlocks;
 // source operation's own CoreCLR evaluation on input rows t - width + 1 .. t of every series input, with scalar
 // parameters passed through unchanged. Warm-up rows and rows where the source result is invalid hold the fill
 // value; the validity sibling marks exactly the rows that were computed.
+// A form with a kernel computes its rows with the kernel instead of evaluating the source on each window. The
+// type, length, width and fill rules stay those of the lift. For the window.* forms the kernel gives the same bits
+// as the direct lift; the window-prefix.* forms use the source only for their types.
 internal sealed class MathBlockWindowForm
 {
     private readonly MathBlockOperation source;
     private readonly MathBlockWindowLift lift;
     private readonly bool[] series;
+    private readonly MathBlockWindowKernel? kernel;
 
-    internal MathBlockWindowForm(MathBlockOperation source, MathBlockWindowLift lift, bool[] series)
+    internal MathBlockWindowForm(
+        MathBlockOperation source,
+        MathBlockWindowLift lift,
+        bool[] series,
+        MathBlockWindowKernel? kernel = null)
     {
         if (series.Length != source.Arity)
             throw new ArgumentException("The window series map must cover every source input.", nameof(series));
         this.source = source;
         this.lift = lift;
         this.series = series;
+        this.kernel = kernel;
         FormTypeResolver = ResolveFormType;
         ValidityTypeResolver = ResolveValidityType;
     }
 
     internal MathBlockOperation Source => source;
+
+    internal MathBlockWindowKernel? Kernel => kernel;
+
+    // The same form evaluated by the direct lift, kept as the reference for the kernels.
+    internal MathBlockWindowForm WithoutKernel() => new(source, lift, series);
+
+    internal int SourceArity => source.Arity;
 
     internal MathBlockTypeResolver FormTypeResolver { get; }
 
@@ -68,6 +84,10 @@ internal sealed class MathBlockWindowForm
         Run(inputs, count, width, 0d, null, valid);
         return MathBlockValue.BooleanVector(valid, true);
     }
+
+    // The unit of one window's result for the given series and parameter types.
+    internal MathBlockUnit ResolveResultUnit(IReadOnlyList<MathBlockType> sourceTypes) =>
+        ResolveSourceType(sourceTypes, out _).Unit;
 
     // The source resolver sees shapeless series types, so equal-length checks happen per evaluation and unequal
     // lengths give an invalid result rather than a type error.
@@ -157,6 +177,12 @@ internal sealed class MathBlockWindowForm
         double[]? values,
         bool[]? valid)
     {
+        if (kernel is not null)
+        {
+            kernel.Run(kernel.Prepare(inputs), inputs, count, width, fill, values, valid);
+            return;
+        }
+
         var windowInputs = new MathBlockValue[source.Arity];
         var vectors = new MathBlockVector?[source.Arity];
         var booleanVectors = new MathBlockBooleanVector?[source.Arity];
