@@ -35,6 +35,8 @@ internal static class MathBlocksCudaKernelModule
                 state.Value.AdvancedFunction, feature.Opcode, AdvancedCudaBlockCatalog.BlockSize),
             MathBlockCudaFamily.Transport => new KernelBinding(
                 state.Value.TransportFunction, feature.Opcode, TransportCudaBlockCatalog.BlockSize),
+            MathBlockCudaFamily.Window => new KernelBinding(
+                state.Value.WindowFunction, feature.Opcode, WindowCudaBlockCatalog.BlockSize, RowStriped: true),
             _ => throw new InvalidOperationException($"CUDA family '{feature.Family}' is not supported.")
         };
     }
@@ -112,6 +114,12 @@ internal static class MathBlocksCudaKernelModule
                 module,
                 TransportCudaBlockCatalog.KernelEntryPoint),
             "cuModuleGetFunction(mathblocks_transport)");
+        MathBlocksCudaNative.ThrowIfFailed(
+            MathBlocksCudaNative.cuModuleGetFunction(
+                out var windowFunction,
+                module,
+                WindowCudaBlockCatalog.KernelEntryPoint),
+            "cuModuleGetFunction(mathblocks_window)");
         return new ModuleState(
             module,
             scalarFunction,
@@ -124,11 +132,14 @@ internal static class MathBlocksCudaKernelModule
             geometryFunction,
             graphFunction,
             advancedFunction,
-            transportFunction);
+            transportFunction,
+            windowFunction);
     }
 
+    // A row-striped kernel (the window family) takes its grid from the plan and a fifth argument, the scratch
+    // doubles per thread; every other kernel runs one block with four arguments.
     [StructLayout(LayoutKind.Sequential)]
-    public readonly record struct KernelBinding(IntPtr Function, int Opcode, uint BlockX);
+    public readonly record struct KernelBinding(IntPtr Function, int Opcode, uint BlockX, bool RowStriped = false);
     private sealed record ModuleState(
         IntPtr Module,
         IntPtr ScalarFunction,
@@ -141,5 +152,6 @@ internal static class MathBlocksCudaKernelModule
         IntPtr GeometryFunction,
         IntPtr GraphFunction,
         IntPtr AdvancedFunction,
-        IntPtr TransportFunction);
+        IntPtr TransportFunction,
+        IntPtr WindowFunction);
 }

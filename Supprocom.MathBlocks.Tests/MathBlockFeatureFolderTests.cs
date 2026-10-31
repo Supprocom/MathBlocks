@@ -43,7 +43,9 @@ public sealed class MathBlockFeatureFolderTests
         }
 
         Assert.Equal(
-            registered.Order(StringComparer.Ordinal),
+            registered
+                .Concat(MathBlockWindowTestSupport.Windowed.Operations.Select(operation => operation.Identity))
+                .Order(StringComparer.Ordinal),
             MathBlocksCUDAWorker.SupportedBlockIdentities.Order(StringComparer.Ordinal));
     }
 

@@ -69,6 +69,8 @@
           CopyToOutputDirectory="PreserveNewest" />
     <None Include="Golden\TransportCudaBlockCatalog.cu"
           CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Golden\WindowCudaBlockCatalog.cu"
+          CopyToOutputDirectory="PreserveNewest" />
     <None Include="Golden\DeviceDispatchCudaBlockCatalog.cu"
           CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

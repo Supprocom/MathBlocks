@@ -262,6 +262,34 @@ internal static unsafe class ProbabilityModule
             mathblocks_complex_phase(value) / 3.0);
     }
 
+    // Renyi (renyi) or Tsallis entropy of a distribution. Returns false for a nonpositive order; the caller checks
+    // that the value is finite.
+    [CudaDevice]
+    private static bool mathblocks_probability_ordered_entropy_value(
+        [CudaReadOnly] double* values,
+        int count,
+        double order,
+        bool renyi,
+        double* value)
+    {
+        if (order <= 0.0)
+            return false;
+        if (order == 1.0)
+        {
+            *value = mathblocks_probability_entropy(values, count);
+        }
+        else
+        {
+            double sum = 0.0;
+            for (int index = 0; index < count; index++)
+                sum += mathblocks_power(values[index], order);
+            *value = renyi
+                ? mathblocks_natural_logarithm(sum) / (1.0 - order)
+                : (1.0 - sum) / (order - 1.0);
+        }
+        return true;
+    }
+
     [CudaDevice(Name = "mathblocks_probability_dispatch")]
     private static void mathblocks_probability(
         int opcode,
@@ -549,24 +577,15 @@ internal static unsafe class ProbabilityModule
             }
             else if (opcode == 13 || opcode == 16)
             {
-                double order = second->scalar_value;
-                if (order <= 0.0)
+                if (!mathblocks_probability_ordered_entropy_value(
+                        a,
+                        first->count,
+                        second->scalar_value,
+                        opcode == 13,
+                        &value))
                 {
                     output->valid = 0;
                     return;
-                }
-                if (order == 1.0)
-                {
-                    value = mathblocks_probability_entropy(a, first->count);
-                }
-                else
-                {
-                    double sum = 0.0;
-                    for (int index = 0; index < first->count; index++)
-                        sum += mathblocks_power(a[index], order);
-                    value = opcode == 13
-                        ? mathblocks_natural_logarithm(sum) / (1.0 - order)
-                        : (1.0 - sum) / (order - 1.0);
                 }
             }
             else if (opcode == 14)

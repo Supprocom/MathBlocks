@@ -63,7 +63,7 @@ public static class MathBlockCudaDeviceModule
     {
         var source = CreateSource();
         var sourceFingerprint = MathBlockCudaContractHash.Create(source);
-        var registryOperations = MathBlockCatalog.Standard.Operations;
+        var registryOperations = MathBlockCatalog.Cuda.Operations;
         var contracts = new MathBlockCudaOperationContract[registryOperations.Count];
         var contractsByIdentity = new Dictionary<string, MathBlockCudaOperationContract>(
             registryOperations.Count,
@@ -159,6 +159,7 @@ public static class MathBlockCudaDeviceModule
         MathBlockCudaFamily.Graph => 128,
         MathBlockCudaFamily.Advanced => 128,
         MathBlockCudaFamily.Transport => 128,
+        MathBlockCudaFamily.Window => 128,
         _ => throw new InvalidOperationException($"CUDA family '{family}' is not supported.")
     };
 

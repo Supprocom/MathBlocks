@@ -57,3 +57,4 @@ static Supprocom.MathBlocks.MathBlockCausalityInfo.NotSeries.get -> Supprocom.Ma
 static Supprocom.MathBlocks.MathBlockCausalityInfo.Pointwise.get -> Supprocom.MathBlocks.MathBlockCausalityInfo!
 static Supprocom.MathBlocks.MathBlockCausalityInfo.Trailing(int widthInputIndex) -> Supprocom.MathBlocks.MathBlockCausalityInfo!
 static Supprocom.MathBlocks.MathBlockCausalityInfo.WholeSeries.get -> Supprocom.MathBlocks.MathBlockCausalityInfo!
+Supprocom.MathBlocks.Cuda.MathBlockCudaOperationFamily.Window = 11 -> Supprocom.MathBlocks.Cuda.MathBlockCudaOperationFamily

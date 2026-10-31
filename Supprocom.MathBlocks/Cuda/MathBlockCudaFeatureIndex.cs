@@ -341,6 +341,7 @@ internal static class MathBlockCudaFeatureIndex
         VectorSubtractV1BlockCuda.Identity,
         VectorSumV1BlockCuda.Identity,
         VectorUniqueV1BlockCuda.Identity,
+        .. WindowCudaBlockCatalog.Identities,
     ];
 
     internal static MathBlockCudaFeature Resolve(string identity) => identity switch
@@ -682,6 +683,6 @@ internal static class MathBlockCudaFeatureIndex
         VectorSubtractV1BlockCuda.Identity => VectorSubtractV1BlockCuda.Feature,
         VectorSumV1BlockCuda.Identity => VectorSumV1BlockCuda.Feature,
         VectorUniqueV1BlockCuda.Identity => VectorUniqueV1BlockCuda.Feature,
-        _ => throw new NotSupportedException($"MathBlock '{identity}' has no CUDA implementation.")
+        _ => WindowCudaBlockCatalog.Resolve(identity)
     };
 }

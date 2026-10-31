@@ -132,6 +132,26 @@ internal static unsafe class VectorModule
         }
     }
 
+    // Stable insertion sort of count values into sorted.
+    [CudaDevice]
+    private static void mathblocks_sort_copy_values(
+        [CudaReadOnly] double* source,
+        int count,
+        double* sorted)
+    {
+        for (int index = 0; index < count; index++)
+        {
+            double value = source[index];
+            int position = index;
+            while (position > 0 && sorted[position - 1] > value)
+            {
+                sorted[position] = sorted[position - 1];
+                position--;
+            }
+            sorted[position] = value;
+        }
+    }
+
     [CudaDevice]
     private static void mathblocks_copy_and_sort(
         [CudaReadOnly] MathBlockSlot* input,
@@ -141,17 +161,25 @@ internal static unsafe class VectorModule
             ? output->data_pointer
             : output->scratch_pointer);
         double* source = Cuda.ReadOnly((double*)input->data_pointer);
-        for (int index = 0; index < input->count; index++)
-        {
-            double value = source[index];
-            int position = index;
-            while (position > 0 && scratch[position - 1] > value)
-            {
-                scratch[position] = scratch[position - 1];
-                position--;
-            }
-            scratch[position] = value;
-        }
+        mathblocks_sort_copy_values(source, input->count, scratch);
+    }
+
+    // Sorts count values into sorted and interpolates the quantile at probability.
+    [CudaDevice]
+    private static double mathblocks_quantile_values(
+        [CudaReadOnly] double* values,
+        int count,
+        double* sorted,
+        double probability)
+    {
+        mathblocks_sort_copy_values(values, count, sorted);
+        if (count == 1)
+            return sorted[0];
+        double position = probability * (count - 1);
+        int lower = (int)Math.Floor(position);
+        int upper = (int)Math.Ceiling(position);
+        double weight = position - lower;
+        return sorted[lower] * (1.0 - weight) + sorted[upper] * weight;
     }
 
     [CudaDevice]
@@ -160,17 +188,86 @@ internal static unsafe class VectorModule
         MathBlockSlot* output,
         double probability)
     {
-        mathblocks_copy_and_sort(input, output);
         double* scratch = (double*)(output->data_pointer != 0
             ? output->data_pointer
             : output->scratch_pointer);
-        if (input->count == 1)
-            return scratch[0];
-        double position = probability * (input->count - 1);
-        int lower = (int)Math.Floor(position);
-        int upper = (int)Math.Ceiling(position);
-        double weight = position - lower;
-        return scratch[lower] * (1.0 - weight) + scratch[upper] * weight;
+        double* source = Cuda.ReadOnly((double*)input->data_pointer);
+        return mathblocks_quantile_values(source, input->count, scratch, probability);
+    }
+
+    [CudaDevice]
+    private static bool mathblocks_vector_geometric_mean_value(
+        [CudaReadOnly] double* values,
+        int count,
+        double* logarithms,
+        double* value)
+    {
+        if (count <= 0)
+            return false;
+        bool finite = true;
+        for (int index = 0; index < count; index++)
+        {
+            logarithms[index] = mathblocks_natural_logarithm(values[index]);
+            if (!double.IsFinite(logarithms[index]))
+                finite = false;
+        }
+        if (!finite)
+            return false;
+        *value = mathblocks_exponential(mathblocks_compensated_sum(logarithms, count) / count);
+        return double.IsFinite(*value);
+    }
+
+    // The first position of the largest (maximum) or smallest value.
+    [CudaDevice]
+    private static bool mathblocks_vector_arg_extreme_value(
+        [CudaReadOnly] double* values,
+        int count,
+        bool maximum,
+        double* value)
+    {
+        if (count <= 0)
+            return false;
+        int selected = 0;
+        for (int index = 1; index < count; index++)
+            if (maximum ? values[index] > values[selected] : values[index] < values[selected]) selected = index;
+        *value = (double)selected;
+        return true;
+    }
+
+    // The average rank of values[position]: smaller values, plus the mean position among equal values.
+    [CudaDevice]
+    private static double mathblocks_vector_rank_at(
+        [CudaReadOnly] double* values,
+        int count,
+        int position)
+    {
+        int less = 0;
+        int equal = 0;
+        for (int other = 0; other < count; other++)
+        {
+            if (values[other] < values[position]) less++;
+            else if (values[other] == values[position]) equal++;
+        }
+        return less + (equal + 1.0) / 2.0;
+    }
+
+    [CudaDevice]
+    private static void mathblocks_vector_standardize_moments(
+        [CudaReadOnly] double* values,
+        int count,
+        double* mean,
+        double* deviation)
+    {
+        double average = mathblocks_compensated_sum(values, count) / count;
+        double variance = 0.0;
+        for (int index = 0; index < count; index++)
+        {
+            double difference = values[index] - average;
+            variance += difference * difference;
+        }
+        variance /= count;
+        *mean = average;
+        *deviation = mathblocks_square_root(variance);
     }
 
     [CudaDevice(Name = "mathblocks_vector_dispatch")]
@@ -258,18 +355,9 @@ internal static unsafe class VectorModule
                 break;
             case 4:
             case 5:
-                if (thread == 0)
-                {
-                    if (first->count <= 0)
-                    {
-                        output->valid = 0;
-                        break;
-                    }
-                    int selected = 0;
-                    for (int index = 1; index < first->count; index++)
-                        if (opcode == 4 ? a[index] > a[selected] : a[index] < a[selected]) selected = index;
-                    output->scalar_value = (double)selected;
-                }
+                if (thread == 0 &&
+                    !mathblocks_vector_arg_extreme_value(a, first->count, opcode == 4, &output->scalar_value))
+                    output->valid = 0;
                 break;
             case 6:
                 if (thread == 0) mathblocks_set_vector_shape(output, first->count + second->count);
@@ -357,25 +445,10 @@ internal static unsafe class VectorModule
                 }
                 break;
             case 14:
-                if (thread == 0)
-                {
-                    if (first->count <= 0 || output->scratch_pointer == 0)
-                    {
-                        output->valid = 0;
-                        break;
-                    }
-                    for (int index = 0; index < first->count; index++)
-                    {
-                        result[index] = mathblocks_natural_logarithm(a[index]);
-                        if (!double.IsFinite(result[index])) output->valid = 0;
-                    }
-                    if (output->valid)
-                    {
-                        output->scalar_value = mathblocks_exponential(
-                            mathblocks_compensated_sum(result, first->count) / first->count);
-                        if (!double.IsFinite(output->scalar_value)) output->valid = 0;
-                    }
-                }
+                if (thread == 0 &&
+                    (output->scratch_pointer == 0 ||
+                     !mathblocks_vector_geometric_mean_value(a, first->count, result, &output->scalar_value)))
+                    output->valid = 0;
                 break;
             case 16:
                 if (thread == 0)
@@ -532,16 +605,7 @@ internal static unsafe class VectorModule
                 if (thread == 0) mathblocks_set_vector_shape(output, first->count);
                 Cuda.SyncThreads();
                 for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
-                {
-                    int less = 0;
-                    int equal = 0;
-                    for (int other = 0; other < first->count; other++)
-                    {
-                        if (a[other] < a[index]) less++;
-                        else if (a[other] == a[index]) equal++;
-                    }
-                    result[index] = less + (equal + 1.0) / 2.0;
-                }
+                    result[index] = mathblocks_vector_rank_at(a, first->count, index);
                 break;
             case 37:
                 if (thread == 0)
@@ -617,15 +681,9 @@ internal static unsafe class VectorModule
                         output->valid = 0;
                         break;
                     }
-                    double mean = mathblocks_compensated_sum(a, first->count) / first->count;
-                    double variance = 0.0;
-                    for (int index = 0; index < first->count; index++)
-                    {
-                        double difference = a[index] - mean;
-                        variance += difference * difference;
-                    }
-                    variance /= first->count;
-                    double deviation = mathblocks_square_root(variance);
+                    double mean = 0.0;
+                    double deviation = 0.0;
+                    mathblocks_vector_standardize_moments(a, first->count, &mean, &deviation);
                     for (int index = 0; index < first->count; index++)
                     {
                         result[index] = (a[index] - mean) / deviation;

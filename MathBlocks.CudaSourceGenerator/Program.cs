@@ -18,7 +18,8 @@ internal static class Program
         new("Geometry", "GeometryModule.cs"),
         new("Graph", "GraphModule.cs"),
         new("Advanced", "AdvancedModule.cs"),
-        new("Transport", "TransportModule.cs")
+        new("Transport", "TransportModule.cs"),
+        new("Window", "WindowModule.cs")
     ];
 
     private static int Main(string[] args)
@@ -49,7 +50,7 @@ internal static class Program
         var fullBytes = Encoding.UTF8.GetBytes(fullSource);
         var fullHash = Convert.ToHexString(SHA256.HashData(fullBytes));
         const string expectedFullHash =
-            "6A6E8A49FD4DAD50A7B9007069A0D81A5957D7D6EE2C14FFB8DAE27BF18DCF84";
+            "17F3081CA03EDC3A780EF5AE0F6FB999D10060C2D8CD8A5BCD802918850DC217";
         if (!string.Equals(fullHash, expectedFullHash, StringComparison.Ordinal))
             throw new InvalidOperationException(
                 $"Full CUDA source hash mismatch. Expected {expectedFullHash}, actual {fullHash}.");
