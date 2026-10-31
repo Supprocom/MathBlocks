@@ -381,8 +381,8 @@ public sealed class MathBlockOpenMathRobustnessTests
         Assert.All(imports, result =>
         {
             Assert.Equal(program.Fingerprint, result.Program.Fingerprint);
-            Assert.Equal(337, result.Operations.Count);
-            Assert.Equal(337, result.OperationOccurrences.Count);
+            Assert.Equal(MathBlockCatalog.Standard.Operations.Count, result.Operations.Count);
+            Assert.Equal(MathBlockCatalog.Standard.Operations.Count, result.OperationOccurrences.Count);
             Assert.Equal(
                 MathBlockCatalog.Standard.Operations.Select(operation => operation.Identity),
                 result.Operations.Select(operation => operation.Identity), StringComparer.Ordinal);

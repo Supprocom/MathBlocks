@@ -1,5 +1,37 @@
 #nullable enable
+Supprocom.MathBlocks.MathBlockFormulaImportResult.Profile.get -> Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor!
 Supprocom.MathBlocks.MathBlockFormulaMappingKind.None = 0 -> Supprocom.MathBlocks.MathBlockFormulaMappingKind
+Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor.Contains(Supprocom.MathBlocks.MathBlockOperation? operation) -> bool
+Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor.ExactAnnotationMediaType.get -> string!
+Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor.OpenMathProfile.get -> Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor!
+Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor.TryGetOperation(Supprocom.MathBlocks.MathBlockFormulaSymbol symbol, out Supprocom.MathBlocks.MathBlockOperation? operation) -> bool
+Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor.TryGetOperationMapping(Supprocom.MathBlocks.MathBlockOperation? operation, out Supprocom.MathBlocks.MathBlockFormulaOperationMapping? mapping) -> bool
+Supprocom.MathBlocks.MathBlockOpenMathImportResult.Profile.get -> Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor!
+Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor.Contains(Supprocom.MathBlocks.MathBlockOperation? operation) -> bool
+Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor.TryGetOperation(Supprocom.MathBlocks.MathBlockOpenMathOperationSymbol symbol, out Supprocom.MathBlocks.MathBlockOperation? operation) -> bool
+Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor.TryGetOperationSymbol(Supprocom.MathBlocks.MathBlockOperation? operation, out Supprocom.MathBlocks.MathBlockOpenMathOperationSymbol symbol) -> bool
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.Export(Supprocom.MathBlocks.MathBlockProgram! program, string! outputName, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor! profile) -> string!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.ExportUtf8(Supprocom.MathBlocks.MathBlockProgram! program, string! outputName, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor! profile) -> byte[]!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.GetUtf8ByteCount(Supprocom.MathBlocks.MathBlockProgram! program, string! outputName, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor! profile) -> int
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.Profile2.get -> Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.Profiles.get -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor!>!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.SelectProfile(Supprocom.MathBlocks.MathBlockProgram! program, string! outputName) -> Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.TryWriteUtf8(Supprocom.MathBlocks.MathBlockProgram! program, string! outputName, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor! profile, System.Span<byte> destination, out int bytesWritten) -> bool
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.ValidateProgram(Supprocom.MathBlocks.MathBlockProgram? program, string? outputName, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor! profile) -> Supprocom.MathBlocks.MathBlockFormulaValidationResult!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.Write(Supprocom.MathBlocks.MathBlockProgram! program, string! outputName, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor! profile, System.IO.TextWriter! destination) -> void
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.WriteUtf8(Supprocom.MathBlocks.MathBlockProgram! program, string! outputName, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor! profile, System.Buffers.IBufferWriter<byte>! destination) -> void
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.WriteUtf8(Supprocom.MathBlocks.MathBlockProgram! program, string! outputName, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaProfileDescriptor! profile, System.IO.Stream! destination) -> void
+static Supprocom.MathBlocks.MathBlockOpenMath.Export(Supprocom.MathBlocks.MathBlockProgram! program, Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor! profile) -> string!
+static Supprocom.MathBlocks.MathBlockOpenMath.ExportUtf8(Supprocom.MathBlocks.MathBlockProgram! program, Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor! profile) -> byte[]!
+static Supprocom.MathBlocks.MathBlockOpenMath.GetUtf8ByteCount(Supprocom.MathBlocks.MathBlockProgram! program, Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor! profile) -> int
+static Supprocom.MathBlocks.MathBlockOpenMath.Profile2.get -> Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor!
+static Supprocom.MathBlocks.MathBlockOpenMath.Profiles.get -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor!>!
+static Supprocom.MathBlocks.MathBlockOpenMath.SelectProfile(Supprocom.MathBlocks.MathBlockProgram! program) -> Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor!
+static Supprocom.MathBlocks.MathBlockOpenMath.TryWriteUtf8(Supprocom.MathBlocks.MathBlockProgram! program, Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor! profile, System.Span<byte> destination, out int bytesWritten) -> bool
+static Supprocom.MathBlocks.MathBlockOpenMath.ValidateProgram(Supprocom.MathBlocks.MathBlockProgram? program, Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor! profile) -> Supprocom.MathBlocks.MathBlockOpenMathProgramValidationResult!
+static Supprocom.MathBlocks.MathBlockOpenMath.Write(Supprocom.MathBlocks.MathBlockProgram! program, Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor! profile, System.IO.TextWriter! destination) -> void
+static Supprocom.MathBlocks.MathBlockOpenMath.WriteUtf8(Supprocom.MathBlocks.MathBlockProgram! program, Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor! profile, System.Buffers.IBufferWriter<byte>! destination) -> void
+static Supprocom.MathBlocks.MathBlockOpenMath.WriteUtf8(Supprocom.MathBlocks.MathBlockProgram! program, Supprocom.MathBlocks.MathBlockOpenMathProfileDescriptor! profile, System.IO.Stream! destination) -> void
 static Supprocom.MathBlocks.MathRational.Add(Supprocom.MathBlocks.MathRational left, Supprocom.MathBlocks.MathRational right) -> Supprocom.MathBlocks.MathRational
 static Supprocom.MathBlocks.MathRational.Multiply(Supprocom.MathBlocks.MathRational left, Supprocom.MathBlocks.MathRational right) -> Supprocom.MathBlocks.MathRational
 static Supprocom.MathBlocks.MathRational.Subtract(Supprocom.MathBlocks.MathRational left, Supprocom.MathBlocks.MathRational right) -> Supprocom.MathBlocks.MathRational

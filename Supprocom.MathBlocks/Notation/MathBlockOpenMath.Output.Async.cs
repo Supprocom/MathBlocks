@@ -18,12 +18,12 @@ public static partial class MathBlockOpenMath
             throw new ArgumentException("The destination stream is not writable.", nameof(destination));
 
         cancellationToken.ThrowIfCancellationRequested();
-        await ValidateOutputAsync(program, cancellationToken).ConfigureAwait(false);
-        var output = new CancellationWriteStream(destination, cancellationToken);
-        await using var configuredOutput = output.ConfigureAwait(false);
-        using var writer = XmlWriter.Create(output, CreateWriterSettings(StrictUtf8, true));
-        await WriteDocumentAsync(writer, program, cancellationToken).ConfigureAwait(false);
-        await writer.FlushAsync().ConfigureAwait(false);
+        await WriteUtf8CoreAsync(
+                program,
+                SelectProfile(program, PublishedProfiles),
+                destination,
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>Writes canonical characters asynchronously to a caller-owned text writer.</summary>
@@ -36,40 +36,70 @@ public static partial class MathBlockOpenMath
         ArgumentNullException.ThrowIfNull(destination);
 
         cancellationToken.ThrowIfCancellationRequested();
-        await ValidateOutputAsync(program, cancellationToken).ConfigureAwait(false);
+        await WriteCoreAsync(
+                program,
+                SelectProfile(program, PublishedProfiles),
+                destination,
+                cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private static async Task WriteUtf8CoreAsync(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile,
+        Stream destination,
+        CancellationToken cancellationToken)
+    {
+        await ValidateOutputAsync(program, profile, cancellationToken).ConfigureAwait(false);
+        var output = new CancellationWriteStream(destination, cancellationToken);
+        await using var configuredOutput = output.ConfigureAwait(false);
+        using var writer = XmlWriter.Create(output, CreateWriterSettings(StrictUtf8, true));
+        await WriteDocumentAsync(writer, program, profile, cancellationToken).ConfigureAwait(false);
+        await writer.FlushAsync().ConfigureAwait(false);
+    }
+
+    private static async Task WriteCoreAsync(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile,
+        TextWriter destination,
+        CancellationToken cancellationToken)
+    {
+        await ValidateOutputAsync(program, profile, cancellationToken).ConfigureAwait(false);
         var output = new CancellationTextWriter(destination, cancellationToken);
         await using var configuredOutput = output.ConfigureAwait(false);
         using var writer = XmlWriter.Create(output, CreateWriterSettings(async: true));
-        await WriteDocumentAsync(writer, program, cancellationToken).ConfigureAwait(false);
+        await WriteDocumentAsync(writer, program, profile, cancellationToken).ConfigureAwait(false);
         await writer.FlushAsync().ConfigureAwait(false);
     }
 
     private static async Task ValidateOutputAsync(
         MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile,
         CancellationToken cancellationToken)
     {
         using var stream = new CountingWriteStream();
         using var writer = XmlWriter.Create(stream, CreateWriterSettings(StrictUtf8, true));
-        await WriteDocumentAsync(writer, program, cancellationToken).ConfigureAwait(false);
+        await WriteDocumentAsync(writer, program, profile, cancellationToken).ConfigureAwait(false);
         await writer.FlushAsync().ConfigureAwait(false);
     }
 
     private static async Task WriteDocumentAsync(
         XmlWriter writer,
         MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         await writer.WriteStartElementAsync(null, "OMOBJ", NamespaceUri).ConfigureAwait(false);
         await writer.WriteAttributeStringAsync(null, "xmlns", null, NamespaceUri).ConfigureAwait(false);
-        await writer.WriteAttributeStringAsync(null, "cdbase", null, ContentDictionaryBase).ConfigureAwait(false);
-        await writer.WriteAttributeStringAsync(null, "cdgroup", null, ContentDictionaryGroup).ConfigureAwait(false);
+        await writer.WriteAttributeStringAsync(null, "cdbase", null, profile.ContentDictionaryBase).ConfigureAwait(false);
+        await writer.WriteAttributeStringAsync(null, "cdgroup", null, profile.ContentDictionaryGroup).ConfigureAwait(false);
         await writer.WriteAttributeStringAsync(null, "version", null, StandardVersion).ConfigureAwait(false);
 
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-        await WriteSymbolAsync(writer, ProgramDictionary, "program").ConfigureAwait(false);
-        await WriteNodesAsync(writer, program, cancellationToken).ConfigureAwait(false);
-        await WriteOutputsAsync(writer, program, cancellationToken).ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.ProgramDictionary, "program").ConfigureAwait(false);
+        await WriteNodesAsync(writer, program, profile, cancellationToken).ConfigureAwait(false);
+        await WriteOutputsAsync(writer, program, profile, cancellationToken).ConfigureAwait(false);
         await writer.WriteEndElementAsync().ConfigureAwait(false);
         await writer.WriteEndElementAsync().ConfigureAwait(false);
     }
@@ -77,10 +107,11 @@ public static partial class MathBlockOpenMath
     private static async Task WriteNodesAsync(
         XmlWriter writer,
         MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile,
         CancellationToken cancellationToken)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-        await WriteSymbolAsync(writer, ProgramDictionary, "nodes").ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.ProgramDictionary, "nodes").ConfigureAwait(false);
         for (var index = 0; index < program.PlanNodes.Count; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -98,38 +129,30 @@ public static partial class MathBlockOpenMath
             switch (node.Kind)
             {
                 case MathBlockProgramNodeKind.Input:
-                    await WriteSymbolAsync(writer, ProgramDictionary, "input").ConfigureAwait(false);
+                    await WriteSymbolAsync(writer, profile.ProgramDictionary, "input").ConfigureAwait(false);
                     await WriteStringAsync(
                             writer,
                             RequireExportName(node.Name, "input"))
                         .ConfigureAwait(false);
-                    await WriteTypeAsync(writer, node.Type, cancellationToken).ConfigureAwait(false);
+                    await WriteTypeAsync(writer, profile, node.Type, cancellationToken).ConfigureAwait(false);
                     break;
                 case MathBlockProgramNodeKind.Constant:
-                    await WriteSymbolAsync(writer, ProgramDictionary, "constant").ConfigureAwait(false);
-                    await WriteTypeAsync(writer, node.Type, cancellationToken).ConfigureAwait(false);
-                    await WriteValueAsync(writer, node.Value, cancellationToken).ConfigureAwait(false);
+                    await WriteSymbolAsync(writer, profile.ProgramDictionary, "constant").ConfigureAwait(false);
+                    await WriteTypeAsync(writer, profile, node.Type, cancellationToken).ConfigureAwait(false);
+                    await WriteValueAsync(writer, profile, node.Value, cancellationToken).ConfigureAwait(false);
                     break;
                 case MathBlockProgramNodeKind.Operation:
-                    if (node.OperationIdentity is null)
+                    if (node.OperationIdentity is null ||
+                        !profile.TryGetOperationSymbol(
+                            program.Nodes[index].Operation,
+                            out var operationSymbol))
                     {
-                        throw new InvalidOperationException(
-                            "The program contains an operation outside the standard OpenMath profile.");
-                    }
-
-                    var operationSymbol = OperationSymbolName(node.OperationIdentity);
-                    if (!StandardProfile.Value.OperationSymbols.TryGetValue(
-                            operationSymbol,
-                            out var standardOperation) ||
-                        !ReferenceEquals(program.Nodes[index].Operation, standardOperation))
-                    {
-                        throw new InvalidOperationException(
-                            "The program contains an operation outside the standard OpenMath profile.");
+                        throw OutsideProfile(program, profile, false);
                     }
                     await WriteSymbolAsync(
                             writer,
-                            OperationDictionary,
-                            operationSymbol)
+                            operationSymbol.Dictionary,
+                            operationSymbol.Name)
                         .ConfigureAwait(false);
                     for (var inputIndex = 0; inputIndex < node.Inputs.Count; inputIndex++)
                     {
@@ -154,10 +177,11 @@ public static partial class MathBlockOpenMath
     private static async Task WriteOutputsAsync(
         XmlWriter writer,
         MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile,
         CancellationToken cancellationToken)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-        await WriteSymbolAsync(writer, ProgramDictionary, "outputs").ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.ProgramDictionary, "outputs").ConfigureAwait(false);
         for (var index = 0; index < program.OutputCount; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -166,7 +190,7 @@ public static partial class MathBlockOpenMath
                 throw new InvalidOperationException("A program output has an invalid node.");
 
             await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-            await WriteSymbolAsync(writer, ProgramDictionary, "output").ConfigureAwait(false);
+            await WriteSymbolAsync(writer, profile.ProgramDictionary, "output").ConfigureAwait(false);
             await WriteStringAsync(
                     writer,
                     RequireExportName(program.GetOutputName(index), "output"))
@@ -179,15 +203,16 @@ public static partial class MathBlockOpenMath
 
     private static async Task WriteTypeAsync(
         XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
         MathBlockType type,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         RequireSupportedType(type, false);
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-        await WriteSymbolAsync(writer, TypeDictionary, "type").ConfigureAwait(false);
-        await WriteSymbolAsync(writer, TypeDictionary, KindName(type.Kind)).ConfigureAwait(false);
-        await WriteUnitAsync(writer, type.Unit, cancellationToken).ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.TypeDictionary, "type").ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.TypeDictionary, KindName(type.Kind)).ConfigureAwait(false);
+        await WriteUnitAsync(writer, profile, type.Unit, cancellationToken).ConfigureAwait(false);
         await WriteIntegerAsync(writer, type.Rows).ConfigureAwait(false);
         await WriteIntegerAsync(writer, type.Columns).ConfigureAwait(false);
         await writer.WriteEndElementAsync().ConfigureAwait(false);
@@ -195,23 +220,27 @@ public static partial class MathBlockOpenMath
 
     private static async Task WriteUnitAsync(
         XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
         MathBlockUnit unit,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-        await WriteSymbolAsync(writer, TypeDictionary, "unit").ConfigureAwait(false);
-        await WriteRationalAsync(writer, unit.Dimension0).ConfigureAwait(false);
-        await WriteRationalAsync(writer, unit.Dimension1).ConfigureAwait(false);
-        await WriteRationalAsync(writer, unit.Dimension2).ConfigureAwait(false);
-        await WriteRationalAsync(writer, unit.Dimension3).ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.TypeDictionary, "unit").ConfigureAwait(false);
+        await WriteRationalAsync(writer, profile, unit.Dimension0).ConfigureAwait(false);
+        await WriteRationalAsync(writer, profile, unit.Dimension1).ConfigureAwait(false);
+        await WriteRationalAsync(writer, profile, unit.Dimension2).ConfigureAwait(false);
+        await WriteRationalAsync(writer, profile, unit.Dimension3).ConfigureAwait(false);
         await writer.WriteEndElementAsync().ConfigureAwait(false);
     }
 
-    private static async Task WriteRationalAsync(XmlWriter writer, MathRational value)
+    private static async Task WriteRationalAsync(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        MathRational value)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-        await WriteSymbolAsync(writer, TypeDictionary, "rational").ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.TypeDictionary, "rational").ConfigureAwait(false);
         await WriteIntegerAsync(writer, value.Numerator).ConfigureAwait(false);
         await WriteIntegerAsync(writer, value.Denominator).ConfigureAwait(false);
         await writer.WriteEndElementAsync().ConfigureAwait(false);
@@ -219,6 +248,7 @@ public static partial class MathBlockOpenMath
 
     private static async Task WriteValueAsync(
         XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
         MathBlockValue value,
         CancellationToken cancellationToken)
     {
@@ -232,20 +262,21 @@ public static partial class MathBlockOpenMath
                 await WriteDoubleAsync(writer, value.AsScalar()).ConfigureAwait(false);
                 break;
             case MathBlockValueKind.Boolean:
-                await WriteBooleanAsync(writer, value.AsBoolean()).ConfigureAwait(false);
+                await WriteBooleanAsync(writer, profile, value.AsBoolean()).ConfigureAwait(false);
                 break;
             case MathBlockValueKind.Complex:
-                await WriteComplexAsync(writer, value.AsComplex()).ConfigureAwait(false);
+                await WriteComplexAsync(writer, profile, value.AsComplex()).ConfigureAwait(false);
                 break;
             case MathBlockValueKind.Vector:
-                await WriteVectorAsync(writer, value.AsVector(), cancellationToken).ConfigureAwait(false);
+                await WriteVectorAsync(writer, profile, value.AsVector(), cancellationToken).ConfigureAwait(false);
                 break;
             case MathBlockValueKind.Matrix:
-                await WriteMatrixAsync(writer, value.AsMatrix(), cancellationToken).ConfigureAwait(false);
+                await WriteMatrixAsync(writer, profile, value.AsMatrix(), cancellationToken).ConfigureAwait(false);
                 break;
             case MathBlockValueKind.ComplexVector:
                 await WriteComplexVectorAsync(
                         writer,
+                        profile,
                         value.AsComplexVector(),
                         cancellationToken)
                     .ConfigureAwait(false);
@@ -253,22 +284,24 @@ public static partial class MathBlockOpenMath
             case MathBlockValueKind.ComplexMatrix:
                 await WriteComplexMatrixAsync(
                         writer,
+                        profile,
                         value.AsComplexMatrix(),
                         cancellationToken)
                     .ConfigureAwait(false);
                 break;
             case MathBlockValueKind.PointSet:
-                await WritePointSetAsync(writer, value.AsPointSet(), cancellationToken).ConfigureAwait(false);
+                await WritePointSetAsync(writer, profile, value.AsPointSet(), cancellationToken).ConfigureAwait(false);
                 break;
             case MathBlockValueKind.Graph:
-                await WriteGraphAsync(writer, value.AsGraph(), cancellationToken).ConfigureAwait(false);
+                await WriteGraphAsync(writer, profile, value.AsGraph(), cancellationToken).ConfigureAwait(false);
                 break;
             case MathBlockValueKind.RunSet:
-                await WriteRunSetAsync(writer, value.AsRunSet(), cancellationToken).ConfigureAwait(false);
+                await WriteRunSetAsync(writer, profile, value.AsRunSet(), cancellationToken).ConfigureAwait(false);
                 break;
             case MathBlockValueKind.BooleanVector:
                 await WriteBooleanVectorAsync(
                         writer,
+                        profile,
                         value.AsBooleanVector(),
                         cancellationToken)
                     .ConfigureAwait(false);
@@ -280,11 +313,12 @@ public static partial class MathBlockOpenMath
 
     private static async Task WriteVectorAsync(
         XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
         Supprocom.MathBlocks.MathBlockVector values,
         CancellationToken cancellationToken)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-        await WriteSymbolAsync(writer, ValueDictionary, "vector").ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.ValueDictionary, "vector").ConfigureAwait(false);
         for (var index = 0; index < values.Count; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -295,11 +329,12 @@ public static partial class MathBlockOpenMath
 
     private static async Task WriteMatrixAsync(
         XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
         MathBlockMatrix value,
         CancellationToken cancellationToken)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-        await WriteSymbolAsync(writer, ValueDictionary, "matrix").ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.ValueDictionary, "matrix").ConfigureAwait(false);
         for (var row = 0; row < value.Rows; row++)
         {
             for (var column = 0; column < value.Columns; column++)
@@ -311,10 +346,13 @@ public static partial class MathBlockOpenMath
         await writer.WriteEndElementAsync().ConfigureAwait(false);
     }
 
-    private static async Task WriteComplexAsync(XmlWriter writer, MathBlockComplexValue value)
+    private static async Task WriteComplexAsync(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        MathBlockComplexValue value)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-        await WriteSymbolAsync(writer, ValueDictionary, "complex").ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.ValueDictionary, "complex").ConfigureAwait(false);
         await WriteDoubleAsync(writer, value.Real).ConfigureAwait(false);
         await WriteDoubleAsync(writer, value.Imaginary).ConfigureAwait(false);
         await writer.WriteEndElementAsync().ConfigureAwait(false);
@@ -322,32 +360,34 @@ public static partial class MathBlockOpenMath
 
     private static async Task WriteComplexVectorAsync(
         XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
         Supprocom.MathBlocks.MathBlockComplexVector values,
         CancellationToken cancellationToken)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-        await WriteSymbolAsync(writer, ValueDictionary, "complex-vector").ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.ValueDictionary, "complex-vector").ConfigureAwait(false);
         for (var index = 0; index < values.Count; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await WriteComplexAsync(writer, values[index]).ConfigureAwait(false);
+            await WriteComplexAsync(writer, profile, values[index]).ConfigureAwait(false);
         }
         await writer.WriteEndElementAsync().ConfigureAwait(false);
     }
 
     private static async Task WriteComplexMatrixAsync(
         XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
         MathBlockComplexMatrix value,
         CancellationToken cancellationToken)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-        await WriteSymbolAsync(writer, ValueDictionary, "complex-matrix").ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.ValueDictionary, "complex-matrix").ConfigureAwait(false);
         for (var row = 0; row < value.Rows; row++)
         {
             for (var column = 0; column < value.Columns; column++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                await WriteComplexAsync(writer, value[row, column]).ConfigureAwait(false);
+                await WriteComplexAsync(writer, profile, value[row, column]).ConfigureAwait(false);
             }
         }
         await writer.WriteEndElementAsync().ConfigureAwait(false);
@@ -355,16 +395,17 @@ public static partial class MathBlockOpenMath
 
     private static async Task WritePointSetAsync(
         XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
         Supprocom.MathBlocks.MathBlockPointSet values,
         CancellationToken cancellationToken)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-        await WriteSymbolAsync(writer, ValueDictionary, "point-set").ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.ValueDictionary, "point-set").ConfigureAwait(false);
         for (var index = 0; index < values.Count; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-            await WriteSymbolAsync(writer, ValueDictionary, "point").ConfigureAwait(false);
+            await WriteSymbolAsync(writer, profile.ValueDictionary, "point").ConfigureAwait(false);
             await WriteDoubleAsync(writer, values[index].X).ConfigureAwait(false);
             await WriteDoubleAsync(writer, values[index].Y).ConfigureAwait(false);
             await writer.WriteEndElementAsync().ConfigureAwait(false);
@@ -374,18 +415,19 @@ public static partial class MathBlockOpenMath
 
     private static async Task WriteGraphAsync(
         XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
         MathBlockGraph value,
         CancellationToken cancellationToken)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-        await WriteSymbolAsync(writer, ValueDictionary, "graph").ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.ValueDictionary, "graph").ConfigureAwait(false);
         await WriteIntegerAsync(writer, value.VertexCount).ConfigureAwait(false);
         for (var index = 0; index < value.Count; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var edge = value[index];
             await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-            await WriteSymbolAsync(writer, ValueDictionary, "edge").ConfigureAwait(false);
+            await WriteSymbolAsync(writer, profile.ValueDictionary, "edge").ConfigureAwait(false);
             await WriteIntegerAsync(writer, edge.From).ConfigureAwait(false);
             await WriteIntegerAsync(writer, edge.To).ConfigureAwait(false);
             await WriteDoubleAsync(writer, edge.Weight).ConfigureAwait(false);
@@ -396,16 +438,17 @@ public static partial class MathBlockOpenMath
 
     private static async Task WriteRunSetAsync(
         XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
         Supprocom.MathBlocks.MathBlockRunSet values,
         CancellationToken cancellationToken)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-        await WriteSymbolAsync(writer, ValueDictionary, "run-set").ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.ValueDictionary, "run-set").ConfigureAwait(false);
         for (var index = 0; index < values.Count; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
             await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-            await WriteSymbolAsync(writer, ValueDictionary, "run").ConfigureAwait(false);
+            await WriteSymbolAsync(writer, profile.ValueDictionary, "run").ConfigureAwait(false);
             await WriteIntegerAsync(writer, values[index].Start).ConfigureAwait(false);
             await WriteIntegerAsync(writer, values[index].Length).ConfigureAwait(false);
             await WriteDoubleAsync(writer, values[index].Value).ConfigureAwait(false);
@@ -416,15 +459,16 @@ public static partial class MathBlockOpenMath
 
     private static async Task WriteBooleanVectorAsync(
         XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
         Supprocom.MathBlocks.MathBlockBooleanVector values,
         CancellationToken cancellationToken)
     {
         await WriteApplicationStartAsync(writer).ConfigureAwait(false);
-        await WriteSymbolAsync(writer, ValueDictionary, "boolean-vector").ConfigureAwait(false);
+        await WriteSymbolAsync(writer, profile.ValueDictionary, "boolean-vector").ConfigureAwait(false);
         for (var index = 0; index < values.Count; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await WriteBooleanAsync(writer, values[index]).ConfigureAwait(false);
+            await WriteBooleanAsync(writer, profile, values[index]).ConfigureAwait(false);
         }
         await writer.WriteEndElementAsync().ConfigureAwait(false);
     }
@@ -443,8 +487,11 @@ public static partial class MathBlockOpenMath
         await writer.WriteFullEndElementAsync().ConfigureAwait(false);
     }
 
-    private static Task WriteBooleanAsync(XmlWriter writer, bool value) =>
-        WriteSymbolAsync(writer, ValueDictionary, value ? "true" : "false");
+    private static Task WriteBooleanAsync(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        bool value) =>
+        WriteSymbolAsync(writer, profile.ValueDictionary, value ? "true" : "false");
 
     private static async Task WriteIntegerAsync(XmlWriter writer, int value)
     {

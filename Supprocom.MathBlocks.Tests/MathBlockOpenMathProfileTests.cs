@@ -19,10 +19,14 @@ public sealed class MathBlockOpenMathProfileTests
         Assert.Equal(MathBlockOpenMath.ContentDictionaryGroup, profile.ContentDictionaryGroup);
         Assert.Equal(337, profile.Operations.Count);
 
+        var profile1Operations = MathBlockCatalog.Standard.Operations
+            .Where(operation => profile.Contains(operation))
+            .ToArray();
+        Assert.Equal(profile.Operations.Count, profile1Operations.Length);
         for (var index = 0; index < profile.Operations.Count; index++)
         {
             var definition = profile.Operations[index];
-            var operation = MathBlockCatalog.Standard.Operations[index];
+            var operation = profile1Operations[index];
             Assert.Same(operation, definition.Operation);
             Assert.Equal(operation.Identity, definition.Identity);
             Assert.Equal(operation.Arity, definition.Arity);

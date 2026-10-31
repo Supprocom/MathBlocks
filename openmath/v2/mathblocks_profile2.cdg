@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CDGroup version="2.0" xmlns="http://www.openmath.org/OpenMathCDG">
+  <CDGroupName>mathblocks_profile2</CDGroupName>
+  <CDGroupVersion>2</CDGroupVersion>
+  <CDGroupRevision>0</CDGroupRevision>
+  <CDGroupURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v2/mathblocks_profile2.cdg</CDGroupURL>
+  <CDGroupDescription>This group defines the deterministic MathBlocks OpenMath program profile.</CDGroupDescription>
+  <CDGroupMember>
+    <CDName>mathblocks_program2</CDName>
+    <CDVersion>2</CDVersion>
+    <CDURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v2/mathblocks_program2.ocd</CDURL>
+  </CDGroupMember>
+  <CDGroupMember>
+    <CDName>mathblocks_operations2</CDName>
+    <CDVersion>2</CDVersion>
+    <CDURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v2/mathblocks_operations2.ocd</CDURL>
+  </CDGroupMember>
+  <CDGroupMember>
+    <CDName>mathblocks_types2</CDName>
+    <CDVersion>2</CDVersion>
+    <CDURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v2/mathblocks_types2.ocd</CDURL>
+  </CDGroupMember>
+  <CDGroupMember>
+    <CDName>mathblocks_values2</CDName>
+    <CDVersion>2</CDVersion>
+    <CDURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v2/mathblocks_values2.ocd</CDURL>
+  </CDGroupMember>
+</CDGroup>

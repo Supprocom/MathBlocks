@@ -51,7 +51,7 @@ public sealed class MathBlockOpenMathTests
     [Fact]
     public async Task ExportAndImportCoverEveryStandardOperationAsync()
     {
-        Assert.Equal(337, MathBlockCatalog.Standard.Operations.Count);
+        Assert.Equal(MathBlockOpenMath.Profile2.Operations.Count, MathBlockCatalog.Standard.Operations.Count);
 
         foreach (var operation in MathBlockCatalog.Standard.Operations)
         {
@@ -158,7 +158,7 @@ public sealed class MathBlockOpenMathTests
         var program = builder.Output("result", result).Build();
         var exception = Assert.Throws<InvalidOperationException>(() => MathBlockOpenMath.Export(program));
         Assert.Equal(
-            "The program contains an operation outside the standard OpenMath profile.",
+            "The program contains operation '7custom.identity@7', which is outside MathBlocks OpenMath Profile 2, the highest supported profile.",
             exception.Message);
 
         using var stream = new MemoryStream([1, 2, 3], writable: true);
@@ -194,7 +194,7 @@ public sealed class MathBlockOpenMathTests
         var exception = Assert.Throws<InvalidOperationException>(() => MathBlockOpenMath.Export(program));
 
         Assert.Equal(
-            "The program contains an operation outside the standard OpenMath profile.",
+            "The program contains operation 'scalar.add@1', which is outside MathBlocks OpenMath Profile 2, the highest supported profile.",
             exception.Message);
     }
 
@@ -476,8 +476,8 @@ public sealed class MathBlockOpenMathTests
                 "boolean-vector", "complex", "complex-matrix", "complex-vector", "edge", "false",
                 "graph", "matrix", "point", "point-set", "run", "run-set", "true", "vector"
             ],
-            ["mathblocks_operations1"] = MathBlockCatalog.Standard.Operations
-                .Select(OperationSymbolName)
+            ["mathblocks_operations1"] = MathBlockOpenMath.Profile.Operations
+                .Select(definition => OperationSymbolName(definition.Operation))
                 .Order(StringComparer.Ordinal)
                 .ToArray()
         };
@@ -510,7 +510,7 @@ public sealed class MathBlockOpenMathTests
             .ToDictionary(
                 element => element.Element(dictionaryNamespace + "Name")?.Value ?? string.Empty,
                 StringComparer.Ordinal) ?? throw new InvalidDataException("The operation dictionary is empty.");
-        foreach (var operation in MathBlockCatalog.Standard.Operations)
+        foreach (var operation in MathBlockOpenMath.Profile.Operations.Select(definition => definition.Operation))
         {
             var definition = operationDefinitions[OperationSymbolName(operation)];
             var description = definition.Element(dictionaryNamespace + "Description")?.Value;

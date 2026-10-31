@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace Supprocom.MathBlocks;
 
-/// <summary>Describes one standard operation in OpenMath Profile 1.</summary>
+/// <summary>Describes one standard operation in an OpenMath profile.</summary>
 [DebuggerDisplay("{Operation.Identity}: {Symbol.Dictionary}:{Symbol.Name}")]
 public sealed class MathBlockOpenMathOperationDefinition
 {
@@ -23,6 +23,6 @@ public sealed class MathBlockOpenMathOperationDefinition
     /// <summary>Gets the operation arity.</summary>
     public int Arity => Operation.Arity;
 
-    /// <summary>Gets the Profile 1 symbol.</summary>
+    /// <summary>Gets the profile symbol.</summary>
     public MathBlockOpenMathOperationSymbol Symbol { get; }
 }

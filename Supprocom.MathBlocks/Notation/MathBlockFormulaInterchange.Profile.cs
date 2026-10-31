@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -36,89 +37,86 @@ public static partial class MathBlockFormulaInterchange
     public const string ContentDictionaryGroup =
         ContentDictionaryBase + "/mathblocks_formula_profile1.cdg";
 
-    internal const string FormulaDictionary = "mathblocks_formula1";
-    internal const string FormulaOperationDictionary = "mathblocks_formula_operations1";
-    internal const string FormulaValueDictionary = "mathblocks_formula_values1";
-    private static readonly Lazy<FormulaProfileState> FormulaProfile =
-        new(CreateFormulaProfile);
-    private const string FormulaResourcePrefix = "Supprocom.MathBlocks.Formula.v1.";
+    private const string OutsideProfileKey = "MathBlocks.Formula.OutsideProfile";
+    private static readonly Lazy<MathBlockFormulaProfileDescriptor> Profile1State =
+        new(CreateProfile1);
+    private static readonly Lazy<MathBlockFormulaProfileDescriptor> Profile2State =
+        new(CreateProfile2);
+    private static readonly Lazy<MathBlockFormulaProfileDescriptor>[] PublishedProfiles =
+        [Profile1State, Profile2State];
+    private static readonly Lazy<IReadOnlyList<MathBlockFormulaProfileDescriptor>> ProfileList =
+        new(() => Array.AsReadOnly(new[] { Profile1State.Value, Profile2State.Value }));
 
     /// <summary>Gets the immutable, total Formula Interchange Profile 1 descriptor.</summary>
-    public static MathBlockFormulaProfileDescriptor Profile =>
-        FormulaProfile.Value.Descriptor;
+    public static MathBlockFormulaProfileDescriptor Profile => Profile1State.Value;
 
-    /// <summary>Gets the total formula mapping for an exact standard operation instance.</summary>
+    /// <summary>Gets the immutable, total Formula Interchange Profile 2 descriptor.</summary>
+    public static MathBlockFormulaProfileDescriptor Profile2 => Profile2State.Value;
+
+    /// <summary>Gets every supported Formula Interchange profile in ascending version order.</summary>
+    public static IReadOnlyList<MathBlockFormulaProfileDescriptor> Profiles => ProfileList.Value;
+
+    /// <summary>Gets the total Profile 1 formula mapping for an exact standard operation instance.</summary>
     public static bool TryGetOperationMapping(
         MathBlockOperation? operation,
-        out MathBlockFormulaOperationMapping? mapping)
-    {
-        mapping = null;
-        return operation is not null &&
-               FormulaProfile.Value.ByOperation.TryGetValue(operation, out mapping);
-    }
+        out MathBlockFormulaOperationMapping? mapping) =>
+        Profile.TryGetOperationMapping(operation, out mapping);
 
-    /// <summary>Gets the exact standard operation for a formula symbol.</summary>
+    /// <summary>Gets the exact standard operation for a Profile 1 formula symbol.</summary>
     public static bool TryGetOperation(
         MathBlockFormulaSymbol symbol,
         out MathBlockOperation? operation) =>
-        FormulaProfile.Value.BySymbol.TryGetValue(symbol, out operation);
+        Profile.TryGetOperation(symbol, out operation);
 
-    internal static MathBlockFormulaOperationMapping RequireMapping(
-        MathBlockOperation? operation)
+    // Creates a profile over every operation of an unpublished OpenMath profile, without
+    // embedded artifacts. Only the published profiles are reachable through the public API.
+    internal static MathBlockFormulaProfileDescriptor CreateUnpublishedProfile(
+        MathBlockOpenMathProfileDescriptor openMathProfile)
     {
-        if (operation is not null &&
-            FormulaProfile.Value.ByOperation.TryGetValue(operation, out var mapping))
-        {
-            return mapping;
-        }
-        throw new InvalidOperationException(
-            "The formula contains an operation outside the standard catalog.");
+        ArgumentNullException.ThrowIfNull(openMathProfile);
+        return CreateProfile(openMathProfile, []);
     }
 
-    private static FormulaProfileState CreateFormulaProfile()
+    internal static Lazy<MathBlockFormulaProfileDescriptor>[] CreateCandidates(
+        MathBlockFormulaProfileDescriptor[] profiles)
     {
-        var catalog = MathBlockCatalog.Standard.Operations;
-        var mappings = new MathBlockFormulaOperationMapping[catalog.Count];
-        var byOperation = new Dictionary<MathBlockOperation, MathBlockFormulaOperationMapping>(
-            ReferenceEqualityComparer.Instance);
-        var bySymbol = new Dictionary<MathBlockFormulaSymbol, MathBlockOperation>();
-        var fingerprintSource = new StringBuilder();
-        fingerprintSource.Append("mathblocks-formula-profile-1\n");
-
-        for (var index = 0; index < catalog.Count; index++)
+        ArgumentNullException.ThrowIfNull(profiles);
+        if (profiles.Length == 0)
+            throw new ArgumentException("At least one formula profile is required.", nameof(profiles));
+        var result = new Lazy<MathBlockFormulaProfileDescriptor>[profiles.Length];
+        for (var index = 0; index < result.Length; index++)
         {
-            var operation = catalog[index];
-            var symbol = CreateOperationSymbol(operation, out var kind);
-            var mapping = new MathBlockFormulaOperationMapping(
-                operation,
-                MathBlockFormulaMappingClassification.DirectMapping,
-                kind,
-                symbol);
-            mappings[index] = mapping;
-            byOperation.Add(operation, mapping);
-            if (!bySymbol.TryAdd(symbol, operation))
-            {
-                throw new InvalidOperationException(
-                    "The formula profile contains a duplicate operation symbol.");
-            }
-
-            fingerprintSource
-                .Append(operation.Identity).Append('|')
-                .Append((int)mapping.Classification).Append('|')
-                .Append((int)kind).Append('|')
-                .Append(symbol.ContentDictionaryBase).Append('|')
-                .Append(symbol.Dictionary).Append('|')
-                .Append(symbol.Name).Append('\n');
+            var profile = profiles[index] ??
+                throw new ArgumentException("A formula profile is null.", nameof(profiles));
+            result[index] = new Lazy<MathBlockFormulaProfileDescriptor>(profile);
         }
+        return result;
+    }
 
-        if (mappings.Length != 337)
-        {
-            throw new InvalidOperationException(
-                "Formula Interchange Profile 1 requires exactly 337 operations.");
-        }
+    internal static MathBlockFormulaOperationMapping RequireMapping(
+        MathBlockFormulaProfileDescriptor profile,
+        MathBlockOperation? operation,
+        bool highest)
+    {
+        if (profile.TryGetOperationMapping(operation, out var mapping))
+            return mapping!;
+        var target = string.Concat(
+            "MathBlocks Formula Interchange Profile ",
+            profile.ProfileVersion);
+        var exception = new InvalidOperationException(operation is null
+            ? string.Concat("The formula contains an operation outside ", target, ".")
+            : string.Concat(
+                "The formula contains operation '",
+                operation.Identity,
+                "', which is outside ",
+                target,
+                highest ? ", the highest supported profile." : "."));
+        exception.Data[OutsideProfileKey] = profile.ProfileVersion;
+        throw exception;
+    }
 
-        var fingerprint = Convert.ToHexString(
-            SHA256.HashData(Encoding.UTF8.GetBytes(fingerprintSource.ToString())));
+    private static MathBlockFormulaProfileDescriptor CreateProfile1()
+    {
         FormulaArtifactAuthority[] authority =
         [
             new("mathblocks_formula1.ocd", 867, "17A14DB6B311C2E9FEC5FFAB8C6B1AA79DC670880946A1EAAB62EB5DDE1E780B", true),
@@ -131,23 +129,117 @@ public static partial class MathBlockFormulaInterchange
             new("mathblocks_formula_values1.ocd", 2891, "FE73F951A443B3B2694D3C56C25D34B23F2F80D11DEE2FCC88A5B72D70E059CB", true),
             new("README.md", 4288, "1D9815FDA4765250000526099F5F03C82448961C594FACBBBD76BCC2AB23DA20", false)
         ];
-        var artifacts = new MathBlockFormulaProfileArtifact[authority.Length];
-        var assembly = typeof(MathBlockFormulaInterchange).Assembly;
-        for (var index = 0; index < authority.Length; index++)
-            artifacts[index] = CreateArtifact(assembly, authority[index]);
+        var profile = CreateProfile(MathBlockOpenMath.Profile, CreateArtifacts(1, authority));
+        if (profile.Operations.Count != 337)
+        {
+            throw new InvalidOperationException(
+                "Formula Interchange Profile 1 requires exactly 337 operations.");
+        }
+        return profile;
+    }
 
-        return new FormulaProfileState(
-            new MathBlockFormulaProfileDescriptor(mappings, artifacts, fingerprint),
-            byOperation,
-            bySymbol);
+    private static MathBlockFormulaProfileDescriptor CreateProfile2()
+    {
+        FormulaArtifactAuthority[] authority =
+        [
+            new("mathblocks_formula2.ocd", 867, "62B7AE087DB2799F425FFD69F93C2E83D71C5F6554F1F722CB1D876F369DCB78", true),
+            new("mathblocks_formula_mappings2.xml", 88249, "406CA77CB23B990D2F9DDF63E5D2C181319050315D4E74E8851BFB7583F7DFF5", true),
+            new("mathblocks_formula_mappings2.rnc", 807, "A9FC946948B914A4E6941E65E45874902834DDC94200793F0CA7A1C2742CED52", true),
+            new("mathblocks_formula_mathml2.rnc", 968, "BADF0F363AB72F719D49DC1FD98F29B5EDD9BAD58D26DE9B2CE8F043258FA514", true),
+            new("mathblocks_formula_openmath2.rnc", 1325, "59F98994C52081453EA271697F4364A220EDD80FF58574606DDBB8C6A1EFC31A", true),
+            new("mathblocks_formula_operations2.ocd", 85903, "BD66B38DFFDF54B87997549DD104CA0A78FEEB9073AC934B7A30F0A30956AA22", true),
+            new("mathblocks_formula_profile2.cdg", 2144, "40CCDFDB3219C40F8020F88067276F1EA13406B73B3DF371C6CB27A9A5004037", true),
+            new("mathblocks_formula_values2.ocd", 2891, "BE9D964434217E8591DD15FF70779B9422A04A797A2CECBE4738AB63320744EB", true)
+        ];
+        var profile = CreateProfile(MathBlockOpenMath.Profile2, CreateArtifacts(2, authority));
+        if (profile.Operations.Count != MathBlockInterchangeProfiles.Profile2OperationCount)
+        {
+            throw new InvalidOperationException(string.Concat(
+                "Formula Interchange Profile 2 requires exactly ",
+                MathBlockInterchangeProfiles.Profile2OperationCount.ToString(CultureInfo.InvariantCulture),
+                " operations."));
+        }
+        return profile;
+    }
+
+    // The mapping of each operation follows the OpenMath profile's operation order. The
+    // fingerprint binds the profile version and every ordered mapping.
+    private static MathBlockFormulaProfileDescriptor CreateProfile(
+        MathBlockOpenMathProfileDescriptor openMathProfile,
+        IReadOnlyList<MathBlockFormulaProfileArtifact> artifacts)
+    {
+        var version = openMathProfile.Version;
+        var contentDictionaryBase = MathBlockFormulaProfileDescriptor.PublishedContentDictionaryBase(version);
+        var operationDictionary = MathBlockFormulaProfileDescriptor.OperationDictionaryName(version);
+        var catalog = openMathProfile.Operations;
+        var mappings = new MathBlockFormulaOperationMapping[catalog.Count];
+        var fingerprintSource = new StringBuilder();
+        fingerprintSource
+            .Append("mathblocks-formula-profile-")
+            .Append(openMathProfile.ProfileVersion)
+            .Append('\n');
+
+        for (var index = 0; index < catalog.Count; index++)
+        {
+            var operation = catalog[index].Operation;
+            var symbol = CreateOperationSymbol(
+                operation,
+                contentDictionaryBase,
+                operationDictionary,
+                out var kind);
+            var mapping = new MathBlockFormulaOperationMapping(
+                operation,
+                MathBlockFormulaMappingClassification.DirectMapping,
+                kind,
+                symbol);
+            mappings[index] = mapping;
+
+            fingerprintSource
+                .Append(operation.Identity).Append('|')
+                .Append((int)mapping.Classification).Append('|')
+                .Append((int)kind).Append('|')
+                .Append(symbol.ContentDictionaryBase).Append('|')
+                .Append(symbol.Dictionary).Append('|')
+                .Append(symbol.Name).Append('\n');
+        }
+
+        var fingerprint = Convert.ToHexString(
+            SHA256.HashData(Encoding.UTF8.GetBytes(fingerprintSource.ToString())));
+        return new MathBlockFormulaProfileDescriptor(
+            openMathProfile,
+            mappings,
+            artifacts,
+            fingerprint);
+    }
+
+    private static MathBlockFormulaProfileArtifact[] CreateArtifacts(
+        int version,
+        FormulaArtifactAuthority[] authority)
+    {
+        var suffix = version.ToString(CultureInfo.InvariantCulture);
+        var resourcePrefix = string.Concat("Supprocom.MathBlocks.Formula.v", suffix, ".");
+        var packageDirectory = string.Concat("formula/v", suffix, "/");
+        var assembly = typeof(MathBlockFormulaInterchange).Assembly;
+        var artifacts = new MathBlockFormulaProfileArtifact[authority.Length];
+        for (var index = 0; index < authority.Length; index++)
+        {
+            artifacts[index] = CreateArtifact(
+                assembly,
+                resourcePrefix,
+                packageDirectory,
+                authority[index]);
+        }
+        return artifacts;
     }
 
     private static MathBlockFormulaProfileArtifact CreateArtifact(
         Assembly assembly,
+        string resourcePrefix,
+        string packageDirectory,
         FormulaArtifactAuthority authority)
     {
         using var stream = assembly.GetManifestResourceStream(
-            string.Concat(FormulaResourcePrefix, authority.Name)) ??
+            string.Concat(resourcePrefix, authority.Name)) ??
             throw new InvalidOperationException("An embedded formula profile artifact is missing.");
         var content = new byte[authority.Length];
         stream.ReadExactly(content);
@@ -157,6 +249,7 @@ public static partial class MathBlockFormulaInterchange
             throw new InvalidOperationException("An embedded formula profile artifact is invalid.");
         }
         return new MathBlockFormulaProfileArtifact(
+            packageDirectory,
             authority.Name,
             authority.Length,
             authority.Sha256,
@@ -166,6 +259,8 @@ public static partial class MathBlockFormulaInterchange
 
     private static MathBlockFormulaSymbol CreateOperationSymbol(
         MathBlockOperation operation,
+        string contentDictionaryBase,
+        string operationDictionary,
         out MathBlockFormulaMappingKind kind)
     {
         var official = operation.Identifier switch
@@ -222,8 +317,8 @@ public static partial class MathBlockFormulaInterchange
 
         kind = MathBlockFormulaMappingKind.MathBlocksExtension;
         return new MathBlockFormulaSymbol(
-            ContentDictionaryBase,
-            FormulaOperationDictionary,
+            contentDictionaryBase,
+            operationDictionary,
             OperationSymbolName(operation.Identity));
     }
 
@@ -234,11 +329,6 @@ public static partial class MathBlockFormulaInterchange
             throw new InvalidOperationException("A standard operation identity is invalid.");
         return string.Concat("op.", identity[..separator], ".v", identity[(separator + 1)..]);
     }
-
-    private sealed record FormulaProfileState(
-        MathBlockFormulaProfileDescriptor Descriptor,
-        IReadOnlyDictionary<MathBlockOperation, MathBlockFormulaOperationMapping> ByOperation,
-        IReadOnlyDictionary<MathBlockFormulaSymbol, MathBlockOperation> BySymbol);
 
     private readonly record struct FormulaArtifactAuthority(
         string Name,

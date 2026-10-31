@@ -277,21 +277,36 @@ jobs:
             --sample "$env:OPENMATH_EVIDENCE/canonical-sample.xml" `
             --catalog-sample "$env:OPENMATH_EVIDENCE/catalog-sample.xml"
 
+      - name: Generate OpenMath Profile 2 verification artifacts
+        shell: pwsh
+        run: |
+          $generator = Join-Path `
+            $env:ARTIFACT_ROOT `
+            'openmath-generator/bin/MathBlocks.OpenMathProfileGenerator/release/MathBlocks.OpenMathProfileGenerator.dll'
+          dotnet $generator `
+            --profile 2 `
+            --output "$env:OPENMATH_EVIDENCE/generated-profile2" `
+            --sample "$env:OPENMATH_EVIDENCE/canonical-sample2.xml" `
+            --catalog-sample "$env:OPENMATH_EVIDENCE/catalog-sample2.xml"
+
       - name: Verify generated OpenMath profile artifacts
         shell: pwsh
         run: |
-          $generatedRoot = Join-Path $env:OPENMATH_EVIDENCE 'generated-profile'
-          $generatedFiles = @(Get-ChildItem $generatedRoot -File | Sort-Object Name)
-          if ($generatedFiles.Count -ne 5) {
-              throw 'The profile generator did not create five standard artifacts.'
-          }
+          foreach ($profile in @(@{ Generated = 'generated-profile'; Tracked = 'openmath/v1' },
+                                 @{ Generated = 'generated-profile2'; Tracked = 'openmath/v2' })) {
+              $generatedRoot = Join-Path $env:OPENMATH_EVIDENCE $profile.Generated
+              $generatedFiles = @(Get-ChildItem $generatedRoot -File | Sort-Object Name)
+              if ($generatedFiles.Count -ne 5) {
+                  throw 'The profile generator did not create five standard artifacts.'
+              }
 
-          foreach ($generated in $generatedFiles) {
-              $tracked = Join-Path 'openmath/v1' $generated.Name
-              $expectedHash = (Get-FileHash $tracked -Algorithm SHA256).Hash
-              $actualHash = (Get-FileHash $generated.FullName -Algorithm SHA256).Hash
-              if ($actualHash -ne $expectedHash) {
-                  throw "The generated OpenMath artifact '$($generated.Name)' differs from source."
+              foreach ($generated in $generatedFiles) {
+                  $tracked = Join-Path $profile.Tracked $generated.Name
+                  $expectedHash = (Get-FileHash $tracked -Algorithm SHA256).Hash
+                  $actualHash = (Get-FileHash $generated.FullName -Algorithm SHA256).Hash
+                  if ($actualHash -ne $expectedHash) {
+                      throw "The generated OpenMath artifact '$($generated.Name)' differs from source."
+                  }
               }
           }
 
@@ -318,21 +333,36 @@ jobs:
             --openmath-sample "$env:FORMULA_EVIDENCE/sample.openmath.xml" `
             --mathml-sample "$env:FORMULA_EVIDENCE/sample.mathml"
 
+      - name: Generate formula Profile 2 verification artifacts
+        shell: pwsh
+        run: |
+          $generator = Join-Path `
+            $env:ARTIFACT_ROOT `
+            'formula-generator/bin/MathBlocks.FormulaProfileGenerator/release/MathBlocks.FormulaProfileGenerator.dll'
+          dotnet $generator `
+            --profile 2 `
+            --output "$env:FORMULA_EVIDENCE/generated-profile2" `
+            --openmath-sample "$env:FORMULA_EVIDENCE/sample2.openmath.xml" `
+            --mathml-sample "$env:FORMULA_EVIDENCE/sample2.mathml"
+
       - name: Verify generated formula profile artifacts
         shell: pwsh
         run: |
-          $generatedRoot = Join-Path $env:FORMULA_EVIDENCE 'generated-profile'
-          $generatedFiles = @(Get-ChildItem $generatedRoot -File | Sort-Object Name)
-          if ($generatedFiles.Count -ne 5) {
-              throw 'The formula profile generator did not create five generated artifacts.'
-          }
+          foreach ($profile in @(@{ Generated = 'generated-profile'; Tracked = 'formula/v1' },
+                                 @{ Generated = 'generated-profile2'; Tracked = 'formula/v2' })) {
+              $generatedRoot = Join-Path $env:FORMULA_EVIDENCE $profile.Generated
+              $generatedFiles = @(Get-ChildItem $generatedRoot -File | Sort-Object Name)
+              if ($generatedFiles.Count -ne 5) {
+                  throw 'The formula profile generator did not create five generated artifacts.'
+              }
 
-          foreach ($generated in $generatedFiles) {
-              $tracked = Join-Path 'formula/v1' $generated.Name
-              $expectedHash = (Get-FileHash $tracked -Algorithm SHA256).Hash
-              $actualHash = (Get-FileHash $generated.FullName -Algorithm SHA256).Hash
-              if ($actualHash -ne $expectedHash) {
-                  throw "The generated formula artifact '$($generated.Name)' differs from source."
+              foreach ($generated in $generatedFiles) {
+                  $tracked = Join-Path $profile.Tracked $generated.Name
+                  $expectedHash = (Get-FileHash $tracked -Algorithm SHA256).Hash
+                  $actualHash = (Get-FileHash $generated.FullName -Algorithm SHA256).Hash
+                  if ($actualHash -ne $expectedHash) {
+                      throw "The generated formula artifact '$($generated.Name)' differs from source."
+                  }
               }
           }
 
@@ -381,6 +411,16 @@ jobs:
             xmllint --c14n11 "$OPENMATH_EVIDENCE/$document" > "$OPENMATH_EVIDENCE/$document.c14n11"
             cmp "$OPENMATH_EVIDENCE/$document" "$OPENMATH_EVIDENCE/$document.c14n11"
           done
+          for document in openmath/v2/*.ocd; do
+            jing -c "$schema_root/omcd2.rnc" "$document"
+          done
+          jing -c "$schema_root/omcdgroup2.rnc" openmath/v2/mathblocks_profile2.cdg
+          for document in canonical-sample2.xml catalog-sample2.xml; do
+            jing -c "$schema_root/openmath2.rnc" "$OPENMATH_EVIDENCE/$document"
+            jing -c openmath/v2/mathblocks_profile2.rnc "$OPENMATH_EVIDENCE/$document"
+            xmllint --c14n11 "$OPENMATH_EVIDENCE/$document" > "$OPENMATH_EVIDENCE/$document.c14n11"
+            cmp "$OPENMATH_EVIDENCE/$document" "$OPENMATH_EVIDENCE/$document.c14n11"
+          done
 
       - name: Validate the formula interchange profile
         run: |
@@ -402,6 +442,25 @@ jobs:
           test "$(grep -c 'classification="canonical-pattern-mapping"' formula/v1/mathblocks_formula_mappings1.xml || true)" -eq 0
           test "$(grep -c 'classification="unsupported"' formula/v1/mathblocks_formula_mappings1.xml || true)" -eq 0
           for document in sample.openmath.xml sample.mathml; do
+            xmllint --c14n11 "$FORMULA_EVIDENCE/$document" > "$FORMULA_EVIDENCE/$document.c14n11"
+            cmp "$FORMULA_EVIDENCE/$document" "$FORMULA_EVIDENCE/$document.c14n11"
+          done
+          for document in formula/v2/*.ocd; do
+            jing -c "$schema_root/omcd2.rnc" "$document"
+          done
+          jing -c "$schema_root/omcdgroup2.rnc" formula/v2/mathblocks_formula_profile2.cdg
+          jing -c "$schema_root/openmath2.rnc" "$FORMULA_EVIDENCE/sample2.openmath.xml"
+          jing -c formula/v2/mathblocks_formula_openmath2.rnc "$FORMULA_EVIDENCE/sample2.openmath.xml"
+          jing "$FORMULA_EVIDENCE/w3c-mathml3/mathml3/mathml3.rng" \
+            "$FORMULA_EVIDENCE/sample2.mathml"
+          jing -c formula/v2/mathblocks_formula_mathml2.rnc "$FORMULA_EVIDENCE/sample2.mathml"
+          jing -c formula/v2/mathblocks_formula_mappings2.rnc \
+            formula/v2/mathblocks_formula_mappings2.xml
+          xmllint --noout formula/v2/mathblocks_formula_mappings2.xml
+          count2="$(grep -c '<operation ' formula/v2/mathblocks_formula_mappings2.xml)"
+          test "$(grep -c 'classification="direct-mapping"' formula/v2/mathblocks_formula_mappings2.xml)" -eq "$count2"
+          grep -F "count=\"$count2\"" formula/v2/mathblocks_formula_mappings2.xml
+          for document in sample2.openmath.xml sample2.mathml; do
             xmllint --c14n11 "$FORMULA_EVIDENCE/$document" > "$FORMULA_EVIDENCE/$document.c14n11"
             cmp "$FORMULA_EVIDENCE/$document" "$FORMULA_EVIDENCE/$document.c14n11"
           done
@@ -460,6 +519,25 @@ jobs:
             grep -Fx "$required" "$PACKAGE_EVIDENCE/nupkg-contents.txt"
           done
           test "$(grep -c '^formula/v1/' "$PACKAGE_EVIDENCE/nupkg-contents.txt")" -eq 9
+          for required in \
+            openmath/v2/mathblocks_operations2.ocd \
+            openmath/v2/mathblocks_profile2.cdg \
+            openmath/v2/mathblocks_profile2.rnc \
+            openmath/v2/mathblocks_program2.ocd \
+            openmath/v2/mathblocks_types2.ocd \
+            openmath/v2/mathblocks_values2.ocd \
+            formula/v2/mathblocks_formula2.ocd \
+            formula/v2/mathblocks_formula_mappings2.rnc \
+            formula/v2/mathblocks_formula_mappings2.xml \
+            formula/v2/mathblocks_formula_mathml2.rnc \
+            formula/v2/mathblocks_formula_openmath2.rnc \
+            formula/v2/mathblocks_formula_operations2.ocd \
+            formula/v2/mathblocks_formula_profile2.cdg \
+            formula/v2/mathblocks_formula_values2.ocd; do
+            grep -Fx "$required" "$PACKAGE_EVIDENCE/nupkg-contents.txt"
+          done
+          test "$(grep -c '^openmath/v2/' "$PACKAGE_EVIDENCE/nupkg-contents.txt")" -eq 6
+          test "$(grep -c '^formula/v2/' "$PACKAGE_EVIDENCE/nupkg-contents.txt")" -eq 8
           unzip -p "$nupkg" README.md > "$PACKAGE_EVIDENCE/README.md"
           cmp README.md "$PACKAGE_EVIDENCE/README.md"
 
@@ -561,14 +639,20 @@ jobs:
             $clone `
             'Supprocom.MathBlocks/Notation/MathBlockFormulaInterchange.Profile.cs'
           $authoritySource = Get-Content $authorityPath -Raw
+          $profile2Start = $authoritySource.IndexOf('CreateProfile2()', [StringComparison]::Ordinal)
+          if ($profile2Start -lt 0) {
+              throw 'The embedded formula Profile 2 authority is missing.'
+          }
+          foreach ($profile in @(@{ Root = 'formula/v1'; Count = 9; Source = $authoritySource.Substring(0, $profile2Start) },
+                                 @{ Root = 'formula/v2'; Count = 8; Source = $authoritySource.Substring($profile2Start) })) {
           $matches = [regex]::Matches(
-            $authoritySource,
+            $profile.Source,
             'new\("(?<name>[^\"]+)", (?<length>[0-9]+), "(?<sha>[0-9A-F]{64})", (?:true|false)\)')
-          if ($matches.Count -ne 9) {
+          if ($matches.Count -ne $profile.Count) {
               throw 'The embedded formula artifact authority is incomplete.'
           }
 
-          $formulaRoot = Join-Path $clone 'formula/v1'
+          $formulaRoot = Join-Path $clone $profile.Root
           $tracked = @(Get-ChildItem $formulaRoot -File)
           if ($tracked.Count -ne $matches.Count) {
               throw 'The formula artifact set differs from the embedded authority.'
@@ -590,4 +674,5 @@ jobs:
               if ($hash -ne $match.Groups['sha'].Value) {
                   throw "The formula artifact '$path' has the wrong SHA-256."
               }
+          }
           }

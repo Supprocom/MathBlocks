@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockOpenMath
 {
-    /// <summary>Validates a Profile 1 character document and its canonical state.</summary>
+    /// <summary>Validates a profile character document and its canonical state in that profile.</summary>
     public static MathBlockOpenMathValidationResult Validate(
         string? source,
         MathBlockOpenMathImportOptions? options = null)
@@ -15,12 +15,12 @@ public static partial class MathBlockOpenMath
         var attempt = TryImport(source, validationOptions);
         if (!attempt.Succeeded)
             return InvalidValidation(attempt.Diagnostic!);
-        var canonical = Export(attempt.Result!.Program);
+        var canonical = ExportCore(attempt.Result!.Program, attempt.Result.Profile);
         var difference = FindDifference(source.AsSpan(), canonical.AsSpan());
         return ValidValidation(difference, MathBlockOpenMathDifferenceUnit.Character);
     }
 
-    /// <summary>Validates contiguous Profile 1 UTF-8 bytes and their canonical state.</summary>
+    /// <summary>Validates contiguous profile UTF-8 bytes and their canonical state in that profile.</summary>
     public static MathBlockOpenMathValidationResult ValidateUtf8(
         ReadOnlySpan<byte> source,
         MathBlockOpenMathImportOptions? options = null)
@@ -29,12 +29,12 @@ public static partial class MathBlockOpenMath
         var attempt = TryImportUtf8(source, validationOptions);
         if (!attempt.Succeeded)
             return InvalidValidation(attempt.Diagnostic!);
-        var canonical = ExportUtf8(attempt.Result!.Program);
+        var canonical = ExportUtf8Core(attempt.Result!.Program, attempt.Result.Profile);
         var difference = FindDifference(source, canonical);
         return ValidValidation(difference, MathBlockOpenMathDifferenceUnit.Byte);
     }
 
-    /// <summary>Validates segmented Profile 1 UTF-8 bytes and their canonical state.</summary>
+    /// <summary>Validates segmented profile UTF-8 bytes and their canonical state in that profile.</summary>
     public static MathBlockOpenMathValidationResult ValidateUtf8(
         ReadOnlySequence<byte> source,
         MathBlockOpenMathImportOptions? options = null)
@@ -43,37 +43,37 @@ public static partial class MathBlockOpenMath
         var attempt = TryImportUtf8(source, validationOptions);
         if (!attempt.Succeeded)
             return InvalidValidation(attempt.Diagnostic!);
-        var canonical = ExportUtf8(attempt.Result!.Program);
+        var canonical = ExportUtf8Core(attempt.Result!.Program, attempt.Result.Profile);
         var difference = FindDifference(source, canonical);
         return ValidValidation(difference, MathBlockOpenMathDifferenceUnit.Byte);
     }
 
-    /// <summary>Normalizes one valid Profile 1 character document.</summary>
+    /// <summary>Normalizes one valid profile character document within its profile.</summary>
     public static string Normalize(
         string source,
         MathBlockOpenMathImportOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(source);
         var result = Import(source, CreateValidationOptions(options));
-        return Export(result.Program);
+        return ExportCore(result.Program, result.Profile);
     }
 
-    /// <summary>Normalizes contiguous Profile 1 UTF-8 bytes.</summary>
+    /// <summary>Normalizes contiguous profile UTF-8 bytes within their profile.</summary>
     public static byte[] NormalizeUtf8(
         ReadOnlySpan<byte> source,
         MathBlockOpenMathImportOptions? options = null)
     {
         var result = ImportUtf8(source, CreateValidationOptions(options));
-        return ExportUtf8(result.Program);
+        return ExportUtf8Core(result.Program, result.Profile);
     }
 
-    /// <summary>Normalizes segmented Profile 1 UTF-8 bytes.</summary>
+    /// <summary>Normalizes segmented profile UTF-8 bytes within their profile.</summary>
     public static byte[] NormalizeUtf8(
         ReadOnlySequence<byte> source,
         MathBlockOpenMathImportOptions? options = null)
     {
         var result = ImportUtf8(source, CreateValidationOptions(options));
-        return ExportUtf8(result.Program);
+        return ExportUtf8Core(result.Program, result.Profile);
     }
 
     /// <summary>Normalizes a character document between caller-owned endpoints.</summary>
@@ -87,7 +87,7 @@ public static partial class MathBlockOpenMath
         if (ReferenceEquals(source, destination))
             throw new ArgumentException("The source and destination must be different objects.");
         var result = Read(source, CreateValidationOptions(options));
-        Write(result.Program, destination);
+        WriteCore(result.Program, result.Profile, destination);
     }
 
     /// <summary>Normalizes a character document asynchronously.</summary>
@@ -107,7 +107,8 @@ public static partial class MathBlockOpenMath
                 CreateValidationOptions(options),
                 cancellationToken)
             .ConfigureAwait(false);
-        await WriteAsync(result.Program, destination, cancellationToken).ConfigureAwait(false);
+        await WriteCoreAsync(result.Program, result.Profile, destination, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     /// <summary>Normalizes a UTF-8 document between caller-owned streams.</summary>
@@ -121,7 +122,7 @@ public static partial class MathBlockOpenMath
         if (ReferenceEquals(source, destination))
             throw new ArgumentException("The source and destination streams must be different.");
         var result = ReadUtf8(source, CreateValidationOptions(options));
-        WriteUtf8(result.Program, destination);
+        WriteUtf8Core(result.Program, result.Profile, destination);
     }
 
     /// <summary>Normalizes a UTF-8 document asynchronously.</summary>
@@ -141,13 +142,26 @@ public static partial class MathBlockOpenMath
                 CreateValidationOptions(options),
                 cancellationToken)
             .ConfigureAwait(false);
-        await WriteUtf8Async(result.Program, destination, cancellationToken)
+        await WriteUtf8CoreAsync(result.Program, result.Profile, destination, cancellationToken)
             .ConfigureAwait(false);
     }
 
-    /// <summary>Checks whether Profile 1 can export a program.</summary>
+    /// <summary>Checks whether a supported profile can export a program.</summary>
     public static MathBlockOpenMathProgramValidationResult ValidateProgram(
-        MathBlockProgram? program)
+        MathBlockProgram? program) => ValidateProgramCore(program, null);
+
+    /// <summary>Checks whether the specified profile can export a program.</summary>
+    public static MathBlockOpenMathProgramValidationResult ValidateProgram(
+        MathBlockProgram? program,
+        MathBlockOpenMathProfileDescriptor profile)
+    {
+        ArgumentNullException.ThrowIfNull(profile);
+        return ValidateProgramCore(program, profile);
+    }
+
+    private static MathBlockOpenMathProgramValidationResult ValidateProgramCore(
+        MathBlockProgram? program,
+        MathBlockOpenMathProfileDescriptor? profile)
     {
         if (program is null)
         {
@@ -159,7 +173,9 @@ public static partial class MathBlockOpenMath
         }
         try
         {
-            _ = GetUtf8ByteCount(program);
+            _ = profile is null
+                ? GetUtf8ByteCount(program)
+                : GetUtf8ByteCount(program, profile);
             return new MathBlockOpenMathProgramValidationResult(true, null);
         }
         catch (InvalidOperationException exception)
@@ -241,10 +257,16 @@ public static partial class MathBlockOpenMath
     private static MathBlockOpenMathDiagnostic CreateProgramDiagnostic(
         InvalidOperationException exception)
     {
+        if (exception.Data.Contains(OutsideProfileKey))
+        {
+            return new MathBlockOpenMathDiagnostic(
+                MathBlockOpenMathDiagnosticCode.OperationOutsideProfile,
+                exception.Message,
+                nodeIndex: exception.Data[DiagnosticNodeKey] as int?,
+                operationIdentifier: exception.Data[DiagnosticOperationKey] as string);
+        }
         var code = exception.Message switch
         {
-            "The program contains an operation outside the standard OpenMath profile." =>
-                MathBlockOpenMathDiagnosticCode.OperationOutsideProfile,
             "The program node order is invalid." or
             "An operation input must reference an earlier node." =>
                 MathBlockOpenMathDiagnosticCode.InvalidProgramNodeOrder,

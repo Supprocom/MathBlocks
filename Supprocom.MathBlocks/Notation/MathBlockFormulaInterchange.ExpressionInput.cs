@@ -35,7 +35,11 @@ public static partial class MathBlockFormulaInterchange
             output = ParseExpression(expression, state, format, 0);
             var program = state.Builder.Output(outputName, output).Build();
             var exact = MathBlockOpenMath.Import(MathBlockOpenMath.Export(program));
-            return new MathBlockFormulaImportResult(exact, outputName, format);
+            return new MathBlockFormulaImportResult(
+                exact,
+                ProfileForOpenMath(exact.Profile),
+                outputName,
+                format);
         }
         catch (FormatException)
         {
@@ -73,6 +77,18 @@ public static partial class MathBlockFormulaInterchange
         {
             throw new FormatException("The formula UTF-8 source is invalid.", exception);
         }
+    }
+
+    private static MathBlockFormulaProfileDescriptor ProfileForOpenMath(
+        MathBlockOpenMathProfileDescriptor openMathProfile)
+    {
+        for (var index = 0; index < PublishedProfiles.Length; index++)
+        {
+            var profile = PublishedProfiles[index].Value;
+            if (ReferenceEquals(profile.OpenMathProfile, openMathProfile))
+                return profile;
+        }
+        throw new InvalidOperationException("The OpenMath profile has no formula profile.");
     }
 
     private static Dictionary<string, MathBlockType> CopyBindings(
@@ -423,15 +439,14 @@ public static partial class MathBlockFormulaInterchange
             element.Children[0],
             element.Children.Length - 1,
             true);
-        if (string.Equals(symbol.Dictionary, FormulaValueDictionary, StringComparison.Ordinal) &&
-string.Equals(symbol.ContentDictionaryBase, ContentDictionaryBase, StringComparison.Ordinal))
+        if (IsFormulaValueSymbol(symbol))
         {
             var value = ParseStructuredFormulaValue(element, symbol.Name);
             var constant = state.Builder.Constant(value);
             RegisterElementId(element, constant, state);
             return constant;
         }
-        if (!TryGetOperation(symbol, out var operation) || operation is null)
+        if (!TryGetAnyProfileOperation(symbol, out var operation) || operation is null)
         {
             throw new FormatException(
                 $"Formula operation symbol '{symbol.Dictionary}:{symbol.Name}' is not supported.");
@@ -531,21 +546,55 @@ string.Equals(symbol.ContentDictionaryBase, ContentDictionaryBase, StringCompari
         if (element.ContentDictionaryBase is not null)
             return element.ContentDictionaryBase;
 
-        var isMathBlocksDictionary = string.Equals(dictionary, FormulaOperationDictionary, StringComparison.Ordinal) ||
-string.Equals(dictionary, FormulaValueDictionary, StringComparison.Ordinal) ||
-string.Equals(dictionary, FormulaDictionary, StringComparison.Ordinal);
+        var profiles = Profiles;
         if (element.ContentDictionaryGroup is not null)
         {
-            if (!string.Equals(element.ContentDictionaryGroup, ContentDictionaryGroup, StringComparison.Ordinal))
-                return string.Empty;
-            return isMathBlocksDictionary
-                ? ContentDictionaryBase
-                : OfficialContentDictionaryBase;
+            for (var index = 0; index < profiles.Count; index++)
+            {
+                var profile = profiles[index];
+                if (!string.Equals(element.ContentDictionaryGroup, profile.ContentDictionaryGroup, StringComparison.Ordinal))
+                    continue;
+                return profile.IsMathBlocksDictionary(dictionary)
+                    ? profile.ContentDictionaryBase
+                    : OfficialContentDictionaryBase;
+            }
+            return string.Empty;
         }
 
-        return isMathBlocksDictionary
-            ? string.Empty
-            : OfficialContentDictionaryBase;
+        for (var index = 0; index < profiles.Count; index++)
+        {
+            if (profiles[index].IsMathBlocksDictionary(dictionary))
+                return string.Empty;
+        }
+        return OfficialContentDictionaryBase;
+    }
+
+    private static bool IsFormulaValueSymbol(MathBlockFormulaSymbol symbol)
+    {
+        var profiles = Profiles;
+        for (var index = 0; index < profiles.Count; index++)
+        {
+            if (string.Equals(symbol.Dictionary, profiles[index].FormulaValueDictionary, StringComparison.Ordinal) &&
+                string.Equals(symbol.ContentDictionaryBase, profiles[index].ContentDictionaryBase, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static bool TryGetAnyProfileOperation(
+        MathBlockFormulaSymbol symbol,
+        out MathBlockOperation? operation)
+    {
+        var profiles = Profiles;
+        for (var index = 0; index < profiles.Count; index++)
+        {
+            if (profiles[index].TryGetOperation(symbol, out operation))
+                return true;
+        }
+        operation = null;
+        return false;
     }
 
     private static bool TryGetPredefinedSymbol(
@@ -669,8 +718,7 @@ string.Equals(dictionary, FormulaDictionary, StringComparison.Ordinal);
             throw new FormatException("A formula complex value is invalid.");
         RequireFormulaWhitespace(element);
         var symbol = ParseFormulaSymbol(children[0], children.Length - 1, false);
-        if (!string.Equals(symbol.ContentDictionaryBase, ContentDictionaryBase, StringComparison.Ordinal) ||
-!string.Equals(symbol.Dictionary, FormulaValueDictionary, StringComparison.Ordinal) ||
+        if (!IsFormulaValueSymbol(symbol) ||
 !string.Equals(symbol.Name, "complex", StringComparison.Ordinal))
         {
             throw new FormatException("A formula complex value is invalid.");
@@ -715,8 +763,7 @@ string.Equals(dictionary, FormulaDictionary, StringComparison.Ordinal);
                 throw new FormatException("A formula point is invalid.");
             RequireFormulaWhitespace(point);
             var symbol = ParseFormulaSymbol(point.Children[0], point.Children.Length - 1, false);
-            if (!string.Equals(symbol.ContentDictionaryBase, ContentDictionaryBase, StringComparison.Ordinal) ||
-!string.Equals(symbol.Dictionary, FormulaValueDictionary, StringComparison.Ordinal) || !string.Equals(symbol.Name, "point", StringComparison.Ordinal))
+            if (!IsFormulaValueSymbol(symbol) || !string.Equals(symbol.Name, "point", StringComparison.Ordinal))
             {
                 throw new FormatException("A formula point is invalid.");
             }
@@ -740,8 +787,7 @@ string.Equals(dictionary, FormulaDictionary, StringComparison.Ordinal);
                 throw new FormatException("A formula graph edge is invalid.");
             RequireFormulaWhitespace(edge);
             var symbol = ParseFormulaSymbol(edge.Children[0], edge.Children.Length - 1, false);
-            if (!string.Equals(symbol.ContentDictionaryBase, ContentDictionaryBase, StringComparison.Ordinal) ||
-!string.Equals(symbol.Dictionary, FormulaValueDictionary, StringComparison.Ordinal) || !string.Equals(symbol.Name, "edge", StringComparison.Ordinal))
+            if (!IsFormulaValueSymbol(symbol) || !string.Equals(symbol.Name, "edge", StringComparison.Ordinal))
             {
                 throw new FormatException("A formula graph edge is invalid.");
             }
@@ -763,8 +809,7 @@ string.Equals(dictionary, FormulaDictionary, StringComparison.Ordinal);
                 throw new FormatException("A formula run is invalid.");
             RequireFormulaWhitespace(run);
             var symbol = ParseFormulaSymbol(run.Children[0], run.Children.Length - 1, false);
-            if (!string.Equals(symbol.ContentDictionaryBase, ContentDictionaryBase, StringComparison.Ordinal) ||
-!string.Equals(symbol.Dictionary, FormulaValueDictionary, StringComparison.Ordinal) || !string.Equals(symbol.Name, "run", StringComparison.Ordinal))
+            if (!IsFormulaValueSymbol(symbol) || !string.Equals(symbol.Name, "run", StringComparison.Ordinal))
             {
                 throw new FormatException("A formula run is invalid.");
             }
@@ -810,8 +855,7 @@ string.Equals(dictionary, FormulaDictionary, StringComparison.Ordinal);
         }
         if ((string.Equals(symbol.Dictionary, "logic1", StringComparison.Ordinal) &&
 string.Equals(symbol.ContentDictionaryBase, OfficialContentDictionaryBase, StringComparison.Ordinal)) ||
-            (string.Equals(symbol.Dictionary, FormulaValueDictionary, StringComparison.Ordinal) &&
-string.Equals(symbol.ContentDictionaryBase, ContentDictionaryBase, StringComparison.Ordinal)))
+            IsFormulaValueSymbol(symbol))
         {
             if (string.Equals(symbol.Name, "true", StringComparison.Ordinal))
             {

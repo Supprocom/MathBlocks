@@ -40,7 +40,7 @@ public sealed class MathBlockOpenMathDiagnostic
     /// <summary>Gets the one-based source column when it is available.</summary>
     public int? Column { get; }
 
-    /// <summary>Gets the stable Profile 1 path when it is available.</summary>
+    /// <summary>Gets the stable profile path when it is available.</summary>
     public string? ProfilePath { get; }
 
     /// <summary>Gets the program node index when it is available.</summary>

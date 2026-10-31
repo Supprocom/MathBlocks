@@ -8,41 +8,166 @@ public static partial class MathBlockOpenMath
 {
     private static readonly Encoding StrictUtf8 = new UTF8Encoding(false, true);
 
-    /// <summary>Exports a typed program as canonical Profile 1 UTF-8 bytes.</summary>
+    /// <summary>Exports a typed program as canonical UTF-8 bytes in its lowest covering profile.</summary>
     public static byte[] ExportUtf8(MathBlockProgram program)
     {
         ArgumentNullException.ThrowIfNull(program);
-
-        var byteCount = GetUtf8ByteCount(program);
-        var result = new byte[byteCount];
-        using var stream = new MemoryStream(result, 0, result.Length, true, true);
-        using var writer = XmlWriter.Create(stream, CreateWriterSettings(StrictUtf8));
-        WriteDocument(writer, program);
-        writer.Flush();
-        return result;
+        return ExportUtf8Core(program, SelectProfile(program, PublishedProfiles));
     }
 
-    /// <summary>Gets the exact canonical UTF-8 byte count for a typed program.</summary>
+    /// <summary>Exports a typed program as canonical UTF-8 bytes in the specified profile.</summary>
+    public static byte[] ExportUtf8(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile)
+    {
+        RequireExportProfile(program, profile);
+        return ExportUtf8Core(program, profile);
+    }
+
+    /// <summary>Gets the exact canonical UTF-8 byte count in the program's lowest covering profile.</summary>
     public static int GetUtf8ByteCount(MathBlockProgram program)
     {
         ArgumentNullException.ThrowIfNull(program);
+        return GetUtf8ByteCountCore(program, SelectProfile(program, PublishedProfiles));
+    }
 
-        using var stream = new CountingWriteStream();
-        using var writer = XmlWriter.Create(stream, CreateWriterSettings(StrictUtf8));
-        WriteDocument(writer, program);
-        writer.Flush();
-        return stream.ByteCount;
+    /// <summary>Gets the exact canonical UTF-8 byte count in the specified profile.</summary>
+    public static int GetUtf8ByteCount(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile)
+    {
+        RequireExportProfile(program, profile);
+        return GetUtf8ByteCountCore(program, profile);
     }
 
     /// <summary>Tries to write canonical UTF-8 into a supplied destination.</summary>
-    public static unsafe bool TryWriteUtf8(
+    public static bool TryWriteUtf8(
         MathBlockProgram program,
         Span<byte> destination,
         out int bytesWritten)
     {
         ArgumentNullException.ThrowIfNull(program);
+        return TryWriteUtf8Core(
+            program,
+            SelectProfile(program, PublishedProfiles),
+            destination,
+            out bytesWritten);
+    }
 
-        var byteCount = GetUtf8ByteCount(program);
+    /// <summary>Tries to write canonical UTF-8 in the specified profile into a supplied destination.</summary>
+    public static bool TryWriteUtf8(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile,
+        Span<byte> destination,
+        out int bytesWritten)
+    {
+        RequireExportProfile(program, profile);
+        return TryWriteUtf8Core(program, profile, destination, out bytesWritten);
+    }
+
+    /// <summary>Writes canonical UTF-8 through a caller-owned buffer writer.</summary>
+    public static void WriteUtf8(
+        MathBlockProgram program,
+        IBufferWriter<byte> destination)
+    {
+        ArgumentNullException.ThrowIfNull(program);
+        ArgumentNullException.ThrowIfNull(destination);
+        WriteUtf8Core(program, SelectProfile(program, PublishedProfiles), destination);
+    }
+
+    /// <summary>Writes canonical UTF-8 in the specified profile through a caller-owned buffer writer.</summary>
+    public static void WriteUtf8(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile,
+        IBufferWriter<byte> destination)
+    {
+        RequireExportProfile(program, profile);
+        ArgumentNullException.ThrowIfNull(destination);
+        WriteUtf8Core(program, profile, destination);
+    }
+
+    /// <summary>Writes canonical UTF-8 to a caller-owned stream.</summary>
+    public static void WriteUtf8(MathBlockProgram program, Stream destination)
+    {
+        ArgumentNullException.ThrowIfNull(program);
+        ArgumentNullException.ThrowIfNull(destination);
+        if (!destination.CanWrite)
+            throw new ArgumentException("The destination stream is not writable.", nameof(destination));
+        WriteUtf8Core(program, SelectProfile(program, PublishedProfiles), destination);
+    }
+
+    /// <summary>Writes canonical UTF-8 in the specified profile to a caller-owned stream.</summary>
+    public static void WriteUtf8(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile,
+        Stream destination)
+    {
+        RequireExportProfile(program, profile);
+        ArgumentNullException.ThrowIfNull(destination);
+        if (!destination.CanWrite)
+            throw new ArgumentException("The destination stream is not writable.", nameof(destination));
+        WriteUtf8Core(program, profile, destination);
+    }
+
+    /// <summary>Writes canonical characters to a caller-owned text writer.</summary>
+    public static void Write(MathBlockProgram program, TextWriter destination)
+    {
+        ArgumentNullException.ThrowIfNull(program);
+        ArgumentNullException.ThrowIfNull(destination);
+        WriteCore(program, SelectProfile(program, PublishedProfiles), destination);
+    }
+
+    /// <summary>Writes canonical characters in the specified profile to a caller-owned text writer.</summary>
+    public static void Write(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile,
+        TextWriter destination)
+    {
+        RequireExportProfile(program, profile);
+        ArgumentNullException.ThrowIfNull(destination);
+        WriteCore(program, profile, destination);
+    }
+
+    private static void RequireExportProfile(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile)
+    {
+        ArgumentNullException.ThrowIfNull(program);
+        ArgumentNullException.ThrowIfNull(profile);
+        RequireProfileOperations(program, profile);
+    }
+
+    private static byte[] ExportUtf8Core(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile)
+    {
+        var byteCount = GetUtf8ByteCountCore(program, profile);
+        var result = new byte[byteCount];
+        using var stream = new MemoryStream(result, 0, result.Length, true, true);
+        using var writer = XmlWriter.Create(stream, CreateWriterSettings(StrictUtf8));
+        WriteDocument(writer, program, profile);
+        writer.Flush();
+        return result;
+    }
+
+    private static int GetUtf8ByteCountCore(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile)
+    {
+        using var stream = new CountingWriteStream();
+        using var writer = XmlWriter.Create(stream, CreateWriterSettings(StrictUtf8));
+        WriteDocument(writer, program, profile);
+        writer.Flush();
+        return stream.ByteCount;
+    }
+
+    private static unsafe bool TryWriteUtf8Core(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile,
+        Span<byte> destination,
+        out int bytesWritten)
+    {
+        var byteCount = GetUtf8ByteCountCore(program, profile);
         if (destination.Length < byteCount)
         {
             bytesWritten = 0;
@@ -57,7 +182,7 @@ public static partial class MathBlockOpenMath
                 byteCount,
                 FileAccess.Write);
             using var writer = XmlWriter.Create(stream, CreateWriterSettings(StrictUtf8));
-            WriteDocument(writer, program);
+            WriteDocument(writer, program, profile);
             writer.Flush();
         }
 
@@ -65,44 +190,37 @@ public static partial class MathBlockOpenMath
         return true;
     }
 
-    /// <summary>Writes canonical UTF-8 through a caller-owned buffer writer.</summary>
-    public static void WriteUtf8(
+    private static void WriteUtf8Core(
         MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile,
         IBufferWriter<byte> destination)
     {
-        ArgumentNullException.ThrowIfNull(program);
-        ArgumentNullException.ThrowIfNull(destination);
-
-        _ = GetUtf8ByteCount(program);
+        _ = GetUtf8ByteCountCore(program, profile);
         using var stream = new BufferWriterStream(destination);
         using var writer = XmlWriter.Create(stream, CreateWriterSettings(StrictUtf8));
-        WriteDocument(writer, program);
+        WriteDocument(writer, program, profile);
         writer.Flush();
     }
 
-    /// <summary>Writes canonical UTF-8 to a caller-owned stream.</summary>
-    public static void WriteUtf8(MathBlockProgram program, Stream destination)
+    private static void WriteUtf8Core(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile,
+        Stream destination)
     {
-        ArgumentNullException.ThrowIfNull(program);
-        ArgumentNullException.ThrowIfNull(destination);
-        if (!destination.CanWrite)
-            throw new ArgumentException("The destination stream is not writable.", nameof(destination));
-
-        _ = GetUtf8ByteCount(program);
+        _ = GetUtf8ByteCountCore(program, profile);
         using var writer = XmlWriter.Create(destination, CreateWriterSettings(StrictUtf8));
-        WriteDocument(writer, program);
+        WriteDocument(writer, program, profile);
         writer.Flush();
     }
 
-    /// <summary>Writes canonical characters to a caller-owned text writer.</summary>
-    public static void Write(MathBlockProgram program, TextWriter destination)
+    private static void WriteCore(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile,
+        TextWriter destination)
     {
-        ArgumentNullException.ThrowIfNull(program);
-        ArgumentNullException.ThrowIfNull(destination);
-
-        _ = GetUtf8ByteCount(program);
+        _ = GetUtf8ByteCountCore(program, profile);
         using var writer = XmlWriter.Create(destination, CreateWriterSettings());
-        WriteDocument(writer, program);
+        WriteDocument(writer, program, profile);
         writer.Flush();
     }
 

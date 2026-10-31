@@ -4,7 +4,7 @@ using System.Xml;
 
 namespace Supprocom.MathBlocks;
 
-/// <summary>Imports, exports, validates, and describes MathBlocks OpenMath Profile 1.</summary>
+/// <summary>Imports, exports, validates, and describes the MathBlocks OpenMath profiles.</summary>
 public static partial class MathBlockOpenMath
 {
     /// <summary>Gets the supported OpenMath standard version.</summary>
@@ -34,48 +34,69 @@ public static partial class MathBlockOpenMath
         ContentDictionaryBase + "/mathblocks_profile1.cdg";
 
     private const string NamespaceUri = "http://www.openmath.org/OpenMath";
-    private const string ProgramDictionary = "mathblocks_program1";
-    private const string OperationDictionary = "mathblocks_operations1";
-    private const string TypeDictionary = "mathblocks_types1";
-    private const string ValueDictionary = "mathblocks_values1";
-    private static readonly Lazy<ProfileState> StandardProfile = new(CreateStandardProfile);
 
-    /// <summary>Exports a typed program as canonical Profile 1 XML characters.</summary>
+    /// <summary>
+    /// Exports a typed program as canonical XML characters in the lowest profile that contains every
+    /// operation of the program.
+    /// </summary>
     public static string Export(MathBlockProgram program)
     {
         ArgumentNullException.ThrowIfNull(program);
+        return ExportCore(program, SelectProfile(program, PublishedProfiles));
+    }
 
+    /// <summary>Exports a typed program as canonical XML characters in the specified profile.</summary>
+    public static string Export(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile)
+    {
+        ArgumentNullException.ThrowIfNull(program);
+        ArgumentNullException.ThrowIfNull(profile);
+        RequireProfileOperations(program, profile);
+        return ExportCore(program, profile);
+    }
+
+    private static string ExportCore(
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile)
+    {
         var result = new StringBuilder();
         using (var writer = XmlWriter.Create(result, CreateWriterSettings()))
-            WriteDocument(writer, program);
+            WriteDocument(writer, program, profile);
         return result.ToString();
     }
 
-    private static void WriteDocument(XmlWriter writer, MathBlockProgram program)
+    private static void WriteDocument(
+        XmlWriter writer,
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile)
     {
         writer.WriteStartElement("OMOBJ", NamespaceUri);
         writer.WriteAttributeString("xmlns", NamespaceUri);
-        writer.WriteAttributeString("cdbase", ContentDictionaryBase);
-        writer.WriteAttributeString("cdgroup", ContentDictionaryGroup);
+        writer.WriteAttributeString("cdbase", profile.ContentDictionaryBase);
+        writer.WriteAttributeString("cdgroup", profile.ContentDictionaryGroup);
         writer.WriteAttributeString("version", StandardVersion);
 
         WriteApplicationStart(writer);
-        WriteSymbol(writer, ProgramDictionary, "program");
-        WriteNodes(writer, program);
-        WriteOutputs(writer, program);
+        WriteSymbol(writer, profile.ProgramDictionary, "program");
+        WriteNodes(writer, program, profile);
+        WriteOutputs(writer, program, profile);
         writer.WriteEndElement();
 
         writer.WriteEndElement();
     }
 
-    /// <summary>Imports a Profile 1 character document with compatibility options.</summary>
+    /// <summary>Imports a Profile 1 or Profile 2 character document with compatibility options.</summary>
     public static MathBlockOpenMathImportResult Import(string source)
         => Import(source, null);
 
-    private static void WriteNodes(XmlWriter writer, MathBlockProgram program)
+    private static void WriteNodes(
+        XmlWriter writer,
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile)
     {
         WriteApplicationStart(writer);
-        WriteSymbol(writer, ProgramDictionary, "nodes");
+        WriteSymbol(writer, profile.ProgramDictionary, "nodes");
         for (var index = 0; index < program.PlanNodes.Count; index++)
         {
             var node = program.PlanNodes[index];
@@ -87,35 +108,27 @@ public static partial class MathBlockOpenMath
             switch (node.Kind)
             {
                 case MathBlockProgramNodeKind.Input:
-                    WriteSymbol(writer, ProgramDictionary, "input");
+                    WriteSymbol(writer, profile.ProgramDictionary, "input");
                     WriteString(writer, RequireExportName(node.Name, "input"));
-                    WriteType(writer, node.Type);
+                    WriteType(writer, profile, node.Type);
                     break;
                 case MathBlockProgramNodeKind.Constant:
-                    WriteSymbol(writer, ProgramDictionary, "constant");
-                    WriteType(writer, node.Type);
-                    WriteValue(writer, node.Value);
+                    WriteSymbol(writer, profile.ProgramDictionary, "constant");
+                    WriteType(writer, profile, node.Type);
+                    WriteValue(writer, profile, node.Value);
                     break;
                 case MathBlockProgramNodeKind.Operation:
-                    if (node.OperationIdentity is null)
+                    if (node.OperationIdentity is null ||
+                        !profile.TryGetOperationSymbol(
+                            program.Nodes[index].Operation,
+                            out var operationSymbol))
                     {
-                        throw new InvalidOperationException(
-                            "The program contains an operation outside the standard OpenMath profile.");
-                    }
-
-                    var operationSymbol = OperationSymbolName(node.OperationIdentity);
-                    if (!StandardProfile.Value.OperationSymbols.TryGetValue(
-                            operationSymbol,
-                            out var standardOperation) ||
-                        !ReferenceEquals(program.Nodes[index].Operation, standardOperation))
-                    {
-                        throw new InvalidOperationException(
-                            "The program contains an operation outside the standard OpenMath profile.");
+                        throw OutsideProfile(program, profile, false);
                     }
                     WriteSymbol(
                         writer,
-                        OperationDictionary,
-                        operationSymbol);
+                        operationSymbol.Dictionary,
+                        operationSymbol.Name);
                     for (var inputIndex = 0; inputIndex < node.Inputs.Count; inputIndex++)
                     {
                         var input = node.Inputs[inputIndex];
@@ -133,10 +146,13 @@ public static partial class MathBlockOpenMath
         writer.WriteEndElement();
     }
 
-    private static void WriteOutputs(XmlWriter writer, MathBlockProgram program)
+    private static void WriteOutputs(
+        XmlWriter writer,
+        MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile)
     {
         WriteApplicationStart(writer);
-        WriteSymbol(writer, ProgramDictionary, "outputs");
+        WriteSymbol(writer, profile.ProgramDictionary, "outputs");
         for (var index = 0; index < program.OutputCount; index++)
         {
             var nodeIndex = program.GetOutputNodeIndex(index);
@@ -144,7 +160,7 @@ public static partial class MathBlockOpenMath
                 throw new InvalidOperationException("A program output has an invalid node.");
 
             WriteApplicationStart(writer);
-            WriteSymbol(writer, ProgramDictionary, "output");
+            WriteSymbol(writer, profile.ProgramDictionary, "output");
             WriteString(writer, RequireExportName(program.GetOutputName(index), "output"));
             WriteReference(writer, nodeIndex);
             writer.WriteEndElement();
@@ -152,21 +168,7 @@ public static partial class MathBlockOpenMath
         writer.WriteEndElement();
     }
 
-    private static ProfileState CreateStandardProfile()
-    {
-        var operations = MathBlockCatalog.Standard.Operations;
-        var symbols = new Dictionary<string, MathBlockOperation>(StringComparer.Ordinal);
-        for (var index = 0; index < operations.Count; index++)
-        {
-            var operation = operations[index];
-            var symbol = OperationSymbolName(operation.Identity);
-            if (!symbols.TryAdd(symbol, operation))
-                throw new InvalidOperationException("The standard catalog has duplicate OpenMath symbols.");
-        }
-        return new ProfileState(symbols);
-    }
-
-    private static string OperationSymbolName(string? identity)
+    internal static string OperationSymbolName(string? identity)
     {
         if (string.IsNullOrEmpty(identity))
             throw new InvalidOperationException("An operation identity is missing.");
@@ -198,39 +200,51 @@ public static partial class MathBlockOpenMath
         return name;
     }
 
-    private static void WriteType(XmlWriter writer, MathBlockType type)
+    private static void WriteType(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        MathBlockType type)
     {
         RequireSupportedType(type, false);
         WriteApplicationStart(writer);
-        WriteSymbol(writer, TypeDictionary, "type");
-        WriteSymbol(writer, TypeDictionary, KindName(type.Kind));
-        WriteUnit(writer, type.Unit);
+        WriteSymbol(writer, profile.TypeDictionary, "type");
+        WriteSymbol(writer, profile.TypeDictionary, KindName(type.Kind));
+        WriteUnit(writer, profile, type.Unit);
         WriteInteger(writer, type.Rows);
         WriteInteger(writer, type.Columns);
         writer.WriteEndElement();
     }
 
-    private static void WriteUnit(XmlWriter writer, MathBlockUnit unit)
+    private static void WriteUnit(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        MathBlockUnit unit)
     {
         WriteApplicationStart(writer);
-        WriteSymbol(writer, TypeDictionary, "unit");
-        WriteRational(writer, unit.Dimension0);
-        WriteRational(writer, unit.Dimension1);
-        WriteRational(writer, unit.Dimension2);
-        WriteRational(writer, unit.Dimension3);
+        WriteSymbol(writer, profile.TypeDictionary, "unit");
+        WriteRational(writer, profile, unit.Dimension0);
+        WriteRational(writer, profile, unit.Dimension1);
+        WriteRational(writer, profile, unit.Dimension2);
+        WriteRational(writer, profile, unit.Dimension3);
         writer.WriteEndElement();
     }
 
-    private static void WriteRational(XmlWriter writer, MathRational value)
+    private static void WriteRational(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        MathRational value)
     {
         WriteApplicationStart(writer);
-        WriteSymbol(writer, TypeDictionary, "rational");
+        WriteSymbol(writer, profile.TypeDictionary, "rational");
         WriteInteger(writer, value.Numerator);
         WriteInteger(writer, value.Denominator);
         writer.WriteEndElement();
     }
 
-    private static void WriteValue(XmlWriter writer, MathBlockValue value)
+    private static void WriteValue(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        MathBlockValue value)
     {
         if (!value.IsValid)
             throw new InvalidOperationException("An OpenMath constant must be valid.");
@@ -241,63 +255,72 @@ public static partial class MathBlockOpenMath
                 WriteDouble(writer, value.AsScalar());
                 break;
             case MathBlockValueKind.Boolean:
-                WriteBoolean(writer, value.AsBoolean());
+                WriteBoolean(writer, profile, value.AsBoolean());
                 break;
             case MathBlockValueKind.Complex:
-                WriteComplex(writer, value.AsComplex());
+                WriteComplex(writer, profile, value.AsComplex());
                 break;
             case MathBlockValueKind.Vector:
-                WriteVector(writer, value.AsVector());
+                WriteVector(writer, profile, value.AsVector());
                 break;
             case MathBlockValueKind.Matrix:
-                WriteMatrix(writer, value.AsMatrix());
+                WriteMatrix(writer, profile, value.AsMatrix());
                 break;
             case MathBlockValueKind.ComplexVector:
-                WriteComplexVector(writer, value.AsComplexVector());
+                WriteComplexVector(writer, profile, value.AsComplexVector());
                 break;
             case MathBlockValueKind.ComplexMatrix:
-                WriteComplexMatrix(writer, value.AsComplexMatrix());
+                WriteComplexMatrix(writer, profile, value.AsComplexMatrix());
                 break;
             case MathBlockValueKind.PointSet:
-                WritePointSet(writer, value.AsPointSet());
+                WritePointSet(writer, profile, value.AsPointSet());
                 break;
             case MathBlockValueKind.Graph:
-                WriteGraph(writer, value.AsGraph());
+                WriteGraph(writer, profile, value.AsGraph());
                 break;
             case MathBlockValueKind.RunSet:
-                WriteRunSet(writer, value.AsRunSet());
+                WriteRunSet(writer, profile, value.AsRunSet());
                 break;
             case MathBlockValueKind.BooleanVector:
-                WriteBooleanVector(writer, value.AsBooleanVector());
+                WriteBooleanVector(writer, profile, value.AsBooleanVector());
                 break;
             default:
                 throw new InvalidOperationException("The constant value kind is not supported.");
         }
     }
 
-    private static void WriteVector(XmlWriter writer, Supprocom.MathBlocks.MathBlockVector values)
+    private static void WriteVector(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        Supprocom.MathBlocks.MathBlockVector values)
     {
         WriteApplicationStart(writer);
-        WriteSymbol(writer, ValueDictionary, "vector");
+        WriteSymbol(writer, profile.ValueDictionary, "vector");
         for (var index = 0; index < values.Count; index++)
             WriteDouble(writer, values[index]);
         writer.WriteEndElement();
     }
 
-    private static void WriteMatrix(XmlWriter writer, MathBlockMatrix value)
+    private static void WriteMatrix(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        MathBlockMatrix value)
     {
         WriteApplicationStart(writer);
-        WriteSymbol(writer, ValueDictionary, "matrix");
+        WriteSymbol(writer, profile.ValueDictionary, "matrix");
         for (var row = 0; row < value.Rows; row++)
             for (var column = 0; column < value.Columns; column++)
                 WriteDouble(writer, value[row, column]);
         writer.WriteEndElement();
     }
 
-    private static void WriteComplex(XmlWriter writer, MathBlockComplexValue value)
+    private static void WriteComplex(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        MathBlockComplexValue value)
     {
         WriteApplicationStart(writer);
-        WriteSymbol(writer, ValueDictionary, "complex");
+        WriteSymbol(writer, profile.ValueDictionary, "complex");
         WriteDouble(writer, value.Real);
         WriteDouble(writer, value.Imaginary);
         writer.WriteEndElement();
@@ -305,33 +328,40 @@ public static partial class MathBlockOpenMath
 
     private static void WriteComplexVector(
         XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
         Supprocom.MathBlocks.MathBlockComplexVector values)
     {
         WriteApplicationStart(writer);
-        WriteSymbol(writer, ValueDictionary, "complex-vector");
+        WriteSymbol(writer, profile.ValueDictionary, "complex-vector");
         for (var index = 0; index < values.Count; index++)
-            WriteComplex(writer, values[index]);
+            WriteComplex(writer, profile, values[index]);
         writer.WriteEndElement();
     }
 
-    private static void WriteComplexMatrix(XmlWriter writer, MathBlockComplexMatrix value)
+    private static void WriteComplexMatrix(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        MathBlockComplexMatrix value)
     {
         WriteApplicationStart(writer);
-        WriteSymbol(writer, ValueDictionary, "complex-matrix");
+        WriteSymbol(writer, profile.ValueDictionary, "complex-matrix");
         for (var row = 0; row < value.Rows; row++)
             for (var column = 0; column < value.Columns; column++)
-                WriteComplex(writer, value[row, column]);
+                WriteComplex(writer, profile, value[row, column]);
         writer.WriteEndElement();
     }
 
-    private static void WritePointSet(XmlWriter writer, Supprocom.MathBlocks.MathBlockPointSet values)
+    private static void WritePointSet(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        Supprocom.MathBlocks.MathBlockPointSet values)
     {
         WriteApplicationStart(writer);
-        WriteSymbol(writer, ValueDictionary, "point-set");
+        WriteSymbol(writer, profile.ValueDictionary, "point-set");
         for (var index = 0; index < values.Count; index++)
         {
             WriteApplicationStart(writer);
-            WriteSymbol(writer, ValueDictionary, "point");
+            WriteSymbol(writer, profile.ValueDictionary, "point");
             WriteDouble(writer, values[index].X);
             WriteDouble(writer, values[index].Y);
             writer.WriteEndElement();
@@ -339,16 +369,19 @@ public static partial class MathBlockOpenMath
         writer.WriteEndElement();
     }
 
-    private static void WriteGraph(XmlWriter writer, MathBlockGraph value)
+    private static void WriteGraph(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        MathBlockGraph value)
     {
         WriteApplicationStart(writer);
-        WriteSymbol(writer, ValueDictionary, "graph");
+        WriteSymbol(writer, profile.ValueDictionary, "graph");
         WriteInteger(writer, value.VertexCount);
         for (var index = 0; index < value.Count; index++)
         {
             var edge = value[index];
             WriteApplicationStart(writer);
-            WriteSymbol(writer, ValueDictionary, "edge");
+            WriteSymbol(writer, profile.ValueDictionary, "edge");
             WriteInteger(writer, edge.From);
             WriteInteger(writer, edge.To);
             WriteDouble(writer, edge.Weight);
@@ -357,14 +390,17 @@ public static partial class MathBlockOpenMath
         writer.WriteEndElement();
     }
 
-    private static void WriteRunSet(XmlWriter writer, Supprocom.MathBlocks.MathBlockRunSet values)
+    private static void WriteRunSet(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        Supprocom.MathBlocks.MathBlockRunSet values)
     {
         WriteApplicationStart(writer);
-        WriteSymbol(writer, ValueDictionary, "run-set");
+        WriteSymbol(writer, profile.ValueDictionary, "run-set");
         for (var index = 0; index < values.Count; index++)
         {
             WriteApplicationStart(writer);
-            WriteSymbol(writer, ValueDictionary, "run");
+            WriteSymbol(writer, profile.ValueDictionary, "run");
             WriteInteger(writer, values[index].Start);
             WriteInteger(writer, values[index].Length);
             WriteDouble(writer, values[index].Value);
@@ -373,12 +409,15 @@ public static partial class MathBlockOpenMath
         writer.WriteEndElement();
     }
 
-    private static void WriteBooleanVector(XmlWriter writer, Supprocom.MathBlocks.MathBlockBooleanVector values)
+    private static void WriteBooleanVector(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        Supprocom.MathBlocks.MathBlockBooleanVector values)
     {
         WriteApplicationStart(writer);
-        WriteSymbol(writer, ValueDictionary, "boolean-vector");
+        WriteSymbol(writer, profile.ValueDictionary, "boolean-vector");
         for (var index = 0; index < values.Count; index++)
-            WriteBoolean(writer, values[index]);
+            WriteBoolean(writer, profile, values[index]);
         writer.WriteEndElement();
     }
 
@@ -393,8 +432,11 @@ public static partial class MathBlockOpenMath
         writer.WriteFullEndElement();
     }
 
-    private static void WriteBoolean(XmlWriter writer, bool value) =>
-        WriteSymbol(writer, ValueDictionary, value ? "true" : "false");
+    private static void WriteBoolean(
+        XmlWriter writer,
+        MathBlockOpenMathProfileDescriptor profile,
+        bool value) =>
+        WriteSymbol(writer, profile.ValueDictionary, value ? "true" : "false");
 
     private static void WriteInteger(XmlWriter writer, int value)
     {
@@ -568,7 +610,4 @@ public static partial class MathBlockOpenMath
         new(message, innerException);
 
     private readonly record struct OpenMathSymbol(string Dictionary, string Name);
-
-    private sealed record ProfileState(
-        IReadOnlyDictionary<string, MathBlockOperation> OperationSymbols);
 }
