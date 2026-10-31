@@ -414,7 +414,7 @@ public sealed class MathBlockOpenMathInputTests
     [Fact]
     public void EveryOperationRoundTripsThroughContiguousUTF8Input()
     {
-        Assert.Equal(337, MathBlockCatalog.Standard.Operations.Count);
+        Assert.Equal(MathBlockOpenMath.Profile2.Operations.Count, MathBlockCatalog.Standard.Operations.Count);
         foreach (var operation in MathBlockCatalog.Standard.Operations)
         {
             var regression = operation.RegressionCases[0];

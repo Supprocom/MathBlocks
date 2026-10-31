@@ -15,13 +15,13 @@ public sealed class MathBlockFormulaInterchangeApiTests
             .Where(method => !method.IsSpecialName)
             .ToArray();
 
-        Assert.Equal(30, methods.Length);
+        Assert.Equal(39, methods.Length);
         Assert.Equal(
             new Dictionary<string, int>(StringComparer.Ordinal)
             {
-                ["Export"] = 1,
-                ["ExportUtf8"] = 1,
-                ["GetUtf8ByteCount"] = 1,
+                ["Export"] = 2,
+                ["ExportUtf8"] = 2,
+                ["GetUtf8ByteCount"] = 2,
                 ["Import"] = 2,
                 ["ImportUtf8"] = 3,
                 ["Normalize"] = 1,
@@ -30,19 +30,20 @@ public sealed class MathBlockFormulaInterchangeApiTests
                 ["ReadAsync"] = 1,
                 ["ReadUtf8"] = 1,
                 ["ReadUtf8Async"] = 1,
+                ["SelectProfile"] = 1,
                 ["TryGetOperation"] = 1,
                 ["TryGetOperationMapping"] = 1,
                 ["TryImport"] = 1,
                 ["TryImportUtf8"] = 2,
                 ["TryRead"] = 1,
                 ["TryReadUtf8"] = 1,
-                ["TryWriteUtf8"] = 1,
+                ["TryWriteUtf8"] = 2,
                 ["Validate"] = 1,
-                ["ValidateProgram"] = 1,
+                ["ValidateProgram"] = 2,
                 ["ValidateUtf8"] = 1,
-                ["Write"] = 1,
+                ["Write"] = 2,
                 ["WriteAsync"] = 1,
-                ["WriteUtf8"] = 2,
+                ["WriteUtf8"] = 4,
                 ["WriteUtf8Async"] = 1
             },
             methods

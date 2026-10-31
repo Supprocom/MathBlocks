@@ -44,7 +44,7 @@ public sealed class MathBlockFormulaInterchangeTests
                 MathBlockFormulaMappingClassification.CanonicalPatternMapping or
                 MathBlockFormulaMappingClassification.Unsupported);
         Assert.Equal(
-            MathBlockCatalog.Standard.Operations.Select(operation => operation.Identity),
+            MathBlockOpenMath.Profile.Operations.Select(definition => definition.Identity),
             profile.Operations.Select(mapping => mapping.Identity), StringComparer.Ordinal);
         Assert.Equal(
             337,
@@ -103,8 +103,8 @@ public sealed class MathBlockFormulaInterchangeTests
                 .ToArray();
             Assert.Equal(337, names.Length);
             Assert.Equal(
-                MathBlockCatalog.Standard.Operations
-                    .Select(operation => $"op.{operation.Identifier}.v{operation.Version}")
+                profile.Operations
+                    .Select(mapping => $"op.{mapping.Operation.Identifier}.v{mapping.Operation.Version}")
                     .Order(StringComparer.Ordinal),
                 names, StringComparer.Ordinal);
         }
@@ -136,7 +136,7 @@ public sealed class MathBlockFormulaInterchangeTests
     [Fact]
     public void EveryOperationRoundTripsThroughEverySupportedFormat()
     {
-        Assert.Equal(337, MathBlockCatalog.Standard.Operations.Count);
+        Assert.Equal(MathBlockFormulaInterchange.Profile2.Operations.Count, MathBlockCatalog.Standard.Operations.Count);
         foreach (var operation in MathBlockCatalog.Standard.Operations)
         {
             var regression = operation.RegressionCases[0];

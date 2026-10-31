@@ -25,11 +25,24 @@
 
   <ItemGroup>
     <Compile Include="..\Supprocom.MathBlocks\Blocks\**\*.Tests.cs" LinkBase="Blocks" />
+    <Compile Include="..\MathBlocks.OpenMathProfileGenerator\OpenMathProfileArtifacts.cs"
+             Link="Generators\OpenMathProfileArtifacts.cs" />
+    <Compile Include="..\MathBlocks.FormulaProfileGenerator\FormulaProfileArtifacts.cs"
+             Link="Generators\FormulaProfileArtifacts.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="..\openmath\v1\*.*"
           Link="openmath\v1\%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\openmath\v2\*.*"
+          Link="openmath\v2\%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\formula\v1\*.*"
+          Link="formula\v1\%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\formula\v2\*.*"
+          Link="formula\v2\%(Filename)%(Extension)"
           CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
