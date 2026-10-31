@@ -54,7 +54,10 @@ public sealed class MathBlockInvalidStateTests
             ["geometry.centroid/overflow"] = ("geometry.centroid@1", () => [Points((1.7e308d, 0d), (1.7e308d, 0d))]),
             ["geometry.delaunay-graph/overflow"] = ("geometry.delaunay-graph@1", () => [Points((0d, 0d), (1e200d, 0d), (0d, 1e200d))]),
             ["geometry.gabriel-graph/overflow"] = ("geometry.gabriel-graph@1", () => [Points((0d, 0d), (1e200d, 0d), (0d, 1e200d))]),
-            ["topology.zero-dimensional-persistence/overflow"] = ("topology.zero-dimensional-persistence@1", () => [Points((0d, 0d), (1e200d, 0d), (0d, 1e200d))])
+            ["topology.zero-dimensional-persistence/overflow"] = ("topology.zero-dimensional-persistence@1", () => [Points((0d, 0d), (1e200d, 0d), (0d, 1e200d))]),
+
+            // A row norm that overflows asked for int.MaxValue squarings.
+            ["matrix.exponential/overflowing-norm"] = ("matrix.exponential@1", () => [Matrix(2, 2, 1.7e308d, 1.7e308d, 0d, 0d)])
         };
 
     /// <summary>Gets the out-of-domain case names.</summary>
@@ -72,6 +75,7 @@ public sealed class MathBlockInvalidStateTests
         var inputs = create();
         var declared = operation.ResolveOutputType(inputs.Select(input => input.Type).ToArray());
 
+        // matrix.exponential used to run for int.MaxValue squarings here; the time limit turns that into a failure.
         var result = await Task.Run(() => operation.Evaluate(inputs)).WaitAsync(TimeSpan.FromSeconds(60));
 
         Assert.False(result.IsValid, $"{name} returned a valid {result.Type}.");

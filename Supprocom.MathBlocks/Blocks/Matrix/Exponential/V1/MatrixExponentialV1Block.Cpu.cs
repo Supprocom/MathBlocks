@@ -16,6 +16,10 @@ public static partial class MathBlockAdvanced
             norm = Math.Max(norm, rowSum);
         }
 
+        // An overflowing norm would ask for int.MaxValue squarings. The result is then not finite, as for any
+        // overflow in the series or the squarings.
+        if (!double.IsFinite(norm))
+            return new MathBlockMatrix(matrix.Rows, matrix.Columns, MathBlockCollectionPrimitives.Repeat(double.NaN, matrix.Rows * matrix.Columns), true);
         var scaling = norm > 1d ? Math.Max(0, (int)Math.Ceiling(Math.Log2(norm))) : 0;
         var scaled = MathBlockLinearAlgebra.Scale(matrix, Math.Pow(2d, -scaling));
         var result = MathBlockLinearAlgebra.Identity(matrix.Rows);
