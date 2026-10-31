@@ -58,3 +58,23 @@ static Supprocom.MathBlocks.MathBlockCausalityInfo.Pointwise.get -> Supprocom.Ma
 static Supprocom.MathBlocks.MathBlockCausalityInfo.Trailing(int widthInputIndex) -> Supprocom.MathBlocks.MathBlockCausalityInfo!
 static Supprocom.MathBlocks.MathBlockCausalityInfo.WholeSeries.get -> Supprocom.MathBlocks.MathBlockCausalityInfo!
 Supprocom.MathBlocks.Cuda.MathBlockCudaOperationFamily.Window = 11 -> Supprocom.MathBlocks.Cuda.MathBlockCudaOperationFamily
+Supprocom.MathBlocks.MathBlockFusedExpression
+Supprocom.MathBlocks.MathBlockFusedExpression.CreateCudaResult(System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>? validity, System.Collections.Generic.IReadOnlyList<System.Array!>! outputs, System.Collections.Generic.IReadOnlyList<int[]!>! validityOutputs, ulong invalidMask) -> Supprocom.MathBlocks.MathBlockFusedResult!
+Supprocom.MathBlocks.MathBlockFusedExpression.CudaFunctionName.get -> string!
+Supprocom.MathBlocks.MathBlockFusedExpression.CudaKernelName.get -> string!
+Supprocom.MathBlocks.MathBlockFusedExpression.CudaSource.get -> string!
+Supprocom.MathBlocks.MathBlockFusedExpression.EvaluateCoreCLR(System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>? validity = null) -> Supprocom.MathBlocks.MathBlockFusedResult!
+Supprocom.MathBlocks.MathBlockFusedExpression.Fingerprint.get -> string!
+Supprocom.MathBlocks.MathBlockFusedExpression.MaskNodeIndexes.get -> System.Collections.Generic.IReadOnlyList<int>!
+Supprocom.MathBlocks.MathBlockFusedExpression.OutputNames.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Supprocom.MathBlocks.MathBlockFusedExpression.Program.get -> Supprocom.MathBlocks.MathBlockProgram!
+Supprocom.MathBlocks.MathBlockFusedExpression.ScalarInputNames.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Supprocom.MathBlocks.MathBlockFusedExpression.VectorInputNames.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Supprocom.MathBlocks.MathBlockFusedResult
+Supprocom.MathBlocks.MathBlockFusedResult.InvalidMask.get -> ulong
+Supprocom.MathBlocks.MathBlockFusedResult.Outputs.get -> System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>!
+Supprocom.MathBlocks.MathBlockFusedResult.Validity.get -> System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>!
+const Supprocom.MathBlocks.MathBlockFusedExpression.MaximumOperationNodes = 64 -> int
+const Supprocom.MathBlocks.MathBlockFusedExpression.MaximumOutputs = 4 -> int
+const Supprocom.MathBlocks.MathBlockFusedExpression.MaximumVectorInputs = 16 -> int
+static Supprocom.MathBlocks.MathBlockFusedExpression.Create(Supprocom.MathBlocks.MathBlockProgram! program) -> Supprocom.MathBlocks.MathBlockFusedExpression!
