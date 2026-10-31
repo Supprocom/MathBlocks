@@ -2,11 +2,12 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Supprocom.MathBlocks.Cuda;
+using Xunit.Abstractions;
 
 namespace Supprocom.MathBlocks.Tests;
 
 /// <summary>Contains regression tests for Math Block Cuda Worker Tests.</summary>
-public sealed class MathBlockCudaWorkerTests
+public sealed class MathBlockCudaWorkerTests(ITestOutputHelper testOutput)
 {
     /// <summary>Verifies the NVRTC P/Invoke path compiles UTF-8 options without a CUDA device.</summary>
     [Fact]
@@ -26,12 +27,19 @@ public sealed class MathBlockCudaWorkerTests
         Assert.NotEmpty(ptx);
     }
 
-    /// <summary>Verifies the installed NVRTC reports a supported version and the file it was loaded from.</summary>
+    /// <summary>
+    /// Verifies the installed NVRTC reports a supported version and the file it was loaded from, and, when
+    /// MATHBLOCKS_EXPECTED_NVRTC_VERSION is set, that it is that major.minor version.
+    /// </summary>
     [Fact]
     [Trait("Category", "NvrtcInteropContract")]
     public void NVRTCLibraryReportsItsVersionAndFile()
     {
         var library = MathBlockCudaNvrtcLibrary.Current;
+        testOutput.WriteLine(library.ToString());
+        var expected = Environment.GetEnvironmentVariable("MATHBLOCKS_EXPECTED_NVRTC_VERSION");
+        if (!string.IsNullOrEmpty(expected))
+            Assert.Equal(expected, $"{library.Major}.{library.Minor}");
 
         Assert.True(library.Major >= 12, library.ToString());
         Assert.True(Path.IsPathFullyQualified(library.Path), library.ToString());
