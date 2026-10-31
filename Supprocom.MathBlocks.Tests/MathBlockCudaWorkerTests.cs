@@ -888,6 +888,127 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
             string.Join(Environment.NewLine, failures.Take(20)));
     }
 
+    /// <summary>
+    /// Gets every scalar and special operation with scalar inputs, plus the elementwise and reduction vector forms
+    /// whose result can carry the sign of a zero input.
+    /// </summary>
+    public static TheoryData<string> SignedZeroParityOperations
+    {
+        get
+        {
+            var data = new TheoryData<string>();
+            foreach (var operation in MathBlockCatalog.Standard.Operations)
+            {
+                if ((operation.Identifier.StartsWith("scalar.", StringComparison.Ordinal) ||
+                     operation.Identifier.StartsWith("special.", StringComparison.Ordinal)) &&
+                    operation.RegressionCases[0].Inputs.All(input => input.Type.Kind == MathBlockValueKind.Scalar))
+                {
+                    data.Add(operation.Identifier);
+                }
+            }
+            foreach (var identifier in SignedZeroVectorOperations)
+                data.Add(identifier);
+            foreach (var identifier in SignedZeroComplexOperations)
+                data.Add(identifier);
+            return data;
+        }
+    }
+
+    private static readonly string[] SignedZeroVectorOperations =
+    [
+        "vector.absolute", "vector.sign", "vector.positive-part", "vector.square", "vector.square-root",
+        "vector.exponential", "vector.cumulative-sum", "vector.cumulative-product", "vector.sum", "vector.product",
+        "vector.maximum", "vector.minimum", "vector.add", "vector.subtract", "vector.multiply", "vector.divide",
+        "vector.scale", "vector.add-scalar", "vector.power"
+    ];
+
+    // The C99 Annex G branch-cut operations, which take the sign of a zero imaginary part from arc-tangent-2.
+    private static readonly string[] SignedZeroComplexOperations =
+    [
+        "complex.phase", "complex.natural-logarithm", "complex.square-root"
+    ];
+
+    /// <summary>
+    /// Verifies CUDA gives the CoreCLR bits for every combination of +0, -0, 1 and -1 in the scalar inputs, with
+    /// vector inputs that hold every pairing of signed zeros.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(SignedZeroParityOperations))]
+    public void CUDASignedZeroMatchesCoreCLRBitForBit(string identifier)
+    {
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        var operation = MathBlockCatalog.Standard.Get(identifier);
+        var cases = CreateSignedZeroCases(operation);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var inputNodes = cases[0].Select((input, index) => builder.Input($"input-{index}", input.Type)).ToArray();
+        var program = builder.Output("result", builder.Apply(operation.Identifier, operation.Version, inputNodes)).Build();
+        using var compiled = new MathBlocksCUDAWorker().Compile(program, Named(cases[0]));
+        var failures = new List<string>();
+        foreach (var inputs in cases)
+        {
+            compiled.UploadInputs(Named(inputs));
+            compiled.ExecuteResident();
+            var cuda = compiled.ReadOutputs()["result"];
+            var coreclr = operation.Evaluate(inputs);
+            if (!IsExact(coreclr, cuda))
+                failures.Add($"({string.Join(", ", inputs.Select(Describe))}): CoreCLR={Describe(coreclr)}, CUDA={Describe(cuda)}");
+        }
+
+        Assert.True(failures.Count == 0, $"{identifier}: {failures.Count} of {cases.Length} cases differ: {string.Join("; ", failures)}");
+
+        static Dictionary<string, MathBlockValue> Named(MathBlockValue[] inputs) =>
+            inputs.Select((input, index) => (Name: $"input-{index}", Input: input))
+                .ToDictionary(item => item.Name, item => item.Input, StringComparer.Ordinal);
+    }
+
+    private static MathBlockValue[][] CreateSignedZeroCases(MathBlockOperation operation)
+    {
+        double[] scalars = [0d, -0d, 1d, -1d];
+        double[][] vectors =
+        [
+            [0d, 0d, -0d, -0d, 1d, -1d, 0d, -0d],
+            [0d, -0d, 0d, -0d, 0d, 0d, 1d, -1d]
+        ];
+        var reference = operation.RegressionCases[0].Inputs;
+        var cases = new List<MathBlockValue[]>();
+        var combinations = 1;
+        for (var index = 0; index < reference.Count; index++)
+        {
+            if (reference[index].Type.Kind == MathBlockValueKind.Scalar)
+                combinations *= scalars.Length;
+            else if (reference[index].Type.Kind == MathBlockValueKind.Complex)
+                combinations *= scalars.Length * scalars.Length;
+        }
+        for (var combination = 0; combination < combinations; combination++)
+        {
+            var inputs = new MathBlockValue[reference.Count];
+            var remaining = combination;
+            var vectorIndex = 0;
+            for (var index = 0; index < reference.Count; index++)
+            {
+                var unit = reference[index].Type.Unit;
+                if (reference[index].Type.Kind == MathBlockValueKind.Scalar)
+                {
+                    inputs[index] = MathBlockValue.Scalar(scalars[remaining % scalars.Length], unit);
+                    remaining /= scalars.Length;
+                }
+                else if (reference[index].Type.Kind == MathBlockValueKind.Complex)
+                {
+                    var real = scalars[remaining % scalars.Length];
+                    remaining /= scalars.Length;
+                    inputs[index] = MathBlockValue.Complex(new Complex(real, scalars[remaining % scalars.Length]), unit);
+                    remaining /= scalars.Length;
+                }
+                else
+                {
+                    inputs[index] = MathBlockValue.Vector(vectors[vectorIndex++ % vectors.Length], unit);
+                }
+            }
+            cases.Add(inputs);
+        }
+        return [.. cases];
+    }
+
     private static double[] CreateUnitIntervalInputs()
     {
         var values = new List<double> { 0d, -0d, 1d, -1d };
