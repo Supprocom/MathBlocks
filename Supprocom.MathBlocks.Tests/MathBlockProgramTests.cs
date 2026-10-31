@@ -165,6 +165,46 @@ public sealed class MathBlockProgramTests
         });
     }
 
+    /// <summary>Verifies serial CoreCLR execution runs every node of a multi-node level.</summary>
+    [Fact]
+    public void SerialCoreCLRExecutionRunsEveryNodeOfAMultiNodeLevel()
+    {
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var input = builder.Input("input", MathBlockType.Vector());
+        var doubled = builder.Apply("vector.scale", inputs: [input, builder.Constant(MathBlockValue.Scalar(2d))]);
+        var tripled = builder.Apply("vector.scale", inputs: [input, builder.Constant(MathBlockValue.Scalar(3d))]);
+        var quintupled = builder.Apply("vector.scale", inputs: [input, builder.Constant(MathBlockValue.Scalar(5d))]);
+        var partial = builder.Apply("vector.add", inputs: [doubled, tripled]);
+        var total = builder.Apply("vector.add", inputs: [partial, quintupled]);
+        var program = builder
+            .Output("doubled", doubled)
+            .Output("tripled", tripled)
+            .Output("quintupled", quintupled)
+            .Output("total", total)
+            .Build();
+        var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
+        {
+            ["input"] = MathBlockValue.Vector([1d, 2d, 3d, 4d])
+        };
+
+        var serial = new MathBlocksCPUWorker(1).Execute(program, inputs);
+        var parallel = new MathBlocksCPUWorker(2).Execute(program, inputs);
+
+        var expected = new Dictionary<string, double[]>(StringComparer.Ordinal)
+        {
+            ["doubled"] = [2d, 4d, 6d, 8d],
+            ["tripled"] = [3d, 6d, 9d, 12d],
+            ["quintupled"] = [5d, 10d, 15d, 20d],
+            ["total"] = [10d, 20d, 30d, 40d]
+        };
+        foreach (var (name, values) in expected)
+        {
+            Assert.True(serial[name].IsValid, $"Serial output '{name}' is invalid: {serial[name].InvalidReason}");
+            Assert.Equal(values, serial[name].AsVector().ToArray());
+            Assert.Equal(parallel[name].AsVector().ToArray(), serial[name].AsVector().ToArray());
+        }
+    }
+
     private static MathBlockProgram BuildAffineProgram(double constant)
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
