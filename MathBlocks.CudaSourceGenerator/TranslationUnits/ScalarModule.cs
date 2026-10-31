@@ -183,6 +183,9 @@ internal static unsafe class ScalarModule
     [CudaDevice]
     private static double mathblocks_sine(double value)
     {
+        // Odd function: f(-0) = -0 and f(+0) = +0, as IEEE 754 gives it.
+        if (value == 0.0)
+            return value;
         double sign = 1.0;
         double x = value;
         if (x < 0.0)
@@ -276,6 +279,9 @@ internal static unsafe class ScalarModule
     [CudaDevice]
     private static double mathblocks_arc_tangent(double value)
     {
+        // Odd function: f(-0) = -0 and f(+0) = +0, as IEEE 754 gives it.
+        if (value == 0.0)
+            return value;
         double sign = value < 0.0 ? -1.0 : 1.0;
         double x = Math.Abs(value);
         double offset = 0.0;
@@ -343,8 +349,9 @@ internal static unsafe class ScalarModule
     [CudaDevice]
     private static double mathblocks_error_function(double value)
     {
+        // Odd function: f(-0) = -0 and f(+0) = +0, as IEEE 754 gives it.
         if (value == 0.0)
-            return 0.0;
+            return value;
         double magnitude = Math.Abs(value);
         double t = 1.0 / (1.0 + 0.5 * magnitude);
         double tau = t * mathblocks_exponential(
@@ -423,6 +430,11 @@ internal static unsafe class ScalarModule
             case 27: output->scalar_value = mathblocks_arc_tangent_2(a, b); break;
             case 28:
             {
+                if (a == 0.0)
+                {
+                    output->scalar_value = a;
+                    break;
+                }
                 double positive = mathblocks_exponential(a);
                 double negative = mathblocks_exponential(-a);
                 output->scalar_value = (positive - negative) / 2.0;
@@ -437,6 +449,11 @@ internal static unsafe class ScalarModule
             }
             case 30:
             {
+                if (a == 0.0)
+                {
+                    output->scalar_value = a;
+                    break;
+                }
                 double positive = mathblocks_exponential(a);
                 double negative = mathblocks_exponential(-a);
                 output->scalar_value = (positive - negative) / (positive + negative);
