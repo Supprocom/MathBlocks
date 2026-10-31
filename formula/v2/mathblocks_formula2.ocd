@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CD version="2.0" xmlns="http://www.openmath.org/OpenMathCD">
+  <CDName>mathblocks_formula2</CDName>
+  <CDBase>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/formula/v2</CDBase>
+  <CDURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/formula/v2/mathblocks_formula2.ocd</CDURL>
+  <CDReviewDate>2031-10-31</CDReviewDate>
+  <CDStatus>private</CDStatus>
+  <CDDate>2026-10-31</CDDate>
+  <CDVersion>2</CDVersion>
+  <CDRevision>0</CDRevision>
+  <Description>This content dictionary defines exact MathBlocks annotations for interoperable formula expressions.</Description>
+  <CDDefinition>
+    <Name>profile2</Name>
+    <Role>attribution</Role>
+    <Description>This attribution contains the canonical MathBlocks OpenMath Profile 2 program for the selected formula output.</Description>
+  </CDDefinition>
+</CD>

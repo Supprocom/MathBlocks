@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CD version="2.0" xmlns="http://www.openmath.org/OpenMathCD">
+  <CDName>mathblocks_program2</CDName>
+  <CDBase>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v2</CDBase>
+  <CDURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v2/mathblocks_program2.ocd</CDURL>
+  <CDReviewDate>2031-10-31</CDReviewDate>
+  <CDStatus>private</CDStatus>
+  <CDDate>2026-10-31</CDDate>
+  <CDVersion>2</CDVersion>
+  <CDRevision>0</CDRevision>
+  <Description>This content dictionary defines the MathBlocks program envelope and its ordered program nodes.</Description>
+  <CDDefinition>
+    <Name>program</Name>
+    <Role>application</Role>
+    <Description>This application contains one ordered node collection and one ordered output collection.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>nodes</Name>
+    <Role>application</Role>
+    <Description>This application contains program nodes in their canonical order.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>input</Name>
+    <Role>application</Role>
+    <Description>This application defines one named and typed program input.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>constant</Name>
+    <Role>application</Role>
+    <Description>This application defines one typed program constant.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>outputs</Name>
+    <Role>application</Role>
+    <Description>This application contains named program outputs in their canonical order.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>output</Name>
+    <Role>application</Role>
+    <Description>This application defines one named output and its local node reference.</Description>
+  </CDDefinition>
+</CD>

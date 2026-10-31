@@ -27,33 +27,56 @@ public static partial class MathBlockFormulaInterchange
     private const string MathMlNamespace = "http://www.w3.org/1998/Math/MathML";
     private static readonly Encoding StrictUtf8 = new UTF8Encoding(false, true);
 
-    /// <summary>Exports one selected output as a canonical formula document.</summary>
+    /// <summary>
+    /// Exports one selected output as a canonical formula document in the lowest profile that
+    /// contains every operation reachable from that output.
+    /// </summary>
     public static string Export(
         MathBlockProgram program,
         string outputName,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format) =>
+        ExportCore(program, outputName, format, null);
+
+    /// <summary>Exports one selected output as a canonical formula document in the specified profile.</summary>
+    public static string Export(
+        MathBlockProgram program,
+        string outputName,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaProfileDescriptor profile)
     {
-        var selection = CreateSelection(program, outputName);
-        var exact = MathBlockOpenMath.Export(selection.Program);
-        var result = new StringBuilder();
-        using (var writer = XmlWriter.Create(result, CreateWriterSettings()))
-            WriteDocument(writer, selection, exact, format);
-        return result.ToString();
+        ArgumentNullException.ThrowIfNull(profile);
+        return ExportCore(program, outputName, format, profile);
     }
 
-    /// <summary>Exports one selected output as canonical UTF-8.</summary>
+    /// <summary>Exports one selected output as canonical UTF-8 in its lowest covering profile.</summary>
     public static byte[] ExportUtf8(
         MathBlockProgram program,
         string outputName,
         MathBlockFormulaFormat format) =>
-        StrictUtf8.GetBytes(Export(program, outputName, format));
+        StrictUtf8.GetBytes(ExportCore(program, outputName, format, null));
 
-    /// <summary>Gets the exact canonical UTF-8 byte count for one selected output.</summary>
+    /// <summary>Exports one selected output as canonical UTF-8 in the specified profile.</summary>
+    public static byte[] ExportUtf8(
+        MathBlockProgram program,
+        string outputName,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaProfileDescriptor profile) =>
+        StrictUtf8.GetBytes(Export(program, outputName, format, profile));
+
+    /// <summary>Gets the exact canonical UTF-8 byte count in the lowest covering profile.</summary>
     public static int GetUtf8ByteCount(
         MathBlockProgram program,
         string outputName,
         MathBlockFormulaFormat format) =>
-        StrictUtf8.GetByteCount(Export(program, outputName, format));
+        StrictUtf8.GetByteCount(ExportCore(program, outputName, format, null));
+
+    /// <summary>Gets the exact canonical UTF-8 byte count in the specified profile.</summary>
+    public static int GetUtf8ByteCount(
+        MathBlockProgram program,
+        string outputName,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaProfileDescriptor profile) =>
+        StrictUtf8.GetByteCount(Export(program, outputName, format, profile));
 
     /// <summary>Tries to write one canonical formula into a supplied UTF-8 destination.</summary>
     public static bool TryWriteUtf8(
@@ -61,18 +84,24 @@ public static partial class MathBlockFormulaInterchange
         string outputName,
         MathBlockFormulaFormat format,
         Span<byte> destination,
-        out int bytesWritten)
-    {
-        var source = Export(program, outputName, format);
-        var required = StrictUtf8.GetByteCount(source);
-        if (destination.Length < required)
-        {
-            bytesWritten = 0;
-            return false;
-        }
-        bytesWritten = StrictUtf8.GetBytes(source, destination);
-        return true;
-    }
+        out int bytesWritten) =>
+        TryWriteUtf8(
+            ExportCore(program, outputName, format, null),
+            destination,
+            out bytesWritten);
+
+    /// <summary>Tries to write one canonical formula in the specified profile into a UTF-8 destination.</summary>
+    public static bool TryWriteUtf8(
+        MathBlockProgram program,
+        string outputName,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaProfileDescriptor profile,
+        Span<byte> destination,
+        out int bytesWritten) =>
+        TryWriteUtf8(
+            Export(program, outputName, format, profile),
+            destination,
+            out bytesWritten);
 
     /// <summary>Writes one canonical formula through a caller-owned buffer writer.</summary>
     public static void WriteUtf8(
@@ -82,8 +111,19 @@ public static partial class MathBlockFormulaInterchange
         IBufferWriter<byte> destination)
     {
         ArgumentNullException.ThrowIfNull(destination);
-        var source = ExportUtf8(program, outputName, format);
-        destination.Write(source);
+        destination.Write(StrictUtf8.GetBytes(ExportCore(program, outputName, format, null)));
+    }
+
+    /// <summary>Writes one canonical formula in the specified profile through a buffer writer.</summary>
+    public static void WriteUtf8(
+        MathBlockProgram program,
+        string outputName,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaProfileDescriptor profile,
+        IBufferWriter<byte> destination)
+    {
+        ArgumentNullException.ThrowIfNull(destination);
+        destination.Write(ExportUtf8(program, outputName, format, profile));
     }
 
     /// <summary>Writes one canonical formula to a caller-owned character writer.</summary>
@@ -94,7 +134,19 @@ public static partial class MathBlockFormulaInterchange
         TextWriter destination)
     {
         ArgumentNullException.ThrowIfNull(destination);
-        destination.Write(Export(program, outputName, format));
+        destination.Write(ExportCore(program, outputName, format, null));
+    }
+
+    /// <summary>Writes one canonical formula in the specified profile to a character writer.</summary>
+    public static void Write(
+        MathBlockProgram program,
+        string outputName,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaProfileDescriptor profile,
+        TextWriter destination)
+    {
+        ArgumentNullException.ThrowIfNull(destination);
+        destination.Write(Export(program, outputName, format, profile));
     }
 
     /// <summary>Writes one canonical formula to a caller-owned byte stream.</summary>
@@ -107,8 +159,21 @@ public static partial class MathBlockFormulaInterchange
         ArgumentNullException.ThrowIfNull(destination);
         if (!destination.CanWrite)
             throw new ArgumentException("The destination stream must support writing.", nameof(destination));
-        var source = ExportUtf8(program, outputName, format);
-        destination.Write(source);
+        destination.Write(StrictUtf8.GetBytes(ExportCore(program, outputName, format, null)));
+    }
+
+    /// <summary>Writes one canonical formula in the specified profile to a byte stream.</summary>
+    public static void WriteUtf8(
+        MathBlockProgram program,
+        string outputName,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaProfileDescriptor profile,
+        Stream destination)
+    {
+        ArgumentNullException.ThrowIfNull(destination);
+        if (!destination.CanWrite)
+            throw new ArgumentException("The destination stream must support writing.", nameof(destination));
+        destination.Write(ExportUtf8(program, outputName, format, profile));
     }
 
     /// <summary>Writes one canonical formula asynchronously to a caller-owned byte stream.</summary>
@@ -123,7 +188,7 @@ public static partial class MathBlockFormulaInterchange
         if (!destination.CanWrite)
             throw new ArgumentException("The destination stream must support writing.", nameof(destination));
         cancellationToken.ThrowIfCancellationRequested();
-        var source = ExportUtf8(program, outputName, format);
+        var source = StrictUtf8.GetBytes(ExportCore(program, outputName, format, null));
         await destination.WriteAsync(source, cancellationToken).ConfigureAwait(false);
     }
 
@@ -137,8 +202,58 @@ public static partial class MathBlockFormulaInterchange
     {
         ArgumentNullException.ThrowIfNull(destination);
         cancellationToken.ThrowIfCancellationRequested();
-        var source = Export(program, outputName, format);
+        var source = ExportCore(program, outputName, format, null);
         await destination.WriteAsync(source.AsMemory(), cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Gets the lowest supported profile that contains every operation reachable from one output.
+    /// </summary>
+    public static MathBlockFormulaProfileDescriptor SelectProfile(
+        MathBlockProgram program,
+        string outputName) =>
+        CreateSelection(program, outputName, PublishedProfiles, null).Profile;
+
+    internal static MathBlockFormulaProfileDescriptor SelectProfile(
+        MathBlockProgram program,
+        string outputName,
+        MathBlockFormulaProfileDescriptor[] profiles) =>
+        CreateSelection(program, outputName, CreateCandidates(profiles), null).Profile;
+
+    private static string ExportCore(
+        MathBlockProgram program,
+        string outputName,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaProfileDescriptor? profile)
+    {
+        var selection = CreateSelection(program, outputName, PublishedProfiles, profile);
+        return ExportSelection(selection, format);
+    }
+
+    private static string ExportSelection(
+        FormulaSelection selection,
+        MathBlockFormulaFormat format)
+    {
+        var exact = MathBlockOpenMath.Export(selection.Program, selection.Profile.OpenMathProfile);
+        var result = new StringBuilder();
+        using (var writer = XmlWriter.Create(result, CreateWriterSettings()))
+            WriteDocument(writer, selection, exact, format);
+        return result.ToString();
+    }
+
+    private static bool TryWriteUtf8(
+        string source,
+        Span<byte> destination,
+        out int bytesWritten)
+    {
+        var required = StrictUtf8.GetByteCount(source);
+        if (destination.Length < required)
+        {
+            bytesWritten = 0;
+            return false;
+        }
+        bytesWritten = StrictUtf8.GetBytes(source, destination);
+        return true;
     }
 
     /// <summary>Imports one canonical formula document.</summary>
@@ -153,11 +268,37 @@ public static partial class MathBlockFormulaInterchange
         if (source.Length > MaximumDocumentCharacters)
             throw new FormatException("The formula source exceeds the character limit.");
 
-        var exact = ExtractExactAnnotation(source, format);
+        return ImportCore(source, format, PublishedProfiles);
+    }
+
+    // Imports with an explicit ascending profile list instead of the published profiles.
+    internal static MathBlockFormulaImportResult Import(
+        string source,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaProfileDescriptor[] profiles)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        RequireFormat(format);
+        if (source.Length == 0)
+            throw new FormatException("The formula source is empty.");
+        if (source.Length > MaximumDocumentCharacters)
+            throw new FormatException("The formula source exceeds the character limit.");
+        return ImportCore(source, format, CreateCandidates(profiles));
+    }
+
+    // The document's cdgroup selects the profile, and the exact annotation must be a canonical
+    // program of that profile's OpenMath profile. A source whose cdgroup matches no profile is
+    // checked against the lowest profile, so it fails the canonical comparison.
+    private static MathBlockFormulaImportResult ImportCore(
+        string source,
+        MathBlockFormulaFormat format,
+        Lazy<MathBlockFormulaProfileDescriptor>[] profiles)
+    {
+        var exact = ExtractExactAnnotation(source, format, profiles, out var profile);
         MathBlockOpenMathImportResult imported;
         try
         {
-            imported = MathBlockOpenMath.Import(exact);
+            imported = MathBlockOpenMath.Import(exact, null, [profile.OpenMathProfile]);
         }
         catch (FormatException exception)
         {
@@ -166,13 +307,15 @@ public static partial class MathBlockFormulaInterchange
         if (imported.Program.OutputCount != 1)
             throw new FormatException("A formula annotation must contain exactly one output.");
         var outputName = imported.Program.GetOutputName(0);
-        var canonical = Export(imported.Program, outputName, format);
+        var canonical = ExportSelection(
+            CreateSelection(imported.Program, outputName, profiles, profile),
+            format);
         if (!string.Equals(source, canonical, StringComparison.Ordinal))
         {
             throw new FormatException(
                 "The formula expression does not match its exact annotation or canonical form.");
         }
-        return new MathBlockFormulaImportResult(imported, outputName, format);
+        return new MathBlockFormulaImportResult(imported, profile, outputName, format);
     }
 
     /// <summary>Imports one canonical formula from contiguous UTF-8.</summary>
@@ -210,7 +353,7 @@ public static partial class MathBlockFormulaInterchange
     public static string Normalize(string source, MathBlockFormulaFormat format)
     {
         var result = Import(source, format);
-        return Export(result.Program, result.OutputName, format);
+        return Export(result.Program, result.OutputName, format, result.Profile);
     }
 
     /// <summary>Normalizes a canonical UTF-8 formula.</summary>
@@ -219,7 +362,7 @@ public static partial class MathBlockFormulaInterchange
         MathBlockFormulaFormat format)
     {
         var result = ImportUtf8(source, format);
-        return ExportUtf8(result.Program, result.OutputName, format);
+        return ExportUtf8(result.Program, result.OutputName, format, result.Profile);
     }
 
     /// <summary>Reads one canonical formula from a caller-owned character reader.</summary>
@@ -391,11 +534,29 @@ public static partial class MathBlockFormulaInterchange
         return new MathBlockFormulaValidationResult(attempt.Succeeded, attempt.Diagnostic);
     }
 
-    /// <summary>Checks whether one selected output can be exported by the profile.</summary>
+    /// <summary>Checks whether one selected output can be exported by a supported profile.</summary>
     public static MathBlockFormulaValidationResult ValidateProgram(
         MathBlockProgram? program,
         string? outputName,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format) =>
+        ValidateProgramCore(program, outputName, format, null);
+
+    /// <summary>Checks whether one selected output can be exported by the specified profile.</summary>
+    public static MathBlockFormulaValidationResult ValidateProgram(
+        MathBlockProgram? program,
+        string? outputName,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaProfileDescriptor profile)
+    {
+        ArgumentNullException.ThrowIfNull(profile);
+        return ValidateProgramCore(program, outputName, format, profile);
+    }
+
+    private static MathBlockFormulaValidationResult ValidateProgramCore(
+        MathBlockProgram? program,
+        string? outputName,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaProfileDescriptor? profile)
     {
         RequireFormat(format);
         if (program is null)
@@ -408,7 +569,7 @@ public static partial class MathBlockFormulaInterchange
         }
         try
         {
-            _ = Export(program, outputName!, format);
+            _ = ExportCore(program, outputName!, format, profile);
             return new MathBlockFormulaValidationResult(true, null);
         }
         catch (ArgumentException exception)
@@ -429,8 +590,8 @@ public static partial class MathBlockFormulaInterchange
         }
         catch (InvalidOperationException exception)
         {
-            var code = string.Equals(exception.Message, "The formula contains an operation outside the standard catalog."
-, StringComparison.Ordinal) ? MathBlockFormulaDiagnosticCode.OperationOutsideProfile
+            var code = exception.Data.Contains(OutsideProfileKey)
+                ? MathBlockFormulaDiagnosticCode.OperationOutsideProfile
                 : MathBlockFormulaDiagnosticCode.InvalidProgram;
             return new MathBlockFormulaValidationResult(
                 false,
@@ -536,7 +697,9 @@ public static partial class MathBlockFormulaInterchange
 
     private static FormulaSelection CreateSelection(
         MathBlockProgram program,
-        string outputName)
+        string outputName,
+        Lazy<MathBlockFormulaProfileDescriptor>[] profiles,
+        MathBlockFormulaProfileDescriptor? requiredProfile)
     {
         ArgumentNullException.ThrowIfNull(program);
         if (string.IsNullOrWhiteSpace(outputName) || !string.Equals(outputName, outputName.Trim(), StringComparison.Ordinal))
@@ -569,7 +732,10 @@ public static partial class MathBlockFormulaInterchange
             }
         }
 
-        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var profile = requiredProfile is null
+            ? SelectReachableProfile(nodes, reachable, profiles)
+            : RequireReachableProfile(nodes, reachable, requiredProfile);
+        var builder = new MathBlockProgramBuilder(profile.OpenMathProfile.Registry);
         var indexes = new int[nodes.Length];
         for (var index = 0; index < indexes.Length; index++)
             indexes[index] = -1;
@@ -586,7 +752,7 @@ public static partial class MathBlockFormulaInterchange
                 MathBlockProgramBuilder.NodeKind.Constant =>
                     builder.Constant(node.Value),
                 MathBlockProgramBuilder.NodeKind.Operation =>
-                    CopyOperation(builder, node, indexes),
+                    CopyOperation(builder, node, indexes, profile),
                 _ => throw new InvalidOperationException(
                     "The formula contains an unsupported node kind.")
             };
@@ -597,15 +763,64 @@ public static partial class MathBlockFormulaInterchange
             throw new InvalidOperationException("The formula output has an invalid node.");
         return new FormulaSelection(
             builder.Output(outputName, selectedRoot).Build(),
-            selectedRoot);
+            selectedRoot,
+            profile);
+    }
+
+    // Profiles are tried in ascending order, so an output that a lower profile covers never
+    // constructs a higher one.
+    private static MathBlockFormulaProfileDescriptor SelectReachableProfile(
+        MathBlockProgram.Node[] nodes,
+        bool[] reachable,
+        Lazy<MathBlockFormulaProfileDescriptor>[] profiles)
+    {
+        MathBlockFormulaProfileDescriptor? highest = null;
+        for (var index = 0; index < profiles.Length; index++)
+        {
+            highest = profiles[index].Value;
+            if (FindReachableOperationOutside(nodes, reachable, highest) < 0)
+                return highest;
+        }
+        var outside = FindReachableOperationOutside(nodes, reachable, highest!);
+        _ = RequireMapping(highest!, nodes[outside].Operation, true);
+        return highest!;
+    }
+
+    private static MathBlockFormulaProfileDescriptor RequireReachableProfile(
+        MathBlockProgram.Node[] nodes,
+        bool[] reachable,
+        MathBlockFormulaProfileDescriptor profile)
+    {
+        var outside = FindReachableOperationOutside(nodes, reachable, profile);
+        if (outside >= 0)
+            _ = RequireMapping(profile, nodes[outside].Operation, false);
+        return profile;
+    }
+
+    private static int FindReachableOperationOutside(
+        MathBlockProgram.Node[] nodes,
+        bool[] reachable,
+        MathBlockFormulaProfileDescriptor profile)
+    {
+        for (var index = 0; index < nodes.Length; index++)
+        {
+            if (reachable[index] &&
+                nodes[index].Kind == MathBlockProgramBuilder.NodeKind.Operation &&
+                !profile.Contains(nodes[index].Operation))
+            {
+                return index;
+            }
+        }
+        return -1;
     }
 
     private static int CopyOperation(
         MathBlockProgramBuilder builder,
         MathBlockProgram.Node node,
-        int[] indexes)
+        int[] indexes,
+        MathBlockFormulaProfileDescriptor profile)
     {
-        var mapping = RequireMapping(node.Operation);
+        var mapping = RequireMapping(profile, node.Operation, false);
         var inputs = new int[node.Inputs.Length];
         for (var index = 0; index < inputs.Length; index++)
         {
@@ -629,10 +844,10 @@ public static partial class MathBlockFormulaInterchange
         switch (format)
         {
             case MathBlockFormulaFormat.OpenMath:
-                WriteOpenMathDocument(writer, selection, exact);
+                WriteOpenMathDocument(writer, selection, exact, selection.Profile);
                 break;
             case MathBlockFormulaFormat.ContentMathMl:
-                WriteMathMlDocument(writer, selection, exact);
+                WriteMathMlDocument(writer, selection, exact, selection.Profile);
                 break;
         }
     }
@@ -640,17 +855,18 @@ public static partial class MathBlockFormulaInterchange
     private static void WriteOpenMathDocument(
         XmlWriter writer,
         FormulaSelection selection,
-        string exact)
+        string exact,
+        MathBlockFormulaProfileDescriptor profile)
     {
         writer.WriteStartElement("OMOBJ", OpenMathNamespace);
         writer.WriteAttributeString("xmlns", OpenMathNamespace);
-        writer.WriteAttributeString("cdbase", ContentDictionaryBase);
-        writer.WriteAttributeString("cdgroup", ContentDictionaryGroup);
+        writer.WriteAttributeString("cdbase", profile.ContentDictionaryBase);
+        writer.WriteAttributeString("cdgroup", profile.ContentDictionaryGroup);
         writer.WriteAttributeString("version", OpenMathVersion);
 
         writer.WriteStartElement("OMATTR", OpenMathNamespace);
         writer.WriteStartElement("OMATP", OpenMathNamespace);
-        WriteOpenMathSymbol(writer, FormulaDictionary, "profile1", null);
+        WriteOpenMathSymbol(writer, profile, profile.FormulaDictionary, profile.AnnotationSymbol, null);
         writer.WriteStartElement("OMSTR", OpenMathNamespace);
         writer.WriteString(exact);
         writer.WriteEndElement();
@@ -663,15 +879,16 @@ public static partial class MathBlockFormulaInterchange
     private static void WriteMathMlDocument(
         XmlWriter writer,
         FormulaSelection selection,
-        string exact)
+        string exact,
+        MathBlockFormulaProfileDescriptor profile)
     {
         writer.WriteStartElement("math", MathMlNamespace);
         writer.WriteAttributeString("xmlns", MathMlNamespace);
-        writer.WriteAttributeString("cdgroup", ContentDictionaryGroup);
+        writer.WriteAttributeString("cdgroup", profile.ContentDictionaryGroup);
         writer.WriteStartElement("semantics", MathMlNamespace);
         WriteExpression(writer, selection, MathBlockFormulaFormat.ContentMathMl);
         writer.WriteStartElement("annotation", MathMlNamespace);
-        writer.WriteAttributeString("encoding", ExactAnnotationMediaType);
+        writer.WriteAttributeString("encoding", profile.ExactAnnotationMediaType);
         writer.WriteString(exact);
         writer.WriteEndElement();
         writer.WriteEndElement();
@@ -709,12 +926,12 @@ public static partial class MathBlockFormulaInterchange
                     WriteVariable(writer, frame.NodeIndex, node.Name!, format);
                     break;
                 case MathBlockProgramBuilder.NodeKind.Constant:
-                    WriteValue(writer, frame.NodeIndex, node.Value, format);
+                    WriteValue(writer, selection.Profile, frame.NodeIndex, node.Value, format);
                     break;
                 case MathBlockProgramBuilder.NodeKind.Operation:
                     WriteApplicationStart(writer, frame.NodeIndex, format);
-                    var mapping = RequireMapping(node.Operation);
-                    WriteOperationSymbol(writer, mapping.Symbol, format);
+                    var mapping = RequireMapping(selection.Profile, node.Operation, false);
+                    WriteOperationSymbol(writer, selection.Profile, mapping.Symbol, format);
                     frames.Push(new ExpressionFrame(frame.NodeIndex, true));
                     for (var index = node.Inputs.Length - 1; index >= 0; index--)
                         frames.Push(new ExpressionFrame(node.Inputs[index], false));
@@ -774,12 +991,13 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteOperationSymbol(
         XmlWriter writer,
+        MathBlockFormulaProfileDescriptor profile,
         MathBlockFormulaSymbol symbol,
         MathBlockFormulaFormat format)
     {
         if (format == MathBlockFormulaFormat.OpenMath)
         {
-            WriteOpenMathSymbol(writer, symbol.Dictionary, symbol.Name, symbol.ContentDictionaryBase);
+            WriteOpenMathSymbol(writer, profile, symbol.Dictionary, symbol.Name, symbol.ContentDictionaryBase);
             return;
         }
         WriteMathMlSymbol(writer, symbol.Dictionary, symbol.Name, null);
@@ -787,6 +1005,7 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteValue(
         XmlWriter writer,
+        MathBlockFormulaProfileDescriptor profile,
         int nodeIndex,
         MathBlockValue value,
         MathBlockFormulaFormat format)
@@ -800,34 +1019,34 @@ public static partial class MathBlockFormulaInterchange
                 WriteDouble(writer, value.AsScalar(), id, format);
                 break;
             case MathBlockValueKind.Boolean:
-                WriteBoolean(writer, value.AsBoolean(), id, format);
+                WriteBoolean(writer, profile, value.AsBoolean(), id, format);
                 break;
             case MathBlockValueKind.Complex:
-                WriteComplex(writer, value.AsComplex(), id, format);
+                WriteComplex(writer, profile, value.AsComplex(), id, format);
                 break;
             case MathBlockValueKind.Vector:
-                WriteVector(writer, value.AsVector(), id, format);
+                WriteVector(writer, profile, value.AsVector(), id, format);
                 break;
             case MathBlockValueKind.Matrix:
-                WriteMatrix(writer, value.AsMatrix(), id, format);
+                WriteMatrix(writer, profile, value.AsMatrix(), id, format);
                 break;
             case MathBlockValueKind.ComplexVector:
-                WriteComplexVector(writer, value.AsComplexVector(), id, format);
+                WriteComplexVector(writer, profile, value.AsComplexVector(), id, format);
                 break;
             case MathBlockValueKind.ComplexMatrix:
-                WriteComplexMatrix(writer, value.AsComplexMatrix(), id, format);
+                WriteComplexMatrix(writer, profile, value.AsComplexMatrix(), id, format);
                 break;
             case MathBlockValueKind.PointSet:
-                WritePointSet(writer, value.AsPointSet(), id, format);
+                WritePointSet(writer, profile, value.AsPointSet(), id, format);
                 break;
             case MathBlockValueKind.Graph:
-                WriteGraph(writer, value.AsGraph(), id, format);
+                WriteGraph(writer, profile, value.AsGraph(), id, format);
                 break;
             case MathBlockValueKind.RunSet:
-                WriteRunSet(writer, value.AsRunSet(), id, format);
+                WriteRunSet(writer, profile, value.AsRunSet(), id, format);
                 break;
             case MathBlockValueKind.BooleanVector:
-                WriteBooleanVector(writer, value.AsBooleanVector(), id, format);
+                WriteBooleanVector(writer, profile, value.AsBooleanVector(), id, format);
                 break;
             default:
                 throw new InvalidOperationException(
@@ -837,11 +1056,12 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteVector(
         XmlWriter writer,
+        MathBlockFormulaProfileDescriptor profile,
         Supprocom.MathBlocks.MathBlockVector values,
         string id,
         MathBlockFormulaFormat format)
     {
-        WriteValueApplicationStart(writer, "vector", id, format);
+        WriteValueApplicationStart(writer, profile, "vector", id, format);
         for (var index = 0; index < values.Count; index++)
             WriteDouble(writer, values[index], null, format);
         writer.WriteEndElement();
@@ -849,11 +1069,12 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteMatrix(
         XmlWriter writer,
+        MathBlockFormulaProfileDescriptor profile,
         MathBlockMatrix value,
         string id,
         MathBlockFormulaFormat format)
     {
-        WriteValueApplicationStart(writer, "matrix", id, format);
+        WriteValueApplicationStart(writer, profile, "matrix", id, format);
         WriteInteger(writer, value.Rows, format);
         WriteInteger(writer, value.Columns, format);
         for (var row = 0; row < value.Rows; row++)
@@ -864,11 +1085,12 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteComplex(
         XmlWriter writer,
+        MathBlockFormulaProfileDescriptor profile,
         MathBlockComplexValue value,
         string? id,
         MathBlockFormulaFormat format)
     {
-        WriteValueApplicationStart(writer, "complex", id, format);
+        WriteValueApplicationStart(writer, profile, "complex", id, format);
         WriteDouble(writer, value.Real, null, format);
         WriteDouble(writer, value.Imaginary, null, format);
         writer.WriteEndElement();
@@ -876,41 +1098,44 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteComplexVector(
         XmlWriter writer,
+        MathBlockFormulaProfileDescriptor profile,
         Supprocom.MathBlocks.MathBlockComplexVector values,
         string id,
         MathBlockFormulaFormat format)
     {
-        WriteValueApplicationStart(writer, "complex-vector", id, format);
+        WriteValueApplicationStart(writer, profile, "complex-vector", id, format);
         for (var index = 0; index < values.Count; index++)
-            WriteComplex(writer, values[index], null, format);
+            WriteComplex(writer, profile, values[index], null, format);
         writer.WriteEndElement();
     }
 
     private static void WriteComplexMatrix(
         XmlWriter writer,
+        MathBlockFormulaProfileDescriptor profile,
         MathBlockComplexMatrix value,
         string id,
         MathBlockFormulaFormat format)
     {
-        WriteValueApplicationStart(writer, "complex-matrix", id, format);
+        WriteValueApplicationStart(writer, profile, "complex-matrix", id, format);
         WriteInteger(writer, value.Rows, format);
         WriteInteger(writer, value.Columns, format);
         for (var row = 0; row < value.Rows; row++)
             for (var column = 0; column < value.Columns; column++)
-                WriteComplex(writer, value[row, column], null, format);
+                WriteComplex(writer, profile, value[row, column], null, format);
         writer.WriteEndElement();
     }
 
     private static void WritePointSet(
         XmlWriter writer,
+        MathBlockFormulaProfileDescriptor profile,
         Supprocom.MathBlocks.MathBlockPointSet values,
         string id,
         MathBlockFormulaFormat format)
     {
-        WriteValueApplicationStart(writer, "point-set", id, format);
+        WriteValueApplicationStart(writer, profile, "point-set", id, format);
         for (var index = 0; index < values.Count; index++)
         {
-            WriteValueApplicationStart(writer, "point", null, format);
+            WriteValueApplicationStart(writer, profile, "point", null, format);
             WriteDouble(writer, values[index].X, null, format);
             WriteDouble(writer, values[index].Y, null, format);
             writer.WriteEndElement();
@@ -920,16 +1145,17 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteGraph(
         XmlWriter writer,
+        MathBlockFormulaProfileDescriptor profile,
         MathBlockGraph value,
         string id,
         MathBlockFormulaFormat format)
     {
-        WriteValueApplicationStart(writer, "graph", id, format);
+        WriteValueApplicationStart(writer, profile, "graph", id, format);
         WriteInteger(writer, value.VertexCount, format);
         for (var index = 0; index < value.Count; index++)
         {
             var edge = value[index];
-            WriteValueApplicationStart(writer, "edge", null, format);
+            WriteValueApplicationStart(writer, profile, "edge", null, format);
             WriteInteger(writer, edge.From, format);
             WriteInteger(writer, edge.To, format);
             WriteDouble(writer, edge.Weight, null, format);
@@ -940,14 +1166,15 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteRunSet(
         XmlWriter writer,
+        MathBlockFormulaProfileDescriptor profile,
         Supprocom.MathBlocks.MathBlockRunSet values,
         string id,
         MathBlockFormulaFormat format)
     {
-        WriteValueApplicationStart(writer, "run-set", id, format);
+        WriteValueApplicationStart(writer, profile, "run-set", id, format);
         for (var index = 0; index < values.Count; index++)
         {
-            WriteValueApplicationStart(writer, "run", null, format);
+            WriteValueApplicationStart(writer, profile, "run", null, format);
             WriteInteger(writer, values[index].Start, format);
             WriteInteger(writer, values[index].Length, format);
             WriteDouble(writer, values[index].Value, null, format);
@@ -958,18 +1185,20 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteBooleanVector(
         XmlWriter writer,
+        MathBlockFormulaProfileDescriptor profile,
         Supprocom.MathBlocks.MathBlockBooleanVector values,
         string id,
         MathBlockFormulaFormat format)
     {
-        WriteValueApplicationStart(writer, "boolean-vector", id, format);
+        WriteValueApplicationStart(writer, profile, "boolean-vector", id, format);
         for (var index = 0; index < values.Count; index++)
-            WriteBoolean(writer, values[index], null, format);
+            WriteBoolean(writer, profile, values[index], null, format);
         writer.WriteEndElement();
     }
 
     private static void WriteValueApplicationStart(
         XmlWriter writer,
+        MathBlockFormulaProfileDescriptor profile,
         string name,
         string? id,
         MathBlockFormulaFormat format)
@@ -980,9 +1209,9 @@ public static partial class MathBlockFormulaInterchange
         if (id is not null)
             writer.WriteAttributeString("id", id);
         if (format == MathBlockFormulaFormat.OpenMath)
-            WriteOpenMathSymbol(writer, FormulaValueDictionary, name, null);
+            WriteOpenMathSymbol(writer, profile, profile.FormulaValueDictionary, name, null);
         else
-            WriteMathMlSymbol(writer, FormulaValueDictionary, name, null);
+            WriteMathMlSymbol(writer, profile.FormulaValueDictionary, name, null);
     }
 
     private static void WriteDouble(
@@ -1014,6 +1243,7 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteBoolean(
         XmlWriter writer,
+        MathBlockFormulaProfileDescriptor profile,
         bool value,
         string? id,
         MathBlockFormulaFormat format)
@@ -1022,7 +1252,8 @@ public static partial class MathBlockFormulaInterchange
         {
             WriteOpenMathSymbol(
                 writer,
-                FormulaValueDictionary,
+                profile,
+                profile.FormulaValueDictionary,
                 value ? "true" : "false",
                 null,
                 id);
@@ -1055,6 +1286,7 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteOpenMathSymbol(
         XmlWriter writer,
+        MathBlockFormulaProfileDescriptor profile,
         string dictionary,
         string name,
         string? dictionaryBase,
@@ -1062,7 +1294,7 @@ public static partial class MathBlockFormulaInterchange
     {
         writer.WriteStartElement("OMS", OpenMathNamespace);
         writer.WriteAttributeString("cd", dictionary);
-        if (dictionaryBase is not null && !string.Equals(dictionaryBase, ContentDictionaryBase, StringComparison.Ordinal))
+        if (dictionaryBase is not null && !string.Equals(dictionaryBase, profile.ContentDictionaryBase, StringComparison.Ordinal))
             writer.WriteAttributeString("cdbase", dictionaryBase);
         if (id is not null)
             writer.WriteAttributeString("id", id);
@@ -1086,8 +1318,11 @@ public static partial class MathBlockFormulaInterchange
 
     private static string ExtractExactAnnotation(
         string source,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format,
+        Lazy<MathBlockFormulaProfileDescriptor>[] profiles,
+        out MathBlockFormulaProfileDescriptor profile)
     {
+        profile = profiles[0].Value;
         var settings = new XmlReaderSettings
         {
             DtdProcessing = DtdProcessing.Prohibit,
@@ -1131,6 +1366,7 @@ public static partial class MathBlockFormulaInterchange
                         throw new FormatException(
                             "The formula document root does not match its format.");
                     }
+                    profile = SelectDocumentProfile(reader.GetAttribute("cdgroup"), profiles);
                 }
 
                 if (format == MathBlockFormulaFormat.OpenMath)
@@ -1148,14 +1384,14 @@ string.Equals(reader.NamespaceURI, OpenMathNamespace, StringComparison.Ordinal))
                     awaitingOpenMathValue =
 string.Equals(reader.LocalName, "OMS", StringComparison.Ordinal) &&
 string.Equals(reader.NamespaceURI, OpenMathNamespace, StringComparison.Ordinal) &&
-string.Equals(reader.GetAttribute("cd"), FormulaDictionary, StringComparison.Ordinal) &&
-string.Equals(reader.GetAttribute("name"), "profile1", StringComparison.Ordinal);
+string.Equals(reader.GetAttribute("cd"), profile.FormulaDictionary, StringComparison.Ordinal) &&
+string.Equals(reader.GetAttribute("name"), profile.AnnotationSymbol, StringComparison.Ordinal);
                     continue;
                 }
 
                 if (string.Equals(reader.LocalName, "annotation", StringComparison.Ordinal) &&
 string.Equals(reader.NamespaceURI, MathMlNamespace, StringComparison.Ordinal) &&
-string.Equals(reader.GetAttribute("encoding"), ExactAnnotationMediaType, StringComparison.Ordinal))
+string.Equals(reader.GetAttribute("encoding"), profile.ExactAnnotationMediaType, StringComparison.Ordinal))
                 {
                     if (exact is not null)
                         throw new FormatException("The formula has duplicate exact annotations.");
@@ -1171,6 +1407,22 @@ string.Equals(reader.GetAttribute("encoding"), ExactAnnotationMediaType, StringC
         {
             throw new FormatException("The formula source is not valid XML.", exception);
         }
+    }
+
+    private static MathBlockFormulaProfileDescriptor SelectDocumentProfile(
+        string? contentDictionaryGroup,
+        Lazy<MathBlockFormulaProfileDescriptor>[] profiles)
+    {
+        if (contentDictionaryGroup is not null)
+        {
+            for (var index = 0; index < profiles.Length; index++)
+            {
+                var candidate = profiles[index].Value;
+                if (string.Equals(contentDictionaryGroup, candidate.ContentDictionaryGroup, StringComparison.Ordinal))
+                    return candidate;
+            }
+        }
+        return profiles[0].Value;
     }
 
     private static void RequireFormat(MathBlockFormulaFormat format)
@@ -1195,7 +1447,10 @@ string.Equals(reader.GetAttribute("encoding"), ExactAnnotationMediaType, StringC
         CloseOutput = false
     };
 
-    private sealed record FormulaSelection(MathBlockProgram Program, int RootNode);
+    private sealed record FormulaSelection(
+        MathBlockProgram Program,
+        int RootNode,
+        MathBlockFormulaProfileDescriptor Profile);
 
     private readonly record struct ExpressionFrame(int NodeIndex, bool Close);
 }

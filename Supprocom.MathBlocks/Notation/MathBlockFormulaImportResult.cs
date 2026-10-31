@@ -5,10 +5,12 @@ public sealed class MathBlockFormulaImportResult
 {
     internal MathBlockFormulaImportResult(
         MathBlockOpenMathImportResult exactResult,
+        MathBlockFormulaProfileDescriptor profile,
         string outputName,
         MathBlockFormulaFormat format)
     {
         Program = exactResult.Program;
+        Profile = profile;
         OutputName = outputName;
         Format = format;
         Operations = exactResult.Operations;
@@ -17,6 +19,9 @@ public sealed class MathBlockFormulaImportResult
 
     /// <summary>Gets the imported single-output typed program.</summary>
     public MathBlockProgram Program { get; }
+
+    /// <summary>Gets the formula profile of the imported document.</summary>
+    public MathBlockFormulaProfileDescriptor Profile { get; }
 
     /// <summary>Gets the selected output name.</summary>
     public string OutputName { get; }

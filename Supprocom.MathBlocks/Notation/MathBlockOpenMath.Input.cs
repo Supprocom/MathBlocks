@@ -20,7 +20,7 @@ public static partial class MathBlockOpenMath
     private const string ProcessingInstructionStart = "<?";
     private const string ProhibitedDtdPrefix = "<!D";
 
-    /// <summary>Imports a Profile 1 document with the specified options.</summary>
+    /// <summary>Imports a Profile 1 or Profile 2 document with the specified options.</summary>
     public static MathBlockOpenMathImportResult Import(
         string source,
         MathBlockOpenMathImportOptions? options)
@@ -33,14 +33,35 @@ public static partial class MathBlockOpenMath
             throw InvalidFormat("The OpenMath source exceeds the character limit.");
         var result = ImportForward(source, snapshot);
         if (snapshot.RequireCanonicalSource &&
-            !string.Equals(source, Export(result.Program), StringComparison.Ordinal))
+            !string.Equals(source, ExportCore(result.Program, result.Profile), StringComparison.Ordinal))
         {
             throw InvalidFormat("The OpenMath source must use the canonical form.");
         }
         return result;
     }
 
-    /// <summary>Imports a Profile 1 document from contiguous UTF-8 bytes.</summary>
+    // Imports with an explicit ascending profile list instead of the published profiles.
+    internal static MathBlockOpenMathImportResult Import(
+        string source,
+        MathBlockOpenMathImportOptions? options,
+        MathBlockOpenMathProfileDescriptor[] profiles)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        var snapshot = CreateOptionsSnapshot(options) with { Profiles = CreateCandidates(profiles) };
+        if (source.Length == 0)
+            throw InvalidFormat("The OpenMath source is empty.");
+        if (source.Length > snapshot.MaximumDocumentCharacters)
+            throw InvalidFormat("The OpenMath source exceeds the character limit.");
+        var result = ImportForward(source, snapshot);
+        if (snapshot.RequireCanonicalSource &&
+            !string.Equals(source, ExportCore(result.Program, result.Profile), StringComparison.Ordinal))
+        {
+            throw InvalidFormat("The OpenMath source must use the canonical form.");
+        }
+        return result;
+    }
+
+    /// <summary>Imports a Profile 1 or Profile 2 document from contiguous UTF-8 bytes.</summary>
     public static unsafe MathBlockOpenMathImportResult ImportUtf8(
         ReadOnlySpan<byte> source,
         MathBlockOpenMathImportOptions? options = null)
@@ -62,7 +83,7 @@ public static partial class MathBlockOpenMath
         }
     }
 
-    /// <summary>Imports a Profile 1 document from segmented UTF-8 bytes.</summary>
+    /// <summary>Imports a Profile 1 or Profile 2 document from segmented UTF-8 bytes.</summary>
     public static MathBlockOpenMathImportResult ImportUtf8(
         ReadOnlySequence<byte> source,
         MathBlockOpenMathImportOptions? options = null)
@@ -76,7 +97,7 @@ public static partial class MathBlockOpenMath
         return ReadUtf8Core(stream, snapshot, false);
     }
 
-    /// <summary>Reads one Profile 1 UTF-8 document from a caller-owned stream.</summary>
+    /// <summary>Reads one Profile 1 or Profile 2 UTF-8 document from a caller-owned stream.</summary>
     public static MathBlockOpenMathImportResult ReadUtf8(
         Stream source,
         MathBlockOpenMathImportOptions? options = null)
@@ -88,7 +109,7 @@ public static partial class MathBlockOpenMath
         return ReadUtf8Core(source, snapshot, false);
     }
 
-    /// <summary>Reads one Profile 1 UTF-8 document asynchronously.</summary>
+    /// <summary>Reads one Profile 1 or Profile 2 UTF-8 document asynchronously.</summary>
     public static async Task<MathBlockOpenMathImportResult> ReadUtf8Async(
         Stream source,
         MathBlockOpenMathImportOptions? options = null,
@@ -118,7 +139,7 @@ public static partial class MathBlockOpenMath
         }
     }
 
-    /// <summary>Reads one Profile 1 document from a caller-owned character reader.</summary>
+    /// <summary>Reads one Profile 1 or Profile 2 document from a caller-owned character reader.</summary>
     public static MathBlockOpenMathImportResult Read(
         TextReader source,
         MathBlockOpenMathImportOptions? options = null)
@@ -139,7 +160,7 @@ public static partial class MathBlockOpenMath
         return result;
     }
 
-    /// <summary>Reads one Profile 1 document asynchronously from a character reader.</summary>
+    /// <summary>Reads one Profile 1 or Profile 2 document asynchronously from a character reader.</summary>
     public static async Task<MathBlockOpenMathImportResult> ReadAsync(
         TextReader source,
         MathBlockOpenMathImportOptions? options = null,
@@ -174,7 +195,7 @@ public static partial class MathBlockOpenMath
         return result;
     }
 
-    /// <summary>Attempts to import a Profile 1 character document.</summary>
+    /// <summary>Attempts to import a Profile 1 or Profile 2 character document.</summary>
     public static MathBlockOpenMathImportAttempt TryImport(
         string? source,
         MathBlockOpenMathImportOptions? options = null)
@@ -192,7 +213,7 @@ public static partial class MathBlockOpenMath
         }
     }
 
-    /// <summary>Attempts to import contiguous Profile 1 UTF-8 bytes.</summary>
+    /// <summary>Attempts to import contiguous Profile 1 or Profile 2 UTF-8 bytes.</summary>
     public static MathBlockOpenMathImportAttempt TryImportUtf8(
         ReadOnlySpan<byte> source,
         MathBlockOpenMathImportOptions? options = null)
@@ -207,7 +228,7 @@ public static partial class MathBlockOpenMath
         }
     }
 
-    /// <summary>Attempts to import segmented Profile 1 UTF-8 bytes.</summary>
+    /// <summary>Attempts to import segmented Profile 1 or Profile 2 UTF-8 bytes.</summary>
     public static MathBlockOpenMathImportAttempt TryImportUtf8(
         ReadOnlySequence<byte> source,
         MathBlockOpenMathImportOptions? options = null)
@@ -222,7 +243,7 @@ public static partial class MathBlockOpenMath
         }
     }
 
-    /// <summary>Attempts to read one Profile 1 UTF-8 document.</summary>
+    /// <summary>Attempts to read one Profile 1 or Profile 2 UTF-8 document.</summary>
     public static MathBlockOpenMathImportAttempt TryReadUtf8(
         Stream? source,
         MathBlockOpenMathImportOptions? options = null)
@@ -240,7 +261,7 @@ public static partial class MathBlockOpenMath
         }
     }
 
-    /// <summary>Attempts to read one Profile 1 UTF-8 document asynchronously.</summary>
+    /// <summary>Attempts to read one Profile 1 or Profile 2 UTF-8 document asynchronously.</summary>
     public static async Task<MathBlockOpenMathImportAttempt> TryReadUtf8Async(
         Stream? source,
         MathBlockOpenMathImportOptions? options = null,
@@ -261,7 +282,7 @@ public static partial class MathBlockOpenMath
         }
     }
 
-    /// <summary>Attempts to read one Profile 1 character document.</summary>
+    /// <summary>Attempts to read one Profile 1 or Profile 2 character document.</summary>
     public static MathBlockOpenMathImportAttempt TryRead(
         TextReader? source,
         MathBlockOpenMathImportOptions? options = null)
@@ -279,7 +300,7 @@ public static partial class MathBlockOpenMath
         }
     }
 
-    /// <summary>Attempts to read one Profile 1 character document asynchronously.</summary>
+    /// <summary>Attempts to read one Profile 1 or Profile 2 character document asynchronously.</summary>
     public static async Task<MathBlockOpenMathImportAttempt> TryReadAsync(
         TextReader? source,
         MathBlockOpenMathImportOptions? options = null,
@@ -704,7 +725,8 @@ public static partial class MathBlockOpenMath
             value.MaximumOutputs,
             value.MaximumValueElements,
             value.RequireCanonicalSource,
-            value.CaptureSourceLocations);
+            value.CaptureSourceLocations,
+            PublishedProfiles);
     }
 
     private static void RequireCanonicalText(
@@ -715,7 +737,7 @@ public static partial class MathBlockOpenMath
         if (!options.RequireCanonicalSource)
             return;
         if (source is null ||
-            !string.Equals(source, Export(result.Program), StringComparison.Ordinal))
+            !string.Equals(source, ExportCore(result.Program, result.Profile), StringComparison.Ordinal))
         {
             throw InvalidFormat("The OpenMath source must use the canonical form.");
         }
@@ -728,7 +750,7 @@ public static partial class MathBlockOpenMath
     {
         if (!options.RequireCanonicalSource)
             return;
-        if (!source.SequenceEqual(ExportUtf8(result.Program)))
+        if (!source.SequenceEqual(ExportUtf8Core(result.Program, result.Profile)))
             throw InvalidFormat("The OpenMath source must use the canonical form.");
     }
 
@@ -901,7 +923,7 @@ public static partial class MathBlockOpenMath
         BufferedElement element,
         int nodeIndex,
         MathBlockProgramBuilder builder,
-        IReadOnlyDictionary<string, MathBlockOperation> operationSymbols,
+        MathBlockOpenMathProfileDescriptor profile,
         List<MathBlockOperation> operations,
         List<MathBlockOpenMathOperationOccurrence> occurrences,
         Dictionary<string, MathBlockOpenMathSourceLocation>? sourceLocations,
@@ -925,34 +947,34 @@ public static partial class MathBlockOpenMath
 
         try
         {
-            if (string.Equals(head.Dictionary, ProgramDictionary, StringComparison.Ordinal) && string.Equals(head.Name, "input", StringComparison.Ordinal))
+            if (string.Equals(head.Dictionary, profile.ProgramDictionary, StringComparison.Ordinal) && string.Equals(head.Name, "input", StringComparison.Ordinal))
             {
                 if (children.Length != 3)
                     throw InvalidFormat("An OpenMath input node is invalid.");
                 var name = ParseName(children[1], "input");
-                var type = ParseType(children[2]);
+                var type = ParseType(children[2], profile);
                 if (builder.Input(name, type) != nodeIndex)
                     throw InvalidFormat("The OpenMath input order is invalid.");
                 return;
             }
 
-            if (string.Equals(head.Dictionary, ProgramDictionary, StringComparison.Ordinal) && string.Equals(head.Name, "constant", StringComparison.Ordinal))
+            if (string.Equals(head.Dictionary, profile.ProgramDictionary, StringComparison.Ordinal) && string.Equals(head.Name, "constant", StringComparison.Ordinal))
             {
                 if (children.Length != 3)
                     throw InvalidFormat("An OpenMath constant node is invalid.");
-                var type = ParseType(children[1]);
+                var type = ParseType(children[1], profile);
                 var elements = GetValueElementCount(children[2], type.Kind);
                 if (elements > maximumValueElements - valueElementCount)
                     throw InvalidFormat("The OpenMath source exceeds the value-element limit.");
                 valueElementCount += elements;
-                var value = ParseValue(children[2], type);
+                var value = ParseValue(children[2], type, profile);
                 if (builder.Constant(value) != nodeIndex)
                     throw InvalidFormat("The OpenMath constant order is invalid.");
                 return;
             }
 
-            if (!string.Equals(head.Dictionary, OperationDictionary, StringComparison.Ordinal) ||
-                !operationSymbols.TryGetValue(head.Name, out var operation))
+            if (!string.Equals(head.Dictionary, profile.OperationDictionary, StringComparison.Ordinal) ||
+                !profile.OperationSymbols.TryGetValue(head.Name, out var operation))
             {
                 throw InvalidFormat("An OpenMath operation symbol is not supported.");
             }
@@ -969,7 +991,7 @@ public static partial class MathBlockOpenMath
             if (builder.Apply(operation.Identifier, operation.Version, inputs) != nodeIndex)
                 throw InvalidFormat("The OpenMath operation order is invalid.");
             operations.Add(operation);
-            var symbol = new MathBlockOpenMathOperationSymbol(OperationDictionary, head.Name);
+            var symbol = new MathBlockOpenMathOperationSymbol(profile.OperationDictionary, head.Name);
             occurrences.Add(new MathBlockOpenMathOperationOccurrence(
                 occurrences.Count,
                 nodeIndex,
@@ -1000,7 +1022,8 @@ public static partial class MathBlockOpenMath
         MathBlockProgramBuilder builder,
         int nodeCount,
         int outputIndex,
-        Dictionary<string, MathBlockOpenMathSourceLocation>? sourceLocations)
+        Dictionary<string, MathBlockOpenMathSourceLocation>? sourceLocations,
+        MathBlockOpenMathProfileDescriptor profile)
     {
         AddSourceLocation(
             sourceLocations,
@@ -1013,7 +1036,7 @@ public static partial class MathBlockOpenMath
         var children = ReadBufferedApplication(element);
         if (children.Length != 3)
             throw InvalidFormat("An OpenMath output is invalid.");
-        RequireParsedSymbol(children[0], ProgramDictionary, "output");
+        RequireParsedSymbol(children[0], profile.ProgramDictionary, "output");
         var name = ParseName(children[1], "output");
         var node = ParseReference(children[2], nodeCount);
         try
@@ -1039,46 +1062,52 @@ public static partial class MathBlockOpenMath
             new MathBlockOpenMathSourceLocation(profilePath, line, column));
     }
 
-    private static MathBlockType ParseType(BufferedElement element)
+    private static MathBlockType ParseType(
+        BufferedElement element,
+        MathBlockOpenMathProfileDescriptor profile)
     {
         RequireOnlyBufferedAttributes(element);
         var children = ReadBufferedApplication(element);
         if (children.Length != 5)
             throw InvalidFormat("An OpenMath type is invalid.");
-        RequireParsedSymbol(children[0], TypeDictionary, "type");
+        RequireParsedSymbol(children[0], profile.TypeDictionary, "type");
         var kindSymbol = ParseSymbol(children[1]);
-        if (!string.Equals(kindSymbol.Dictionary, TypeDictionary, StringComparison.Ordinal))
+        if (!string.Equals(kindSymbol.Dictionary, profile.TypeDictionary, StringComparison.Ordinal))
             throw InvalidFormat("An OpenMath value kind is invalid.");
         var type = new MathBlockType(
             ReadKind(kindSymbol.Name),
-            ParseUnit(children[2]),
+            ParseUnit(children[2], profile),
             ParseInteger(children[3]),
             ParseInteger(children[4]));
         RequireSupportedType(type, true);
         return type;
     }
 
-    private static MathBlockUnit ParseUnit(BufferedElement element)
+    private static MathBlockUnit ParseUnit(
+        BufferedElement element,
+        MathBlockOpenMathProfileDescriptor profile)
     {
         RequireOnlyBufferedAttributes(element);
         var children = ReadBufferedApplication(element);
         if (children.Length != 5)
             throw InvalidFormat("An OpenMath unit is invalid.");
-        RequireParsedSymbol(children[0], TypeDictionary, "unit");
+        RequireParsedSymbol(children[0], profile.TypeDictionary, "unit");
         return new MathBlockUnit(
-            ParseRational(children[1]),
-            ParseRational(children[2]),
-            ParseRational(children[3]),
-            ParseRational(children[4]));
+            ParseRational(children[1], profile),
+            ParseRational(children[2], profile),
+            ParseRational(children[3], profile),
+            ParseRational(children[4], profile));
     }
 
-    private static MathRational ParseRational(BufferedElement element)
+    private static MathRational ParseRational(
+        BufferedElement element,
+        MathBlockOpenMathProfileDescriptor profile)
     {
         RequireOnlyBufferedAttributes(element);
         var children = ReadBufferedApplication(element);
         if (children.Length != 3)
             throw InvalidFormat("An OpenMath rational is invalid.");
-        RequireParsedSymbol(children[0], TypeDictionary, "rational");
+        RequireParsedSymbol(children[0], profile.TypeDictionary, "rational");
         var numerator = ParseInteger(children[1]);
         var denominator = ParseInteger(children[2]);
         if (denominator <= 0)
@@ -1096,7 +1125,10 @@ public static partial class MathBlockOpenMath
         }
     }
 
-    private static MathBlockValue ParseValue(BufferedElement element, MathBlockType type)
+    private static MathBlockValue ParseValue(
+        BufferedElement element,
+        MathBlockType type,
+        MathBlockOpenMathProfileDescriptor profile)
     {
         MathBlockValue value;
         try
@@ -1104,16 +1136,16 @@ public static partial class MathBlockOpenMath
             value = type.Kind switch
             {
                 MathBlockValueKind.Scalar => MathBlockValue.Scalar(ParseDouble(element), type.Unit),
-                MathBlockValueKind.Boolean => MathBlockValue.Boolean(ParseBoolean(element)),
-                MathBlockValueKind.Complex => MathBlockValue.Complex(ParseComplex(element), type.Unit),
-                MathBlockValueKind.Vector => ParseVector(element, type),
-                MathBlockValueKind.Matrix => ParseMatrix(element, type),
-                MathBlockValueKind.ComplexVector => ParseComplexVector(element, type),
-                MathBlockValueKind.ComplexMatrix => ParseComplexMatrix(element, type),
-                MathBlockValueKind.PointSet => ParsePointSet(element, type),
-                MathBlockValueKind.Graph => ParseGraph(element, type),
-                MathBlockValueKind.RunSet => ParseRunSet(element, type),
-                MathBlockValueKind.BooleanVector => ParseBooleanVector(element),
+                MathBlockValueKind.Boolean => MathBlockValue.Boolean(ParseBoolean(element, profile)),
+                MathBlockValueKind.Complex => MathBlockValue.Complex(ParseComplex(element, profile), type.Unit),
+                MathBlockValueKind.Vector => ParseVector(element, type, profile),
+                MathBlockValueKind.Matrix => ParseMatrix(element, type, profile),
+                MathBlockValueKind.ComplexVector => ParseComplexVector(element, type, profile),
+                MathBlockValueKind.ComplexMatrix => ParseComplexMatrix(element, type, profile),
+                MathBlockValueKind.PointSet => ParsePointSet(element, type, profile),
+                MathBlockValueKind.Graph => ParseGraph(element, type, profile),
+                MathBlockValueKind.RunSet => ParseRunSet(element, type, profile),
+                MathBlockValueKind.BooleanVector => ParseBooleanVector(element, profile),
                 _ => throw InvalidFormat("The OpenMath constant value kind is not supported.")
             };
         }
@@ -1149,18 +1181,24 @@ public static partial class MathBlockOpenMath
             _ => 0
         };
 
-    private static MathBlockValue ParseVector(BufferedElement element, MathBlockType type)
+    private static MathBlockValue ParseVector(
+        BufferedElement element,
+        MathBlockType type,
+        MathBlockOpenMathProfileDescriptor profile)
     {
-        var children = ReadBufferedValueApplication(element, "vector");
+        var children = ReadBufferedValueApplication(element, "vector", profile);
         var values = new double[children.Length - 1];
         for (var index = 0; index < values.Length; index++)
             values[index] = ParseDouble(children[index + 1]);
         return MathBlockValue.Vector(values, type.Unit);
     }
 
-    private static MathBlockValue ParseMatrix(BufferedElement element, MathBlockType type)
+    private static MathBlockValue ParseMatrix(
+        BufferedElement element,
+        MathBlockType type,
+        MathBlockOpenMathProfileDescriptor profile)
     {
-        var children = ReadBufferedValueApplication(element, "matrix");
+        var children = ReadBufferedValueApplication(element, "matrix", profile);
         var count = RequireMatrixElementCount(type, children.Length - 1);
         var values = new double[count];
         for (var index = 0; index < values.Length; index++)
@@ -1168,9 +1206,11 @@ public static partial class MathBlockOpenMath
         return MathBlockValue.Matrix(new MathBlockMatrix(type.Rows, type.Columns, values), type.Unit);
     }
 
-    private static MathBlockComplexValue ParseComplex(BufferedElement element)
+    private static MathBlockComplexValue ParseComplex(
+        BufferedElement element,
+        MathBlockOpenMathProfileDescriptor profile)
     {
-        var children = ReadBufferedValueApplication(element, "complex");
+        var children = ReadBufferedValueApplication(element, "complex", profile);
         if (children.Length != 3)
             throw InvalidFormat("An OpenMath complex value is invalid.");
         return new MathBlockComplexValue(ParseDouble(children[1]), ParseDouble(children[2]));
@@ -1178,36 +1218,41 @@ public static partial class MathBlockOpenMath
 
     private static MathBlockValue ParseComplexVector(
         BufferedElement element,
-        MathBlockType type)
+        MathBlockType type,
+        MathBlockOpenMathProfileDescriptor profile)
     {
-        var children = ReadBufferedValueApplication(element, "complex-vector");
+        var children = ReadBufferedValueApplication(element, "complex-vector", profile);
         var values = new MathBlockComplexValue[children.Length - 1];
         for (var index = 0; index < values.Length; index++)
-            values[index] = ParseComplex(children[index + 1]);
+            values[index] = ParseComplex(children[index + 1], profile);
         return MathBlockValue.ComplexVector(values, type.Unit);
     }
 
     private static MathBlockValue ParseComplexMatrix(
         BufferedElement element,
-        MathBlockType type)
+        MathBlockType type,
+        MathBlockOpenMathProfileDescriptor profile)
     {
-        var children = ReadBufferedValueApplication(element, "complex-matrix");
+        var children = ReadBufferedValueApplication(element, "complex-matrix", profile);
         var count = RequireMatrixElementCount(type, children.Length - 1);
         var values = new MathBlockComplexValue[count];
         for (var index = 0; index < values.Length; index++)
-            values[index] = ParseComplex(children[index + 1]);
+            values[index] = ParseComplex(children[index + 1], profile);
         return MathBlockValue.ComplexMatrix(
             new MathBlockComplexMatrix(type.Rows, type.Columns, values),
             type.Unit);
     }
 
-    private static MathBlockValue ParsePointSet(BufferedElement element, MathBlockType type)
+    private static MathBlockValue ParsePointSet(
+        BufferedElement element,
+        MathBlockType type,
+        MathBlockOpenMathProfileDescriptor profile)
     {
-        var children = ReadBufferedValueApplication(element, "point-set");
+        var children = ReadBufferedValueApplication(element, "point-set", profile);
         var values = new MathBlockPoint[children.Length - 1];
         for (var index = 0; index < values.Length; index++)
         {
-            var pointChildren = ReadBufferedValueApplication(children[index + 1], "point");
+            var pointChildren = ReadBufferedValueApplication(children[index + 1], "point", profile);
             if (pointChildren.Length != 3)
                 throw InvalidFormat("An OpenMath point is invalid.");
             values[index] = new MathBlockPoint(
@@ -1217,16 +1262,19 @@ public static partial class MathBlockOpenMath
         return MathBlockValue.PointSet(new MathBlockPointSet(values), type.Unit);
     }
 
-    private static MathBlockValue ParseGraph(BufferedElement element, MathBlockType type)
+    private static MathBlockValue ParseGraph(
+        BufferedElement element,
+        MathBlockType type,
+        MathBlockOpenMathProfileDescriptor profile)
     {
-        var children = ReadBufferedValueApplication(element, "graph");
+        var children = ReadBufferedValueApplication(element, "graph", profile);
         if (children.Length < 2)
             throw InvalidFormat("An OpenMath graph is invalid.");
         var vertexCount = ParseInteger(children[1]);
         var edges = new MathBlockGraphEdge[children.Length - 2];
         for (var index = 0; index < edges.Length; index++)
         {
-            var edgeChildren = ReadBufferedValueApplication(children[index + 2], "edge");
+            var edgeChildren = ReadBufferedValueApplication(children[index + 2], "edge", profile);
             if (edgeChildren.Length != 4)
                 throw InvalidFormat("An OpenMath graph edge is invalid.");
             edges[index] = new MathBlockGraphEdge(
@@ -1237,13 +1285,16 @@ public static partial class MathBlockOpenMath
         return MathBlockValue.Graph(new MathBlockGraph(vertexCount, edges), type.Unit);
     }
 
-    private static MathBlockValue ParseRunSet(BufferedElement element, MathBlockType type)
+    private static MathBlockValue ParseRunSet(
+        BufferedElement element,
+        MathBlockType type,
+        MathBlockOpenMathProfileDescriptor profile)
     {
-        var children = ReadBufferedValueApplication(element, "run-set");
+        var children = ReadBufferedValueApplication(element, "run-set", profile);
         var values = new MathBlockRun[children.Length - 1];
         for (var index = 0; index < values.Length; index++)
         {
-            var runChildren = ReadBufferedValueApplication(children[index + 1], "run");
+            var runChildren = ReadBufferedValueApplication(children[index + 1], "run", profile);
             if (runChildren.Length != 4)
                 throw InvalidFormat("An OpenMath run is invalid.");
             values[index] = new MathBlockRun(
@@ -1254,24 +1305,27 @@ public static partial class MathBlockOpenMath
         return MathBlockValue.RunSet(new MathBlockRunSet(values), type.Unit);
     }
 
-    private static MathBlockValue ParseBooleanVector(BufferedElement element)
+    private static MathBlockValue ParseBooleanVector(
+        BufferedElement element,
+        MathBlockOpenMathProfileDescriptor profile)
     {
-        var children = ReadBufferedValueApplication(element, "boolean-vector");
+        var children = ReadBufferedValueApplication(element, "boolean-vector", profile);
         var values = new bool[children.Length - 1];
         for (var index = 0; index < values.Length; index++)
-            values[index] = ParseBoolean(children[index + 1]);
+            values[index] = ParseBoolean(children[index + 1], profile);
         return MathBlockValue.BooleanVector(values);
     }
 
     private static BufferedElement[] ReadBufferedValueApplication(
         BufferedElement element,
-        string name)
+        string name,
+        MathBlockOpenMathProfileDescriptor profile)
     {
         RequireOnlyBufferedAttributes(element);
         var children = ReadBufferedApplication(element);
         if (children.Length == 0)
             throw InvalidFormat("An OpenMath value application is empty.");
-        RequireParsedSymbol(children[0], ValueDictionary, name);
+        RequireParsedSymbol(children[0], profile.ValueDictionary, name);
         return children;
     }
 
@@ -1296,10 +1350,12 @@ public static partial class MathBlockOpenMath
         return value;
     }
 
-    private static bool ParseBoolean(BufferedElement element)
+    private static bool ParseBoolean(
+        BufferedElement element,
+        MathBlockOpenMathProfileDescriptor profile)
     {
         var symbol = ParseSymbol(element);
-        if (!string.Equals(symbol.Dictionary, ValueDictionary, StringComparison.Ordinal))
+        if (!string.Equals(symbol.Dictionary, profile.ValueDictionary, StringComparison.Ordinal))
             throw InvalidFormat("An OpenMath Boolean value is invalid.");
         return symbol.Name switch
         {
@@ -1474,14 +1530,14 @@ public static partial class MathBlockOpenMath
         bool byteInput)
     {
         private readonly Stack<ElementFrame> frames = new();
-        private readonly MathBlockProgramBuilder builder =
-            new(MathBlockCatalog.Standard);
         private readonly List<MathBlockOperation> operations = [];
         private readonly List<MathBlockOpenMathOperationOccurrence> occurrences = [];
         private readonly Dictionary<string, MathBlockOpenMathSourceLocation>? sourceLocations =
             options.CaptureSourceLocations
                 ? new Dictionary<string, MathBlockOpenMathSourceLocation>(StringComparer.Ordinal)
                 : null;
+        private MathBlockOpenMathProfileDescriptor? profile;
+        private MathBlockProgramBuilder? builder;
         private int valueElementCount;
         private int nodeCount;
         private bool rootSeen;
@@ -1542,7 +1598,8 @@ public static partial class MathBlockOpenMath
                     throw InvalidFormat("The OpenMath document contains unsupported content.");
                 rootSeen = true;
                 role = ElementRole.Root;
-                ValidateRootHeader(header);
+                profile = SelectRootProfile(header, options.Profiles);
+                builder = new MathBlockProgramBuilder(profile.Registry);
             }
             else
             {
@@ -1629,7 +1686,8 @@ public static partial class MathBlockOpenMath
             try
             {
                 result = new MathBlockOpenMathImportResult(
-                    builder.Build(),
+                    builder!.Build(),
+                    profile!,
                     operations,
                     occurrences,
                     sourceLocations);
@@ -1641,11 +1699,11 @@ public static partial class MathBlockOpenMath
             return RootResult.Instance;
         }
 
-        private static Supprocom.MathBlocks.MathBlockOpenMath.ProgramResult CompleteProgram(ElementFrame frame)
+        private Supprocom.MathBlocks.MathBlockOpenMath.ProgramResult CompleteProgram(ElementFrame frame)
         {
             try
             {
-                CompleteProgramCore(frame);
+                CompleteProgramCore(frame, profile!);
                 return new ProgramResult(null);
             }
             catch (FormatException exception)
@@ -1654,7 +1712,9 @@ public static partial class MathBlockOpenMath
             }
         }
 
-        private static void CompleteProgramCore(ElementFrame frame)
+        private static void CompleteProgramCore(
+            ElementFrame frame,
+            MathBlockOpenMathProfileDescriptor profile)
         {
             RequireOnlyBufferedAttributes(frame.Header.Attributes);
             RequireStructuralElement(frame, "OMA");
@@ -1665,7 +1725,7 @@ public static partial class MathBlockOpenMath
                 throw InvalidFormat("The OpenMath program must contain nodes and outputs.");
             if (frame.Children[0] is not BufferedElement head)
                 throw InvalidFormat("An OpenMath symbol is invalid.");
-            RequireParsedSymbol(head, ProgramDictionary, "program");
+            RequireParsedSymbol(head, profile.ProgramDictionary, "program");
             if (frame.Children[1] is not NodesResult nodes ||
                 frame.Children[2] is not OutputsResult outputs)
             {
@@ -1677,7 +1737,9 @@ public static partial class MathBlockOpenMath
                 throw outputs.Error;
         }
 
-        private static int CompleteNodes(ElementFrame frame)
+        private static int CompleteNodes(
+            ElementFrame frame,
+            MathBlockOpenMathProfileDescriptor profile)
         {
             RequireOnlyBufferedAttributes(frame.Header.Attributes);
             RequireStructuralElement(frame, "OMA");
@@ -1686,7 +1748,7 @@ public static partial class MathBlockOpenMath
                 throw InvalidFormat("An OpenMath application is empty.");
             if (frame.Children[0] is not BufferedElement head)
                 throw InvalidFormat("An OpenMath symbol is invalid.");
-            RequireParsedSymbol(head, ProgramDictionary, "nodes");
+            RequireParsedSymbol(head, profile.ProgramDictionary, "nodes");
             return frame.ChildCount - 1;
         }
 
@@ -1694,7 +1756,7 @@ public static partial class MathBlockOpenMath
         {
             try
             {
-                nodeCount = CompleteNodes(frame);
+                nodeCount = CompleteNodes(frame, profile!);
                 return new NodesResult(nodeCount, frame.DeferredError);
             }
             catch (FormatException exception)
@@ -1703,7 +1765,9 @@ public static partial class MathBlockOpenMath
             }
         }
 
-        private static void CompleteOutputsCore(ElementFrame frame)
+        private static void CompleteOutputsCore(
+            ElementFrame frame,
+            MathBlockOpenMathProfileDescriptor profile)
         {
             RequireOnlyBufferedAttributes(frame.Header.Attributes);
             RequireStructuralElement(frame, "OMA");
@@ -1714,16 +1778,16 @@ public static partial class MathBlockOpenMath
                 throw InvalidFormat("The OpenMath program requires an output.");
             if (frame.Children[0] is not BufferedElement head)
                 throw InvalidFormat("An OpenMath symbol is invalid.");
-            RequireParsedSymbol(head, ProgramDictionary, "outputs");
+            RequireParsedSymbol(head, profile.ProgramDictionary, "outputs");
             if (frame.DeferredError is not null)
                 throw frame.DeferredError;
         }
 
-        private static Supprocom.MathBlocks.MathBlockOpenMath.OutputsResult CompleteOutputs(ElementFrame frame)
+        private Supprocom.MathBlocks.MathBlockOpenMath.OutputsResult CompleteOutputs(ElementFrame frame)
         {
             try
             {
-                CompleteOutputsCore(frame);
+                CompleteOutputsCore(frame, profile!);
                 return new OutputsResult(null);
             }
             catch (FormatException exception)
@@ -1758,8 +1822,8 @@ public static partial class MathBlockOpenMath
                             ParseNode(
                                 node,
                                 parent.ChildCount - 1,
-                                builder,
-                                StandardProfile.Value.OperationSymbols,
+                                builder!,
+                                profile!,
                                 operations,
                                 occurrences,
                                 sourceLocations,
@@ -1771,7 +1835,8 @@ public static partial class MathBlockOpenMath
                             AttachNodeDiagnosticContext(
                                 exception,
                                 node,
-                                parent.ChildCount - 1);
+                                parent.ChildCount - 1,
+                                profile!);
                             parent.RecordError(exception);
                         }
                     }
@@ -1793,10 +1858,11 @@ public static partial class MathBlockOpenMath
                         {
                             ParseOutput(
                                 output,
-                                builder,
+                                builder!,
                                 nodeCount,
                                 parent.ChildCount - 1,
-                                sourceLocations);
+                                sourceLocations,
+                                profile!);
                         }
                         catch (FormatException exception)
                         {
@@ -1822,7 +1888,8 @@ public static partial class MathBlockOpenMath
         private static void AttachNodeDiagnosticContext(
             FormatException exception,
             BufferedElement node,
-            int nodeIndex)
+            int nodeIndex,
+            MathBlockOpenMathProfileDescriptor profile)
         {
             AttachElementDiagnosticContext(
                 exception,
@@ -1840,9 +1907,9 @@ public static partial class MathBlockOpenMath
                 exception.Data[DiagnosticDictionaryKey] = dictionary;
             if (symbol is not null)
                 exception.Data[DiagnosticSymbolKey] = symbol;
-            if (string.Equals(dictionary, OperationDictionary, StringComparison.Ordinal) &&
+            if (string.Equals(dictionary, profile.OperationDictionary, StringComparison.Ordinal) &&
                 symbol is not null &&
-                StandardProfile.Value.OperationSymbols.TryGetValue(symbol, out var operation))
+                profile.OperationSymbols.TryGetValue(symbol, out var operation))
             {
                 exception.Data[DiagnosticOperationKey] = operation.Identity;
             }
@@ -1876,17 +1943,31 @@ public static partial class MathBlockOpenMath
             return null;
         }
 
-        private static void ValidateRootHeader(BufferedHeader header)
+        // The content dictionary base selects the profile; its group must then match that
+        // profile. Profiles are tried in ascending order, so a Profile 1 document never
+        // constructs a higher profile.
+        private static MathBlockOpenMathProfileDescriptor SelectRootProfile(
+            BufferedHeader header,
+            Lazy<MathBlockOpenMathProfileDescriptor>[] profiles)
         {
             if (!string.Equals(header.LocalName, "OMOBJ", StringComparison.Ordinal) || !string.Equals(header.NamespaceName, NamespaceUri, StringComparison.Ordinal))
                 throw InvalidFormat("Expected the OpenMath OMOBJ element.");
             RequireOnlyBufferedAttributes(header.Attributes, "version", "cdbase", "cdgroup");
             if (!string.Equals(RequireBufferedAttribute(header, "version"), StandardVersion, StringComparison.Ordinal))
                 throw InvalidFormat("The OpenMath version is not supported.");
-            if (!string.Equals(RequireBufferedAttribute(header, "cdbase"), ContentDictionaryBase, StringComparison.Ordinal))
+            var contentDictionaryBase = RequireBufferedAttribute(header, "cdbase");
+            MathBlockOpenMathProfileDescriptor? selected = null;
+            for (var index = 0; index < profiles.Length && selected is null; index++)
+            {
+                var candidate = profiles[index].Value;
+                if (string.Equals(contentDictionaryBase, candidate.ContentDictionaryBase, StringComparison.Ordinal))
+                    selected = candidate;
+            }
+            if (selected is null)
                 throw InvalidFormat("The OpenMath content dictionary base is not supported.");
-            if (!string.Equals(RequireBufferedAttribute(header, "cdgroup"), ContentDictionaryGroup, StringComparison.Ordinal))
+            if (!string.Equals(RequireBufferedAttribute(header, "cdgroup"), selected.ContentDictionaryGroup, StringComparison.Ordinal))
                 throw InvalidFormat("The OpenMath content dictionary group is not supported.");
+            return selected;
         }
 
         private static string RequireBufferedAttribute(BufferedHeader header, string name)
@@ -2566,7 +2647,8 @@ public static partial class MathBlockOpenMath
         int MaximumOutputs,
         int MaximumValueElements,
         bool RequireCanonicalSource,
-        bool CaptureSourceLocations);
+        bool CaptureSourceLocations,
+        Lazy<MathBlockOpenMathProfileDescriptor>[] Profiles);
 
     private readonly record struct CharacterPrefix(char[] Buffer, int Count);
 

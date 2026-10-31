@@ -1,16 +1,18 @@
 namespace Supprocom.MathBlocks;
 
-/// <summary>Contains one imported Profile 1 program and its operation metadata.</summary>
+/// <summary>Contains one imported OpenMath program, its profile, and its operation metadata.</summary>
 [System.Diagnostics.DebuggerDisplay("{Program.PlanNodes.Count} nodes, {Operations.Count} operations")]
 public sealed class MathBlockOpenMathImportResult
 {
     internal MathBlockOpenMathImportResult(
         MathBlockProgram program,
+        MathBlockOpenMathProfileDescriptor profile,
         IReadOnlyList<MathBlockOperation> operations,
         IReadOnlyList<MathBlockOpenMathOperationOccurrence> operationOccurrences,
         IReadOnlyDictionary<string, MathBlockOpenMathSourceLocation>? sourceLocations)
     {
         Program = program;
+        Profile = profile;
         Operations = Array.AsReadOnly(MathBlockCollectionPrimitives.Copy(operations));
         OperationOccurrences = Array.AsReadOnly(
             MathBlockCollectionPrimitives.Copy(operationOccurrences));
@@ -26,6 +28,9 @@ public sealed class MathBlockOpenMathImportResult
 
     /// <summary>Gets the imported typed program.</summary>
     public MathBlockProgram Program { get; }
+
+    /// <summary>Gets the profile of the imported document.</summary>
+    public MathBlockOpenMathProfileDescriptor Profile { get; }
 
     /// <summary>Gets operations in program node order.</summary>
     public IReadOnlyList<MathBlockOperation> Operations { get; }

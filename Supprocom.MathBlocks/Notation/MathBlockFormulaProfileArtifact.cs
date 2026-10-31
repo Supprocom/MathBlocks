@@ -2,13 +2,14 @@ using System.Diagnostics;
 
 namespace Supprocom.MathBlocks;
 
-/// <summary>Describes one embedded Formula Interchange Profile 1 artifact.</summary>
+/// <summary>Describes one embedded Formula Interchange profile artifact.</summary>
 [DebuggerDisplay("{PackagePath}, {Length} bytes")]
 public sealed class MathBlockFormulaProfileArtifact
 {
     private readonly byte[] content;
 
     internal MathBlockFormulaProfileArtifact(
+        string packageDirectory,
         string name,
         int length,
         string sha256,
@@ -16,7 +17,7 @@ public sealed class MathBlockFormulaProfileArtifact
         byte[] content)
     {
         Name = name;
-        PackagePath = string.Concat("formula/v1/", name);
+        PackagePath = string.Concat(packageDirectory, name);
         Length = length;
         Sha256 = sha256;
         IsNormative = isNormative;
