@@ -187,6 +187,57 @@ public sealed class MathBlockElementwiseFormTests
         Assert.True(failures.Count == 0, MathBlockCausalityChecks.Format(failures));
     }
 
+    /// <summary>
+    /// Applies the causality perturbation check directly with each source's own value mix, for every vector or
+    /// scalar choice per argument: perturbing every other row leaves row t of the form and the sibling bit for bit
+    /// unchanged, and perturbing row t itself changes it in some trial, so the check is not vacuous. The M5 check
+    /// above draws from fixed domains, on which an integer-only source fills every row.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(Sources))]
+    [Trait("Category", "CausalityContract")]
+    public void EachRowDependsOnlyOnItsOwnArgumentRow(string source)
+    {
+        const int count = 48;
+        var failures = new List<string>();
+        var ownRowChanges = 0;
+        var seed = 17_000 + 64 * Array.IndexOf(SourceIdentifiers, source);
+        foreach (var mask in BroadcastMasks(source))
+        {
+            for (var trial = 0; trial < 4; trial++)
+            {
+                var random = new Random(seed++);
+                var arguments = CreateArguments(source, count, mask, random.Next());
+                var form = Form(source).Evaluate([.. arguments, MathBlockValue.Scalar(Sentinel)]).AsVector();
+                var flags = Validity(source).Evaluate(arguments).AsBooleanVector();
+                var computedRows = Enumerable.Range(0, count).Where(row => flags[row]).ToArray();
+                for (var pick = 0; pick < 6; pick++)
+                {
+                    // Half of the picks are computed rows, so sources that fill most rows are still checked.
+                    var row = pick % 2 == 0 && computedRows.Length > 0
+                        ? computedRows[random.Next(computedRows.Length)]
+                        : random.Next(count);
+                    var others = Perturb(source, arguments, other => other != row, random);
+                    var otherForm = Form(source).Evaluate([.. others, MathBlockValue.Scalar(Sentinel)]).AsVector();
+                    var otherFlags = Validity(source).Evaluate(others).AsBooleanVector();
+                    if (BitConverter.DoubleToInt64Bits(otherForm[row]) != BitConverter.DoubleToInt64Bits(form[row]) ||
+                        otherFlags[row] != flags[row])
+                    {
+                        failures.Add($"{source} [{DescribeMask(source, mask)}] row {row} changed when every other row was perturbed: " +
+                                     $"{form[row]:R}/{flags[row]} became {otherForm[row]:R}/{otherFlags[row]}.");
+                    }
+                    var own = Perturb(source, arguments, other => other == row, random);
+                    var ownForm = Form(source).Evaluate([.. own, MathBlockValue.Scalar(Sentinel)]).AsVector();
+                    if (BitConverter.DoubleToInt64Bits(ownForm[row]) != BitConverter.DoubleToInt64Bits(form[row]))
+                        ownRowChanges++;
+                }
+            }
+        }
+
+        Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures.Take(8)));
+        Assert.True(ownRowChanges > 0, $"{source}: perturbing a row never changed that row.");
+    }
+
     /// <summary>Verifies source-invalid rows hold the fill and are marked false, including a fill equal to a real row.</summary>
     [Fact]
     public void SourceInvalidRowsHoldTheFillAndTheSiblingTellsThemApart()

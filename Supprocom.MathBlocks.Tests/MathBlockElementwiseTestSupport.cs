@@ -91,6 +91,34 @@ internal static class MathBlockElementwiseTestSupport
         return arguments;
     }
 
+    // Returns a copy of the arguments with every vector row for which perturbRow holds redrawn from the same value
+    // mix. Scalar arguments stay fixed, and clamp rows keep lower <= upper; a row that already satisfies that
+    // order is left unchanged by the reordering, so unperturbed rows keep their bits.
+    public static MathBlockValue[] Perturb(string source, MathBlockValue[] arguments, Func<int, bool> perturbRow, Random random)
+    {
+        var rows = new double[arguments.Length][];
+        for (var index = 0; index < arguments.Length; index++)
+        {
+            if (arguments[index].Type.Kind != MathBlockValueKind.Vector)
+            {
+                rows[index] = [arguments[index].AsScalar()];
+                continue;
+            }
+            rows[index] = arguments[index].AsVector().ToArray();
+            for (var row = 0; row < rows[index].Length; row++)
+                if (perturbRow(row))
+                    rows[index][row] = Draw(random);
+        }
+        if (string.Equals(source, "scalar.clamp", StringComparison.Ordinal))
+            OrderClampLimits(rows[1], rows[2]);
+        var result = new MathBlockValue[arguments.Length];
+        for (var index = 0; index < arguments.Length; index++)
+            result[index] = arguments[index].Type.Kind == MathBlockValueKind.Vector
+                ? MathBlockValue.Vector(rows[index], arguments[index].Type.Unit)
+                : arguments[index];
+        return result;
+    }
+
     private static void OrderClampLimits(double[] lower, double[] upper)
     {
         var count = Math.Max(lower.Length, upper.Length);
