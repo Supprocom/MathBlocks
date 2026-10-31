@@ -302,7 +302,7 @@ internal static class MathBlockCausalityChecks
             samples[index + 1] = context.Operation.RegressionCases[index].Inputs;
         foreach (var sample in samples)
         {
-            var baseline = EvaluateOrInvalid(context.Operation, sample.ToArray());
+            var baseline = context.Operation.Evaluate(sample.ToArray());
             if (!baseline.IsValid)
                 continue;
             var length = SeriesLength(sample[context.SeriesInputs[0]]);
@@ -314,7 +314,7 @@ internal static class MathBlockCausalityChecks
                     {
                         var inputs = sample.ToArray();
                         inputs[input] = changed;
-                        var result = EvaluateOrInvalid(context.Operation, inputs);
+                        var result = context.Operation.Evaluate(inputs);
                         if (!result.IsValid)
                             continue;
                         if (!IsSeriesKind(baseline.Type.Kind))
@@ -336,22 +336,22 @@ internal static class MathBlockCausalityChecks
         return false;
     }
 
-    /// <summary>Evaluates an operation, treating an out-of-domain input that the operation rejects by throwing as invalid.</summary>
+    /// <summary>Evaluates an operation, treating inputs whose types the operation rejects as outside its domain.</summary>
     /// <remarks>
-    /// Some operations return an invalid value whose shape differs from the declared output type when an input is
-    /// outside their domain (for example a set function whose length is not a power of two), and
-    /// <see cref="MathBlockOperation.Evaluate(IReadOnlyList{MathBlockValue})"/> reports that mismatch by throwing.
+    /// A generated length can disagree with a parameter of fixed shape, such as a graph's vertex count, and the
+    /// type resolver rejects that combination. Past type resolution, evaluation must return a value.
     /// </remarks>
-    private static MathBlockValue EvaluateOrInvalid(MathBlockOperation operation, MathBlockValue[] inputs)
+    private static MathBlockValue EvaluateTyped(MathBlockOperation operation, MathBlockValue[] inputs)
     {
         try
         {
-            return operation.Evaluate(inputs);
+            operation.ResolveOutputType(Array.ConvertAll(inputs, input => input.Type));
         }
         catch (InvalidOperationException exception)
         {
             return MathBlockValue.Invalid(MathBlockType.Scalar(), exception.Message);
         }
+        return operation.Evaluate(inputs);
     }
 
     private static bool Changed(MathBlockValue baseline, MathBlockValue result, int length, int resultLength)
@@ -534,7 +534,7 @@ internal static class MathBlockCausalityChecks
                 inputs[SeriesInputs[index]] = series[index].ToValue(Template[SeriesInputs[index]].Type.Unit);
             if (Operation.Causality.WidthInputIndex is { } widthIndex)
                 inputs[widthIndex] = MathBlockValue.Scalar(width, Template[widthIndex].Type.Unit);
-            return EvaluateOrInvalid(Operation, inputs);
+            return EvaluateTyped(Operation, inputs);
         }
     }
 

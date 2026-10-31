@@ -60,6 +60,16 @@ public sealed class MathBlockInvalidStateTests
             ["matrix.exponential/overflowing-norm"] = ("matrix.exponential@1", () => [Matrix(2, 2, 1.7e308d, 1.7e308d, 0d, 0d)])
         };
 
+    // Inputs that reach Math.Clamp with lower > upper, which throws; scalar.clamp's invalid result is not part of
+    // this test.
+    private static readonly HashSet<string> ClampIdentities = new(StringComparer.Ordinal)
+    {
+        "scalar.clamp@1", "elementwise.scalar.clamp@1", "elementwise-valid.scalar.clamp@1"
+    };
+
+    private static readonly double[] ScalarVariants =
+        [0d, -0d, -1d, 1d, 2d, 0.5d, -0.5d, 3d, 21d, 65537d, 1e308d, -1e308d, 1e-310d, 4097d, 1_000_001d];
+
     /// <summary>Gets the out-of-domain case names.</summary>
     public static TheoryData<string> CaseNames => [.. Cases.Keys.Order(StringComparer.Ordinal)];
 
@@ -101,6 +111,55 @@ public sealed class MathBlockInvalidStateTests
         Assert.Equal(squared, tooWide.Type.Unit);
     }
 
+    /// <summary>
+    /// Evaluates every operation of the standard, window and elementwise registries on its samples with inputs
+    /// replaced by out-of-domain values, and requires a value of a type its declared type accepts whenever the type
+    /// resolves: an exception from Evaluate past type resolution is a failure.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "InvalidState")]
+    public void EveryOperationReturnsAValueForOutOfDomainInputs()
+    {
+        var operations = MathBlockCatalog.Standard.Operations
+            .Concat(MathBlockWindowTestSupport.Windowed.Operations)
+            .Concat(MathBlockElementwiseTestSupport.Elementwise.Operations);
+        var failures = new SortedDictionary<string, string>(StringComparer.Ordinal);
+        var evaluations = 0;
+        foreach (var operation in operations)
+        {
+            foreach (var inputs in Variants(operation))
+            {
+                MathBlockType declared;
+                try
+                {
+                    declared = operation.ResolveOutputType(inputs.Select(input => input.Type).ToArray());
+                }
+                catch (Exception exception) when (exception is InvalidOperationException or ArgumentException)
+                {
+                    continue;
+                }
+                evaluations++;
+                try
+                {
+                    var result = operation.Evaluate(inputs);
+                    if (!declared.Accepts(result.Type))
+                        failures.TryAdd(operation.Identity, $"returned {result.Type} for the declared {declared}");
+                }
+                catch (Exception exception) when (exception is not OutOfMemoryException)
+                {
+                    if (exception is ArgumentException && ClampIdentities.Contains(operation.Identity))
+                        continue;
+                    failures.TryAdd(operation.Identity, $"{exception.GetType().Name}: {exception.Message} ({Describe(inputs)})");
+                }
+            }
+        }
+
+        Assert.True(evaluations > 10_000, $"Only {evaluations} evaluations ran.");
+        Assert.True(
+            failures.Count == 0,
+            string.Create(CultureInfo.InvariantCulture, $"{failures.Count} operation(s) threw:{Environment.NewLine}{string.Join(Environment.NewLine, failures.Select(item => $"{item.Key}: {item.Value}"))}"));
+    }
+
     private static MathBlockOperation Find(string identity)
     {
         var separator = identity.LastIndexOf('@');
@@ -108,6 +167,157 @@ public sealed class MathBlockInvalidStateTests
         var version = int.Parse(identity[(separator + 1)..], CultureInfo.InvariantCulture);
         return MathBlockCatalog.Standard.Get(identifier, version);
     }
+
+    // Each sample (the performance case and every regression case), the sample with every input in one unit, and
+    // the sample with one input at a time in a unit; for each, every input replaced by each of its kind's variants,
+    // then every input replaced by its variant of the same index.
+    private static IEnumerable<MathBlockValue[]> Variants(MathBlockOperation operation)
+    {
+        var samples = new List<MathBlockValue[]> { operation.PerformanceCase.Inputs.ToArray() };
+        samples.AddRange(operation.RegressionCases.Select(item => item.Inputs.ToArray()));
+        var plain = samples.Count;
+        for (var index = 0; index < plain; index++)
+        {
+            samples.Add(samples[index].Select(value => WithUnit(value, MathBlockUnit.Basis0)).ToArray());
+            for (var input = 0; input < samples[index].Length; input++)
+            {
+                var single = (MathBlockValue[])samples[index].Clone();
+                single[input] = WithUnit(single[input], MathBlockUnit.Basis1);
+                samples.Add(single);
+            }
+        }
+        for (var index = 0; index < samples.Count; index++)
+        {
+            var sample = samples[index];
+            yield return sample;
+            var alternatives = sample.Select(Alternatives).ToArray();
+            for (var input = 0; input < sample.Length; input++)
+                for (var variant = 0; variant < alternatives[input].Count; variant++)
+                {
+                    var inputs = (MathBlockValue[])sample.Clone();
+                    inputs[input] = alternatives[input][variant];
+                    yield return inputs;
+                }
+            var widest = alternatives.Max(list => list.Count);
+            for (var variant = 0; variant < widest; variant++)
+            {
+                var inputs = new MathBlockValue[sample.Length];
+                for (var input = 0; input < sample.Length; input++)
+                    inputs[input] = alternatives[input].Count == 0 ? sample[input] : alternatives[input][variant % alternatives[input].Count];
+                yield return inputs;
+            }
+        }
+    }
+
+    private static List<MathBlockValue> Alternatives(MathBlockValue value)
+    {
+        var list = new List<MathBlockValue>();
+        if (!value.IsValid)
+            return list;
+        var unit = value.Type.Unit;
+        switch (value.Type.Kind)
+        {
+            case MathBlockValueKind.Scalar:
+                list.AddRange(ScalarVariants.Select(item => MathBlockValue.Scalar(item, unit)));
+                break;
+            case MathBlockValueKind.Boolean:
+                list.Add(MathBlockValue.Boolean(!value.AsBoolean()));
+                break;
+            case MathBlockValueKind.Complex:
+                list.Add(MathBlockValue.Complex(new Complex(0d, 0d), unit));
+                list.Add(MathBlockValue.Complex(new Complex(1.7e308d, 1.7e308d), unit));
+                break;
+            case MathBlockValueKind.Vector:
+                {
+                    var values = value.AsVector().ToArray();
+                    var count = values.Length;
+                    list.Add(MathBlockValue.Vector([], unit));
+                    list.Add(MathBlockValue.Vector([0d], unit));
+                    list.Add(MathBlockValue.Vector(new double[count], unit));
+                    list.Add(MathBlockValue.Vector(values.Select(item => -item - 1d), unit));
+                    list.Add(MathBlockValue.Vector(Enumerable.Repeat(1d, count), unit));
+                    list.Add(MathBlockValue.Vector(Enumerable.Repeat(1e308d, count), unit));
+                    list.Add(MathBlockValue.Vector(Enumerable.Range(0, Math.Max(count, 2)).Select(item => item % 2 == 0 ? 1.7e308d : -1.7e308d), unit));
+                    list.Add(MathBlockValue.Vector(values.Select(item => item + 0.5d), unit));
+                    list.Add(MathBlockValue.Vector([.. values, count == 0 ? 1d : values[^1]], unit));
+                    list.Add(MathBlockValue.Vector(Enumerable.Range(0, 7).Select(item => (double)item), unit));
+                    break;
+                }
+            case MathBlockValueKind.BooleanVector:
+                {
+                    var values = value.AsBooleanVector().ToArray();
+                    list.Add(MathBlockValue.BooleanVector([]));
+                    list.Add(MathBlockValue.BooleanVector(new bool[values.Length]));
+                    list.Add(MathBlockValue.BooleanVector([.. values, true]));
+                    break;
+                }
+            case MathBlockValueKind.Matrix:
+                {
+                    var matrix = value.AsMatrix();
+                    var entries = matrix.ToArray();
+                    list.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, new double[entries.Length]), unit));
+                    list.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, entries.Select((_, index) => index % 2 == 0 ? 1.7e308d : -1.7e308d)), unit));
+                    list.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Repeat(1e308d, entries.Length)), unit));
+                    list.Add(MathBlockValue.Matrix(new MathBlockMatrix(1, 1, [2d]), unit));
+                    list.Add(MathBlockValue.Matrix(new MathBlockMatrix(2, 3, [1d, 2d, 3d, 4d, 5d, 6d]), unit));
+                    list.Add(MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1d, 1d, 1d, 1d]), unit));
+                    break;
+                }
+            case MathBlockValueKind.ComplexVector:
+                {
+                    var count = value.AsComplexVector().Count;
+                    list.Add(MathBlockValue.ComplexVector([], unit));
+                    list.Add(MathBlockValue.ComplexVector(new Complex[count], unit));
+                    list.Add(MathBlockValue.ComplexVector(Enumerable.Repeat(new Complex(1.7e308d, 1.7e308d), Math.Max(count, 1)), unit));
+                    break;
+                }
+            case MathBlockValueKind.PointSet:
+                {
+                    var count = value.AsPointSet().Count;
+                    list.Add(MathBlockValue.PointSet(new MathBlockPointSet([]), unit));
+                    list.Add(MathBlockValue.PointSet(new MathBlockPointSet([new MathBlockPoint(0d, 0d)]), unit));
+                    list.Add(MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Repeat(new MathBlockPoint(1d, 1d), count)), unit));
+                    list.Add(MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Range(0, count).Select(index => new MathBlockPoint(index * 1e200d, (index % 2) * 1e200d))), unit));
+                    list.Add(MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Range(0, count).Select(index => new MathBlockPoint(index % 2 == 0 ? 1.7e308d : -1.7e308d, index % 3 == 0 ? -1.7e308d : 1.7e308d))), unit));
+                    break;
+                }
+            case MathBlockValueKind.Graph:
+                {
+                    var graph = value.AsGraph();
+                    list.Add(MathBlockValue.Graph(new MathBlockGraph(1, []), unit));
+                    list.Add(MathBlockValue.Graph(new MathBlockGraph(graph.VertexCount, []), unit));
+                    list.Add(MathBlockValue.Graph(new MathBlockGraph(graph.VertexCount, graph.Select(edge => edge with { Weight = -edge.Weight - 1d })), unit));
+                    list.Add(MathBlockValue.Graph(new MathBlockGraph(graph.VertexCount, graph.Select(edge => edge with { Weight = 1e308d })), unit));
+                    list.Add(MathBlockValue.Graph(new MathBlockGraph(graph.VertexCount + 1, graph), unit));
+                    break;
+                }
+        }
+        return list;
+    }
+
+    private static MathBlockValue WithUnit(MathBlockValue value, MathBlockUnit unit)
+    {
+        if (!value.IsValid)
+            return value;
+        return value.Type.Kind switch
+        {
+            MathBlockValueKind.Scalar => MathBlockValue.Scalar(value.AsScalar(), unit),
+            MathBlockValueKind.Complex => MathBlockValue.Complex(value.AsComplex(), unit),
+            MathBlockValueKind.Vector => MathBlockValue.Vector(value.AsVector(), unit),
+            MathBlockValueKind.Matrix => MathBlockValue.Matrix(value.AsMatrix(), unit),
+            MathBlockValueKind.ComplexVector => MathBlockValue.ComplexVector(value.AsComplexVector(), unit),
+            MathBlockValueKind.ComplexMatrix => MathBlockValue.ComplexMatrix(value.AsComplexMatrix(), unit),
+            MathBlockValueKind.PointSet => MathBlockValue.PointSet(value.AsPointSet(), unit),
+            MathBlockValueKind.Graph => MathBlockValue.Graph(value.AsGraph(), unit),
+            MathBlockValueKind.RunSet => MathBlockValue.RunSet(value.AsRunSet(), unit),
+            _ => value
+        };
+    }
+
+    private static string Describe(MathBlockValue[] inputs) =>
+        string.Join(", ", inputs.Select(input => input.IsValid && input.Type.Kind == MathBlockValueKind.Scalar
+            ? input.AsScalar().ToString("R", CultureInfo.InvariantCulture)
+            : input.Type.ToString()));
 
     private static MathBlockValue Scalar(double value) => MathBlockValue.Scalar(value);
 
