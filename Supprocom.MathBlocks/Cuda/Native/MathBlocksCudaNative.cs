@@ -68,7 +68,22 @@ internal static class MathBlocksCudaNative
         return CompilePtxForArchitecture(source, name, ResolvePtxArchitecture());
     }
 
-    private static byte[] CompilePtxForArchitecture(string source, string name, string architecture)
+    // Compiles with --fmad=true or --fmad=false, for checks that code written with explicit rounding intrinsics
+    // keeps its bits under either contraction setting a consumer may choose.
+    public static byte[] CompilePtx(string source, string name, bool fusedMultiplyAdd)
+    {
+        EnsureContext();
+        return CompileForArchitecture(source, name, ResolvePtxArchitecture(), fusedMultiplyAdd);
+    }
+
+    private static byte[] CompilePtxForArchitecture(string source, string name, string architecture) =>
+        CompileForArchitecture(source, name, architecture, fusedMultiplyAdd: false);
+
+    private static byte[] CompileForArchitecture(
+        string source,
+        string name,
+        string architecture,
+        bool fusedMultiplyAdd)
     {
         ThrowIfFailed(nvrtcCreateProgram(out var program, source, name, 0, IntPtr.Zero, IntPtr.Zero), "nvrtcCreateProgram");
         try
@@ -76,7 +91,7 @@ internal static class MathBlocksCudaNative
             var options = new[]
             {
                 $"--gpu-architecture={architecture}",
-                "--fmad=false",
+                fusedMultiplyAdd ? "--fmad=true" : "--fmad=false",
                 "--prec-div=true",
                 "--prec-sqrt=true"
             };
