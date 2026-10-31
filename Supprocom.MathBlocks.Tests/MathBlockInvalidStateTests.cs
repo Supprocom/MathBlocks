@@ -78,6 +78,25 @@ public sealed class MathBlockInvalidStateTests
         Assert.True(declared.Accepts(result.Type), $"{name} returned {result.Type}; the declared type is {declared}.");
     }
 
+    /// <summary>Verifies the rolling variance is in the square of the input unit.</summary>
+    [Fact]
+    [Trait("Category", "InvalidState")]
+    public void RollingVarianceIsInTheSquareOfTheInputUnit()
+    {
+        var operation = MathBlockCatalog.Standard.Get("sequence.rolling-variance");
+        var unit = MathBlockUnit.Basis0;
+        MathBlockValue[] inputs = [MathBlockValue.Vector([1d, 2d, 4d, 8d], unit), Scalar(2d)];
+        var squared = unit.Pow(new MathRational(2));
+
+        Assert.Equal(squared, operation.ResolveOutputType(inputs.Select(input => input.Type).ToArray()).Unit);
+        var result = operation.Evaluate(inputs);
+        Assert.True(result.IsValid);
+        Assert.Equal(squared, result.Type.Unit);
+        var tooWide = operation.Evaluate(MathBlockValue.Vector([1d, 2d], unit), Scalar(3d));
+        Assert.False(tooWide.IsValid);
+        Assert.Equal(squared, tooWide.Type.Unit);
+    }
+
     private static MathBlockOperation Find(string identity)
     {
         var separator = identity.LastIndexOf('@');

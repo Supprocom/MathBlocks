@@ -125,18 +125,22 @@ internal static partial class VectorMathBlocks
         string identifier,
         Func<IReadOnlyList<double>, int, double[]> function,
         double[] expected,
-        bool squaredOutput) => MathBlockOperationFactory.Create(
-        identifier, 2, VectorScalarVectorType,
-        inputs =>
-        {
-            var width = RequirePositiveInteger(inputs[1].AsScalar());
-            var values = inputs[0].AsVector();
-            var unit = squaredOutput ? inputs[0].Type.Unit.Pow(new MathRational(2)) : inputs[0].Type.Unit;
-            return width <= values.Count
-                ? MathBlockValue.Vector(function(values, width), unit, true)
-                : MathBlockValue.Invalid(MathBlockType.Vector(unit), "The width is outside the sequence domain.");
-        },
-        [sampleVector, MathBlockValue.Scalar(2d)], MathBlockValue.Vector(expected), 1e-9, 32);
+        bool squaredOutput)
+    {
+        MathBlockTypeResolver resolver = squaredOutput ? VectorScalarSquaredVectorType : VectorScalarVectorType;
+        return MathBlockOperationFactory.Create(
+            identifier, 2, resolver,
+            inputs =>
+            {
+                var width = RequirePositiveInteger(inputs[1].AsScalar());
+                var values = inputs[0].AsVector();
+                var unit = squaredOutput ? inputs[0].Type.Unit.Pow(new MathRational(2)) : inputs[0].Type.Unit;
+                return width <= values.Count
+                    ? MathBlockValue.Vector(function(values, width), unit, true)
+                    : MathBlockOperationFactory.Invalid(resolver, inputs, "The width is outside the sequence domain.");
+            },
+            [sampleVector, MathBlockValue.Scalar(2d)], MathBlockValue.Vector(expected), 1e-9, 32);
+    }
 
     private static MathBlockOperation CreateVectorComparison(
         string identifier,
@@ -272,6 +276,10 @@ internal static partial class VectorMathBlocks
         MathBlockTypeRules.RequireDimensionless(types[1]);
         return MathBlockType.Vector(types[0].Unit);
     }
+
+    // The rolling variance is in the square of the input unit.
+    private static MathBlockType VectorScalarSquaredVectorType(IReadOnlyList<MathBlockType> types) =>
+        MathBlockType.Vector(VectorScalarVectorType(types).Unit.Pow(new MathRational(2)));
 
     private static MathBlockType VectorTwoScalarVectorType(IReadOnlyList<MathBlockType> types)
     {
