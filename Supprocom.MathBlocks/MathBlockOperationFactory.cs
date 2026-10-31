@@ -10,7 +10,8 @@ internal static class MathBlockOperationFactory
         IReadOnlyList<MathBlockValue> sampleInputs,
         MathBlockValue sampleOutput,
         double tolerance = 1e-10,
-        int performanceIterations = 64) =>
+        int performanceIterations = 64,
+        MathBlockCausalityInfo? causality = null) =>
         new(
             identifier,
             1,
@@ -19,7 +20,7 @@ internal static class MathBlockOperationFactory
             evaluator,
             [new MathBlockRegressionCase("reference", sampleInputs, sampleOutput, tolerance)],
             new MathBlockPerformanceCase(sampleInputs, performanceIterations),
-            MathBlockCausalityIndex.Resolve($"{identifier}@1"));
+            causality ?? MathBlockCausalityIndex.Resolve($"{identifier}@1"));
 
     public static MathBlockOperation ScalarUnary(
         string identifier,

@@ -94,7 +94,7 @@ public sealed class MathBlockFeatureFolderTests
             var directory = new DirectoryInfo(start);
             while (directory is not null)
             {
-                if (Directory.Exists(Path.Combine(directory.FullName, ".git")) &&
+                if (Path.Exists(Path.Combine(directory.FullName, ".git")) &&
                     Directory.Exists(Path.Combine(directory.FullName, "Supprocom.MathBlocks")))
                 {
                     return directory.FullName;

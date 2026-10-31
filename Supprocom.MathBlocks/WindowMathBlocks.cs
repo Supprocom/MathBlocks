@@ -170,7 +170,8 @@ internal static class WindowMathBlocks
             sample,
             MathBlockValue.Vector(expected, outputUnit),
             1e-12,
-            16);
+            16,
+            MathBlockCausalityInfo.Trailing(form.FormArity - 2));
     }
 
     private static MathBlockOperation CreateValidity(WindowSource definition)
@@ -190,7 +191,8 @@ internal static class WindowMathBlocks
             form.EvaluateValidity,
             sample,
             MathBlockValue.BooleanVector(expected),
-            performanceIterations: 16);
+            performanceIterations: 16,
+            causality: MathBlockCausalityInfo.Trailing(form.ValidityArity - 1));
     }
 
     // Create builds an independent instance of the source operation; Sample holds the source inputs used for the

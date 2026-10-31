@@ -1110,7 +1110,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         var directory = new DirectoryInfo(Path.GetDirectoryName(sourceFile)!);
         while (directory is not null)
         {
-            if (Directory.Exists(Path.Combine(directory.FullName, ".git")))
+            if (Path.Exists(Path.Combine(directory.FullName, ".git")))
                 return directory.FullName;
             directory = directory.Parent;
         }
