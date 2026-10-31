@@ -399,11 +399,14 @@ public sealed class MathBlockFusedExpression
             result[ordinal] = value;
         }
         if (matched != validity.Count)
+        {
+            var names = new HashSet<string>(VectorInputNames, StringComparer.Ordinal);
             foreach (var name in validity.Keys)
-                if (!VectorInputNames.Contains(name, StringComparer.Ordinal))
+                if (!names.Contains(name))
                     throw new ArgumentException(
                         $"The validity input '{name}' does not name a vector input of the fused expression.",
                         nameof(validity));
+        }
         return result;
     }
 
