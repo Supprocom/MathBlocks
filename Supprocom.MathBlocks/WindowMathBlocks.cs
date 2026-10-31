@@ -129,8 +129,8 @@ internal static class WindowMathBlocks
     private static readonly Lazy<MathBlockWindowEntry[]> entries = new(CreateEntries);
     private static readonly Lazy<MathBlockRegistry> directReference = new(CreateDirectReference);
 
-    // Every window.* and window-valid.* operation with its form. The operations are the instances registered in
-    // MathBlockCatalog.Windowed.
+    // Every window.*, window-valid.*, window-prefix.* and window-prefix-valid.* operation with its form. The
+    // operations are the instances registered in MathBlockCatalog.Windowed.
     internal static IReadOnlyList<MathBlockWindowEntry> Entries => entries.Value;
 
     // The window.* and window-valid.* forms evaluated by the direct lift on every row, including the forms that have
@@ -152,9 +152,12 @@ internal static class WindowMathBlocks
     private static MathBlockWindowEntry[] CreateEntries()
     {
         var sources = Sources;
-        var result = new MathBlockWindowEntry[sources.Length];
+        var prefix = WindowPrefixMathBlocks.CreateEntries();
+        var result = new MathBlockWindowEntry[sources.Length + prefix.Length];
         for (var index = 0; index < sources.Length; index++)
             result[index] = CreateEntry(sources[index], direct: false);
+        for (var index = 0; index < prefix.Length; index++)
+            result[sources.Length + index] = prefix[index];
         return result;
     }
 
