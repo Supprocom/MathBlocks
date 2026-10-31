@@ -901,10 +901,8 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
             var data = new TheoryData<string>();
             foreach (var operation in MathBlockCatalog.Standard.Operations)
             {
-                // M4-CUDA owns clamp's ±0 behaviour and its parity test.
                 if ((operation.Identifier.StartsWith("scalar.", StringComparison.Ordinal) ||
                      operation.Identifier.StartsWith("special.", StringComparison.Ordinal)) &&
-                    !string.Equals(operation.Identifier, "scalar.clamp", StringComparison.Ordinal) &&
                     operation.RegressionCases[0].Inputs.All(input => input.Type.Kind == MathBlockValueKind.Scalar))
                 {
                     data.Add(operation.Identifier);
@@ -1173,8 +1171,9 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
     // The window forms have CUDA support but are kept outside Standard.
     private static MathBlockRegistry ResolveSupportedRegistry(string identity) =>
-        identity.StartsWith("window", StringComparison.Ordinal)
-            ? MathBlockWindowTestSupport.Windowed
+        identity.StartsWith("window", StringComparison.Ordinal) ||
+        identity.StartsWith("elementwise", StringComparison.Ordinal)
+            ? MathBlockWindowTestSupport.Cuda
             : MathBlockCatalog.Standard;
 
     private static MathBlockProgram CreateParallelFormula() =>
