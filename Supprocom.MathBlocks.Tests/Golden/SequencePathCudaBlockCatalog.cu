@@ -1816,13 +1816,24 @@ __device__ void mathblocks_sequence_path_dispatch(
                         if (!(csharp2cuda_temp_60))
                             break;
 #line 621 "SequencePathModule.cs"
-#line 621 "SequencePathModule.cs"
-                        double* csharp2cuda_temp_62 = &((result)[index]);
-#line 621 "SequencePathModule.cs"
-                        double csharp2cuda_temp_63 = (a)[csharp2cuda_i32_add(index, lag)];
-#line 621 "SequencePathModule.cs"
-                        double csharp2cuda_temp_64 = (a)[index];
-                        (*(csharp2cuda_temp_62) = __dsub_rn(csharp2cuda_temp_63, csharp2cuda_temp_64));
+                        {
+#line 622 "SequencePathModule.cs"
+#line 622 "SequencePathModule.cs"
+                            double* csharp2cuda_temp_62 = &((result)[index]);
+#line 622 "SequencePathModule.cs"
+                            double csharp2cuda_temp_63 = (a)[csharp2cuda_i32_add(index, lag)];
+#line 622 "SequencePathModule.cs"
+                            double csharp2cuda_temp_64 = (a)[index];
+                            (*(csharp2cuda_temp_62) = __dsub_rn(csharp2cuda_temp_63, csharp2cuda_temp_64));
+#line 623 "SequencePathModule.cs"
+#line 623 "SequencePathModule.cs"
+                            double csharp2cuda_temp_65 = (result)[index];
+                            if ((!(isfinite(csharp2cuda_temp_65))))
+                            {
+#line 623 "SequencePathModule.cs"
+                                atomicExch(&((output)->valid), 0);
+                            }
+                        }
 #line 620 "SequencePathModule.cs"
                         int* csharp2cuda_temp_57 = &(index);
 #line 620 "SequencePathModule.cs"
@@ -1830,2949 +1841,3071 @@ __device__ void mathblocks_sequence_path_dispatch(
                         (*(csharp2cuda_temp_57) = csharp2cuda_i32_add(csharp2cuda_temp_58, blockDim.x));
                     }
                 }
-#line 622 "SequencePathModule.cs"
+#line 625 "SequencePathModule.cs"
                 break;
             }
-#line 624 "SequencePathModule.cs"
-        case 2:
-#line 625 "SequencePathModule.cs"
-            if (((thread) == (0)))
-#line 626 "SequencePathModule.cs"
-            {
 #line 627 "SequencePathModule.cs"
+        case 2:
+#line 628 "SequencePathModule.cs"
+            if (((thread) == (0)))
+#line 629 "SequencePathModule.cs"
+            {
+#line 630 "SequencePathModule.cs"
                 double alpha = (second)->scalar_value;
-#line 628 "SequencePathModule.cs"
-#line 628 "SequencePathModule.cs"
-                int csharp2cuda_temp_65 = (first)->count;
-                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_65);
-#line 629 "SequencePathModule.cs"
-#line 629 "SequencePathModule.cs"
+#line 631 "SequencePathModule.cs"
+#line 631 "SequencePathModule.cs"
                 int csharp2cuda_temp_66 = (first)->count;
-#line 629 "SequencePathModule.cs"
-                bool csharp2cuda_temp_67;
-#line 629 "SequencePathModule.cs"
-                if (!(((csharp2cuda_temp_66) <= (0))))
+                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_66);
+#line 632 "SequencePathModule.cs"
+#line 632 "SequencePathModule.cs"
+                int csharp2cuda_temp_67 = (first)->count;
+#line 632 "SequencePathModule.cs"
+                bool csharp2cuda_temp_68;
+#line 632 "SequencePathModule.cs"
+                if (!(((csharp2cuda_temp_67) <= (0))))
                 {
-#line 629 "SequencePathModule.cs"
-                    bool csharp2cuda_temp_68;
-#line 629 "SequencePathModule.cs"
+#line 632 "SequencePathModule.cs"
+                    bool csharp2cuda_temp_69;
+#line 632 "SequencePathModule.cs"
                     if (((alpha) > (0.0)))
                     {
-#line 629 "SequencePathModule.cs"
-                        csharp2cuda_temp_68 = ((alpha) <= (1.0));
+#line 632 "SequencePathModule.cs"
+                        csharp2cuda_temp_69 = ((alpha) <= (1.0));
                     }
                     else
                     {
-#line 629 "SequencePathModule.cs"
-                        csharp2cuda_temp_68 = false;
+#line 632 "SequencePathModule.cs"
+                        csharp2cuda_temp_69 = false;
                     }
-#line 629 "SequencePathModule.cs"
-                    csharp2cuda_temp_67 = (!(csharp2cuda_temp_68));
+#line 632 "SequencePathModule.cs"
+                    csharp2cuda_temp_68 = (!(csharp2cuda_temp_69));
                 }
                 else
                 {
-#line 629 "SequencePathModule.cs"
-                    csharp2cuda_temp_67 = true;
-                }
-                if (csharp2cuda_temp_67)
-                {
-#line 630 "SequencePathModule.cs"
-#line 630 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_69 = &((output)->valid);
-                    (*(csharp2cuda_temp_69) = 0);
-                }
-#line 631 "SequencePathModule.cs"
-                if ((output)->valid)
 #line 632 "SequencePathModule.cs"
+                    csharp2cuda_temp_68 = true;
+                }
+                if (csharp2cuda_temp_68)
                 {
 #line 633 "SequencePathModule.cs"
 #line 633 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_70 = &((result)[0]);
-#line 633 "SequencePathModule.cs"
-                    double csharp2cuda_temp_71 = (a)[0];
-                    (*(csharp2cuda_temp_70) = csharp2cuda_temp_71);
+                    int* csharp2cuda_temp_70 = &((output)->valid);
+                    (*(csharp2cuda_temp_70) = 0);
+                }
 #line 634 "SequencePathModule.cs"
+                if ((output)->valid)
+#line 635 "SequencePathModule.cs"
+                {
+#line 636 "SequencePathModule.cs"
+#line 636 "SequencePathModule.cs"
+                    double* csharp2cuda_temp_71 = &((result)[0]);
+#line 636 "SequencePathModule.cs"
+                    double csharp2cuda_temp_72 = (a)[0];
+                    (*(csharp2cuda_temp_71) = csharp2cuda_temp_72);
+#line 637 "SequencePathModule.cs"
                     {
-#line 634 "SequencePathModule.cs"
+#line 637 "SequencePathModule.cs"
                         int index = 1;
                         while (true)
                         {
-#line 634 "SequencePathModule.cs"
-                            int csharp2cuda_temp_73 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_73))))
+#line 637 "SequencePathModule.cs"
+                            int csharp2cuda_temp_74 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_74))))
                                 break;
-#line 635 "SequencePathModule.cs"
+#line 638 "SequencePathModule.cs"
                             {
-#line 636 "SequencePathModule.cs"
-#line 636 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_74 = &((result)[index]);
-#line 636 "SequencePathModule.cs"
-                                double csharp2cuda_temp_75 = (a)[index];
-#line 636 "SequencePathModule.cs"
-                                double csharp2cuda_temp_76 = (result)[csharp2cuda_i32_sub(index, 1)];
-                                (*(csharp2cuda_temp_74) = __dadd_rn(__dmul_rn(alpha, csharp2cuda_temp_75), __dmul_rn(__dsub_rn(1.0, alpha), csharp2cuda_temp_76)));
-#line 637 "SequencePathModule.cs"
-#line 637 "SequencePathModule.cs"
-                                double csharp2cuda_temp_77 = (result)[index];
-                                if ((!(isfinite(csharp2cuda_temp_77))))
+#line 639 "SequencePathModule.cs"
+#line 639 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_75 = &((result)[index]);
+#line 639 "SequencePathModule.cs"
+                                double csharp2cuda_temp_76 = (a)[index];
+#line 639 "SequencePathModule.cs"
+                                double csharp2cuda_temp_77 = (result)[csharp2cuda_i32_sub(index, 1)];
+                                (*(csharp2cuda_temp_75) = __dadd_rn(__dmul_rn(alpha, csharp2cuda_temp_76), __dmul_rn(__dsub_rn(1.0, alpha), csharp2cuda_temp_77)));
+#line 640 "SequencePathModule.cs"
+#line 640 "SequencePathModule.cs"
+                                double csharp2cuda_temp_78 = (result)[index];
+                                if ((!(isfinite(csharp2cuda_temp_78))))
                                 {
-#line 638 "SequencePathModule.cs"
-#line 638 "SequencePathModule.cs"
-                                    int* csharp2cuda_temp_78 = &((output)->valid);
-                                    (*(csharp2cuda_temp_78) = 0);
+#line 641 "SequencePathModule.cs"
+#line 641 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_79 = &((output)->valid);
+                                    (*(csharp2cuda_temp_79) = 0);
                                 }
                             }
-#line 634 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_72 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_72));
+#line 637 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_73 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_73));
                         }
                     }
                 }
             }
-#line 642 "SequencePathModule.cs"
+#line 645 "SequencePathModule.cs"
             break;
-#line 643 "SequencePathModule.cs"
+#line 646 "SequencePathModule.cs"
         case 3:
         case 6:
-#line 645 "SequencePathModule.cs"
+#line 648 "SequencePathModule.cs"
             if (((thread) == (0)))
-#line 646 "SequencePathModule.cs"
-            {
-#line 647 "SequencePathModule.cs"
-                int width = 0;
-#line 648 "SequencePathModule.cs"
-#line 648 "SequencePathModule.cs"
-                double csharp2cuda_temp_79 = (second)->scalar_value;
-#line 648 "SequencePathModule.cs"
-                int* csharp2cuda_temp_80 = &(width);
-#line 648 "SequencePathModule.cs"
-                bool csharp2cuda_temp_81 = mathblocks_sequence_positive_integer(csharp2cuda_temp_79, csharp2cuda_temp_80);
-#line 648 "SequencePathModule.cs"
-                bool csharp2cuda_temp_82;
-#line 648 "SequencePathModule.cs"
-                if (!((!(csharp2cuda_temp_81))))
-                {
 #line 649 "SequencePathModule.cs"
-                    int csharp2cuda_temp_83 = (first)->count;
-#line 648 "SequencePathModule.cs"
-                    csharp2cuda_temp_82 = ((width) > (csharp2cuda_temp_83));
-                }
-                else
-                {
-#line 648 "SequencePathModule.cs"
-                    csharp2cuda_temp_82 = true;
-                }
-#line 648 "SequencePathModule.cs"
-                bool csharp2cuda_temp_84;
-#line 648 "SequencePathModule.cs"
-                if (!(csharp2cuda_temp_82))
-                {
-#line 648 "SequencePathModule.cs"
-                    csharp2cuda_temp_84 = ((((void*)(scratch))) == (((void*)(nullptr))));
-                }
-                else
-                {
-#line 648 "SequencePathModule.cs"
-                    csharp2cuda_temp_84 = true;
-                }
-                if (csharp2cuda_temp_84)
+            {
 #line 650 "SequencePathModule.cs"
+                int width = 0;
+#line 651 "SequencePathModule.cs"
+#line 651 "SequencePathModule.cs"
+                double csharp2cuda_temp_80 = (second)->scalar_value;
+#line 651 "SequencePathModule.cs"
+                int* csharp2cuda_temp_81 = &(width);
+#line 651 "SequencePathModule.cs"
+                bool csharp2cuda_temp_82 = mathblocks_sequence_positive_integer(csharp2cuda_temp_80, csharp2cuda_temp_81);
+#line 651 "SequencePathModule.cs"
+                bool csharp2cuda_temp_83;
+#line 651 "SequencePathModule.cs"
+                if (!((!(csharp2cuda_temp_82))))
                 {
+#line 652 "SequencePathModule.cs"
+                    int csharp2cuda_temp_84 = (first)->count;
 #line 651 "SequencePathModule.cs"
-#line 651 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_85 = &((output)->valid);
-                    (*(csharp2cuda_temp_85) = 0);
+                    csharp2cuda_temp_83 = ((width) > (csharp2cuda_temp_84));
                 }
                 else
-#line 654 "SequencePathModule.cs"
                 {
-#line 655 "SequencePathModule.cs"
-#line 655 "SequencePathModule.cs"
-                    int csharp2cuda_temp_86 = (first)->count;
-                    mathblocks_sequence_set_vector_shape(output, csharp2cuda_i32_add(csharp2cuda_i32_sub(csharp2cuda_temp_86, width), 1));
-#line 656 "SequencePathModule.cs"
-                    int* deque = ((int*)(scratch));
+#line 651 "SequencePathModule.cs"
+                    csharp2cuda_temp_83 = true;
+                }
+#line 651 "SequencePathModule.cs"
+                bool csharp2cuda_temp_85;
+#line 651 "SequencePathModule.cs"
+                if (!(csharp2cuda_temp_83))
+                {
+#line 651 "SequencePathModule.cs"
+                    csharp2cuda_temp_85 = ((((void*)(scratch))) == (((void*)(nullptr))));
+                }
+                else
+                {
+#line 651 "SequencePathModule.cs"
+                    csharp2cuda_temp_85 = true;
+                }
+                if (csharp2cuda_temp_85)
+#line 653 "SequencePathModule.cs"
+                {
+#line 654 "SequencePathModule.cs"
+#line 654 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_86 = &((output)->valid);
+                    (*(csharp2cuda_temp_86) = 0);
+                }
+                else
 #line 657 "SequencePathModule.cs"
-                    int head = 0;
+                {
 #line 658 "SequencePathModule.cs"
+#line 658 "SequencePathModule.cs"
+                    int csharp2cuda_temp_87 = (first)->count;
+                    mathblocks_sequence_set_vector_shape(output, csharp2cuda_i32_add(csharp2cuda_i32_sub(csharp2cuda_temp_87, width), 1));
+#line 659 "SequencePathModule.cs"
+                    int* deque = ((int*)(scratch));
+#line 660 "SequencePathModule.cs"
+                    int head = 0;
+#line 661 "SequencePathModule.cs"
                     int tail = 0;
-#line 659 "SequencePathModule.cs"
+#line 662 "SequencePathModule.cs"
                     {
-#line 659 "SequencePathModule.cs"
+#line 662 "SequencePathModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 659 "SequencePathModule.cs"
-                            int csharp2cuda_temp_88 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_88))))
+#line 662 "SequencePathModule.cs"
+                            int csharp2cuda_temp_89 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_89))))
                                 break;
-#line 660 "SequencePathModule.cs"
+#line 663 "SequencePathModule.cs"
                             {
-#line 661 "SequencePathModule.cs"
+#line 664 "SequencePathModule.cs"
                                 while (true)
                                 {
-#line 661 "SequencePathModule.cs"
-                                    bool csharp2cuda_temp_89;
-#line 661 "SequencePathModule.cs"
+#line 664 "SequencePathModule.cs"
+                                    bool csharp2cuda_temp_90;
+#line 664 "SequencePathModule.cs"
                                     if (((head) < (tail)))
                                     {
-#line 661 "SequencePathModule.cs"
-                                        int csharp2cuda_temp_90 = (deque)[head];
-#line 661 "SequencePathModule.cs"
-                                        csharp2cuda_temp_89 = ((csharp2cuda_temp_90) <= (csharp2cuda_i32_sub(index, width)));
+#line 664 "SequencePathModule.cs"
+                                        int csharp2cuda_temp_91 = (deque)[head];
+#line 664 "SequencePathModule.cs"
+                                        csharp2cuda_temp_90 = ((csharp2cuda_temp_91) <= (csharp2cuda_i32_sub(index, width)));
                                     }
                                     else
                                     {
-#line 661 "SequencePathModule.cs"
-                                        csharp2cuda_temp_89 = false;
+#line 664 "SequencePathModule.cs"
+                                        csharp2cuda_temp_90 = false;
                                     }
-                                    if (!(csharp2cuda_temp_89))
+                                    if (!(csharp2cuda_temp_90))
                                         break;
-#line 662 "SequencePathModule.cs"
-#line 662 "SequencePathModule.cs"
-                                    int* csharp2cuda_temp_91 = &(head);
-                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_91));
+#line 665 "SequencePathModule.cs"
+#line 665 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_92 = &(head);
+                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_92));
                                 }
-#line 663 "SequencePathModule.cs"
+#line 666 "SequencePathModule.cs"
                                 while (true)
                                 {
-#line 663 "SequencePathModule.cs"
-                                    bool csharp2cuda_temp_92;
-#line 663 "SequencePathModule.cs"
+#line 666 "SequencePathModule.cs"
+                                    bool csharp2cuda_temp_93;
+#line 666 "SequencePathModule.cs"
                                     if (((head) < (tail)))
                                     {
-#line 663 "SequencePathModule.cs"
-                                        bool csharp2cuda_temp_93;
-#line 663 "SequencePathModule.cs"
+#line 666 "SequencePathModule.cs"
+                                        bool csharp2cuda_temp_94;
+#line 666 "SequencePathModule.cs"
                                         if (((opcode) == (6)))
                                         {
-#line 664 "SequencePathModule.cs"
-                                            int csharp2cuda_temp_94 = (deque)[csharp2cuda_i32_sub(tail, 1)];
-#line 664 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_95 = (a)[csharp2cuda_temp_94];
-#line 664 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_96 = (a)[index];
-#line 663 "SequencePathModule.cs"
-                                            csharp2cuda_temp_93 = ((csharp2cuda_temp_95) >= (csharp2cuda_temp_96));
+#line 667 "SequencePathModule.cs"
+                                            int csharp2cuda_temp_95 = (deque)[csharp2cuda_i32_sub(tail, 1)];
+#line 667 "SequencePathModule.cs"
+                                            double csharp2cuda_temp_96 = (a)[csharp2cuda_temp_95];
+#line 667 "SequencePathModule.cs"
+                                            double csharp2cuda_temp_97 = (a)[index];
+#line 666 "SequencePathModule.cs"
+                                            csharp2cuda_temp_94 = ((csharp2cuda_temp_96) >= (csharp2cuda_temp_97));
                                         }
                                         else
                                         {
-#line 665 "SequencePathModule.cs"
-                                            int csharp2cuda_temp_97 = (deque)[csharp2cuda_i32_sub(tail, 1)];
-#line 665 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_98 = (a)[csharp2cuda_temp_97];
-#line 665 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_99 = (a)[index];
-#line 663 "SequencePathModule.cs"
-                                            csharp2cuda_temp_93 = ((csharp2cuda_temp_98) <= (csharp2cuda_temp_99));
+#line 668 "SequencePathModule.cs"
+                                            int csharp2cuda_temp_98 = (deque)[csharp2cuda_i32_sub(tail, 1)];
+#line 668 "SequencePathModule.cs"
+                                            double csharp2cuda_temp_99 = (a)[csharp2cuda_temp_98];
+#line 668 "SequencePathModule.cs"
+                                            double csharp2cuda_temp_100 = (a)[index];
+#line 666 "SequencePathModule.cs"
+                                            csharp2cuda_temp_94 = ((csharp2cuda_temp_99) <= (csharp2cuda_temp_100));
                                         }
-#line 663 "SequencePathModule.cs"
-                                        csharp2cuda_temp_92 = csharp2cuda_temp_93;
+#line 666 "SequencePathModule.cs"
+                                        csharp2cuda_temp_93 = csharp2cuda_temp_94;
                                     }
                                     else
                                     {
-#line 663 "SequencePathModule.cs"
-                                        csharp2cuda_temp_92 = false;
-                                    }
-                                    if (!(csharp2cuda_temp_92))
-                                        break;
 #line 666 "SequencePathModule.cs"
+                                        csharp2cuda_temp_93 = false;
+                                    }
+                                    if (!(csharp2cuda_temp_93))
+                                        break;
+#line 669 "SequencePathModule.cs"
                                     {
-#line 667 "SequencePathModule.cs"
-#line 667 "SequencePathModule.cs"
-                                        int* csharp2cuda_temp_100 = &(tail);
-                                        csharp2cuda_i32_post_decrement(*(csharp2cuda_temp_100));
+#line 670 "SequencePathModule.cs"
+#line 670 "SequencePathModule.cs"
+                                        int* csharp2cuda_temp_101 = &(tail);
+                                        csharp2cuda_i32_post_decrement(*(csharp2cuda_temp_101));
                                     }
                                 }
-#line 669 "SequencePathModule.cs"
-#line 669 "SequencePathModule.cs"
-                                int* csharp2cuda_temp_101 = &(tail);
-#line 669 "SequencePathModule.cs"
-                                int csharp2cuda_temp_102 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_101));
-#line 669 "SequencePathModule.cs"
-                                int* csharp2cuda_temp_103 = &((deque)[csharp2cuda_temp_102]);
-                                (*(csharp2cuda_temp_103) = index);
-#line 670 "SequencePathModule.cs"
+#line 672 "SequencePathModule.cs"
+#line 672 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_102 = &(tail);
+#line 672 "SequencePathModule.cs"
+                                int csharp2cuda_temp_103 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_102));
+#line 672 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_104 = &((deque)[csharp2cuda_temp_103]);
+                                (*(csharp2cuda_temp_104) = index);
+#line 673 "SequencePathModule.cs"
                                 if (((index) >= (csharp2cuda_i32_sub(width, 1))))
                                 {
-#line 671 "SequencePathModule.cs"
-#line 671 "SequencePathModule.cs"
-                                    double* csharp2cuda_temp_104 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_sub(index, width), 1)]);
-#line 671 "SequencePathModule.cs"
-                                    int csharp2cuda_temp_105 = (deque)[head];
-#line 671 "SequencePathModule.cs"
-                                    double csharp2cuda_temp_106 = (a)[csharp2cuda_temp_105];
-                                    (*(csharp2cuda_temp_104) = csharp2cuda_temp_106);
+#line 674 "SequencePathModule.cs"
+#line 674 "SequencePathModule.cs"
+                                    double* csharp2cuda_temp_105 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_sub(index, width), 1)]);
+#line 674 "SequencePathModule.cs"
+                                    int csharp2cuda_temp_106 = (deque)[head];
+#line 674 "SequencePathModule.cs"
+                                    double csharp2cuda_temp_107 = (a)[csharp2cuda_temp_106];
+                                    (*(csharp2cuda_temp_105) = csharp2cuda_temp_107);
                                 }
                             }
-#line 659 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_87 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_87));
+#line 662 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_88 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_88));
                         }
                     }
                 }
             }
-#line 675 "SequencePathModule.cs"
+#line 678 "SequencePathModule.cs"
             break;
-#line 676 "SequencePathModule.cs"
+#line 679 "SequencePathModule.cs"
         case 4:
         case 9:
-#line 678 "SequencePathModule.cs"
+#line 681 "SequencePathModule.cs"
             if (((thread) == (0)))
-#line 679 "SequencePathModule.cs"
-            {
-#line 680 "SequencePathModule.cs"
-                int width = 0;
-#line 681 "SequencePathModule.cs"
-#line 681 "SequencePathModule.cs"
-                double csharp2cuda_temp_107 = (second)->scalar_value;
-#line 681 "SequencePathModule.cs"
-                int* csharp2cuda_temp_108 = &(width);
-#line 681 "SequencePathModule.cs"
-                bool csharp2cuda_temp_109 = mathblocks_sequence_positive_integer(csharp2cuda_temp_107, csharp2cuda_temp_108);
-#line 681 "SequencePathModule.cs"
-                bool csharp2cuda_temp_110;
-#line 681 "SequencePathModule.cs"
-                if (!((!(csharp2cuda_temp_109))))
-                {
-#line 681 "SequencePathModule.cs"
-                    int csharp2cuda_temp_111 = (first)->count;
-#line 681 "SequencePathModule.cs"
-                    csharp2cuda_temp_110 = ((width) > (csharp2cuda_temp_111));
-                }
-                else
-                {
-#line 681 "SequencePathModule.cs"
-                    csharp2cuda_temp_110 = true;
-                }
-                if (csharp2cuda_temp_110)
 #line 682 "SequencePathModule.cs"
+            {
+#line 683 "SequencePathModule.cs"
+                int width = 0;
+#line 684 "SequencePathModule.cs"
+#line 684 "SequencePathModule.cs"
+                double csharp2cuda_temp_108 = (second)->scalar_value;
+#line 684 "SequencePathModule.cs"
+                int* csharp2cuda_temp_109 = &(width);
+#line 684 "SequencePathModule.cs"
+                bool csharp2cuda_temp_110 = mathblocks_sequence_positive_integer(csharp2cuda_temp_108, csharp2cuda_temp_109);
+#line 684 "SequencePathModule.cs"
+                bool csharp2cuda_temp_111;
+#line 684 "SequencePathModule.cs"
+                if (!((!(csharp2cuda_temp_110))))
                 {
-#line 683 "SequencePathModule.cs"
-#line 683 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_112 = &((output)->valid);
-                    (*(csharp2cuda_temp_112) = 0);
+#line 684 "SequencePathModule.cs"
+                    int csharp2cuda_temp_112 = (first)->count;
+#line 684 "SequencePathModule.cs"
+                    csharp2cuda_temp_111 = ((width) > (csharp2cuda_temp_112));
                 }
                 else
-#line 686 "SequencePathModule.cs"
                 {
-#line 687 "SequencePathModule.cs"
-#line 687 "SequencePathModule.cs"
-                    int csharp2cuda_temp_113 = (first)->count;
-                    mathblocks_sequence_set_vector_shape(output, csharp2cuda_i32_add(csharp2cuda_i32_sub(csharp2cuda_temp_113, width), 1));
-#line 688 "SequencePathModule.cs"
-#line 688 "SequencePathModule.cs"
-                    int csharp2cuda_temp_114 = (first)->count;
-                    mathblocks_sequence_rolling_sum(a, csharp2cuda_temp_114, width, result);
+#line 684 "SequencePathModule.cs"
+                    csharp2cuda_temp_111 = true;
+                }
+                if (csharp2cuda_temp_111)
+#line 685 "SequencePathModule.cs"
+                {
+#line 686 "SequencePathModule.cs"
+#line 686 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_113 = &((output)->valid);
+                    (*(csharp2cuda_temp_113) = 0);
+                }
+                else
 #line 689 "SequencePathModule.cs"
-                    if (((opcode) == (4)))
+                {
 #line 690 "SequencePathModule.cs"
-                    {
+#line 690 "SequencePathModule.cs"
+                    int csharp2cuda_temp_114 = (first)->count;
+                    mathblocks_sequence_set_vector_shape(output, csharp2cuda_i32_add(csharp2cuda_i32_sub(csharp2cuda_temp_114, width), 1));
 #line 691 "SequencePathModule.cs"
+#line 691 "SequencePathModule.cs"
+                    int csharp2cuda_temp_115 = (first)->count;
+                    mathblocks_sequence_rolling_sum(a, csharp2cuda_temp_115, width, result);
+#line 692 "SequencePathModule.cs"
+                    if (((opcode) == (4)))
+#line 693 "SequencePathModule.cs"
+                    {
+#line 694 "SequencePathModule.cs"
                         double scale = __ddiv_rn(1.0, ((double)(width)));
-#line 692 "SequencePathModule.cs"
+#line 695 "SequencePathModule.cs"
                         {
-#line 692 "SequencePathModule.cs"
+#line 695 "SequencePathModule.cs"
                             int index = 0;
                             while (true)
                             {
-#line 692 "SequencePathModule.cs"
-                                int csharp2cuda_temp_116 = (output)->count;
-                                if (!(((index) < (csharp2cuda_temp_116))))
+#line 695 "SequencePathModule.cs"
+                                int csharp2cuda_temp_117 = (output)->count;
+                                if (!(((index) < (csharp2cuda_temp_117))))
                                     break;
-#line 693 "SequencePathModule.cs"
-#line 693 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_117 = &((result)[index]);
-#line 693 "SequencePathModule.cs"
-                                double csharp2cuda_temp_118 = *(csharp2cuda_temp_117);
-                                (*(csharp2cuda_temp_117) = __dmul_rn(csharp2cuda_temp_118, scale));
-#line 692 "SequencePathModule.cs"
-                                int* csharp2cuda_temp_115 = &(index);
-                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_115));
+#line 696 "SequencePathModule.cs"
+#line 696 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_118 = &((result)[index]);
+#line 696 "SequencePathModule.cs"
+                                double csharp2cuda_temp_119 = *(csharp2cuda_temp_118);
+                                (*(csharp2cuda_temp_118) = __dmul_rn(csharp2cuda_temp_119, scale));
+#line 695 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_116 = &(index);
+                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_116));
                             }
+                        }
+                    }
+#line 698 "SequencePathModule.cs"
+                    {
+#line 698 "SequencePathModule.cs"
+                        int index = 0;
+                        while (true)
+                        {
+#line 698 "SequencePathModule.cs"
+                            int csharp2cuda_temp_121 = (output)->count;
+                            if (!(((index) < (csharp2cuda_temp_121))))
+                                break;
+#line 699 "SequencePathModule.cs"
+#line 699 "SequencePathModule.cs"
+                            double csharp2cuda_temp_122 = (result)[index];
+                            if ((!(isfinite(csharp2cuda_temp_122))))
+                            {
+#line 699 "SequencePathModule.cs"
+#line 699 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_123 = &((output)->valid);
+                                (*(csharp2cuda_temp_123) = 0);
+                            }
+#line 698 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_120 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_120));
                         }
                     }
                 }
             }
-#line 697 "SequencePathModule.cs"
+#line 702 "SequencePathModule.cs"
             break;
-#line 698 "SequencePathModule.cs"
+#line 703 "SequencePathModule.cs"
         case 5:
         case 7:
-#line 700 "SequencePathModule.cs"
+#line 705 "SequencePathModule.cs"
             {
-#line 701 "SequencePathModule.cs"
+#line 706 "SequencePathModule.cs"
                 int width = 0;
-#line 702 "SequencePathModule.cs"
+#line 707 "SequencePathModule.cs"
                 double probability = 0.0;
-#line 703 "SequencePathModule.cs"
+#line 708 "SequencePathModule.cs"
                 if (((thread) == (0)))
-#line 704 "SequencePathModule.cs"
+#line 709 "SequencePathModule.cs"
                 {
-#line 705 "SequencePathModule.cs"
-#line 705 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_119 = &(probability);
-#line 705 "SequencePathModule.cs"
-                    double csharp2cuda_temp_120;
-#line 705 "SequencePathModule.cs"
+#line 710 "SequencePathModule.cs"
+#line 710 "SequencePathModule.cs"
+                    double* csharp2cuda_temp_124 = &(probability);
+#line 710 "SequencePathModule.cs"
+                    double csharp2cuda_temp_125;
+#line 710 "SequencePathModule.cs"
                     if (((opcode) == (5)))
                     {
-#line 705 "SequencePathModule.cs"
-                        csharp2cuda_temp_120 = 0.5;
+#line 710 "SequencePathModule.cs"
+                        csharp2cuda_temp_125 = 0.5;
                     }
                     else
                     {
-#line 705 "SequencePathModule.cs"
-                        csharp2cuda_temp_120 = (third)->scalar_value;
+#line 710 "SequencePathModule.cs"
+                        csharp2cuda_temp_125 = (third)->scalar_value;
                     }
-                    (*(csharp2cuda_temp_119) = csharp2cuda_temp_120);
-#line 706 "SequencePathModule.cs"
-#line 706 "SequencePathModule.cs"
-                    double csharp2cuda_temp_121 = (second)->scalar_value;
-#line 706 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_122 = &(width);
-#line 706 "SequencePathModule.cs"
-                    bool csharp2cuda_temp_123 = mathblocks_sequence_positive_integer(csharp2cuda_temp_121, csharp2cuda_temp_122);
-#line 706 "SequencePathModule.cs"
-                    bool csharp2cuda_temp_124;
-#line 706 "SequencePathModule.cs"
-                    if (!((!(csharp2cuda_temp_123))))
+                    (*(csharp2cuda_temp_124) = csharp2cuda_temp_125);
+#line 711 "SequencePathModule.cs"
+#line 711 "SequencePathModule.cs"
+                    double csharp2cuda_temp_126 = (second)->scalar_value;
+#line 711 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_127 = &(width);
+#line 711 "SequencePathModule.cs"
+                    bool csharp2cuda_temp_128 = mathblocks_sequence_positive_integer(csharp2cuda_temp_126, csharp2cuda_temp_127);
+#line 711 "SequencePathModule.cs"
+                    bool csharp2cuda_temp_129;
+#line 711 "SequencePathModule.cs"
+                    if (!((!(csharp2cuda_temp_128))))
                     {
-#line 707 "SequencePathModule.cs"
-                        int csharp2cuda_temp_125 = (first)->count;
-#line 706 "SequencePathModule.cs"
-                        csharp2cuda_temp_124 = ((width) > (csharp2cuda_temp_125));
+#line 712 "SequencePathModule.cs"
+                        int csharp2cuda_temp_130 = (first)->count;
+#line 711 "SequencePathModule.cs"
+                        csharp2cuda_temp_129 = ((width) > (csharp2cuda_temp_130));
                     }
                     else
                     {
-#line 706 "SequencePathModule.cs"
-                        csharp2cuda_temp_124 = true;
+#line 711 "SequencePathModule.cs"
+                        csharp2cuda_temp_129 = true;
                     }
-#line 706 "SequencePathModule.cs"
-                    bool csharp2cuda_temp_126;
-#line 706 "SequencePathModule.cs"
-                    if (!(csharp2cuda_temp_124))
+#line 711 "SequencePathModule.cs"
+                    bool csharp2cuda_temp_131;
+#line 711 "SequencePathModule.cs"
+                    if (!(csharp2cuda_temp_129))
                     {
-#line 707 "SequencePathModule.cs"
-                        bool csharp2cuda_temp_127;
-#line 707 "SequencePathModule.cs"
+#line 712 "SequencePathModule.cs"
+                        bool csharp2cuda_temp_132;
+#line 712 "SequencePathModule.cs"
                         if (((probability) >= (0.0)))
                         {
-#line 707 "SequencePathModule.cs"
-                            csharp2cuda_temp_127 = ((probability) <= (1.0));
+#line 712 "SequencePathModule.cs"
+                            csharp2cuda_temp_132 = ((probability) <= (1.0));
                         }
                         else
                         {
-#line 707 "SequencePathModule.cs"
-                            csharp2cuda_temp_127 = false;
+#line 712 "SequencePathModule.cs"
+                            csharp2cuda_temp_132 = false;
                         }
-#line 706 "SequencePathModule.cs"
-                        csharp2cuda_temp_126 = (!(csharp2cuda_temp_127));
+#line 711 "SequencePathModule.cs"
+                        csharp2cuda_temp_131 = (!(csharp2cuda_temp_132));
                     }
                     else
                     {
-#line 706 "SequencePathModule.cs"
-                        csharp2cuda_temp_126 = true;
+#line 711 "SequencePathModule.cs"
+                        csharp2cuda_temp_131 = true;
                     }
-#line 706 "SequencePathModule.cs"
-                    bool csharp2cuda_temp_128;
-#line 706 "SequencePathModule.cs"
-                    if (!(csharp2cuda_temp_126))
+#line 711 "SequencePathModule.cs"
+                    bool csharp2cuda_temp_133;
+#line 711 "SequencePathModule.cs"
+                    if (!(csharp2cuda_temp_131))
                     {
-#line 708 "SequencePathModule.cs"
-                        bool csharp2cuda_temp_129;
-#line 708 "SequencePathModule.cs"
+#line 713 "SequencePathModule.cs"
+                        bool csharp2cuda_temp_134;
+#line 713 "SequencePathModule.cs"
                         if (((width) > (1)))
                         {
-#line 708 "SequencePathModule.cs"
-                            csharp2cuda_temp_129 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 713 "SequencePathModule.cs"
+                            csharp2cuda_temp_134 = ((((void*)(scratch))) == (((void*)(nullptr))));
                         }
                         else
                         {
-#line 708 "SequencePathModule.cs"
-                            csharp2cuda_temp_129 = false;
-                        }
-#line 706 "SequencePathModule.cs"
-                        csharp2cuda_temp_128 = csharp2cuda_temp_129;
-                    }
-                    else
-                    {
-#line 706 "SequencePathModule.cs"
-                        csharp2cuda_temp_128 = true;
-                    }
-                    if (csharp2cuda_temp_128)
-#line 709 "SequencePathModule.cs"
-                    {
-#line 710 "SequencePathModule.cs"
-#line 710 "SequencePathModule.cs"
-                        int* csharp2cuda_temp_130 = &((output)->valid);
-                        (*(csharp2cuda_temp_130) = 0);
-                    }
-                    else
 #line 713 "SequencePathModule.cs"
-                    {
-#line 714 "SequencePathModule.cs"
-#line 714 "SequencePathModule.cs"
-                        int csharp2cuda_temp_131 = (first)->count;
-                        mathblocks_sequence_set_vector_shape(output, csharp2cuda_i32_add(csharp2cuda_i32_sub(csharp2cuda_temp_131, width), 1));
+                            csharp2cuda_temp_134 = false;
+                        }
+#line 711 "SequencePathModule.cs"
+                        csharp2cuda_temp_133 = csharp2cuda_temp_134;
                     }
-#line 716 "SequencePathModule.cs"
-#line 716 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_132 = &((output)->scalar_value);
-                    (*(csharp2cuda_temp_132) = probability);
-#line 717 "SequencePathModule.cs"
-#line 717 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_133 = &((output)->boolean_value);
-                    (*(csharp2cuda_temp_133) = width);
-                }
+                    else
+                    {
+#line 711 "SequencePathModule.cs"
+                        csharp2cuda_temp_133 = true;
+                    }
+                    if (csharp2cuda_temp_133)
+#line 714 "SequencePathModule.cs"
+                    {
+#line 715 "SequencePathModule.cs"
+#line 715 "SequencePathModule.cs"
+                        int* csharp2cuda_temp_135 = &((output)->valid);
+                        (*(csharp2cuda_temp_135) = 0);
+                    }
+                    else
+#line 718 "SequencePathModule.cs"
+                    {
 #line 719 "SequencePathModule.cs"
-                __syncthreads();
-#line 720 "SequencePathModule.cs"
-#line 720 "SequencePathModule.cs"
-                int* csharp2cuda_temp_134 = &(width);
-#line 720 "SequencePathModule.cs"
-                int csharp2cuda_temp_135 = (output)->boolean_value;
-                (*(csharp2cuda_temp_134) = csharp2cuda_temp_135);
+#line 719 "SequencePathModule.cs"
+                        int csharp2cuda_temp_136 = (first)->count;
+                        mathblocks_sequence_set_vector_shape(output, csharp2cuda_i32_add(csharp2cuda_i32_sub(csharp2cuda_temp_136, width), 1));
+                    }
 #line 721 "SequencePathModule.cs"
 #line 721 "SequencePathModule.cs"
-                double* csharp2cuda_temp_136 = &(probability);
-#line 721 "SequencePathModule.cs"
-                double csharp2cuda_temp_137 = (output)->scalar_value;
-                (*(csharp2cuda_temp_136) = csharp2cuda_temp_137);
+                    double* csharp2cuda_temp_137 = &((output)->scalar_value);
+                    (*(csharp2cuda_temp_137) = probability);
 #line 722 "SequencePathModule.cs"
 #line 722 "SequencePathModule.cs"
-                bool csharp2cuda_temp_138 = (output)->valid;
-                if ((!(csharp2cuda_temp_138)))
-                {
-#line 723 "SequencePathModule.cs"
-                    break;
+                    int* csharp2cuda_temp_138 = &((output)->boolean_value);
+                    (*(csharp2cuda_temp_138) = width);
                 }
 #line 724 "SequencePathModule.cs"
-                if (((width) == (1)))
+                __syncthreads();
 #line 725 "SequencePathModule.cs"
+#line 725 "SequencePathModule.cs"
+                int* csharp2cuda_temp_139 = &(width);
+#line 725 "SequencePathModule.cs"
+                int csharp2cuda_temp_140 = (output)->boolean_value;
+                (*(csharp2cuda_temp_139) = csharp2cuda_temp_140);
+#line 726 "SequencePathModule.cs"
+#line 726 "SequencePathModule.cs"
+                double* csharp2cuda_temp_141 = &(probability);
+#line 726 "SequencePathModule.cs"
+                double csharp2cuda_temp_142 = (output)->scalar_value;
+                (*(csharp2cuda_temp_141) = csharp2cuda_temp_142);
+#line 727 "SequencePathModule.cs"
+#line 727 "SequencePathModule.cs"
+                bool csharp2cuda_temp_143 = (output)->valid;
+                if ((!(csharp2cuda_temp_143)))
                 {
-#line 726 "SequencePathModule.cs"
+#line 728 "SequencePathModule.cs"
+                    break;
+                }
+#line 729 "SequencePathModule.cs"
+                if (((width) == (1)))
+#line 730 "SequencePathModule.cs"
+                {
+#line 731 "SequencePathModule.cs"
                     {
-#line 726 "SequencePathModule.cs"
+#line 731 "SequencePathModule.cs"
                         int index = thread;
                         while (true)
                         {
-#line 726 "SequencePathModule.cs"
-                            int csharp2cuda_temp_141 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_141))))
+#line 731 "SequencePathModule.cs"
+                            int csharp2cuda_temp_146 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_146))))
                                 break;
-#line 727 "SequencePathModule.cs"
-#line 727 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_142 = &((result)[index]);
-#line 727 "SequencePathModule.cs"
-                            double csharp2cuda_temp_143 = (a)[index];
-                            (*(csharp2cuda_temp_142) = csharp2cuda_temp_143);
-#line 726 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_139 = &(index);
-#line 726 "SequencePathModule.cs"
-                            int csharp2cuda_temp_140 = *(csharp2cuda_temp_139);
-                            (*(csharp2cuda_temp_139) = csharp2cuda_i32_add(csharp2cuda_temp_140, blockDim.x));
+#line 732 "SequencePathModule.cs"
+#line 732 "SequencePathModule.cs"
+                            double* csharp2cuda_temp_147 = &((result)[index]);
+#line 732 "SequencePathModule.cs"
+                            double csharp2cuda_temp_148 = (a)[index];
+                            (*(csharp2cuda_temp_147) = csharp2cuda_temp_148);
+#line 731 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_144 = &(index);
+#line 731 "SequencePathModule.cs"
+                            int csharp2cuda_temp_145 = *(csharp2cuda_temp_144);
+                            (*(csharp2cuda_temp_144) = csharp2cuda_i32_add(csharp2cuda_temp_145, blockDim.x));
                         }
                     }
-#line 728 "SequencePathModule.cs"
+#line 733 "SequencePathModule.cs"
                     __syncthreads();
-#line 729 "SequencePathModule.cs"
-                    if (((thread) == (0)))
-#line 730 "SequencePathModule.cs"
-                    {
-#line 731 "SequencePathModule.cs"
-#line 731 "SequencePathModule.cs"
-                        double* csharp2cuda_temp_144 = &((output)->scalar_value);
-#line 731 "SequencePathModule.cs"
-                        int csharp2cuda_temp_145 = (first)->count;
-                        (*(csharp2cuda_temp_144) = ((double)(csharp2cuda_temp_145)));
-#line 732 "SequencePathModule.cs"
-#line 732 "SequencePathModule.cs"
-                        int* csharp2cuda_temp_146 = &((output)->boolean_value);
-                        (*(csharp2cuda_temp_146) = 0);
-                    }
 #line 734 "SequencePathModule.cs"
+                    if (((thread) == (0)))
+#line 735 "SequencePathModule.cs"
+                    {
+#line 736 "SequencePathModule.cs"
+#line 736 "SequencePathModule.cs"
+                        double* csharp2cuda_temp_149 = &((output)->scalar_value);
+#line 736 "SequencePathModule.cs"
+                        int csharp2cuda_temp_150 = (first)->count;
+                        (*(csharp2cuda_temp_149) = ((double)(csharp2cuda_temp_150)));
+#line 737 "SequencePathModule.cs"
+#line 737 "SequencePathModule.cs"
+                        int* csharp2cuda_temp_151 = &((output)->boolean_value);
+                        (*(csharp2cuda_temp_151) = 0);
+                    }
+#line 739 "SequencePathModule.cs"
                     break;
                 }
-#line 736 "SequencePathModule.cs"
-#line 736 "SequencePathModule.cs"
-                bool csharp2cuda_temp_147;
-#line 736 "SequencePathModule.cs"
+#line 741 "SequencePathModule.cs"
+#line 741 "SequencePathModule.cs"
+                bool csharp2cuda_temp_152;
+#line 741 "SequencePathModule.cs"
                 if (!(((probability) == (0.0))))
                 {
-#line 736 "SequencePathModule.cs"
-                    csharp2cuda_temp_147 = ((probability) == (1.0));
+#line 741 "SequencePathModule.cs"
+                    csharp2cuda_temp_152 = ((probability) == (1.0));
                 }
                 else
                 {
-#line 736 "SequencePathModule.cs"
-                    csharp2cuda_temp_147 = true;
+#line 741 "SequencePathModule.cs"
+                    csharp2cuda_temp_152 = true;
                 }
-                if (csharp2cuda_temp_147)
-#line 737 "SequencePathModule.cs"
-                {
-#line 738 "SequencePathModule.cs"
-                    if (((thread) == (0)))
-#line 739 "SequencePathModule.cs"
-                    {
-#line 740 "SequencePathModule.cs"
+                if (csharp2cuda_temp_152)
 #line 742 "SequencePathModule.cs"
-                        int csharp2cuda_temp_148 = (first)->count;
-                        mathblocks_sequence_rolling_extreme(a, csharp2cuda_temp_148, width, result, ((int*)(scratch)), ((probability) == (0.0)));
-#line 747 "SequencePathModule.cs"
-#line 747 "SequencePathModule.cs"
-                        double* csharp2cuda_temp_149 = &((output)->scalar_value);
-#line 748 "SequencePathModule.cs"
-                        int csharp2cuda_temp_150 = (first)->count;
-#line 748 "SequencePathModule.cs"
-                        int csharp2cuda_temp_151 = (output)->count;
-                        (*(csharp2cuda_temp_149) = ((double)(csharp2cuda_i64_add(csharp2cuda_i64_mul(((long long)(csharp2cuda_temp_150)), ((long long)(3))), ((long long)(csharp2cuda_temp_151))))));
-#line 749 "SequencePathModule.cs"
-#line 749 "SequencePathModule.cs"
-                        int* csharp2cuda_temp_152 = &((output)->boolean_value);
-                        (*(csharp2cuda_temp_152) = 0);
-                    }
-#line 751 "SequencePathModule.cs"
-                    __syncthreads();
-#line 752 "SequencePathModule.cs"
-                    break;
-                }
-#line 755 "SequencePathModule.cs"
-                unsigned char* order_scratch = ((unsigned char*)(scratch));
-#line 756 "SequencePathModule.cs"
-#line 758 "SequencePathModule.cs"
-                int csharp2cuda_temp_153 = (first)->count;
-                mathblocks_sequence_prepare_order_ranks(a, csharp2cuda_temp_153, order_scratch, output);
-#line 761 "SequencePathModule.cs"
-#line 761 "SequencePathModule.cs"
-                bool csharp2cuda_temp_154 = (output)->valid;
-                if ((!(csharp2cuda_temp_154)))
                 {
-#line 762 "SequencePathModule.cs"
-                    break;
-                }
-#line 763 "SequencePathModule.cs"
-                unsigned long long* first_keys = ((unsigned long long*)(order_scratch));
-#line 764 "SequencePathModule.cs"
-                int csharp2cuda_temp_155 = (first)->count;
-#line 764 "SequencePathModule.cs"
-                unsigned long long* second_keys = csharp2cuda_pointer_add(first_keys, csharp2cuda_temp_155);
-#line 765 "SequencePathModule.cs"
-                int csharp2cuda_temp_156 = (first)->count;
-#line 765 "SequencePathModule.cs"
-                int* first_indexes = ((int*)(csharp2cuda_pointer_add(second_keys, csharp2cuda_temp_156)));
-#line 766 "SequencePathModule.cs"
-                int csharp2cuda_temp_157 = (first)->count;
-#line 766 "SequencePathModule.cs"
-                int* second_indexes = csharp2cuda_pointer_add(first_indexes, csharp2cuda_temp_157);
-#line 767 "SequencePathModule.cs"
-                int csharp2cuda_temp_158 = (first)->count;
-#line 767 "SequencePathModule.cs"
-                int* ranks = csharp2cuda_pointer_add(second_indexes, csharp2cuda_temp_158);
-#line 768 "SequencePathModule.cs"
-                int csharp2cuda_temp_159 = (first)->count;
-#line 768 "SequencePathModule.cs"
-                int* lower_heap = csharp2cuda_pointer_add(ranks, csharp2cuda_temp_159);
-#line 769 "SequencePathModule.cs"
-                int* upper_heap = csharp2cuda_pointer_add(lower_heap, width);
-#line 770 "SequencePathModule.cs"
-                int* positions = csharp2cuda_pointer_add(upper_heap, width);
-#line 771 "SequencePathModule.cs"
-                int csharp2cuda_temp_160 = (first)->count;
-#line 771 "SequencePathModule.cs"
-                int* kinds = csharp2cuda_pointer_add(positions, csharp2cuda_temp_160);
-#line 772 "SequencePathModule.cs"
-                double quantile_position = __dmul_rn(probability, ((double)(csharp2cuda_i32_sub(width, 1))));
-#line 773 "SequencePathModule.cs"
-                int lower_index = csharp2cuda_f64_to_i32(floor(quantile_position));
-#line 774 "SequencePathModule.cs"
-                int upper_index = csharp2cuda_f64_to_i32(ceil(quantile_position));
-#line 775 "SequencePathModule.cs"
-                double weight = __dsub_rn(quantile_position, ((double)(lower_index)));
-#line 777 "SequencePathModule.cs"
-#line 777 "SequencePathModule.cs"
-                int csharp2cuda_temp_161 = (output)->count;
-                if (((csharp2cuda_temp_161) == (1)))
-#line 778 "SequencePathModule.cs"
-                {
-#line 779 "SequencePathModule.cs"
+#line 743 "SequencePathModule.cs"
                     if (((thread) == (0)))
-#line 780 "SequencePathModule.cs"
+#line 744 "SequencePathModule.cs"
                     {
-#line 781 "SequencePathModule.cs"
-                        int csharp2cuda_temp_162 = (first_indexes)[lower_index];
-#line 781 "SequencePathModule.cs"
-                        double lower_value = (a)[csharp2cuda_temp_162];
-#line 782 "SequencePathModule.cs"
-                        int csharp2cuda_temp_163 = (first_indexes)[upper_index];
-#line 782 "SequencePathModule.cs"
-                        double upper_value = (a)[csharp2cuda_temp_163];
-#line 783 "SequencePathModule.cs"
-#line 783 "SequencePathModule.cs"
-                        double* csharp2cuda_temp_164 = &((result)[0]);
-                        (*(csharp2cuda_temp_164) = __dadd_rn(__dmul_rn(lower_value, __dsub_rn(1.0, weight)), __dmul_rn(upper_value, weight)));
-#line 784 "SequencePathModule.cs"
-#line 784 "SequencePathModule.cs"
-                        int* csharp2cuda_temp_165 = &((output)->valid);
-#line 784 "SequencePathModule.cs"
-                        double csharp2cuda_temp_166 = (result)[0];
-                        (*(csharp2cuda_temp_165) = isfinite(csharp2cuda_temp_166));
-#line 785 "SequencePathModule.cs"
-#line 785 "SequencePathModule.cs"
-                        double* csharp2cuda_temp_167 = &((output)->scalar_value);
-#line 785 "SequencePathModule.cs"
-                        int csharp2cuda_temp_168 = (first)->count;
-                        (*(csharp2cuda_temp_167) = ((double)(csharp2cuda_i64_add(csharp2cuda_i64_mul(((long long)(csharp2cuda_temp_168)), ((long long)(64))), ((long long)(2))))));
-#line 786 "SequencePathModule.cs"
-#line 786 "SequencePathModule.cs"
-                        int* csharp2cuda_temp_169 = &((output)->boolean_value);
-                        (*(csharp2cuda_temp_169) = 64);
+#line 745 "SequencePathModule.cs"
+#line 747 "SequencePathModule.cs"
+                        int csharp2cuda_temp_153 = (first)->count;
+                        mathblocks_sequence_rolling_extreme(a, csharp2cuda_temp_153, width, result, ((int*)(scratch)), ((probability) == (0.0)));
+#line 752 "SequencePathModule.cs"
+#line 752 "SequencePathModule.cs"
+                        double* csharp2cuda_temp_154 = &((output)->scalar_value);
+#line 753 "SequencePathModule.cs"
+                        int csharp2cuda_temp_155 = (first)->count;
+#line 753 "SequencePathModule.cs"
+                        int csharp2cuda_temp_156 = (output)->count;
+                        (*(csharp2cuda_temp_154) = ((double)(csharp2cuda_i64_add(csharp2cuda_i64_mul(((long long)(csharp2cuda_temp_155)), ((long long)(3))), ((long long)(csharp2cuda_temp_156))))));
+#line 754 "SequencePathModule.cs"
+#line 754 "SequencePathModule.cs"
+                        int* csharp2cuda_temp_157 = &((output)->boolean_value);
+                        (*(csharp2cuda_temp_157) = 0);
                     }
-#line 788 "SequencePathModule.cs"
+#line 756 "SequencePathModule.cs"
                     __syncthreads();
-#line 789 "SequencePathModule.cs"
+#line 757 "SequencePathModule.cs"
                     break;
                 }
-#line 792 "SequencePathModule.cs"
+#line 760 "SequencePathModule.cs"
+                unsigned char* order_scratch = ((unsigned char*)(scratch));
+#line 761 "SequencePathModule.cs"
+#line 763 "SequencePathModule.cs"
+                int csharp2cuda_temp_158 = (first)->count;
+                mathblocks_sequence_prepare_order_ranks(a, csharp2cuda_temp_158, order_scratch, output);
+#line 766 "SequencePathModule.cs"
+#line 766 "SequencePathModule.cs"
+                bool csharp2cuda_temp_159 = (output)->valid;
+                if ((!(csharp2cuda_temp_159)))
                 {
-#line 792 "SequencePathModule.cs"
+#line 767 "SequencePathModule.cs"
+                    break;
+                }
+#line 768 "SequencePathModule.cs"
+                unsigned long long* first_keys = ((unsigned long long*)(order_scratch));
+#line 769 "SequencePathModule.cs"
+                int csharp2cuda_temp_160 = (first)->count;
+#line 769 "SequencePathModule.cs"
+                unsigned long long* second_keys = csharp2cuda_pointer_add(first_keys, csharp2cuda_temp_160);
+#line 770 "SequencePathModule.cs"
+                int csharp2cuda_temp_161 = (first)->count;
+#line 770 "SequencePathModule.cs"
+                int* first_indexes = ((int*)(csharp2cuda_pointer_add(second_keys, csharp2cuda_temp_161)));
+#line 771 "SequencePathModule.cs"
+                int csharp2cuda_temp_162 = (first)->count;
+#line 771 "SequencePathModule.cs"
+                int* second_indexes = csharp2cuda_pointer_add(first_indexes, csharp2cuda_temp_162);
+#line 772 "SequencePathModule.cs"
+                int csharp2cuda_temp_163 = (first)->count;
+#line 772 "SequencePathModule.cs"
+                int* ranks = csharp2cuda_pointer_add(second_indexes, csharp2cuda_temp_163);
+#line 773 "SequencePathModule.cs"
+                int csharp2cuda_temp_164 = (first)->count;
+#line 773 "SequencePathModule.cs"
+                int* lower_heap = csharp2cuda_pointer_add(ranks, csharp2cuda_temp_164);
+#line 774 "SequencePathModule.cs"
+                int* upper_heap = csharp2cuda_pointer_add(lower_heap, width);
+#line 775 "SequencePathModule.cs"
+                int* positions = csharp2cuda_pointer_add(upper_heap, width);
+#line 776 "SequencePathModule.cs"
+                int csharp2cuda_temp_165 = (first)->count;
+#line 776 "SequencePathModule.cs"
+                int* kinds = csharp2cuda_pointer_add(positions, csharp2cuda_temp_165);
+#line 777 "SequencePathModule.cs"
+                double quantile_position = __dmul_rn(probability, ((double)(csharp2cuda_i32_sub(width, 1))));
+#line 778 "SequencePathModule.cs"
+                int lower_index = csharp2cuda_f64_to_i32(floor(quantile_position));
+#line 779 "SequencePathModule.cs"
+                int upper_index = csharp2cuda_f64_to_i32(ceil(quantile_position));
+#line 780 "SequencePathModule.cs"
+                double weight = __dsub_rn(quantile_position, ((double)(lower_index)));
+#line 782 "SequencePathModule.cs"
+#line 782 "SequencePathModule.cs"
+                int csharp2cuda_temp_166 = (output)->count;
+                if (((csharp2cuda_temp_166) == (1)))
+#line 783 "SequencePathModule.cs"
+                {
+#line 784 "SequencePathModule.cs"
+                    if (((thread) == (0)))
+#line 785 "SequencePathModule.cs"
+                    {
+#line 786 "SequencePathModule.cs"
+                        int csharp2cuda_temp_167 = (first_indexes)[lower_index];
+#line 786 "SequencePathModule.cs"
+                        double lower_value = (a)[csharp2cuda_temp_167];
+#line 787 "SequencePathModule.cs"
+                        int csharp2cuda_temp_168 = (first_indexes)[upper_index];
+#line 787 "SequencePathModule.cs"
+                        double upper_value = (a)[csharp2cuda_temp_168];
+#line 788 "SequencePathModule.cs"
+#line 788 "SequencePathModule.cs"
+                        double* csharp2cuda_temp_169 = &((result)[0]);
+                        (*(csharp2cuda_temp_169) = __dadd_rn(__dmul_rn(lower_value, __dsub_rn(1.0, weight)), __dmul_rn(upper_value, weight)));
+#line 789 "SequencePathModule.cs"
+#line 789 "SequencePathModule.cs"
+                        int* csharp2cuda_temp_170 = &((output)->valid);
+#line 789 "SequencePathModule.cs"
+                        double csharp2cuda_temp_171 = (result)[0];
+                        (*(csharp2cuda_temp_170) = isfinite(csharp2cuda_temp_171));
+#line 790 "SequencePathModule.cs"
+#line 790 "SequencePathModule.cs"
+                        double* csharp2cuda_temp_172 = &((output)->scalar_value);
+#line 790 "SequencePathModule.cs"
+                        int csharp2cuda_temp_173 = (first)->count;
+                        (*(csharp2cuda_temp_172) = ((double)(csharp2cuda_i64_add(csharp2cuda_i64_mul(((long long)(csharp2cuda_temp_173)), ((long long)(64))), ((long long)(2))))));
+#line 791 "SequencePathModule.cs"
+#line 791 "SequencePathModule.cs"
+                        int* csharp2cuda_temp_174 = &((output)->boolean_value);
+                        (*(csharp2cuda_temp_174) = 64);
+                    }
+#line 793 "SequencePathModule.cs"
+                    __syncthreads();
+#line 794 "SequencePathModule.cs"
+                    break;
+                }
+#line 797 "SequencePathModule.cs"
+                {
+#line 797 "SequencePathModule.cs"
                     int index = thread;
                     while (true)
                     {
-#line 792 "SequencePathModule.cs"
-                        int csharp2cuda_temp_172 = (first)->count;
-                        if (!(((index) < (csharp2cuda_temp_172))))
+#line 797 "SequencePathModule.cs"
+                        int csharp2cuda_temp_177 = (first)->count;
+                        if (!(((index) < (csharp2cuda_temp_177))))
                             break;
-#line 793 "SequencePathModule.cs"
+#line 798 "SequencePathModule.cs"
                         {
-#line 794 "SequencePathModule.cs"
-#line 794 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_173 = &((positions)[index]);
-                            (*(csharp2cuda_temp_173) = csharp2cuda_i32_neg(1));
-#line 795 "SequencePathModule.cs"
-#line 795 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_174 = &((kinds)[index]);
-                            (*(csharp2cuda_temp_174) = csharp2cuda_i32_neg(1));
+#line 799 "SequencePathModule.cs"
+#line 799 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_178 = &((positions)[index]);
+                            (*(csharp2cuda_temp_178) = csharp2cuda_i32_neg(1));
+#line 800 "SequencePathModule.cs"
+#line 800 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_179 = &((kinds)[index]);
+                            (*(csharp2cuda_temp_179) = csharp2cuda_i32_neg(1));
                         }
-#line 792 "SequencePathModule.cs"
-                        int* csharp2cuda_temp_170 = &(index);
-#line 792 "SequencePathModule.cs"
-                        int csharp2cuda_temp_171 = *(csharp2cuda_temp_170);
-                        (*(csharp2cuda_temp_170) = csharp2cuda_i32_add(csharp2cuda_temp_171, blockDim.x));
+#line 797 "SequencePathModule.cs"
+                        int* csharp2cuda_temp_175 = &(index);
+#line 797 "SequencePathModule.cs"
+                        int csharp2cuda_temp_176 = *(csharp2cuda_temp_175);
+                        (*(csharp2cuda_temp_175) = csharp2cuda_i32_add(csharp2cuda_temp_176, blockDim.x));
                     }
                 }
-#line 797 "SequencePathModule.cs"
-                __syncthreads();
-#line 798 "SequencePathModule.cs"
-                if (((thread) == (0)))
-#line 799 "SequencePathModule.cs"
-                {
-#line 800 "SequencePathModule.cs"
-                    int lower_count = 0;
-#line 801 "SequencePathModule.cs"
-                    int upper_count = 0;
 #line 802 "SequencePathModule.cs"
+                __syncthreads();
+#line 803 "SequencePathModule.cs"
+                if (((thread) == (0)))
+#line 804 "SequencePathModule.cs"
+                {
+#line 805 "SequencePathModule.cs"
+                    int lower_count = 0;
+#line 806 "SequencePathModule.cs"
+                    int upper_count = 0;
+#line 807 "SequencePathModule.cs"
                     int target_lower_count = csharp2cuda_i32_add(lower_index, 1);
-#line 803 "SequencePathModule.cs"
+#line 808 "SequencePathModule.cs"
                     {
-#line 803 "SequencePathModule.cs"
+#line 808 "SequencePathModule.cs"
                         int index = 0;
                         while (true)
                         {
                             if (!(((index) < (width))))
                                 break;
-#line 804 "SequencePathModule.cs"
+#line 809 "SequencePathModule.cs"
                             {
-#line 805 "SequencePathModule.cs"
-#line 805 "SequencePathModule.cs"
-                                bool csharp2cuda_temp_176;
-#line 805 "SequencePathModule.cs"
+#line 810 "SequencePathModule.cs"
+#line 810 "SequencePathModule.cs"
+                                bool csharp2cuda_temp_181;
+#line 810 "SequencePathModule.cs"
                                 if (((lower_count) == (0)))
                                 {
-#line 805 "SequencePathModule.cs"
-                                    csharp2cuda_temp_176 = ((upper_count) == (0));
+#line 810 "SequencePathModule.cs"
+                                    csharp2cuda_temp_181 = ((upper_count) == (0));
                                 }
                                 else
                                 {
-#line 805 "SequencePathModule.cs"
-                                    csharp2cuda_temp_176 = false;
+#line 810 "SequencePathModule.cs"
+                                    csharp2cuda_temp_181 = false;
                                 }
-                                if (csharp2cuda_temp_176)
-#line 806 "SequencePathModule.cs"
+                                if (csharp2cuda_temp_181)
+#line 811 "SequencePathModule.cs"
                                 {
-#line 807 "SequencePathModule.cs"
-#line 809 "SequencePathModule.cs"
-                                    int* csharp2cuda_temp_177 = &(lower_count);
-                                    mathblocks_sequence_heap_insert(lower_heap, csharp2cuda_temp_177, index, 0, positions, kinds, ranks, true);
+#line 812 "SequencePathModule.cs"
+#line 814 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_182 = &(lower_count);
+                                    mathblocks_sequence_heap_insert(lower_heap, csharp2cuda_temp_182, index, 0, positions, kinds, ranks, true);
                                 }
                                 else
                                 {
-#line 817 "SequencePathModule.cs"
+#line 822 "SequencePathModule.cs"
                                     if (((lower_count) == (0)))
-#line 818 "SequencePathModule.cs"
+#line 823 "SequencePathModule.cs"
                                     {
-#line 819 "SequencePathModule.cs"
-#line 821 "SequencePathModule.cs"
-                                        int* csharp2cuda_temp_178 = &(upper_count);
-                                        mathblocks_sequence_heap_insert(upper_heap, csharp2cuda_temp_178, index, 1, positions, kinds, ranks, false);
+#line 824 "SequencePathModule.cs"
+#line 826 "SequencePathModule.cs"
+                                        int* csharp2cuda_temp_183 = &(upper_count);
+                                        mathblocks_sequence_heap_insert(upper_heap, csharp2cuda_temp_183, index, 1, positions, kinds, ranks, false);
                                     }
                                     else
                                     {
-#line 829 "SequencePathModule.cs"
-#line 829 "SequencePathModule.cs"
-                                        int csharp2cuda_temp_179 = (ranks)[index];
-#line 829 "SequencePathModule.cs"
-                                        int csharp2cuda_temp_180 = (lower_heap)[0];
-#line 829 "SequencePathModule.cs"
-                                        int csharp2cuda_temp_181 = (ranks)[csharp2cuda_temp_180];
-                                        if (((csharp2cuda_temp_179) <= (csharp2cuda_temp_181)))
-#line 830 "SequencePathModule.cs"
+#line 834 "SequencePathModule.cs"
+#line 834 "SequencePathModule.cs"
+                                        int csharp2cuda_temp_184 = (ranks)[index];
+#line 834 "SequencePathModule.cs"
+                                        int csharp2cuda_temp_185 = (lower_heap)[0];
+#line 834 "SequencePathModule.cs"
+                                        int csharp2cuda_temp_186 = (ranks)[csharp2cuda_temp_185];
+                                        if (((csharp2cuda_temp_184) <= (csharp2cuda_temp_186)))
+#line 835 "SequencePathModule.cs"
                                         {
-#line 831 "SequencePathModule.cs"
-#line 833 "SequencePathModule.cs"
-                                            int* csharp2cuda_temp_182 = &(lower_count);
-                                            mathblocks_sequence_heap_insert(lower_heap, csharp2cuda_temp_182, index, 0, positions, kinds, ranks, true);
+#line 836 "SequencePathModule.cs"
+#line 838 "SequencePathModule.cs"
+                                            int* csharp2cuda_temp_187 = &(lower_count);
+                                            mathblocks_sequence_heap_insert(lower_heap, csharp2cuda_temp_187, index, 0, positions, kinds, ranks, true);
                                         }
                                         else
-#line 842 "SequencePathModule.cs"
+#line 847 "SequencePathModule.cs"
                                         {
-#line 843 "SequencePathModule.cs"
-#line 845 "SequencePathModule.cs"
-                                            int* csharp2cuda_temp_183 = &(upper_count);
-                                            mathblocks_sequence_heap_insert(upper_heap, csharp2cuda_temp_183, index, 1, positions, kinds, ranks, false);
+#line 848 "SequencePathModule.cs"
+#line 850 "SequencePathModule.cs"
+                                            int* csharp2cuda_temp_188 = &(upper_count);
+                                            mathblocks_sequence_heap_insert(upper_heap, csharp2cuda_temp_188, index, 1, positions, kinds, ranks, false);
                                         }
                                     }
                                 }
-#line 853 "SequencePathModule.cs"
-                                int csharp2cuda_temp_184;
-#line 853 "SequencePathModule.cs"
+#line 858 "SequencePathModule.cs"
+                                int csharp2cuda_temp_189;
+#line 858 "SequencePathModule.cs"
                                 if (((target_lower_count) < (csharp2cuda_i32_add(index, 1))))
                                 {
-#line 853 "SequencePathModule.cs"
-                                    csharp2cuda_temp_184 = target_lower_count;
+#line 858 "SequencePathModule.cs"
+                                    csharp2cuda_temp_189 = target_lower_count;
                                 }
                                 else
                                 {
-#line 853 "SequencePathModule.cs"
-                                    csharp2cuda_temp_184 = csharp2cuda_i32_add(index, 1);
-                                }
-#line 853 "SequencePathModule.cs"
-                                int active_target = csharp2cuda_temp_184;
-#line 856 "SequencePathModule.cs"
 #line 858 "SequencePathModule.cs"
-                                int* csharp2cuda_temp_185 = &(lower_count);
-#line 860 "SequencePathModule.cs"
-                                int* csharp2cuda_temp_186 = &(upper_count);
-                                mathblocks_sequence_rebalance_heaps(lower_heap, csharp2cuda_temp_185, upper_heap, csharp2cuda_temp_186, active_target, positions, kinds, ranks);
+                                    csharp2cuda_temp_189 = csharp2cuda_i32_add(index, 1);
+                                }
+#line 858 "SequencePathModule.cs"
+                                int active_target = csharp2cuda_temp_189;
+#line 861 "SequencePathModule.cs"
+#line 863 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_190 = &(lower_count);
+#line 865 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_191 = &(upper_count);
+                                mathblocks_sequence_rebalance_heaps(lower_heap, csharp2cuda_temp_190, upper_heap, csharp2cuda_temp_191, active_target, positions, kinds, ranks);
                             }
-#line 803 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_175 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_175));
+#line 808 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_180 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_180));
                         }
                     }
-#line 866 "SequencePathModule.cs"
+#line 871 "SequencePathModule.cs"
                     {
-#line 866 "SequencePathModule.cs"
+#line 871 "SequencePathModule.cs"
                         int start = 0;
                         while (true)
                         {
-#line 866 "SequencePathModule.cs"
-                            int csharp2cuda_temp_188 = (output)->count;
-                            if (!(((start) < (csharp2cuda_temp_188))))
+#line 871 "SequencePathModule.cs"
+                            int csharp2cuda_temp_193 = (output)->count;
+                            if (!(((start) < (csharp2cuda_temp_193))))
                                 break;
-#line 867 "SequencePathModule.cs"
+#line 872 "SequencePathModule.cs"
                             {
-#line 868 "SequencePathModule.cs"
-                                int csharp2cuda_temp_189 = (lower_heap)[0];
-#line 868 "SequencePathModule.cs"
-                                double lower_value = (a)[csharp2cuda_temp_189];
-#line 869 "SequencePathModule.cs"
-                                double csharp2cuda_temp_190;
-#line 869 "SequencePathModule.cs"
+#line 873 "SequencePathModule.cs"
+                                int csharp2cuda_temp_194 = (lower_heap)[0];
+#line 873 "SequencePathModule.cs"
+                                double lower_value = (a)[csharp2cuda_temp_194];
+#line 874 "SequencePathModule.cs"
+                                double csharp2cuda_temp_195;
+#line 874 "SequencePathModule.cs"
                                 if (((lower_index) == (upper_index)))
                                 {
-#line 869 "SequencePathModule.cs"
-                                    csharp2cuda_temp_190 = lower_value;
+#line 874 "SequencePathModule.cs"
+                                    csharp2cuda_temp_195 = lower_value;
                                 }
                                 else
                                 {
-#line 871 "SequencePathModule.cs"
-                                    int csharp2cuda_temp_191 = (upper_heap)[0];
-#line 869 "SequencePathModule.cs"
-                                    csharp2cuda_temp_190 = (a)[csharp2cuda_temp_191];
-                                }
-#line 869 "SequencePathModule.cs"
-                                double upper_value = csharp2cuda_temp_190;
-#line 872 "SequencePathModule.cs"
-#line 872 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_192 = &((result)[start]);
-                                (*(csharp2cuda_temp_192) = __dadd_rn(__dmul_rn(lower_value, __dsub_rn(1.0, weight)), __dmul_rn(upper_value, weight)));
-#line 873 "SequencePathModule.cs"
-#line 873 "SequencePathModule.cs"
-                                double csharp2cuda_temp_193 = (result)[start];
-                                if ((!(isfinite(csharp2cuda_temp_193))))
-#line 874 "SequencePathModule.cs"
-                                {
-#line 875 "SequencePathModule.cs"
-#line 875 "SequencePathModule.cs"
-                                    int* csharp2cuda_temp_194 = &((output)->valid);
-                                    (*(csharp2cuda_temp_194) = 0);
 #line 876 "SequencePathModule.cs"
-                                    break;
+                                    int csharp2cuda_temp_196 = (upper_heap)[0];
+#line 874 "SequencePathModule.cs"
+                                    csharp2cuda_temp_195 = (a)[csharp2cuda_temp_196];
                                 }
+#line 874 "SequencePathModule.cs"
+                                double upper_value = csharp2cuda_temp_195;
+#line 877 "SequencePathModule.cs"
+#line 877 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_197 = &((result)[start]);
+                                (*(csharp2cuda_temp_197) = __dadd_rn(__dmul_rn(lower_value, __dsub_rn(1.0, weight)), __dmul_rn(upper_value, weight)));
 #line 878 "SequencePathModule.cs"
 #line 878 "SequencePathModule.cs"
-                                int csharp2cuda_temp_195 = (output)->count;
-                                if (((csharp2cuda_i32_add(start, 1)) == (csharp2cuda_temp_195)))
-                                {
+                                double csharp2cuda_temp_198 = (result)[start];
+                                if ((!(isfinite(csharp2cuda_temp_198))))
 #line 879 "SequencePathModule.cs"
+                                {
+#line 880 "SequencePathModule.cs"
+#line 880 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_199 = &((output)->valid);
+                                    (*(csharp2cuda_temp_199) = 0);
+#line 881 "SequencePathModule.cs"
                                     break;
                                 }
-#line 880 "SequencePathModule.cs"
-                                int outgoing = start;
-#line 881 "SequencePathModule.cs"
-                                int incoming = csharp2cuda_i32_add(start, width);
-#line 882 "SequencePathModule.cs"
-#line 882 "SequencePathModule.cs"
-                                int csharp2cuda_temp_196 = (kinds)[outgoing];
-                                if (((csharp2cuda_temp_196) == (0)))
 #line 883 "SequencePathModule.cs"
+#line 883 "SequencePathModule.cs"
+                                int csharp2cuda_temp_200 = (output)->count;
+                                if (((csharp2cuda_i32_add(start, 1)) == (csharp2cuda_temp_200)))
                                 {
 #line 884 "SequencePathModule.cs"
+                                    break;
+                                }
+#line 885 "SequencePathModule.cs"
+                                int outgoing = start;
 #line 886 "SequencePathModule.cs"
-                                    int* csharp2cuda_temp_197 = &(lower_count);
-                                    mathblocks_sequence_heap_remove(lower_heap, csharp2cuda_temp_197, outgoing, positions, kinds, ranks, true);
+                                int incoming = csharp2cuda_i32_add(start, width);
+#line 887 "SequencePathModule.cs"
+#line 887 "SequencePathModule.cs"
+                                int csharp2cuda_temp_201 = (kinds)[outgoing];
+                                if (((csharp2cuda_temp_201) == (0)))
+#line 888 "SequencePathModule.cs"
+                                {
+#line 889 "SequencePathModule.cs"
+#line 891 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_202 = &(lower_count);
+                                    mathblocks_sequence_heap_remove(lower_heap, csharp2cuda_temp_202, outgoing, positions, kinds, ranks, true);
                                 }
                                 else
-#line 894 "SequencePathModule.cs"
+#line 899 "SequencePathModule.cs"
                                 {
-#line 895 "SequencePathModule.cs"
-#line 897 "SequencePathModule.cs"
-                                    int* csharp2cuda_temp_198 = &(upper_count);
-                                    mathblocks_sequence_heap_remove(upper_heap, csharp2cuda_temp_198, outgoing, positions, kinds, ranks, false);
+#line 900 "SequencePathModule.cs"
+#line 902 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_203 = &(upper_count);
+                                    mathblocks_sequence_heap_remove(upper_heap, csharp2cuda_temp_203, outgoing, positions, kinds, ranks, false);
                                 }
-#line 904 "SequencePathModule.cs"
+#line 909 "SequencePathModule.cs"
                                 if (((lower_count) == (0)))
-#line 905 "SequencePathModule.cs"
+#line 910 "SequencePathModule.cs"
                                 {
-#line 906 "SequencePathModule.cs"
-#line 908 "SequencePathModule.cs"
-                                    int* csharp2cuda_temp_199 = &(upper_count);
-                                    mathblocks_sequence_heap_insert(upper_heap, csharp2cuda_temp_199, incoming, 1, positions, kinds, ranks, false);
+#line 911 "SequencePathModule.cs"
+#line 913 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_204 = &(upper_count);
+                                    mathblocks_sequence_heap_insert(upper_heap, csharp2cuda_temp_204, incoming, 1, positions, kinds, ranks, false);
                                 }
                                 else
                                 {
-#line 916 "SequencePathModule.cs"
-#line 916 "SequencePathModule.cs"
-                                    int csharp2cuda_temp_200 = (ranks)[incoming];
-#line 916 "SequencePathModule.cs"
-                                    int csharp2cuda_temp_201 = (lower_heap)[0];
-#line 916 "SequencePathModule.cs"
-                                    int csharp2cuda_temp_202 = (ranks)[csharp2cuda_temp_201];
-                                    if (((csharp2cuda_temp_200) <= (csharp2cuda_temp_202)))
-#line 917 "SequencePathModule.cs"
+#line 921 "SequencePathModule.cs"
+#line 921 "SequencePathModule.cs"
+                                    int csharp2cuda_temp_205 = (ranks)[incoming];
+#line 921 "SequencePathModule.cs"
+                                    int csharp2cuda_temp_206 = (lower_heap)[0];
+#line 921 "SequencePathModule.cs"
+                                    int csharp2cuda_temp_207 = (ranks)[csharp2cuda_temp_206];
+                                    if (((csharp2cuda_temp_205) <= (csharp2cuda_temp_207)))
+#line 922 "SequencePathModule.cs"
                                     {
-#line 918 "SequencePathModule.cs"
-#line 920 "SequencePathModule.cs"
-                                        int* csharp2cuda_temp_203 = &(lower_count);
-                                        mathblocks_sequence_heap_insert(lower_heap, csharp2cuda_temp_203, incoming, 0, positions, kinds, ranks, true);
+#line 923 "SequencePathModule.cs"
+#line 925 "SequencePathModule.cs"
+                                        int* csharp2cuda_temp_208 = &(lower_count);
+                                        mathblocks_sequence_heap_insert(lower_heap, csharp2cuda_temp_208, incoming, 0, positions, kinds, ranks, true);
                                     }
                                     else
-#line 929 "SequencePathModule.cs"
+#line 934 "SequencePathModule.cs"
                                     {
-#line 930 "SequencePathModule.cs"
-#line 932 "SequencePathModule.cs"
-                                        int* csharp2cuda_temp_204 = &(upper_count);
-                                        mathblocks_sequence_heap_insert(upper_heap, csharp2cuda_temp_204, incoming, 1, positions, kinds, ranks, false);
+#line 935 "SequencePathModule.cs"
+#line 937 "SequencePathModule.cs"
+                                        int* csharp2cuda_temp_209 = &(upper_count);
+                                        mathblocks_sequence_heap_insert(upper_heap, csharp2cuda_temp_209, incoming, 1, positions, kinds, ranks, false);
                                     }
                                 }
-#line 940 "SequencePathModule.cs"
-#line 942 "SequencePathModule.cs"
-                                int* csharp2cuda_temp_205 = &(lower_count);
-#line 944 "SequencePathModule.cs"
-                                int* csharp2cuda_temp_206 = &(upper_count);
-                                mathblocks_sequence_rebalance_heaps(lower_heap, csharp2cuda_temp_205, upper_heap, csharp2cuda_temp_206, target_lower_count, positions, kinds, ranks);
+#line 945 "SequencePathModule.cs"
+#line 947 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_210 = &(lower_count);
+#line 949 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_211 = &(upper_count);
+                                mathblocks_sequence_rebalance_heaps(lower_heap, csharp2cuda_temp_210, upper_heap, csharp2cuda_temp_211, target_lower_count, positions, kinds, ranks);
                             }
-#line 866 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_187 = &(start);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_187));
+#line 871 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_192 = &(start);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_192));
                         }
                     }
-#line 950 "SequencePathModule.cs"
+#line 955 "SequencePathModule.cs"
                     int heap_height = 1;
-#line 951 "SequencePathModule.cs"
+#line 956 "SequencePathModule.cs"
                     {
-#line 951 "SequencePathModule.cs"
+#line 956 "SequencePathModule.cs"
                         int value = width;
                         while (true)
                         {
                             if (!(((value) > (1))))
                                 break;
-#line 952 "SequencePathModule.cs"
-#line 952 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_208 = &(heap_height);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_208));
-#line 951 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_207 = &(value);
-                            (*(csharp2cuda_temp_207) = csharp2cuda_i32_shr(csharp2cuda_i32_add(value, 1), 1));
+#line 957 "SequencePathModule.cs"
+#line 957 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_213 = &(heap_height);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_213));
+#line 956 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_212 = &(value);
+                            (*(csharp2cuda_temp_212) = csharp2cuda_i32_shr(csharp2cuda_i32_add(value, 1), 1));
                         }
                     }
-#line 954 "SequencePathModule.cs"
-                    int csharp2cuda_temp_209 = (first)->count;
-#line 953 "SequencePathModule.cs"
-                    long long heap_bound = csharp2cuda_i64_mul(csharp2cuda_i64_add(((long long)(width)), csharp2cuda_i64_mul(2LL, ((long long)(csharp2cuda_i32_sub(csharp2cuda_temp_209, width))))), ((long long)(heap_height)));
-#line 955 "SequencePathModule.cs"
-                    int csharp2cuda_temp_210 = (output)->count;
-#line 955 "SequencePathModule.cs"
-                    long long selection_bound = csharp2cuda_i64_mul(((long long)(csharp2cuda_temp_210)), ((long long)(2)));
-#line 956 "SequencePathModule.cs"
-#line 956 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_211 = &((output)->scalar_value);
-#line 957 "SequencePathModule.cs"
-                    int csharp2cuda_temp_212 = (first)->count;
-                    (*(csharp2cuda_temp_211) = ((double)(csharp2cuda_i64_add(csharp2cuda_i64_add(csharp2cuda_i64_mul(((long long)(csharp2cuda_temp_212)), ((long long)(64))), heap_bound), selection_bound))));
+#line 959 "SequencePathModule.cs"
+                    int csharp2cuda_temp_214 = (first)->count;
 #line 958 "SequencePathModule.cs"
-#line 958 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_213 = &((output)->boolean_value);
-                    (*(csharp2cuda_temp_213) = 64);
-                }
+                    long long heap_bound = csharp2cuda_i64_mul(csharp2cuda_i64_add(((long long)(width)), csharp2cuda_i64_mul(2LL, ((long long)(csharp2cuda_i32_sub(csharp2cuda_temp_214, width))))), ((long long)(heap_height)));
 #line 960 "SequencePathModule.cs"
-                __syncthreads();
+                    int csharp2cuda_temp_215 = (output)->count;
+#line 960 "SequencePathModule.cs"
+                    long long selection_bound = csharp2cuda_i64_mul(((long long)(csharp2cuda_temp_215)), ((long long)(2)));
 #line 961 "SequencePathModule.cs"
+#line 961 "SequencePathModule.cs"
+                    double* csharp2cuda_temp_216 = &((output)->scalar_value);
+#line 962 "SequencePathModule.cs"
+                    int csharp2cuda_temp_217 = (first)->count;
+                    (*(csharp2cuda_temp_216) = ((double)(csharp2cuda_i64_add(csharp2cuda_i64_add(csharp2cuda_i64_mul(((long long)(csharp2cuda_temp_217)), ((long long)(64))), heap_bound), selection_bound))));
+#line 963 "SequencePathModule.cs"
+#line 963 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_218 = &((output)->boolean_value);
+                    (*(csharp2cuda_temp_218) = 64);
+                }
+#line 965 "SequencePathModule.cs"
+                __syncthreads();
+#line 966 "SequencePathModule.cs"
                 break;
             }
-#line 963 "SequencePathModule.cs"
+#line 968 "SequencePathModule.cs"
         case 8:
         case 10:
-#line 965 "SequencePathModule.cs"
+#line 970 "SequencePathModule.cs"
             if (((thread) == (0)))
-#line 966 "SequencePathModule.cs"
+#line 971 "SequencePathModule.cs"
             {
-#line 967 "SequencePathModule.cs"
+#line 972 "SequencePathModule.cs"
                 int width = 0;
-#line 968 "SequencePathModule.cs"
-#line 968 "SequencePathModule.cs"
-                double csharp2cuda_temp_214 = (second)->scalar_value;
-#line 968 "SequencePathModule.cs"
-                int* csharp2cuda_temp_215 = &(width);
-#line 968 "SequencePathModule.cs"
-                bool csharp2cuda_temp_216 = mathblocks_sequence_positive_integer(csharp2cuda_temp_214, csharp2cuda_temp_215);
-#line 968 "SequencePathModule.cs"
-                bool csharp2cuda_temp_217;
-#line 968 "SequencePathModule.cs"
-                if (!((!(csharp2cuda_temp_216))))
-                {
-#line 968 "SequencePathModule.cs"
-                    int csharp2cuda_temp_218 = (first)->count;
-#line 968 "SequencePathModule.cs"
-                    csharp2cuda_temp_217 = ((width) > (csharp2cuda_temp_218));
-                }
-                else
-                {
-#line 968 "SequencePathModule.cs"
-                    csharp2cuda_temp_217 = true;
-                }
-                if (csharp2cuda_temp_217)
-#line 969 "SequencePathModule.cs"
-                {
-#line 970 "SequencePathModule.cs"
-#line 970 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_219 = &((output)->valid);
-                    (*(csharp2cuda_temp_219) = 0);
-                }
-                else
 #line 973 "SequencePathModule.cs"
+#line 973 "SequencePathModule.cs"
+                double csharp2cuda_temp_219 = (second)->scalar_value;
+#line 973 "SequencePathModule.cs"
+                int* csharp2cuda_temp_220 = &(width);
+#line 973 "SequencePathModule.cs"
+                bool csharp2cuda_temp_221 = mathblocks_sequence_positive_integer(csharp2cuda_temp_219, csharp2cuda_temp_220);
+#line 973 "SequencePathModule.cs"
+                bool csharp2cuda_temp_222;
+#line 973 "SequencePathModule.cs"
+                if (!((!(csharp2cuda_temp_221))))
                 {
+#line 973 "SequencePathModule.cs"
+                    int csharp2cuda_temp_223 = (first)->count;
+#line 973 "SequencePathModule.cs"
+                    csharp2cuda_temp_222 = ((width) > (csharp2cuda_temp_223));
+                }
+                else
+                {
+#line 973 "SequencePathModule.cs"
+                    csharp2cuda_temp_222 = true;
+                }
+                if (csharp2cuda_temp_222)
 #line 974 "SequencePathModule.cs"
-#line 974 "SequencePathModule.cs"
-                    int csharp2cuda_temp_220 = (first)->count;
-                    mathblocks_sequence_set_vector_shape(output, csharp2cuda_i32_add(csharp2cuda_i32_sub(csharp2cuda_temp_220, width), 1));
+                {
 #line 975 "SequencePathModule.cs"
+#line 975 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_224 = &((output)->valid);
+                    (*(csharp2cuda_temp_224) = 0);
+                }
+                else
+#line 978 "SequencePathModule.cs"
+                {
+#line 979 "SequencePathModule.cs"
+#line 979 "SequencePathModule.cs"
+                    int csharp2cuda_temp_225 = (first)->count;
+                    mathblocks_sequence_set_vector_shape(output, csharp2cuda_i32_add(csharp2cuda_i32_sub(csharp2cuda_temp_225, width), 1));
+#line 980 "SequencePathModule.cs"
                     {
-#line 975 "SequencePathModule.cs"
+#line 980 "SequencePathModule.cs"
                         int start = 0;
                         while (true)
                         {
-#line 975 "SequencePathModule.cs"
-                            int csharp2cuda_temp_222 = (output)->count;
-                            if (!(((start) < (csharp2cuda_temp_222))))
+#line 980 "SequencePathModule.cs"
+                            int csharp2cuda_temp_227 = (output)->count;
+                            if (!(((start) < (csharp2cuda_temp_227))))
                                 break;
-#line 976 "SequencePathModule.cs"
-                            {
-#line 977 "SequencePathModule.cs"
-                                double mean = 0.0;
-#line 978 "SequencePathModule.cs"
-                                {
-#line 978 "SequencePathModule.cs"
-                                    int index = 0;
-                                    while (true)
-                                    {
-                                        if (!(((index) < (width))))
-                                            break;
-#line 979 "SequencePathModule.cs"
-#line 979 "SequencePathModule.cs"
-                                        double* csharp2cuda_temp_224 = &(mean);
-#line 979 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_225 = *(csharp2cuda_temp_224);
-#line 979 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_226 = (a)[csharp2cuda_i32_add(start, index)];
-                                        (*(csharp2cuda_temp_224) = __dadd_rn(csharp2cuda_temp_225, csharp2cuda_temp_226));
-#line 978 "SequencePathModule.cs"
-                                        int* csharp2cuda_temp_223 = &(index);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_223));
-                                    }
-                                }
-#line 980 "SequencePathModule.cs"
-#line 980 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_227 = &(mean);
-#line 980 "SequencePathModule.cs"
-                                double csharp2cuda_temp_228 = *(csharp2cuda_temp_227);
-                                (*(csharp2cuda_temp_227) = __ddiv_rn(csharp2cuda_temp_228, ((double)(width))));
 #line 981 "SequencePathModule.cs"
-                                double sum_squares = 0.0;
+                            {
 #line 982 "SequencePathModule.cs"
+                                double mean = 0.0;
+#line 983 "SequencePathModule.cs"
                                 {
-#line 982 "SequencePathModule.cs"
+#line 983 "SequencePathModule.cs"
                                     int index = 0;
                                     while (true)
                                     {
                                         if (!(((index) < (width))))
                                             break;
+#line 984 "SequencePathModule.cs"
+#line 984 "SequencePathModule.cs"
+                                        double* csharp2cuda_temp_229 = &(mean);
+#line 984 "SequencePathModule.cs"
+                                        double csharp2cuda_temp_230 = *(csharp2cuda_temp_229);
+#line 984 "SequencePathModule.cs"
+                                        double csharp2cuda_temp_231 = (a)[csharp2cuda_i32_add(start, index)];
+                                        (*(csharp2cuda_temp_229) = __dadd_rn(csharp2cuda_temp_230, csharp2cuda_temp_231));
 #line 983 "SequencePathModule.cs"
-                                        {
-#line 984 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_230 = (a)[csharp2cuda_i32_add(start, index)];
-#line 984 "SequencePathModule.cs"
-                                            double difference = __dsub_rn(csharp2cuda_temp_230, mean);
-#line 985 "SequencePathModule.cs"
-#line 985 "SequencePathModule.cs"
-                                            double* csharp2cuda_temp_231 = &(sum_squares);
-#line 985 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_232 = *(csharp2cuda_temp_231);
-                                            (*(csharp2cuda_temp_231) = __dadd_rn(csharp2cuda_temp_232, __dmul_rn(difference, difference)));
-                                        }
-#line 982 "SequencePathModule.cs"
-                                        int* csharp2cuda_temp_229 = &(index);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_229));
+                                        int* csharp2cuda_temp_228 = &(index);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_228));
                                     }
                                 }
+#line 985 "SequencePathModule.cs"
+#line 985 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_232 = &(mean);
+#line 985 "SequencePathModule.cs"
+                                double csharp2cuda_temp_233 = *(csharp2cuda_temp_232);
+                                (*(csharp2cuda_temp_232) = __ddiv_rn(csharp2cuda_temp_233, ((double)(width))));
+#line 986 "SequencePathModule.cs"
+                                double sum_squares = 0.0;
 #line 987 "SequencePathModule.cs"
-                                double csharp2cuda_temp_233 = __ddiv_rn(sum_squares, ((double)(width)));
+                                {
 #line 987 "SequencePathModule.cs"
-                                double deviation = mathblocks_square_root(csharp2cuda_temp_233);
+                                    int index = 0;
+                                    while (true)
+                                    {
+                                        if (!(((index) < (width))))
+                                            break;
 #line 988 "SequencePathModule.cs"
-#line 988 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_234 = &((result)[start]);
-#line 988 "SequencePathModule.cs"
-                                double csharp2cuda_temp_235;
-#line 988 "SequencePathModule.cs"
+                                        {
+#line 989 "SequencePathModule.cs"
+                                            double csharp2cuda_temp_235 = (a)[csharp2cuda_i32_add(start, index)];
+#line 989 "SequencePathModule.cs"
+                                            double difference = __dsub_rn(csharp2cuda_temp_235, mean);
+#line 990 "SequencePathModule.cs"
+#line 990 "SequencePathModule.cs"
+                                            double* csharp2cuda_temp_236 = &(sum_squares);
+#line 990 "SequencePathModule.cs"
+                                            double csharp2cuda_temp_237 = *(csharp2cuda_temp_236);
+                                            (*(csharp2cuda_temp_236) = __dadd_rn(csharp2cuda_temp_237, __dmul_rn(difference, difference)));
+                                        }
+#line 987 "SequencePathModule.cs"
+                                        int* csharp2cuda_temp_234 = &(index);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_234));
+                                    }
+                                }
+#line 992 "SequencePathModule.cs"
+                                double csharp2cuda_temp_238 = __ddiv_rn(sum_squares, ((double)(width)));
+#line 992 "SequencePathModule.cs"
+                                double deviation = mathblocks_square_root(csharp2cuda_temp_238);
+#line 993 "SequencePathModule.cs"
+#line 993 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_239 = &((result)[start]);
+#line 993 "SequencePathModule.cs"
+                                double csharp2cuda_temp_240;
+#line 993 "SequencePathModule.cs"
                                 if (((opcode) == (8)))
                                 {
-#line 988 "SequencePathModule.cs"
-                                    csharp2cuda_temp_235 = deviation;
+#line 993 "SequencePathModule.cs"
+                                    csharp2cuda_temp_240 = deviation;
                                 }
                                 else
                                 {
-#line 988 "SequencePathModule.cs"
-                                    csharp2cuda_temp_235 = __dmul_rn(deviation, deviation);
+#line 993 "SequencePathModule.cs"
+                                    csharp2cuda_temp_240 = __dmul_rn(deviation, deviation);
                                 }
-                                (*(csharp2cuda_temp_234) = csharp2cuda_temp_235);
-#line 989 "SequencePathModule.cs"
-#line 989 "SequencePathModule.cs"
-                                double csharp2cuda_temp_236 = (result)[start];
-                                if ((!(isfinite(csharp2cuda_temp_236))))
+                                (*(csharp2cuda_temp_239) = csharp2cuda_temp_240);
+#line 994 "SequencePathModule.cs"
+#line 994 "SequencePathModule.cs"
+                                double csharp2cuda_temp_241 = (result)[start];
+                                if ((!(isfinite(csharp2cuda_temp_241))))
                                 {
-#line 990 "SequencePathModule.cs"
-#line 990 "SequencePathModule.cs"
-                                    int* csharp2cuda_temp_237 = &((output)->valid);
-                                    (*(csharp2cuda_temp_237) = 0);
+#line 995 "SequencePathModule.cs"
+#line 995 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_242 = &((output)->valid);
+                                    (*(csharp2cuda_temp_242) = 0);
                                 }
                             }
-#line 975 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_221 = &(start);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_221));
+#line 980 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_226 = &(start);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_226));
                         }
                     }
                 }
             }
-#line 994 "SequencePathModule.cs"
+#line 999 "SequencePathModule.cs"
             break;
-#line 995 "SequencePathModule.cs"
-        case 11:
-#line 996 "SequencePathModule.cs"
-            if (((thread) == (0)))
-#line 997 "SequencePathModule.cs"
-            {
-#line 998 "SequencePathModule.cs"
-#line 998 "SequencePathModule.cs"
-                int csharp2cuda_temp_238 = (first)->count;
-                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_238);
-#line 999 "SequencePathModule.cs"
-#line 999 "SequencePathModule.cs"
-                int csharp2cuda_temp_239 = (first)->count;
-#line 999 "SequencePathModule.cs"
-                bool csharp2cuda_temp_240;
-#line 999 "SequencePathModule.cs"
-                if (!((!(mathblocks_sequence_is_power_of_two(csharp2cuda_temp_239)))))
-                {
-#line 999 "SequencePathModule.cs"
-                    csharp2cuda_temp_240 = ((((void*)(scratch))) == (((void*)(nullptr))));
-                }
-                else
-                {
-#line 999 "SequencePathModule.cs"
-                    csharp2cuda_temp_240 = true;
-                }
-                if (csharp2cuda_temp_240)
 #line 1000 "SequencePathModule.cs"
+        case 11:
+#line 1001 "SequencePathModule.cs"
+            if (((thread) == (0)))
+#line 1002 "SequencePathModule.cs"
+            {
+#line 1003 "SequencePathModule.cs"
+#line 1003 "SequencePathModule.cs"
+                int csharp2cuda_temp_243 = (first)->count;
+                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_243);
+#line 1004 "SequencePathModule.cs"
+#line 1004 "SequencePathModule.cs"
+                int csharp2cuda_temp_244 = (first)->count;
+#line 1004 "SequencePathModule.cs"
+                bool csharp2cuda_temp_245;
+#line 1004 "SequencePathModule.cs"
+                if (!((!(mathblocks_sequence_is_power_of_two(csharp2cuda_temp_244)))))
                 {
-#line 1001 "SequencePathModule.cs"
-#line 1001 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_241 = &((output)->valid);
-                    (*(csharp2cuda_temp_241) = 0);
+#line 1004 "SequencePathModule.cs"
+                    csharp2cuda_temp_245 = ((((void*)(scratch))) == (((void*)(nullptr))));
                 }
                 else
-#line 1004 "SequencePathModule.cs"
                 {
+#line 1004 "SequencePathModule.cs"
+                    csharp2cuda_temp_245 = true;
+                }
+                if (csharp2cuda_temp_245)
 #line 1005 "SequencePathModule.cs"
+                {
+#line 1006 "SequencePathModule.cs"
+#line 1006 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_246 = &((output)->valid);
+                    (*(csharp2cuda_temp_246) = 0);
+                }
+                else
+#line 1009 "SequencePathModule.cs"
+                {
+#line 1010 "SequencePathModule.cs"
                     {
-#line 1005 "SequencePathModule.cs"
+#line 1010 "SequencePathModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 1005 "SequencePathModule.cs"
-                            int csharp2cuda_temp_243 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_243))))
+#line 1010 "SequencePathModule.cs"
+                            int csharp2cuda_temp_248 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_248))))
                                 break;
-#line 1006 "SequencePathModule.cs"
-#line 1006 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_244 = &((result)[index]);
-#line 1006 "SequencePathModule.cs"
-                            double csharp2cuda_temp_245 = (a)[index];
-                            (*(csharp2cuda_temp_244) = csharp2cuda_temp_245);
-#line 1005 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_242 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_242));
+#line 1011 "SequencePathModule.cs"
+#line 1011 "SequencePathModule.cs"
+                            double* csharp2cuda_temp_249 = &((result)[index]);
+#line 1011 "SequencePathModule.cs"
+                            double csharp2cuda_temp_250 = (a)[index];
+                            (*(csharp2cuda_temp_249) = csharp2cuda_temp_250);
+#line 1010 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_247 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_247));
                         }
                     }
-#line 1007 "SequencePathModule.cs"
+#line 1012 "SequencePathModule.cs"
                     int length = (first)->count;
-#line 1008 "SequencePathModule.cs"
+#line 1013 "SequencePathModule.cs"
                     double scale = __ddiv_rn(1.0, mathblocks_square_root(2.0));
-#line 1009 "SequencePathModule.cs"
+#line 1014 "SequencePathModule.cs"
                     while (true)
                     {
                         if (!(((length) > (1))))
                             break;
-#line 1010 "SequencePathModule.cs"
+#line 1015 "SequencePathModule.cs"
                         {
-#line 1011 "SequencePathModule.cs"
+#line 1016 "SequencePathModule.cs"
                             int half = csharp2cuda_i32_div(length, 2);
-#line 1012 "SequencePathModule.cs"
+#line 1017 "SequencePathModule.cs"
                             {
-#line 1012 "SequencePathModule.cs"
+#line 1017 "SequencePathModule.cs"
                                 int index = 0;
                                 while (true)
                                 {
                                     if (!(((index) < (half))))
                                         break;
-#line 1013 "SequencePathModule.cs"
+#line 1018 "SequencePathModule.cs"
                                     {
-#line 1014 "SequencePathModule.cs"
-#line 1014 "SequencePathModule.cs"
-                                        double* csharp2cuda_temp_247 = &((scratch)[index]);
-#line 1014 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_248 = (result)[csharp2cuda_i32_mul(2, index)];
-#line 1014 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_249 = (result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
-                                        (*(csharp2cuda_temp_247) = __dmul_rn(__dadd_rn(csharp2cuda_temp_248, csharp2cuda_temp_249), scale));
-#line 1015 "SequencePathModule.cs"
-#line 1015 "SequencePathModule.cs"
-                                        double* csharp2cuda_temp_250 = &((scratch)[csharp2cuda_i32_add(half, index)]);
-#line 1015 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_251 = (result)[csharp2cuda_i32_mul(2, index)];
-#line 1015 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_252 = (result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
-                                        (*(csharp2cuda_temp_250) = __dmul_rn(__dsub_rn(csharp2cuda_temp_251, csharp2cuda_temp_252), scale));
+#line 1019 "SequencePathModule.cs"
+#line 1019 "SequencePathModule.cs"
+                                        double* csharp2cuda_temp_252 = &((scratch)[index]);
+#line 1019 "SequencePathModule.cs"
+                                        double csharp2cuda_temp_253 = (result)[csharp2cuda_i32_mul(2, index)];
+#line 1019 "SequencePathModule.cs"
+                                        double csharp2cuda_temp_254 = (result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
+                                        (*(csharp2cuda_temp_252) = __dmul_rn(__dadd_rn(csharp2cuda_temp_253, csharp2cuda_temp_254), scale));
+#line 1020 "SequencePathModule.cs"
+#line 1020 "SequencePathModule.cs"
+                                        double* csharp2cuda_temp_255 = &((scratch)[csharp2cuda_i32_add(half, index)]);
+#line 1020 "SequencePathModule.cs"
+                                        double csharp2cuda_temp_256 = (result)[csharp2cuda_i32_mul(2, index)];
+#line 1020 "SequencePathModule.cs"
+                                        double csharp2cuda_temp_257 = (result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
+                                        (*(csharp2cuda_temp_255) = __dmul_rn(__dsub_rn(csharp2cuda_temp_256, csharp2cuda_temp_257), scale));
                                     }
-#line 1012 "SequencePathModule.cs"
-                                    int* csharp2cuda_temp_246 = &(index);
-                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_246));
+#line 1017 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_251 = &(index);
+                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_251));
                                 }
                             }
-#line 1017 "SequencePathModule.cs"
+#line 1022 "SequencePathModule.cs"
                             {
-#line 1017 "SequencePathModule.cs"
+#line 1022 "SequencePathModule.cs"
                                 int index = 0;
                                 while (true)
                                 {
                                     if (!(((index) < (length))))
                                         break;
-#line 1018 "SequencePathModule.cs"
-#line 1018 "SequencePathModule.cs"
-                                    double* csharp2cuda_temp_254 = &((result)[index]);
-#line 1018 "SequencePathModule.cs"
-                                    double csharp2cuda_temp_255 = (scratch)[index];
-                                    (*(csharp2cuda_temp_254) = csharp2cuda_temp_255);
-#line 1017 "SequencePathModule.cs"
-                                    int* csharp2cuda_temp_253 = &(index);
-                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_253));
+#line 1023 "SequencePathModule.cs"
+#line 1023 "SequencePathModule.cs"
+                                    double* csharp2cuda_temp_259 = &((result)[index]);
+#line 1023 "SequencePathModule.cs"
+                                    double csharp2cuda_temp_260 = (scratch)[index];
+                                    (*(csharp2cuda_temp_259) = csharp2cuda_temp_260);
+#line 1022 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_258 = &(index);
+                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_258));
                                 }
                             }
-#line 1019 "SequencePathModule.cs"
-#line 1019 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_256 = &(length);
-                            (*(csharp2cuda_temp_256) = half);
+#line 1024 "SequencePathModule.cs"
+#line 1024 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_261 = &(length);
+                            (*(csharp2cuda_temp_261) = half);
+                        }
+                    }
+#line 1026 "SequencePathModule.cs"
+                    {
+#line 1026 "SequencePathModule.cs"
+                        int index = 0;
+                        while (true)
+                        {
+#line 1026 "SequencePathModule.cs"
+                            int csharp2cuda_temp_263 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_263))))
+                                break;
+#line 1027 "SequencePathModule.cs"
+#line 1027 "SequencePathModule.cs"
+                            double csharp2cuda_temp_264 = (result)[index];
+                            if ((!(isfinite(csharp2cuda_temp_264))))
+                            {
+#line 1027 "SequencePathModule.cs"
+#line 1027 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_265 = &((output)->valid);
+                                (*(csharp2cuda_temp_265) = 0);
+                            }
+#line 1026 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_262 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_262));
                         }
                     }
                 }
             }
-#line 1023 "SequencePathModule.cs"
+#line 1030 "SequencePathModule.cs"
             break;
-#line 1024 "SequencePathModule.cs"
+#line 1031 "SequencePathModule.cs"
         case 12:
-#line 1025 "SequencePathModule.cs"
+#line 1032 "SequencePathModule.cs"
             if (((thread) == (0)))
-#line 1026 "SequencePathModule.cs"
+#line 1033 "SequencePathModule.cs"
             {
-#line 1027 "SequencePathModule.cs"
-#line 1027 "SequencePathModule.cs"
-                int csharp2cuda_temp_257 = (first)->count;
-                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_257);
-#line 1028 "SequencePathModule.cs"
-#line 1028 "SequencePathModule.cs"
-                int csharp2cuda_temp_258 = (first)->count;
-                if ((!(mathblocks_sequence_is_power_of_two(csharp2cuda_temp_258))))
-#line 1029 "SequencePathModule.cs"
+#line 1034 "SequencePathModule.cs"
+#line 1034 "SequencePathModule.cs"
+                int csharp2cuda_temp_266 = (first)->count;
+                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_266);
+#line 1035 "SequencePathModule.cs"
+#line 1035 "SequencePathModule.cs"
+                int csharp2cuda_temp_267 = (first)->count;
+                if ((!(mathblocks_sequence_is_power_of_two(csharp2cuda_temp_267))))
+#line 1036 "SequencePathModule.cs"
                 {
-#line 1030 "SequencePathModule.cs"
-#line 1030 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_259 = &((output)->valid);
-                    (*(csharp2cuda_temp_259) = 0);
+#line 1037 "SequencePathModule.cs"
+#line 1037 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_268 = &((output)->valid);
+                    (*(csharp2cuda_temp_268) = 0);
                 }
                 else
-#line 1033 "SequencePathModule.cs"
+#line 1040 "SequencePathModule.cs"
                 {
-#line 1034 "SequencePathModule.cs"
+#line 1041 "SequencePathModule.cs"
                     {
-#line 1034 "SequencePathModule.cs"
+#line 1041 "SequencePathModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 1034 "SequencePathModule.cs"
-                            int csharp2cuda_temp_261 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_261))))
+#line 1041 "SequencePathModule.cs"
+                            int csharp2cuda_temp_270 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_270))))
                                 break;
-#line 1035 "SequencePathModule.cs"
-#line 1035 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_262 = &((result)[index]);
-#line 1035 "SequencePathModule.cs"
-                            double csharp2cuda_temp_263 = (a)[index];
-                            (*(csharp2cuda_temp_262) = csharp2cuda_temp_263);
-#line 1034 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_260 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_260));
+#line 1042 "SequencePathModule.cs"
+#line 1042 "SequencePathModule.cs"
+                            double* csharp2cuda_temp_271 = &((result)[index]);
+#line 1042 "SequencePathModule.cs"
+                            double csharp2cuda_temp_272 = (a)[index];
+                            (*(csharp2cuda_temp_271) = csharp2cuda_temp_272);
+#line 1041 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_269 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_269));
                         }
                     }
-#line 1036 "SequencePathModule.cs"
+#line 1043 "SequencePathModule.cs"
                     {
-#line 1036 "SequencePathModule.cs"
+#line 1043 "SequencePathModule.cs"
                         int width = 1;
                         while (true)
                         {
-#line 1036 "SequencePathModule.cs"
-                            int csharp2cuda_temp_266 = (first)->count;
-                            if (!(((width) < (csharp2cuda_temp_266))))
+#line 1043 "SequencePathModule.cs"
+                            int csharp2cuda_temp_275 = (first)->count;
+                            if (!(((width) < (csharp2cuda_temp_275))))
                                 break;
-#line 1037 "SequencePathModule.cs"
+#line 1044 "SequencePathModule.cs"
                             {
-#line 1038 "SequencePathModule.cs"
+#line 1045 "SequencePathModule.cs"
                                 {
-#line 1038 "SequencePathModule.cs"
+#line 1045 "SequencePathModule.cs"
                                     int start = 0;
                                     while (true)
                                     {
-#line 1038 "SequencePathModule.cs"
-                                        int csharp2cuda_temp_269 = (first)->count;
-                                        if (!(((start) < (csharp2cuda_temp_269))))
+#line 1045 "SequencePathModule.cs"
+                                        int csharp2cuda_temp_278 = (first)->count;
+                                        if (!(((start) < (csharp2cuda_temp_278))))
                                             break;
-#line 1039 "SequencePathModule.cs"
+#line 1046 "SequencePathModule.cs"
                                         {
-#line 1040 "SequencePathModule.cs"
+#line 1047 "SequencePathModule.cs"
                                             {
-#line 1040 "SequencePathModule.cs"
+#line 1047 "SequencePathModule.cs"
                                                 int offset = 0;
                                                 while (true)
                                                 {
                                                     if (!(((offset) < (width))))
                                                         break;
-#line 1041 "SequencePathModule.cs"
+#line 1048 "SequencePathModule.cs"
                                                     {
-#line 1042 "SequencePathModule.cs"
+#line 1049 "SequencePathModule.cs"
                                                         double left = (result)[csharp2cuda_i32_add(start, offset)];
-#line 1043 "SequencePathModule.cs"
+#line 1050 "SequencePathModule.cs"
                                                         double right = (result)[csharp2cuda_i32_add(csharp2cuda_i32_add(start, width), offset)];
-#line 1044 "SequencePathModule.cs"
-#line 1044 "SequencePathModule.cs"
-                                                        double* csharp2cuda_temp_271 = &((result)[csharp2cuda_i32_add(start, offset)]);
-                                                        (*(csharp2cuda_temp_271) = __dadd_rn(left, right));
-#line 1045 "SequencePathModule.cs"
-#line 1045 "SequencePathModule.cs"
-                                                        double* csharp2cuda_temp_272 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_add(start, width), offset)]);
-                                                        (*(csharp2cuda_temp_272) = __dsub_rn(left, right));
+#line 1051 "SequencePathModule.cs"
+#line 1051 "SequencePathModule.cs"
+                                                        double* csharp2cuda_temp_280 = &((result)[csharp2cuda_i32_add(start, offset)]);
+                                                        (*(csharp2cuda_temp_280) = __dadd_rn(left, right));
+#line 1052 "SequencePathModule.cs"
+#line 1052 "SequencePathModule.cs"
+                                                        double* csharp2cuda_temp_281 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_add(start, width), offset)]);
+                                                        (*(csharp2cuda_temp_281) = __dsub_rn(left, right));
                                                     }
-#line 1040 "SequencePathModule.cs"
-                                                    int* csharp2cuda_temp_270 = &(offset);
-                                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_270));
+#line 1047 "SequencePathModule.cs"
+                                                    int* csharp2cuda_temp_279 = &(offset);
+                                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_279));
                                                 }
                                             }
                                         }
-#line 1038 "SequencePathModule.cs"
-                                        int* csharp2cuda_temp_267 = &(start);
-#line 1038 "SequencePathModule.cs"
-                                        int csharp2cuda_temp_268 = *(csharp2cuda_temp_267);
-                                        (*(csharp2cuda_temp_267) = csharp2cuda_i32_add(csharp2cuda_temp_268, csharp2cuda_i32_mul(2, width)));
+#line 1045 "SequencePathModule.cs"
+                                        int* csharp2cuda_temp_276 = &(start);
+#line 1045 "SequencePathModule.cs"
+                                        int csharp2cuda_temp_277 = *(csharp2cuda_temp_276);
+                                        (*(csharp2cuda_temp_276) = csharp2cuda_i32_add(csharp2cuda_temp_277, csharp2cuda_i32_mul(2, width)));
                                     }
                                 }
                             }
-#line 1036 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_264 = &(width);
-#line 1036 "SequencePathModule.cs"
-                            int csharp2cuda_temp_265 = *(csharp2cuda_temp_264);
-                            (*(csharp2cuda_temp_264) = csharp2cuda_i32_mul(csharp2cuda_temp_265, 2));
+#line 1043 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_273 = &(width);
+#line 1043 "SequencePathModule.cs"
+                            int csharp2cuda_temp_274 = *(csharp2cuda_temp_273);
+                            (*(csharp2cuda_temp_273) = csharp2cuda_i32_mul(csharp2cuda_temp_274, 2));
                         }
                     }
-#line 1049 "SequencePathModule.cs"
-                    int csharp2cuda_temp_273 = (first)->count;
-#line 1049 "SequencePathModule.cs"
-                    double scale = __ddiv_rn(1.0, mathblocks_square_root(((double)(csharp2cuda_temp_273))));
-#line 1050 "SequencePathModule.cs"
+#line 1056 "SequencePathModule.cs"
+                    int csharp2cuda_temp_282 = (first)->count;
+#line 1056 "SequencePathModule.cs"
+                    double scale = __ddiv_rn(1.0, mathblocks_square_root(((double)(csharp2cuda_temp_282))));
+#line 1057 "SequencePathModule.cs"
                     {
-#line 1050 "SequencePathModule.cs"
+#line 1057 "SequencePathModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 1050 "SequencePathModule.cs"
-                            int csharp2cuda_temp_275 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_275))))
+#line 1057 "SequencePathModule.cs"
+                            int csharp2cuda_temp_284 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_284))))
                                 break;
-#line 1051 "SequencePathModule.cs"
-#line 1051 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_276 = &((result)[index]);
-#line 1051 "SequencePathModule.cs"
-                            double csharp2cuda_temp_277 = *(csharp2cuda_temp_276);
-                            (*(csharp2cuda_temp_276) = __dmul_rn(csharp2cuda_temp_277, scale));
-#line 1050 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_274 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_274));
+#line 1058 "SequencePathModule.cs"
+                            {
+#line 1059 "SequencePathModule.cs"
+#line 1059 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_285 = &((result)[index]);
+#line 1059 "SequencePathModule.cs"
+                                double csharp2cuda_temp_286 = *(csharp2cuda_temp_285);
+                                (*(csharp2cuda_temp_285) = __dmul_rn(csharp2cuda_temp_286, scale));
+#line 1060 "SequencePathModule.cs"
+#line 1060 "SequencePathModule.cs"
+                                double csharp2cuda_temp_287 = (result)[index];
+                                if ((!(isfinite(csharp2cuda_temp_287))))
+                                {
+#line 1060 "SequencePathModule.cs"
+#line 1060 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_288 = &((output)->valid);
+                                    (*(csharp2cuda_temp_288) = 0);
+                                }
+                            }
+#line 1057 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_283 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_283));
                         }
                     }
                 }
             }
-#line 1054 "SequencePathModule.cs"
+#line 1064 "SequencePathModule.cs"
             break;
-#line 1055 "SequencePathModule.cs"
+#line 1065 "SequencePathModule.cs"
         case 13:
-#line 1056 "SequencePathModule.cs"
+#line 1066 "SequencePathModule.cs"
             if (((thread) == (0)))
-#line 1057 "SequencePathModule.cs"
+#line 1067 "SequencePathModule.cs"
             {
-#line 1058 "SequencePathModule.cs"
-#line 1058 "SequencePathModule.cs"
-                int csharp2cuda_temp_278 = (first)->count;
-                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_278);
-#line 1059 "SequencePathModule.cs"
+#line 1068 "SequencePathModule.cs"
+#line 1068 "SequencePathModule.cs"
+                int csharp2cuda_temp_289 = (first)->count;
+                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_289);
+#line 1069 "SequencePathModule.cs"
                 double sum = 0.0;
-#line 1060 "SequencePathModule.cs"
+#line 1070 "SequencePathModule.cs"
                 {
-#line 1060 "SequencePathModule.cs"
+#line 1070 "SequencePathModule.cs"
                     int index = 0;
                     while (true)
                     {
-#line 1060 "SequencePathModule.cs"
-                        int csharp2cuda_temp_280 = (first)->count;
-                        if (!(((index) < (csharp2cuda_temp_280))))
+#line 1070 "SequencePathModule.cs"
+                        int csharp2cuda_temp_291 = (first)->count;
+                        if (!(((index) < (csharp2cuda_temp_291))))
                             break;
-#line 1061 "SequencePathModule.cs"
+#line 1071 "SequencePathModule.cs"
                         {
-#line 1062 "SequencePathModule.cs"
-#line 1062 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_281 = &(sum);
-#line 1062 "SequencePathModule.cs"
-                            double csharp2cuda_temp_282 = *(csharp2cuda_temp_281);
-#line 1062 "SequencePathModule.cs"
-                            double csharp2cuda_temp_283 = (a)[index];
-#line 1062 "SequencePathModule.cs"
-                            double csharp2cuda_temp_284 = (second)->scalar_value;
-                            (*(csharp2cuda_temp_281) = __dadd_rn(csharp2cuda_temp_282, __dsub_rn(csharp2cuda_temp_283, csharp2cuda_temp_284)));
-#line 1063 "SequencePathModule.cs"
-#line 1063 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_285 = &((result)[index]);
-                            (*(csharp2cuda_temp_285) = sum);
-#line 1064 "SequencePathModule.cs"
+#line 1072 "SequencePathModule.cs"
+#line 1072 "SequencePathModule.cs"
+                            double* csharp2cuda_temp_292 = &(sum);
+#line 1072 "SequencePathModule.cs"
+                            double csharp2cuda_temp_293 = *(csharp2cuda_temp_292);
+#line 1072 "SequencePathModule.cs"
+                            double csharp2cuda_temp_294 = (a)[index];
+#line 1072 "SequencePathModule.cs"
+                            double csharp2cuda_temp_295 = (second)->scalar_value;
+                            (*(csharp2cuda_temp_292) = __dadd_rn(csharp2cuda_temp_293, __dsub_rn(csharp2cuda_temp_294, csharp2cuda_temp_295)));
+#line 1073 "SequencePathModule.cs"
+#line 1073 "SequencePathModule.cs"
+                            double* csharp2cuda_temp_296 = &((result)[index]);
+                            (*(csharp2cuda_temp_296) = sum);
+#line 1074 "SequencePathModule.cs"
                             if ((!(isfinite(sum))))
                             {
-#line 1065 "SequencePathModule.cs"
-#line 1065 "SequencePathModule.cs"
-                                int* csharp2cuda_temp_286 = &((output)->valid);
-                                (*(csharp2cuda_temp_286) = 0);
+#line 1075 "SequencePathModule.cs"
+#line 1075 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_297 = &((output)->valid);
+                                (*(csharp2cuda_temp_297) = 0);
                             }
                         }
-#line 1060 "SequencePathModule.cs"
-                        int* csharp2cuda_temp_279 = &(index);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_279));
+#line 1070 "SequencePathModule.cs"
+                        int* csharp2cuda_temp_290 = &(index);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_290));
                     }
                 }
             }
-#line 1068 "SequencePathModule.cs"
+#line 1078 "SequencePathModule.cs"
             break;
-#line 1069 "SequencePathModule.cs"
-        case 14:
-#line 1070 "SequencePathModule.cs"
-            if (((thread) == (0)))
-#line 1071 "SequencePathModule.cs"
-            {
-#line 1072 "SequencePathModule.cs"
-#line 1072 "SequencePathModule.cs"
-                int csharp2cuda_temp_287 = (first)->count;
-#line 1072 "SequencePathModule.cs"
-                bool csharp2cuda_temp_288;
-#line 1072 "SequencePathModule.cs"
-                if (!(((csharp2cuda_temp_287) <= (0))))
-                {
-#line 1072 "SequencePathModule.cs"
-                    int csharp2cuda_temp_289 = (second)->count;
-#line 1072 "SequencePathModule.cs"
-                    csharp2cuda_temp_288 = ((csharp2cuda_temp_289) <= (0));
-                }
-                else
-                {
-#line 1072 "SequencePathModule.cs"
-                    csharp2cuda_temp_288 = true;
-                }
-#line 1072 "SequencePathModule.cs"
-                bool csharp2cuda_temp_290;
-#line 1072 "SequencePathModule.cs"
-                if (!(csharp2cuda_temp_288))
-                {
-#line 1072 "SequencePathModule.cs"
-                    csharp2cuda_temp_290 = ((((void*)(scratch))) == (((void*)(nullptr))));
-                }
-                else
-                {
-#line 1072 "SequencePathModule.cs"
-                    csharp2cuda_temp_290 = true;
-                }
-                if (csharp2cuda_temp_290)
-#line 1073 "SequencePathModule.cs"
-                {
-#line 1074 "SequencePathModule.cs"
-#line 1074 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_291 = &((output)->valid);
-                    (*(csharp2cuda_temp_291) = 0);
-                }
-                else
-#line 1077 "SequencePathModule.cs"
-                {
-#line 1078 "SequencePathModule.cs"
-                    int csharp2cuda_temp_292 = (second)->count;
-#line 1078 "SequencePathModule.cs"
-                    int width = csharp2cuda_i32_add(csharp2cuda_temp_292, 1);
 #line 1079 "SequencePathModule.cs"
-                    double* previous = scratch;
+        case 14:
 #line 1080 "SequencePathModule.cs"
+            if (((thread) == (0)))
+#line 1081 "SequencePathModule.cs"
+            {
+#line 1082 "SequencePathModule.cs"
+#line 1082 "SequencePathModule.cs"
+                int csharp2cuda_temp_298 = (first)->count;
+#line 1082 "SequencePathModule.cs"
+                bool csharp2cuda_temp_299;
+#line 1082 "SequencePathModule.cs"
+                if (!(((csharp2cuda_temp_298) <= (0))))
+                {
+#line 1082 "SequencePathModule.cs"
+                    int csharp2cuda_temp_300 = (second)->count;
+#line 1082 "SequencePathModule.cs"
+                    csharp2cuda_temp_299 = ((csharp2cuda_temp_300) <= (0));
+                }
+                else
+                {
+#line 1082 "SequencePathModule.cs"
+                    csharp2cuda_temp_299 = true;
+                }
+#line 1082 "SequencePathModule.cs"
+                bool csharp2cuda_temp_301;
+#line 1082 "SequencePathModule.cs"
+                if (!(csharp2cuda_temp_299))
+                {
+#line 1082 "SequencePathModule.cs"
+                    csharp2cuda_temp_301 = ((((void*)(scratch))) == (((void*)(nullptr))));
+                }
+                else
+                {
+#line 1082 "SequencePathModule.cs"
+                    csharp2cuda_temp_301 = true;
+                }
+                if (csharp2cuda_temp_301)
+#line 1083 "SequencePathModule.cs"
+                {
+#line 1084 "SequencePathModule.cs"
+#line 1084 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_302 = &((output)->valid);
+                    (*(csharp2cuda_temp_302) = 0);
+                }
+                else
+#line 1087 "SequencePathModule.cs"
+                {
+#line 1088 "SequencePathModule.cs"
+                    int csharp2cuda_temp_303 = (second)->count;
+#line 1088 "SequencePathModule.cs"
+                    int width = csharp2cuda_i32_add(csharp2cuda_temp_303, 1);
+#line 1089 "SequencePathModule.cs"
+                    double* previous = scratch;
+#line 1090 "SequencePathModule.cs"
                     double* current = csharp2cuda_pointer_add(scratch, width);
-#line 1081 "SequencePathModule.cs"
+#line 1091 "SequencePathModule.cs"
                     {
-#line 1081 "SequencePathModule.cs"
+#line 1091 "SequencePathModule.cs"
                         int index = 0;
                         while (true)
                         {
                             if (!(((index) < (width))))
                                 break;
-#line 1082 "SequencePathModule.cs"
-#line 1082 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_294 = &((previous)[index]);
-                            (*(csharp2cuda_temp_294) = mathblocks_positive_infinity());
-#line 1081 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_293 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_293));
+#line 1092 "SequencePathModule.cs"
+#line 1092 "SequencePathModule.cs"
+                            double* csharp2cuda_temp_305 = &((previous)[index]);
+                            (*(csharp2cuda_temp_305) = mathblocks_positive_infinity());
+#line 1091 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_304 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_304));
                         }
                     }
-#line 1083 "SequencePathModule.cs"
-#line 1083 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_295 = &((previous)[0]);
-                    (*(csharp2cuda_temp_295) = 0.0);
-#line 1084 "SequencePathModule.cs"
+#line 1093 "SequencePathModule.cs"
+#line 1093 "SequencePathModule.cs"
+                    double* csharp2cuda_temp_306 = &((previous)[0]);
+                    (*(csharp2cuda_temp_306) = 0.0);
+#line 1094 "SequencePathModule.cs"
                     {
-#line 1084 "SequencePathModule.cs"
+#line 1094 "SequencePathModule.cs"
                         int left = 0;
                         while (true)
                         {
-#line 1084 "SequencePathModule.cs"
-                            int csharp2cuda_temp_297 = (first)->count;
-                            if (!(((left) < (csharp2cuda_temp_297))))
+#line 1094 "SequencePathModule.cs"
+                            int csharp2cuda_temp_308 = (first)->count;
+                            if (!(((left) < (csharp2cuda_temp_308))))
                                 break;
-#line 1085 "SequencePathModule.cs"
+#line 1095 "SequencePathModule.cs"
                             {
-#line 1086 "SequencePathModule.cs"
-#line 1086 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_298 = &((current)[0]);
-                                (*(csharp2cuda_temp_298) = mathblocks_positive_infinity());
-#line 1087 "SequencePathModule.cs"
+#line 1096 "SequencePathModule.cs"
+#line 1096 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_309 = &((current)[0]);
+                                (*(csharp2cuda_temp_309) = mathblocks_positive_infinity());
+#line 1097 "SequencePathModule.cs"
                                 {
-#line 1087 "SequencePathModule.cs"
+#line 1097 "SequencePathModule.cs"
                                     int right = 0;
                                     while (true)
                                     {
-#line 1087 "SequencePathModule.cs"
-                                        int csharp2cuda_temp_300 = (second)->count;
-                                        if (!(((right) < (csharp2cuda_temp_300))))
+#line 1097 "SequencePathModule.cs"
+                                        int csharp2cuda_temp_311 = (second)->count;
+                                        if (!(((right) < (csharp2cuda_temp_311))))
                                             break;
-#line 1088 "SequencePathModule.cs"
+#line 1098 "SequencePathModule.cs"
                                         {
-#line 1089 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_301 = (previous)[csharp2cuda_i32_add(right, 1)];
-#line 1089 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_302 = (current)[right];
-#line 1089 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_303;
-#line 1089 "SequencePathModule.cs"
-                                            if (((csharp2cuda_temp_301) < (csharp2cuda_temp_302)))
+#line 1099 "SequencePathModule.cs"
+                                            double csharp2cuda_temp_312 = (previous)[csharp2cuda_i32_add(right, 1)];
+#line 1099 "SequencePathModule.cs"
+                                            double csharp2cuda_temp_313 = (current)[right];
+#line 1099 "SequencePathModule.cs"
+                                            double csharp2cuda_temp_314;
+#line 1099 "SequencePathModule.cs"
+                                            if (((csharp2cuda_temp_312) < (csharp2cuda_temp_313)))
                                             {
-#line 1089 "SequencePathModule.cs"
-                                                csharp2cuda_temp_303 = (previous)[csharp2cuda_i32_add(right, 1)];
+#line 1099 "SequencePathModule.cs"
+                                                csharp2cuda_temp_314 = (previous)[csharp2cuda_i32_add(right, 1)];
                                             }
                                             else
                                             {
-#line 1089 "SequencePathModule.cs"
-                                                csharp2cuda_temp_303 = (current)[right];
+#line 1099 "SequencePathModule.cs"
+                                                csharp2cuda_temp_314 = (current)[right];
                                             }
-#line 1089 "SequencePathModule.cs"
-                                            double minimum = csharp2cuda_temp_303;
-#line 1092 "SequencePathModule.cs"
-#line 1092 "SequencePathModule.cs"
-                                            double* csharp2cuda_temp_304 = &(minimum);
-#line 1092 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_305 = (previous)[right];
-#line 1092 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_306;
-#line 1092 "SequencePathModule.cs"
-                                            if (((minimum) < (csharp2cuda_temp_305)))
+#line 1099 "SequencePathModule.cs"
+                                            double minimum = csharp2cuda_temp_314;
+#line 1102 "SequencePathModule.cs"
+#line 1102 "SequencePathModule.cs"
+                                            double* csharp2cuda_temp_315 = &(minimum);
+#line 1102 "SequencePathModule.cs"
+                                            double csharp2cuda_temp_316 = (previous)[right];
+#line 1102 "SequencePathModule.cs"
+                                            double csharp2cuda_temp_317;
+#line 1102 "SequencePathModule.cs"
+                                            if (((minimum) < (csharp2cuda_temp_316)))
                                             {
-#line 1092 "SequencePathModule.cs"
-                                                csharp2cuda_temp_306 = minimum;
+#line 1102 "SequencePathModule.cs"
+                                                csharp2cuda_temp_317 = minimum;
                                             }
                                             else
                                             {
-#line 1092 "SequencePathModule.cs"
-                                                csharp2cuda_temp_306 = (previous)[right];
+#line 1102 "SequencePathModule.cs"
+                                                csharp2cuda_temp_317 = (previous)[right];
                                             }
-                                            (*(csharp2cuda_temp_304) = csharp2cuda_temp_306);
-#line 1093 "SequencePathModule.cs"
-#line 1093 "SequencePathModule.cs"
-                                            double* csharp2cuda_temp_307 = &((current)[csharp2cuda_i32_add(right, 1)]);
-#line 1093 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_308 = (a)[left];
-#line 1093 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_309 = (b)[right];
-                                            (*(csharp2cuda_temp_307) = __dadd_rn(fabs(__dsub_rn(csharp2cuda_temp_308, csharp2cuda_temp_309)), minimum));
+                                            (*(csharp2cuda_temp_315) = csharp2cuda_temp_317);
+#line 1103 "SequencePathModule.cs"
+#line 1103 "SequencePathModule.cs"
+                                            double* csharp2cuda_temp_318 = &((current)[csharp2cuda_i32_add(right, 1)]);
+#line 1103 "SequencePathModule.cs"
+                                            double csharp2cuda_temp_319 = (a)[left];
+#line 1103 "SequencePathModule.cs"
+                                            double csharp2cuda_temp_320 = (b)[right];
+                                            (*(csharp2cuda_temp_318) = __dadd_rn(fabs(__dsub_rn(csharp2cuda_temp_319, csharp2cuda_temp_320)), minimum));
                                         }
-#line 1087 "SequencePathModule.cs"
-                                        int* csharp2cuda_temp_299 = &(right);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_299));
+#line 1097 "SequencePathModule.cs"
+                                        int* csharp2cuda_temp_310 = &(right);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_310));
                                     }
                                 }
-#line 1095 "SequencePathModule.cs"
+#line 1105 "SequencePathModule.cs"
                                 double* swap = previous;
-#line 1096 "SequencePathModule.cs"
-#line 1096 "SequencePathModule.cs"
-                                double** csharp2cuda_temp_310 = &(previous);
-                                (*(csharp2cuda_temp_310) = current);
-#line 1097 "SequencePathModule.cs"
-#line 1097 "SequencePathModule.cs"
-                                double** csharp2cuda_temp_311 = &(current);
-                                (*(csharp2cuda_temp_311) = swap);
+#line 1106 "SequencePathModule.cs"
+#line 1106 "SequencePathModule.cs"
+                                double** csharp2cuda_temp_321 = &(previous);
+                                (*(csharp2cuda_temp_321) = current);
+#line 1107 "SequencePathModule.cs"
+#line 1107 "SequencePathModule.cs"
+                                double** csharp2cuda_temp_322 = &(current);
+                                (*(csharp2cuda_temp_322) = swap);
                             }
-#line 1084 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_296 = &(left);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_296));
+#line 1094 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_307 = &(left);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_307));
                         }
                     }
-#line 1099 "SequencePathModule.cs"
-#line 1099 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_312 = &((output)->scalar_value);
-#line 1099 "SequencePathModule.cs"
-                    int csharp2cuda_temp_313 = (second)->count;
-#line 1099 "SequencePathModule.cs"
-                    double csharp2cuda_temp_314 = (previous)[csharp2cuda_temp_313];
-                    (*(csharp2cuda_temp_312) = csharp2cuda_temp_314);
-#line 1100 "SequencePathModule.cs"
-#line 1100 "SequencePathModule.cs"
-                    double csharp2cuda_temp_315 = (output)->scalar_value;
-                    if ((!(isfinite(csharp2cuda_temp_315))))
+#line 1109 "SequencePathModule.cs"
+#line 1109 "SequencePathModule.cs"
+                    double* csharp2cuda_temp_323 = &((output)->scalar_value);
+#line 1109 "SequencePathModule.cs"
+                    int csharp2cuda_temp_324 = (second)->count;
+#line 1109 "SequencePathModule.cs"
+                    double csharp2cuda_temp_325 = (previous)[csharp2cuda_temp_324];
+                    (*(csharp2cuda_temp_323) = csharp2cuda_temp_325);
+#line 1110 "SequencePathModule.cs"
+#line 1110 "SequencePathModule.cs"
+                    double csharp2cuda_temp_326 = (output)->scalar_value;
+                    if ((!(isfinite(csharp2cuda_temp_326))))
                     {
-#line 1101 "SequencePathModule.cs"
-#line 1101 "SequencePathModule.cs"
-                        int* csharp2cuda_temp_316 = &((output)->valid);
-                        (*(csharp2cuda_temp_316) = 0);
+#line 1111 "SequencePathModule.cs"
+#line 1111 "SequencePathModule.cs"
+                        int* csharp2cuda_temp_327 = &((output)->valid);
+                        (*(csharp2cuda_temp_327) = 0);
                     }
                 }
-            }
-#line 1104 "SequencePathModule.cs"
-            break;
-#line 1105 "SequencePathModule.cs"
-        case 15:
-#line 1106 "SequencePathModule.cs"
-            if (((thread) == (0)))
-#line 1107 "SequencePathModule.cs"
-            {
-#line 1108 "SequencePathModule.cs"
-#line 1108 "SequencePathModule.cs"
-                double* csharp2cuda_temp_317 = &((output)->scalar_value);
-#line 1110 "SequencePathModule.cs"
-                int csharp2cuda_temp_318 = (first)->count;
-#line 1111 "SequencePathModule.cs"
-                double csharp2cuda_temp_319 = (second)->scalar_value;
-#line 1112 "SequencePathModule.cs"
-                int csharp2cuda_temp_320 = (third)->boolean_value;
-#line 1108 "SequencePathModule.cs"
-                double csharp2cuda_temp_321 = mathblocks_sequence_first_passage_value(a, csharp2cuda_temp_318, csharp2cuda_temp_319, ((csharp2cuda_temp_320) != (0)));
-                (*(csharp2cuda_temp_317) = csharp2cuda_temp_321);
             }
 #line 1114 "SequencePathModule.cs"
             break;
 #line 1115 "SequencePathModule.cs"
-        case 16:
+        case 15:
 #line 1116 "SequencePathModule.cs"
             if (((thread) == (0)))
 #line 1117 "SequencePathModule.cs"
             {
 #line 1118 "SequencePathModule.cs"
-                double lower = (second)->scalar_value;
-#line 1119 "SequencePathModule.cs"
-                double upper = (third)->scalar_value;
+#line 1118 "SequencePathModule.cs"
+                double* csharp2cuda_temp_328 = &((output)->scalar_value);
 #line 1120 "SequencePathModule.cs"
-#line 1120 "SequencePathModule.cs"
-                int csharp2cuda_temp_322 = (first)->count;
-                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_322);
+                int csharp2cuda_temp_329 = (first)->count;
 #line 1121 "SequencePathModule.cs"
-                if ((!(((lower) < (upper)))))
+                double csharp2cuda_temp_330 = (second)->scalar_value;
 #line 1122 "SequencePathModule.cs"
+                int csharp2cuda_temp_331 = (third)->boolean_value;
+#line 1118 "SequencePathModule.cs"
+                double csharp2cuda_temp_332 = mathblocks_sequence_first_passage_value(a, csharp2cuda_temp_329, csharp2cuda_temp_330, ((csharp2cuda_temp_331) != (0)));
+                (*(csharp2cuda_temp_328) = csharp2cuda_temp_332);
+            }
+#line 1124 "SequencePathModule.cs"
+            break;
+#line 1125 "SequencePathModule.cs"
+        case 16:
+#line 1126 "SequencePathModule.cs"
+            if (((thread) == (0)))
+#line 1127 "SequencePathModule.cs"
+            {
+#line 1128 "SequencePathModule.cs"
+                double lower = (second)->scalar_value;
+#line 1129 "SequencePathModule.cs"
+                double upper = (third)->scalar_value;
+#line 1130 "SequencePathModule.cs"
+#line 1130 "SequencePathModule.cs"
+                int csharp2cuda_temp_333 = (first)->count;
+                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_333);
+#line 1131 "SequencePathModule.cs"
+                if ((!(((lower) < (upper)))))
+#line 1132 "SequencePathModule.cs"
                 {
-#line 1123 "SequencePathModule.cs"
-#line 1123 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_323 = &((output)->valid);
-                    (*(csharp2cuda_temp_323) = 0);
+#line 1133 "SequencePathModule.cs"
+#line 1133 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_334 = &((output)->valid);
+                    (*(csharp2cuda_temp_334) = 0);
                 }
                 else
-#line 1126 "SequencePathModule.cs"
+#line 1136 "SequencePathModule.cs"
                 {
-#line 1127 "SequencePathModule.cs"
+#line 1137 "SequencePathModule.cs"
                     double state = 0.0;
-#line 1128 "SequencePathModule.cs"
+#line 1138 "SequencePathModule.cs"
                     {
-#line 1128 "SequencePathModule.cs"
+#line 1138 "SequencePathModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 1128 "SequencePathModule.cs"
-                            int csharp2cuda_temp_325 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_325))))
+#line 1138 "SequencePathModule.cs"
+                            int csharp2cuda_temp_336 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_336))))
                                 break;
-#line 1129 "SequencePathModule.cs"
+#line 1139 "SequencePathModule.cs"
                             {
-#line 1130 "SequencePathModule.cs"
-#line 1130 "SequencePathModule.cs"
-                                double csharp2cuda_temp_326 = (a)[index];
-                                if (((csharp2cuda_temp_326) >= (upper)))
+#line 1140 "SequencePathModule.cs"
+#line 1140 "SequencePathModule.cs"
+                                double csharp2cuda_temp_337 = (a)[index];
+                                if (((csharp2cuda_temp_337) >= (upper)))
                                 {
-#line 1131 "SequencePathModule.cs"
-#line 1131 "SequencePathModule.cs"
-                                    double* csharp2cuda_temp_327 = &(state);
-                                    (*(csharp2cuda_temp_327) = 1.0);
+#line 1141 "SequencePathModule.cs"
+#line 1141 "SequencePathModule.cs"
+                                    double* csharp2cuda_temp_338 = &(state);
+                                    (*(csharp2cuda_temp_338) = 1.0);
                                 }
                                 else
                                 {
-#line 1132 "SequencePathModule.cs"
-#line 1132 "SequencePathModule.cs"
-                                    double csharp2cuda_temp_328 = (a)[index];
-                                    if (((csharp2cuda_temp_328) <= (lower)))
+#line 1142 "SequencePathModule.cs"
+#line 1142 "SequencePathModule.cs"
+                                    double csharp2cuda_temp_339 = (a)[index];
+                                    if (((csharp2cuda_temp_339) <= (lower)))
                                     {
-#line 1133 "SequencePathModule.cs"
-#line 1133 "SequencePathModule.cs"
-                                        double* csharp2cuda_temp_329 = &(state);
-                                        (*(csharp2cuda_temp_329) = (-(1.0)));
+#line 1143 "SequencePathModule.cs"
+#line 1143 "SequencePathModule.cs"
+                                        double* csharp2cuda_temp_340 = &(state);
+                                        (*(csharp2cuda_temp_340) = (-(1.0)));
                                     }
                                 }
-#line 1134 "SequencePathModule.cs"
-#line 1134 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_330 = &((result)[index]);
-                                (*(csharp2cuda_temp_330) = state);
+#line 1144 "SequencePathModule.cs"
+#line 1144 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_341 = &((result)[index]);
+                                (*(csharp2cuda_temp_341) = state);
                             }
-#line 1128 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_324 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_324));
+#line 1138 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_335 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_335));
                         }
                     }
                 }
             }
-#line 1138 "SequencePathModule.cs"
+#line 1148 "SequencePathModule.cs"
             break;
-#line 1139 "SequencePathModule.cs"
-        case 17:
-#line 1140 "SequencePathModule.cs"
-            if (((thread) == (0)))
-#line 1141 "SequencePathModule.cs"
-            {
-#line 1142 "SequencePathModule.cs"
-                int csharp2cuda_temp_331 = (first)->count;
-#line 1142 "SequencePathModule.cs"
-                int csharp2cuda_temp_332;
-#line 1142 "SequencePathModule.cs"
-                if (((csharp2cuda_temp_331) == (0)))
-                {
-#line 1142 "SequencePathModule.cs"
-                    csharp2cuda_temp_332 = 0;
-                }
-                else
-                {
-#line 1142 "SequencePathModule.cs"
-                    int csharp2cuda_temp_333 = (first)->count;
-#line 1142 "SequencePathModule.cs"
-                    csharp2cuda_temp_332 = csharp2cuda_i32_sub(csharp2cuda_i32_mul(2, csharp2cuda_temp_333), 1);
-                }
-#line 1142 "SequencePathModule.cs"
-                int rows = csharp2cuda_temp_332;
-#line 1143 "SequencePathModule.cs"
-                mathblocks_sequence_set_matrix_shape(output, rows, 2);
-#line 1144 "SequencePathModule.cs"
-#line 1144 "SequencePathModule.cs"
-                int csharp2cuda_temp_334 = (first)->count;
-                if (((csharp2cuda_temp_334) <= (0)))
-#line 1145 "SequencePathModule.cs"
-                {
-#line 1146 "SequencePathModule.cs"
-#line 1146 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_335 = &((output)->valid);
-                    (*(csharp2cuda_temp_335) = 0);
-                }
-                else
 #line 1149 "SequencePathModule.cs"
-                {
+        case 17:
 #line 1150 "SequencePathModule.cs"
-#line 1150 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_336 = &((result)[0]);
-#line 1150 "SequencePathModule.cs"
-                    double csharp2cuda_temp_337 = (a)[0];
-                    (*(csharp2cuda_temp_336) = csharp2cuda_temp_337);
+            if (((thread) == (0)))
 #line 1151 "SequencePathModule.cs"
-#line 1151 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_338 = &((result)[1]);
-#line 1151 "SequencePathModule.cs"
-                    double csharp2cuda_temp_339 = (a)[0];
-                    (*(csharp2cuda_temp_338) = csharp2cuda_temp_339);
+            {
 #line 1152 "SequencePathModule.cs"
+                int csharp2cuda_temp_342 = (first)->count;
+#line 1152 "SequencePathModule.cs"
+                int csharp2cuda_temp_343;
+#line 1152 "SequencePathModule.cs"
+                if (((csharp2cuda_temp_342) == (0)))
+                {
+#line 1152 "SequencePathModule.cs"
+                    csharp2cuda_temp_343 = 0;
+                }
+                else
+                {
+#line 1152 "SequencePathModule.cs"
+                    int csharp2cuda_temp_344 = (first)->count;
+#line 1152 "SequencePathModule.cs"
+                    csharp2cuda_temp_343 = csharp2cuda_i32_sub(csharp2cuda_i32_mul(2, csharp2cuda_temp_344), 1);
+                }
+#line 1152 "SequencePathModule.cs"
+                int rows = csharp2cuda_temp_343;
+#line 1153 "SequencePathModule.cs"
+                mathblocks_sequence_set_matrix_shape(output, rows, 2);
+#line 1154 "SequencePathModule.cs"
+#line 1154 "SequencePathModule.cs"
+                int csharp2cuda_temp_345 = (first)->count;
+                if (((csharp2cuda_temp_345) <= (0)))
+#line 1155 "SequencePathModule.cs"
+                {
+#line 1156 "SequencePathModule.cs"
+#line 1156 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_346 = &((output)->valid);
+                    (*(csharp2cuda_temp_346) = 0);
+                }
+                else
+#line 1159 "SequencePathModule.cs"
+                {
+#line 1160 "SequencePathModule.cs"
+#line 1160 "SequencePathModule.cs"
+                    double* csharp2cuda_temp_347 = &((result)[0]);
+#line 1160 "SequencePathModule.cs"
+                    double csharp2cuda_temp_348 = (a)[0];
+                    (*(csharp2cuda_temp_347) = csharp2cuda_temp_348);
+#line 1161 "SequencePathModule.cs"
+#line 1161 "SequencePathModule.cs"
+                    double* csharp2cuda_temp_349 = &((result)[1]);
+#line 1161 "SequencePathModule.cs"
+                    double csharp2cuda_temp_350 = (a)[0];
+                    (*(csharp2cuda_temp_349) = csharp2cuda_temp_350);
+#line 1162 "SequencePathModule.cs"
                     int row = 0;
-#line 1153 "SequencePathModule.cs"
+#line 1163 "SequencePathModule.cs"
                     {
-#line 1153 "SequencePathModule.cs"
+#line 1163 "SequencePathModule.cs"
                         int index = 1;
                         while (true)
                         {
-#line 1153 "SequencePathModule.cs"
-                            int csharp2cuda_temp_341 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_341))))
+#line 1163 "SequencePathModule.cs"
+                            int csharp2cuda_temp_352 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_352))))
                                 break;
-#line 1154 "SequencePathModule.cs"
+#line 1164 "SequencePathModule.cs"
                             {
-#line 1155 "SequencePathModule.cs"
-#line 1155 "SequencePathModule.cs"
-                                int* csharp2cuda_temp_342 = &(row);
-                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_342));
-#line 1156 "SequencePathModule.cs"
-#line 1156 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_343 = &((result)[csharp2cuda_i32_mul(row, 2)]);
-#line 1156 "SequencePathModule.cs"
-                                double csharp2cuda_temp_344 = (a)[index];
-                                (*(csharp2cuda_temp_343) = csharp2cuda_temp_344);
-#line 1157 "SequencePathModule.cs"
-#line 1157 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_345 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, 2), 1)]);
-#line 1157 "SequencePathModule.cs"
-                                double csharp2cuda_temp_346 = (a)[csharp2cuda_i32_sub(index, 1)];
-                                (*(csharp2cuda_temp_345) = csharp2cuda_temp_346);
-#line 1158 "SequencePathModule.cs"
-#line 1158 "SequencePathModule.cs"
-                                int* csharp2cuda_temp_347 = &(row);
-                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_347));
-#line 1159 "SequencePathModule.cs"
-#line 1159 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_348 = &((result)[csharp2cuda_i32_mul(row, 2)]);
-#line 1159 "SequencePathModule.cs"
-                                double csharp2cuda_temp_349 = (a)[index];
-                                (*(csharp2cuda_temp_348) = csharp2cuda_temp_349);
-#line 1160 "SequencePathModule.cs"
-#line 1160 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_350 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, 2), 1)]);
-#line 1160 "SequencePathModule.cs"
-                                double csharp2cuda_temp_351 = (a)[index];
-                                (*(csharp2cuda_temp_350) = csharp2cuda_temp_351);
+#line 1165 "SequencePathModule.cs"
+#line 1165 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_353 = &(row);
+                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_353));
+#line 1166 "SequencePathModule.cs"
+#line 1166 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_354 = &((result)[csharp2cuda_i32_mul(row, 2)]);
+#line 1166 "SequencePathModule.cs"
+                                double csharp2cuda_temp_355 = (a)[index];
+                                (*(csharp2cuda_temp_354) = csharp2cuda_temp_355);
+#line 1167 "SequencePathModule.cs"
+#line 1167 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_356 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, 2), 1)]);
+#line 1167 "SequencePathModule.cs"
+                                double csharp2cuda_temp_357 = (a)[csharp2cuda_i32_sub(index, 1)];
+                                (*(csharp2cuda_temp_356) = csharp2cuda_temp_357);
+#line 1168 "SequencePathModule.cs"
+#line 1168 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_358 = &(row);
+                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_358));
+#line 1169 "SequencePathModule.cs"
+#line 1169 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_359 = &((result)[csharp2cuda_i32_mul(row, 2)]);
+#line 1169 "SequencePathModule.cs"
+                                double csharp2cuda_temp_360 = (a)[index];
+                                (*(csharp2cuda_temp_359) = csharp2cuda_temp_360);
+#line 1170 "SequencePathModule.cs"
+#line 1170 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_361 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, 2), 1)]);
+#line 1170 "SequencePathModule.cs"
+                                double csharp2cuda_temp_362 = (a)[index];
+                                (*(csharp2cuda_temp_361) = csharp2cuda_temp_362);
                             }
-#line 1153 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_340 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_340));
+#line 1163 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_351 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_351));
                         }
                     }
                 }
-            }
-#line 1164 "SequencePathModule.cs"
-            break;
-#line 1165 "SequencePathModule.cs"
-        case 18:
-#line 1166 "SequencePathModule.cs"
-            if (((thread) == (0)))
-            {
-#line 1167 "SequencePathModule.cs"
-#line 1167 "SequencePathModule.cs"
-                double* csharp2cuda_temp_352 = &((output)->scalar_value);
-#line 1167 "SequencePathModule.cs"
-                int csharp2cuda_temp_353 = (first)->count;
-#line 1167 "SequencePathModule.cs"
-                double csharp2cuda_temp_354 = mathblocks_sequence_longest_run_value(boolean_a, csharp2cuda_temp_353);
-                (*(csharp2cuda_temp_352) = csharp2cuda_temp_354);
-            }
-#line 1168 "SequencePathModule.cs"
-            break;
-#line 1169 "SequencePathModule.cs"
-        case 19:
-        case 20:
-#line 1171 "SequencePathModule.cs"
-#line 1171 "SequencePathModule.cs"
-            bool csharp2cuda_temp_355;
-#line 1171 "SequencePathModule.cs"
-            if (((thread) == (0)))
-            {
-#line 1172 "SequencePathModule.cs"
-                int csharp2cuda_temp_356 = (first)->count;
-#line 1172 "SequencePathModule.cs"
-                double* csharp2cuda_temp_357 = &((output)->scalar_value);
-#line 1172 "SequencePathModule.cs"
-                bool csharp2cuda_temp_358 = mathblocks_sequence_decline_value(a, csharp2cuda_temp_356, ((opcode) == (20)), csharp2cuda_temp_357);
-#line 1171 "SequencePathModule.cs"
-                csharp2cuda_temp_355 = (!(csharp2cuda_temp_358));
-            }
-            else
-            {
-#line 1171 "SequencePathModule.cs"
-                csharp2cuda_temp_355 = false;
-            }
-            if (csharp2cuda_temp_355)
-            {
-#line 1173 "SequencePathModule.cs"
-#line 1173 "SequencePathModule.cs"
-                int* csharp2cuda_temp_359 = &((output)->valid);
-                (*(csharp2cuda_temp_359) = 0);
             }
 #line 1174 "SequencePathModule.cs"
             break;
 #line 1175 "SequencePathModule.cs"
-        case 21:
-        case 22:
-        case 29:
-#line 1178 "SequencePathModule.cs"
-#line 1178 "SequencePathModule.cs"
-            bool csharp2cuda_temp_360;
-#line 1178 "SequencePathModule.cs"
+        case 18:
+#line 1176 "SequencePathModule.cs"
             if (((thread) == (0)))
             {
-#line 1181 "SequencePathModule.cs"
-                int csharp2cuda_temp_361 = (first)->count;
-#line 1182 "SequencePathModule.cs"
-                double csharp2cuda_temp_362;
-#line 1182 "SequencePathModule.cs"
-                if (((opcode) == (22)))
-                {
-#line 1182 "SequencePathModule.cs"
-                    csharp2cuda_temp_362 = 2.0;
-                }
-                else
-                {
-#line 1182 "SequencePathModule.cs"
-                    double csharp2cuda_temp_363;
-#line 1182 "SequencePathModule.cs"
-                    if (((((void*)(second))) == (((void*)(nullptr)))))
-                    {
-#line 1182 "SequencePathModule.cs"
-                        csharp2cuda_temp_363 = 1.0;
-                    }
-                    else
-                    {
-#line 1182 "SequencePathModule.cs"
-                        csharp2cuda_temp_363 = (second)->scalar_value;
-                    }
-#line 1182 "SequencePathModule.cs"
-                    csharp2cuda_temp_362 = csharp2cuda_temp_363;
-                }
-#line 1184 "SequencePathModule.cs"
-                double* csharp2cuda_temp_364 = &((output)->scalar_value);
-#line 1179 "SequencePathModule.cs"
-                bool csharp2cuda_temp_365 = mathblocks_sequence_variation_value(a, csharp2cuda_temp_361, csharp2cuda_temp_362, ((opcode) == (29)), csharp2cuda_temp_364);
+#line 1177 "SequencePathModule.cs"
+#line 1177 "SequencePathModule.cs"
+                double* csharp2cuda_temp_363 = &((output)->scalar_value);
+#line 1177 "SequencePathModule.cs"
+                int csharp2cuda_temp_364 = (first)->count;
+#line 1177 "SequencePathModule.cs"
+                double csharp2cuda_temp_365 = mathblocks_sequence_longest_run_value(boolean_a, csharp2cuda_temp_364);
+                (*(csharp2cuda_temp_363) = csharp2cuda_temp_365);
+            }
 #line 1178 "SequencePathModule.cs"
-                csharp2cuda_temp_360 = (!(csharp2cuda_temp_365));
+            break;
+#line 1179 "SequencePathModule.cs"
+        case 19:
+        case 20:
+#line 1181 "SequencePathModule.cs"
+#line 1181 "SequencePathModule.cs"
+            bool csharp2cuda_temp_366;
+#line 1181 "SequencePathModule.cs"
+            if (((thread) == (0)))
+            {
+#line 1182 "SequencePathModule.cs"
+                int csharp2cuda_temp_367 = (first)->count;
+#line 1182 "SequencePathModule.cs"
+                double* csharp2cuda_temp_368 = &((output)->scalar_value);
+#line 1182 "SequencePathModule.cs"
+                bool csharp2cuda_temp_369 = mathblocks_sequence_decline_value(a, csharp2cuda_temp_367, ((opcode) == (20)), csharp2cuda_temp_368);
+#line 1181 "SequencePathModule.cs"
+                csharp2cuda_temp_366 = (!(csharp2cuda_temp_369));
             }
             else
             {
-#line 1178 "SequencePathModule.cs"
-                csharp2cuda_temp_360 = false;
+#line 1181 "SequencePathModule.cs"
+                csharp2cuda_temp_366 = false;
             }
-            if (csharp2cuda_temp_360)
+            if (csharp2cuda_temp_366)
             {
-#line 1185 "SequencePathModule.cs"
-#line 1185 "SequencePathModule.cs"
-                int* csharp2cuda_temp_366 = &((output)->valid);
-                (*(csharp2cuda_temp_366) = 0);
+#line 1183 "SequencePathModule.cs"
+#line 1183 "SequencePathModule.cs"
+                int* csharp2cuda_temp_370 = &((output)->valid);
+                (*(csharp2cuda_temp_370) = 0);
             }
-#line 1186 "SequencePathModule.cs"
+#line 1184 "SequencePathModule.cs"
             break;
-#line 1187 "SequencePathModule.cs"
-        case 23:
+#line 1185 "SequencePathModule.cs"
+        case 21:
+        case 22:
+        case 29:
 #line 1188 "SequencePathModule.cs"
 #line 1188 "SequencePathModule.cs"
-            bool csharp2cuda_temp_367;
+            bool csharp2cuda_temp_371;
 #line 1188 "SequencePathModule.cs"
             if (((thread) == (0)))
             {
 #line 1191 "SequencePathModule.cs"
-                int csharp2cuda_temp_368 = (first)->count;
+                int csharp2cuda_temp_372 = (first)->count;
 #line 1192 "SequencePathModule.cs"
-                double csharp2cuda_temp_369 = (second)->scalar_value;
-#line 1193 "SequencePathModule.cs"
-                double* csharp2cuda_temp_370 = &((output)->scalar_value);
+                double csharp2cuda_temp_373;
+#line 1192 "SequencePathModule.cs"
+                if (((opcode) == (22)))
+                {
+#line 1192 "SequencePathModule.cs"
+                    csharp2cuda_temp_373 = 2.0;
+                }
+                else
+                {
+#line 1192 "SequencePathModule.cs"
+                    double csharp2cuda_temp_374;
+#line 1192 "SequencePathModule.cs"
+                    if (((((void*)(second))) == (((void*)(nullptr)))))
+                    {
+#line 1192 "SequencePathModule.cs"
+                        csharp2cuda_temp_374 = 1.0;
+                    }
+                    else
+                    {
+#line 1192 "SequencePathModule.cs"
+                        csharp2cuda_temp_374 = (second)->scalar_value;
+                    }
+#line 1192 "SequencePathModule.cs"
+                    csharp2cuda_temp_373 = csharp2cuda_temp_374;
+                }
+#line 1194 "SequencePathModule.cs"
+                double* csharp2cuda_temp_375 = &((output)->scalar_value);
 #line 1189 "SequencePathModule.cs"
-                bool csharp2cuda_temp_371 = mathblocks_sequence_recurrence_value(a, csharp2cuda_temp_368, csharp2cuda_temp_369, csharp2cuda_temp_370);
+                bool csharp2cuda_temp_376 = mathblocks_sequence_variation_value(a, csharp2cuda_temp_372, csharp2cuda_temp_373, ((opcode) == (29)), csharp2cuda_temp_375);
 #line 1188 "SequencePathModule.cs"
-                csharp2cuda_temp_367 = (!(csharp2cuda_temp_371));
+                csharp2cuda_temp_371 = (!(csharp2cuda_temp_376));
             }
             else
             {
 #line 1188 "SequencePathModule.cs"
-                csharp2cuda_temp_367 = false;
+                csharp2cuda_temp_371 = false;
             }
-            if (csharp2cuda_temp_367)
+            if (csharp2cuda_temp_371)
             {
-#line 1194 "SequencePathModule.cs"
-#line 1194 "SequencePathModule.cs"
-                int* csharp2cuda_temp_372 = &((output)->valid);
-                (*(csharp2cuda_temp_372) = 0);
-            }
 #line 1195 "SequencePathModule.cs"
-            break;
+#line 1195 "SequencePathModule.cs"
+                int* csharp2cuda_temp_377 = &((output)->valid);
+                (*(csharp2cuda_temp_377) = 0);
+            }
 #line 1196 "SequencePathModule.cs"
-        case 24:
+            break;
 #line 1197 "SequencePathModule.cs"
-            if (((thread) == (0)))
+        case 23:
 #line 1198 "SequencePathModule.cs"
+#line 1198 "SequencePathModule.cs"
+            bool csharp2cuda_temp_378;
+#line 1198 "SequencePathModule.cs"
+            if (((thread) == (0)))
             {
-#line 1199 "SequencePathModule.cs"
-#line 1199 "SequencePathModule.cs"
-                int csharp2cuda_temp_373 = (first)->count;
-                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_373);
-#line 1200 "SequencePathModule.cs"
-#line 1200 "SequencePathModule.cs"
-                int csharp2cuda_temp_374 = (first)->count;
-                if (((csharp2cuda_temp_374) <= (0)))
 #line 1201 "SequencePathModule.cs"
+                int csharp2cuda_temp_379 = (first)->count;
+#line 1202 "SequencePathModule.cs"
+                double csharp2cuda_temp_380 = (second)->scalar_value;
+#line 1203 "SequencePathModule.cs"
+                double* csharp2cuda_temp_381 = &((output)->scalar_value);
+#line 1199 "SequencePathModule.cs"
+                bool csharp2cuda_temp_382 = mathblocks_sequence_recurrence_value(a, csharp2cuda_temp_379, csharp2cuda_temp_380, csharp2cuda_temp_381);
+#line 1198 "SequencePathModule.cs"
+                csharp2cuda_temp_378 = (!(csharp2cuda_temp_382));
+            }
+            else
+            {
+#line 1198 "SequencePathModule.cs"
+                csharp2cuda_temp_378 = false;
+            }
+            if (csharp2cuda_temp_378)
+            {
+#line 1204 "SequencePathModule.cs"
+#line 1204 "SequencePathModule.cs"
+                int* csharp2cuda_temp_383 = &((output)->valid);
+                (*(csharp2cuda_temp_383) = 0);
+            }
+#line 1205 "SequencePathModule.cs"
+            break;
+#line 1206 "SequencePathModule.cs"
+        case 24:
+#line 1207 "SequencePathModule.cs"
+            if (((thread) == (0)))
+#line 1208 "SequencePathModule.cs"
+            {
+#line 1209 "SequencePathModule.cs"
+#line 1209 "SequencePathModule.cs"
+                int csharp2cuda_temp_384 = (first)->count;
+                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_384);
+#line 1210 "SequencePathModule.cs"
+#line 1210 "SequencePathModule.cs"
+                int csharp2cuda_temp_385 = (first)->count;
+                if (((csharp2cuda_temp_385) <= (0)))
+#line 1211 "SequencePathModule.cs"
                 {
-#line 1202 "SequencePathModule.cs"
-#line 1202 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_375 = &((output)->valid);
-                    (*(csharp2cuda_temp_375) = 0);
+#line 1212 "SequencePathModule.cs"
+#line 1212 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_386 = &((output)->valid);
+                    (*(csharp2cuda_temp_386) = 0);
                 }
                 else
-#line 1205 "SequencePathModule.cs"
+#line 1215 "SequencePathModule.cs"
                 {
-#line 1206 "SequencePathModule.cs"
+#line 1216 "SequencePathModule.cs"
                     double cumulative = 0.0;
-#line 1207 "SequencePathModule.cs"
+#line 1217 "SequencePathModule.cs"
                     double minimum = 0.0;
-#line 1208 "SequencePathModule.cs"
+#line 1218 "SequencePathModule.cs"
                     {
-#line 1208 "SequencePathModule.cs"
+#line 1218 "SequencePathModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 1208 "SequencePathModule.cs"
-                            int csharp2cuda_temp_377 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_377))))
+#line 1218 "SequencePathModule.cs"
+                            int csharp2cuda_temp_388 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_388))))
                                 break;
-#line 1209 "SequencePathModule.cs"
+#line 1219 "SequencePathModule.cs"
                             {
-#line 1210 "SequencePathModule.cs"
-#line 1210 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_378 = &(cumulative);
-#line 1210 "SequencePathModule.cs"
-                                double csharp2cuda_temp_379 = *(csharp2cuda_temp_378);
-#line 1210 "SequencePathModule.cs"
-                                double csharp2cuda_temp_380 = (a)[index];
-                                (*(csharp2cuda_temp_378) = __dadd_rn(csharp2cuda_temp_379, csharp2cuda_temp_380));
-#line 1211 "SequencePathModule.cs"
-#line 1211 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_381 = &(minimum);
-#line 1211 "SequencePathModule.cs"
-                                double csharp2cuda_temp_382;
-#line 1211 "SequencePathModule.cs"
+#line 1220 "SequencePathModule.cs"
+#line 1220 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_389 = &(cumulative);
+#line 1220 "SequencePathModule.cs"
+                                double csharp2cuda_temp_390 = *(csharp2cuda_temp_389);
+#line 1220 "SequencePathModule.cs"
+                                double csharp2cuda_temp_391 = (a)[index];
+                                (*(csharp2cuda_temp_389) = __dadd_rn(csharp2cuda_temp_390, csharp2cuda_temp_391));
+#line 1221 "SequencePathModule.cs"
+#line 1221 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_392 = &(minimum);
+#line 1221 "SequencePathModule.cs"
+                                double csharp2cuda_temp_393;
+#line 1221 "SequencePathModule.cs"
                                 if (((minimum) < (cumulative)))
                                 {
-#line 1211 "SequencePathModule.cs"
-                                    csharp2cuda_temp_382 = minimum;
+#line 1221 "SequencePathModule.cs"
+                                    csharp2cuda_temp_393 = minimum;
                                 }
                                 else
                                 {
-#line 1211 "SequencePathModule.cs"
-                                    csharp2cuda_temp_382 = cumulative;
+#line 1221 "SequencePathModule.cs"
+                                    csharp2cuda_temp_393 = cumulative;
                                 }
-                                (*(csharp2cuda_temp_381) = csharp2cuda_temp_382);
-#line 1212 "SequencePathModule.cs"
-#line 1212 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_383 = &((result)[index]);
-                                (*(csharp2cuda_temp_383) = __dsub_rn(cumulative, minimum));
-#line 1213 "SequencePathModule.cs"
-#line 1213 "SequencePathModule.cs"
-                                double csharp2cuda_temp_384 = (result)[index];
-                                if ((!(isfinite(csharp2cuda_temp_384))))
+                                (*(csharp2cuda_temp_392) = csharp2cuda_temp_393);
+#line 1222 "SequencePathModule.cs"
+#line 1222 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_394 = &((result)[index]);
+                                (*(csharp2cuda_temp_394) = __dsub_rn(cumulative, minimum));
+#line 1223 "SequencePathModule.cs"
+#line 1223 "SequencePathModule.cs"
+                                double csharp2cuda_temp_395 = (result)[index];
+                                if ((!(isfinite(csharp2cuda_temp_395))))
                                 {
-#line 1214 "SequencePathModule.cs"
-#line 1214 "SequencePathModule.cs"
-                                    int* csharp2cuda_temp_385 = &((output)->valid);
-                                    (*(csharp2cuda_temp_385) = 0);
+#line 1224 "SequencePathModule.cs"
+#line 1224 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_396 = &((output)->valid);
+                                    (*(csharp2cuda_temp_396) = 0);
                                 }
                             }
-#line 1208 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_376 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_376));
+#line 1218 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_387 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_387));
                         }
                     }
                 }
             }
-#line 1218 "SequencePathModule.cs"
+#line 1228 "SequencePathModule.cs"
             break;
-#line 1219 "SequencePathModule.cs"
+#line 1229 "SequencePathModule.cs"
         case 25:
-#line 1220 "SequencePathModule.cs"
+#line 1230 "SequencePathModule.cs"
             if (((thread) == (0)))
-#line 1221 "SequencePathModule.cs"
+#line 1231 "SequencePathModule.cs"
             {
-#line 1222 "SequencePathModule.cs"
-                unsigned long long csharp2cuda_temp_386 = (output)->data_pointer;
-#line 1222 "SequencePathModule.cs"
-                MathBlockSequencePathRun* runs = ((MathBlockSequencePathRun*)(csharp2cuda_temp_386));
-#line 1223 "SequencePathModule.cs"
-#line 1223 "SequencePathModule.cs"
-                int csharp2cuda_temp_387 = (first)->count;
-                if (((csharp2cuda_temp_387) == (0)))
-#line 1224 "SequencePathModule.cs"
+#line 1232 "SequencePathModule.cs"
+                unsigned long long csharp2cuda_temp_397 = (output)->data_pointer;
+#line 1232 "SequencePathModule.cs"
+                MathBlockSequencePathRun* runs = ((MathBlockSequencePathRun*)(csharp2cuda_temp_397));
+#line 1233 "SequencePathModule.cs"
+#line 1233 "SequencePathModule.cs"
+                int csharp2cuda_temp_398 = (first)->count;
+                if (((csharp2cuda_temp_398) == (0)))
+#line 1234 "SequencePathModule.cs"
                 {
-#line 1225 "SequencePathModule.cs"
-#line 1225 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_388 = &((output)->count);
-                    (*(csharp2cuda_temp_388) = 0);
-#line 1226 "SequencePathModule.cs"
-#line 1226 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_389 = &((output)->rows);
-                    (*(csharp2cuda_temp_389) = 0);
+#line 1235 "SequencePathModule.cs"
+#line 1235 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_399 = &((output)->count);
+                    (*(csharp2cuda_temp_399) = 0);
+#line 1236 "SequencePathModule.cs"
+#line 1236 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_400 = &((output)->rows);
+                    (*(csharp2cuda_temp_400) = 0);
                 }
                 else
-#line 1229 "SequencePathModule.cs"
+#line 1239 "SequencePathModule.cs"
                 {
-#line 1230 "SequencePathModule.cs"
+#line 1240 "SequencePathModule.cs"
                     int start = 0;
-#line 1231 "SequencePathModule.cs"
+#line 1241 "SequencePathModule.cs"
                     int count = 0;
-#line 1232 "SequencePathModule.cs"
+#line 1242 "SequencePathModule.cs"
                     {
-#line 1232 "SequencePathModule.cs"
+#line 1242 "SequencePathModule.cs"
                         int index = 1;
                         while (true)
                         {
-#line 1232 "SequencePathModule.cs"
-                            int csharp2cuda_temp_391 = (first)->count;
-                            if (!(((index) <= (csharp2cuda_temp_391))))
+#line 1242 "SequencePathModule.cs"
+                            int csharp2cuda_temp_402 = (first)->count;
+                            if (!(((index) <= (csharp2cuda_temp_402))))
                                 break;
-#line 1233 "SequencePathModule.cs"
+#line 1243 "SequencePathModule.cs"
                             {
-#line 1234 "SequencePathModule.cs"
-#line 1234 "SequencePathModule.cs"
-                                int csharp2cuda_temp_392 = (first)->count;
-#line 1234 "SequencePathModule.cs"
-                                bool csharp2cuda_temp_393;
-#line 1234 "SequencePathModule.cs"
-                                if (((index) < (csharp2cuda_temp_392)))
+#line 1244 "SequencePathModule.cs"
+#line 1244 "SequencePathModule.cs"
+                                int csharp2cuda_temp_403 = (first)->count;
+#line 1244 "SequencePathModule.cs"
+                                bool csharp2cuda_temp_404;
+#line 1244 "SequencePathModule.cs"
+                                if (((index) < (csharp2cuda_temp_403)))
                                 {
-#line 1234 "SequencePathModule.cs"
-                                    double csharp2cuda_temp_394 = (a)[index];
-#line 1234 "SequencePathModule.cs"
-                                    double csharp2cuda_temp_395 = (a)[start];
-#line 1234 "SequencePathModule.cs"
-                                    csharp2cuda_temp_393 = ((csharp2cuda_temp_394) == (csharp2cuda_temp_395));
+#line 1244 "SequencePathModule.cs"
+                                    double csharp2cuda_temp_405 = (a)[index];
+#line 1244 "SequencePathModule.cs"
+                                    double csharp2cuda_temp_406 = (a)[start];
+#line 1244 "SequencePathModule.cs"
+                                    csharp2cuda_temp_404 = ((csharp2cuda_temp_405) == (csharp2cuda_temp_406));
                                 }
                                 else
                                 {
-#line 1234 "SequencePathModule.cs"
-                                    csharp2cuda_temp_393 = false;
+#line 1244 "SequencePathModule.cs"
+                                    csharp2cuda_temp_404 = false;
                                 }
-                                if (csharp2cuda_temp_393)
+                                if (csharp2cuda_temp_404)
                                 {
-#line 1235 "SequencePathModule.cs"
-                                    goto csharp2cuda_for_continue_30;
+#line 1245 "SequencePathModule.cs"
+                                    goto csharp2cuda_for_continue_32;
                                 }
-#line 1236 "SequencePathModule.cs"
-#line 1236 "SequencePathModule.cs"
-                                int csharp2cuda_temp_396 = (output)->capacity;
-                                if (((count) >= (csharp2cuda_temp_396)))
-#line 1237 "SequencePathModule.cs"
+#line 1246 "SequencePathModule.cs"
+#line 1246 "SequencePathModule.cs"
+                                int csharp2cuda_temp_407 = (output)->capacity;
+                                if (((count) >= (csharp2cuda_temp_407)))
+#line 1247 "SequencePathModule.cs"
                                 {
-#line 1238 "SequencePathModule.cs"
-#line 1238 "SequencePathModule.cs"
-                                    int* csharp2cuda_temp_397 = &((output)->count);
-#line 1238 "SequencePathModule.cs"
-                                    int csharp2cuda_temp_398 = (output)->capacity;
-#line 1238 "SequencePathModule.cs"
-                                    int csharp2cuda_temp_399;
-#line 1238 "SequencePathModule.cs"
-                                    if (((csharp2cuda_temp_398) == (2147483647)))
+#line 1248 "SequencePathModule.cs"
+#line 1248 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_408 = &((output)->count);
+#line 1248 "SequencePathModule.cs"
+                                    int csharp2cuda_temp_409 = (output)->capacity;
+#line 1248 "SequencePathModule.cs"
+                                    int csharp2cuda_temp_410;
+#line 1248 "SequencePathModule.cs"
+                                    if (((csharp2cuda_temp_409) == (2147483647)))
                                     {
-#line 1238 "SequencePathModule.cs"
-                                        csharp2cuda_temp_399 = csharp2cuda_i32_neg(1);
+#line 1248 "SequencePathModule.cs"
+                                        csharp2cuda_temp_410 = csharp2cuda_i32_neg(1);
                                     }
                                     else
                                     {
-#line 1240 "SequencePathModule.cs"
-                                        int csharp2cuda_temp_400 = (output)->capacity;
-#line 1238 "SequencePathModule.cs"
-                                        csharp2cuda_temp_399 = csharp2cuda_i32_add(csharp2cuda_temp_400, 1);
+#line 1250 "SequencePathModule.cs"
+                                        int csharp2cuda_temp_411 = (output)->capacity;
+#line 1248 "SequencePathModule.cs"
+                                        csharp2cuda_temp_410 = csharp2cuda_i32_add(csharp2cuda_temp_411, 1);
                                     }
-                                    (*(csharp2cuda_temp_397) = csharp2cuda_temp_399);
-#line 1241 "SequencePathModule.cs"
-#line 1241 "SequencePathModule.cs"
-                                    int* csharp2cuda_temp_401 = &((output)->rows);
-#line 1241 "SequencePathModule.cs"
-                                    int csharp2cuda_temp_402 = (output)->count;
-                                    (*(csharp2cuda_temp_401) = csharp2cuda_temp_402);
-#line 1242 "SequencePathModule.cs"
-#line 1242 "SequencePathModule.cs"
-                                    int* csharp2cuda_temp_403 = &((output)->valid);
-                                    (*(csharp2cuda_temp_403) = 0);
-#line 1243 "SequencePathModule.cs"
+                                    (*(csharp2cuda_temp_408) = csharp2cuda_temp_410);
+#line 1251 "SequencePathModule.cs"
+#line 1251 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_412 = &((output)->rows);
+#line 1251 "SequencePathModule.cs"
+                                    int csharp2cuda_temp_413 = (output)->count;
+                                    (*(csharp2cuda_temp_412) = csharp2cuda_temp_413);
+#line 1252 "SequencePathModule.cs"
+#line 1252 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_414 = &((output)->valid);
+                                    (*(csharp2cuda_temp_414) = 0);
+#line 1253 "SequencePathModule.cs"
                                     break;
                                 }
-#line 1245 "SequencePathModule.cs"
-#line 1245 "SequencePathModule.cs"
-                                int* csharp2cuda_temp_404 = &(((runs)[count]).start);
-                                (*(csharp2cuda_temp_404) = start);
-#line 1246 "SequencePathModule.cs"
-#line 1246 "SequencePathModule.cs"
-                                int* csharp2cuda_temp_405 = &(((runs)[count]).length);
-                                (*(csharp2cuda_temp_405) = csharp2cuda_i32_sub(index, start));
-#line 1247 "SequencePathModule.cs"
-#line 1247 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_406 = &(((runs)[count]).value);
-#line 1247 "SequencePathModule.cs"
-                                double csharp2cuda_temp_407 = (a)[start];
-                                (*(csharp2cuda_temp_406) = csharp2cuda_temp_407);
-#line 1248 "SequencePathModule.cs"
-#line 1248 "SequencePathModule.cs"
-                                int* csharp2cuda_temp_408 = &(count);
-                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_408));
-#line 1249 "SequencePathModule.cs"
-#line 1249 "SequencePathModule.cs"
-                                int* csharp2cuda_temp_409 = &(start);
-                                (*(csharp2cuda_temp_409) = index);
+#line 1255 "SequencePathModule.cs"
+#line 1255 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_415 = &(((runs)[count]).start);
+                                (*(csharp2cuda_temp_415) = start);
+#line 1256 "SequencePathModule.cs"
+#line 1256 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_416 = &(((runs)[count]).length);
+                                (*(csharp2cuda_temp_416) = csharp2cuda_i32_sub(index, start));
+#line 1257 "SequencePathModule.cs"
+#line 1257 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_417 = &(((runs)[count]).value);
+#line 1257 "SequencePathModule.cs"
+                                double csharp2cuda_temp_418 = (a)[start];
+                                (*(csharp2cuda_temp_417) = csharp2cuda_temp_418);
+#line 1258 "SequencePathModule.cs"
+#line 1258 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_419 = &(count);
+                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_419));
+#line 1259 "SequencePathModule.cs"
+#line 1259 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_420 = &(start);
+                                (*(csharp2cuda_temp_420) = index);
                             }
-                            csharp2cuda_for_continue_30:
-#line 1232 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_390 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_390));
+                            csharp2cuda_for_continue_32:
+#line 1242 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_401 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_401));
                         }
                     }
-#line 1251 "SequencePathModule.cs"
+#line 1261 "SequencePathModule.cs"
                     if ((output)->valid)
-#line 1252 "SequencePathModule.cs"
+#line 1262 "SequencePathModule.cs"
                     {
-#line 1253 "SequencePathModule.cs"
-#line 1253 "SequencePathModule.cs"
-                        int* csharp2cuda_temp_410 = &((output)->count);
-                        (*(csharp2cuda_temp_410) = count);
-#line 1254 "SequencePathModule.cs"
-#line 1254 "SequencePathModule.cs"
-                        int* csharp2cuda_temp_411 = &((output)->rows);
-                        (*(csharp2cuda_temp_411) = count);
+#line 1263 "SequencePathModule.cs"
+#line 1263 "SequencePathModule.cs"
+                        int* csharp2cuda_temp_421 = &((output)->count);
+                        (*(csharp2cuda_temp_421) = count);
+#line 1264 "SequencePathModule.cs"
+#line 1264 "SequencePathModule.cs"
+                        int* csharp2cuda_temp_422 = &((output)->rows);
+                        (*(csharp2cuda_temp_422) = count);
                     }
                 }
             }
-#line 1258 "SequencePathModule.cs"
+#line 1268 "SequencePathModule.cs"
             break;
-#line 1259 "SequencePathModule.cs"
+#line 1269 "SequencePathModule.cs"
         case 26:
-#line 1260 "SequencePathModule.cs"
+#line 1270 "SequencePathModule.cs"
             if (((thread) == (0)))
-#line 1261 "SequencePathModule.cs"
+#line 1271 "SequencePathModule.cs"
             {
-#line 1262 "SequencePathModule.cs"
-#line 1262 "SequencePathModule.cs"
-                int csharp2cuda_temp_412 = (first)->columns;
-                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_412);
-#line 1263 "SequencePathModule.cs"
-#line 1263 "SequencePathModule.cs"
-                int csharp2cuda_temp_413 = (first)->rows;
-                if (((csharp2cuda_temp_413) <= (0)))
-#line 1264 "SequencePathModule.cs"
+#line 1272 "SequencePathModule.cs"
+#line 1272 "SequencePathModule.cs"
+                int csharp2cuda_temp_423 = (first)->columns;
+                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_423);
+#line 1273 "SequencePathModule.cs"
+#line 1273 "SequencePathModule.cs"
+                int csharp2cuda_temp_424 = (first)->rows;
+                if (((csharp2cuda_temp_424) <= (0)))
+#line 1274 "SequencePathModule.cs"
                 {
-#line 1265 "SequencePathModule.cs"
-#line 1265 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_414 = &((output)->valid);
-                    (*(csharp2cuda_temp_414) = 0);
+#line 1275 "SequencePathModule.cs"
+#line 1275 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_425 = &((output)->valid);
+                    (*(csharp2cuda_temp_425) = 0);
                 }
                 else
-#line 1268 "SequencePathModule.cs"
+#line 1278 "SequencePathModule.cs"
                 {
-#line 1269 "SequencePathModule.cs"
+#line 1279 "SequencePathModule.cs"
                     {
-#line 1269 "SequencePathModule.cs"
+#line 1279 "SequencePathModule.cs"
                         int column = 0;
                         while (true)
                         {
-#line 1269 "SequencePathModule.cs"
-                            int csharp2cuda_temp_416 = (first)->columns;
-                            if (!(((column) < (csharp2cuda_temp_416))))
+#line 1279 "SequencePathModule.cs"
+                            int csharp2cuda_temp_427 = (first)->columns;
+                            if (!(((column) < (csharp2cuda_temp_427))))
                                 break;
-#line 1270 "SequencePathModule.cs"
-#line 1270 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_417 = &((result)[column]);
-#line 1270 "SequencePathModule.cs"
-                            int csharp2cuda_temp_418 = (first)->rows;
-#line 1270 "SequencePathModule.cs"
-                            int csharp2cuda_temp_419 = (first)->columns;
-#line 1270 "SequencePathModule.cs"
-                            double csharp2cuda_temp_420 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(csharp2cuda_temp_418, 1), csharp2cuda_temp_419), column)];
-#line 1270 "SequencePathModule.cs"
-                            double csharp2cuda_temp_421 = (a)[column];
-                            (*(csharp2cuda_temp_417) = __dsub_rn(csharp2cuda_temp_420, csharp2cuda_temp_421));
-#line 1269 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_415 = &(column);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_415));
+#line 1280 "SequencePathModule.cs"
+                            {
+#line 1281 "SequencePathModule.cs"
+#line 1281 "SequencePathModule.cs"
+                                double* csharp2cuda_temp_428 = &((result)[column]);
+#line 1281 "SequencePathModule.cs"
+                                int csharp2cuda_temp_429 = (first)->rows;
+#line 1281 "SequencePathModule.cs"
+                                int csharp2cuda_temp_430 = (first)->columns;
+#line 1281 "SequencePathModule.cs"
+                                double csharp2cuda_temp_431 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(csharp2cuda_temp_429, 1), csharp2cuda_temp_430), column)];
+#line 1281 "SequencePathModule.cs"
+                                double csharp2cuda_temp_432 = (a)[column];
+                                (*(csharp2cuda_temp_428) = __dsub_rn(csharp2cuda_temp_431, csharp2cuda_temp_432));
+#line 1282 "SequencePathModule.cs"
+#line 1282 "SequencePathModule.cs"
+                                double csharp2cuda_temp_433 = (result)[column];
+                                if ((!(isfinite(csharp2cuda_temp_433))))
+                                {
+#line 1282 "SequencePathModule.cs"
+#line 1282 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_434 = &((output)->valid);
+                                    (*(csharp2cuda_temp_434) = 0);
+                                }
+                            }
+#line 1279 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_426 = &(column);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_426));
                         }
                     }
                 }
             }
-#line 1273 "SequencePathModule.cs"
-            break;
-#line 1274 "SequencePathModule.cs"
-        case 27:
-#line 1275 "SequencePathModule.cs"
-            if (((thread) == (0)))
-#line 1276 "SequencePathModule.cs"
-            {
-#line 1277 "SequencePathModule.cs"
-                int dimension = (first)->columns;
-#line 1278 "SequencePathModule.cs"
-                int count = csharp2cuda_i32_mul(csharp2cuda_i32_mul(dimension, dimension), dimension);
-#line 1279 "SequencePathModule.cs"
-                mathblocks_sequence_set_vector_shape(output, count);
-#line 1280 "SequencePathModule.cs"
-#line 1280 "SequencePathModule.cs"
-                int csharp2cuda_temp_422 = (first)->rows;
-#line 1280 "SequencePathModule.cs"
-                bool csharp2cuda_temp_423;
-#line 1280 "SequencePathModule.cs"
-                if (!(((csharp2cuda_temp_422) < (1))))
-                {
-#line 1280 "SequencePathModule.cs"
-                    csharp2cuda_temp_423 = ((((void*)(scratch))) == (((void*)(nullptr))));
-                }
-                else
-                {
-#line 1280 "SequencePathModule.cs"
-                    csharp2cuda_temp_423 = true;
-                }
-                if (csharp2cuda_temp_423)
-#line 1281 "SequencePathModule.cs"
-                {
-#line 1282 "SequencePathModule.cs"
-#line 1282 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_424 = &((output)->valid);
-                    (*(csharp2cuda_temp_424) = 0);
-                }
-                else
-#line 1285 "SequencePathModule.cs"
-                {
 #line 1286 "SequencePathModule.cs"
-                    double* level_one = scratch;
+            break;
 #line 1287 "SequencePathModule.cs"
-                    double* level_two = csharp2cuda_pointer_add(scratch, dimension);
+        case 27:
 #line 1288 "SequencePathModule.cs"
+            if (((thread) == (0)))
+#line 1289 "SequencePathModule.cs"
+            {
+#line 1290 "SequencePathModule.cs"
+                int dimension = (first)->columns;
+#line 1291 "SequencePathModule.cs"
+                int count = csharp2cuda_i32_mul(csharp2cuda_i32_mul(dimension, dimension), dimension);
+#line 1292 "SequencePathModule.cs"
+                mathblocks_sequence_set_vector_shape(output, count);
+#line 1293 "SequencePathModule.cs"
+#line 1293 "SequencePathModule.cs"
+                int csharp2cuda_temp_435 = (first)->rows;
+#line 1293 "SequencePathModule.cs"
+                bool csharp2cuda_temp_436;
+#line 1293 "SequencePathModule.cs"
+                if (!(((csharp2cuda_temp_435) < (1))))
+                {
+#line 1293 "SequencePathModule.cs"
+                    csharp2cuda_temp_436 = ((((void*)(scratch))) == (((void*)(nullptr))));
+                }
+                else
+                {
+#line 1293 "SequencePathModule.cs"
+                    csharp2cuda_temp_436 = true;
+                }
+                if (csharp2cuda_temp_436)
+#line 1294 "SequencePathModule.cs"
+                {
+#line 1295 "SequencePathModule.cs"
+#line 1295 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_437 = &((output)->valid);
+                    (*(csharp2cuda_temp_437) = 0);
+                }
+                else
+#line 1298 "SequencePathModule.cs"
+                {
+#line 1299 "SequencePathModule.cs"
+                    double* level_one = scratch;
+#line 1300 "SequencePathModule.cs"
+                    double* level_two = csharp2cuda_pointer_add(scratch, dimension);
+#line 1301 "SequencePathModule.cs"
                     double* increment = csharp2cuda_pointer_add(level_two, csharp2cuda_i32_mul(dimension, dimension));
-#line 1289 "SequencePathModule.cs"
+#line 1302 "SequencePathModule.cs"
                     {
-#line 1289 "SequencePathModule.cs"
+#line 1302 "SequencePathModule.cs"
                         int index = 0;
                         while (true)
                         {
                             if (!(((index) < (dimension))))
                                 break;
-#line 1290 "SequencePathModule.cs"
-#line 1290 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_426 = &((level_one)[index]);
-                            (*(csharp2cuda_temp_426) = 0.0);
-#line 1289 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_425 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_425));
+#line 1303 "SequencePathModule.cs"
+#line 1303 "SequencePathModule.cs"
+                            double* csharp2cuda_temp_439 = &((level_one)[index]);
+                            (*(csharp2cuda_temp_439) = 0.0);
+#line 1302 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_438 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_438));
                         }
                     }
-#line 1291 "SequencePathModule.cs"
+#line 1304 "SequencePathModule.cs"
                     {
-#line 1291 "SequencePathModule.cs"
+#line 1304 "SequencePathModule.cs"
                         int index = 0;
                         while (true)
                         {
                             if (!(((index) < (csharp2cuda_i32_mul(dimension, dimension)))))
                                 break;
-#line 1292 "SequencePathModule.cs"
-#line 1292 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_428 = &((level_two)[index]);
-                            (*(csharp2cuda_temp_428) = 0.0);
-#line 1291 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_427 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_427));
+#line 1305 "SequencePathModule.cs"
+#line 1305 "SequencePathModule.cs"
+                            double* csharp2cuda_temp_441 = &((level_two)[index]);
+                            (*(csharp2cuda_temp_441) = 0.0);
+#line 1304 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_440 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_440));
                         }
                     }
-#line 1293 "SequencePathModule.cs"
+#line 1306 "SequencePathModule.cs"
                     {
-#line 1293 "SequencePathModule.cs"
+#line 1306 "SequencePathModule.cs"
                         int index = 0;
                         while (true)
                         {
                             if (!(((index) < (count))))
                                 break;
-#line 1294 "SequencePathModule.cs"
-#line 1294 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_430 = &((result)[index]);
-                            (*(csharp2cuda_temp_430) = 0.0);
-#line 1293 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_429 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_429));
+#line 1307 "SequencePathModule.cs"
+#line 1307 "SequencePathModule.cs"
+                            double* csharp2cuda_temp_443 = &((result)[index]);
+                            (*(csharp2cuda_temp_443) = 0.0);
+#line 1306 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_442 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_442));
                         }
                     }
-#line 1295 "SequencePathModule.cs"
+#line 1308 "SequencePathModule.cs"
                     {
-#line 1295 "SequencePathModule.cs"
+#line 1308 "SequencePathModule.cs"
                         int row = 1;
                         while (true)
                         {
-#line 1295 "SequencePathModule.cs"
-                            int csharp2cuda_temp_432 = (first)->rows;
-                            if (!(((row) < (csharp2cuda_temp_432))))
+#line 1308 "SequencePathModule.cs"
+                            int csharp2cuda_temp_445 = (first)->rows;
+                            if (!(((row) < (csharp2cuda_temp_445))))
                                 break;
-#line 1296 "SequencePathModule.cs"
+#line 1309 "SequencePathModule.cs"
                             {
-#line 1297 "SequencePathModule.cs"
+#line 1310 "SequencePathModule.cs"
                                 {
-#line 1297 "SequencePathModule.cs"
+#line 1310 "SequencePathModule.cs"
                                     int index = 0;
                                     while (true)
                                     {
                                         if (!(((index) < (dimension))))
                                             break;
-#line 1298 "SequencePathModule.cs"
-#line 1298 "SequencePathModule.cs"
-                                        double* csharp2cuda_temp_434 = &((increment)[index]);
-#line 1298 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_435 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, dimension), index)];
-#line 1298 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_436 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, 1), dimension), index)];
-                                        (*(csharp2cuda_temp_434) = __dsub_rn(csharp2cuda_temp_435, csharp2cuda_temp_436));
-#line 1297 "SequencePathModule.cs"
-                                        int* csharp2cuda_temp_433 = &(index);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_433));
+#line 1311 "SequencePathModule.cs"
+#line 1311 "SequencePathModule.cs"
+                                        double* csharp2cuda_temp_447 = &((increment)[index]);
+#line 1311 "SequencePathModule.cs"
+                                        double csharp2cuda_temp_448 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, dimension), index)];
+#line 1311 "SequencePathModule.cs"
+                                        double csharp2cuda_temp_449 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, 1), dimension), index)];
+                                        (*(csharp2cuda_temp_447) = __dsub_rn(csharp2cuda_temp_448, csharp2cuda_temp_449));
+#line 1310 "SequencePathModule.cs"
+                                        int* csharp2cuda_temp_446 = &(index);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_446));
                                     }
                                 }
-#line 1299 "SequencePathModule.cs"
+#line 1312 "SequencePathModule.cs"
                                 {
-#line 1299 "SequencePathModule.cs"
+#line 1312 "SequencePathModule.cs"
                                     int left = 0;
                                     while (true)
                                     {
                                         if (!(((left) < (dimension))))
                                             break;
-#line 1300 "SequencePathModule.cs"
+#line 1313 "SequencePathModule.cs"
                                         {
-#line 1301 "SequencePathModule.cs"
+#line 1314 "SequencePathModule.cs"
                                             {
-#line 1301 "SequencePathModule.cs"
+#line 1314 "SequencePathModule.cs"
                                                 int middle = 0;
                                                 while (true)
                                                 {
                                                     if (!(((middle) < (dimension))))
                                                         break;
-#line 1302 "SequencePathModule.cs"
+#line 1315 "SequencePathModule.cs"
                                                     {
-#line 1303 "SequencePathModule.cs"
+#line 1316 "SequencePathModule.cs"
                                                         {
-#line 1303 "SequencePathModule.cs"
+#line 1316 "SequencePathModule.cs"
                                                             int right = 0;
                                                             while (true)
                                                             {
                                                                 if (!(((right) < (dimension))))
                                                                     break;
-#line 1304 "SequencePathModule.cs"
+#line 1317 "SequencePathModule.cs"
                                                                 {
-#line 1305 "SequencePathModule.cs"
+#line 1318 "SequencePathModule.cs"
                                                                     int target = csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_add(csharp2cuda_i32_mul(left, dimension), middle), dimension), right);
-#line 1306 "SequencePathModule.cs"
-#line 1306 "SequencePathModule.cs"
-                                                                    double* csharp2cuda_temp_440 = &((result)[target]);
-#line 1306 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_441 = *(csharp2cuda_temp_440);
-#line 1307 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_442 = (level_two)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, dimension), middle)];
-#line 1307 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_443 = (increment)[right];
-#line 1308 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_444 = (level_one)[left];
-#line 1308 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_445 = (increment)[middle];
-#line 1308 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_446 = (increment)[right];
-#line 1308 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_447 = __ddiv_rn(__dmul_rn(__dmul_rn(csharp2cuda_temp_444, csharp2cuda_temp_445), csharp2cuda_temp_446), 2.0);
-#line 1309 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_448 = (increment)[left];
-#line 1309 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_449 = (increment)[middle];
-#line 1309 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_450 = (increment)[right];
-#line 1309 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_451 = __ddiv_rn(__dmul_rn(__dmul_rn(csharp2cuda_temp_448, csharp2cuda_temp_449), csharp2cuda_temp_450), 6.0);
-                                                                    (*(csharp2cuda_temp_440) = __dadd_rn(csharp2cuda_temp_441, __dadd_rn(__dadd_rn(__dmul_rn(csharp2cuda_temp_442, csharp2cuda_temp_443), csharp2cuda_temp_447), csharp2cuda_temp_451)));
+#line 1319 "SequencePathModule.cs"
+#line 1319 "SequencePathModule.cs"
+                                                                    double* csharp2cuda_temp_453 = &((result)[target]);
+#line 1319 "SequencePathModule.cs"
+                                                                    double csharp2cuda_temp_454 = *(csharp2cuda_temp_453);
+#line 1320 "SequencePathModule.cs"
+                                                                    double csharp2cuda_temp_455 = (level_two)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, dimension), middle)];
+#line 1320 "SequencePathModule.cs"
+                                                                    double csharp2cuda_temp_456 = (increment)[right];
+#line 1321 "SequencePathModule.cs"
+                                                                    double csharp2cuda_temp_457 = (level_one)[left];
+#line 1321 "SequencePathModule.cs"
+                                                                    double csharp2cuda_temp_458 = (increment)[middle];
+#line 1321 "SequencePathModule.cs"
+                                                                    double csharp2cuda_temp_459 = (increment)[right];
+#line 1321 "SequencePathModule.cs"
+                                                                    double csharp2cuda_temp_460 = __ddiv_rn(__dmul_rn(__dmul_rn(csharp2cuda_temp_457, csharp2cuda_temp_458), csharp2cuda_temp_459), 2.0);
+#line 1322 "SequencePathModule.cs"
+                                                                    double csharp2cuda_temp_461 = (increment)[left];
+#line 1322 "SequencePathModule.cs"
+                                                                    double csharp2cuda_temp_462 = (increment)[middle];
+#line 1322 "SequencePathModule.cs"
+                                                                    double csharp2cuda_temp_463 = (increment)[right];
+#line 1322 "SequencePathModule.cs"
+                                                                    double csharp2cuda_temp_464 = __ddiv_rn(__dmul_rn(__dmul_rn(csharp2cuda_temp_461, csharp2cuda_temp_462), csharp2cuda_temp_463), 6.0);
+                                                                    (*(csharp2cuda_temp_453) = __dadd_rn(csharp2cuda_temp_454, __dadd_rn(__dadd_rn(__dmul_rn(csharp2cuda_temp_455, csharp2cuda_temp_456), csharp2cuda_temp_460), csharp2cuda_temp_464)));
                                                                 }
-#line 1303 "SequencePathModule.cs"
-                                                                int* csharp2cuda_temp_439 = &(right);
-                                                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_439));
+#line 1316 "SequencePathModule.cs"
+                                                                int* csharp2cuda_temp_452 = &(right);
+                                                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_452));
                                                             }
                                                         }
-#line 1311 "SequencePathModule.cs"
-#line 1311 "SequencePathModule.cs"
-                                                        double* csharp2cuda_temp_452 = &((level_two)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, dimension), middle)]);
-#line 1311 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_453 = *(csharp2cuda_temp_452);
-#line 1312 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_454 = (level_one)[left];
-#line 1312 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_455 = (increment)[middle];
-#line 1313 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_456 = (increment)[left];
-#line 1313 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_457 = (increment)[middle];
-#line 1313 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_458 = __ddiv_rn(__dmul_rn(csharp2cuda_temp_456, csharp2cuda_temp_457), 2.0);
-                                                        (*(csharp2cuda_temp_452) = __dadd_rn(csharp2cuda_temp_453, __dadd_rn(__dmul_rn(csharp2cuda_temp_454, csharp2cuda_temp_455), csharp2cuda_temp_458)));
+#line 1324 "SequencePathModule.cs"
+#line 1324 "SequencePathModule.cs"
+                                                        double* csharp2cuda_temp_465 = &((level_two)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, dimension), middle)]);
+#line 1324 "SequencePathModule.cs"
+                                                        double csharp2cuda_temp_466 = *(csharp2cuda_temp_465);
+#line 1325 "SequencePathModule.cs"
+                                                        double csharp2cuda_temp_467 = (level_one)[left];
+#line 1325 "SequencePathModule.cs"
+                                                        double csharp2cuda_temp_468 = (increment)[middle];
+#line 1326 "SequencePathModule.cs"
+                                                        double csharp2cuda_temp_469 = (increment)[left];
+#line 1326 "SequencePathModule.cs"
+                                                        double csharp2cuda_temp_470 = (increment)[middle];
+#line 1326 "SequencePathModule.cs"
+                                                        double csharp2cuda_temp_471 = __ddiv_rn(__dmul_rn(csharp2cuda_temp_469, csharp2cuda_temp_470), 2.0);
+                                                        (*(csharp2cuda_temp_465) = __dadd_rn(csharp2cuda_temp_466, __dadd_rn(__dmul_rn(csharp2cuda_temp_467, csharp2cuda_temp_468), csharp2cuda_temp_471)));
                                                     }
-#line 1301 "SequencePathModule.cs"
-                                                    int* csharp2cuda_temp_438 = &(middle);
-                                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_438));
+#line 1314 "SequencePathModule.cs"
+                                                    int* csharp2cuda_temp_451 = &(middle);
+                                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_451));
                                                 }
                                             }
-#line 1315 "SequencePathModule.cs"
-#line 1315 "SequencePathModule.cs"
-                                            double* csharp2cuda_temp_459 = &((level_one)[left]);
-#line 1315 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_460 = *(csharp2cuda_temp_459);
-#line 1315 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_461 = (increment)[left];
-                                            (*(csharp2cuda_temp_459) = __dadd_rn(csharp2cuda_temp_460, csharp2cuda_temp_461));
+#line 1328 "SequencePathModule.cs"
+#line 1328 "SequencePathModule.cs"
+                                            double* csharp2cuda_temp_472 = &((level_one)[left]);
+#line 1328 "SequencePathModule.cs"
+                                            double csharp2cuda_temp_473 = *(csharp2cuda_temp_472);
+#line 1328 "SequencePathModule.cs"
+                                            double csharp2cuda_temp_474 = (increment)[left];
+                                            (*(csharp2cuda_temp_472) = __dadd_rn(csharp2cuda_temp_473, csharp2cuda_temp_474));
                                         }
-#line 1299 "SequencePathModule.cs"
-                                        int* csharp2cuda_temp_437 = &(left);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_437));
+#line 1312 "SequencePathModule.cs"
+                                        int* csharp2cuda_temp_450 = &(left);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_450));
                                     }
                                 }
                             }
-#line 1295 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_431 = &(row);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_431));
+#line 1308 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_444 = &(row);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_444));
+                        }
+                    }
+#line 1331 "SequencePathModule.cs"
+                    {
+#line 1331 "SequencePathModule.cs"
+                        int index = 0;
+                        while (true)
+                        {
+                            if (!(((index) < (count))))
+                                break;
+#line 1332 "SequencePathModule.cs"
+#line 1332 "SequencePathModule.cs"
+                            double csharp2cuda_temp_476 = (result)[index];
+                            if ((!(isfinite(csharp2cuda_temp_476))))
+                            {
+#line 1332 "SequencePathModule.cs"
+#line 1332 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_477 = &((output)->valid);
+                                (*(csharp2cuda_temp_477) = 0);
+                            }
+#line 1331 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_475 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_475));
                         }
                     }
                 }
             }
-#line 1320 "SequencePathModule.cs"
+#line 1335 "SequencePathModule.cs"
             break;
-#line 1321 "SequencePathModule.cs"
+#line 1336 "SequencePathModule.cs"
         case 28:
-#line 1322 "SequencePathModule.cs"
+#line 1337 "SequencePathModule.cs"
             if (((thread) == (0)))
-#line 1323 "SequencePathModule.cs"
+#line 1338 "SequencePathModule.cs"
             {
-#line 1324 "SequencePathModule.cs"
+#line 1339 "SequencePathModule.cs"
                 int dimension = (first)->columns;
-#line 1325 "SequencePathModule.cs"
+#line 1340 "SequencePathModule.cs"
                 mathblocks_sequence_set_matrix_shape(output, dimension, dimension);
-#line 1326 "SequencePathModule.cs"
+#line 1341 "SequencePathModule.cs"
                 if (((((void*)(scratch))) == (((void*)(nullptr)))))
-#line 1327 "SequencePathModule.cs"
+#line 1342 "SequencePathModule.cs"
                 {
-#line 1328 "SequencePathModule.cs"
-#line 1328 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_462 = &((output)->valid);
-                    (*(csharp2cuda_temp_462) = 0);
+#line 1343 "SequencePathModule.cs"
+#line 1343 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_478 = &((output)->valid);
+                    (*(csharp2cuda_temp_478) = 0);
                 }
                 else
-#line 1331 "SequencePathModule.cs"
+#line 1346 "SequencePathModule.cs"
                 {
-#line 1332 "SequencePathModule.cs"
+#line 1347 "SequencePathModule.cs"
                     double* cumulative = scratch;
-#line 1333 "SequencePathModule.cs"
+#line 1348 "SequencePathModule.cs"
                     double* increment = csharp2cuda_pointer_add(scratch, dimension);
-#line 1334 "SequencePathModule.cs"
+#line 1349 "SequencePathModule.cs"
                     {
-#line 1334 "SequencePathModule.cs"
+#line 1349 "SequencePathModule.cs"
                         int index = 0;
                         while (true)
                         {
                             if (!(((index) < (dimension))))
                                 break;
-#line 1335 "SequencePathModule.cs"
-#line 1335 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_464 = &((cumulative)[index]);
-                            (*(csharp2cuda_temp_464) = 0.0);
-#line 1334 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_463 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_463));
+#line 1350 "SequencePathModule.cs"
+#line 1350 "SequencePathModule.cs"
+                            double* csharp2cuda_temp_480 = &((cumulative)[index]);
+                            (*(csharp2cuda_temp_480) = 0.0);
+#line 1349 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_479 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_479));
                         }
                     }
-#line 1336 "SequencePathModule.cs"
+#line 1351 "SequencePathModule.cs"
                     {
-#line 1336 "SequencePathModule.cs"
+#line 1351 "SequencePathModule.cs"
                         int index = 0;
                         while (true)
                         {
                             if (!(((index) < (csharp2cuda_i32_mul(dimension, dimension)))))
                                 break;
-#line 1337 "SequencePathModule.cs"
-#line 1337 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_466 = &((result)[index]);
-                            (*(csharp2cuda_temp_466) = 0.0);
-#line 1336 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_465 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_465));
+#line 1352 "SequencePathModule.cs"
+#line 1352 "SequencePathModule.cs"
+                            double* csharp2cuda_temp_482 = &((result)[index]);
+                            (*(csharp2cuda_temp_482) = 0.0);
+#line 1351 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_481 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_481));
                         }
                     }
-#line 1338 "SequencePathModule.cs"
+#line 1353 "SequencePathModule.cs"
                     {
-#line 1338 "SequencePathModule.cs"
+#line 1353 "SequencePathModule.cs"
                         int row = 1;
                         while (true)
                         {
-#line 1338 "SequencePathModule.cs"
-                            int csharp2cuda_temp_468 = (first)->rows;
-                            if (!(((row) < (csharp2cuda_temp_468))))
+#line 1353 "SequencePathModule.cs"
+                            int csharp2cuda_temp_484 = (first)->rows;
+                            if (!(((row) < (csharp2cuda_temp_484))))
                                 break;
-#line 1339 "SequencePathModule.cs"
+#line 1354 "SequencePathModule.cs"
                             {
-#line 1340 "SequencePathModule.cs"
+#line 1355 "SequencePathModule.cs"
                                 {
-#line 1340 "SequencePathModule.cs"
+#line 1355 "SequencePathModule.cs"
                                     int column = 0;
                                     while (true)
                                     {
                                         if (!(((column) < (dimension))))
                                             break;
-#line 1341 "SequencePathModule.cs"
-#line 1341 "SequencePathModule.cs"
-                                        double* csharp2cuda_temp_470 = &((increment)[column]);
-#line 1341 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_471 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, dimension), column)];
-#line 1341 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_472 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, 1), dimension), column)];
-                                        (*(csharp2cuda_temp_470) = __dsub_rn(csharp2cuda_temp_471, csharp2cuda_temp_472));
-#line 1340 "SequencePathModule.cs"
-                                        int* csharp2cuda_temp_469 = &(column);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_469));
+#line 1356 "SequencePathModule.cs"
+#line 1356 "SequencePathModule.cs"
+                                        double* csharp2cuda_temp_486 = &((increment)[column]);
+#line 1356 "SequencePathModule.cs"
+                                        double csharp2cuda_temp_487 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, dimension), column)];
+#line 1356 "SequencePathModule.cs"
+                                        double csharp2cuda_temp_488 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, 1), dimension), column)];
+                                        (*(csharp2cuda_temp_486) = __dsub_rn(csharp2cuda_temp_487, csharp2cuda_temp_488));
+#line 1355 "SequencePathModule.cs"
+                                        int* csharp2cuda_temp_485 = &(column);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_485));
                                     }
                                 }
-#line 1342 "SequencePathModule.cs"
+#line 1357 "SequencePathModule.cs"
                                 {
-#line 1342 "SequencePathModule.cs"
+#line 1357 "SequencePathModule.cs"
                                     int left = 0;
                                     while (true)
                                     {
                                         if (!(((left) < (dimension))))
                                             break;
-#line 1343 "SequencePathModule.cs"
+#line 1358 "SequencePathModule.cs"
                                         {
-#line 1344 "SequencePathModule.cs"
+#line 1359 "SequencePathModule.cs"
                                             {
-#line 1344 "SequencePathModule.cs"
+#line 1359 "SequencePathModule.cs"
                                                 int right = 0;
                                                 while (true)
                                                 {
                                                     if (!(((right) < (dimension))))
                                                         break;
-#line 1345 "SequencePathModule.cs"
+#line 1360 "SequencePathModule.cs"
                                                     {
-#line 1346 "SequencePathModule.cs"
-#line 1346 "SequencePathModule.cs"
-                                                        double* csharp2cuda_temp_475 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, dimension), right)]);
-#line 1346 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_476 = *(csharp2cuda_temp_475);
-#line 1347 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_477 = (cumulative)[left];
-#line 1347 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_478 = (increment)[right];
-#line 1348 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_479 = (increment)[left];
-#line 1348 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_480 = (increment)[right];
-                                                        (*(csharp2cuda_temp_475) = __dadd_rn(csharp2cuda_temp_476, __dadd_rn(__dmul_rn(csharp2cuda_temp_477, csharp2cuda_temp_478), __dmul_rn(__dmul_rn(0.5, csharp2cuda_temp_479), csharp2cuda_temp_480))));
+#line 1361 "SequencePathModule.cs"
+#line 1361 "SequencePathModule.cs"
+                                                        double* csharp2cuda_temp_491 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, dimension), right)]);
+#line 1361 "SequencePathModule.cs"
+                                                        double csharp2cuda_temp_492 = *(csharp2cuda_temp_491);
+#line 1362 "SequencePathModule.cs"
+                                                        double csharp2cuda_temp_493 = (cumulative)[left];
+#line 1362 "SequencePathModule.cs"
+                                                        double csharp2cuda_temp_494 = (increment)[right];
+#line 1363 "SequencePathModule.cs"
+                                                        double csharp2cuda_temp_495 = (increment)[left];
+#line 1363 "SequencePathModule.cs"
+                                                        double csharp2cuda_temp_496 = (increment)[right];
+                                                        (*(csharp2cuda_temp_491) = __dadd_rn(csharp2cuda_temp_492, __dadd_rn(__dmul_rn(csharp2cuda_temp_493, csharp2cuda_temp_494), __dmul_rn(__dmul_rn(0.5, csharp2cuda_temp_495), csharp2cuda_temp_496))));
                                                     }
-#line 1344 "SequencePathModule.cs"
-                                                    int* csharp2cuda_temp_474 = &(right);
-                                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_474));
+#line 1359 "SequencePathModule.cs"
+                                                    int* csharp2cuda_temp_490 = &(right);
+                                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_490));
                                                 }
                                             }
                                         }
-#line 1342 "SequencePathModule.cs"
-                                        int* csharp2cuda_temp_473 = &(left);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_473));
+#line 1357 "SequencePathModule.cs"
+                                        int* csharp2cuda_temp_489 = &(left);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_489));
                                     }
                                 }
-#line 1351 "SequencePathModule.cs"
+#line 1366 "SequencePathModule.cs"
                                 {
-#line 1351 "SequencePathModule.cs"
+#line 1366 "SequencePathModule.cs"
                                     int column = 0;
                                     while (true)
                                     {
                                         if (!(((column) < (dimension))))
                                             break;
-#line 1352 "SequencePathModule.cs"
-#line 1352 "SequencePathModule.cs"
-                                        double* csharp2cuda_temp_482 = &((cumulative)[column]);
-#line 1352 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_483 = *(csharp2cuda_temp_482);
-#line 1352 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_484 = (increment)[column];
-                                        (*(csharp2cuda_temp_482) = __dadd_rn(csharp2cuda_temp_483, csharp2cuda_temp_484));
-#line 1351 "SequencePathModule.cs"
-                                        int* csharp2cuda_temp_481 = &(column);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_481));
+#line 1367 "SequencePathModule.cs"
+#line 1367 "SequencePathModule.cs"
+                                        double* csharp2cuda_temp_498 = &((cumulative)[column]);
+#line 1367 "SequencePathModule.cs"
+                                        double csharp2cuda_temp_499 = *(csharp2cuda_temp_498);
+#line 1367 "SequencePathModule.cs"
+                                        double csharp2cuda_temp_500 = (increment)[column];
+                                        (*(csharp2cuda_temp_498) = __dadd_rn(csharp2cuda_temp_499, csharp2cuda_temp_500));
+#line 1366 "SequencePathModule.cs"
+                                        int* csharp2cuda_temp_497 = &(column);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_497));
                                     }
                                 }
                             }
-#line 1338 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_467 = &(row);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_467));
+#line 1353 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_483 = &(row);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_483));
+                        }
+                    }
+#line 1369 "SequencePathModule.cs"
+                    {
+#line 1369 "SequencePathModule.cs"
+                        int index = 0;
+                        while (true)
+                        {
+                            if (!(((index) < (csharp2cuda_i32_mul(dimension, dimension)))))
+                                break;
+#line 1370 "SequencePathModule.cs"
+#line 1370 "SequencePathModule.cs"
+                            double csharp2cuda_temp_502 = (result)[index];
+                            if ((!(isfinite(csharp2cuda_temp_502))))
+                            {
+#line 1370 "SequencePathModule.cs"
+#line 1370 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_503 = &((output)->valid);
+                                (*(csharp2cuda_temp_503) = 0);
+                            }
+#line 1369 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_501 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_501));
                         }
                     }
                 }
             }
-#line 1356 "SequencePathModule.cs"
+#line 1373 "SequencePathModule.cs"
             break;
-#line 1357 "SequencePathModule.cs"
+#line 1374 "SequencePathModule.cs"
         case 30:
         case 31:
-#line 1359 "SequencePathModule.cs"
+#line 1376 "SequencePathModule.cs"
             if (((thread) == (0)))
             {
-#line 1360 "SequencePathModule.cs"
-#line 1360 "SequencePathModule.cs"
-                double* csharp2cuda_temp_485 = &((output)->scalar_value);
-#line 1360 "SequencePathModule.cs"
-                int csharp2cuda_temp_486 = (first)->count;
-#line 1360 "SequencePathModule.cs"
-                double csharp2cuda_temp_487 = mathblocks_sequence_sign_change_value(a, csharp2cuda_temp_486, ((opcode) == (30)));
-                (*(csharp2cuda_temp_485) = csharp2cuda_temp_487);
+#line 1377 "SequencePathModule.cs"
+#line 1377 "SequencePathModule.cs"
+                double* csharp2cuda_temp_504 = &((output)->scalar_value);
+#line 1377 "SequencePathModule.cs"
+                int csharp2cuda_temp_505 = (first)->count;
+#line 1377 "SequencePathModule.cs"
+                double csharp2cuda_temp_506 = mathblocks_sequence_sign_change_value(a, csharp2cuda_temp_505, ((opcode) == (30)));
+                (*(csharp2cuda_temp_504) = csharp2cuda_temp_506);
             }
-#line 1361 "SequencePathModule.cs"
+#line 1378 "SequencePathModule.cs"
             break;
-#line 1362 "SequencePathModule.cs"
+#line 1379 "SequencePathModule.cs"
         case 32:
-#line 1363 "SequencePathModule.cs"
+#line 1380 "SequencePathModule.cs"
             if (((thread) == (0)))
-#line 1364 "SequencePathModule.cs"
+#line 1381 "SequencePathModule.cs"
             {
-#line 1365 "SequencePathModule.cs"
+#line 1382 "SequencePathModule.cs"
                 int state_count = 0;
-#line 1366 "SequencePathModule.cs"
-#line 1366 "SequencePathModule.cs"
-                double csharp2cuda_temp_488 = (second)->scalar_value;
-#line 1366 "SequencePathModule.cs"
-                int* csharp2cuda_temp_489 = &(state_count);
-#line 1366 "SequencePathModule.cs"
-                bool csharp2cuda_temp_490 = mathblocks_sequence_positive_integer(csharp2cuda_temp_488, csharp2cuda_temp_489);
-#line 1366 "SequencePathModule.cs"
-                bool csharp2cuda_temp_491;
-#line 1366 "SequencePathModule.cs"
-                if (!((!(csharp2cuda_temp_490))))
+#line 1383 "SequencePathModule.cs"
+#line 1383 "SequencePathModule.cs"
+                double csharp2cuda_temp_507 = (second)->scalar_value;
+#line 1383 "SequencePathModule.cs"
+                int* csharp2cuda_temp_508 = &(state_count);
+#line 1383 "SequencePathModule.cs"
+                bool csharp2cuda_temp_509 = mathblocks_sequence_positive_integer(csharp2cuda_temp_507, csharp2cuda_temp_508);
+#line 1383 "SequencePathModule.cs"
+                bool csharp2cuda_temp_510;
+#line 1383 "SequencePathModule.cs"
+                if (!((!(csharp2cuda_temp_509))))
                 {
-#line 1366 "SequencePathModule.cs"
-                    csharp2cuda_temp_491 = ((state_count) > (4096));
+#line 1383 "SequencePathModule.cs"
+                    csharp2cuda_temp_510 = ((state_count) > (4096));
                 }
                 else
                 {
-#line 1366 "SequencePathModule.cs"
-                    csharp2cuda_temp_491 = true;
+#line 1383 "SequencePathModule.cs"
+                    csharp2cuda_temp_510 = true;
                 }
-                if (csharp2cuda_temp_491)
-#line 1367 "SequencePathModule.cs"
+                if (csharp2cuda_temp_510)
+#line 1384 "SequencePathModule.cs"
                 {
-#line 1368 "SequencePathModule.cs"
-#line 1368 "SequencePathModule.cs"
-                    int* csharp2cuda_temp_492 = &((output)->valid);
-                    (*(csharp2cuda_temp_492) = 0);
+#line 1385 "SequencePathModule.cs"
+#line 1385 "SequencePathModule.cs"
+                    int* csharp2cuda_temp_511 = &((output)->valid);
+                    (*(csharp2cuda_temp_511) = 0);
                 }
                 else
-#line 1371 "SequencePathModule.cs"
+#line 1388 "SequencePathModule.cs"
                 {
-#line 1372 "SequencePathModule.cs"
+#line 1389 "SequencePathModule.cs"
                     mathblocks_sequence_set_matrix_shape(output, state_count, state_count);
-#line 1373 "SequencePathModule.cs"
+#line 1390 "SequencePathModule.cs"
                     {
-#line 1373 "SequencePathModule.cs"
+#line 1390 "SequencePathModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 1373 "SequencePathModule.cs"
-                            bool csharp2cuda_temp_494 = (output)->valid;
-#line 1373 "SequencePathModule.cs"
-                            bool csharp2cuda_temp_495;
-#line 1373 "SequencePathModule.cs"
-                            if (csharp2cuda_temp_494)
+#line 1390 "SequencePathModule.cs"
+                            bool csharp2cuda_temp_513 = (output)->valid;
+#line 1390 "SequencePathModule.cs"
+                            bool csharp2cuda_temp_514;
+#line 1390 "SequencePathModule.cs"
+                            if (csharp2cuda_temp_513)
                             {
-#line 1373 "SequencePathModule.cs"
-                                int csharp2cuda_temp_496 = (output)->count;
-#line 1373 "SequencePathModule.cs"
-                                csharp2cuda_temp_495 = ((index) < (csharp2cuda_temp_496));
+#line 1390 "SequencePathModule.cs"
+                                int csharp2cuda_temp_515 = (output)->count;
+#line 1390 "SequencePathModule.cs"
+                                csharp2cuda_temp_514 = ((index) < (csharp2cuda_temp_515));
                             }
                             else
                             {
-#line 1373 "SequencePathModule.cs"
-                                csharp2cuda_temp_495 = false;
+#line 1390 "SequencePathModule.cs"
+                                csharp2cuda_temp_514 = false;
                             }
-                            if (!(csharp2cuda_temp_495))
+                            if (!(csharp2cuda_temp_514))
                                 break;
-#line 1374 "SequencePathModule.cs"
-#line 1374 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_497 = &((result)[index]);
-                            (*(csharp2cuda_temp_497) = 0.0);
-#line 1373 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_493 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_493));
+#line 1391 "SequencePathModule.cs"
+#line 1391 "SequencePathModule.cs"
+                            double* csharp2cuda_temp_516 = &((result)[index]);
+                            (*(csharp2cuda_temp_516) = 0.0);
+#line 1390 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_512 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_512));
                         }
                     }
-#line 1375 "SequencePathModule.cs"
+#line 1392 "SequencePathModule.cs"
                     {
-#line 1375 "SequencePathModule.cs"
+#line 1392 "SequencePathModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 1375 "SequencePathModule.cs"
-                            bool csharp2cuda_temp_499 = (output)->valid;
-#line 1375 "SequencePathModule.cs"
-                            bool csharp2cuda_temp_500;
-#line 1375 "SequencePathModule.cs"
-                            if (csharp2cuda_temp_499)
+#line 1392 "SequencePathModule.cs"
+                            bool csharp2cuda_temp_518 = (output)->valid;
+#line 1392 "SequencePathModule.cs"
+                            bool csharp2cuda_temp_519;
+#line 1392 "SequencePathModule.cs"
+                            if (csharp2cuda_temp_518)
                             {
-#line 1375 "SequencePathModule.cs"
-                                int csharp2cuda_temp_501 = (first)->count;
-#line 1375 "SequencePathModule.cs"
-                                csharp2cuda_temp_500 = ((index) < (csharp2cuda_temp_501));
+#line 1392 "SequencePathModule.cs"
+                                int csharp2cuda_temp_520 = (first)->count;
+#line 1392 "SequencePathModule.cs"
+                                csharp2cuda_temp_519 = ((index) < (csharp2cuda_temp_520));
                             }
                             else
                             {
-#line 1375 "SequencePathModule.cs"
-                                csharp2cuda_temp_500 = false;
+#line 1392 "SequencePathModule.cs"
+                                csharp2cuda_temp_519 = false;
                             }
-                            if (!(csharp2cuda_temp_500))
+                            if (!(csharp2cuda_temp_519))
                                 break;
-#line 1376 "SequencePathModule.cs"
+#line 1393 "SequencePathModule.cs"
                             {
-#line 1377 "SequencePathModule.cs"
+#line 1394 "SequencePathModule.cs"
                                 int state = 0;
-#line 1378 "SequencePathModule.cs"
-#line 1378 "SequencePathModule.cs"
-                                double csharp2cuda_temp_502 = (a)[index];
-#line 1378 "SequencePathModule.cs"
-                                int* csharp2cuda_temp_503 = &(state);
-#line 1378 "SequencePathModule.cs"
-                                bool csharp2cuda_temp_504 = mathblocks_nonnegative_integer(csharp2cuda_temp_502, csharp2cuda_temp_503);
-#line 1378 "SequencePathModule.cs"
-                                bool csharp2cuda_temp_505;
-#line 1378 "SequencePathModule.cs"
-                                if (!((!(csharp2cuda_temp_504))))
+#line 1395 "SequencePathModule.cs"
+#line 1395 "SequencePathModule.cs"
+                                double csharp2cuda_temp_521 = (a)[index];
+#line 1395 "SequencePathModule.cs"
+                                int* csharp2cuda_temp_522 = &(state);
+#line 1395 "SequencePathModule.cs"
+                                bool csharp2cuda_temp_523 = mathblocks_nonnegative_integer(csharp2cuda_temp_521, csharp2cuda_temp_522);
+#line 1395 "SequencePathModule.cs"
+                                bool csharp2cuda_temp_524;
+#line 1395 "SequencePathModule.cs"
+                                if (!((!(csharp2cuda_temp_523))))
                                 {
-#line 1378 "SequencePathModule.cs"
-                                    csharp2cuda_temp_505 = ((state) >= (state_count));
+#line 1395 "SequencePathModule.cs"
+                                    csharp2cuda_temp_524 = ((state) >= (state_count));
                                 }
                                 else
                                 {
-#line 1378 "SequencePathModule.cs"
-                                    csharp2cuda_temp_505 = true;
+#line 1395 "SequencePathModule.cs"
+                                    csharp2cuda_temp_524 = true;
                                 }
-                                if (csharp2cuda_temp_505)
+                                if (csharp2cuda_temp_524)
                                 {
-#line 1379 "SequencePathModule.cs"
-#line 1379 "SequencePathModule.cs"
-                                    int* csharp2cuda_temp_506 = &((output)->valid);
-                                    (*(csharp2cuda_temp_506) = 0);
+#line 1396 "SequencePathModule.cs"
+#line 1396 "SequencePathModule.cs"
+                                    int* csharp2cuda_temp_525 = &((output)->valid);
+                                    (*(csharp2cuda_temp_525) = 0);
                                 }
                             }
-#line 1375 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_498 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_498));
+#line 1392 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_517 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_517));
                         }
                     }
-#line 1381 "SequencePathModule.cs"
+#line 1398 "SequencePathModule.cs"
                     {
-#line 1381 "SequencePathModule.cs"
+#line 1398 "SequencePathModule.cs"
                         int index = 1;
                         while (true)
                         {
-#line 1381 "SequencePathModule.cs"
-                            bool csharp2cuda_temp_508 = (output)->valid;
-#line 1381 "SequencePathModule.cs"
-                            bool csharp2cuda_temp_509;
-#line 1381 "SequencePathModule.cs"
-                            if (csharp2cuda_temp_508)
+#line 1398 "SequencePathModule.cs"
+                            bool csharp2cuda_temp_527 = (output)->valid;
+#line 1398 "SequencePathModule.cs"
+                            bool csharp2cuda_temp_528;
+#line 1398 "SequencePathModule.cs"
+                            if (csharp2cuda_temp_527)
                             {
-#line 1381 "SequencePathModule.cs"
-                                int csharp2cuda_temp_510 = (first)->count;
-#line 1381 "SequencePathModule.cs"
-                                csharp2cuda_temp_509 = ((index) < (csharp2cuda_temp_510));
+#line 1398 "SequencePathModule.cs"
+                                int csharp2cuda_temp_529 = (first)->count;
+#line 1398 "SequencePathModule.cs"
+                                csharp2cuda_temp_528 = ((index) < (csharp2cuda_temp_529));
                             }
                             else
                             {
-#line 1381 "SequencePathModule.cs"
-                                csharp2cuda_temp_509 = false;
+#line 1398 "SequencePathModule.cs"
+                                csharp2cuda_temp_528 = false;
                             }
-                            if (!(csharp2cuda_temp_509))
+                            if (!(csharp2cuda_temp_528))
                                 break;
-#line 1382 "SequencePathModule.cs"
-#line 1382 "SequencePathModule.cs"
-                            double csharp2cuda_temp_511 = (a)[csharp2cuda_i32_sub(index, 1)];
-#line 1382 "SequencePathModule.cs"
-                            double csharp2cuda_temp_512 = (a)[index];
-#line 1382 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_513 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_f64_to_i32(csharp2cuda_temp_511), state_count), csharp2cuda_f64_to_i32(csharp2cuda_temp_512))]);
-#line 1382 "SequencePathModule.cs"
-                            double csharp2cuda_temp_514 = *(csharp2cuda_temp_513);
-                            (*(csharp2cuda_temp_513) = __dadd_rn(csharp2cuda_temp_514, 1.0));
-#line 1381 "SequencePathModule.cs"
-                            int* csharp2cuda_temp_507 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_507));
+#line 1399 "SequencePathModule.cs"
+#line 1399 "SequencePathModule.cs"
+                            double csharp2cuda_temp_530 = (a)[csharp2cuda_i32_sub(index, 1)];
+#line 1399 "SequencePathModule.cs"
+                            double csharp2cuda_temp_531 = (a)[index];
+#line 1399 "SequencePathModule.cs"
+                            double* csharp2cuda_temp_532 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_f64_to_i32(csharp2cuda_temp_530), state_count), csharp2cuda_f64_to_i32(csharp2cuda_temp_531))]);
+#line 1399 "SequencePathModule.cs"
+                            double csharp2cuda_temp_533 = *(csharp2cuda_temp_532);
+                            (*(csharp2cuda_temp_532) = __dadd_rn(csharp2cuda_temp_533, 1.0));
+#line 1398 "SequencePathModule.cs"
+                            int* csharp2cuda_temp_526 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_526));
                         }
                     }
                 }
             }
-#line 1385 "SequencePathModule.cs"
+#line 1402 "SequencePathModule.cs"
             break;
     }
 }

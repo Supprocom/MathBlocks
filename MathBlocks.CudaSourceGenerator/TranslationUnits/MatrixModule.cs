@@ -869,6 +869,12 @@ internal static unsafe class MatrixModule
                     row_sum += Math.Abs(a[row * size + column]);
                 if (row_sum > norm) norm = row_sum;
             }
+            // An overflowing norm would ask for int.MaxValue squarings; the result is not finite.
+            if (!double.IsFinite(norm))
+            {
+                output->valid = 0;
+                return;
+            }
             int scaling = norm > 1.0 ? (int)Math.Ceiling(mathblocks_binary_logarithm(norm)) : 0;
             if (scaling < 0) scaling = 0;
             double scale = mathblocks_power(2.0, (double)-scaling);
@@ -1075,6 +1081,8 @@ internal static unsafe class MatrixModule
                     work);
             }
             mathblocks_set_vector_shape(output, output_index);
+            for (int index = 0; index < output_index; index++)
+                if (!double.IsFinite(result[index])) output->valid = 0;
             return;
         }
 
@@ -1114,6 +1122,8 @@ internal static unsafe class MatrixModule
             if (opcode == 36)
             {
                 mathblocks_set_vector_shape(output, size);
+                for (int index = 0; index < size; index++)
+                    if (!double.IsFinite(result[index])) output->valid = 0;
                 return;
             }
             for (int row = 0; row < size; row++)
@@ -1157,6 +1167,7 @@ internal static unsafe class MatrixModule
                     order,
                     submatrix);
                 result[mask - 1] = mathblocks_matrix_determinant(submatrix, order, work);
+                if (!double.IsFinite(result[mask - 1])) output->valid = 0;
             }
             return;
         }

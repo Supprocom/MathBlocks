@@ -298,6 +298,7 @@ internal static unsafe class GeometryModule
                     }
                     result[0] /= first->count;
                     result[1] /= first->count;
+                    if (!double.IsFinite(result[0]) || !double.IsFinite(result[1])) output->valid = 0;
                     break;
                 case 2:
                     if (first->count != 3)
@@ -519,6 +520,7 @@ internal static unsafe class GeometryModule
                             edges[edge_count].from = left;
                             edges[edge_count].to = right;
                             edges[edge_count].weight = mathblocks_geometry_distance(a, left, a, right);
+                            if (!double.IsFinite(edges[edge_count].weight)) output->valid = 0;
                             edge_count++;
                         }
                     }
@@ -641,6 +643,7 @@ internal static unsafe class GeometryModule
                             edges[edge_count].from = left;
                             edges[edge_count].to = right;
                             edges[edge_count].weight = 2.0 * radius;
+                            if (!double.IsFinite(edges[edge_count].weight)) output->valid = 0;
                             edge_count++;
                         }
                     }
@@ -892,6 +895,8 @@ internal static unsafe class GeometryModule
                         result[selected++] = edges[index].weight;
                     }
                     mathblocks_sequence_set_vector_shape(output, selected);
+                    for (int index = 0; index < selected; index++)
+                        if (!double.IsFinite(result[index])) output->valid = 0;
                     break;
                 }
             }

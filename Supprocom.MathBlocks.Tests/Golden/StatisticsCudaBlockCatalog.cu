@@ -1245,6 +1245,14 @@ __device__ void mathblocks_statistics_dispatch(
 #line 432 "StatisticsModule.cs"
                                             double* csharp2cuda_temp_53 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(right, columns), left)]);
                                             (*(csharp2cuda_temp_53) = covariance);
+#line 433 "StatisticsModule.cs"
+                                            if ((!(isfinite(covariance))))
+                                            {
+#line 433 "StatisticsModule.cs"
+#line 433 "StatisticsModule.cs"
+                                                int* csharp2cuda_temp_54 = &((output)->valid);
+                                                (*(csharp2cuda_temp_54) = 0);
+                                            }
                                         }
 #line 422 "StatisticsModule.cs"
                                         int* csharp2cuda_temp_44 = &(right);
@@ -1257,995 +1265,995 @@ __device__ void mathblocks_statistics_dispatch(
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_43));
                         }
                     }
-#line 435 "StatisticsModule.cs"
+#line 436 "StatisticsModule.cs"
                     break;
                 }
-#line 437 "StatisticsModule.cs"
-            case 3:
 #line 438 "StatisticsModule.cs"
-                {
+            case 3:
 #line 439 "StatisticsModule.cs"
+                {
+#line 440 "StatisticsModule.cs"
                     int count = (first)->count;
-#line 440 "StatisticsModule.cs"
-#line 440 "StatisticsModule.cs"
-                    bool csharp2cuda_temp_54;
-#line 440 "StatisticsModule.cs"
+#line 441 "StatisticsModule.cs"
+#line 441 "StatisticsModule.cs"
+                    bool csharp2cuda_temp_55;
+#line 441 "StatisticsModule.cs"
                     if (!(((count) <= (0))))
                     {
-#line 440 "StatisticsModule.cs"
-                        int csharp2cuda_temp_55 = (second)->count;
-#line 440 "StatisticsModule.cs"
-                        csharp2cuda_temp_54 = ((count) != (csharp2cuda_temp_55));
-                    }
-                    else
-                    {
-#line 440 "StatisticsModule.cs"
-                        csharp2cuda_temp_54 = true;
-                    }
-#line 440 "StatisticsModule.cs"
-                    bool csharp2cuda_temp_56;
-#line 440 "StatisticsModule.cs"
-                    if (!(csharp2cuda_temp_54))
-                    {
-#line 440 "StatisticsModule.cs"
-                        csharp2cuda_temp_56 = ((((void*)(scratch))) == (((void*)(nullptr))));
-                    }
-                    else
-                    {
-#line 440 "StatisticsModule.cs"
-                        csharp2cuda_temp_56 = true;
-                    }
-                    if (csharp2cuda_temp_56)
 #line 441 "StatisticsModule.cs"
+                        int csharp2cuda_temp_56 = (second)->count;
+#line 441 "StatisticsModule.cs"
+                        csharp2cuda_temp_55 = ((count) != (csharp2cuda_temp_56));
+                    }
+                    else
                     {
+#line 441 "StatisticsModule.cs"
+                        csharp2cuda_temp_55 = true;
+                    }
+#line 441 "StatisticsModule.cs"
+                    bool csharp2cuda_temp_57;
+#line 441 "StatisticsModule.cs"
+                    if (!(csharp2cuda_temp_55))
+                    {
+#line 441 "StatisticsModule.cs"
+                        csharp2cuda_temp_57 = ((((void*)(scratch))) == (((void*)(nullptr))));
+                    }
+                    else
+                    {
+#line 441 "StatisticsModule.cs"
+                        csharp2cuda_temp_57 = true;
+                    }
+                    if (csharp2cuda_temp_57)
 #line 442 "StatisticsModule.cs"
-#line 442 "StatisticsModule.cs"
-                        int* csharp2cuda_temp_57 = &((output)->valid);
-                        (*(csharp2cuda_temp_57) = 0);
+                    {
 #line 443 "StatisticsModule.cs"
+#line 443 "StatisticsModule.cs"
+                        int* csharp2cuda_temp_58 = &((output)->valid);
+                        (*(csharp2cuda_temp_58) = 0);
+#line 444 "StatisticsModule.cs"
                         break;
                     }
-#line 445 "StatisticsModule.cs"
-                    double* left_distances = scratch;
 #line 446 "StatisticsModule.cs"
-                    double* right_distances = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_mul(count, count));
+                    double* left_distances = scratch;
 #line 447 "StatisticsModule.cs"
-                    double* row_means = csharp2cuda_pointer_add(right_distances, csharp2cuda_i32_mul(count, count));
+                    double* right_distances = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_mul(count, count));
 #line 448 "StatisticsModule.cs"
-                    mathblocks_statistics_center_distance(a, count, left_distances, row_means);
+                    double* row_means = csharp2cuda_pointer_add(right_distances, csharp2cuda_i32_mul(count, count));
 #line 449 "StatisticsModule.cs"
-                    mathblocks_statistics_center_distance(b, count, right_distances, row_means);
+                    mathblocks_statistics_center_distance(a, count, left_distances, row_means);
 #line 450 "StatisticsModule.cs"
-                    double covariance_square = 0.0;
+                    mathblocks_statistics_center_distance(b, count, right_distances, row_means);
 #line 451 "StatisticsModule.cs"
-                    double left_variance_square = 0.0;
+                    double covariance_square = 0.0;
 #line 452 "StatisticsModule.cs"
+                    double left_variance_square = 0.0;
+#line 453 "StatisticsModule.cs"
                     double right_variance_square = 0.0;
-#line 453 "StatisticsModule.cs"
+#line 454 "StatisticsModule.cs"
                     {
-#line 453 "StatisticsModule.cs"
+#line 454 "StatisticsModule.cs"
                         int index = 0;
                         while (true)
                         {
                             if (!(((index) < (csharp2cuda_i32_mul(count, count)))))
                                 break;
-#line 454 "StatisticsModule.cs"
+#line 455 "StatisticsModule.cs"
                             {
-#line 455 "StatisticsModule.cs"
-#line 455 "StatisticsModule.cs"
-                                double* csharp2cuda_temp_59 = &(covariance_square);
-#line 455 "StatisticsModule.cs"
-                                double csharp2cuda_temp_60 = *(csharp2cuda_temp_59);
-#line 455 "StatisticsModule.cs"
-                                double csharp2cuda_temp_61 = (left_distances)[index];
-#line 455 "StatisticsModule.cs"
-                                double csharp2cuda_temp_62 = (right_distances)[index];
-                                (*(csharp2cuda_temp_59) = __dadd_rn(csharp2cuda_temp_60, __dmul_rn(csharp2cuda_temp_61, csharp2cuda_temp_62)));
 #line 456 "StatisticsModule.cs"
 #line 456 "StatisticsModule.cs"
-                                double* csharp2cuda_temp_63 = &(left_variance_square);
+                                double* csharp2cuda_temp_60 = &(covariance_square);
 #line 456 "StatisticsModule.cs"
-                                double csharp2cuda_temp_64 = *(csharp2cuda_temp_63);
+                                double csharp2cuda_temp_61 = *(csharp2cuda_temp_60);
 #line 456 "StatisticsModule.cs"
-                                double csharp2cuda_temp_65 = (left_distances)[index];
+                                double csharp2cuda_temp_62 = (left_distances)[index];
 #line 456 "StatisticsModule.cs"
+                                double csharp2cuda_temp_63 = (right_distances)[index];
+                                (*(csharp2cuda_temp_60) = __dadd_rn(csharp2cuda_temp_61, __dmul_rn(csharp2cuda_temp_62, csharp2cuda_temp_63)));
+#line 457 "StatisticsModule.cs"
+#line 457 "StatisticsModule.cs"
+                                double* csharp2cuda_temp_64 = &(left_variance_square);
+#line 457 "StatisticsModule.cs"
+                                double csharp2cuda_temp_65 = *(csharp2cuda_temp_64);
+#line 457 "StatisticsModule.cs"
                                 double csharp2cuda_temp_66 = (left_distances)[index];
-                                (*(csharp2cuda_temp_63) = __dadd_rn(csharp2cuda_temp_64, __dmul_rn(csharp2cuda_temp_65, csharp2cuda_temp_66)));
 #line 457 "StatisticsModule.cs"
-#line 457 "StatisticsModule.cs"
-                                double* csharp2cuda_temp_67 = &(right_variance_square);
-#line 457 "StatisticsModule.cs"
-                                double csharp2cuda_temp_68 = *(csharp2cuda_temp_67);
-#line 457 "StatisticsModule.cs"
-                                double csharp2cuda_temp_69 = (right_distances)[index];
-#line 457 "StatisticsModule.cs"
+                                double csharp2cuda_temp_67 = (left_distances)[index];
+                                (*(csharp2cuda_temp_64) = __dadd_rn(csharp2cuda_temp_65, __dmul_rn(csharp2cuda_temp_66, csharp2cuda_temp_67)));
+#line 458 "StatisticsModule.cs"
+#line 458 "StatisticsModule.cs"
+                                double* csharp2cuda_temp_68 = &(right_variance_square);
+#line 458 "StatisticsModule.cs"
+                                double csharp2cuda_temp_69 = *(csharp2cuda_temp_68);
+#line 458 "StatisticsModule.cs"
                                 double csharp2cuda_temp_70 = (right_distances)[index];
-                                (*(csharp2cuda_temp_67) = __dadd_rn(csharp2cuda_temp_68, __dmul_rn(csharp2cuda_temp_69, csharp2cuda_temp_70)));
+#line 458 "StatisticsModule.cs"
+                                double csharp2cuda_temp_71 = (right_distances)[index];
+                                (*(csharp2cuda_temp_68) = __dadd_rn(csharp2cuda_temp_69, __dmul_rn(csharp2cuda_temp_70, csharp2cuda_temp_71)));
                             }
-#line 453 "StatisticsModule.cs"
-                            int* csharp2cuda_temp_58 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_58));
+#line 454 "StatisticsModule.cs"
+                            int* csharp2cuda_temp_59 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_59));
                         }
                     }
-#line 459 "StatisticsModule.cs"
-#line 459 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_71 = &(covariance_square);
-#line 459 "StatisticsModule.cs"
-                    double csharp2cuda_temp_72 = *(csharp2cuda_temp_71);
-                    (*(csharp2cuda_temp_71) = __ddiv_rn(csharp2cuda_temp_72, ((double)(csharp2cuda_i32_mul(count, count)))));
 #line 460 "StatisticsModule.cs"
 #line 460 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_73 = &(left_variance_square);
+                    double* csharp2cuda_temp_72 = &(covariance_square);
 #line 460 "StatisticsModule.cs"
-                    double csharp2cuda_temp_74 = *(csharp2cuda_temp_73);
-                    (*(csharp2cuda_temp_73) = __ddiv_rn(csharp2cuda_temp_74, ((double)(csharp2cuda_i32_mul(count, count)))));
+                    double csharp2cuda_temp_73 = *(csharp2cuda_temp_72);
+                    (*(csharp2cuda_temp_72) = __ddiv_rn(csharp2cuda_temp_73, ((double)(csharp2cuda_i32_mul(count, count)))));
 #line 461 "StatisticsModule.cs"
 #line 461 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_75 = &(right_variance_square);
+                    double* csharp2cuda_temp_74 = &(left_variance_square);
 #line 461 "StatisticsModule.cs"
-                    double csharp2cuda_temp_76 = *(csharp2cuda_temp_75);
-                    (*(csharp2cuda_temp_75) = __ddiv_rn(csharp2cuda_temp_76, ((double)(csharp2cuda_i32_mul(count, count)))));
+                    double csharp2cuda_temp_75 = *(csharp2cuda_temp_74);
+                    (*(csharp2cuda_temp_74) = __ddiv_rn(csharp2cuda_temp_75, ((double)(csharp2cuda_i32_mul(count, count)))));
 #line 462 "StatisticsModule.cs"
 #line 462 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_77 = &((output)->scalar_value);
+                    double* csharp2cuda_temp_76 = &(right_variance_square);
+#line 462 "StatisticsModule.cs"
+                    double csharp2cuda_temp_77 = *(csharp2cuda_temp_76);
+                    (*(csharp2cuda_temp_76) = __ddiv_rn(csharp2cuda_temp_77, ((double)(csharp2cuda_i32_mul(count, count)))));
 #line 463 "StatisticsModule.cs"
-                    double csharp2cuda_temp_78 = __ddiv_rn(covariance_square, mathblocks_square_root(__dmul_rn(left_variance_square, right_variance_square)));
-                    (*(csharp2cuda_temp_77) = mathblocks_square_root(csharp2cuda_temp_78));
-#line 465 "StatisticsModule.cs"
+#line 463 "StatisticsModule.cs"
+                    double* csharp2cuda_temp_78 = &((output)->scalar_value);
+#line 464 "StatisticsModule.cs"
+                    double csharp2cuda_temp_79 = __ddiv_rn(covariance_square, mathblocks_square_root(__dmul_rn(left_variance_square, right_variance_square)));
+                    (*(csharp2cuda_temp_78) = mathblocks_square_root(csharp2cuda_temp_79));
+#line 466 "StatisticsModule.cs"
                     break;
                 }
-#line 467 "StatisticsModule.cs"
-            case 4:
 #line 468 "StatisticsModule.cs"
+            case 4:
+#line 469 "StatisticsModule.cs"
                 {
-#line 469 "StatisticsModule.cs"
-#line 469 "StatisticsModule.cs"
-                    int csharp2cuda_temp_79 = (second)->count;
-                    mathblocks_sequence_set_vector_shape(output, csharp2cuda_i32_add(csharp2cuda_temp_79, 1));
 #line 470 "StatisticsModule.cs"
+#line 470 "StatisticsModule.cs"
+                    int csharp2cuda_temp_80 = (second)->count;
+                    mathblocks_sequence_set_vector_shape(output, csharp2cuda_i32_add(csharp2cuda_temp_80, 1));
+#line 471 "StatisticsModule.cs"
                     {
-#line 470 "StatisticsModule.cs"
+#line 471 "StatisticsModule.cs"
                         int index = 1;
                         while (true)
                         {
-#line 470 "StatisticsModule.cs"
-                            int csharp2cuda_temp_81 = (second)->count;
-                            if (!(((index) < (csharp2cuda_temp_81))))
-                                break;
 #line 471 "StatisticsModule.cs"
+                            int csharp2cuda_temp_82 = (second)->count;
+                            if (!(((index) < (csharp2cuda_temp_82))))
+                                break;
+#line 472 "StatisticsModule.cs"
                             {
-#line 472 "StatisticsModule.cs"
-#line 472 "StatisticsModule.cs"
-                                double csharp2cuda_temp_82 = (b)[index];
-#line 472 "StatisticsModule.cs"
-                                double csharp2cuda_temp_83 = (b)[csharp2cuda_i32_sub(index, 1)];
-                                if (((csharp2cuda_temp_82) <= (csharp2cuda_temp_83)))
 #line 473 "StatisticsModule.cs"
+#line 473 "StatisticsModule.cs"
+                                double csharp2cuda_temp_83 = (b)[index];
+#line 473 "StatisticsModule.cs"
+                                double csharp2cuda_temp_84 = (b)[csharp2cuda_i32_sub(index, 1)];
+                                if (((csharp2cuda_temp_83) <= (csharp2cuda_temp_84)))
+#line 474 "StatisticsModule.cs"
                                 {
-#line 474 "StatisticsModule.cs"
-#line 474 "StatisticsModule.cs"
-                                    int* csharp2cuda_temp_84 = &((output)->valid);
-                                    (*(csharp2cuda_temp_84) = 0);
 #line 475 "StatisticsModule.cs"
+#line 475 "StatisticsModule.cs"
+                                    int* csharp2cuda_temp_85 = &((output)->valid);
+                                    (*(csharp2cuda_temp_85) = 0);
+#line 476 "StatisticsModule.cs"
                                     break;
                                 }
                             }
-#line 470 "StatisticsModule.cs"
-                            int* csharp2cuda_temp_80 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_80));
+#line 471 "StatisticsModule.cs"
+                            int* csharp2cuda_temp_81 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_81));
                         }
                     }
-#line 478 "StatisticsModule.cs"
+#line 479 "StatisticsModule.cs"
                     {
-#line 478 "StatisticsModule.cs"
+#line 479 "StatisticsModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 478 "StatisticsModule.cs"
-                            bool csharp2cuda_temp_86 = (output)->valid;
-#line 478 "StatisticsModule.cs"
-                            bool csharp2cuda_temp_87;
-#line 478 "StatisticsModule.cs"
-                            if (csharp2cuda_temp_86)
+#line 479 "StatisticsModule.cs"
+                            bool csharp2cuda_temp_87 = (output)->valid;
+#line 479 "StatisticsModule.cs"
+                            bool csharp2cuda_temp_88;
+#line 479 "StatisticsModule.cs"
+                            if (csharp2cuda_temp_87)
                             {
-#line 478 "StatisticsModule.cs"
-                                int csharp2cuda_temp_88 = (output)->count;
-#line 478 "StatisticsModule.cs"
-                                csharp2cuda_temp_87 = ((index) < (csharp2cuda_temp_88));
+#line 479 "StatisticsModule.cs"
+                                int csharp2cuda_temp_89 = (output)->count;
+#line 479 "StatisticsModule.cs"
+                                csharp2cuda_temp_88 = ((index) < (csharp2cuda_temp_89));
                             }
                             else
                             {
-#line 478 "StatisticsModule.cs"
-                                csharp2cuda_temp_87 = false;
+#line 479 "StatisticsModule.cs"
+                                csharp2cuda_temp_88 = false;
                             }
-                            if (!(csharp2cuda_temp_87))
+                            if (!(csharp2cuda_temp_88))
                                 break;
+#line 480 "StatisticsModule.cs"
+#line 480 "StatisticsModule.cs"
+                            double* csharp2cuda_temp_90 = &((result)[index]);
+                            (*(csharp2cuda_temp_90) = 0.0);
 #line 479 "StatisticsModule.cs"
-#line 479 "StatisticsModule.cs"
-                            double* csharp2cuda_temp_89 = &((result)[index]);
-                            (*(csharp2cuda_temp_89) = 0.0);
-#line 478 "StatisticsModule.cs"
-                            int* csharp2cuda_temp_85 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_85));
+                            int* csharp2cuda_temp_86 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_86));
                         }
                     }
-#line 480 "StatisticsModule.cs"
+#line 481 "StatisticsModule.cs"
                     {
-#line 480 "StatisticsModule.cs"
+#line 481 "StatisticsModule.cs"
                         int value_index = 0;
                         while (true)
                         {
-#line 480 "StatisticsModule.cs"
-                            bool csharp2cuda_temp_91 = (output)->valid;
-#line 480 "StatisticsModule.cs"
-                            bool csharp2cuda_temp_92;
-#line 480 "StatisticsModule.cs"
-                            if (csharp2cuda_temp_91)
+#line 481 "StatisticsModule.cs"
+                            bool csharp2cuda_temp_92 = (output)->valid;
+#line 481 "StatisticsModule.cs"
+                            bool csharp2cuda_temp_93;
+#line 481 "StatisticsModule.cs"
+                            if (csharp2cuda_temp_92)
                             {
-#line 480 "StatisticsModule.cs"
-                                int csharp2cuda_temp_93 = (first)->count;
-#line 480 "StatisticsModule.cs"
-                                csharp2cuda_temp_92 = ((value_index) < (csharp2cuda_temp_93));
+#line 481 "StatisticsModule.cs"
+                                int csharp2cuda_temp_94 = (first)->count;
+#line 481 "StatisticsModule.cs"
+                                csharp2cuda_temp_93 = ((value_index) < (csharp2cuda_temp_94));
                             }
                             else
                             {
-#line 480 "StatisticsModule.cs"
-                                csharp2cuda_temp_92 = false;
-                            }
-                            if (!(csharp2cuda_temp_92))
-                                break;
 #line 481 "StatisticsModule.cs"
-                            {
+                                csharp2cuda_temp_93 = false;
+                            }
+                            if (!(csharp2cuda_temp_93))
+                                break;
 #line 482 "StatisticsModule.cs"
-                                int lower = 0;
+                            {
 #line 483 "StatisticsModule.cs"
-                                int upper = (second)->count;
+                                int lower = 0;
 #line 484 "StatisticsModule.cs"
+                                int upper = (second)->count;
+#line 485 "StatisticsModule.cs"
                                 while (true)
                                 {
                                     if (!(((lower) < (upper))))
                                         break;
-#line 485 "StatisticsModule.cs"
+#line 486 "StatisticsModule.cs"
                                     {
-#line 486 "StatisticsModule.cs"
-                                        int csharp2cuda_temp_94 = csharp2cuda_i32_div(csharp2cuda_i32_sub(upper, lower), 2);
-#line 486 "StatisticsModule.cs"
-                                        int middle = csharp2cuda_i32_add(lower, csharp2cuda_temp_94);
 #line 487 "StatisticsModule.cs"
+                                        int csharp2cuda_temp_95 = csharp2cuda_i32_div(csharp2cuda_i32_sub(upper, lower), 2);
 #line 487 "StatisticsModule.cs"
-                                        double csharp2cuda_temp_95 = (a)[value_index];
-#line 487 "StatisticsModule.cs"
-                                        double csharp2cuda_temp_96 = (b)[middle];
-                                        if (((csharp2cuda_temp_95) <= (csharp2cuda_temp_96)))
+                                        int middle = csharp2cuda_i32_add(lower, csharp2cuda_temp_95);
+#line 488 "StatisticsModule.cs"
+#line 488 "StatisticsModule.cs"
+                                        double csharp2cuda_temp_96 = (a)[value_index];
+#line 488 "StatisticsModule.cs"
+                                        double csharp2cuda_temp_97 = (b)[middle];
+                                        if (((csharp2cuda_temp_96) <= (csharp2cuda_temp_97)))
                                         {
-#line 488 "StatisticsModule.cs"
-#line 488 "StatisticsModule.cs"
-                                            int* csharp2cuda_temp_97 = &(upper);
-                                            (*(csharp2cuda_temp_97) = middle);
+#line 489 "StatisticsModule.cs"
+#line 489 "StatisticsModule.cs"
+                                            int* csharp2cuda_temp_98 = &(upper);
+                                            (*(csharp2cuda_temp_98) = middle);
                                         }
                                         else
                                         {
-#line 490 "StatisticsModule.cs"
-#line 490 "StatisticsModule.cs"
-                                            int* csharp2cuda_temp_98 = &(lower);
-                                            (*(csharp2cuda_temp_98) = csharp2cuda_i32_add(middle, 1));
+#line 491 "StatisticsModule.cs"
+#line 491 "StatisticsModule.cs"
+                                            int* csharp2cuda_temp_99 = &(lower);
+                                            (*(csharp2cuda_temp_99) = csharp2cuda_i32_add(middle, 1));
                                         }
                                     }
                                 }
-#line 492 "StatisticsModule.cs"
-#line 492 "StatisticsModule.cs"
-                                double* csharp2cuda_temp_99 = &((result)[lower]);
-#line 492 "StatisticsModule.cs"
-                                double csharp2cuda_temp_100 = *(csharp2cuda_temp_99);
-                                (*(csharp2cuda_temp_99) = __dadd_rn(csharp2cuda_temp_100, 1.0));
+#line 493 "StatisticsModule.cs"
+#line 493 "StatisticsModule.cs"
+                                double* csharp2cuda_temp_100 = &((result)[lower]);
+#line 493 "StatisticsModule.cs"
+                                double csharp2cuda_temp_101 = *(csharp2cuda_temp_100);
+                                (*(csharp2cuda_temp_100) = __dadd_rn(csharp2cuda_temp_101, 1.0));
                             }
-#line 480 "StatisticsModule.cs"
-                            int* csharp2cuda_temp_90 = &(value_index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_90));
+#line 481 "StatisticsModule.cs"
+                            int* csharp2cuda_temp_91 = &(value_index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_91));
                         }
                     }
-#line 494 "StatisticsModule.cs"
+#line 495 "StatisticsModule.cs"
                     break;
                 }
-#line 496 "StatisticsModule.cs"
-            case 5:
 #line 497 "StatisticsModule.cs"
+            case 5:
+#line 498 "StatisticsModule.cs"
                 {
-#line 498 "StatisticsModule.cs"
-#line 498 "StatisticsModule.cs"
-                    int csharp2cuda_temp_101 = (first)->count;
-#line 498 "StatisticsModule.cs"
-                    bool csharp2cuda_temp_102;
-#line 498 "StatisticsModule.cs"
-                    if (!(((csharp2cuda_temp_101) <= (0))))
+#line 499 "StatisticsModule.cs"
+#line 499 "StatisticsModule.cs"
+                    int csharp2cuda_temp_102 = (first)->count;
+#line 499 "StatisticsModule.cs"
+                    bool csharp2cuda_temp_103;
+#line 499 "StatisticsModule.cs"
+                    if (!(((csharp2cuda_temp_102) <= (0))))
                     {
-#line 498 "StatisticsModule.cs"
-                        csharp2cuda_temp_102 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 499 "StatisticsModule.cs"
+                        csharp2cuda_temp_103 = ((((void*)(scratch))) == (((void*)(nullptr))));
                     }
                     else
                     {
-#line 498 "StatisticsModule.cs"
-                        csharp2cuda_temp_102 = true;
-                    }
-                    if (csharp2cuda_temp_102)
 #line 499 "StatisticsModule.cs"
+                        csharp2cuda_temp_103 = true;
+                    }
+                    if (csharp2cuda_temp_103)
+#line 500 "StatisticsModule.cs"
                     {
-#line 500 "StatisticsModule.cs"
-#line 500 "StatisticsModule.cs"
-                        int* csharp2cuda_temp_103 = &((output)->valid);
-                        (*(csharp2cuda_temp_103) = 0);
 #line 501 "StatisticsModule.cs"
+#line 501 "StatisticsModule.cs"
+                        int* csharp2cuda_temp_104 = &((output)->valid);
+                        (*(csharp2cuda_temp_104) = 0);
+#line 502 "StatisticsModule.cs"
                         break;
                     }
-#line 503 "StatisticsModule.cs"
-#line 503 "StatisticsModule.cs"
-                    int csharp2cuda_temp_104 = (first)->count;
-                    mathblocks_statistics_sort_copy(a, csharp2cuda_temp_104, scratch);
 #line 504 "StatisticsModule.cs"
 #line 504 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_105 = &((output)->scalar_value);
+                    int csharp2cuda_temp_105 = (first)->count;
+                    mathblocks_statistics_sort_copy(a, csharp2cuda_temp_105, scratch);
 #line 505 "StatisticsModule.cs"
-                    int csharp2cuda_temp_106 = (first)->count;
 #line 505 "StatisticsModule.cs"
-                    double csharp2cuda_temp_107 = mathblocks_statistics_sorted_quantile(scratch, csharp2cuda_temp_106, 0.75);
+                    double* csharp2cuda_temp_106 = &((output)->scalar_value);
 #line 506 "StatisticsModule.cs"
-                    int csharp2cuda_temp_108 = (first)->count;
+                    int csharp2cuda_temp_107 = (first)->count;
 #line 506 "StatisticsModule.cs"
-                    double csharp2cuda_temp_109 = mathblocks_statistics_sorted_quantile(scratch, csharp2cuda_temp_108, 0.25);
-                    (*(csharp2cuda_temp_105) = __dsub_rn(csharp2cuda_temp_107, csharp2cuda_temp_109));
+                    double csharp2cuda_temp_108 = mathblocks_statistics_sorted_quantile(scratch, csharp2cuda_temp_107, 0.75);
 #line 507 "StatisticsModule.cs"
+                    int csharp2cuda_temp_109 = (first)->count;
+#line 507 "StatisticsModule.cs"
+                    double csharp2cuda_temp_110 = mathblocks_statistics_sorted_quantile(scratch, csharp2cuda_temp_109, 0.25);
+                    (*(csharp2cuda_temp_106) = __dsub_rn(csharp2cuda_temp_108, csharp2cuda_temp_110));
+#line 508 "StatisticsModule.cs"
                     break;
                 }
-#line 509 "StatisticsModule.cs"
+#line 510 "StatisticsModule.cs"
             case 6:
-#line 510 "StatisticsModule.cs"
-#line 510 "StatisticsModule.cs"
-                int csharp2cuda_temp_110 = (first)->count;
-#line 510 "StatisticsModule.cs"
-                int csharp2cuda_temp_111 = (second)->count;
-#line 510 "StatisticsModule.cs"
-                bool csharp2cuda_temp_112;
-#line 510 "StatisticsModule.cs"
-                if (!(((csharp2cuda_temp_110) != (csharp2cuda_temp_111))))
+#line 511 "StatisticsModule.cs"
+#line 511 "StatisticsModule.cs"
+                int csharp2cuda_temp_111 = (first)->count;
+#line 511 "StatisticsModule.cs"
+                int csharp2cuda_temp_112 = (second)->count;
+#line 511 "StatisticsModule.cs"
+                bool csharp2cuda_temp_113;
+#line 511 "StatisticsModule.cs"
+                if (!(((csharp2cuda_temp_111) != (csharp2cuda_temp_112))))
                 {
+#line 512 "StatisticsModule.cs"
+                    int csharp2cuda_temp_114 = (first)->count;
+#line 512 "StatisticsModule.cs"
+                    double* csharp2cuda_temp_115 = &((output)->scalar_value);
+#line 512 "StatisticsModule.cs"
+                    bool csharp2cuda_temp_116 = mathblocks_statistics_kendall_value(a, b, csharp2cuda_temp_114, csharp2cuda_temp_115);
 #line 511 "StatisticsModule.cs"
-                    int csharp2cuda_temp_113 = (first)->count;
-#line 511 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_114 = &((output)->scalar_value);
-#line 511 "StatisticsModule.cs"
-                    bool csharp2cuda_temp_115 = mathblocks_statistics_kendall_value(a, b, csharp2cuda_temp_113, csharp2cuda_temp_114);
-#line 510 "StatisticsModule.cs"
-                    csharp2cuda_temp_112 = (!(csharp2cuda_temp_115));
+                    csharp2cuda_temp_113 = (!(csharp2cuda_temp_116));
                 }
                 else
                 {
-#line 510 "StatisticsModule.cs"
-                    csharp2cuda_temp_112 = true;
+#line 511 "StatisticsModule.cs"
+                    csharp2cuda_temp_113 = true;
                 }
-                if (csharp2cuda_temp_112)
+                if (csharp2cuda_temp_113)
                 {
-#line 512 "StatisticsModule.cs"
-#line 512 "StatisticsModule.cs"
-                    int* csharp2cuda_temp_116 = &((output)->valid);
-                    (*(csharp2cuda_temp_116) = 0);
-                }
 #line 513 "StatisticsModule.cs"
-                break;
+#line 513 "StatisticsModule.cs"
+                    int* csharp2cuda_temp_117 = &((output)->valid);
+                    (*(csharp2cuda_temp_117) = 0);
+                }
 #line 514 "StatisticsModule.cs"
+                break;
+#line 515 "StatisticsModule.cs"
             case 7:
             case 8:
             case 9:
             case 11:
             case 12:
             case 20:
-#line 520 "StatisticsModule.cs"
+#line 521 "StatisticsModule.cs"
                 {
-#line 521 "StatisticsModule.cs"
-#line 521 "StatisticsModule.cs"
-                    int csharp2cuda_temp_117 = (first)->count;
-#line 521 "StatisticsModule.cs"
-                    bool csharp2cuda_temp_118;
-#line 521 "StatisticsModule.cs"
-                    if (!(((csharp2cuda_temp_117) <= (0))))
+#line 522 "StatisticsModule.cs"
+#line 522 "StatisticsModule.cs"
+                    int csharp2cuda_temp_118 = (first)->count;
+#line 522 "StatisticsModule.cs"
+                    bool csharp2cuda_temp_119;
+#line 522 "StatisticsModule.cs"
+                    if (!(((csharp2cuda_temp_118) <= (0))))
                     {
-#line 521 "StatisticsModule.cs"
-                        int csharp2cuda_temp_119 = (first)->count;
-#line 521 "StatisticsModule.cs"
-                        int csharp2cuda_temp_120 = (second)->count;
-#line 521 "StatisticsModule.cs"
-                        csharp2cuda_temp_118 = ((csharp2cuda_temp_119) != (csharp2cuda_temp_120));
+#line 522 "StatisticsModule.cs"
+                        int csharp2cuda_temp_120 = (first)->count;
+#line 522 "StatisticsModule.cs"
+                        int csharp2cuda_temp_121 = (second)->count;
+#line 522 "StatisticsModule.cs"
+                        csharp2cuda_temp_119 = ((csharp2cuda_temp_120) != (csharp2cuda_temp_121));
                     }
                     else
                     {
-#line 521 "StatisticsModule.cs"
-                        csharp2cuda_temp_118 = true;
-                    }
-                    if (csharp2cuda_temp_118)
 #line 522 "StatisticsModule.cs"
+                        csharp2cuda_temp_119 = true;
+                    }
+                    if (csharp2cuda_temp_119)
+#line 523 "StatisticsModule.cs"
                     {
-#line 523 "StatisticsModule.cs"
-#line 523 "StatisticsModule.cs"
-                        int* csharp2cuda_temp_121 = &((output)->valid);
-                        (*(csharp2cuda_temp_121) = 0);
 #line 524 "StatisticsModule.cs"
+#line 524 "StatisticsModule.cs"
+                        int* csharp2cuda_temp_122 = &((output)->valid);
+                        (*(csharp2cuda_temp_122) = 0);
+#line 525 "StatisticsModule.cs"
                         break;
                     }
-#line 526 "StatisticsModule.cs"
-                    int csharp2cuda_temp_122 = (first)->count;
-#line 526 "StatisticsModule.cs"
-                    double covariance = mathblocks_statistics_population_covariance(a, b, csharp2cuda_temp_122);
 #line 527 "StatisticsModule.cs"
+                    int csharp2cuda_temp_123 = (first)->count;
 #line 527 "StatisticsModule.cs"
-                    bool csharp2cuda_temp_123;
-#line 527 "StatisticsModule.cs"
+                    double covariance = mathblocks_statistics_population_covariance(a, b, csharp2cuda_temp_123);
+#line 528 "StatisticsModule.cs"
+#line 528 "StatisticsModule.cs"
+                    bool csharp2cuda_temp_124;
+#line 528 "StatisticsModule.cs"
                     if (!(((opcode) == (12))))
                     {
-#line 527 "StatisticsModule.cs"
-                        csharp2cuda_temp_123 = ((opcode) == (20));
+#line 528 "StatisticsModule.cs"
+                        csharp2cuda_temp_124 = ((opcode) == (20));
                     }
                     else
                     {
-#line 527 "StatisticsModule.cs"
-                        csharp2cuda_temp_123 = true;
-                    }
-                    if (csharp2cuda_temp_123)
 #line 528 "StatisticsModule.cs"
+                        csharp2cuda_temp_124 = true;
+                    }
+                    if (csharp2cuda_temp_124)
+#line 529 "StatisticsModule.cs"
                     {
-#line 529 "StatisticsModule.cs"
-#line 529 "StatisticsModule.cs"
-                        double* csharp2cuda_temp_124 = &((output)->scalar_value);
-#line 529 "StatisticsModule.cs"
-                        double csharp2cuda_temp_125;
-#line 529 "StatisticsModule.cs"
+#line 530 "StatisticsModule.cs"
+#line 530 "StatisticsModule.cs"
+                        double* csharp2cuda_temp_125 = &((output)->scalar_value);
+#line 530 "StatisticsModule.cs"
+                        double csharp2cuda_temp_126;
+#line 530 "StatisticsModule.cs"
                         if (((opcode) == (12)))
                         {
-#line 529 "StatisticsModule.cs"
-                            csharp2cuda_temp_125 = covariance;
+#line 530 "StatisticsModule.cs"
+                            csharp2cuda_temp_126 = covariance;
                         }
                         else
                         {
-#line 531 "StatisticsModule.cs"
-                            int csharp2cuda_temp_126 = (first)->count;
-#line 531 "StatisticsModule.cs"
+#line 532 "StatisticsModule.cs"
                             int csharp2cuda_temp_127 = (first)->count;
-#line 529 "StatisticsModule.cs"
-                            csharp2cuda_temp_125 = __ddiv_rn(__dmul_rn(covariance, ((double)(csharp2cuda_temp_126))), __dsub_rn(((double)(csharp2cuda_temp_127)), 1.0));
+#line 532 "StatisticsModule.cs"
+                            int csharp2cuda_temp_128 = (first)->count;
+#line 530 "StatisticsModule.cs"
+                            csharp2cuda_temp_126 = __ddiv_rn(__dmul_rn(covariance, ((double)(csharp2cuda_temp_127))), __dsub_rn(((double)(csharp2cuda_temp_128)), 1.0));
                         }
-                        (*(csharp2cuda_temp_124) = csharp2cuda_temp_125);
+                        (*(csharp2cuda_temp_125) = csharp2cuda_temp_126);
                     }
                     else
                     {
-#line 533 "StatisticsModule.cs"
-                        if (((opcode) == (9)))
 #line 534 "StatisticsModule.cs"
+                        if (((opcode) == (9)))
+#line 535 "StatisticsModule.cs"
                         {
-#line 535 "StatisticsModule.cs"
-#line 535 "StatisticsModule.cs"
-                            double* csharp2cuda_temp_128 = &((output)->scalar_value);
 #line 536 "StatisticsModule.cs"
-                            int csharp2cuda_temp_129 = (first)->count;
 #line 536 "StatisticsModule.cs"
-                            double csharp2cuda_temp_130 = mathblocks_statistics_population_variance(a, csharp2cuda_temp_129);
-#line 535 "StatisticsModule.cs"
-                            double csharp2cuda_temp_131 = __ddiv_rn(covariance, csharp2cuda_temp_130);
-                            (*(csharp2cuda_temp_128) = csharp2cuda_temp_131);
+                            double* csharp2cuda_temp_129 = &((output)->scalar_value);
+#line 537 "StatisticsModule.cs"
+                            int csharp2cuda_temp_130 = (first)->count;
+#line 537 "StatisticsModule.cs"
+                            double csharp2cuda_temp_131 = mathblocks_statistics_population_variance(a, csharp2cuda_temp_130);
+#line 536 "StatisticsModule.cs"
+                            double csharp2cuda_temp_132 = __ddiv_rn(covariance, csharp2cuda_temp_131);
+                            (*(csharp2cuda_temp_129) = csharp2cuda_temp_132);
                         }
                         else
                         {
-#line 538 "StatisticsModule.cs"
-                            if (((opcode) == (7)))
 #line 539 "StatisticsModule.cs"
-                            {
-#line 541 "StatisticsModule.cs"
-                                int csharp2cuda_temp_132 = (first)->count;
-#line 541 "StatisticsModule.cs"
-                                double csharp2cuda_temp_133 = mathblocks_statistics_population_variance(a, csharp2cuda_temp_132);
+                            if (((opcode) == (7)))
 #line 540 "StatisticsModule.cs"
-                                double slope = __ddiv_rn(covariance, csharp2cuda_temp_133);
+                            {
 #line 542 "StatisticsModule.cs"
+                                int csharp2cuda_temp_133 = (first)->count;
 #line 542 "StatisticsModule.cs"
-                                double* csharp2cuda_temp_134 = &((output)->scalar_value);
-#line 542 "StatisticsModule.cs"
-                                int csharp2cuda_temp_135 = (first)->count;
-#line 542 "StatisticsModule.cs"
-                                double csharp2cuda_temp_136 = mathblocks_statistics_mean(b, csharp2cuda_temp_135);
+                                double csharp2cuda_temp_134 = mathblocks_statistics_population_variance(a, csharp2cuda_temp_133);
+#line 541 "StatisticsModule.cs"
+                                double slope = __ddiv_rn(covariance, csharp2cuda_temp_134);
 #line 543 "StatisticsModule.cs"
-                                int csharp2cuda_temp_137 = (first)->count;
 #line 543 "StatisticsModule.cs"
-                                double csharp2cuda_temp_138 = mathblocks_statistics_mean(a, csharp2cuda_temp_137);
-                                (*(csharp2cuda_temp_134) = __dsub_rn(csharp2cuda_temp_136, __dmul_rn(slope, csharp2cuda_temp_138)));
+                                double* csharp2cuda_temp_135 = &((output)->scalar_value);
+#line 543 "StatisticsModule.cs"
+                                int csharp2cuda_temp_136 = (first)->count;
+#line 543 "StatisticsModule.cs"
+                                double csharp2cuda_temp_137 = mathblocks_statistics_mean(b, csharp2cuda_temp_136);
+#line 544 "StatisticsModule.cs"
+                                int csharp2cuda_temp_138 = (first)->count;
+#line 544 "StatisticsModule.cs"
+                                double csharp2cuda_temp_139 = mathblocks_statistics_mean(a, csharp2cuda_temp_138);
+                                (*(csharp2cuda_temp_135) = __dsub_rn(csharp2cuda_temp_137, __dmul_rn(slope, csharp2cuda_temp_139)));
                             }
                             else
-#line 546 "StatisticsModule.cs"
-                            {
-#line 548 "StatisticsModule.cs"
-                                int csharp2cuda_temp_139 = (first)->count;
-#line 548 "StatisticsModule.cs"
-                                double csharp2cuda_temp_140 = mathblocks_statistics_population_variance(a, csharp2cuda_temp_139);
-#line 549 "StatisticsModule.cs"
-                                int csharp2cuda_temp_141 = (first)->count;
-#line 549 "StatisticsModule.cs"
-                                double csharp2cuda_temp_142 = mathblocks_statistics_population_variance(b, csharp2cuda_temp_141);
 #line 547 "StatisticsModule.cs"
-                                double correlation = __ddiv_rn(covariance, __dmul_rn(mathblocks_square_root(csharp2cuda_temp_140), mathblocks_square_root(csharp2cuda_temp_142)));
+                            {
+#line 549 "StatisticsModule.cs"
+                                int csharp2cuda_temp_140 = (first)->count;
+#line 549 "StatisticsModule.cs"
+                                double csharp2cuda_temp_141 = mathblocks_statistics_population_variance(a, csharp2cuda_temp_140);
 #line 550 "StatisticsModule.cs"
+                                int csharp2cuda_temp_142 = (first)->count;
 #line 550 "StatisticsModule.cs"
-                                double* csharp2cuda_temp_143 = &((output)->scalar_value);
-#line 550 "StatisticsModule.cs"
-                                double csharp2cuda_temp_144;
-#line 550 "StatisticsModule.cs"
+                                double csharp2cuda_temp_143 = mathblocks_statistics_population_variance(b, csharp2cuda_temp_142);
+#line 548 "StatisticsModule.cs"
+                                double correlation = __ddiv_rn(covariance, __dmul_rn(mathblocks_square_root(csharp2cuda_temp_141), mathblocks_square_root(csharp2cuda_temp_143)));
+#line 551 "StatisticsModule.cs"
+#line 551 "StatisticsModule.cs"
+                                double* csharp2cuda_temp_144 = &((output)->scalar_value);
+#line 551 "StatisticsModule.cs"
+                                double csharp2cuda_temp_145;
+#line 551 "StatisticsModule.cs"
                                 if (((opcode) == (8)))
                                 {
-#line 550 "StatisticsModule.cs"
-                                    csharp2cuda_temp_144 = __dmul_rn(correlation, correlation);
+#line 551 "StatisticsModule.cs"
+                                    csharp2cuda_temp_145 = __dmul_rn(correlation, correlation);
                                 }
                                 else
                                 {
-#line 550 "StatisticsModule.cs"
-                                    csharp2cuda_temp_144 = correlation;
+#line 551 "StatisticsModule.cs"
+                                    csharp2cuda_temp_145 = correlation;
                                 }
-                                (*(csharp2cuda_temp_143) = csharp2cuda_temp_144);
+                                (*(csharp2cuda_temp_144) = csharp2cuda_temp_145);
                             }
                         }
                     }
-#line 552 "StatisticsModule.cs"
+#line 553 "StatisticsModule.cs"
                     break;
                 }
-#line 554 "StatisticsModule.cs"
-            case 10:
 #line 555 "StatisticsModule.cs"
+            case 10:
+#line 556 "StatisticsModule.cs"
                 {
-#line 556 "StatisticsModule.cs"
-#line 556 "StatisticsModule.cs"
-                    int csharp2cuda_temp_145 = (first)->count;
-#line 556 "StatisticsModule.cs"
-                    bool csharp2cuda_temp_146;
-#line 556 "StatisticsModule.cs"
-                    if (!(((csharp2cuda_temp_145) <= (0))))
+#line 557 "StatisticsModule.cs"
+#line 557 "StatisticsModule.cs"
+                    int csharp2cuda_temp_146 = (first)->count;
+#line 557 "StatisticsModule.cs"
+                    bool csharp2cuda_temp_147;
+#line 557 "StatisticsModule.cs"
+                    if (!(((csharp2cuda_temp_146) <= (0))))
                     {
-#line 556 "StatisticsModule.cs"
-                        csharp2cuda_temp_146 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 557 "StatisticsModule.cs"
+                        csharp2cuda_temp_147 = ((((void*)(scratch))) == (((void*)(nullptr))));
                     }
                     else
                     {
-#line 556 "StatisticsModule.cs"
-                        csharp2cuda_temp_146 = true;
-                    }
-                    if (csharp2cuda_temp_146)
 #line 557 "StatisticsModule.cs"
+                        csharp2cuda_temp_147 = true;
+                    }
+                    if (csharp2cuda_temp_147)
+#line 558 "StatisticsModule.cs"
                     {
-#line 558 "StatisticsModule.cs"
-#line 558 "StatisticsModule.cs"
-                        int* csharp2cuda_temp_147 = &((output)->valid);
-                        (*(csharp2cuda_temp_147) = 0);
 #line 559 "StatisticsModule.cs"
+#line 559 "StatisticsModule.cs"
+                        int* csharp2cuda_temp_148 = &((output)->valid);
+                        (*(csharp2cuda_temp_148) = 0);
+#line 560 "StatisticsModule.cs"
                         break;
                     }
-#line 561 "StatisticsModule.cs"
+#line 562 "StatisticsModule.cs"
                     double* sorted = scratch;
-#line 562 "StatisticsModule.cs"
-                    int csharp2cuda_temp_148 = (first)->count;
-#line 562 "StatisticsModule.cs"
-                    double* deviations = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_148);
-#line 563 "StatisticsModule.cs"
 #line 563 "StatisticsModule.cs"
                     int csharp2cuda_temp_149 = (first)->count;
-                    mathblocks_statistics_sort_copy(a, csharp2cuda_temp_149, sorted);
+#line 563 "StatisticsModule.cs"
+                    double* deviations = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_149);
+#line 564 "StatisticsModule.cs"
 #line 564 "StatisticsModule.cs"
                     int csharp2cuda_temp_150 = (first)->count;
-#line 564 "StatisticsModule.cs"
-                    double median = mathblocks_statistics_sorted_quantile(sorted, csharp2cuda_temp_150, 0.5);
+                    mathblocks_statistics_sort_copy(a, csharp2cuda_temp_150, sorted);
 #line 565 "StatisticsModule.cs"
+                    int csharp2cuda_temp_151 = (first)->count;
+#line 565 "StatisticsModule.cs"
+                    double median = mathblocks_statistics_sorted_quantile(sorted, csharp2cuda_temp_151, 0.5);
+#line 566 "StatisticsModule.cs"
                     {
-#line 565 "StatisticsModule.cs"
+#line 566 "StatisticsModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 565 "StatisticsModule.cs"
-                            int csharp2cuda_temp_152 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_152))))
+#line 566 "StatisticsModule.cs"
+                            int csharp2cuda_temp_153 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_153))))
                                 break;
+#line 567 "StatisticsModule.cs"
+#line 567 "StatisticsModule.cs"
+                            double* csharp2cuda_temp_154 = &((deviations)[index]);
+#line 567 "StatisticsModule.cs"
+                            double csharp2cuda_temp_155 = (a)[index];
+                            (*(csharp2cuda_temp_154) = fabs(__dsub_rn(csharp2cuda_temp_155, median)));
 #line 566 "StatisticsModule.cs"
-#line 566 "StatisticsModule.cs"
-                            double* csharp2cuda_temp_153 = &((deviations)[index]);
-#line 566 "StatisticsModule.cs"
-                            double csharp2cuda_temp_154 = (a)[index];
-                            (*(csharp2cuda_temp_153) = fabs(__dsub_rn(csharp2cuda_temp_154, median)));
-#line 565 "StatisticsModule.cs"
-                            int* csharp2cuda_temp_151 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_151));
+                            int* csharp2cuda_temp_152 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_152));
                         }
                     }
-#line 567 "StatisticsModule.cs"
-#line 567 "StatisticsModule.cs"
-                    int csharp2cuda_temp_155 = (first)->count;
-                    mathblocks_statistics_sort_copy(deviations, csharp2cuda_temp_155, sorted);
 #line 568 "StatisticsModule.cs"
 #line 568 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_156 = &((output)->scalar_value);
-#line 568 "StatisticsModule.cs"
-                    int csharp2cuda_temp_157 = (first)->count;
-#line 568 "StatisticsModule.cs"
-                    double csharp2cuda_temp_158 = mathblocks_statistics_sorted_quantile(sorted, csharp2cuda_temp_157, 0.5);
-                    (*(csharp2cuda_temp_156) = csharp2cuda_temp_158);
+                    int csharp2cuda_temp_156 = (first)->count;
+                    mathblocks_statistics_sort_copy(deviations, csharp2cuda_temp_156, sorted);
 #line 569 "StatisticsModule.cs"
+#line 569 "StatisticsModule.cs"
+                    double* csharp2cuda_temp_157 = &((output)->scalar_value);
+#line 569 "StatisticsModule.cs"
+                    int csharp2cuda_temp_158 = (first)->count;
+#line 569 "StatisticsModule.cs"
+                    double csharp2cuda_temp_159 = mathblocks_statistics_sorted_quantile(sorted, csharp2cuda_temp_158, 0.5);
+                    (*(csharp2cuda_temp_157) = csharp2cuda_temp_159);
+#line 570 "StatisticsModule.cs"
                     break;
                 }
-#line 571 "StatisticsModule.cs"
+#line 572 "StatisticsModule.cs"
             case 13:
             case 14:
-#line 573 "StatisticsModule.cs"
-#line 575 "StatisticsModule.cs"
-                int csharp2cuda_temp_159 = (first)->count;
-#line 577 "StatisticsModule.cs"
-                double* csharp2cuda_temp_160 = &((output)->scalar_value);
-#line 573 "StatisticsModule.cs"
-                bool csharp2cuda_temp_161 = mathblocks_statistics_shape_moment_value(a, csharp2cuda_temp_159, ((opcode) == (13)), csharp2cuda_temp_160);
-                if ((!(csharp2cuda_temp_161)))
+#line 574 "StatisticsModule.cs"
+#line 576 "StatisticsModule.cs"
+                int csharp2cuda_temp_160 = (first)->count;
+#line 578 "StatisticsModule.cs"
+                double* csharp2cuda_temp_161 = &((output)->scalar_value);
+#line 574 "StatisticsModule.cs"
+                bool csharp2cuda_temp_162 = mathblocks_statistics_shape_moment_value(a, csharp2cuda_temp_160, ((opcode) == (13)), csharp2cuda_temp_161);
+                if ((!(csharp2cuda_temp_162)))
                 {
-#line 578 "StatisticsModule.cs"
-#line 578 "StatisticsModule.cs"
-                    int* csharp2cuda_temp_162 = &((output)->valid);
-                    (*(csharp2cuda_temp_162) = 0);
-                }
 #line 579 "StatisticsModule.cs"
-                break;
+#line 579 "StatisticsModule.cs"
+                    int* csharp2cuda_temp_163 = &((output)->valid);
+                    (*(csharp2cuda_temp_163) = 0);
+                }
 #line 580 "StatisticsModule.cs"
+                break;
+#line 581 "StatisticsModule.cs"
             case 15:
             case 16:
             case 21:
             case 22:
-#line 584 "StatisticsModule.cs"
+#line 585 "StatisticsModule.cs"
                 {
-#line 585 "StatisticsModule.cs"
-#line 585 "StatisticsModule.cs"
-                    int csharp2cuda_temp_163 = (first)->count;
-                    if (((csharp2cuda_temp_163) <= (0)))
 #line 586 "StatisticsModule.cs"
+#line 586 "StatisticsModule.cs"
+                    int csharp2cuda_temp_164 = (first)->count;
+                    if (((csharp2cuda_temp_164) <= (0)))
+#line 587 "StatisticsModule.cs"
                     {
-#line 587 "StatisticsModule.cs"
-#line 587 "StatisticsModule.cs"
-                        int* csharp2cuda_temp_164 = &((output)->valid);
-                        (*(csharp2cuda_temp_164) = 0);
 #line 588 "StatisticsModule.cs"
+#line 588 "StatisticsModule.cs"
+                        int* csharp2cuda_temp_165 = &((output)->valid);
+                        (*(csharp2cuda_temp_165) = 0);
+#line 589 "StatisticsModule.cs"
                         break;
                     }
-#line 590 "StatisticsModule.cs"
-                    int csharp2cuda_temp_165 = (first)->count;
-#line 590 "StatisticsModule.cs"
-                    double variance = mathblocks_statistics_population_variance(a, csharp2cuda_temp_165);
 #line 591 "StatisticsModule.cs"
+                    int csharp2cuda_temp_166 = (first)->count;
 #line 591 "StatisticsModule.cs"
-                    bool csharp2cuda_temp_166;
-#line 591 "StatisticsModule.cs"
+                    double variance = mathblocks_statistics_population_variance(a, csharp2cuda_temp_166);
+#line 592 "StatisticsModule.cs"
+#line 592 "StatisticsModule.cs"
+                    bool csharp2cuda_temp_167;
+#line 592 "StatisticsModule.cs"
                     if (!(((opcode) == (21))))
                     {
-#line 591 "StatisticsModule.cs"
-                        csharp2cuda_temp_166 = ((opcode) == (22));
+#line 592 "StatisticsModule.cs"
+                        csharp2cuda_temp_167 = ((opcode) == (22));
                     }
                     else
                     {
-#line 591 "StatisticsModule.cs"
-                        csharp2cuda_temp_166 = true;
+#line 592 "StatisticsModule.cs"
+                        csharp2cuda_temp_167 = true;
                     }
-                    if (csharp2cuda_temp_166)
+                    if (csharp2cuda_temp_167)
                     {
-#line 592 "StatisticsModule.cs"
-#line 592 "StatisticsModule.cs"
-                        double* csharp2cuda_temp_167 = &(variance);
-#line 592 "StatisticsModule.cs"
-                        int csharp2cuda_temp_168 = (first)->count;
-#line 592 "StatisticsModule.cs"
+#line 593 "StatisticsModule.cs"
+#line 593 "StatisticsModule.cs"
+                        double* csharp2cuda_temp_168 = &(variance);
+#line 593 "StatisticsModule.cs"
                         int csharp2cuda_temp_169 = (first)->count;
-#line 592 "StatisticsModule.cs"
-                        double csharp2cuda_temp_170 = __ddiv_rn(__dmul_rn(variance, ((double)(csharp2cuda_temp_168))), __dsub_rn(((double)(csharp2cuda_temp_169)), 1.0));
-                        (*(csharp2cuda_temp_167) = csharp2cuda_temp_170);
+#line 593 "StatisticsModule.cs"
+                        int csharp2cuda_temp_170 = (first)->count;
+#line 593 "StatisticsModule.cs"
+                        double csharp2cuda_temp_171 = __ddiv_rn(__dmul_rn(variance, ((double)(csharp2cuda_temp_169))), __dsub_rn(((double)(csharp2cuda_temp_170)), 1.0));
+                        (*(csharp2cuda_temp_168) = csharp2cuda_temp_171);
                     }
-#line 593 "StatisticsModule.cs"
-#line 593 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_171 = &((output)->scalar_value);
-#line 593 "StatisticsModule.cs"
-                    bool csharp2cuda_temp_172;
-#line 593 "StatisticsModule.cs"
+#line 594 "StatisticsModule.cs"
+#line 594 "StatisticsModule.cs"
+                    double* csharp2cuda_temp_172 = &((output)->scalar_value);
+#line 594 "StatisticsModule.cs"
+                    bool csharp2cuda_temp_173;
+#line 594 "StatisticsModule.cs"
                     if (!(((opcode) == (15))))
                     {
-#line 593 "StatisticsModule.cs"
-                        csharp2cuda_temp_172 = ((opcode) == (21));
+#line 594 "StatisticsModule.cs"
+                        csharp2cuda_temp_173 = ((opcode) == (21));
                     }
                     else
                     {
-#line 593 "StatisticsModule.cs"
-                        csharp2cuda_temp_172 = true;
+#line 594 "StatisticsModule.cs"
+                        csharp2cuda_temp_173 = true;
                     }
-#line 593 "StatisticsModule.cs"
-                    double csharp2cuda_temp_173;
-#line 593 "StatisticsModule.cs"
-                    if (csharp2cuda_temp_172)
+#line 594 "StatisticsModule.cs"
+                    double csharp2cuda_temp_174;
+#line 594 "StatisticsModule.cs"
+                    if (csharp2cuda_temp_173)
                     {
-#line 593 "StatisticsModule.cs"
-                        csharp2cuda_temp_173 = mathblocks_square_root(variance);
+#line 594 "StatisticsModule.cs"
+                        csharp2cuda_temp_174 = mathblocks_square_root(variance);
                     }
                     else
                     {
-#line 593 "StatisticsModule.cs"
-                        csharp2cuda_temp_173 = variance;
+#line 594 "StatisticsModule.cs"
+                        csharp2cuda_temp_174 = variance;
                     }
-                    (*(csharp2cuda_temp_171) = csharp2cuda_temp_173);
-#line 596 "StatisticsModule.cs"
+                    (*(csharp2cuda_temp_172) = csharp2cuda_temp_174);
+#line 597 "StatisticsModule.cs"
                     break;
                 }
-#line 598 "StatisticsModule.cs"
-            case 17:
 #line 599 "StatisticsModule.cs"
+            case 17:
+#line 600 "StatisticsModule.cs"
                 {
-#line 600 "StatisticsModule.cs"
-#line 600 "StatisticsModule.cs"
-                    int csharp2cuda_temp_174 = (first)->count;
-#line 600 "StatisticsModule.cs"
-                    bool csharp2cuda_temp_175;
-#line 600 "StatisticsModule.cs"
-                    if (!(((csharp2cuda_temp_174) <= (0))))
+#line 601 "StatisticsModule.cs"
+#line 601 "StatisticsModule.cs"
+                    int csharp2cuda_temp_175 = (first)->count;
+#line 601 "StatisticsModule.cs"
+                    bool csharp2cuda_temp_176;
+#line 601 "StatisticsModule.cs"
+                    if (!(((csharp2cuda_temp_175) <= (0))))
                     {
-#line 600 "StatisticsModule.cs"
-                        csharp2cuda_temp_175 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 601 "StatisticsModule.cs"
+                        csharp2cuda_temp_176 = ((((void*)(scratch))) == (((void*)(nullptr))));
                     }
                     else
                     {
-#line 600 "StatisticsModule.cs"
-                        csharp2cuda_temp_175 = true;
-                    }
-                    if (csharp2cuda_temp_175)
 #line 601 "StatisticsModule.cs"
+                        csharp2cuda_temp_176 = true;
+                    }
+                    if (csharp2cuda_temp_176)
+#line 602 "StatisticsModule.cs"
                     {
-#line 602 "StatisticsModule.cs"
-#line 602 "StatisticsModule.cs"
-                        int* csharp2cuda_temp_176 = &((output)->valid);
-                        (*(csharp2cuda_temp_176) = 0);
 #line 603 "StatisticsModule.cs"
+#line 603 "StatisticsModule.cs"
+                        int* csharp2cuda_temp_177 = &((output)->valid);
+                        (*(csharp2cuda_temp_177) = 0);
+#line 604 "StatisticsModule.cs"
                         break;
                     }
-#line 605 "StatisticsModule.cs"
-                    int csharp2cuda_temp_177 = (first)->count;
-#line 605 "StatisticsModule.cs"
-                    int count = mathblocks_statistics_pair_averages(a, csharp2cuda_temp_177, scratch);
 #line 606 "StatisticsModule.cs"
+                    int csharp2cuda_temp_178 = (first)->count;
 #line 606 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_178 = &((output)->scalar_value);
-#line 606 "StatisticsModule.cs"
-                    double csharp2cuda_temp_179 = mathblocks_statistics_median(scratch, count);
-                    (*(csharp2cuda_temp_178) = csharp2cuda_temp_179);
+                    int count = mathblocks_statistics_pair_averages(a, csharp2cuda_temp_178, scratch);
 #line 607 "StatisticsModule.cs"
+#line 607 "StatisticsModule.cs"
+                    double* csharp2cuda_temp_179 = &((output)->scalar_value);
+#line 607 "StatisticsModule.cs"
+                    double csharp2cuda_temp_180 = mathblocks_statistics_median(scratch, count);
+                    (*(csharp2cuda_temp_179) = csharp2cuda_temp_180);
+#line 608 "StatisticsModule.cs"
                     break;
                 }
-#line 609 "StatisticsModule.cs"
+#line 610 "StatisticsModule.cs"
             case 19:
-#line 610 "StatisticsModule.cs"
-#line 610 "StatisticsModule.cs"
-                double* csharp2cuda_temp_180 = &((output)->scalar_value);
 #line 611 "StatisticsModule.cs"
-                int csharp2cuda_temp_181 = (first)->count;
 #line 611 "StatisticsModule.cs"
-                int csharp2cuda_temp_182 = (first)->count;
-#line 611 "StatisticsModule.cs"
-                double csharp2cuda_temp_183 = __ddiv_rn(mathblocks_compensated_product_sum(a, a, csharp2cuda_temp_181), ((double)(csharp2cuda_temp_182)));
-                (*(csharp2cuda_temp_180) = mathblocks_square_root(csharp2cuda_temp_183));
+                double* csharp2cuda_temp_181 = &((output)->scalar_value);
 #line 612 "StatisticsModule.cs"
-                break;
+                int csharp2cuda_temp_182 = (first)->count;
+#line 612 "StatisticsModule.cs"
+                int csharp2cuda_temp_183 = (first)->count;
+#line 612 "StatisticsModule.cs"
+                double csharp2cuda_temp_184 = __ddiv_rn(mathblocks_compensated_product_sum(a, a, csharp2cuda_temp_182), ((double)(csharp2cuda_temp_183)));
+                (*(csharp2cuda_temp_181) = mathblocks_square_root(csharp2cuda_temp_184));
 #line 613 "StatisticsModule.cs"
-            case 23:
+                break;
 #line 614 "StatisticsModule.cs"
+            case 23:
+#line 615 "StatisticsModule.cs"
                 {
-#line 615 "StatisticsModule.cs"
-#line 615 "StatisticsModule.cs"
-                    int csharp2cuda_temp_184 = (first)->count;
-#line 615 "StatisticsModule.cs"
-                    bool csharp2cuda_temp_185;
-#line 615 "StatisticsModule.cs"
-                    if (!(((csharp2cuda_temp_184) <= (0))))
-                    {
-#line 615 "StatisticsModule.cs"
-                        int csharp2cuda_temp_186 = (first)->count;
-#line 615 "StatisticsModule.cs"
-                        int csharp2cuda_temp_187 = (second)->count;
-#line 615 "StatisticsModule.cs"
-                        csharp2cuda_temp_185 = ((csharp2cuda_temp_186) != (csharp2cuda_temp_187));
-                    }
-                    else
-                    {
-#line 615 "StatisticsModule.cs"
-                        csharp2cuda_temp_185 = true;
-                    }
-#line 615 "StatisticsModule.cs"
-                    bool csharp2cuda_temp_188;
-#line 615 "StatisticsModule.cs"
-                    if (!(csharp2cuda_temp_185))
-                    {
-#line 615 "StatisticsModule.cs"
-                        csharp2cuda_temp_188 = ((((void*)(scratch))) == (((void*)(nullptr))));
-                    }
-                    else
-                    {
-#line 615 "StatisticsModule.cs"
-                        csharp2cuda_temp_188 = true;
-                    }
-                    if (csharp2cuda_temp_188)
 #line 616 "StatisticsModule.cs"
+#line 616 "StatisticsModule.cs"
+                    int csharp2cuda_temp_185 = (first)->count;
+#line 616 "StatisticsModule.cs"
+                    bool csharp2cuda_temp_186;
+#line 616 "StatisticsModule.cs"
+                    if (!(((csharp2cuda_temp_185) <= (0))))
                     {
+#line 616 "StatisticsModule.cs"
+                        int csharp2cuda_temp_187 = (first)->count;
+#line 616 "StatisticsModule.cs"
+                        int csharp2cuda_temp_188 = (second)->count;
+#line 616 "StatisticsModule.cs"
+                        csharp2cuda_temp_186 = ((csharp2cuda_temp_187) != (csharp2cuda_temp_188));
+                    }
+                    else
+                    {
+#line 616 "StatisticsModule.cs"
+                        csharp2cuda_temp_186 = true;
+                    }
+#line 616 "StatisticsModule.cs"
+                    bool csharp2cuda_temp_189;
+#line 616 "StatisticsModule.cs"
+                    if (!(csharp2cuda_temp_186))
+                    {
+#line 616 "StatisticsModule.cs"
+                        csharp2cuda_temp_189 = ((((void*)(scratch))) == (((void*)(nullptr))));
+                    }
+                    else
+                    {
+#line 616 "StatisticsModule.cs"
+                        csharp2cuda_temp_189 = true;
+                    }
+                    if (csharp2cuda_temp_189)
 #line 617 "StatisticsModule.cs"
-#line 617 "StatisticsModule.cs"
-                        int* csharp2cuda_temp_189 = &((output)->valid);
-                        (*(csharp2cuda_temp_189) = 0);
+                    {
 #line 618 "StatisticsModule.cs"
+#line 618 "StatisticsModule.cs"
+                        int* csharp2cuda_temp_190 = &((output)->valid);
+                        (*(csharp2cuda_temp_190) = 0);
+#line 619 "StatisticsModule.cs"
                         break;
                     }
-#line 620 "StatisticsModule.cs"
+#line 621 "StatisticsModule.cs"
                     double* left_ranks = scratch;
-#line 621 "StatisticsModule.cs"
-                    int csharp2cuda_temp_190 = (first)->count;
-#line 621 "StatisticsModule.cs"
-                    double* right_ranks = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_190);
-#line 622 "StatisticsModule.cs"
 #line 622 "StatisticsModule.cs"
                     int csharp2cuda_temp_191 = (first)->count;
-                    mathblocks_statistics_rank(a, csharp2cuda_temp_191, left_ranks);
+#line 622 "StatisticsModule.cs"
+                    double* right_ranks = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_191);
 #line 623 "StatisticsModule.cs"
 #line 623 "StatisticsModule.cs"
                     int csharp2cuda_temp_192 = (first)->count;
-                    mathblocks_statistics_rank(b, csharp2cuda_temp_192, right_ranks);
+                    mathblocks_statistics_rank(a, csharp2cuda_temp_192, left_ranks);
 #line 624 "StatisticsModule.cs"
 #line 624 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_193 = &((output)->scalar_value);
-#line 627 "StatisticsModule.cs"
-                    int csharp2cuda_temp_194 = (first)->count;
-#line 624 "StatisticsModule.cs"
-                    double csharp2cuda_temp_195 = mathblocks_statistics_pearson(left_ranks, right_ranks, csharp2cuda_temp_194);
-                    (*(csharp2cuda_temp_193) = csharp2cuda_temp_195);
+                    int csharp2cuda_temp_193 = (first)->count;
+                    mathblocks_statistics_rank(b, csharp2cuda_temp_193, right_ranks);
+#line 625 "StatisticsModule.cs"
+#line 625 "StatisticsModule.cs"
+                    double* csharp2cuda_temp_194 = &((output)->scalar_value);
 #line 628 "StatisticsModule.cs"
+                    int csharp2cuda_temp_195 = (first)->count;
+#line 625 "StatisticsModule.cs"
+                    double csharp2cuda_temp_196 = mathblocks_statistics_pearson(left_ranks, right_ranks, csharp2cuda_temp_195);
+                    (*(csharp2cuda_temp_194) = csharp2cuda_temp_196);
+#line 629 "StatisticsModule.cs"
                     break;
                 }
-#line 630 "StatisticsModule.cs"
-            case 24:
 #line 631 "StatisticsModule.cs"
+            case 24:
+#line 632 "StatisticsModule.cs"
                 {
-#line 632 "StatisticsModule.cs"
-#line 632 "StatisticsModule.cs"
-                    int csharp2cuda_temp_196 = (first)->count;
-#line 632 "StatisticsModule.cs"
-                    int csharp2cuda_temp_197 = (second)->count;
-#line 632 "StatisticsModule.cs"
-                    bool csharp2cuda_temp_198;
-#line 632 "StatisticsModule.cs"
-                    if (!(((csharp2cuda_temp_196) != (csharp2cuda_temp_197))))
+#line 633 "StatisticsModule.cs"
+#line 633 "StatisticsModule.cs"
+                    int csharp2cuda_temp_197 = (first)->count;
+#line 633 "StatisticsModule.cs"
+                    int csharp2cuda_temp_198 = (second)->count;
+#line 633 "StatisticsModule.cs"
+                    bool csharp2cuda_temp_199;
+#line 633 "StatisticsModule.cs"
+                    if (!(((csharp2cuda_temp_197) != (csharp2cuda_temp_198))))
                     {
-#line 632 "StatisticsModule.cs"
-                        csharp2cuda_temp_198 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 633 "StatisticsModule.cs"
+                        csharp2cuda_temp_199 = ((((void*)(scratch))) == (((void*)(nullptr))));
                     }
                     else
                     {
-#line 632 "StatisticsModule.cs"
-                        csharp2cuda_temp_198 = true;
-                    }
-                    if (csharp2cuda_temp_198)
 #line 633 "StatisticsModule.cs"
+                        csharp2cuda_temp_199 = true;
+                    }
+                    if (csharp2cuda_temp_199)
+#line 634 "StatisticsModule.cs"
                     {
-#line 634 "StatisticsModule.cs"
-#line 634 "StatisticsModule.cs"
-                        int* csharp2cuda_temp_199 = &((output)->valid);
-                        (*(csharp2cuda_temp_199) = 0);
 #line 635 "StatisticsModule.cs"
+#line 635 "StatisticsModule.cs"
+                        int* csharp2cuda_temp_200 = &((output)->valid);
+                        (*(csharp2cuda_temp_200) = 0);
+#line 636 "StatisticsModule.cs"
                         break;
                     }
-#line 637 "StatisticsModule.cs"
-                    int csharp2cuda_temp_200 = (first)->count;
-#line 637 "StatisticsModule.cs"
-                    int count = mathblocks_statistics_pair_slopes(a, b, csharp2cuda_temp_200, scratch);
 #line 638 "StatisticsModule.cs"
+                    int csharp2cuda_temp_201 = (first)->count;
+#line 638 "StatisticsModule.cs"
+                    int count = mathblocks_statistics_pair_slopes(a, b, csharp2cuda_temp_201, scratch);
+#line 639 "StatisticsModule.cs"
                     if (((count) == (0)))
                     {
-#line 639 "StatisticsModule.cs"
-#line 639 "StatisticsModule.cs"
-                        int* csharp2cuda_temp_201 = &((output)->valid);
-                        (*(csharp2cuda_temp_201) = 0);
+#line 640 "StatisticsModule.cs"
+#line 640 "StatisticsModule.cs"
+                        int* csharp2cuda_temp_202 = &((output)->valid);
+                        (*(csharp2cuda_temp_202) = 0);
                     }
                     else
                     {
-#line 641 "StatisticsModule.cs"
-#line 641 "StatisticsModule.cs"
-                        double* csharp2cuda_temp_202 = &((output)->scalar_value);
-#line 641 "StatisticsModule.cs"
-                        double csharp2cuda_temp_203 = mathblocks_statistics_median(scratch, count);
-                        (*(csharp2cuda_temp_202) = csharp2cuda_temp_203);
-                    }
 #line 642 "StatisticsModule.cs"
+#line 642 "StatisticsModule.cs"
+                        double* csharp2cuda_temp_203 = &((output)->scalar_value);
+#line 642 "StatisticsModule.cs"
+                        double csharp2cuda_temp_204 = mathblocks_statistics_median(scratch, count);
+                        (*(csharp2cuda_temp_203) = csharp2cuda_temp_204);
+                    }
+#line 643 "StatisticsModule.cs"
                     break;
                 }
-#line 644 "StatisticsModule.cs"
+#line 645 "StatisticsModule.cs"
             case 25:
             case 26:
-#line 646 "StatisticsModule.cs"
-#line 646 "StatisticsModule.cs"
-                int csharp2cuda_temp_204 = (first)->count;
-#line 646 "StatisticsModule.cs"
-                int csharp2cuda_temp_205 = (second)->count;
-#line 646 "StatisticsModule.cs"
-                bool csharp2cuda_temp_206;
-#line 646 "StatisticsModule.cs"
-                if (!(((csharp2cuda_temp_204) != (csharp2cuda_temp_205))))
-                {
-#line 650 "StatisticsModule.cs"
-                    int csharp2cuda_temp_207 = (first)->count;
-#line 652 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_208 = &((output)->scalar_value);
 #line 647 "StatisticsModule.cs"
-                    bool csharp2cuda_temp_209 = mathblocks_statistics_weighted_value(a, b, csharp2cuda_temp_207, ((opcode) == (26)), csharp2cuda_temp_208);
-#line 646 "StatisticsModule.cs"
-                    csharp2cuda_temp_206 = (!(csharp2cuda_temp_209));
+#line 647 "StatisticsModule.cs"
+                int csharp2cuda_temp_205 = (first)->count;
+#line 647 "StatisticsModule.cs"
+                int csharp2cuda_temp_206 = (second)->count;
+#line 647 "StatisticsModule.cs"
+                bool csharp2cuda_temp_207;
+#line 647 "StatisticsModule.cs"
+                if (!(((csharp2cuda_temp_205) != (csharp2cuda_temp_206))))
+                {
+#line 651 "StatisticsModule.cs"
+                    int csharp2cuda_temp_208 = (first)->count;
+#line 653 "StatisticsModule.cs"
+                    double* csharp2cuda_temp_209 = &((output)->scalar_value);
+#line 648 "StatisticsModule.cs"
+                    bool csharp2cuda_temp_210 = mathblocks_statistics_weighted_value(a, b, csharp2cuda_temp_208, ((opcode) == (26)), csharp2cuda_temp_209);
+#line 647 "StatisticsModule.cs"
+                    csharp2cuda_temp_207 = (!(csharp2cuda_temp_210));
                 }
                 else
                 {
-#line 646 "StatisticsModule.cs"
-                    csharp2cuda_temp_206 = true;
+#line 647 "StatisticsModule.cs"
+                    csharp2cuda_temp_207 = true;
                 }
-                if (csharp2cuda_temp_206)
+                if (csharp2cuda_temp_207)
                 {
-#line 653 "StatisticsModule.cs"
-#line 653 "StatisticsModule.cs"
-                    int* csharp2cuda_temp_210 = &((output)->valid);
-                    (*(csharp2cuda_temp_210) = 0);
-                }
 #line 654 "StatisticsModule.cs"
+#line 654 "StatisticsModule.cs"
+                    int* csharp2cuda_temp_211 = &((output)->valid);
+                    (*(csharp2cuda_temp_211) = 0);
+                }
+#line 655 "StatisticsModule.cs"
                 break;
         }
-#line 656 "StatisticsModule.cs"
-#line 656 "StatisticsModule.cs"
-        bool csharp2cuda_temp_211 = (output)->valid;
-#line 656 "StatisticsModule.cs"
-        bool csharp2cuda_temp_212;
-#line 656 "StatisticsModule.cs"
-        if (csharp2cuda_temp_211)
-        {
-#line 656 "StatisticsModule.cs"
-            csharp2cuda_temp_212 = ((opcode) != (2));
-        }
-        else
-        {
-#line 656 "StatisticsModule.cs"
-            csharp2cuda_temp_212 = false;
-        }
-#line 656 "StatisticsModule.cs"
+#line 657 "StatisticsModule.cs"
+#line 657 "StatisticsModule.cs"
+        bool csharp2cuda_temp_212 = (output)->valid;
+#line 657 "StatisticsModule.cs"
         bool csharp2cuda_temp_213;
-#line 656 "StatisticsModule.cs"
+#line 657 "StatisticsModule.cs"
         if (csharp2cuda_temp_212)
         {
-#line 656 "StatisticsModule.cs"
-            csharp2cuda_temp_213 = ((opcode) != (4));
+#line 657 "StatisticsModule.cs"
+            csharp2cuda_temp_213 = ((opcode) != (2));
         }
         else
         {
-#line 656 "StatisticsModule.cs"
+#line 657 "StatisticsModule.cs"
             csharp2cuda_temp_213 = false;
         }
-#line 656 "StatisticsModule.cs"
+#line 657 "StatisticsModule.cs"
         bool csharp2cuda_temp_214;
-#line 656 "StatisticsModule.cs"
+#line 657 "StatisticsModule.cs"
         if (csharp2cuda_temp_213)
         {
-#line 656 "StatisticsModule.cs"
-            double csharp2cuda_temp_215 = (output)->scalar_value;
-#line 656 "StatisticsModule.cs"
-            csharp2cuda_temp_214 = (!(isfinite(csharp2cuda_temp_215)));
+#line 657 "StatisticsModule.cs"
+            csharp2cuda_temp_214 = ((opcode) != (4));
         }
         else
         {
-#line 656 "StatisticsModule.cs"
+#line 657 "StatisticsModule.cs"
             csharp2cuda_temp_214 = false;
         }
+#line 657 "StatisticsModule.cs"
+        bool csharp2cuda_temp_215;
+#line 657 "StatisticsModule.cs"
         if (csharp2cuda_temp_214)
         {
 #line 657 "StatisticsModule.cs"
+            double csharp2cuda_temp_216 = (output)->scalar_value;
 #line 657 "StatisticsModule.cs"
-            int* csharp2cuda_temp_216 = &((output)->valid);
-            (*(csharp2cuda_temp_216) = 0);
+            csharp2cuda_temp_215 = (!(isfinite(csharp2cuda_temp_216)));
+        }
+        else
+        {
+#line 657 "StatisticsModule.cs"
+            csharp2cuda_temp_215 = false;
+        }
+        if (csharp2cuda_temp_215)
+        {
+#line 658 "StatisticsModule.cs"
+#line 658 "StatisticsModule.cs"
+            int* csharp2cuda_temp_217 = &((output)->valid);
+            (*(csharp2cuda_temp_217) = 0);
         }
     }
 }

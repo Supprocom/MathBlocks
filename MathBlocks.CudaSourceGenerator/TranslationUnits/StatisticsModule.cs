@@ -430,6 +430,7 @@ internal static unsafe class StatisticsModule
                             double covariance = sum / rows;
                             result[left * columns + right] = covariance;
                             result[right * columns + left] = covariance;
+                            if (!double.IsFinite(covariance)) output->valid = 0;
                         }
                     }
                     break;

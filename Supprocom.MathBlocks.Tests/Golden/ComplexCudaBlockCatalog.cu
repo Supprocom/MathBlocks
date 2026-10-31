@@ -977,681 +977,699 @@ __device__ void mathblocks_complex_dispatch(
                 (*(csharp2cuda_temp_33) = mathblocks_complex_magnitude(csharp2cuda_temp_34));
 #line 238 "ComplexModule.cs"
 #line 238 "ComplexModule.cs"
-                int* csharp2cuda_temp_35 = &((output)->count);
-                (*(csharp2cuda_temp_35) = 0);
+                double csharp2cuda_temp_35 = (output)->scalar_value;
+                if ((!(isfinite(csharp2cuda_temp_35))))
+                {
+#line 238 "ComplexModule.cs"
+#line 238 "ComplexModule.cs"
+                    int* csharp2cuda_temp_36 = &((output)->valid);
+                    (*(csharp2cuda_temp_36) = 0);
+                }
 #line 239 "ComplexModule.cs"
-                return;
+#line 239 "ComplexModule.cs"
+                int* csharp2cuda_temp_37 = &((output)->count);
+                (*(csharp2cuda_temp_37) = 0);
 #line 240 "ComplexModule.cs"
-            case 7:
-#line 241 "ComplexModule.cs"
-#line 241 "ComplexModule.cs"
-                MathBlockComplexValue* csharp2cuda_temp_36 = &(value);
-#line 241 "ComplexModule.cs"
-                MathBlockComplexValue csharp2cuda_temp_37 = (complex_first)[0];
-#line 241 "ComplexModule.cs"
-                MathBlockComplexValue csharp2cuda_temp_38 = (complex_second)[0];
-                (*(csharp2cuda_temp_36) = mathblocks_complex_multiply(csharp2cuda_temp_37, csharp2cuda_temp_38));
-#line 242 "ComplexModule.cs"
-                break;
-#line 243 "ComplexModule.cs"
-            case 8:
-#line 244 "ComplexModule.cs"
-#line 244 "ComplexModule.cs"
-                MathBlockComplexValue* csharp2cuda_temp_39 = &(value);
-#line 244 "ComplexModule.cs"
-                MathBlockComplexValue csharp2cuda_temp_40 = (complex_first)[0];
-                (*(csharp2cuda_temp_39) = mathblocks_complex_logarithm(csharp2cuda_temp_40));
-#line 245 "ComplexModule.cs"
-                break;
-#line 246 "ComplexModule.cs"
-            case 9:
-#line 247 "ComplexModule.cs"
-#line 247 "ComplexModule.cs"
-                MathBlockComplexValue* csharp2cuda_temp_41 = &(value);
-#line 247 "ComplexModule.cs"
-                double csharp2cuda_temp_42 = ((complex_first)[0]).real;
-#line 247 "ComplexModule.cs"
-                double csharp2cuda_temp_43 = ((complex_first)[0]).imaginary;
-                (*(csharp2cuda_temp_41) = mathblocks_complex_make((-(csharp2cuda_temp_42)), (-(csharp2cuda_temp_43))));
-#line 248 "ComplexModule.cs"
-                break;
-#line 249 "ComplexModule.cs"
-            case 10:
-#line 250 "ComplexModule.cs"
-#line 250 "ComplexModule.cs"
-                double* csharp2cuda_temp_44 = &((output)->scalar_value);
-#line 250 "ComplexModule.cs"
-                MathBlockComplexValue csharp2cuda_temp_45 = (complex_first)[0];
-                (*(csharp2cuda_temp_44) = mathblocks_complex_phase(csharp2cuda_temp_45));
-#line 251 "ComplexModule.cs"
-#line 251 "ComplexModule.cs"
-                int* csharp2cuda_temp_46 = &((output)->count);
-                (*(csharp2cuda_temp_46) = 0);
-#line 252 "ComplexModule.cs"
                 return;
+#line 241 "ComplexModule.cs"
+            case 7:
+#line 242 "ComplexModule.cs"
+#line 242 "ComplexModule.cs"
+                MathBlockComplexValue* csharp2cuda_temp_38 = &(value);
+#line 242 "ComplexModule.cs"
+                MathBlockComplexValue csharp2cuda_temp_39 = (complex_first)[0];
+#line 242 "ComplexModule.cs"
+                MathBlockComplexValue csharp2cuda_temp_40 = (complex_second)[0];
+                (*(csharp2cuda_temp_38) = mathblocks_complex_multiply(csharp2cuda_temp_39, csharp2cuda_temp_40));
+#line 243 "ComplexModule.cs"
+                break;
+#line 244 "ComplexModule.cs"
+            case 8:
+#line 245 "ComplexModule.cs"
+#line 245 "ComplexModule.cs"
+                MathBlockComplexValue* csharp2cuda_temp_41 = &(value);
+#line 245 "ComplexModule.cs"
+                MathBlockComplexValue csharp2cuda_temp_42 = (complex_first)[0];
+                (*(csharp2cuda_temp_41) = mathblocks_complex_logarithm(csharp2cuda_temp_42));
+#line 246 "ComplexModule.cs"
+                break;
+#line 247 "ComplexModule.cs"
+            case 9:
+#line 248 "ComplexModule.cs"
+#line 248 "ComplexModule.cs"
+                MathBlockComplexValue* csharp2cuda_temp_43 = &(value);
+#line 248 "ComplexModule.cs"
+                double csharp2cuda_temp_44 = ((complex_first)[0]).real;
+#line 248 "ComplexModule.cs"
+                double csharp2cuda_temp_45 = ((complex_first)[0]).imaginary;
+                (*(csharp2cuda_temp_43) = mathblocks_complex_make((-(csharp2cuda_temp_44)), (-(csharp2cuda_temp_45))));
+#line 249 "ComplexModule.cs"
+                break;
+#line 250 "ComplexModule.cs"
+            case 10:
+#line 251 "ComplexModule.cs"
+#line 251 "ComplexModule.cs"
+                double* csharp2cuda_temp_46 = &((output)->scalar_value);
+#line 251 "ComplexModule.cs"
+                MathBlockComplexValue csharp2cuda_temp_47 = (complex_first)[0];
+                (*(csharp2cuda_temp_46) = mathblocks_complex_phase(csharp2cuda_temp_47));
+#line 252 "ComplexModule.cs"
+#line 252 "ComplexModule.cs"
+                int* csharp2cuda_temp_48 = &((output)->count);
+                (*(csharp2cuda_temp_48) = 0);
 #line 253 "ComplexModule.cs"
+                return;
+#line 254 "ComplexModule.cs"
             case 11:
-#line 254 "ComplexModule.cs"
-#line 254 "ComplexModule.cs"
-                MathBlockComplexValue* csharp2cuda_temp_47 = &(value);
-#line 254 "ComplexModule.cs"
-                MathBlockComplexValue csharp2cuda_temp_48 = (complex_first)[0];
-#line 254 "ComplexModule.cs"
-                MathBlockComplexValue csharp2cuda_temp_49 = (complex_second)[0];
-                (*(csharp2cuda_temp_47) = mathblocks_complex_power(csharp2cuda_temp_48, csharp2cuda_temp_49));
 #line 255 "ComplexModule.cs"
-                break;
+#line 255 "ComplexModule.cs"
+                MathBlockComplexValue* csharp2cuda_temp_49 = &(value);
+#line 255 "ComplexModule.cs"
+                MathBlockComplexValue csharp2cuda_temp_50 = (complex_first)[0];
+#line 255 "ComplexModule.cs"
+                MathBlockComplexValue csharp2cuda_temp_51 = (complex_second)[0];
+                (*(csharp2cuda_temp_49) = mathblocks_complex_power(csharp2cuda_temp_50, csharp2cuda_temp_51));
 #line 256 "ComplexModule.cs"
-            case 12:
-#line 257 "ComplexModule.cs"
-#line 257 "ComplexModule.cs"
-                MathBlockComplexValue* csharp2cuda_temp_50 = &(value);
-#line 257 "ComplexModule.cs"
-                MathBlockComplexValue csharp2cuda_temp_51 = (complex_first)[0];
-                (*(csharp2cuda_temp_50) = mathblocks_complex_square_root(csharp2cuda_temp_51));
-#line 258 "ComplexModule.cs"
                 break;
-#line 259 "ComplexModule.cs"
-            case 13:
-#line 260 "ComplexModule.cs"
-#line 260 "ComplexModule.cs"
+#line 257 "ComplexModule.cs"
+            case 12:
+#line 258 "ComplexModule.cs"
+#line 258 "ComplexModule.cs"
                 MathBlockComplexValue* csharp2cuda_temp_52 = &(value);
-#line 260 "ComplexModule.cs"
+#line 258 "ComplexModule.cs"
                 MathBlockComplexValue csharp2cuda_temp_53 = (complex_first)[0];
+                (*(csharp2cuda_temp_52) = mathblocks_complex_square_root(csharp2cuda_temp_53));
+#line 259 "ComplexModule.cs"
+                break;
 #line 260 "ComplexModule.cs"
-                MathBlockComplexValue csharp2cuda_temp_54 = (complex_second)[0];
-                (*(csharp2cuda_temp_52) = mathblocks_complex_subtract(csharp2cuda_temp_53, csharp2cuda_temp_54));
+            case 13:
 #line 261 "ComplexModule.cs"
+#line 261 "ComplexModule.cs"
+                MathBlockComplexValue* csharp2cuda_temp_54 = &(value);
+#line 261 "ComplexModule.cs"
+                MathBlockComplexValue csharp2cuda_temp_55 = (complex_first)[0];
+#line 261 "ComplexModule.cs"
+                MathBlockComplexValue csharp2cuda_temp_56 = (complex_second)[0];
+                (*(csharp2cuda_temp_54) = mathblocks_complex_subtract(csharp2cuda_temp_55, csharp2cuda_temp_56));
+#line 262 "ComplexModule.cs"
                 break;
         }
-#line 263 "ComplexModule.cs"
-#line 263 "ComplexModule.cs"
-        int* csharp2cuda_temp_55 = &((output)->rows);
-        (*(csharp2cuda_temp_55) = 0);
 #line 264 "ComplexModule.cs"
 #line 264 "ComplexModule.cs"
-        int* csharp2cuda_temp_56 = &((output)->columns);
-        (*(csharp2cuda_temp_56) = 0);
+        int* csharp2cuda_temp_57 = &((output)->rows);
+        (*(csharp2cuda_temp_57) = 0);
 #line 265 "ComplexModule.cs"
 #line 265 "ComplexModule.cs"
-        int* csharp2cuda_temp_57 = &((output)->count);
-        (*(csharp2cuda_temp_57) = 1);
+        int* csharp2cuda_temp_58 = &((output)->columns);
+        (*(csharp2cuda_temp_58) = 0);
 #line 266 "ComplexModule.cs"
 #line 266 "ComplexModule.cs"
-        MathBlockComplexValue* csharp2cuda_temp_58 = &((result)[0]);
-        (*(csharp2cuda_temp_58) = value);
+        int* csharp2cuda_temp_59 = &((output)->count);
+        (*(csharp2cuda_temp_59) = 1);
 #line 267 "ComplexModule.cs"
+#line 267 "ComplexModule.cs"
+        MathBlockComplexValue* csharp2cuda_temp_60 = &((result)[0]);
+        (*(csharp2cuda_temp_60) = value);
+#line 268 "ComplexModule.cs"
         if ((!(mathblocks_complex_finite(value))))
         {
-#line 267 "ComplexModule.cs"
-#line 267 "ComplexModule.cs"
-            int* csharp2cuda_temp_59 = &((output)->valid);
-            (*(csharp2cuda_temp_59) = 0);
-        }
 #line 268 "ComplexModule.cs"
+#line 268 "ComplexModule.cs"
+            int* csharp2cuda_temp_61 = &((output)->valid);
+            (*(csharp2cuda_temp_61) = 0);
+        }
+#line 269 "ComplexModule.cs"
         return;
     }
-#line 271 "ComplexModule.cs"
-    if (((opcode) == (14)))
 #line 272 "ComplexModule.cs"
-    {
+    if (((opcode) == (14)))
 #line 273 "ComplexModule.cs"
-        if (((thread) == (0)))
+    {
 #line 274 "ComplexModule.cs"
+        if (((thread) == (0)))
+#line 275 "ComplexModule.cs"
         {
-#line 275 "ComplexModule.cs"
-#line 275 "ComplexModule.cs"
-            int csharp2cuda_temp_60 = (first)->count;
-            mathblocks_complex_shape(output, csharp2cuda_temp_60);
 #line 276 "ComplexModule.cs"
 #line 276 "ComplexModule.cs"
-            int csharp2cuda_temp_61 = (first)->count;
-#line 276 "ComplexModule.cs"
-            int csharp2cuda_temp_62 = (second)->count;
-            if (((csharp2cuda_temp_61) != (csharp2cuda_temp_62)))
+            int csharp2cuda_temp_62 = (first)->count;
+            mathblocks_complex_shape(output, csharp2cuda_temp_62);
+#line 277 "ComplexModule.cs"
+#line 277 "ComplexModule.cs"
+            int csharp2cuda_temp_63 = (first)->count;
+#line 277 "ComplexModule.cs"
+            int csharp2cuda_temp_64 = (second)->count;
+            if (((csharp2cuda_temp_63) != (csharp2cuda_temp_64)))
             {
-#line 276 "ComplexModule.cs"
-#line 276 "ComplexModule.cs"
-                int* csharp2cuda_temp_63 = &((output)->valid);
-                (*(csharp2cuda_temp_63) = 0);
+#line 277 "ComplexModule.cs"
+#line 277 "ComplexModule.cs"
+                int* csharp2cuda_temp_65 = &((output)->valid);
+                (*(csharp2cuda_temp_65) = 0);
             }
         }
-#line 278 "ComplexModule.cs"
+#line 279 "ComplexModule.cs"
         __syncthreads();
-#line 279 "ComplexModule.cs"
-        unsigned long long csharp2cuda_temp_64 = (first)->data_pointer;
-#line 279 "ComplexModule.cs"
-        const double* real = ((double*)(csharp2cuda_temp_64));
 #line 280 "ComplexModule.cs"
-        unsigned long long csharp2cuda_temp_65 = (second)->data_pointer;
+        unsigned long long csharp2cuda_temp_66 = (first)->data_pointer;
 #line 280 "ComplexModule.cs"
-        const double* imaginary = ((double*)(csharp2cuda_temp_65));
+        const double* real = ((double*)(csharp2cuda_temp_66));
 #line 281 "ComplexModule.cs"
+        unsigned long long csharp2cuda_temp_67 = (second)->data_pointer;
+#line 281 "ComplexModule.cs"
+        const double* imaginary = ((double*)(csharp2cuda_temp_67));
+#line 282 "ComplexModule.cs"
         {
-#line 281 "ComplexModule.cs"
+#line 282 "ComplexModule.cs"
             int index = thread;
             while (true)
             {
-#line 281 "ComplexModule.cs"
-                bool csharp2cuda_temp_68 = (output)->valid;
-#line 281 "ComplexModule.cs"
-                bool csharp2cuda_temp_69;
-#line 281 "ComplexModule.cs"
-                if (csharp2cuda_temp_68)
+#line 282 "ComplexModule.cs"
+                bool csharp2cuda_temp_70 = (output)->valid;
+#line 282 "ComplexModule.cs"
+                bool csharp2cuda_temp_71;
+#line 282 "ComplexModule.cs"
+                if (csharp2cuda_temp_70)
                 {
-#line 281 "ComplexModule.cs"
-                    int csharp2cuda_temp_70 = (first)->count;
-#line 281 "ComplexModule.cs"
-                    csharp2cuda_temp_69 = ((index) < (csharp2cuda_temp_70));
+#line 282 "ComplexModule.cs"
+                    int csharp2cuda_temp_72 = (first)->count;
+#line 282 "ComplexModule.cs"
+                    csharp2cuda_temp_71 = ((index) < (csharp2cuda_temp_72));
                 }
                 else
                 {
-#line 281 "ComplexModule.cs"
-                    csharp2cuda_temp_69 = false;
+#line 282 "ComplexModule.cs"
+                    csharp2cuda_temp_71 = false;
                 }
-                if (!(csharp2cuda_temp_69))
+                if (!(csharp2cuda_temp_71))
                     break;
+#line 283 "ComplexModule.cs"
+#line 283 "ComplexModule.cs"
+                MathBlockComplexValue* csharp2cuda_temp_73 = &((result)[index]);
+#line 283 "ComplexModule.cs"
+                double csharp2cuda_temp_74 = (real)[index];
+#line 283 "ComplexModule.cs"
+                double csharp2cuda_temp_75 = (imaginary)[index];
+                (*(csharp2cuda_temp_73) = mathblocks_complex_make(csharp2cuda_temp_74, csharp2cuda_temp_75));
 #line 282 "ComplexModule.cs"
+                int* csharp2cuda_temp_68 = &(index);
 #line 282 "ComplexModule.cs"
-                MathBlockComplexValue* csharp2cuda_temp_71 = &((result)[index]);
-#line 282 "ComplexModule.cs"
-                double csharp2cuda_temp_72 = (real)[index];
-#line 282 "ComplexModule.cs"
-                double csharp2cuda_temp_73 = (imaginary)[index];
-                (*(csharp2cuda_temp_71) = mathblocks_complex_make(csharp2cuda_temp_72, csharp2cuda_temp_73));
-#line 281 "ComplexModule.cs"
-                int* csharp2cuda_temp_66 = &(index);
-#line 281 "ComplexModule.cs"
-                int csharp2cuda_temp_67 = *(csharp2cuda_temp_66);
-                (*(csharp2cuda_temp_66) = csharp2cuda_i32_add(csharp2cuda_temp_67, blockDim.x));
+                int csharp2cuda_temp_69 = *(csharp2cuda_temp_68);
+                (*(csharp2cuda_temp_68) = csharp2cuda_i32_add(csharp2cuda_temp_69, blockDim.x));
             }
         }
-#line 283 "ComplexModule.cs"
+#line 284 "ComplexModule.cs"
         return;
     }
-#line 286 "ComplexModule.cs"
-#line 286 "ComplexModule.cs"
-    bool csharp2cuda_temp_74;
-#line 286 "ComplexModule.cs"
+#line 287 "ComplexModule.cs"
+#line 287 "ComplexModule.cs"
+    bool csharp2cuda_temp_76;
+#line 287 "ComplexModule.cs"
     if (((opcode) >= (15)))
     {
-#line 286 "ComplexModule.cs"
-        csharp2cuda_temp_74 = ((opcode) <= (17));
+#line 287 "ComplexModule.cs"
+        csharp2cuda_temp_76 = ((opcode) <= (17));
     }
     else
     {
-#line 286 "ComplexModule.cs"
-        csharp2cuda_temp_74 = false;
-    }
-    if (csharp2cuda_temp_74)
 #line 287 "ComplexModule.cs"
-    {
+        csharp2cuda_temp_76 = false;
+    }
+    if (csharp2cuda_temp_76)
 #line 288 "ComplexModule.cs"
+    {
+#line 289 "ComplexModule.cs"
         if (((thread) == (0)))
         {
-#line 288 "ComplexModule.cs"
-#line 288 "ComplexModule.cs"
-            int csharp2cuda_temp_75 = (first)->count;
-            mathblocks_complex_shape(output, csharp2cuda_temp_75);
-        }
 #line 289 "ComplexModule.cs"
+#line 289 "ComplexModule.cs"
+            int csharp2cuda_temp_77 = (first)->count;
+            mathblocks_complex_shape(output, csharp2cuda_temp_77);
+        }
+#line 290 "ComplexModule.cs"
         __syncthreads();
-#line 290 "ComplexModule.cs"
-        unsigned long long csharp2cuda_temp_76 = (output)->data_pointer;
-#line 290 "ComplexModule.cs"
-        double* projected = ((double*)(csharp2cuda_temp_76));
 #line 291 "ComplexModule.cs"
+        unsigned long long csharp2cuda_temp_78 = (output)->data_pointer;
+#line 291 "ComplexModule.cs"
+        double* projected = ((double*)(csharp2cuda_temp_78));
+#line 292 "ComplexModule.cs"
         {
-#line 291 "ComplexModule.cs"
+#line 292 "ComplexModule.cs"
             int index = thread;
             while (true)
             {
-#line 291 "ComplexModule.cs"
-                bool csharp2cuda_temp_79 = (output)->valid;
-#line 291 "ComplexModule.cs"
-                bool csharp2cuda_temp_80;
-#line 291 "ComplexModule.cs"
-                if (csharp2cuda_temp_79)
+#line 292 "ComplexModule.cs"
+                bool csharp2cuda_temp_81 = (output)->valid;
+#line 292 "ComplexModule.cs"
+                bool csharp2cuda_temp_82;
+#line 292 "ComplexModule.cs"
+                if (csharp2cuda_temp_81)
                 {
-#line 291 "ComplexModule.cs"
-                    int csharp2cuda_temp_81 = (first)->count;
-#line 291 "ComplexModule.cs"
-                    csharp2cuda_temp_80 = ((index) < (csharp2cuda_temp_81));
+#line 292 "ComplexModule.cs"
+                    int csharp2cuda_temp_83 = (first)->count;
+#line 292 "ComplexModule.cs"
+                    csharp2cuda_temp_82 = ((index) < (csharp2cuda_temp_83));
                 }
                 else
                 {
-#line 291 "ComplexModule.cs"
-                    csharp2cuda_temp_80 = false;
-                }
-                if (!(csharp2cuda_temp_80))
-                    break;
 #line 292 "ComplexModule.cs"
-                {
+                    csharp2cuda_temp_82 = false;
+                }
+                if (!(csharp2cuda_temp_82))
+                    break;
 #line 293 "ComplexModule.cs"
+                {
+#line 294 "ComplexModule.cs"
                     if (((opcode) == (15)))
                     {
-#line 293 "ComplexModule.cs"
-#line 293 "ComplexModule.cs"
-                        double* csharp2cuda_temp_82 = &((projected)[index]);
-#line 293 "ComplexModule.cs"
-                        double csharp2cuda_temp_83 = ((complex_first)[index]).imaginary;
-                        (*(csharp2cuda_temp_82) = csharp2cuda_temp_83);
+#line 294 "ComplexModule.cs"
+#line 294 "ComplexModule.cs"
+                        double* csharp2cuda_temp_84 = &((projected)[index]);
+#line 294 "ComplexModule.cs"
+                        double csharp2cuda_temp_85 = ((complex_first)[index]).imaginary;
+                        (*(csharp2cuda_temp_84) = csharp2cuda_temp_85);
                     }
                     else
                     {
-#line 294 "ComplexModule.cs"
+#line 295 "ComplexModule.cs"
                         if (((opcode) == (16)))
-                        {
-#line 294 "ComplexModule.cs"
-#line 294 "ComplexModule.cs"
-                            double* csharp2cuda_temp_84 = &((projected)[index]);
-#line 294 "ComplexModule.cs"
-                            MathBlockComplexValue csharp2cuda_temp_85 = (complex_first)[index];
-                            (*(csharp2cuda_temp_84) = mathblocks_complex_magnitude(csharp2cuda_temp_85));
-                        }
-                        else
                         {
 #line 295 "ComplexModule.cs"
 #line 295 "ComplexModule.cs"
                             double* csharp2cuda_temp_86 = &((projected)[index]);
 #line 295 "ComplexModule.cs"
-                            double csharp2cuda_temp_87 = ((complex_first)[index]).real;
-                            (*(csharp2cuda_temp_86) = csharp2cuda_temp_87);
+                            MathBlockComplexValue csharp2cuda_temp_87 = (complex_first)[index];
+                            (*(csharp2cuda_temp_86) = mathblocks_complex_magnitude(csharp2cuda_temp_87));
+                        }
+                        else
+                        {
+#line 296 "ComplexModule.cs"
+#line 296 "ComplexModule.cs"
+                            double* csharp2cuda_temp_88 = &((projected)[index]);
+#line 296 "ComplexModule.cs"
+                            double csharp2cuda_temp_89 = ((complex_first)[index]).real;
+                            (*(csharp2cuda_temp_88) = csharp2cuda_temp_89);
                         }
                     }
+#line 297 "ComplexModule.cs"
+#line 297 "ComplexModule.cs"
+                    double csharp2cuda_temp_90 = (projected)[index];
+                    if ((!(isfinite(csharp2cuda_temp_90))))
+                    {
+#line 297 "ComplexModule.cs"
+                        atomicExch(&((output)->valid), 0);
+                    }
                 }
-#line 291 "ComplexModule.cs"
-                int* csharp2cuda_temp_77 = &(index);
-#line 291 "ComplexModule.cs"
-                int csharp2cuda_temp_78 = *(csharp2cuda_temp_77);
-                (*(csharp2cuda_temp_77) = csharp2cuda_i32_add(csharp2cuda_temp_78, blockDim.x));
+#line 292 "ComplexModule.cs"
+                int* csharp2cuda_temp_79 = &(index);
+#line 292 "ComplexModule.cs"
+                int csharp2cuda_temp_80 = *(csharp2cuda_temp_79);
+                (*(csharp2cuda_temp_79) = csharp2cuda_i32_add(csharp2cuda_temp_80, blockDim.x));
             }
         }
-#line 297 "ComplexModule.cs"
+#line 299 "ComplexModule.cs"
         return;
     }
-#line 300 "ComplexModule.cs"
-    if (((opcode) == (18)))
-#line 301 "ComplexModule.cs"
-    {
 #line 302 "ComplexModule.cs"
-        int count = (first)->count;
+    if (((opcode) == (18)))
 #line 303 "ComplexModule.cs"
-        if (((thread) == (0)))
+    {
 #line 304 "ComplexModule.cs"
+        int count = (first)->count;
+#line 305 "ComplexModule.cs"
+        if (((thread) == (0)))
+#line 306 "ComplexModule.cs"
         {
-#line 305 "ComplexModule.cs"
-#line 305 "ComplexModule.cs"
-            int* csharp2cuda_temp_88 = &((output)->rows);
-            (*(csharp2cuda_temp_88) = count);
-#line 306 "ComplexModule.cs"
-#line 306 "ComplexModule.cs"
-            int* csharp2cuda_temp_89 = &((output)->columns);
-            (*(csharp2cuda_temp_89) = count);
 #line 307 "ComplexModule.cs"
 #line 307 "ComplexModule.cs"
-            int* csharp2cuda_temp_90 = &((output)->count);
-            (*(csharp2cuda_temp_90) = csharp2cuda_i32_mul(count, count));
+            int* csharp2cuda_temp_91 = &((output)->rows);
+            (*(csharp2cuda_temp_91) = count);
 #line 308 "ComplexModule.cs"
 #line 308 "ComplexModule.cs"
-            bool csharp2cuda_temp_91;
-#line 308 "ComplexModule.cs"
+            int* csharp2cuda_temp_92 = &((output)->columns);
+            (*(csharp2cuda_temp_92) = count);
+#line 309 "ComplexModule.cs"
+#line 309 "ComplexModule.cs"
+            int* csharp2cuda_temp_93 = &((output)->count);
+            (*(csharp2cuda_temp_93) = csharp2cuda_i32_mul(count, count));
+#line 310 "ComplexModule.cs"
+#line 310 "ComplexModule.cs"
+            bool csharp2cuda_temp_94;
+#line 310 "ComplexModule.cs"
             if (!(((count) <= (0))))
             {
-#line 308 "ComplexModule.cs"
-                int csharp2cuda_temp_92 = (second)->count;
-#line 308 "ComplexModule.cs"
-                csharp2cuda_temp_91 = ((count) != (csharp2cuda_temp_92));
+#line 310 "ComplexModule.cs"
+                int csharp2cuda_temp_95 = (second)->count;
+#line 310 "ComplexModule.cs"
+                csharp2cuda_temp_94 = ((count) != (csharp2cuda_temp_95));
             }
             else
             {
-#line 308 "ComplexModule.cs"
-                csharp2cuda_temp_91 = true;
+#line 310 "ComplexModule.cs"
+                csharp2cuda_temp_94 = true;
             }
-#line 308 "ComplexModule.cs"
-            bool csharp2cuda_temp_93;
-#line 308 "ComplexModule.cs"
-            if (!(csharp2cuda_temp_91))
+#line 310 "ComplexModule.cs"
+            bool csharp2cuda_temp_96;
+#line 310 "ComplexModule.cs"
+            if (!(csharp2cuda_temp_94))
             {
-#line 308 "ComplexModule.cs"
-                int csharp2cuda_temp_94 = (output)->count;
-#line 308 "ComplexModule.cs"
-                int csharp2cuda_temp_95 = (output)->capacity;
-#line 308 "ComplexModule.cs"
-                csharp2cuda_temp_93 = ((csharp2cuda_temp_94) > (csharp2cuda_temp_95));
+#line 310 "ComplexModule.cs"
+                int csharp2cuda_temp_97 = (output)->count;
+#line 310 "ComplexModule.cs"
+                int csharp2cuda_temp_98 = (output)->capacity;
+#line 310 "ComplexModule.cs"
+                csharp2cuda_temp_96 = ((csharp2cuda_temp_97) > (csharp2cuda_temp_98));
             }
             else
             {
-#line 308 "ComplexModule.cs"
-                csharp2cuda_temp_93 = true;
+#line 310 "ComplexModule.cs"
+                csharp2cuda_temp_96 = true;
             }
-            if (csharp2cuda_temp_93)
+            if (csharp2cuda_temp_96)
             {
-#line 309 "ComplexModule.cs"
-#line 309 "ComplexModule.cs"
-                int* csharp2cuda_temp_96 = &((output)->valid);
-                (*(csharp2cuda_temp_96) = 0);
+#line 311 "ComplexModule.cs"
+#line 311 "ComplexModule.cs"
+                int* csharp2cuda_temp_99 = &((output)->valid);
+                (*(csharp2cuda_temp_99) = 0);
             }
         }
-#line 311 "ComplexModule.cs"
+#line 313 "ComplexModule.cs"
         {
-#line 311 "ComplexModule.cs"
+#line 313 "ComplexModule.cs"
             int index = thread;
             while (true)
             {
                 if (!(((index) < (count))))
                     break;
-#line 312 "ComplexModule.cs"
-                {
-#line 313 "ComplexModule.cs"
-#line 313 "ComplexModule.cs"
-                    MathBlockComplexValue csharp2cuda_temp_99 = (complex_first)[index];
-#line 313 "ComplexModule.cs"
-                    bool csharp2cuda_temp_100;
-#line 313 "ComplexModule.cs"
-                    if (!(((mathblocks_complex_magnitude(csharp2cuda_temp_99)) >= (1.0))))
-                    {
 #line 314 "ComplexModule.cs"
-                        MathBlockComplexValue csharp2cuda_temp_101 = (complex_second)[index];
-#line 313 "ComplexModule.cs"
-                        csharp2cuda_temp_100 = ((mathblocks_complex_magnitude(csharp2cuda_temp_101)) > (1.0));
+                {
+#line 315 "ComplexModule.cs"
+#line 315 "ComplexModule.cs"
+                    MathBlockComplexValue csharp2cuda_temp_102 = (complex_first)[index];
+#line 315 "ComplexModule.cs"
+                    bool csharp2cuda_temp_103;
+#line 315 "ComplexModule.cs"
+                    if (!(((mathblocks_complex_magnitude(csharp2cuda_temp_102)) >= (1.0))))
+                    {
+#line 316 "ComplexModule.cs"
+                        MathBlockComplexValue csharp2cuda_temp_104 = (complex_second)[index];
+#line 315 "ComplexModule.cs"
+                        csharp2cuda_temp_103 = ((mathblocks_complex_magnitude(csharp2cuda_temp_104)) > (1.0));
                     }
                     else
                     {
-#line 313 "ComplexModule.cs"
-                        csharp2cuda_temp_100 = true;
-                    }
-                    if (csharp2cuda_temp_100)
 #line 315 "ComplexModule.cs"
+                        csharp2cuda_temp_103 = true;
+                    }
+                    if (csharp2cuda_temp_103)
+#line 317 "ComplexModule.cs"
                     {
-#line 316 "ComplexModule.cs"
+#line 318 "ComplexModule.cs"
                         atomicExch(&((output)->valid), 0);
                     }
                 }
-#line 311 "ComplexModule.cs"
-                int* csharp2cuda_temp_97 = &(index);
-#line 311 "ComplexModule.cs"
-                int csharp2cuda_temp_98 = *(csharp2cuda_temp_97);
-                (*(csharp2cuda_temp_97) = csharp2cuda_i32_add(csharp2cuda_temp_98, blockDim.x));
+#line 313 "ComplexModule.cs"
+                int* csharp2cuda_temp_100 = &(index);
+#line 313 "ComplexModule.cs"
+                int csharp2cuda_temp_101 = *(csharp2cuda_temp_100);
+                (*(csharp2cuda_temp_100) = csharp2cuda_i32_add(csharp2cuda_temp_101, blockDim.x));
             }
         }
-#line 319 "ComplexModule.cs"
+#line 321 "ComplexModule.cs"
         __syncthreads();
-#line 320 "ComplexModule.cs"
+#line 322 "ComplexModule.cs"
         {
-#line 320 "ComplexModule.cs"
+#line 322 "ComplexModule.cs"
             int flat = thread;
             while (true)
             {
-#line 320 "ComplexModule.cs"
-                bool csharp2cuda_temp_104 = (output)->valid;
-#line 320 "ComplexModule.cs"
-                bool csharp2cuda_temp_105;
-#line 320 "ComplexModule.cs"
-                if (csharp2cuda_temp_104)
+#line 322 "ComplexModule.cs"
+                bool csharp2cuda_temp_107 = (output)->valid;
+#line 322 "ComplexModule.cs"
+                bool csharp2cuda_temp_108;
+#line 322 "ComplexModule.cs"
+                if (csharp2cuda_temp_107)
                 {
-#line 320 "ComplexModule.cs"
-                    csharp2cuda_temp_105 = ((flat) < (csharp2cuda_i32_mul(count, count)));
+#line 322 "ComplexModule.cs"
+                    csharp2cuda_temp_108 = ((flat) < (csharp2cuda_i32_mul(count, count)));
                 }
                 else
                 {
-#line 320 "ComplexModule.cs"
-                    csharp2cuda_temp_105 = false;
-                }
-                if (!(csharp2cuda_temp_105))
-                    break;
-#line 321 "ComplexModule.cs"
-                {
 #line 322 "ComplexModule.cs"
-                    int row = csharp2cuda_i32_div(flat, count);
+                    csharp2cuda_temp_108 = false;
+                }
+                if (!(csharp2cuda_temp_108))
+                    break;
 #line 323 "ComplexModule.cs"
-                    int column = csharp2cuda_i32_sub(flat, csharp2cuda_i32_mul(row, count));
+                {
 #line 324 "ComplexModule.cs"
-                    MathBlockComplexValue one = mathblocks_complex_make(1.0, 0.0);
-#line 328 "ComplexModule.cs"
-                    MathBlockComplexValue csharp2cuda_temp_106 = (complex_second)[row];
-#line 329 "ComplexModule.cs"
-                    MathBlockComplexValue csharp2cuda_temp_107 = (complex_second)[column];
+                    int row = csharp2cuda_i32_div(flat, count);
 #line 325 "ComplexModule.cs"
-                    MathBlockComplexValue numerator = mathblocks_complex_subtract(one, mathblocks_complex_multiply(csharp2cuda_temp_106, mathblocks_complex_conjugate(csharp2cuda_temp_107)));
-#line 333 "ComplexModule.cs"
-                    MathBlockComplexValue csharp2cuda_temp_108 = (complex_first)[row];
-#line 334 "ComplexModule.cs"
-                    MathBlockComplexValue csharp2cuda_temp_109 = (complex_first)[column];
+                    int column = csharp2cuda_i32_sub(flat, csharp2cuda_i32_mul(row, count));
+#line 326 "ComplexModule.cs"
+                    MathBlockComplexValue one = mathblocks_complex_make(1.0, 0.0);
 #line 330 "ComplexModule.cs"
-                    MathBlockComplexValue denominator = mathblocks_complex_subtract(one, mathblocks_complex_multiply(csharp2cuda_temp_108, mathblocks_complex_conjugate(csharp2cuda_temp_109)));
+                    MathBlockComplexValue csharp2cuda_temp_109 = (complex_second)[row];
+#line 331 "ComplexModule.cs"
+                    MathBlockComplexValue csharp2cuda_temp_110 = (complex_second)[column];
+#line 327 "ComplexModule.cs"
+                    MathBlockComplexValue numerator = mathblocks_complex_subtract(one, mathblocks_complex_multiply(csharp2cuda_temp_109, mathblocks_complex_conjugate(csharp2cuda_temp_110)));
 #line 335 "ComplexModule.cs"
-#line 335 "ComplexModule.cs"
-                    MathBlockComplexValue* csharp2cuda_temp_110 = &((result)[flat]);
-                    (*(csharp2cuda_temp_110) = mathblocks_complex_divide(numerator, denominator));
+                    MathBlockComplexValue csharp2cuda_temp_111 = (complex_first)[row];
 #line 336 "ComplexModule.cs"
-#line 336 "ComplexModule.cs"
-                    MathBlockComplexValue csharp2cuda_temp_111 = (result)[flat];
-                    if ((!(mathblocks_complex_finite(csharp2cuda_temp_111))))
+                    MathBlockComplexValue csharp2cuda_temp_112 = (complex_first)[column];
+#line 332 "ComplexModule.cs"
+                    MathBlockComplexValue denominator = mathblocks_complex_subtract(one, mathblocks_complex_multiply(csharp2cuda_temp_111, mathblocks_complex_conjugate(csharp2cuda_temp_112)));
+#line 337 "ComplexModule.cs"
+#line 337 "ComplexModule.cs"
+                    MathBlockComplexValue* csharp2cuda_temp_113 = &((result)[flat]);
+                    (*(csharp2cuda_temp_113) = mathblocks_complex_divide(numerator, denominator));
+#line 338 "ComplexModule.cs"
+#line 338 "ComplexModule.cs"
+                    MathBlockComplexValue csharp2cuda_temp_114 = (result)[flat];
+                    if ((!(mathblocks_complex_finite(csharp2cuda_temp_114))))
                     {
-#line 336 "ComplexModule.cs"
+#line 338 "ComplexModule.cs"
                         atomicExch(&((output)->valid), 0);
                     }
                 }
-#line 320 "ComplexModule.cs"
-                int* csharp2cuda_temp_102 = &(flat);
-#line 320 "ComplexModule.cs"
-                int csharp2cuda_temp_103 = *(csharp2cuda_temp_102);
-                (*(csharp2cuda_temp_102) = csharp2cuda_i32_add(csharp2cuda_temp_103, blockDim.x));
+#line 322 "ComplexModule.cs"
+                int* csharp2cuda_temp_105 = &(flat);
+#line 322 "ComplexModule.cs"
+                int csharp2cuda_temp_106 = *(csharp2cuda_temp_105);
+                (*(csharp2cuda_temp_105) = csharp2cuda_i32_add(csharp2cuda_temp_106, blockDim.x));
             }
         }
-#line 338 "ComplexModule.cs"
+#line 340 "ComplexModule.cs"
         return;
     }
-#line 341 "ComplexModule.cs"
-    if (((opcode) == (19)))
-#line 342 "ComplexModule.cs"
-    {
 #line 343 "ComplexModule.cs"
-        if (((thread) == (0)))
+    if (((opcode) == (19)))
 #line 344 "ComplexModule.cs"
+    {
+#line 345 "ComplexModule.cs"
+        if (((thread) == (0)))
+#line 346 "ComplexModule.cs"
         {
-#line 345 "ComplexModule.cs"
-#line 345 "ComplexModule.cs"
-            int csharp2cuda_temp_112 = (first)->count;
-            mathblocks_complex_shape(output, csharp2cuda_temp_112);
-#line 346 "ComplexModule.cs"
-#line 346 "ComplexModule.cs"
-            int csharp2cuda_temp_113 = (first)->count;
-            if (((csharp2cuda_temp_113) <= (0)))
+#line 347 "ComplexModule.cs"
+#line 347 "ComplexModule.cs"
+            int csharp2cuda_temp_115 = (first)->count;
+            mathblocks_complex_shape(output, csharp2cuda_temp_115);
+#line 348 "ComplexModule.cs"
+#line 348 "ComplexModule.cs"
+            int csharp2cuda_temp_116 = (first)->count;
+            if (((csharp2cuda_temp_116) <= (0)))
             {
-#line 346 "ComplexModule.cs"
-#line 346 "ComplexModule.cs"
-                int* csharp2cuda_temp_114 = &((output)->valid);
-                (*(csharp2cuda_temp_114) = 0);
+#line 348 "ComplexModule.cs"
+#line 348 "ComplexModule.cs"
+                int* csharp2cuda_temp_117 = &((output)->valid);
+                (*(csharp2cuda_temp_117) = 0);
             }
         }
-#line 348 "ComplexModule.cs"
+#line 350 "ComplexModule.cs"
         __syncthreads();
-#line 349 "ComplexModule.cs"
-        unsigned long long csharp2cuda_temp_115 = (first)->data_pointer;
-#line 349 "ComplexModule.cs"
-        const double* source = ((double*)(csharp2cuda_temp_115));
-#line 350 "ComplexModule.cs"
+#line 351 "ComplexModule.cs"
+        unsigned long long csharp2cuda_temp_118 = (first)->data_pointer;
+#line 351 "ComplexModule.cs"
+        const double* source = ((double*)(csharp2cuda_temp_118));
+#line 352 "ComplexModule.cs"
         {
-#line 350 "ComplexModule.cs"
+#line 352 "ComplexModule.cs"
             int frequency = thread;
             while (true)
             {
-#line 350 "ComplexModule.cs"
-                bool csharp2cuda_temp_118 = (output)->valid;
-#line 350 "ComplexModule.cs"
-                bool csharp2cuda_temp_119;
-#line 350 "ComplexModule.cs"
-                if (csharp2cuda_temp_118)
+#line 352 "ComplexModule.cs"
+                bool csharp2cuda_temp_121 = (output)->valid;
+#line 352 "ComplexModule.cs"
+                bool csharp2cuda_temp_122;
+#line 352 "ComplexModule.cs"
+                if (csharp2cuda_temp_121)
                 {
-#line 350 "ComplexModule.cs"
-                    int csharp2cuda_temp_120 = (first)->count;
-#line 350 "ComplexModule.cs"
-                    csharp2cuda_temp_119 = ((frequency) < (csharp2cuda_temp_120));
+#line 352 "ComplexModule.cs"
+                    int csharp2cuda_temp_123 = (first)->count;
+#line 352 "ComplexModule.cs"
+                    csharp2cuda_temp_122 = ((frequency) < (csharp2cuda_temp_123));
                 }
                 else
                 {
-#line 350 "ComplexModule.cs"
-                    csharp2cuda_temp_119 = false;
-                }
-                if (!(csharp2cuda_temp_119))
-                    break;
-#line 351 "ComplexModule.cs"
-                {
 #line 352 "ComplexModule.cs"
+                    csharp2cuda_temp_122 = false;
+                }
+                if (!(csharp2cuda_temp_122))
+                    break;
+#line 353 "ComplexModule.cs"
+                {
+#line 354 "ComplexModule.cs"
                     MathBlockComplexValue sum = mathblocks_complex_make(0.0, 0.0);
-#line 353 "ComplexModule.cs"
+#line 355 "ComplexModule.cs"
                     {
-#line 353 "ComplexModule.cs"
+#line 355 "ComplexModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 353 "ComplexModule.cs"
-                            int csharp2cuda_temp_122 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_122))))
-                                break;
-#line 354 "ComplexModule.cs"
-                            {
-#line 356 "ComplexModule.cs"
-                                int csharp2cuda_temp_123 = (first)->count;
 #line 355 "ComplexModule.cs"
-                                double angle = __ddiv_rn(__dmul_rn(__dmul_rn(__dmul_rn((-(2.0)), 3.141592653589793), ((double)(frequency))), ((double)(index))), ((double)(csharp2cuda_temp_123)));
+                            int csharp2cuda_temp_125 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_125))))
+                                break;
+#line 356 "ComplexModule.cs"
+                            {
+#line 358 "ComplexModule.cs"
+                                int csharp2cuda_temp_126 = (first)->count;
 #line 357 "ComplexModule.cs"
-#line 357 "ComplexModule.cs"
-                                MathBlockComplexValue* csharp2cuda_temp_124 = &(sum);
-#line 360 "ComplexModule.cs"
-                                double csharp2cuda_temp_125 = (source)[index];
-                                (*(csharp2cuda_temp_124) = mathblocks_complex_add(sum, mathblocks_complex_multiply(mathblocks_complex_make(csharp2cuda_temp_125, 0.0), mathblocks_complex_from_polar(1.0, angle))));
+                                double angle = __ddiv_rn(__dmul_rn(__dmul_rn(__dmul_rn((-(2.0)), 3.141592653589793), ((double)(frequency))), ((double)(index))), ((double)(csharp2cuda_temp_126)));
+#line 359 "ComplexModule.cs"
+#line 359 "ComplexModule.cs"
+                                MathBlockComplexValue* csharp2cuda_temp_127 = &(sum);
+#line 362 "ComplexModule.cs"
+                                double csharp2cuda_temp_128 = (source)[index];
+                                (*(csharp2cuda_temp_127) = mathblocks_complex_add(sum, mathblocks_complex_multiply(mathblocks_complex_make(csharp2cuda_temp_128, 0.0), mathblocks_complex_from_polar(1.0, angle))));
                             }
-#line 353 "ComplexModule.cs"
-                            int* csharp2cuda_temp_121 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_121));
+#line 355 "ComplexModule.cs"
+                            int* csharp2cuda_temp_124 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_124));
                         }
                     }
-#line 363 "ComplexModule.cs"
-#line 363 "ComplexModule.cs"
-                    MathBlockComplexValue* csharp2cuda_temp_126 = &((result)[frequency]);
-                    (*(csharp2cuda_temp_126) = sum);
-#line 364 "ComplexModule.cs"
+#line 365 "ComplexModule.cs"
+#line 365 "ComplexModule.cs"
+                    MathBlockComplexValue* csharp2cuda_temp_129 = &((result)[frequency]);
+                    (*(csharp2cuda_temp_129) = sum);
+#line 366 "ComplexModule.cs"
                     if ((!(mathblocks_complex_finite(sum))))
                     {
-#line 364 "ComplexModule.cs"
+#line 366 "ComplexModule.cs"
                         atomicExch(&((output)->valid), 0);
                     }
                 }
-#line 350 "ComplexModule.cs"
-                int* csharp2cuda_temp_116 = &(frequency);
-#line 350 "ComplexModule.cs"
-                int csharp2cuda_temp_117 = *(csharp2cuda_temp_116);
-                (*(csharp2cuda_temp_116) = csharp2cuda_i32_add(csharp2cuda_temp_117, blockDim.x));
+#line 352 "ComplexModule.cs"
+                int* csharp2cuda_temp_119 = &(frequency);
+#line 352 "ComplexModule.cs"
+                int csharp2cuda_temp_120 = *(csharp2cuda_temp_119);
+                (*(csharp2cuda_temp_119) = csharp2cuda_i32_add(csharp2cuda_temp_120, blockDim.x));
             }
         }
-#line 366 "ComplexModule.cs"
+#line 368 "ComplexModule.cs"
         return;
     }
-#line 369 "ComplexModule.cs"
-    if (((opcode) == (20)))
-#line 370 "ComplexModule.cs"
-    {
 #line 371 "ComplexModule.cs"
-        if (((thread) == (0)))
+    if (((opcode) == (20)))
 #line 372 "ComplexModule.cs"
+    {
+#line 373 "ComplexModule.cs"
+        if (((thread) == (0)))
+#line 374 "ComplexModule.cs"
         {
-#line 373 "ComplexModule.cs"
-#line 373 "ComplexModule.cs"
-            int csharp2cuda_temp_127 = (first)->count;
-            mathblocks_complex_shape(output, csharp2cuda_temp_127);
-#line 374 "ComplexModule.cs"
-#line 374 "ComplexModule.cs"
-            int csharp2cuda_temp_128 = (first)->count;
-            if (((csharp2cuda_temp_128) <= (0)))
+#line 375 "ComplexModule.cs"
+#line 375 "ComplexModule.cs"
+            int csharp2cuda_temp_130 = (first)->count;
+            mathblocks_complex_shape(output, csharp2cuda_temp_130);
+#line 376 "ComplexModule.cs"
+#line 376 "ComplexModule.cs"
+            int csharp2cuda_temp_131 = (first)->count;
+            if (((csharp2cuda_temp_131) <= (0)))
             {
-#line 374 "ComplexModule.cs"
-#line 374 "ComplexModule.cs"
-                int* csharp2cuda_temp_129 = &((output)->valid);
-                (*(csharp2cuda_temp_129) = 0);
+#line 376 "ComplexModule.cs"
+#line 376 "ComplexModule.cs"
+                int* csharp2cuda_temp_132 = &((output)->valid);
+                (*(csharp2cuda_temp_132) = 0);
             }
         }
-#line 376 "ComplexModule.cs"
+#line 378 "ComplexModule.cs"
         __syncthreads();
-#line 377 "ComplexModule.cs"
+#line 379 "ComplexModule.cs"
         {
-#line 377 "ComplexModule.cs"
+#line 379 "ComplexModule.cs"
             int index = thread;
             while (true)
             {
-#line 377 "ComplexModule.cs"
-                bool csharp2cuda_temp_132 = (output)->valid;
-#line 377 "ComplexModule.cs"
-                bool csharp2cuda_temp_133;
-#line 377 "ComplexModule.cs"
-                if (csharp2cuda_temp_132)
+#line 379 "ComplexModule.cs"
+                bool csharp2cuda_temp_135 = (output)->valid;
+#line 379 "ComplexModule.cs"
+                bool csharp2cuda_temp_136;
+#line 379 "ComplexModule.cs"
+                if (csharp2cuda_temp_135)
                 {
-#line 377 "ComplexModule.cs"
-                    int csharp2cuda_temp_134 = (first)->count;
-#line 377 "ComplexModule.cs"
-                    csharp2cuda_temp_133 = ((index) < (csharp2cuda_temp_134));
+#line 379 "ComplexModule.cs"
+                    int csharp2cuda_temp_137 = (first)->count;
+#line 379 "ComplexModule.cs"
+                    csharp2cuda_temp_136 = ((index) < (csharp2cuda_temp_137));
                 }
                 else
                 {
-#line 377 "ComplexModule.cs"
-                    csharp2cuda_temp_133 = false;
-                }
-                if (!(csharp2cuda_temp_133))
-                    break;
-#line 378 "ComplexModule.cs"
-                {
 #line 379 "ComplexModule.cs"
+                    csharp2cuda_temp_136 = false;
+                }
+                if (!(csharp2cuda_temp_136))
+                    break;
+#line 380 "ComplexModule.cs"
+                {
+#line 381 "ComplexModule.cs"
                     MathBlockComplexValue sum = mathblocks_complex_make(0.0, 0.0);
-#line 380 "ComplexModule.cs"
+#line 382 "ComplexModule.cs"
                     {
-#line 380 "ComplexModule.cs"
+#line 382 "ComplexModule.cs"
                         int frequency = 0;
                         while (true)
                         {
-#line 380 "ComplexModule.cs"
-                            int csharp2cuda_temp_136 = (first)->count;
-                            if (!(((frequency) < (csharp2cuda_temp_136))))
-                                break;
-#line 381 "ComplexModule.cs"
-                            {
-#line 383 "ComplexModule.cs"
-                                int csharp2cuda_temp_137 = (first)->count;
 #line 382 "ComplexModule.cs"
-                                double angle = __ddiv_rn(__dmul_rn(__dmul_rn(__dmul_rn(2.0, 3.141592653589793), ((double)(frequency))), ((double)(index))), ((double)(csharp2cuda_temp_137)));
+                            int csharp2cuda_temp_139 = (first)->count;
+                            if (!(((frequency) < (csharp2cuda_temp_139))))
+                                break;
+#line 383 "ComplexModule.cs"
+                            {
+#line 385 "ComplexModule.cs"
+                                int csharp2cuda_temp_140 = (first)->count;
 #line 384 "ComplexModule.cs"
-#line 384 "ComplexModule.cs"
-                                MathBlockComplexValue* csharp2cuda_temp_138 = &(sum);
-#line 387 "ComplexModule.cs"
-                                MathBlockComplexValue csharp2cuda_temp_139 = (complex_first)[frequency];
-                                (*(csharp2cuda_temp_138) = mathblocks_complex_add(sum, mathblocks_complex_multiply(csharp2cuda_temp_139, mathblocks_complex_from_polar(1.0, angle))));
+                                double angle = __ddiv_rn(__dmul_rn(__dmul_rn(__dmul_rn(2.0, 3.141592653589793), ((double)(frequency))), ((double)(index))), ((double)(csharp2cuda_temp_140)));
+#line 386 "ComplexModule.cs"
+#line 386 "ComplexModule.cs"
+                                MathBlockComplexValue* csharp2cuda_temp_141 = &(sum);
+#line 389 "ComplexModule.cs"
+                                MathBlockComplexValue csharp2cuda_temp_142 = (complex_first)[frequency];
+                                (*(csharp2cuda_temp_141) = mathblocks_complex_add(sum, mathblocks_complex_multiply(csharp2cuda_temp_142, mathblocks_complex_from_polar(1.0, angle))));
                             }
-#line 380 "ComplexModule.cs"
-                            int* csharp2cuda_temp_135 = &(frequency);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_135));
+#line 382 "ComplexModule.cs"
+                            int* csharp2cuda_temp_138 = &(frequency);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_138));
                         }
                     }
-#line 390 "ComplexModule.cs"
-#line 390 "ComplexModule.cs"
-                    MathBlockComplexValue* csharp2cuda_temp_140 = &((result)[index]);
 #line 392 "ComplexModule.cs"
-                    int csharp2cuda_temp_141 = (first)->count;
-                    (*(csharp2cuda_temp_140) = mathblocks_complex_divide(sum, mathblocks_complex_make(((double)(csharp2cuda_temp_141)), 0.0)));
-#line 393 "ComplexModule.cs"
-#line 393 "ComplexModule.cs"
-                    MathBlockComplexValue csharp2cuda_temp_142 = (result)[index];
-                    if ((!(mathblocks_complex_finite(csharp2cuda_temp_142))))
+#line 392 "ComplexModule.cs"
+                    MathBlockComplexValue* csharp2cuda_temp_143 = &((result)[index]);
+#line 394 "ComplexModule.cs"
+                    int csharp2cuda_temp_144 = (first)->count;
+                    (*(csharp2cuda_temp_143) = mathblocks_complex_divide(sum, mathblocks_complex_make(((double)(csharp2cuda_temp_144)), 0.0)));
+#line 395 "ComplexModule.cs"
+#line 395 "ComplexModule.cs"
+                    MathBlockComplexValue csharp2cuda_temp_145 = (result)[index];
+                    if ((!(mathblocks_complex_finite(csharp2cuda_temp_145))))
                     {
-#line 393 "ComplexModule.cs"
+#line 395 "ComplexModule.cs"
                         atomicExch(&((output)->valid), 0);
                     }
                 }
-#line 377 "ComplexModule.cs"
-                int* csharp2cuda_temp_130 = &(index);
-#line 377 "ComplexModule.cs"
-                int csharp2cuda_temp_131 = *(csharp2cuda_temp_130);
-                (*(csharp2cuda_temp_130) = csharp2cuda_i32_add(csharp2cuda_temp_131, blockDim.x));
+#line 379 "ComplexModule.cs"
+                int* csharp2cuda_temp_133 = &(index);
+#line 379 "ComplexModule.cs"
+                int csharp2cuda_temp_134 = *(csharp2cuda_temp_133);
+                (*(csharp2cuda_temp_133) = csharp2cuda_i32_add(csharp2cuda_temp_134, blockDim.x));
             }
         }
     }

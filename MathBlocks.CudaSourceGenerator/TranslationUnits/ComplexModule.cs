@@ -235,6 +235,7 @@ internal static unsafe class ComplexModule
                     break;
                 case 6:
                     output->scalar_value = mathblocks_complex_magnitude(complex_first[0]);
+                    if (!double.IsFinite(output->scalar_value)) output->valid = 0;
                     output->count = 0;
                     return;
                 case 7:
@@ -293,6 +294,7 @@ internal static unsafe class ComplexModule
                 if (opcode == 15) projected[index] = complex_first[index].imaginary;
                 else if (opcode == 16) projected[index] = mathblocks_complex_magnitude(complex_first[index]);
                 else projected[index] = complex_first[index].real;
+                if (!double.IsFinite(projected[index])) Cuda.AtomicExchange(ref output->valid, 0);
             }
             return;
         }

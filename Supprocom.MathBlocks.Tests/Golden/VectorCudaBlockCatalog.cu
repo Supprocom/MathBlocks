@@ -2716,24 +2716,35 @@ __device__ void mathblocks_vector_dispatch(
                         if (!(((index) < (csharp2cuda_temp_208))))
                             break;
 #line 493 "VectorModule.cs"
-#line 493 "VectorModule.cs"
-                        double* csharp2cuda_temp_209 = &((result)[index]);
-#line 493 "VectorModule.cs"
-                        int csharp2cuda_temp_210 = (output)->count;
-#line 493 "VectorModule.cs"
-                        double csharp2cuda_temp_211;
-#line 493 "VectorModule.cs"
-                        if (((index) == (csharp2cuda_i32_sub(csharp2cuda_temp_210, 1))))
                         {
-#line 493 "VectorModule.cs"
-                            csharp2cuda_temp_211 = end;
+#line 494 "VectorModule.cs"
+#line 494 "VectorModule.cs"
+                            double* csharp2cuda_temp_209 = &((result)[index]);
+#line 494 "VectorModule.cs"
+                            int csharp2cuda_temp_210 = (output)->count;
+#line 494 "VectorModule.cs"
+                            double csharp2cuda_temp_211;
+#line 494 "VectorModule.cs"
+                            if (((index) == (csharp2cuda_i32_sub(csharp2cuda_temp_210, 1))))
+                            {
+#line 494 "VectorModule.cs"
+                                csharp2cuda_temp_211 = end;
+                            }
+                            else
+                            {
+#line 494 "VectorModule.cs"
+                                csharp2cuda_temp_211 = __dadd_rn(start, __dmul_rn(step, ((double)(index))));
+                            }
+                            (*(csharp2cuda_temp_209) = csharp2cuda_temp_211);
+#line 495 "VectorModule.cs"
+#line 495 "VectorModule.cs"
+                            double csharp2cuda_temp_212 = (result)[index];
+                            if ((!(isfinite(csharp2cuda_temp_212))))
+                            {
+#line 495 "VectorModule.cs"
+                                atomicExch(&((output)->valid), 0);
+                            }
                         }
-                        else
-                        {
-#line 493 "VectorModule.cs"
-                            csharp2cuda_temp_211 = __dadd_rn(start, __dmul_rn(step, ((double)(index))));
-                        }
-                        (*(csharp2cuda_temp_209) = csharp2cuda_temp_211);
 #line 492 "VectorModule.cs"
                         int* csharp2cuda_temp_206 = &(index);
 #line 492 "VectorModule.cs"
@@ -2742,1721 +2753,1721 @@ __device__ void mathblocks_vector_dispatch(
                     }
                 }
             }
-#line 495 "VectorModule.cs"
+#line 498 "VectorModule.cs"
             break;
-#line 496 "VectorModule.cs"
+#line 499 "VectorModule.cs"
         case 22:
         case 25:
-#line 498 "VectorModule.cs"
-            if (((thread) == (0)))
-#line 499 "VectorModule.cs"
-            {
-#line 500 "VectorModule.cs"
-#line 500 "VectorModule.cs"
-                int csharp2cuda_temp_212 = (first)->count;
-                if (((csharp2cuda_temp_212) <= (0)))
 #line 501 "VectorModule.cs"
-                {
+            if (((thread) == (0)))
 #line 502 "VectorModule.cs"
-#line 502 "VectorModule.cs"
-                    int* csharp2cuda_temp_213 = &((output)->valid);
-                    (*(csharp2cuda_temp_213) = 0);
+            {
 #line 503 "VectorModule.cs"
+#line 503 "VectorModule.cs"
+                int csharp2cuda_temp_213 = (first)->count;
+                if (((csharp2cuda_temp_213) <= (0)))
+#line 504 "VectorModule.cs"
+                {
+#line 505 "VectorModule.cs"
+#line 505 "VectorModule.cs"
+                    int* csharp2cuda_temp_214 = &((output)->valid);
+                    (*(csharp2cuda_temp_214) = 0);
+#line 506 "VectorModule.cs"
                     break;
                 }
-#line 505 "VectorModule.cs"
+#line 508 "VectorModule.cs"
                 double selected = (a)[0];
-#line 506 "VectorModule.cs"
+#line 509 "VectorModule.cs"
                 {
-#line 506 "VectorModule.cs"
+#line 509 "VectorModule.cs"
                     int index = 1;
                     while (true)
                     {
-#line 506 "VectorModule.cs"
-                        int csharp2cuda_temp_215 = (first)->count;
-                        if (!(((index) < (csharp2cuda_temp_215))))
+#line 509 "VectorModule.cs"
+                        int csharp2cuda_temp_216 = (first)->count;
+                        if (!(((index) < (csharp2cuda_temp_216))))
                             break;
-#line 507 "VectorModule.cs"
-#line 507 "VectorModule.cs"
-                        double* csharp2cuda_temp_216 = &(selected);
-#line 507 "VectorModule.cs"
-                        double csharp2cuda_temp_217;
-#line 507 "VectorModule.cs"
+#line 510 "VectorModule.cs"
+#line 510 "VectorModule.cs"
+                        double* csharp2cuda_temp_217 = &(selected);
+#line 510 "VectorModule.cs"
+                        double csharp2cuda_temp_218;
+#line 510 "VectorModule.cs"
                         if (((opcode) == (22)))
                         {
-#line 508 "VectorModule.cs"
-                            double csharp2cuda_temp_218 = (a)[index];
-#line 507 "VectorModule.cs"
-                            csharp2cuda_temp_217 = mathblocks_maximum(selected, csharp2cuda_temp_218);
+#line 511 "VectorModule.cs"
+                            double csharp2cuda_temp_219 = (a)[index];
+#line 510 "VectorModule.cs"
+                            csharp2cuda_temp_218 = mathblocks_maximum(selected, csharp2cuda_temp_219);
                         }
                         else
                         {
-#line 509 "VectorModule.cs"
-                            double csharp2cuda_temp_219 = (a)[index];
-#line 507 "VectorModule.cs"
-                            csharp2cuda_temp_217 = mathblocks_minimum(selected, csharp2cuda_temp_219);
+#line 512 "VectorModule.cs"
+                            double csharp2cuda_temp_220 = (a)[index];
+#line 510 "VectorModule.cs"
+                            csharp2cuda_temp_218 = mathblocks_minimum(selected, csharp2cuda_temp_220);
                         }
-                        (*(csharp2cuda_temp_216) = csharp2cuda_temp_217);
-#line 506 "VectorModule.cs"
-                        int* csharp2cuda_temp_214 = &(index);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_214));
+                        (*(csharp2cuda_temp_217) = csharp2cuda_temp_218);
+#line 509 "VectorModule.cs"
+                        int* csharp2cuda_temp_215 = &(index);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_215));
                     }
                 }
-#line 510 "VectorModule.cs"
-#line 510 "VectorModule.cs"
-                double* csharp2cuda_temp_220 = &((output)->scalar_value);
-                (*(csharp2cuda_temp_220) = selected);
-            }
-#line 512 "VectorModule.cs"
-            break;
 #line 513 "VectorModule.cs"
+#line 513 "VectorModule.cs"
+                double* csharp2cuda_temp_221 = &((output)->scalar_value);
+                (*(csharp2cuda_temp_221) = selected);
+            }
+#line 515 "VectorModule.cs"
+            break;
+#line 516 "VectorModule.cs"
         case 23:
         case 48:
-#line 515 "VectorModule.cs"
+#line 518 "VectorModule.cs"
             if (((thread) == (0)))
-#line 516 "VectorModule.cs"
+#line 519 "VectorModule.cs"
             {
-#line 517 "VectorModule.cs"
-                int csharp2cuda_temp_221 = (first)->count;
-#line 517 "VectorModule.cs"
-                double sum = mathblocks_compensated_sum(a, csharp2cuda_temp_221);
-#line 518 "VectorModule.cs"
-#line 518 "VectorModule.cs"
-                double* csharp2cuda_temp_222 = &((output)->scalar_value);
-#line 518 "VectorModule.cs"
-                double csharp2cuda_temp_223;
-#line 518 "VectorModule.cs"
+#line 520 "VectorModule.cs"
+                int csharp2cuda_temp_222 = (first)->count;
+#line 520 "VectorModule.cs"
+                double sum = mathblocks_compensated_sum(a, csharp2cuda_temp_222);
+#line 521 "VectorModule.cs"
+#line 521 "VectorModule.cs"
+                double* csharp2cuda_temp_223 = &((output)->scalar_value);
+#line 521 "VectorModule.cs"
+                double csharp2cuda_temp_224;
+#line 521 "VectorModule.cs"
                 if (((opcode) == (23)))
                 {
-#line 518 "VectorModule.cs"
-                    int csharp2cuda_temp_224 = (first)->count;
-#line 518 "VectorModule.cs"
-                    csharp2cuda_temp_223 = __ddiv_rn(sum, ((double)(csharp2cuda_temp_224)));
+#line 521 "VectorModule.cs"
+                    int csharp2cuda_temp_225 = (first)->count;
+#line 521 "VectorModule.cs"
+                    csharp2cuda_temp_224 = __ddiv_rn(sum, ((double)(csharp2cuda_temp_225)));
                 }
                 else
                 {
-#line 518 "VectorModule.cs"
-                    csharp2cuda_temp_223 = sum;
+#line 521 "VectorModule.cs"
+                    csharp2cuda_temp_224 = sum;
                 }
-                (*(csharp2cuda_temp_222) = csharp2cuda_temp_223);
-#line 519 "VectorModule.cs"
-#line 519 "VectorModule.cs"
-                double csharp2cuda_temp_225 = (output)->scalar_value;
-                if ((!(isfinite(csharp2cuda_temp_225))))
+                (*(csharp2cuda_temp_223) = csharp2cuda_temp_224);
+#line 522 "VectorModule.cs"
+#line 522 "VectorModule.cs"
+                double csharp2cuda_temp_226 = (output)->scalar_value;
+                if ((!(isfinite(csharp2cuda_temp_226))))
                 {
-#line 519 "VectorModule.cs"
-#line 519 "VectorModule.cs"
-                    int* csharp2cuda_temp_226 = &((output)->valid);
-                    (*(csharp2cuda_temp_226) = 0);
+#line 522 "VectorModule.cs"
+#line 522 "VectorModule.cs"
+                    int* csharp2cuda_temp_227 = &((output)->valid);
+                    (*(csharp2cuda_temp_227) = 0);
                 }
             }
-#line 521 "VectorModule.cs"
+#line 524 "VectorModule.cs"
             break;
-#line 522 "VectorModule.cs"
+#line 525 "VectorModule.cs"
         case 24:
         case 35:
-#line 524 "VectorModule.cs"
+#line 527 "VectorModule.cs"
             if (((thread) == (0)))
-#line 525 "VectorModule.cs"
+#line 528 "VectorModule.cs"
             {
-#line 526 "VectorModule.cs"
-                double csharp2cuda_temp_227;
-#line 526 "VectorModule.cs"
+#line 529 "VectorModule.cs"
+                double csharp2cuda_temp_228;
+#line 529 "VectorModule.cs"
                 if (((opcode) == (24)))
                 {
-#line 526 "VectorModule.cs"
-                    csharp2cuda_temp_227 = 0.5;
+#line 529 "VectorModule.cs"
+                    csharp2cuda_temp_228 = 0.5;
                 }
                 else
                 {
-#line 526 "VectorModule.cs"
-                    csharp2cuda_temp_227 = (second)->scalar_value;
+#line 529 "VectorModule.cs"
+                    csharp2cuda_temp_228 = (second)->scalar_value;
                 }
-#line 526 "VectorModule.cs"
-                double probability = csharp2cuda_temp_227;
-#line 527 "VectorModule.cs"
-#line 527 "VectorModule.cs"
-                int csharp2cuda_temp_228 = (first)->count;
-#line 527 "VectorModule.cs"
-                bool csharp2cuda_temp_229;
-#line 527 "VectorModule.cs"
-                if (!(((csharp2cuda_temp_228) <= (0))))
+#line 529 "VectorModule.cs"
+                double probability = csharp2cuda_temp_228;
+#line 530 "VectorModule.cs"
+#line 530 "VectorModule.cs"
+                int csharp2cuda_temp_229 = (first)->count;
+#line 530 "VectorModule.cs"
+                bool csharp2cuda_temp_230;
+#line 530 "VectorModule.cs"
+                if (!(((csharp2cuda_temp_229) <= (0))))
                 {
-#line 527 "VectorModule.cs"
-                    unsigned long long csharp2cuda_temp_230 = (output)->scratch_pointer;
-#line 527 "VectorModule.cs"
-                    csharp2cuda_temp_229 = ((csharp2cuda_temp_230) == (((unsigned long long)(0))));
+#line 530 "VectorModule.cs"
+                    unsigned long long csharp2cuda_temp_231 = (output)->scratch_pointer;
+#line 530 "VectorModule.cs"
+                    csharp2cuda_temp_230 = ((csharp2cuda_temp_231) == (((unsigned long long)(0))));
                 }
                 else
                 {
-#line 527 "VectorModule.cs"
-                    csharp2cuda_temp_229 = true;
+#line 530 "VectorModule.cs"
+                    csharp2cuda_temp_230 = true;
                 }
-#line 527 "VectorModule.cs"
-                bool csharp2cuda_temp_231;
-#line 527 "VectorModule.cs"
-                if (!(csharp2cuda_temp_229))
-                {
-#line 527 "VectorModule.cs"
-                    csharp2cuda_temp_231 = ((probability) < (0.0));
-                }
-                else
-                {
-#line 527 "VectorModule.cs"
-                    csharp2cuda_temp_231 = true;
-                }
-#line 527 "VectorModule.cs"
+#line 530 "VectorModule.cs"
                 bool csharp2cuda_temp_232;
-#line 527 "VectorModule.cs"
-                if (!(csharp2cuda_temp_231))
+#line 530 "VectorModule.cs"
+                if (!(csharp2cuda_temp_230))
                 {
-#line 527 "VectorModule.cs"
-                    csharp2cuda_temp_232 = ((probability) > (1.0));
+#line 530 "VectorModule.cs"
+                    csharp2cuda_temp_232 = ((probability) < (0.0));
                 }
                 else
                 {
-#line 527 "VectorModule.cs"
+#line 530 "VectorModule.cs"
                     csharp2cuda_temp_232 = true;
                 }
-                if (csharp2cuda_temp_232)
+#line 530 "VectorModule.cs"
+                bool csharp2cuda_temp_233;
+#line 530 "VectorModule.cs"
+                if (!(csharp2cuda_temp_232))
                 {
-#line 529 "VectorModule.cs"
-#line 529 "VectorModule.cs"
-                    int* csharp2cuda_temp_233 = &((output)->valid);
-                    (*(csharp2cuda_temp_233) = 0);
+#line 530 "VectorModule.cs"
+                    csharp2cuda_temp_233 = ((probability) > (1.0));
                 }
                 else
-#line 531 "VectorModule.cs"
+                {
+#line 530 "VectorModule.cs"
+                    csharp2cuda_temp_233 = true;
+                }
+                if (csharp2cuda_temp_233)
                 {
 #line 532 "VectorModule.cs"
 #line 532 "VectorModule.cs"
-                    double* csharp2cuda_temp_234 = &((output)->scalar_value);
-#line 532 "VectorModule.cs"
-                    double csharp2cuda_temp_235 = mathblocks_quantile(first, output, probability);
-                    (*(csharp2cuda_temp_234) = csharp2cuda_temp_235);
-#line 533 "VectorModule.cs"
-#line 533 "VectorModule.cs"
-                    double csharp2cuda_temp_236 = (output)->scalar_value;
-                    if ((!(isfinite(csharp2cuda_temp_236))))
+                    int* csharp2cuda_temp_234 = &((output)->valid);
+                    (*(csharp2cuda_temp_234) = 0);
+                }
+                else
+#line 534 "VectorModule.cs"
+                {
+#line 535 "VectorModule.cs"
+#line 535 "VectorModule.cs"
+                    double* csharp2cuda_temp_235 = &((output)->scalar_value);
+#line 535 "VectorModule.cs"
+                    double csharp2cuda_temp_236 = mathblocks_quantile(first, output, probability);
+                    (*(csharp2cuda_temp_235) = csharp2cuda_temp_236);
+#line 536 "VectorModule.cs"
+#line 536 "VectorModule.cs"
+                    double csharp2cuda_temp_237 = (output)->scalar_value;
+                    if ((!(isfinite(csharp2cuda_temp_237))))
                     {
-#line 533 "VectorModule.cs"
-#line 533 "VectorModule.cs"
-                        int* csharp2cuda_temp_237 = &((output)->valid);
-                        (*(csharp2cuda_temp_237) = 0);
+#line 536 "VectorModule.cs"
+#line 536 "VectorModule.cs"
+                        int* csharp2cuda_temp_238 = &((output)->valid);
+                        (*(csharp2cuda_temp_238) = 0);
                     }
                 }
             }
-#line 536 "VectorModule.cs"
+#line 539 "VectorModule.cs"
             break;
-#line 537 "VectorModule.cs"
+#line 540 "VectorModule.cs"
         case 28:
         case 29:
-#line 539 "VectorModule.cs"
+#line 542 "VectorModule.cs"
             if (((thread) == (0)))
-#line 540 "VectorModule.cs"
+#line 543 "VectorModule.cs"
             {
-#line 541 "VectorModule.cs"
-#line 541 "VectorModule.cs"
-                int csharp2cuda_temp_238 = (first)->count;
-                mathblocks_set_vector_shape(output, csharp2cuda_temp_238);
-#line 542 "VectorModule.cs"
-#line 542 "VectorModule.cs"
-                double* csharp2cuda_temp_239 = &((output)->scalar_value);
-#line 542 "VectorModule.cs"
-                double csharp2cuda_temp_240;
-#line 542 "VectorModule.cs"
+#line 544 "VectorModule.cs"
+#line 544 "VectorModule.cs"
+                int csharp2cuda_temp_239 = (first)->count;
+                mathblocks_set_vector_shape(output, csharp2cuda_temp_239);
+#line 545 "VectorModule.cs"
+#line 545 "VectorModule.cs"
+                double* csharp2cuda_temp_240 = &((output)->scalar_value);
+#line 545 "VectorModule.cs"
+                double csharp2cuda_temp_241;
+#line 545 "VectorModule.cs"
                 if (((opcode) == (28)))
                 {
-#line 543 "VectorModule.cs"
-                    int csharp2cuda_temp_241 = (first)->count;
-#line 542 "VectorModule.cs"
-                    csharp2cuda_temp_240 = mathblocks_compensated_absolute_sum(a, csharp2cuda_temp_241);
-                }
-                else
-                {
-#line 544 "VectorModule.cs"
+#line 546 "VectorModule.cs"
                     int csharp2cuda_temp_242 = (first)->count;
-#line 544 "VectorModule.cs"
-                    double csharp2cuda_temp_243 = mathblocks_compensated_product_sum(a, a, csharp2cuda_temp_242);
-#line 542 "VectorModule.cs"
-                    csharp2cuda_temp_240 = mathblocks_square_root(csharp2cuda_temp_243);
-                }
-                (*(csharp2cuda_temp_239) = csharp2cuda_temp_240);
 #line 545 "VectorModule.cs"
-#line 545 "VectorModule.cs"
-                double csharp2cuda_temp_244 = (output)->scalar_value;
-#line 545 "VectorModule.cs"
-                bool csharp2cuda_temp_245;
-#line 545 "VectorModule.cs"
-                if (!((!(isfinite(csharp2cuda_temp_244)))))
-                {
-#line 545 "VectorModule.cs"
-                    double csharp2cuda_temp_246 = (output)->scalar_value;
-#line 545 "VectorModule.cs"
-                    csharp2cuda_temp_245 = ((csharp2cuda_temp_246) == (0.0));
+                    csharp2cuda_temp_241 = mathblocks_compensated_absolute_sum(a, csharp2cuda_temp_242);
                 }
                 else
                 {
+#line 547 "VectorModule.cs"
+                    int csharp2cuda_temp_243 = (first)->count;
+#line 547 "VectorModule.cs"
+                    double csharp2cuda_temp_244 = mathblocks_compensated_product_sum(a, a, csharp2cuda_temp_243);
 #line 545 "VectorModule.cs"
-                    csharp2cuda_temp_245 = true;
+                    csharp2cuda_temp_241 = mathblocks_square_root(csharp2cuda_temp_244);
                 }
-                if (csharp2cuda_temp_245)
+                (*(csharp2cuda_temp_240) = csharp2cuda_temp_241);
+#line 548 "VectorModule.cs"
+#line 548 "VectorModule.cs"
+                double csharp2cuda_temp_245 = (output)->scalar_value;
+#line 548 "VectorModule.cs"
+                bool csharp2cuda_temp_246;
+#line 548 "VectorModule.cs"
+                if (!((!(isfinite(csharp2cuda_temp_245)))))
                 {
-#line 545 "VectorModule.cs"
-#line 545 "VectorModule.cs"
-                    int* csharp2cuda_temp_247 = &((output)->valid);
-                    (*(csharp2cuda_temp_247) = 0);
+#line 548 "VectorModule.cs"
+                    double csharp2cuda_temp_247 = (output)->scalar_value;
+#line 548 "VectorModule.cs"
+                    csharp2cuda_temp_246 = ((csharp2cuda_temp_247) == (0.0));
+                }
+                else
+                {
+#line 548 "VectorModule.cs"
+                    csharp2cuda_temp_246 = true;
+                }
+                if (csharp2cuda_temp_246)
+                {
+#line 548 "VectorModule.cs"
+#line 548 "VectorModule.cs"
+                    int* csharp2cuda_temp_248 = &((output)->valid);
+                    (*(csharp2cuda_temp_248) = 0);
                 }
             }
-#line 547 "VectorModule.cs"
+#line 550 "VectorModule.cs"
             __syncthreads();
-#line 548 "VectorModule.cs"
+#line 551 "VectorModule.cs"
             {
-#line 548 "VectorModule.cs"
+#line 551 "VectorModule.cs"
                 int index = thread;
                 while (true)
                 {
-#line 548 "VectorModule.cs"
-                    bool csharp2cuda_temp_250 = (output)->valid;
-#line 548 "VectorModule.cs"
-                    bool csharp2cuda_temp_251;
-#line 548 "VectorModule.cs"
-                    if (csharp2cuda_temp_250)
+#line 551 "VectorModule.cs"
+                    bool csharp2cuda_temp_251 = (output)->valid;
+#line 551 "VectorModule.cs"
+                    bool csharp2cuda_temp_252;
+#line 551 "VectorModule.cs"
+                    if (csharp2cuda_temp_251)
                     {
-#line 548 "VectorModule.cs"
-                        int csharp2cuda_temp_252 = (first)->count;
-#line 548 "VectorModule.cs"
-                        csharp2cuda_temp_251 = ((index) < (csharp2cuda_temp_252));
+#line 551 "VectorModule.cs"
+                        int csharp2cuda_temp_253 = (first)->count;
+#line 551 "VectorModule.cs"
+                        csharp2cuda_temp_252 = ((index) < (csharp2cuda_temp_253));
                     }
                     else
                     {
-#line 548 "VectorModule.cs"
-                        csharp2cuda_temp_251 = false;
+#line 551 "VectorModule.cs"
+                        csharp2cuda_temp_252 = false;
                     }
-                    if (!(csharp2cuda_temp_251))
+                    if (!(csharp2cuda_temp_252))
                         break;
-#line 549 "VectorModule.cs"
+#line 552 "VectorModule.cs"
                     {
-#line 550 "VectorModule.cs"
-#line 550 "VectorModule.cs"
-                        double* csharp2cuda_temp_253 = &((result)[index]);
-#line 550 "VectorModule.cs"
-                        double csharp2cuda_temp_254 = (a)[index];
-#line 550 "VectorModule.cs"
-                        double csharp2cuda_temp_255 = (output)->scalar_value;
-#line 550 "VectorModule.cs"
-                        double csharp2cuda_temp_256 = __ddiv_rn(1.0, csharp2cuda_temp_255);
-                        (*(csharp2cuda_temp_253) = __dmul_rn(csharp2cuda_temp_254, csharp2cuda_temp_256));
-#line 551 "VectorModule.cs"
-#line 551 "VectorModule.cs"
-                        double csharp2cuda_temp_257 = (result)[index];
-                        if ((!(isfinite(csharp2cuda_temp_257))))
+#line 553 "VectorModule.cs"
+#line 553 "VectorModule.cs"
+                        double* csharp2cuda_temp_254 = &((result)[index]);
+#line 553 "VectorModule.cs"
+                        double csharp2cuda_temp_255 = (a)[index];
+#line 553 "VectorModule.cs"
+                        double csharp2cuda_temp_256 = (output)->scalar_value;
+#line 553 "VectorModule.cs"
+                        double csharp2cuda_temp_257 = __ddiv_rn(1.0, csharp2cuda_temp_256);
+                        (*(csharp2cuda_temp_254) = __dmul_rn(csharp2cuda_temp_255, csharp2cuda_temp_257));
+#line 554 "VectorModule.cs"
+#line 554 "VectorModule.cs"
+                        double csharp2cuda_temp_258 = (result)[index];
+                        if ((!(isfinite(csharp2cuda_temp_258))))
                         {
-#line 551 "VectorModule.cs"
+#line 554 "VectorModule.cs"
                             atomicExch(&((output)->valid), 0);
                         }
                     }
-#line 548 "VectorModule.cs"
-                    int* csharp2cuda_temp_248 = &(index);
-#line 548 "VectorModule.cs"
-                    int csharp2cuda_temp_249 = *(csharp2cuda_temp_248);
-                    (*(csharp2cuda_temp_248) = csharp2cuda_i32_add(csharp2cuda_temp_249, blockDim.x));
+#line 551 "VectorModule.cs"
+                    int* csharp2cuda_temp_249 = &(index);
+#line 551 "VectorModule.cs"
+                    int csharp2cuda_temp_250 = *(csharp2cuda_temp_249);
+                    (*(csharp2cuda_temp_249) = csharp2cuda_i32_add(csharp2cuda_temp_250, blockDim.x));
                 }
             }
-#line 553 "VectorModule.cs"
-            break;
-#line 554 "VectorModule.cs"
-        case 30:
-#line 555 "VectorModule.cs"
-            if (((thread) == (0)))
 #line 556 "VectorModule.cs"
-            {
+            break;
 #line 557 "VectorModule.cs"
-                mathblocks_set_vector_shape(output, 2);
+        case 30:
 #line 558 "VectorModule.cs"
-                if ((output)->valid)
+            if (((thread) == (0)))
 #line 559 "VectorModule.cs"
+            {
+#line 560 "VectorModule.cs"
+                mathblocks_set_vector_shape(output, 2);
+#line 561 "VectorModule.cs"
+                if ((output)->valid)
+#line 562 "VectorModule.cs"
                 {
-#line 560 "VectorModule.cs"
-#line 560 "VectorModule.cs"
-                    double* csharp2cuda_temp_258 = &((result)[0]);
-#line 560 "VectorModule.cs"
-                    double csharp2cuda_temp_259 = (first)->scalar_value;
-                    (*(csharp2cuda_temp_258) = csharp2cuda_temp_259);
-#line 561 "VectorModule.cs"
-#line 561 "VectorModule.cs"
-                    double* csharp2cuda_temp_260 = &((result)[1]);
-#line 561 "VectorModule.cs"
-                    double csharp2cuda_temp_261 = (second)->scalar_value;
-                    (*(csharp2cuda_temp_260) = csharp2cuda_temp_261);
+#line 563 "VectorModule.cs"
+#line 563 "VectorModule.cs"
+                    double* csharp2cuda_temp_259 = &((result)[0]);
+#line 563 "VectorModule.cs"
+                    double csharp2cuda_temp_260 = (first)->scalar_value;
+                    (*(csharp2cuda_temp_259) = csharp2cuda_temp_260);
+#line 564 "VectorModule.cs"
+#line 564 "VectorModule.cs"
+                    double* csharp2cuda_temp_261 = &((result)[1]);
+#line 564 "VectorModule.cs"
+                    double csharp2cuda_temp_262 = (second)->scalar_value;
+                    (*(csharp2cuda_temp_261) = csharp2cuda_temp_262);
                 }
             }
-#line 564 "VectorModule.cs"
+#line 567 "VectorModule.cs"
             break;
-#line 565 "VectorModule.cs"
+#line 568 "VectorModule.cs"
         case 31:
         case 41:
         case 45:
-#line 568 "VectorModule.cs"
+#line 571 "VectorModule.cs"
             if (((thread) == (0)))
             {
-#line 568 "VectorModule.cs"
-#line 568 "VectorModule.cs"
-                int csharp2cuda_temp_262 = (first)->count;
-                mathblocks_set_vector_shape(output, csharp2cuda_temp_262);
+#line 571 "VectorModule.cs"
+#line 571 "VectorModule.cs"
+                int csharp2cuda_temp_263 = (first)->count;
+                mathblocks_set_vector_shape(output, csharp2cuda_temp_263);
             }
-#line 569 "VectorModule.cs"
+#line 572 "VectorModule.cs"
             __syncthreads();
-#line 570 "VectorModule.cs"
+#line 573 "VectorModule.cs"
             {
-#line 570 "VectorModule.cs"
+#line 573 "VectorModule.cs"
                 int index = thread;
                 while (true)
                 {
-#line 570 "VectorModule.cs"
-                    bool csharp2cuda_temp_265 = (output)->valid;
-#line 570 "VectorModule.cs"
-                    bool csharp2cuda_temp_266;
-#line 570 "VectorModule.cs"
-                    if (csharp2cuda_temp_265)
+#line 573 "VectorModule.cs"
+                    bool csharp2cuda_temp_266 = (output)->valid;
+#line 573 "VectorModule.cs"
+                    bool csharp2cuda_temp_267;
+#line 573 "VectorModule.cs"
+                    if (csharp2cuda_temp_266)
                     {
-#line 570 "VectorModule.cs"
-                        int csharp2cuda_temp_267 = (first)->count;
-#line 570 "VectorModule.cs"
-                        csharp2cuda_temp_266 = ((index) < (csharp2cuda_temp_267));
+#line 573 "VectorModule.cs"
+                        int csharp2cuda_temp_268 = (first)->count;
+#line 573 "VectorModule.cs"
+                        csharp2cuda_temp_267 = ((index) < (csharp2cuda_temp_268));
                     }
                     else
                     {
-#line 570 "VectorModule.cs"
-                        csharp2cuda_temp_266 = false;
+#line 573 "VectorModule.cs"
+                        csharp2cuda_temp_267 = false;
                     }
-                    if (!(csharp2cuda_temp_266))
+                    if (!(csharp2cuda_temp_267))
                         break;
-#line 571 "VectorModule.cs"
+#line 574 "VectorModule.cs"
                     {
-#line 572 "VectorModule.cs"
-                        double csharp2cuda_temp_268;
-#line 572 "VectorModule.cs"
+#line 575 "VectorModule.cs"
+                        double csharp2cuda_temp_269;
+#line 575 "VectorModule.cs"
                         if (((opcode) == (31)))
                         {
-#line 572 "VectorModule.cs"
-                            double csharp2cuda_temp_269 = (a)[index];
-#line 572 "VectorModule.cs"
-                            csharp2cuda_temp_268 = mathblocks_maximum(csharp2cuda_temp_269, 0.0);
+#line 575 "VectorModule.cs"
+                            double csharp2cuda_temp_270 = (a)[index];
+#line 575 "VectorModule.cs"
+                            csharp2cuda_temp_269 = mathblocks_maximum(csharp2cuda_temp_270, 0.0);
                         }
                         else
                         {
-#line 573 "VectorModule.cs"
-                            double csharp2cuda_temp_270;
-#line 573 "VectorModule.cs"
+#line 576 "VectorModule.cs"
+                            double csharp2cuda_temp_271;
+#line 576 "VectorModule.cs"
                             if (((opcode) == (41)))
                             {
-#line 573 "VectorModule.cs"
-                                double csharp2cuda_temp_271 = (a)[index];
-#line 573 "VectorModule.cs"
+#line 576 "VectorModule.cs"
                                 double csharp2cuda_temp_272 = (a)[index];
-#line 573 "VectorModule.cs"
-                                csharp2cuda_temp_270 = ((double)(csharp2cuda_i32_sub(((((csharp2cuda_temp_271) > (0.0))) ? 1 : 0), ((((csharp2cuda_temp_272) < (0.0))) ? 1 : 0))));
+#line 576 "VectorModule.cs"
+                                double csharp2cuda_temp_273 = (a)[index];
+#line 576 "VectorModule.cs"
+                                csharp2cuda_temp_271 = ((double)(csharp2cuda_i32_sub(((((csharp2cuda_temp_272) > (0.0))) ? 1 : 0), ((((csharp2cuda_temp_273) < (0.0))) ? 1 : 0))));
                             }
                             else
                             {
-#line 574 "VectorModule.cs"
-                                double csharp2cuda_temp_273 = (a)[index];
-#line 574 "VectorModule.cs"
+#line 577 "VectorModule.cs"
                                 double csharp2cuda_temp_274 = (a)[index];
-#line 573 "VectorModule.cs"
-                                csharp2cuda_temp_270 = __dmul_rn(csharp2cuda_temp_273, csharp2cuda_temp_274);
-                            }
-#line 572 "VectorModule.cs"
-                            csharp2cuda_temp_268 = csharp2cuda_temp_270;
-                        }
-#line 572 "VectorModule.cs"
-                        double value = csharp2cuda_temp_268;
-#line 575 "VectorModule.cs"
-#line 575 "VectorModule.cs"
-                        double* csharp2cuda_temp_275 = &((result)[index]);
-                        (*(csharp2cuda_temp_275) = value);
+#line 577 "VectorModule.cs"
+                                double csharp2cuda_temp_275 = (a)[index];
 #line 576 "VectorModule.cs"
+                                csharp2cuda_temp_271 = __dmul_rn(csharp2cuda_temp_274, csharp2cuda_temp_275);
+                            }
+#line 575 "VectorModule.cs"
+                            csharp2cuda_temp_269 = csharp2cuda_temp_271;
+                        }
+#line 575 "VectorModule.cs"
+                        double value = csharp2cuda_temp_269;
+#line 578 "VectorModule.cs"
+#line 578 "VectorModule.cs"
+                        double* csharp2cuda_temp_276 = &((result)[index]);
+                        (*(csharp2cuda_temp_276) = value);
+#line 579 "VectorModule.cs"
                         if ((!(isfinite(value))))
                         {
-#line 576 "VectorModule.cs"
+#line 579 "VectorModule.cs"
                             atomicExch(&((output)->valid), 0);
                         }
                     }
-#line 570 "VectorModule.cs"
-                    int* csharp2cuda_temp_263 = &(index);
-#line 570 "VectorModule.cs"
-                    int csharp2cuda_temp_264 = *(csharp2cuda_temp_263);
-                    (*(csharp2cuda_temp_263) = csharp2cuda_i32_add(csharp2cuda_temp_264, blockDim.x));
+#line 573 "VectorModule.cs"
+                    int* csharp2cuda_temp_264 = &(index);
+#line 573 "VectorModule.cs"
+                    int csharp2cuda_temp_265 = *(csharp2cuda_temp_264);
+                    (*(csharp2cuda_temp_264) = csharp2cuda_i32_add(csharp2cuda_temp_265, blockDim.x));
                 }
             }
-#line 578 "VectorModule.cs"
+#line 581 "VectorModule.cs"
             break;
-#line 579 "VectorModule.cs"
+#line 582 "VectorModule.cs"
         case 32:
-#line 580 "VectorModule.cs"
+#line 583 "VectorModule.cs"
             if (((thread) == (0)))
             {
-#line 580 "VectorModule.cs"
-#line 580 "VectorModule.cs"
-                int csharp2cuda_temp_276 = (first)->count;
-                mathblocks_set_vector_shape(output, csharp2cuda_temp_276);
+#line 583 "VectorModule.cs"
+#line 583 "VectorModule.cs"
+                int csharp2cuda_temp_277 = (first)->count;
+                mathblocks_set_vector_shape(output, csharp2cuda_temp_277);
             }
-#line 581 "VectorModule.cs"
+#line 584 "VectorModule.cs"
             __syncthreads();
-#line 582 "VectorModule.cs"
+#line 585 "VectorModule.cs"
             {
-#line 582 "VectorModule.cs"
+#line 585 "VectorModule.cs"
                 int index = thread;
                 while (true)
                 {
-#line 582 "VectorModule.cs"
-                    bool csharp2cuda_temp_279 = (output)->valid;
-#line 582 "VectorModule.cs"
-                    bool csharp2cuda_temp_280;
-#line 582 "VectorModule.cs"
-                    if (csharp2cuda_temp_279)
+#line 585 "VectorModule.cs"
+                    bool csharp2cuda_temp_280 = (output)->valid;
+#line 585 "VectorModule.cs"
+                    bool csharp2cuda_temp_281;
+#line 585 "VectorModule.cs"
+                    if (csharp2cuda_temp_280)
                     {
-#line 582 "VectorModule.cs"
-                        int csharp2cuda_temp_281 = (first)->count;
-#line 582 "VectorModule.cs"
-                        csharp2cuda_temp_280 = ((index) < (csharp2cuda_temp_281));
+#line 585 "VectorModule.cs"
+                        int csharp2cuda_temp_282 = (first)->count;
+#line 585 "VectorModule.cs"
+                        csharp2cuda_temp_281 = ((index) < (csharp2cuda_temp_282));
                     }
                     else
                     {
-#line 582 "VectorModule.cs"
-                        csharp2cuda_temp_280 = false;
+#line 585 "VectorModule.cs"
+                        csharp2cuda_temp_281 = false;
                     }
-                    if (!(csharp2cuda_temp_280))
+                    if (!(csharp2cuda_temp_281))
                         break;
-#line 583 "VectorModule.cs"
+#line 586 "VectorModule.cs"
                     {
-#line 584 "VectorModule.cs"
-#line 584 "VectorModule.cs"
-                        double* csharp2cuda_temp_282 = &((result)[index]);
-#line 584 "VectorModule.cs"
-                        double csharp2cuda_temp_283 = (a)[index];
-#line 584 "VectorModule.cs"
-                        double csharp2cuda_temp_284 = (second)->scalar_value;
-                        (*(csharp2cuda_temp_282) = mathblocks_power(csharp2cuda_temp_283, csharp2cuda_temp_284));
-#line 585 "VectorModule.cs"
-#line 585 "VectorModule.cs"
-                        double csharp2cuda_temp_285 = (result)[index];
-                        if ((!(isfinite(csharp2cuda_temp_285))))
+#line 587 "VectorModule.cs"
+#line 587 "VectorModule.cs"
+                        double* csharp2cuda_temp_283 = &((result)[index]);
+#line 587 "VectorModule.cs"
+                        double csharp2cuda_temp_284 = (a)[index];
+#line 587 "VectorModule.cs"
+                        double csharp2cuda_temp_285 = (second)->scalar_value;
+                        (*(csharp2cuda_temp_283) = mathblocks_power(csharp2cuda_temp_284, csharp2cuda_temp_285));
+#line 588 "VectorModule.cs"
+#line 588 "VectorModule.cs"
+                        double csharp2cuda_temp_286 = (result)[index];
+                        if ((!(isfinite(csharp2cuda_temp_286))))
                         {
-#line 585 "VectorModule.cs"
+#line 588 "VectorModule.cs"
                             atomicExch(&((output)->valid), 0);
                         }
                     }
-#line 582 "VectorModule.cs"
-                    int* csharp2cuda_temp_277 = &(index);
-#line 582 "VectorModule.cs"
-                    int csharp2cuda_temp_278 = *(csharp2cuda_temp_277);
-                    (*(csharp2cuda_temp_277) = csharp2cuda_i32_add(csharp2cuda_temp_278, blockDim.x));
+#line 585 "VectorModule.cs"
+                    int* csharp2cuda_temp_278 = &(index);
+#line 585 "VectorModule.cs"
+                    int csharp2cuda_temp_279 = *(csharp2cuda_temp_278);
+                    (*(csharp2cuda_temp_278) = csharp2cuda_i32_add(csharp2cuda_temp_279, blockDim.x));
                 }
             }
-#line 587 "VectorModule.cs"
-            break;
-#line 588 "VectorModule.cs"
-        case 33:
-#line 589 "VectorModule.cs"
-            if (((thread) == (0)))
-            {
-#line 589 "VectorModule.cs"
-#line 589 "VectorModule.cs"
-                int csharp2cuda_temp_286 = (first)->count;
-                mathblocks_set_vector_shape(output, csharp2cuda_i32_add(csharp2cuda_temp_286, 1));
-            }
 #line 590 "VectorModule.cs"
-            __syncthreads();
+            break;
 #line 591 "VectorModule.cs"
-#line 591 "VectorModule.cs"
-            bool csharp2cuda_temp_287;
-#line 591 "VectorModule.cs"
+        case 33:
+#line 592 "VectorModule.cs"
             if (((thread) == (0)))
             {
-#line 591 "VectorModule.cs"
-                csharp2cuda_temp_287 = (output)->valid;
+#line 592 "VectorModule.cs"
+#line 592 "VectorModule.cs"
+                int csharp2cuda_temp_287 = (first)->count;
+                mathblocks_set_vector_shape(output, csharp2cuda_i32_add(csharp2cuda_temp_287, 1));
+            }
+#line 593 "VectorModule.cs"
+            __syncthreads();
+#line 594 "VectorModule.cs"
+#line 594 "VectorModule.cs"
+            bool csharp2cuda_temp_288;
+#line 594 "VectorModule.cs"
+            if (((thread) == (0)))
+            {
+#line 594 "VectorModule.cs"
+                csharp2cuda_temp_288 = (output)->valid;
             }
             else
             {
-#line 591 "VectorModule.cs"
-                csharp2cuda_temp_287 = false;
+#line 594 "VectorModule.cs"
+                csharp2cuda_temp_288 = false;
             }
-            if (csharp2cuda_temp_287)
+            if (csharp2cuda_temp_288)
             {
-#line 591 "VectorModule.cs"
-#line 591 "VectorModule.cs"
-                double* csharp2cuda_temp_288 = &((result)[0]);
-#line 591 "VectorModule.cs"
-                double csharp2cuda_temp_289 = (second)->scalar_value;
-                (*(csharp2cuda_temp_288) = csharp2cuda_temp_289);
+#line 594 "VectorModule.cs"
+#line 594 "VectorModule.cs"
+                double* csharp2cuda_temp_289 = &((result)[0]);
+#line 594 "VectorModule.cs"
+                double csharp2cuda_temp_290 = (second)->scalar_value;
+                (*(csharp2cuda_temp_289) = csharp2cuda_temp_290);
             }
-#line 592 "VectorModule.cs"
+#line 595 "VectorModule.cs"
             {
-#line 592 "VectorModule.cs"
+#line 595 "VectorModule.cs"
                 int index = thread;
                 while (true)
                 {
-#line 592 "VectorModule.cs"
-                    bool csharp2cuda_temp_292 = (output)->valid;
-#line 592 "VectorModule.cs"
-                    bool csharp2cuda_temp_293;
-#line 592 "VectorModule.cs"
-                    if (csharp2cuda_temp_292)
+#line 595 "VectorModule.cs"
+                    bool csharp2cuda_temp_293 = (output)->valid;
+#line 595 "VectorModule.cs"
+                    bool csharp2cuda_temp_294;
+#line 595 "VectorModule.cs"
+                    if (csharp2cuda_temp_293)
                     {
-#line 592 "VectorModule.cs"
-                        int csharp2cuda_temp_294 = (first)->count;
-#line 592 "VectorModule.cs"
-                        csharp2cuda_temp_293 = ((index) < (csharp2cuda_temp_294));
+#line 595 "VectorModule.cs"
+                        int csharp2cuda_temp_295 = (first)->count;
+#line 595 "VectorModule.cs"
+                        csharp2cuda_temp_294 = ((index) < (csharp2cuda_temp_295));
                     }
                     else
                     {
-#line 592 "VectorModule.cs"
-                        csharp2cuda_temp_293 = false;
+#line 595 "VectorModule.cs"
+                        csharp2cuda_temp_294 = false;
                     }
-                    if (!(csharp2cuda_temp_293))
+                    if (!(csharp2cuda_temp_294))
                         break;
-#line 593 "VectorModule.cs"
-#line 593 "VectorModule.cs"
-                    double* csharp2cuda_temp_295 = &((result)[csharp2cuda_i32_add(index, 1)]);
-#line 593 "VectorModule.cs"
-                    double csharp2cuda_temp_296 = (a)[index];
-                    (*(csharp2cuda_temp_295) = csharp2cuda_temp_296);
-#line 592 "VectorModule.cs"
-                    int* csharp2cuda_temp_290 = &(index);
-#line 592 "VectorModule.cs"
-                    int csharp2cuda_temp_291 = *(csharp2cuda_temp_290);
-                    (*(csharp2cuda_temp_290) = csharp2cuda_i32_add(csharp2cuda_temp_291, blockDim.x));
+#line 596 "VectorModule.cs"
+#line 596 "VectorModule.cs"
+                    double* csharp2cuda_temp_296 = &((result)[csharp2cuda_i32_add(index, 1)]);
+#line 596 "VectorModule.cs"
+                    double csharp2cuda_temp_297 = (a)[index];
+                    (*(csharp2cuda_temp_296) = csharp2cuda_temp_297);
+#line 595 "VectorModule.cs"
+                    int* csharp2cuda_temp_291 = &(index);
+#line 595 "VectorModule.cs"
+                    int csharp2cuda_temp_292 = *(csharp2cuda_temp_291);
+                    (*(csharp2cuda_temp_291) = csharp2cuda_i32_add(csharp2cuda_temp_292, blockDim.x));
                 }
             }
-#line 594 "VectorModule.cs"
-            break;
-#line 595 "VectorModule.cs"
-        case 34:
-#line 596 "VectorModule.cs"
-            if (((thread) == (0)))
 #line 597 "VectorModule.cs"
-            {
+            break;
 #line 598 "VectorModule.cs"
+        case 34:
+#line 599 "VectorModule.cs"
+            if (((thread) == (0)))
+#line 600 "VectorModule.cs"
+            {
+#line 601 "VectorModule.cs"
                 double product = 1.0;
-#line 599 "VectorModule.cs"
+#line 602 "VectorModule.cs"
                 {
-#line 599 "VectorModule.cs"
+#line 602 "VectorModule.cs"
                     int index = 0;
                     while (true)
                     {
-#line 599 "VectorModule.cs"
-                        int csharp2cuda_temp_298 = (first)->count;
-                        if (!(((index) < (csharp2cuda_temp_298))))
+#line 602 "VectorModule.cs"
+                        int csharp2cuda_temp_299 = (first)->count;
+                        if (!(((index) < (csharp2cuda_temp_299))))
                             break;
-#line 599 "VectorModule.cs"
-#line 599 "VectorModule.cs"
-                        double* csharp2cuda_temp_299 = &(product);
-#line 599 "VectorModule.cs"
-                        double csharp2cuda_temp_300 = *(csharp2cuda_temp_299);
-#line 599 "VectorModule.cs"
-                        double csharp2cuda_temp_301 = (a)[index];
-                        (*(csharp2cuda_temp_299) = __dmul_rn(csharp2cuda_temp_300, csharp2cuda_temp_301));
-#line 599 "VectorModule.cs"
-                        int* csharp2cuda_temp_297 = &(index);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_297));
+#line 602 "VectorModule.cs"
+#line 602 "VectorModule.cs"
+                        double* csharp2cuda_temp_300 = &(product);
+#line 602 "VectorModule.cs"
+                        double csharp2cuda_temp_301 = *(csharp2cuda_temp_300);
+#line 602 "VectorModule.cs"
+                        double csharp2cuda_temp_302 = (a)[index];
+                        (*(csharp2cuda_temp_300) = __dmul_rn(csharp2cuda_temp_301, csharp2cuda_temp_302));
+#line 602 "VectorModule.cs"
+                        int* csharp2cuda_temp_298 = &(index);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_298));
                     }
                 }
-#line 600 "VectorModule.cs"
-#line 600 "VectorModule.cs"
-                double* csharp2cuda_temp_302 = &((output)->scalar_value);
-                (*(csharp2cuda_temp_302) = product);
-#line 601 "VectorModule.cs"
+#line 603 "VectorModule.cs"
+#line 603 "VectorModule.cs"
+                double* csharp2cuda_temp_303 = &((output)->scalar_value);
+                (*(csharp2cuda_temp_303) = product);
+#line 604 "VectorModule.cs"
                 if ((!(isfinite(product))))
                 {
-#line 601 "VectorModule.cs"
-#line 601 "VectorModule.cs"
-                    int* csharp2cuda_temp_303 = &((output)->valid);
-                    (*(csharp2cuda_temp_303) = 0);
+#line 604 "VectorModule.cs"
+#line 604 "VectorModule.cs"
+                    int* csharp2cuda_temp_304 = &((output)->valid);
+                    (*(csharp2cuda_temp_304) = 0);
                 }
             }
-#line 603 "VectorModule.cs"
+#line 606 "VectorModule.cs"
             break;
-#line 604 "VectorModule.cs"
+#line 607 "VectorModule.cs"
         case 36:
-#line 605 "VectorModule.cs"
+#line 608 "VectorModule.cs"
             if (((thread) == (0)))
             {
-#line 605 "VectorModule.cs"
-#line 605 "VectorModule.cs"
-                int csharp2cuda_temp_304 = (first)->count;
-                mathblocks_set_vector_shape(output, csharp2cuda_temp_304);
+#line 608 "VectorModule.cs"
+#line 608 "VectorModule.cs"
+                int csharp2cuda_temp_305 = (first)->count;
+                mathblocks_set_vector_shape(output, csharp2cuda_temp_305);
             }
-#line 606 "VectorModule.cs"
+#line 609 "VectorModule.cs"
             __syncthreads();
-#line 607 "VectorModule.cs"
+#line 610 "VectorModule.cs"
             {
-#line 607 "VectorModule.cs"
+#line 610 "VectorModule.cs"
                 int index = thread;
                 while (true)
                 {
-#line 607 "VectorModule.cs"
-                    bool csharp2cuda_temp_307 = (output)->valid;
-#line 607 "VectorModule.cs"
-                    bool csharp2cuda_temp_308;
-#line 607 "VectorModule.cs"
-                    if (csharp2cuda_temp_307)
+#line 610 "VectorModule.cs"
+                    bool csharp2cuda_temp_308 = (output)->valid;
+#line 610 "VectorModule.cs"
+                    bool csharp2cuda_temp_309;
+#line 610 "VectorModule.cs"
+                    if (csharp2cuda_temp_308)
                     {
-#line 607 "VectorModule.cs"
-                        int csharp2cuda_temp_309 = (first)->count;
-#line 607 "VectorModule.cs"
-                        csharp2cuda_temp_308 = ((index) < (csharp2cuda_temp_309));
+#line 610 "VectorModule.cs"
+                        int csharp2cuda_temp_310 = (first)->count;
+#line 610 "VectorModule.cs"
+                        csharp2cuda_temp_309 = ((index) < (csharp2cuda_temp_310));
                     }
                     else
                     {
-#line 607 "VectorModule.cs"
-                        csharp2cuda_temp_308 = false;
+#line 610 "VectorModule.cs"
+                        csharp2cuda_temp_309 = false;
                     }
-                    if (!(csharp2cuda_temp_308))
+                    if (!(csharp2cuda_temp_309))
                         break;
-#line 608 "VectorModule.cs"
-#line 608 "VectorModule.cs"
-                    double* csharp2cuda_temp_310 = &((result)[index]);
-#line 608 "VectorModule.cs"
-                    int csharp2cuda_temp_311 = (first)->count;
-#line 608 "VectorModule.cs"
-                    double csharp2cuda_temp_312 = mathblocks_vector_rank_at(a, csharp2cuda_temp_311, index);
-                    (*(csharp2cuda_temp_310) = csharp2cuda_temp_312);
-#line 607 "VectorModule.cs"
-                    int* csharp2cuda_temp_305 = &(index);
-#line 607 "VectorModule.cs"
-                    int csharp2cuda_temp_306 = *(csharp2cuda_temp_305);
-                    (*(csharp2cuda_temp_305) = csharp2cuda_i32_add(csharp2cuda_temp_306, blockDim.x));
+#line 611 "VectorModule.cs"
+#line 611 "VectorModule.cs"
+                    double* csharp2cuda_temp_311 = &((result)[index]);
+#line 611 "VectorModule.cs"
+                    int csharp2cuda_temp_312 = (first)->count;
+#line 611 "VectorModule.cs"
+                    double csharp2cuda_temp_313 = mathblocks_vector_rank_at(a, csharp2cuda_temp_312, index);
+                    (*(csharp2cuda_temp_311) = csharp2cuda_temp_313);
+#line 610 "VectorModule.cs"
+                    int* csharp2cuda_temp_306 = &(index);
+#line 610 "VectorModule.cs"
+                    int csharp2cuda_temp_307 = *(csharp2cuda_temp_306);
+                    (*(csharp2cuda_temp_306) = csharp2cuda_i32_add(csharp2cuda_temp_307, blockDim.x));
                 }
             }
-#line 609 "VectorModule.cs"
-            break;
-#line 610 "VectorModule.cs"
-        case 37:
-#line 611 "VectorModule.cs"
-            if (((thread) == (0)))
 #line 612 "VectorModule.cs"
-            {
+            break;
 #line 613 "VectorModule.cs"
+        case 37:
+#line 614 "VectorModule.cs"
+            if (((thread) == (0)))
+#line 615 "VectorModule.cs"
+            {
+#line 616 "VectorModule.cs"
                 int count = 0;
-#line 614 "VectorModule.cs"
-#line 614 "VectorModule.cs"
-                double csharp2cuda_temp_313 = (second)->scalar_value;
-#line 614 "VectorModule.cs"
-                int* csharp2cuda_temp_314 = &(count);
-#line 614 "VectorModule.cs"
-                bool csharp2cuda_temp_315 = mathblocks_nonnegative_integer(csharp2cuda_temp_313, csharp2cuda_temp_314);
-#line 614 "VectorModule.cs"
-                bool csharp2cuda_temp_316;
-#line 614 "VectorModule.cs"
-                if (!((!(csharp2cuda_temp_315))))
+#line 617 "VectorModule.cs"
+#line 617 "VectorModule.cs"
+                double csharp2cuda_temp_314 = (second)->scalar_value;
+#line 617 "VectorModule.cs"
+                int* csharp2cuda_temp_315 = &(count);
+#line 617 "VectorModule.cs"
+                bool csharp2cuda_temp_316 = mathblocks_nonnegative_integer(csharp2cuda_temp_314, csharp2cuda_temp_315);
+#line 617 "VectorModule.cs"
+                bool csharp2cuda_temp_317;
+#line 617 "VectorModule.cs"
+                if (!((!(csharp2cuda_temp_316))))
                 {
-#line 614 "VectorModule.cs"
-                    csharp2cuda_temp_316 = ((count) > (1000000));
-                }
-                else
-                {
-#line 614 "VectorModule.cs"
-                    csharp2cuda_temp_316 = true;
-                }
-                if (csharp2cuda_temp_316)
-                {
-#line 615 "VectorModule.cs"
-#line 615 "VectorModule.cs"
-                    int* csharp2cuda_temp_317 = &((output)->valid);
-                    (*(csharp2cuda_temp_317) = 0);
+#line 617 "VectorModule.cs"
+                    csharp2cuda_temp_317 = ((count) > (1000000));
                 }
                 else
                 {
 #line 617 "VectorModule.cs"
+                    csharp2cuda_temp_317 = true;
+                }
+                if (csharp2cuda_temp_317)
+                {
+#line 618 "VectorModule.cs"
+#line 618 "VectorModule.cs"
+                    int* csharp2cuda_temp_318 = &((output)->valid);
+                    (*(csharp2cuda_temp_318) = 0);
+                }
+                else
+                {
+#line 620 "VectorModule.cs"
                     mathblocks_set_vector_shape(output, count);
                 }
             }
-#line 619 "VectorModule.cs"
+#line 622 "VectorModule.cs"
             __syncthreads();
-#line 620 "VectorModule.cs"
+#line 623 "VectorModule.cs"
             {
-#line 620 "VectorModule.cs"
+#line 623 "VectorModule.cs"
                 int index = thread;
                 while (true)
                 {
-#line 620 "VectorModule.cs"
-                    bool csharp2cuda_temp_320 = (output)->valid;
-#line 620 "VectorModule.cs"
-                    bool csharp2cuda_temp_321;
-#line 620 "VectorModule.cs"
-                    if (csharp2cuda_temp_320)
+#line 623 "VectorModule.cs"
+                    bool csharp2cuda_temp_321 = (output)->valid;
+#line 623 "VectorModule.cs"
+                    bool csharp2cuda_temp_322;
+#line 623 "VectorModule.cs"
+                    if (csharp2cuda_temp_321)
                     {
-#line 620 "VectorModule.cs"
-                        int csharp2cuda_temp_322 = (output)->count;
-#line 620 "VectorModule.cs"
-                        csharp2cuda_temp_321 = ((index) < (csharp2cuda_temp_322));
+#line 623 "VectorModule.cs"
+                        int csharp2cuda_temp_323 = (output)->count;
+#line 623 "VectorModule.cs"
+                        csharp2cuda_temp_322 = ((index) < (csharp2cuda_temp_323));
                     }
                     else
                     {
-#line 620 "VectorModule.cs"
-                        csharp2cuda_temp_321 = false;
-                    }
-                    if (!(csharp2cuda_temp_321))
-                        break;
-#line 621 "VectorModule.cs"
-#line 621 "VectorModule.cs"
-                    double* csharp2cuda_temp_323 = &((result)[index]);
-#line 621 "VectorModule.cs"
-                    double csharp2cuda_temp_324 = (first)->scalar_value;
-                    (*(csharp2cuda_temp_323) = csharp2cuda_temp_324);
-#line 620 "VectorModule.cs"
-                    int* csharp2cuda_temp_318 = &(index);
-#line 620 "VectorModule.cs"
-                    int csharp2cuda_temp_319 = *(csharp2cuda_temp_318);
-                    (*(csharp2cuda_temp_318) = csharp2cuda_i32_add(csharp2cuda_temp_319, blockDim.x));
-                }
-            }
-#line 622 "VectorModule.cs"
-            break;
 #line 623 "VectorModule.cs"
-        case 38:
+                        csharp2cuda_temp_322 = false;
+                    }
+                    if (!(csharp2cuda_temp_322))
+                        break;
 #line 624 "VectorModule.cs"
-            if (((thread) == (0)))
-            {
 #line 624 "VectorModule.cs"
+                    double* csharp2cuda_temp_324 = &((result)[index]);
 #line 624 "VectorModule.cs"
-                int csharp2cuda_temp_325 = (first)->count;
-                mathblocks_set_vector_shape(output, csharp2cuda_temp_325);
+                    double csharp2cuda_temp_325 = (first)->scalar_value;
+                    (*(csharp2cuda_temp_324) = csharp2cuda_temp_325);
+#line 623 "VectorModule.cs"
+                    int* csharp2cuda_temp_319 = &(index);
+#line 623 "VectorModule.cs"
+                    int csharp2cuda_temp_320 = *(csharp2cuda_temp_319);
+                    (*(csharp2cuda_temp_319) = csharp2cuda_i32_add(csharp2cuda_temp_320, blockDim.x));
+                }
             }
 #line 625 "VectorModule.cs"
-            __syncthreads();
-#line 626 "VectorModule.cs"
-            {
-#line 626 "VectorModule.cs"
-                int index = thread;
-                while (true)
-                {
-#line 626 "VectorModule.cs"
-                    bool csharp2cuda_temp_328 = (output)->valid;
-#line 626 "VectorModule.cs"
-                    bool csharp2cuda_temp_329;
-#line 626 "VectorModule.cs"
-                    if (csharp2cuda_temp_328)
-                    {
-#line 626 "VectorModule.cs"
-                        int csharp2cuda_temp_330 = (first)->count;
-#line 626 "VectorModule.cs"
-                        csharp2cuda_temp_329 = ((index) < (csharp2cuda_temp_330));
-                    }
-                    else
-                    {
-#line 626 "VectorModule.cs"
-                        csharp2cuda_temp_329 = false;
-                    }
-                    if (!(csharp2cuda_temp_329))
-                        break;
-#line 627 "VectorModule.cs"
-#line 627 "VectorModule.cs"
-                    double* csharp2cuda_temp_331 = &((result)[index]);
-#line 627 "VectorModule.cs"
-                    int csharp2cuda_temp_332 = (first)->count;
-#line 627 "VectorModule.cs"
-                    double csharp2cuda_temp_333 = (a)[csharp2cuda_i32_sub(csharp2cuda_i32_sub(csharp2cuda_temp_332, index), 1)];
-                    (*(csharp2cuda_temp_331) = csharp2cuda_temp_333);
-#line 626 "VectorModule.cs"
-                    int* csharp2cuda_temp_326 = &(index);
-#line 626 "VectorModule.cs"
-                    int csharp2cuda_temp_327 = *(csharp2cuda_temp_326);
-                    (*(csharp2cuda_temp_326) = csharp2cuda_i32_add(csharp2cuda_temp_327, blockDim.x));
-                }
-            }
-#line 628 "VectorModule.cs"
             break;
-#line 629 "VectorModule.cs"
-        case 39:
-#line 630 "VectorModule.cs"
+#line 626 "VectorModule.cs"
+        case 38:
+#line 627 "VectorModule.cs"
             if (((thread) == (0)))
             {
-#line 630 "VectorModule.cs"
-#line 630 "VectorModule.cs"
-                int csharp2cuda_temp_334 = (first)->count;
-                mathblocks_set_vector_shape(output, csharp2cuda_temp_334);
+#line 627 "VectorModule.cs"
+#line 627 "VectorModule.cs"
+                int csharp2cuda_temp_326 = (first)->count;
+                mathblocks_set_vector_shape(output, csharp2cuda_temp_326);
             }
-#line 631 "VectorModule.cs"
+#line 628 "VectorModule.cs"
             __syncthreads();
-#line 632 "VectorModule.cs"
+#line 629 "VectorModule.cs"
             {
-#line 632 "VectorModule.cs"
+#line 629 "VectorModule.cs"
                 int index = thread;
                 while (true)
                 {
-#line 632 "VectorModule.cs"
-                    bool csharp2cuda_temp_337 = (output)->valid;
-#line 632 "VectorModule.cs"
-                    bool csharp2cuda_temp_338;
-#line 632 "VectorModule.cs"
-                    if (csharp2cuda_temp_337)
+#line 629 "VectorModule.cs"
+                    bool csharp2cuda_temp_329 = (output)->valid;
+#line 629 "VectorModule.cs"
+                    bool csharp2cuda_temp_330;
+#line 629 "VectorModule.cs"
+                    if (csharp2cuda_temp_329)
                     {
-#line 632 "VectorModule.cs"
-                        int csharp2cuda_temp_339 = (first)->count;
-#line 632 "VectorModule.cs"
-                        csharp2cuda_temp_338 = ((index) < (csharp2cuda_temp_339));
+#line 629 "VectorModule.cs"
+                        int csharp2cuda_temp_331 = (first)->count;
+#line 629 "VectorModule.cs"
+                        csharp2cuda_temp_330 = ((index) < (csharp2cuda_temp_331));
                     }
                     else
                     {
-#line 632 "VectorModule.cs"
-                        csharp2cuda_temp_338 = false;
+#line 629 "VectorModule.cs"
+                        csharp2cuda_temp_330 = false;
                     }
-                    if (!(csharp2cuda_temp_338))
+                    if (!(csharp2cuda_temp_330))
                         break;
+#line 630 "VectorModule.cs"
+#line 630 "VectorModule.cs"
+                    double* csharp2cuda_temp_332 = &((result)[index]);
+#line 630 "VectorModule.cs"
+                    int csharp2cuda_temp_333 = (first)->count;
+#line 630 "VectorModule.cs"
+                    double csharp2cuda_temp_334 = (a)[csharp2cuda_i32_sub(csharp2cuda_i32_sub(csharp2cuda_temp_333, index), 1)];
+                    (*(csharp2cuda_temp_332) = csharp2cuda_temp_334);
+#line 629 "VectorModule.cs"
+                    int* csharp2cuda_temp_327 = &(index);
+#line 629 "VectorModule.cs"
+                    int csharp2cuda_temp_328 = *(csharp2cuda_temp_327);
+                    (*(csharp2cuda_temp_327) = csharp2cuda_i32_add(csharp2cuda_temp_328, blockDim.x));
+                }
+            }
+#line 631 "VectorModule.cs"
+            break;
+#line 632 "VectorModule.cs"
+        case 39:
 #line 633 "VectorModule.cs"
+            if (((thread) == (0)))
+            {
+#line 633 "VectorModule.cs"
+#line 633 "VectorModule.cs"
+                int csharp2cuda_temp_335 = (first)->count;
+                mathblocks_set_vector_shape(output, csharp2cuda_temp_335);
+            }
+#line 634 "VectorModule.cs"
+            __syncthreads();
+#line 635 "VectorModule.cs"
+            {
+#line 635 "VectorModule.cs"
+                int index = thread;
+                while (true)
+                {
+#line 635 "VectorModule.cs"
+                    bool csharp2cuda_temp_338 = (output)->valid;
+#line 635 "VectorModule.cs"
+                    bool csharp2cuda_temp_339;
+#line 635 "VectorModule.cs"
+                    if (csharp2cuda_temp_338)
                     {
-#line 634 "VectorModule.cs"
-#line 634 "VectorModule.cs"
-                        double* csharp2cuda_temp_340 = &((result)[index]);
-#line 634 "VectorModule.cs"
-                        double csharp2cuda_temp_341 = (a)[index];
-#line 634 "VectorModule.cs"
-                        double csharp2cuda_temp_342 = (second)->scalar_value;
-                        (*(csharp2cuda_temp_340) = __dmul_rn(csharp2cuda_temp_341, csharp2cuda_temp_342));
 #line 635 "VectorModule.cs"
+                        int csharp2cuda_temp_340 = (first)->count;
 #line 635 "VectorModule.cs"
-                        double csharp2cuda_temp_343 = (result)[index];
-                        if ((!(isfinite(csharp2cuda_temp_343))))
+                        csharp2cuda_temp_339 = ((index) < (csharp2cuda_temp_340));
+                    }
+                    else
+                    {
+#line 635 "VectorModule.cs"
+                        csharp2cuda_temp_339 = false;
+                    }
+                    if (!(csharp2cuda_temp_339))
+                        break;
+#line 636 "VectorModule.cs"
+                    {
+#line 637 "VectorModule.cs"
+#line 637 "VectorModule.cs"
+                        double* csharp2cuda_temp_341 = &((result)[index]);
+#line 637 "VectorModule.cs"
+                        double csharp2cuda_temp_342 = (a)[index];
+#line 637 "VectorModule.cs"
+                        double csharp2cuda_temp_343 = (second)->scalar_value;
+                        (*(csharp2cuda_temp_341) = __dmul_rn(csharp2cuda_temp_342, csharp2cuda_temp_343));
+#line 638 "VectorModule.cs"
+#line 638 "VectorModule.cs"
+                        double csharp2cuda_temp_344 = (result)[index];
+                        if ((!(isfinite(csharp2cuda_temp_344))))
                         {
-#line 635 "VectorModule.cs"
+#line 638 "VectorModule.cs"
                             atomicExch(&((output)->valid), 0);
                         }
                     }
-#line 632 "VectorModule.cs"
-                    int* csharp2cuda_temp_335 = &(index);
-#line 632 "VectorModule.cs"
-                    int csharp2cuda_temp_336 = *(csharp2cuda_temp_335);
-                    (*(csharp2cuda_temp_335) = csharp2cuda_i32_add(csharp2cuda_temp_336, blockDim.x));
+#line 635 "VectorModule.cs"
+                    int* csharp2cuda_temp_336 = &(index);
+#line 635 "VectorModule.cs"
+                    int csharp2cuda_temp_337 = *(csharp2cuda_temp_336);
+                    (*(csharp2cuda_temp_336) = csharp2cuda_i32_add(csharp2cuda_temp_337, blockDim.x));
                 }
             }
-#line 637 "VectorModule.cs"
-            break;
-#line 638 "VectorModule.cs"
-        case 40:
-#line 639 "VectorModule.cs"
-            if (((thread) == (0)))
 #line 640 "VectorModule.cs"
+            break;
+#line 641 "VectorModule.cs"
+        case 40:
+#line 642 "VectorModule.cs"
+            if (((thread) == (0)))
+#line 643 "VectorModule.cs"
             {
-#line 641 "VectorModule.cs"
-#line 641 "VectorModule.cs"
-                int csharp2cuda_temp_344 = (first)->count;
-                mathblocks_set_vector_shape(output, csharp2cuda_temp_344);
-#line 642 "VectorModule.cs"
-#line 642 "VectorModule.cs"
+#line 644 "VectorModule.cs"
+#line 644 "VectorModule.cs"
                 int csharp2cuda_temp_345 = (first)->count;
-#line 642 "VectorModule.cs"
-                int csharp2cuda_temp_346 = (second)->count;
-#line 642 "VectorModule.cs"
-                bool csharp2cuda_temp_347;
-#line 642 "VectorModule.cs"
-                if (!(((csharp2cuda_temp_345) != (csharp2cuda_temp_346))))
+                mathblocks_set_vector_shape(output, csharp2cuda_temp_345);
+#line 645 "VectorModule.cs"
+#line 645 "VectorModule.cs"
+                int csharp2cuda_temp_346 = (first)->count;
+#line 645 "VectorModule.cs"
+                int csharp2cuda_temp_347 = (second)->count;
+#line 645 "VectorModule.cs"
+                bool csharp2cuda_temp_348;
+#line 645 "VectorModule.cs"
+                if (!(((csharp2cuda_temp_346) != (csharp2cuda_temp_347))))
                 {
-#line 642 "VectorModule.cs"
-                    int csharp2cuda_temp_348 = (first)->count;
-#line 642 "VectorModule.cs"
-                    int csharp2cuda_temp_349 = (third)->count;
-#line 642 "VectorModule.cs"
-                    csharp2cuda_temp_347 = ((csharp2cuda_temp_348) != (csharp2cuda_temp_349));
+#line 645 "VectorModule.cs"
+                    int csharp2cuda_temp_349 = (first)->count;
+#line 645 "VectorModule.cs"
+                    int csharp2cuda_temp_350 = (third)->count;
+#line 645 "VectorModule.cs"
+                    csharp2cuda_temp_348 = ((csharp2cuda_temp_349) != (csharp2cuda_temp_350));
                 }
                 else
                 {
-#line 642 "VectorModule.cs"
-                    csharp2cuda_temp_347 = true;
-                }
-                if (csharp2cuda_temp_347)
-                {
-#line 642 "VectorModule.cs"
-#line 642 "VectorModule.cs"
-                    int* csharp2cuda_temp_350 = &((output)->valid);
-                    (*(csharp2cuda_temp_350) = 0);
-                }
-            }
-#line 644 "VectorModule.cs"
-            __syncthreads();
 #line 645 "VectorModule.cs"
-            {
-#line 645 "VectorModule.cs"
-                int index = thread;
-                while (true)
+                    csharp2cuda_temp_348 = true;
+                }
+                if (csharp2cuda_temp_348)
                 {
 #line 645 "VectorModule.cs"
-                    bool csharp2cuda_temp_353 = (output)->valid;
 #line 645 "VectorModule.cs"
-                    bool csharp2cuda_temp_354;
-#line 645 "VectorModule.cs"
-                    if (csharp2cuda_temp_353)
-                    {
-#line 645 "VectorModule.cs"
-                        int csharp2cuda_temp_355 = (first)->count;
-#line 645 "VectorModule.cs"
-                        csharp2cuda_temp_354 = ((index) < (csharp2cuda_temp_355));
-                    }
-                    else
-                    {
-#line 645 "VectorModule.cs"
-                        csharp2cuda_temp_354 = false;
-                    }
-                    if (!(csharp2cuda_temp_354))
-                        break;
-#line 646 "VectorModule.cs"
-#line 646 "VectorModule.cs"
-                    double* csharp2cuda_temp_356 = &((result)[index]);
-#line 646 "VectorModule.cs"
-                    bool csharp2cuda_temp_357 = (boolean_a)[index];
-#line 646 "VectorModule.cs"
-                    double csharp2cuda_temp_358;
-#line 646 "VectorModule.cs"
-                    if (csharp2cuda_temp_357)
-                    {
-#line 646 "VectorModule.cs"
-                        csharp2cuda_temp_358 = (b)[index];
-                    }
-                    else
-                    {
-#line 646 "VectorModule.cs"
-                        csharp2cuda_temp_358 = (c)[index];
-                    }
-                    (*(csharp2cuda_temp_356) = csharp2cuda_temp_358);
-#line 645 "VectorModule.cs"
-                    int* csharp2cuda_temp_351 = &(index);
-#line 645 "VectorModule.cs"
-                    int csharp2cuda_temp_352 = *(csharp2cuda_temp_351);
-                    (*(csharp2cuda_temp_351) = csharp2cuda_i32_add(csharp2cuda_temp_352, blockDim.x));
+                    int* csharp2cuda_temp_351 = &((output)->valid);
+                    (*(csharp2cuda_temp_351) = 0);
                 }
             }
 #line 647 "VectorModule.cs"
-            break;
+            __syncthreads();
 #line 648 "VectorModule.cs"
-        case 42:
-#line 649 "VectorModule.cs"
-            if (((thread) == (0)))
-#line 650 "VectorModule.cs"
             {
+#line 648 "VectorModule.cs"
+                int index = thread;
+                while (true)
+                {
+#line 648 "VectorModule.cs"
+                    bool csharp2cuda_temp_354 = (output)->valid;
+#line 648 "VectorModule.cs"
+                    bool csharp2cuda_temp_355;
+#line 648 "VectorModule.cs"
+                    if (csharp2cuda_temp_354)
+                    {
+#line 648 "VectorModule.cs"
+                        int csharp2cuda_temp_356 = (first)->count;
+#line 648 "VectorModule.cs"
+                        csharp2cuda_temp_355 = ((index) < (csharp2cuda_temp_356));
+                    }
+                    else
+                    {
+#line 648 "VectorModule.cs"
+                        csharp2cuda_temp_355 = false;
+                    }
+                    if (!(csharp2cuda_temp_355))
+                        break;
+#line 649 "VectorModule.cs"
+#line 649 "VectorModule.cs"
+                    double* csharp2cuda_temp_357 = &((result)[index]);
+#line 649 "VectorModule.cs"
+                    bool csharp2cuda_temp_358 = (boolean_a)[index];
+#line 649 "VectorModule.cs"
+                    double csharp2cuda_temp_359;
+#line 649 "VectorModule.cs"
+                    if (csharp2cuda_temp_358)
+                    {
+#line 649 "VectorModule.cs"
+                        csharp2cuda_temp_359 = (b)[index];
+                    }
+                    else
+                    {
+#line 649 "VectorModule.cs"
+                        csharp2cuda_temp_359 = (c)[index];
+                    }
+                    (*(csharp2cuda_temp_357) = csharp2cuda_temp_359);
+#line 648 "VectorModule.cs"
+                    int* csharp2cuda_temp_352 = &(index);
+#line 648 "VectorModule.cs"
+                    int csharp2cuda_temp_353 = *(csharp2cuda_temp_352);
+                    (*(csharp2cuda_temp_352) = csharp2cuda_i32_add(csharp2cuda_temp_353, blockDim.x));
+                }
+            }
+#line 650 "VectorModule.cs"
+            break;
 #line 651 "VectorModule.cs"
-                int start = 0;
+        case 42:
 #line 652 "VectorModule.cs"
+            if (((thread) == (0)))
+#line 653 "VectorModule.cs"
+            {
+#line 654 "VectorModule.cs"
+                int start = 0;
+#line 655 "VectorModule.cs"
                 int length = 0;
-#line 653 "VectorModule.cs"
-#line 653 "VectorModule.cs"
-                double csharp2cuda_temp_359 = (second)->scalar_value;
-#line 653 "VectorModule.cs"
-                int* csharp2cuda_temp_360 = &(start);
-#line 653 "VectorModule.cs"
-                bool csharp2cuda_temp_361 = mathblocks_nonnegative_integer(csharp2cuda_temp_359, csharp2cuda_temp_360);
-#line 653 "VectorModule.cs"
-                bool csharp2cuda_temp_362;
-#line 653 "VectorModule.cs"
-                if (!((!(csharp2cuda_temp_361))))
-                {
-#line 654 "VectorModule.cs"
-                    double csharp2cuda_temp_363 = (third)->scalar_value;
-#line 654 "VectorModule.cs"
-                    int* csharp2cuda_temp_364 = &(length);
-#line 654 "VectorModule.cs"
-                    bool csharp2cuda_temp_365 = mathblocks_nonnegative_integer(csharp2cuda_temp_363, csharp2cuda_temp_364);
-#line 653 "VectorModule.cs"
-                    csharp2cuda_temp_362 = (!(csharp2cuda_temp_365));
-                }
-                else
-                {
-#line 653 "VectorModule.cs"
-                    csharp2cuda_temp_362 = true;
-                }
-#line 653 "VectorModule.cs"
-                bool csharp2cuda_temp_366;
-#line 653 "VectorModule.cs"
-                if (!(csharp2cuda_temp_362))
-                {
-#line 655 "VectorModule.cs"
-                    int csharp2cuda_temp_367 = (first)->count;
-#line 653 "VectorModule.cs"
-                    csharp2cuda_temp_366 = ((start) > (csharp2cuda_temp_367));
-                }
-                else
-                {
-#line 653 "VectorModule.cs"
-                    csharp2cuda_temp_366 = true;
-                }
-#line 653 "VectorModule.cs"
-                bool csharp2cuda_temp_368;
-#line 653 "VectorModule.cs"
-                if (!(csharp2cuda_temp_366))
-                {
-#line 655 "VectorModule.cs"
-                    int csharp2cuda_temp_369 = (first)->count;
-#line 653 "VectorModule.cs"
-                    csharp2cuda_temp_368 = ((length) > (csharp2cuda_i32_sub(csharp2cuda_temp_369, start)));
-                }
-                else
-                {
-#line 653 "VectorModule.cs"
-                    csharp2cuda_temp_368 = true;
-                }
-                if (csharp2cuda_temp_368)
-                {
 #line 656 "VectorModule.cs"
 #line 656 "VectorModule.cs"
-                    int* csharp2cuda_temp_370 = &((output)->valid);
-                    (*(csharp2cuda_temp_370) = 0);
+                double csharp2cuda_temp_360 = (second)->scalar_value;
+#line 656 "VectorModule.cs"
+                int* csharp2cuda_temp_361 = &(start);
+#line 656 "VectorModule.cs"
+                bool csharp2cuda_temp_362 = mathblocks_nonnegative_integer(csharp2cuda_temp_360, csharp2cuda_temp_361);
+#line 656 "VectorModule.cs"
+                bool csharp2cuda_temp_363;
+#line 656 "VectorModule.cs"
+                if (!((!(csharp2cuda_temp_362))))
+                {
+#line 657 "VectorModule.cs"
+                    double csharp2cuda_temp_364 = (third)->scalar_value;
+#line 657 "VectorModule.cs"
+                    int* csharp2cuda_temp_365 = &(length);
+#line 657 "VectorModule.cs"
+                    bool csharp2cuda_temp_366 = mathblocks_nonnegative_integer(csharp2cuda_temp_364, csharp2cuda_temp_365);
+#line 656 "VectorModule.cs"
+                    csharp2cuda_temp_363 = (!(csharp2cuda_temp_366));
                 }
                 else
+                {
+#line 656 "VectorModule.cs"
+                    csharp2cuda_temp_363 = true;
+                }
+#line 656 "VectorModule.cs"
+                bool csharp2cuda_temp_367;
+#line 656 "VectorModule.cs"
+                if (!(csharp2cuda_temp_363))
                 {
 #line 658 "VectorModule.cs"
+                    int csharp2cuda_temp_368 = (first)->count;
+#line 656 "VectorModule.cs"
+                    csharp2cuda_temp_367 = ((start) > (csharp2cuda_temp_368));
+                }
+                else
+                {
+#line 656 "VectorModule.cs"
+                    csharp2cuda_temp_367 = true;
+                }
+#line 656 "VectorModule.cs"
+                bool csharp2cuda_temp_369;
+#line 656 "VectorModule.cs"
+                if (!(csharp2cuda_temp_367))
+                {
+#line 658 "VectorModule.cs"
+                    int csharp2cuda_temp_370 = (first)->count;
+#line 656 "VectorModule.cs"
+                    csharp2cuda_temp_369 = ((length) > (csharp2cuda_i32_sub(csharp2cuda_temp_370, start)));
+                }
+                else
+                {
+#line 656 "VectorModule.cs"
+                    csharp2cuda_temp_369 = true;
+                }
+                if (csharp2cuda_temp_369)
+                {
+#line 659 "VectorModule.cs"
+#line 659 "VectorModule.cs"
+                    int* csharp2cuda_temp_371 = &((output)->valid);
+                    (*(csharp2cuda_temp_371) = 0);
+                }
+                else
+                {
+#line 661 "VectorModule.cs"
                     mathblocks_set_vector_shape(output, length);
                 }
             }
-#line 660 "VectorModule.cs"
+#line 663 "VectorModule.cs"
             __syncthreads();
-#line 661 "VectorModule.cs"
+#line 664 "VectorModule.cs"
             if ((output)->valid)
-#line 662 "VectorModule.cs"
+#line 665 "VectorModule.cs"
             {
-#line 663 "VectorModule.cs"
-                double csharp2cuda_temp_371 = (second)->scalar_value;
-#line 663 "VectorModule.cs"
-                int start = csharp2cuda_f64_to_i32(csharp2cuda_temp_371);
-#line 664 "VectorModule.cs"
+#line 666 "VectorModule.cs"
+                double csharp2cuda_temp_372 = (second)->scalar_value;
+#line 666 "VectorModule.cs"
+                int start = csharp2cuda_f64_to_i32(csharp2cuda_temp_372);
+#line 667 "VectorModule.cs"
                 {
-#line 664 "VectorModule.cs"
+#line 667 "VectorModule.cs"
                     int index = thread;
                     while (true)
                     {
-#line 664 "VectorModule.cs"
-                        int csharp2cuda_temp_374 = (output)->count;
-                        if (!(((index) < (csharp2cuda_temp_374))))
+#line 667 "VectorModule.cs"
+                        int csharp2cuda_temp_375 = (output)->count;
+                        if (!(((index) < (csharp2cuda_temp_375))))
                             break;
-#line 665 "VectorModule.cs"
-#line 665 "VectorModule.cs"
-                        double* csharp2cuda_temp_375 = &((result)[index]);
-#line 665 "VectorModule.cs"
-                        double csharp2cuda_temp_376 = (a)[csharp2cuda_i32_add(start, index)];
-                        (*(csharp2cuda_temp_375) = csharp2cuda_temp_376);
-#line 664 "VectorModule.cs"
-                        int* csharp2cuda_temp_372 = &(index);
-#line 664 "VectorModule.cs"
-                        int csharp2cuda_temp_373 = *(csharp2cuda_temp_372);
-                        (*(csharp2cuda_temp_372) = csharp2cuda_i32_add(csharp2cuda_temp_373, blockDim.x));
+#line 668 "VectorModule.cs"
+#line 668 "VectorModule.cs"
+                        double* csharp2cuda_temp_376 = &((result)[index]);
+#line 668 "VectorModule.cs"
+                        double csharp2cuda_temp_377 = (a)[csharp2cuda_i32_add(start, index)];
+                        (*(csharp2cuda_temp_376) = csharp2cuda_temp_377);
+#line 667 "VectorModule.cs"
+                        int* csharp2cuda_temp_373 = &(index);
+#line 667 "VectorModule.cs"
+                        int csharp2cuda_temp_374 = *(csharp2cuda_temp_373);
+                        (*(csharp2cuda_temp_373) = csharp2cuda_i32_add(csharp2cuda_temp_374, blockDim.x));
                     }
                 }
             }
-#line 667 "VectorModule.cs"
-            break;
-#line 668 "VectorModule.cs"
-        case 43:
-#line 669 "VectorModule.cs"
-            if (((thread) == (0)))
 #line 670 "VectorModule.cs"
-            {
+            break;
 #line 671 "VectorModule.cs"
-#line 671 "VectorModule.cs"
-                int csharp2cuda_temp_377 = (first)->count;
-                mathblocks_set_vector_shape(output, csharp2cuda_temp_377);
+        case 43:
 #line 672 "VectorModule.cs"
+            if (((thread) == (0)))
+#line 673 "VectorModule.cs"
+            {
+#line 674 "VectorModule.cs"
+#line 674 "VectorModule.cs"
+                int csharp2cuda_temp_378 = (first)->count;
+                mathblocks_set_vector_shape(output, csharp2cuda_temp_378);
+#line 675 "VectorModule.cs"
                 if ((output)->valid)
                 {
-#line 672 "VectorModule.cs"
+#line 675 "VectorModule.cs"
                     mathblocks_copy_and_sort(first, output);
                 }
             }
-#line 674 "VectorModule.cs"
-            break;
-#line 675 "VectorModule.cs"
-        case 46:
-#line 676 "VectorModule.cs"
-            if (((thread) == (0)))
 #line 677 "VectorModule.cs"
+            break;
+#line 678 "VectorModule.cs"
+        case 46:
+#line 679 "VectorModule.cs"
+            if (((thread) == (0)))
+#line 680 "VectorModule.cs"
             {
-#line 678 "VectorModule.cs"
-#line 678 "VectorModule.cs"
-                int csharp2cuda_temp_378 = (first)->count;
-                mathblocks_set_vector_shape(output, csharp2cuda_temp_378);
-#line 679 "VectorModule.cs"
-#line 679 "VectorModule.cs"
-                bool csharp2cuda_temp_379 = (output)->valid;
-#line 679 "VectorModule.cs"
-                bool csharp2cuda_temp_380;
-#line 679 "VectorModule.cs"
-                if (!((!(csharp2cuda_temp_379))))
+#line 681 "VectorModule.cs"
+#line 681 "VectorModule.cs"
+                int csharp2cuda_temp_379 = (first)->count;
+                mathblocks_set_vector_shape(output, csharp2cuda_temp_379);
+#line 682 "VectorModule.cs"
+#line 682 "VectorModule.cs"
+                bool csharp2cuda_temp_380 = (output)->valid;
+#line 682 "VectorModule.cs"
+                bool csharp2cuda_temp_381;
+#line 682 "VectorModule.cs"
+                if (!((!(csharp2cuda_temp_380))))
                 {
-#line 679 "VectorModule.cs"
-                    int csharp2cuda_temp_381 = (first)->count;
-#line 679 "VectorModule.cs"
-                    csharp2cuda_temp_380 = ((csharp2cuda_temp_381) <= (0));
+#line 682 "VectorModule.cs"
+                    int csharp2cuda_temp_382 = (first)->count;
+#line 682 "VectorModule.cs"
+                    csharp2cuda_temp_381 = ((csharp2cuda_temp_382) <= (0));
                 }
                 else
                 {
-#line 679 "VectorModule.cs"
-                    csharp2cuda_temp_380 = true;
-                }
-                if (csharp2cuda_temp_380)
-#line 680 "VectorModule.cs"
-                {
-#line 681 "VectorModule.cs"
-#line 681 "VectorModule.cs"
-                    int* csharp2cuda_temp_382 = &((output)->valid);
-                    (*(csharp2cuda_temp_382) = 0);
 #line 682 "VectorModule.cs"
+                    csharp2cuda_temp_381 = true;
+                }
+                if (csharp2cuda_temp_381)
+#line 683 "VectorModule.cs"
+                {
+#line 684 "VectorModule.cs"
+#line 684 "VectorModule.cs"
+                    int* csharp2cuda_temp_383 = &((output)->valid);
+                    (*(csharp2cuda_temp_383) = 0);
+#line 685 "VectorModule.cs"
                     break;
                 }
-#line 684 "VectorModule.cs"
+#line 687 "VectorModule.cs"
                 double mean = 0.0;
-#line 685 "VectorModule.cs"
+#line 688 "VectorModule.cs"
                 double deviation = 0.0;
-#line 686 "VectorModule.cs"
-#line 686 "VectorModule.cs"
-                int csharp2cuda_temp_383 = (first)->count;
-#line 686 "VectorModule.cs"
-                double* csharp2cuda_temp_384 = &(mean);
-#line 686 "VectorModule.cs"
-                double* csharp2cuda_temp_385 = &(deviation);
-                mathblocks_vector_standardize_moments(a, csharp2cuda_temp_383, csharp2cuda_temp_384, csharp2cuda_temp_385);
-#line 687 "VectorModule.cs"
+#line 689 "VectorModule.cs"
+#line 689 "VectorModule.cs"
+                int csharp2cuda_temp_384 = (first)->count;
+#line 689 "VectorModule.cs"
+                double* csharp2cuda_temp_385 = &(mean);
+#line 689 "VectorModule.cs"
+                double* csharp2cuda_temp_386 = &(deviation);
+                mathblocks_vector_standardize_moments(a, csharp2cuda_temp_384, csharp2cuda_temp_385, csharp2cuda_temp_386);
+#line 690 "VectorModule.cs"
                 {
-#line 687 "VectorModule.cs"
+#line 690 "VectorModule.cs"
                     int index = 0;
                     while (true)
                     {
-#line 687 "VectorModule.cs"
-                        int csharp2cuda_temp_387 = (first)->count;
-                        if (!(((index) < (csharp2cuda_temp_387))))
+#line 690 "VectorModule.cs"
+                        int csharp2cuda_temp_388 = (first)->count;
+                        if (!(((index) < (csharp2cuda_temp_388))))
                             break;
-#line 688 "VectorModule.cs"
+#line 691 "VectorModule.cs"
                         {
-#line 689 "VectorModule.cs"
-#line 689 "VectorModule.cs"
-                            double* csharp2cuda_temp_388 = &((result)[index]);
-#line 689 "VectorModule.cs"
-                            double csharp2cuda_temp_389 = (a)[index];
-#line 689 "VectorModule.cs"
-                            double csharp2cuda_temp_390 = __ddiv_rn(__dsub_rn(csharp2cuda_temp_389, mean), deviation);
-                            (*(csharp2cuda_temp_388) = csharp2cuda_temp_390);
-#line 690 "VectorModule.cs"
-#line 690 "VectorModule.cs"
-                            double csharp2cuda_temp_391 = (result)[index];
-                            if ((!(isfinite(csharp2cuda_temp_391))))
+#line 692 "VectorModule.cs"
+#line 692 "VectorModule.cs"
+                            double* csharp2cuda_temp_389 = &((result)[index]);
+#line 692 "VectorModule.cs"
+                            double csharp2cuda_temp_390 = (a)[index];
+#line 692 "VectorModule.cs"
+                            double csharp2cuda_temp_391 = __ddiv_rn(__dsub_rn(csharp2cuda_temp_390, mean), deviation);
+                            (*(csharp2cuda_temp_389) = csharp2cuda_temp_391);
+#line 693 "VectorModule.cs"
+#line 693 "VectorModule.cs"
+                            double csharp2cuda_temp_392 = (result)[index];
+                            if ((!(isfinite(csharp2cuda_temp_392))))
                             {
-#line 690 "VectorModule.cs"
-#line 690 "VectorModule.cs"
-                                int* csharp2cuda_temp_392 = &((output)->valid);
-                                (*(csharp2cuda_temp_392) = 0);
+#line 693 "VectorModule.cs"
+#line 693 "VectorModule.cs"
+                                int* csharp2cuda_temp_393 = &((output)->valid);
+                                (*(csharp2cuda_temp_393) = 0);
                             }
                         }
-#line 687 "VectorModule.cs"
-                        int* csharp2cuda_temp_386 = &(index);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_386));
+#line 690 "VectorModule.cs"
+                        int* csharp2cuda_temp_387 = &(index);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_387));
                     }
                 }
             }
-#line 693 "VectorModule.cs"
-            break;
-#line 694 "VectorModule.cs"
-        case 49:
-#line 695 "VectorModule.cs"
-            if (((thread) == (0)))
 #line 696 "VectorModule.cs"
-            {
+            break;
 #line 697 "VectorModule.cs"
+        case 49:
+#line 698 "VectorModule.cs"
+            if (((thread) == (0)))
+#line 699 "VectorModule.cs"
+            {
+#line 700 "VectorModule.cs"
                 int count = 0;
-#line 698 "VectorModule.cs"
+#line 701 "VectorModule.cs"
                 {
-#line 698 "VectorModule.cs"
+#line 701 "VectorModule.cs"
                     int index = 0;
                     while (true)
                     {
-#line 698 "VectorModule.cs"
-                        int csharp2cuda_temp_394 = (first)->count;
-                        if (!(((index) < (csharp2cuda_temp_394))))
+#line 701 "VectorModule.cs"
+                        int csharp2cuda_temp_395 = (first)->count;
+                        if (!(((index) < (csharp2cuda_temp_395))))
                             break;
-#line 699 "VectorModule.cs"
+#line 702 "VectorModule.cs"
                         {
-#line 700 "VectorModule.cs"
+#line 703 "VectorModule.cs"
                             bool found = false;
-#line 701 "VectorModule.cs"
+#line 704 "VectorModule.cs"
                             {
-#line 701 "VectorModule.cs"
+#line 704 "VectorModule.cs"
                                 int prior = 0;
                                 while (true)
                                 {
                                     if (!(((prior) < (count))))
                                         break;
-#line 702 "VectorModule.cs"
-#line 702 "VectorModule.cs"
-                                    double csharp2cuda_temp_396 = (result)[prior];
-#line 702 "VectorModule.cs"
-                                    double csharp2cuda_temp_397 = (a)[index];
-                                    if (((csharp2cuda_temp_396) == (csharp2cuda_temp_397)))
-#line 702 "VectorModule.cs"
+#line 705 "VectorModule.cs"
+#line 705 "VectorModule.cs"
+                                    double csharp2cuda_temp_397 = (result)[prior];
+#line 705 "VectorModule.cs"
+                                    double csharp2cuda_temp_398 = (a)[index];
+                                    if (((csharp2cuda_temp_397) == (csharp2cuda_temp_398)))
+#line 705 "VectorModule.cs"
                                     {
-#line 702 "VectorModule.cs"
-#line 702 "VectorModule.cs"
-                                        bool* csharp2cuda_temp_398 = &(found);
-                                        (*(csharp2cuda_temp_398) = true);
-#line 702 "VectorModule.cs"
+#line 705 "VectorModule.cs"
+#line 705 "VectorModule.cs"
+                                        bool* csharp2cuda_temp_399 = &(found);
+                                        (*(csharp2cuda_temp_399) = true);
+#line 705 "VectorModule.cs"
                                         break;
                                     }
-#line 701 "VectorModule.cs"
-                                    int* csharp2cuda_temp_395 = &(prior);
-                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_395));
+#line 704 "VectorModule.cs"
+                                    int* csharp2cuda_temp_396 = &(prior);
+                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_396));
                                 }
                             }
-#line 703 "VectorModule.cs"
+#line 706 "VectorModule.cs"
                             if ((!(found)))
                             {
-#line 703 "VectorModule.cs"
-#line 703 "VectorModule.cs"
-                                int* csharp2cuda_temp_399 = &(count);
-#line 703 "VectorModule.cs"
-                                int csharp2cuda_temp_400 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_399));
-#line 703 "VectorModule.cs"
-                                double* csharp2cuda_temp_401 = &((result)[csharp2cuda_temp_400]);
-#line 703 "VectorModule.cs"
-                                double csharp2cuda_temp_402 = (a)[index];
-                                (*(csharp2cuda_temp_401) = csharp2cuda_temp_402);
+#line 706 "VectorModule.cs"
+#line 706 "VectorModule.cs"
+                                int* csharp2cuda_temp_400 = &(count);
+#line 706 "VectorModule.cs"
+                                int csharp2cuda_temp_401 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_400));
+#line 706 "VectorModule.cs"
+                                double* csharp2cuda_temp_402 = &((result)[csharp2cuda_temp_401]);
+#line 706 "VectorModule.cs"
+                                double csharp2cuda_temp_403 = (a)[index];
+                                (*(csharp2cuda_temp_402) = csharp2cuda_temp_403);
                             }
                         }
-#line 698 "VectorModule.cs"
-                        int* csharp2cuda_temp_393 = &(index);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_393));
+#line 701 "VectorModule.cs"
+                        int* csharp2cuda_temp_394 = &(index);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_394));
                     }
                 }
-#line 705 "VectorModule.cs"
+#line 708 "VectorModule.cs"
                 mathblocks_set_vector_shape(output, count);
             }
-#line 707 "VectorModule.cs"
+#line 710 "VectorModule.cs"
             break;
-#line 708 "VectorModule.cs"
+#line 711 "VectorModule.cs"
         case 50:
         case 52:
         case 55:
-#line 711 "VectorModule.cs"
+#line 714 "VectorModule.cs"
             {
-#line 712 "VectorModule.cs"
+#line 715 "VectorModule.cs"
                 if (((thread) == (0)))
-#line 713 "VectorModule.cs"
+#line 716 "VectorModule.cs"
                 {
-#line 714 "VectorModule.cs"
-#line 714 "VectorModule.cs"
-                    int* csharp2cuda_temp_403 = &((output)->boolean_value);
-#line 714 "VectorModule.cs"
-                    int csharp2cuda_temp_404;
-#line 714 "VectorModule.cs"
+#line 717 "VectorModule.cs"
+#line 717 "VectorModule.cs"
+                    int* csharp2cuda_temp_404 = &((output)->boolean_value);
+#line 717 "VectorModule.cs"
+                    int csharp2cuda_temp_405;
+#line 717 "VectorModule.cs"
                     if (((opcode) == (50)))
                     {
-#line 714 "VectorModule.cs"
-                        csharp2cuda_temp_404 = 1;
+#line 717 "VectorModule.cs"
+                        csharp2cuda_temp_405 = 1;
                     }
                     else
                     {
-#line 714 "VectorModule.cs"
-                        csharp2cuda_temp_404 = 0;
-                    }
-                    (*(csharp2cuda_temp_403) = csharp2cuda_temp_404);
-#line 715 "VectorModule.cs"
-#line 715 "VectorModule.cs"
-                    double* csharp2cuda_temp_405 = &((output)->scalar_value);
-                    (*(csharp2cuda_temp_405) = 0.0);
-                }
 #line 717 "VectorModule.cs"
-                __syncthreads();
+                        csharp2cuda_temp_405 = 0;
+                    }
+                    (*(csharp2cuda_temp_404) = csharp2cuda_temp_405);
 #line 718 "VectorModule.cs"
-                int local_count = 0;
-#line 719 "VectorModule.cs"
-                bool local_all = true;
+#line 718 "VectorModule.cs"
+                    double* csharp2cuda_temp_406 = &((output)->scalar_value);
+                    (*(csharp2cuda_temp_406) = 0.0);
+                }
 #line 720 "VectorModule.cs"
+                __syncthreads();
+#line 721 "VectorModule.cs"
+                int local_count = 0;
+#line 722 "VectorModule.cs"
+                bool local_all = true;
+#line 723 "VectorModule.cs"
                 bool local_any = false;
-#line 721 "VectorModule.cs"
+#line 724 "VectorModule.cs"
                 {
-#line 721 "VectorModule.cs"
+#line 724 "VectorModule.cs"
                     int index = thread;
                     while (true)
                     {
-#line 721 "VectorModule.cs"
-                        int csharp2cuda_temp_408 = (first)->count;
-                        if (!(((index) < (csharp2cuda_temp_408))))
-                            break;
-#line 722 "VectorModule.cs"
-                        {
-#line 723 "VectorModule.cs"
-                            int csharp2cuda_temp_409 = (boolean_a)[index];
-#line 723 "VectorModule.cs"
-                            bool value = ((csharp2cuda_temp_409) != (0));
 #line 724 "VectorModule.cs"
+                        int csharp2cuda_temp_409 = (first)->count;
+                        if (!(((index) < (csharp2cuda_temp_409))))
+                            break;
+#line 725 "VectorModule.cs"
+                        {
+#line 726 "VectorModule.cs"
+                            int csharp2cuda_temp_410 = (boolean_a)[index];
+#line 726 "VectorModule.cs"
+                            bool value = ((csharp2cuda_temp_410) != (0));
+#line 727 "VectorModule.cs"
                             if (value)
                             {
-#line 724 "VectorModule.cs"
-#line 724 "VectorModule.cs"
-                                int* csharp2cuda_temp_410 = &(local_count);
-                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_410));
+#line 727 "VectorModule.cs"
+#line 727 "VectorModule.cs"
+                                int* csharp2cuda_temp_411 = &(local_count);
+                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_411));
                             }
-#line 725 "VectorModule.cs"
-#line 725 "VectorModule.cs"
-                            bool* csharp2cuda_temp_411 = &(local_all);
-#line 725 "VectorModule.cs"
-                            bool csharp2cuda_temp_412;
-#line 725 "VectorModule.cs"
+#line 728 "VectorModule.cs"
+#line 728 "VectorModule.cs"
+                            bool* csharp2cuda_temp_412 = &(local_all);
+#line 728 "VectorModule.cs"
+                            bool csharp2cuda_temp_413;
+#line 728 "VectorModule.cs"
                             if (local_all)
                             {
-#line 725 "VectorModule.cs"
-                                csharp2cuda_temp_412 = value;
+#line 728 "VectorModule.cs"
+                                csharp2cuda_temp_413 = value;
                             }
                             else
                             {
-#line 725 "VectorModule.cs"
-                                csharp2cuda_temp_412 = false;
+#line 728 "VectorModule.cs"
+                                csharp2cuda_temp_413 = false;
                             }
-                            (*(csharp2cuda_temp_411) = csharp2cuda_temp_412);
-#line 726 "VectorModule.cs"
-#line 726 "VectorModule.cs"
-                            bool* csharp2cuda_temp_413 = &(local_any);
-#line 726 "VectorModule.cs"
-                            bool csharp2cuda_temp_414;
-#line 726 "VectorModule.cs"
+                            (*(csharp2cuda_temp_412) = csharp2cuda_temp_413);
+#line 729 "VectorModule.cs"
+#line 729 "VectorModule.cs"
+                            bool* csharp2cuda_temp_414 = &(local_any);
+#line 729 "VectorModule.cs"
+                            bool csharp2cuda_temp_415;
+#line 729 "VectorModule.cs"
                             if (!(local_any))
                             {
-#line 726 "VectorModule.cs"
-                                csharp2cuda_temp_414 = value;
+#line 729 "VectorModule.cs"
+                                csharp2cuda_temp_415 = value;
                             }
                             else
                             {
-#line 726 "VectorModule.cs"
-                                csharp2cuda_temp_414 = true;
+#line 729 "VectorModule.cs"
+                                csharp2cuda_temp_415 = true;
                             }
-                            (*(csharp2cuda_temp_413) = csharp2cuda_temp_414);
+                            (*(csharp2cuda_temp_414) = csharp2cuda_temp_415);
                         }
-#line 721 "VectorModule.cs"
-                        int* csharp2cuda_temp_406 = &(index);
-#line 721 "VectorModule.cs"
-                        int csharp2cuda_temp_407 = *(csharp2cuda_temp_406);
-                        (*(csharp2cuda_temp_406) = csharp2cuda_i32_add(csharp2cuda_temp_407, blockDim.x));
+#line 724 "VectorModule.cs"
+                        int* csharp2cuda_temp_407 = &(index);
+#line 724 "VectorModule.cs"
+                        int csharp2cuda_temp_408 = *(csharp2cuda_temp_407);
+                        (*(csharp2cuda_temp_407) = csharp2cuda_i32_add(csharp2cuda_temp_408, blockDim.x));
                     }
                 }
-#line 728 "VectorModule.cs"
-#line 728 "VectorModule.cs"
-                bool csharp2cuda_temp_415;
-#line 728 "VectorModule.cs"
+#line 731 "VectorModule.cs"
+#line 731 "VectorModule.cs"
+                bool csharp2cuda_temp_416;
+#line 731 "VectorModule.cs"
                 if (((opcode) == (55)))
                 {
-#line 728 "VectorModule.cs"
-                    csharp2cuda_temp_415 = ((local_count) != (0));
+#line 731 "VectorModule.cs"
+                    csharp2cuda_temp_416 = ((local_count) != (0));
                 }
                 else
                 {
-#line 728 "VectorModule.cs"
-                    csharp2cuda_temp_415 = false;
+#line 731 "VectorModule.cs"
+                    csharp2cuda_temp_416 = false;
                 }
-                if (csharp2cuda_temp_415)
+                if (csharp2cuda_temp_416)
                 {
-#line 729 "VectorModule.cs"
+#line 732 "VectorModule.cs"
                     atomicAdd(&((output)->boolean_value), local_count);
                 }
                 else
                 {
-#line 730 "VectorModule.cs"
-#line 730 "VectorModule.cs"
-                    bool csharp2cuda_temp_416;
-#line 730 "VectorModule.cs"
+#line 733 "VectorModule.cs"
+#line 733 "VectorModule.cs"
+                    bool csharp2cuda_temp_417;
+#line 733 "VectorModule.cs"
                     if (((opcode) == (50)))
                     {
-#line 730 "VectorModule.cs"
-                        csharp2cuda_temp_416 = (!(local_all));
+#line 733 "VectorModule.cs"
+                        csharp2cuda_temp_417 = (!(local_all));
                     }
                     else
                     {
-#line 730 "VectorModule.cs"
-                        csharp2cuda_temp_416 = false;
+#line 733 "VectorModule.cs"
+                        csharp2cuda_temp_417 = false;
                     }
-                    if (csharp2cuda_temp_416)
+                    if (csharp2cuda_temp_417)
                     {
-#line 731 "VectorModule.cs"
+#line 734 "VectorModule.cs"
                         atomicExch(&((output)->boolean_value), 0);
                     }
                     else
                     {
-#line 732 "VectorModule.cs"
-#line 732 "VectorModule.cs"
-                        bool csharp2cuda_temp_417;
-#line 732 "VectorModule.cs"
+#line 735 "VectorModule.cs"
+#line 735 "VectorModule.cs"
+                        bool csharp2cuda_temp_418;
+#line 735 "VectorModule.cs"
                         if (((opcode) == (52)))
                         {
-#line 732 "VectorModule.cs"
-                            csharp2cuda_temp_417 = local_any;
+#line 735 "VectorModule.cs"
+                            csharp2cuda_temp_418 = local_any;
                         }
                         else
                         {
-#line 732 "VectorModule.cs"
-                            csharp2cuda_temp_417 = false;
+#line 735 "VectorModule.cs"
+                            csharp2cuda_temp_418 = false;
                         }
-                        if (csharp2cuda_temp_417)
+                        if (csharp2cuda_temp_418)
                         {
-#line 733 "VectorModule.cs"
+#line 736 "VectorModule.cs"
                             atomicExch(&((output)->boolean_value), 1);
                         }
                     }
                 }
-#line 734 "VectorModule.cs"
+#line 737 "VectorModule.cs"
                 __syncthreads();
-#line 735 "VectorModule.cs"
-#line 735 "VectorModule.cs"
-                bool csharp2cuda_temp_418;
-#line 735 "VectorModule.cs"
+#line 738 "VectorModule.cs"
+#line 738 "VectorModule.cs"
+                bool csharp2cuda_temp_419;
+#line 738 "VectorModule.cs"
                 if (((thread) == (0)))
                 {
-#line 735 "VectorModule.cs"
-                    csharp2cuda_temp_418 = ((opcode) == (55));
+#line 738 "VectorModule.cs"
+                    csharp2cuda_temp_419 = ((opcode) == (55));
                 }
                 else
                 {
-#line 735 "VectorModule.cs"
-                    csharp2cuda_temp_418 = false;
+#line 738 "VectorModule.cs"
+                    csharp2cuda_temp_419 = false;
                 }
-                if (csharp2cuda_temp_418)
-#line 736 "VectorModule.cs"
+                if (csharp2cuda_temp_419)
+#line 739 "VectorModule.cs"
                 {
-#line 737 "VectorModule.cs"
-#line 737 "VectorModule.cs"
-                    double* csharp2cuda_temp_419 = &((output)->scalar_value);
-#line 737 "VectorModule.cs"
-                    int csharp2cuda_temp_420 = (output)->boolean_value;
-                    (*(csharp2cuda_temp_419) = ((double)(csharp2cuda_temp_420)));
-#line 738 "VectorModule.cs"
-#line 738 "VectorModule.cs"
-                    int* csharp2cuda_temp_421 = &((output)->boolean_value);
-                    (*(csharp2cuda_temp_421) = 0);
-                }
 #line 740 "VectorModule.cs"
+#line 740 "VectorModule.cs"
+                    double* csharp2cuda_temp_420 = &((output)->scalar_value);
+#line 740 "VectorModule.cs"
+                    int csharp2cuda_temp_421 = (output)->boolean_value;
+                    (*(csharp2cuda_temp_420) = ((double)(csharp2cuda_temp_421)));
+#line 741 "VectorModule.cs"
+#line 741 "VectorModule.cs"
+                    int* csharp2cuda_temp_422 = &((output)->boolean_value);
+                    (*(csharp2cuda_temp_422) = 0);
+                }
+#line 743 "VectorModule.cs"
                 break;
             }
-#line 742 "VectorModule.cs"
+#line 745 "VectorModule.cs"
         case 51:
         case 54:
         case 57:
-#line 745 "VectorModule.cs"
+#line 748 "VectorModule.cs"
             if (((thread) == (0)))
-#line 746 "VectorModule.cs"
+#line 749 "VectorModule.cs"
             {
-#line 747 "VectorModule.cs"
-#line 747 "VectorModule.cs"
-                int csharp2cuda_temp_422 = (first)->count;
-                mathblocks_set_vector_shape(output, csharp2cuda_temp_422);
-#line 748 "VectorModule.cs"
-#line 748 "VectorModule.cs"
+#line 750 "VectorModule.cs"
+#line 750 "VectorModule.cs"
                 int csharp2cuda_temp_423 = (first)->count;
-#line 748 "VectorModule.cs"
-                int csharp2cuda_temp_424 = (second)->count;
-                if (((csharp2cuda_temp_423) != (csharp2cuda_temp_424)))
+                mathblocks_set_vector_shape(output, csharp2cuda_temp_423);
+#line 751 "VectorModule.cs"
+#line 751 "VectorModule.cs"
+                int csharp2cuda_temp_424 = (first)->count;
+#line 751 "VectorModule.cs"
+                int csharp2cuda_temp_425 = (second)->count;
+                if (((csharp2cuda_temp_424) != (csharp2cuda_temp_425)))
                 {
-#line 748 "VectorModule.cs"
-#line 748 "VectorModule.cs"
-                    int* csharp2cuda_temp_425 = &((output)->valid);
-                    (*(csharp2cuda_temp_425) = 0);
+#line 751 "VectorModule.cs"
+#line 751 "VectorModule.cs"
+                    int* csharp2cuda_temp_426 = &((output)->valid);
+                    (*(csharp2cuda_temp_426) = 0);
                 }
             }
-#line 750 "VectorModule.cs"
+#line 753 "VectorModule.cs"
             __syncthreads();
-#line 751 "VectorModule.cs"
+#line 754 "VectorModule.cs"
             {
-#line 751 "VectorModule.cs"
+#line 754 "VectorModule.cs"
                 int index = thread;
                 while (true)
                 {
-#line 751 "VectorModule.cs"
-                    bool csharp2cuda_temp_428 = (output)->valid;
-#line 751 "VectorModule.cs"
-                    bool csharp2cuda_temp_429;
-#line 751 "VectorModule.cs"
-                    if (csharp2cuda_temp_428)
+#line 754 "VectorModule.cs"
+                    bool csharp2cuda_temp_429 = (output)->valid;
+#line 754 "VectorModule.cs"
+                    bool csharp2cuda_temp_430;
+#line 754 "VectorModule.cs"
+                    if (csharp2cuda_temp_429)
                     {
-#line 751 "VectorModule.cs"
-                        int csharp2cuda_temp_430 = (first)->count;
-#line 751 "VectorModule.cs"
-                        csharp2cuda_temp_429 = ((index) < (csharp2cuda_temp_430));
+#line 754 "VectorModule.cs"
+                        int csharp2cuda_temp_431 = (first)->count;
+#line 754 "VectorModule.cs"
+                        csharp2cuda_temp_430 = ((index) < (csharp2cuda_temp_431));
                     }
                     else
                     {
-#line 751 "VectorModule.cs"
-                        csharp2cuda_temp_429 = false;
+#line 754 "VectorModule.cs"
+                        csharp2cuda_temp_430 = false;
                     }
-                    if (!(csharp2cuda_temp_429))
+                    if (!(csharp2cuda_temp_430))
                         break;
-#line 752 "VectorModule.cs"
-#line 752 "VectorModule.cs"
-                    int* csharp2cuda_temp_431 = &((boolean_result)[index]);
-#line 752 "VectorModule.cs"
-                    bool csharp2cuda_temp_432;
-#line 752 "VectorModule.cs"
+#line 755 "VectorModule.cs"
+#line 755 "VectorModule.cs"
+                    int* csharp2cuda_temp_432 = &((boolean_result)[index]);
+#line 755 "VectorModule.cs"
+                    bool csharp2cuda_temp_433;
+#line 755 "VectorModule.cs"
                     if (((opcode) == (51)))
                     {
-#line 752 "VectorModule.cs"
-                        bool csharp2cuda_temp_433 = (boolean_a)[index];
-#line 752 "VectorModule.cs"
-                        bool csharp2cuda_temp_434;
-#line 752 "VectorModule.cs"
-                        if (csharp2cuda_temp_433)
+#line 755 "VectorModule.cs"
+                        bool csharp2cuda_temp_434 = (boolean_a)[index];
+#line 755 "VectorModule.cs"
+                        bool csharp2cuda_temp_435;
+#line 755 "VectorModule.cs"
+                        if (csharp2cuda_temp_434)
                         {
-#line 752 "VectorModule.cs"
-                            csharp2cuda_temp_434 = (boolean_b)[index];
+#line 755 "VectorModule.cs"
+                            csharp2cuda_temp_435 = (boolean_b)[index];
                         }
                         else
                         {
-#line 752 "VectorModule.cs"
-                            csharp2cuda_temp_434 = false;
+#line 755 "VectorModule.cs"
+                            csharp2cuda_temp_435 = false;
                         }
-#line 752 "VectorModule.cs"
-                        csharp2cuda_temp_432 = csharp2cuda_temp_434;
+#line 755 "VectorModule.cs"
+                        csharp2cuda_temp_433 = csharp2cuda_temp_435;
                     }
                     else
                     {
-#line 753 "VectorModule.cs"
-                        bool csharp2cuda_temp_435;
-#line 753 "VectorModule.cs"
+#line 756 "VectorModule.cs"
+                        bool csharp2cuda_temp_436;
+#line 756 "VectorModule.cs"
                         if (((opcode) == (54)))
                         {
-#line 753 "VectorModule.cs"
-                            bool csharp2cuda_temp_436 = (boolean_a)[index];
-#line 753 "VectorModule.cs"
-                            bool csharp2cuda_temp_437;
-#line 753 "VectorModule.cs"
-                            if (!(csharp2cuda_temp_436))
+#line 756 "VectorModule.cs"
+                            bool csharp2cuda_temp_437 = (boolean_a)[index];
+#line 756 "VectorModule.cs"
+                            bool csharp2cuda_temp_438;
+#line 756 "VectorModule.cs"
+                            if (!(csharp2cuda_temp_437))
                             {
-#line 753 "VectorModule.cs"
-                                csharp2cuda_temp_437 = (boolean_b)[index];
+#line 756 "VectorModule.cs"
+                                csharp2cuda_temp_438 = (boolean_b)[index];
                             }
                             else
                             {
-#line 753 "VectorModule.cs"
-                                csharp2cuda_temp_437 = true;
+#line 756 "VectorModule.cs"
+                                csharp2cuda_temp_438 = true;
                             }
-#line 753 "VectorModule.cs"
-                            csharp2cuda_temp_435 = csharp2cuda_temp_437;
+#line 756 "VectorModule.cs"
+                            csharp2cuda_temp_436 = csharp2cuda_temp_438;
                         }
                         else
                         {
-#line 754 "VectorModule.cs"
-                            int csharp2cuda_temp_438 = (boolean_a)[index];
-#line 754 "VectorModule.cs"
-                            int csharp2cuda_temp_439 = (boolean_b)[index];
-#line 753 "VectorModule.cs"
-                            csharp2cuda_temp_435 = ((csharp2cuda_temp_438) != (csharp2cuda_temp_439));
+#line 757 "VectorModule.cs"
+                            int csharp2cuda_temp_439 = (boolean_a)[index];
+#line 757 "VectorModule.cs"
+                            int csharp2cuda_temp_440 = (boolean_b)[index];
+#line 756 "VectorModule.cs"
+                            csharp2cuda_temp_436 = ((csharp2cuda_temp_439) != (csharp2cuda_temp_440));
                         }
-#line 752 "VectorModule.cs"
-                        csharp2cuda_temp_432 = csharp2cuda_temp_435;
+#line 755 "VectorModule.cs"
+                        csharp2cuda_temp_433 = csharp2cuda_temp_436;
                     }
-                    (*(csharp2cuda_temp_431) = csharp2cuda_temp_432);
-#line 751 "VectorModule.cs"
-                    int* csharp2cuda_temp_426 = &(index);
-#line 751 "VectorModule.cs"
-                    int csharp2cuda_temp_427 = *(csharp2cuda_temp_426);
-                    (*(csharp2cuda_temp_426) = csharp2cuda_i32_add(csharp2cuda_temp_427, blockDim.x));
+                    (*(csharp2cuda_temp_432) = csharp2cuda_temp_433);
+#line 754 "VectorModule.cs"
+                    int* csharp2cuda_temp_427 = &(index);
+#line 754 "VectorModule.cs"
+                    int csharp2cuda_temp_428 = *(csharp2cuda_temp_427);
+                    (*(csharp2cuda_temp_427) = csharp2cuda_i32_add(csharp2cuda_temp_428, blockDim.x));
                 }
             }
-#line 755 "VectorModule.cs"
+#line 758 "VectorModule.cs"
             break;
-#line 756 "VectorModule.cs"
+#line 759 "VectorModule.cs"
         case 53:
-#line 757 "VectorModule.cs"
+#line 760 "VectorModule.cs"
             if (((thread) == (0)))
             {
-#line 757 "VectorModule.cs"
-#line 757 "VectorModule.cs"
-                int csharp2cuda_temp_440 = (first)->count;
-                mathblocks_set_vector_shape(output, csharp2cuda_temp_440);
+#line 760 "VectorModule.cs"
+#line 760 "VectorModule.cs"
+                int csharp2cuda_temp_441 = (first)->count;
+                mathblocks_set_vector_shape(output, csharp2cuda_temp_441);
             }
-#line 758 "VectorModule.cs"
+#line 761 "VectorModule.cs"
             __syncthreads();
-#line 759 "VectorModule.cs"
+#line 762 "VectorModule.cs"
             {
-#line 759 "VectorModule.cs"
+#line 762 "VectorModule.cs"
                 int index = thread;
                 while (true)
                 {
-#line 759 "VectorModule.cs"
-                    bool csharp2cuda_temp_443 = (output)->valid;
-#line 759 "VectorModule.cs"
-                    bool csharp2cuda_temp_444;
-#line 759 "VectorModule.cs"
-                    if (csharp2cuda_temp_443)
+#line 762 "VectorModule.cs"
+                    bool csharp2cuda_temp_444 = (output)->valid;
+#line 762 "VectorModule.cs"
+                    bool csharp2cuda_temp_445;
+#line 762 "VectorModule.cs"
+                    if (csharp2cuda_temp_444)
                     {
-#line 759 "VectorModule.cs"
-                        int csharp2cuda_temp_445 = (first)->count;
-#line 759 "VectorModule.cs"
-                        csharp2cuda_temp_444 = ((index) < (csharp2cuda_temp_445));
+#line 762 "VectorModule.cs"
+                        int csharp2cuda_temp_446 = (first)->count;
+#line 762 "VectorModule.cs"
+                        csharp2cuda_temp_445 = ((index) < (csharp2cuda_temp_446));
                     }
                     else
                     {
-#line 759 "VectorModule.cs"
-                        csharp2cuda_temp_444 = false;
+#line 762 "VectorModule.cs"
+                        csharp2cuda_temp_445 = false;
                     }
-                    if (!(csharp2cuda_temp_444))
+                    if (!(csharp2cuda_temp_445))
                         break;
-#line 760 "VectorModule.cs"
-#line 760 "VectorModule.cs"
-                    int* csharp2cuda_temp_446 = &((boolean_result)[index]);
-#line 760 "VectorModule.cs"
-                    bool csharp2cuda_temp_447 = (boolean_a)[index];
-                    (*(csharp2cuda_temp_446) = (!(csharp2cuda_temp_447)));
-#line 759 "VectorModule.cs"
-                    int* csharp2cuda_temp_441 = &(index);
-#line 759 "VectorModule.cs"
-                    int csharp2cuda_temp_442 = *(csharp2cuda_temp_441);
-                    (*(csharp2cuda_temp_441) = csharp2cuda_i32_add(csharp2cuda_temp_442, blockDim.x));
+#line 763 "VectorModule.cs"
+#line 763 "VectorModule.cs"
+                    int* csharp2cuda_temp_447 = &((boolean_result)[index]);
+#line 763 "VectorModule.cs"
+                    bool csharp2cuda_temp_448 = (boolean_a)[index];
+                    (*(csharp2cuda_temp_447) = (!(csharp2cuda_temp_448)));
+#line 762 "VectorModule.cs"
+                    int* csharp2cuda_temp_442 = &(index);
+#line 762 "VectorModule.cs"
+                    int csharp2cuda_temp_443 = *(csharp2cuda_temp_442);
+                    (*(csharp2cuda_temp_442) = csharp2cuda_i32_add(csharp2cuda_temp_443, blockDim.x));
                 }
             }
-#line 761 "VectorModule.cs"
-            break;
-#line 762 "VectorModule.cs"
-        case 56:
-#line 763 "VectorModule.cs"
-            if (((thread) == (0)))
 #line 764 "VectorModule.cs"
-            {
+            break;
 #line 765 "VectorModule.cs"
+        case 56:
+#line 766 "VectorModule.cs"
+            if (((thread) == (0)))
+#line 767 "VectorModule.cs"
+            {
+#line 768 "VectorModule.cs"
                 int count = 0;
-#line 766 "VectorModule.cs"
+#line 769 "VectorModule.cs"
                 {
-#line 766 "VectorModule.cs"
+#line 769 "VectorModule.cs"
                     int index = 0;
                     while (true)
                     {
-#line 766 "VectorModule.cs"
-                        int csharp2cuda_temp_449 = (first)->count;
-                        if (!(((index) < (csharp2cuda_temp_449))))
+#line 769 "VectorModule.cs"
+                        int csharp2cuda_temp_450 = (first)->count;
+                        if (!(((index) < (csharp2cuda_temp_450))))
                             break;
-#line 767 "VectorModule.cs"
+#line 770 "VectorModule.cs"
                         if ((boolean_a)[index])
                         {
-#line 767 "VectorModule.cs"
-#line 767 "VectorModule.cs"
-                            int* csharp2cuda_temp_450 = &(count);
-#line 767 "VectorModule.cs"
-                            int csharp2cuda_temp_451 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_450));
-#line 767 "VectorModule.cs"
-                            double* csharp2cuda_temp_452 = &((result)[csharp2cuda_temp_451]);
-                            (*(csharp2cuda_temp_452) = ((double)(index)));
+#line 770 "VectorModule.cs"
+#line 770 "VectorModule.cs"
+                            int* csharp2cuda_temp_451 = &(count);
+#line 770 "VectorModule.cs"
+                            int csharp2cuda_temp_452 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_451));
+#line 770 "VectorModule.cs"
+                            double* csharp2cuda_temp_453 = &((result)[csharp2cuda_temp_452]);
+                            (*(csharp2cuda_temp_453) = ((double)(index)));
                         }
-#line 766 "VectorModule.cs"
-                        int* csharp2cuda_temp_448 = &(index);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_448));
+#line 769 "VectorModule.cs"
+                        int* csharp2cuda_temp_449 = &(index);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_449));
                     }
                 }
-#line 768 "VectorModule.cs"
+#line 771 "VectorModule.cs"
                 mathblocks_set_vector_shape(output, count);
             }
-#line 770 "VectorModule.cs"
+#line 773 "VectorModule.cs"
             break;
-#line 771 "VectorModule.cs"
+#line 774 "VectorModule.cs"
         default:
-#line 772 "VectorModule.cs"
+#line 775 "VectorModule.cs"
             if (((thread) == (0)))
             {
-#line 772 "VectorModule.cs"
-#line 772 "VectorModule.cs"
-                int* csharp2cuda_temp_453 = &((output)->valid);
-                (*(csharp2cuda_temp_453) = 0);
+#line 775 "VectorModule.cs"
+#line 775 "VectorModule.cs"
+                int* csharp2cuda_temp_454 = &((output)->valid);
+                (*(csharp2cuda_temp_454) = 0);
             }
-#line 773 "VectorModule.cs"
+#line 776 "VectorModule.cs"
             break;
     }
 }
