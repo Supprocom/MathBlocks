@@ -22,7 +22,9 @@ internal static partial class AdvancedMathBlocks
             ? MathBlockValue.ComplexMatrix(
                 MathBlockAdvanced.PickMatrix(inputs[0].AsComplexVector(), inputs[1].AsComplexVector()))
             : MathBlockValue.Invalid(
-                MathBlockType.ComplexMatrix(),
+                MathBlockType.ComplexMatrix(
+                    rows: inputs[0].AsComplexVector().Count,
+                    columns: inputs[0].AsComplexVector().Count),
                 "The complex values are outside the operation domain."),
             [MathBlockValue.ComplexVector([new Complex(0d, 0d)]), MathBlockValue.ComplexVector([new Complex(0.5d, 0d)])],
             MathBlockValue.ComplexMatrix(new MathBlockComplexMatrix(1, 1, [new Complex(0.75d, 0d)])),
