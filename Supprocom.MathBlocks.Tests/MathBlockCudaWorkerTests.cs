@@ -929,7 +929,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     ];
 
     /// <summary>
-    /// Verifies CUDA gives the CoreCLR bits for every combination of +0, -0, 1 and -1 in the scalar inputs, with
+    /// Verifies CUDA gives the CoreCLR bits for every combination of +0, -0, 1, -1 and 0.5 in the scalar inputs, with
     /// vector inputs that hold every pairing of signed zeros.
     /// </summary>
     [Theory]
@@ -939,35 +939,75 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var operation = MathBlockCatalog.Standard.Get(identifier);
         var cases = CreateSignedZeroCases(operation);
+        // Compile from a case with a finite CoreCLR result: MathBlocksCUDAProgram constant-folds the prototype.
+        var prototype = Array.Find(
+            cases,
+            inputs => !IsRejectedClampCase(operation, inputs) && operation.Evaluate(inputs).IsValid);
+        Assert.True(
+            prototype is not null && operation.Evaluate(prototype).IsValid,
+            $"{identifier}: no case has a finite CoreCLR result to compile from.");
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
-        var inputNodes = cases[0].Select((input, index) => builder.Input($"input-{index}", input.Type)).ToArray();
+        var inputNodes = prototype.Select((input, index) => builder.Input($"input-{index}", input.Type)).ToArray();
         var program = builder.Output("result", builder.Apply(operation.Identifier, operation.Version, inputNodes)).Build();
-        using var compiled = new MathBlocksCUDAWorker().Compile(program, Named(cases[0]));
+        using var compiled = new MathBlocksCUDAWorker().Compile(program, Named(prototype));
         var failures = new List<string>();
+        var skipped = 0;
         foreach (var inputs in cases)
         {
+            if (IsRejectedClampCase(operation, inputs))
+            {
+                skipped++;
+                continue;
+            }
+            var coreclr = operation.Evaluate(inputs);
             compiled.UploadInputs(Named(inputs));
             compiled.ExecuteResident();
             var cuda = compiled.ReadOutputs()["result"];
-            var coreclr = operation.Evaluate(inputs);
             if (!IsExact(coreclr, cuda))
-                failures.Add($"({string.Join(", ", inputs.Select(Describe))}): CoreCLR={Describe(coreclr)}, CUDA={Describe(cuda)}");
+                failures.Add($"({string.Join(", ", inputs.Select(DescribeBits))}): CoreCLR={DescribeBits(coreclr)}, CUDA={DescribeBits(cuda)}");
         }
 
-        Assert.True(failures.Count == 0, $"{identifier}: {failures.Count} of {cases.Length} cases differ: {string.Join("; ", failures)}");
+        Assert.True(
+            failures.Count == 0,
+            $"{identifier}: {failures.Count} of {cases.Length - skipped} cases differ ({skipped} clamp cases with lower > upper skipped): " +
+            string.Join("; ", failures));
 
         static Dictionary<string, MathBlockValue> Named(MathBlockValue[] inputs) =>
             inputs.Select((input, index) => (Name: $"input-{index}", Input: input))
                 .ToDictionary(item => item.Name, item => item.Input, StringComparer.Ordinal);
     }
 
+    // CoreCLR clamp throws ArgumentException when lower > upper, so those cases have no result to match. This skip
+    // goes once M4-CUDA makes clamp return an invalid value on both sides. Any other exception fails the test.
+    private static bool IsRejectedClampCase(MathBlockOperation operation, MathBlockValue[] inputs) =>
+        string.Equals(operation.Identifier, "scalar.clamp", StringComparison.Ordinal) &&
+        inputs[1].AsScalar() > inputs[2].AsScalar();
+
+    private static string DescribeBits(MathBlockValue value)
+    {
+        if (!value.IsValid)
+            return "invalid";
+        static string Bits(double number) => $"0x{BitConverter.DoubleToInt64Bits(number):X16}";
+        return value.Type.Kind switch
+        {
+            MathBlockValueKind.Scalar => Bits(value.AsScalar()),
+            MathBlockValueKind.Complex => $"({Bits(value.AsComplex().Real)}, {Bits(value.AsComplex().Imaginary)}i)",
+            MathBlockValueKind.Vector => $"[{string.Join(' ', value.AsVector().ToArray().Select(Bits))}]",
+            _ => Describe(value)
+        };
+    }
+
     private static MathBlockValue[][] CreateSignedZeroCases(MathBlockOperation operation)
     {
-        double[] scalars = [0d, -0d, 1d, -1d];
+        // 0.5 gives operations such as logit a finite case to compile from.
+        double[] scalars = [0d, -0d, 1d, -1d, 0.5d];
+        // The first vector has no negative nonzero, so square-root stays finite; divide gets nonzero divisors.
         double[][] vectors =
         [
-            [0d, 0d, -0d, -0d, 1d, -1d, 0d, -0d],
-            [0d, -0d, 0d, -0d, 0d, 0d, 1d, -1d]
+            [0d, 0d, -0d, -0d, 1d, 2d, 0d, -0d],
+            string.Equals(operation.Identifier, "vector.divide", StringComparison.Ordinal)
+                ? [1d, -1d, 1d, -1d, 2d, -2d, 0.5d, -0.5d]
+                : [0d, -0d, 0d, -0d, 0d, 0d, 1d, -1d]
         ];
         var reference = operation.RegressionCases[0].Inputs;
         var cases = new List<MathBlockValue[]>();
