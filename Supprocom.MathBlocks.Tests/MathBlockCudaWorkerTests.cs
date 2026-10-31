@@ -2,11 +2,12 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Supprocom.MathBlocks.Cuda;
+using Xunit.Abstractions;
 
 namespace Supprocom.MathBlocks.Tests;
 
 /// <summary>Contains regression tests for Math Block Cuda Worker Tests.</summary>
-public sealed partial class MathBlockCudaWorkerTests
+public sealed partial class MathBlockCudaWorkerTests(ITestOutputHelper testOutput)
 {
     /// <summary>Verifies the NVRTC P/Invoke path compiles UTF-8 options without a CUDA device.</summary>
     [Fact]
@@ -24,6 +25,30 @@ public sealed partial class MathBlockCudaWorkerTests
             null,
             ["extern \"C\" __global__ void mathblocks_interop() {}", "mathblocks-interop.cu", "compute_86"]));
         Assert.NotEmpty(ptx);
+    }
+
+    /// <summary>
+    /// Verifies the installed NVRTC reports a supported version and the file it was loaded from, and, when
+    /// MATHBLOCKS_EXPECTED_NVRTC_VERSION is set, that it is that major.minor version.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "NvrtcInteropContract")]
+    public void NVRTCLibraryReportsItsVersionAndFile()
+    {
+        var library = MathBlockCudaNvrtcLibrary.Current;
+        testOutput.WriteLine(library.ToString());
+        var expected = Environment.GetEnvironmentVariable("MATHBLOCKS_EXPECTED_NVRTC_VERSION");
+        if (!string.IsNullOrEmpty(expected))
+            Assert.Equal(expected, $"{library.Major}.{library.Minor}");
+
+        Assert.True(library.Major >= 12, library.ToString());
+        Assert.True(Path.IsPathFullyQualified(library.Path), library.ToString());
+        Assert.True(File.Exists(library.Path), library.ToString());
+        Assert.StartsWith(
+            OperatingSystem.IsWindows() ? "nvrtc64_" : "libnvrtc",
+            Path.GetFileName(library.Path),
+            StringComparison.Ordinal);
+        Assert.Same(library, MathBlockCudaNvrtcLibrary.Current);
     }
 
     /// <summary>Verifies cudacatalog contains each scalar vector boolean and complex block.</summary>
@@ -820,6 +845,236 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
         Assert.True(parityCaseCount >= 300, $"Only {parityCaseCount} parity cases ran.");
         Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures));
+    }
+
+    /// <summary>
+    /// Verifies the inverse sine and cosine give the CoreCLR bits on CUDA across [-1, 1]: a dense dyadic grid,
+    /// fixed pseudo-random points, the 512 doubles next to each of -1 and 1, every power of two down to the
+    /// smallest subnormal, and both zeros.
+    /// </summary>
+    [Theory]
+    [InlineData("scalar.arc-sine")]
+    [InlineData("scalar.arc-cosine")]
+    public void CUDAInverseSineAndCosineMatchCoreCLRBitForBitAcrossTheDomain(string identifier)
+    {
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        var operation = MathBlockCatalog.Standard.Get(identifier, 1);
+        var unit = operation.RegressionCases[0].Inputs[0].Type.Unit;
+        var values = CreateUnitIntervalInputs();
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var input = builder.Input("input-0", MathBlockValue.Scalar(0d, unit).Type);
+        var program = builder.Output("result", builder.Apply(operation.Identifier, operation.Version, input)).Build();
+        using var compiled = new MathBlocksCUDAWorker().Compile(
+            program,
+            new Dictionary<string, MathBlockValue>(StringComparer.Ordinal) { ["input-0"] = MathBlockValue.Scalar(0d, unit) });
+        var failures = new List<string>();
+        foreach (var value in values)
+        {
+            MathBlockValue[] inputs = [MathBlockValue.Scalar(value, unit)];
+            compiled.UploadInputs(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal) { ["input-0"] = inputs[0] });
+            compiled.ExecuteResident();
+            var cuda = compiled.ReadOutputs()["result"];
+            var coreclr = operation.Evaluate(inputs);
+            if (!IsExact(coreclr, cuda))
+            {
+                failures.Add(string.Create(
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    $"x={value:R} (0x{BitConverter.DoubleToInt64Bits(value):X16}): CoreCLR={Describe(coreclr)}, CUDA={Describe(cuda)}"));
+            }
+        }
+
+        Assert.True(values.Length > 20_000, $"Only {values.Length} inputs were generated.");
+        Assert.True(
+            failures.Count == 0,
+            $"{identifier}: {failures.Count} of {values.Length} inputs differ. First 20:{Environment.NewLine}" +
+            string.Join(Environment.NewLine, failures.Take(20)));
+    }
+
+    /// <summary>
+    /// Gets every scalar and special operation with scalar inputs, plus the elementwise and reduction vector forms
+    /// whose result can carry the sign of a zero input.
+    /// </summary>
+    public static TheoryData<string> SignedZeroParityOperations
+    {
+        get
+        {
+            var data = new TheoryData<string>();
+            foreach (var operation in MathBlockCatalog.Standard.Operations)
+            {
+                // M4-CUDA owns clamp's ±0 behaviour and its parity test.
+                if ((operation.Identifier.StartsWith("scalar.", StringComparison.Ordinal) ||
+                     operation.Identifier.StartsWith("special.", StringComparison.Ordinal)) &&
+                    !string.Equals(operation.Identifier, "scalar.clamp", StringComparison.Ordinal) &&
+                    operation.RegressionCases[0].Inputs.All(input => input.Type.Kind == MathBlockValueKind.Scalar))
+                {
+                    data.Add(operation.Identifier);
+                }
+            }
+            foreach (var identifier in SignedZeroVectorOperations)
+                data.Add(identifier);
+            foreach (var identifier in SignedZeroComplexOperations)
+                data.Add(identifier);
+            return data;
+        }
+    }
+
+    private static readonly string[] SignedZeroVectorOperations =
+    [
+        "vector.absolute", "vector.sign", "vector.positive-part", "vector.square", "vector.square-root",
+        "vector.exponential", "vector.cumulative-sum", "vector.cumulative-product", "vector.sum", "vector.product",
+        "vector.maximum", "vector.minimum", "vector.add", "vector.subtract", "vector.multiply", "vector.divide",
+        "vector.scale", "vector.add-scalar", "vector.power"
+    ];
+
+    // The C99 Annex G branch-cut operations, which take the sign of a zero imaginary part from arc-tangent-2.
+    private static readonly string[] SignedZeroComplexOperations =
+    [
+        "complex.phase", "complex.natural-logarithm", "complex.square-root"
+    ];
+
+    /// <summary>
+    /// Verifies CUDA gives the CoreCLR bits for every combination of +0, -0, 1, -1 and 0.5 in the scalar inputs, with
+    /// vector inputs that hold every pairing of signed zeros.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(SignedZeroParityOperations))]
+    public void CUDASignedZeroMatchesCoreCLRBitForBit(string identifier)
+    {
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        var operation = MathBlockCatalog.Standard.Get(identifier);
+        var cases = CreateSignedZeroCases(operation);
+        // Compile from a case with a finite CoreCLR result: MathBlocksCUDAProgram constant-folds the prototype.
+        var prototype = Array.Find(cases, inputs => operation.Evaluate(inputs).IsValid);
+        Assert.True(
+            prototype is not null && operation.Evaluate(prototype).IsValid,
+            $"{identifier}: no case has a finite CoreCLR result to compile from.");
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var inputNodes = prototype.Select((input, index) => builder.Input($"input-{index}", input.Type)).ToArray();
+        var program = builder.Output("result", builder.Apply(operation.Identifier, operation.Version, inputNodes)).Build();
+        using var compiled = new MathBlocksCUDAWorker().Compile(program, Named(prototype));
+        var failures = new List<string>();
+        foreach (var inputs in cases)
+        {
+            var coreclr = operation.Evaluate(inputs);
+            compiled.UploadInputs(Named(inputs));
+            compiled.ExecuteResident();
+            var cuda = compiled.ReadOutputs()["result"];
+            if (!IsExact(coreclr, cuda))
+                failures.Add($"({string.Join(", ", inputs.Select(DescribeBits))}): CoreCLR={DescribeBits(coreclr)}, CUDA={DescribeBits(cuda)}");
+        }
+
+        Assert.True(
+            failures.Count == 0,
+            $"{identifier}: {failures.Count} of {cases.Length} cases differ: " +
+            string.Join("; ", failures));
+
+        static Dictionary<string, MathBlockValue> Named(MathBlockValue[] inputs) =>
+            inputs.Select((input, index) => (Name: $"input-{index}", Input: input))
+                .ToDictionary(item => item.Name, item => item.Input, StringComparer.Ordinal);
+    }
+
+    private static string DescribeBits(MathBlockValue value)
+    {
+        if (!value.IsValid)
+            return "invalid";
+        static string Bits(double number) => $"0x{BitConverter.DoubleToInt64Bits(number):X16}";
+        return value.Type.Kind switch
+        {
+            MathBlockValueKind.Scalar => Bits(value.AsScalar()),
+            MathBlockValueKind.Complex => $"({Bits(value.AsComplex().Real)}, {Bits(value.AsComplex().Imaginary)}i)",
+            MathBlockValueKind.Vector => $"[{string.Join(' ', value.AsVector().ToArray().Select(Bits))}]",
+            _ => Describe(value)
+        };
+    }
+
+    private static MathBlockValue[][] CreateSignedZeroCases(MathBlockOperation operation)
+    {
+        // 0.5 gives operations such as logit a finite case to compile from.
+        double[] scalars = [0d, -0d, 1d, -1d, 0.5d];
+        // The first vector has no negative nonzero, so square-root stays finite; divide gets nonzero divisors.
+        double[][] vectors =
+        [
+            [0d, 0d, -0d, -0d, 1d, 2d, 0d, -0d],
+            string.Equals(operation.Identifier, "vector.divide", StringComparison.Ordinal)
+                ? [1d, -1d, 1d, -1d, 2d, -2d, 0.5d, -0.5d]
+                : [0d, -0d, 0d, -0d, 0d, 0d, 1d, -1d]
+        ];
+        var reference = operation.RegressionCases[0].Inputs;
+        var cases = new List<MathBlockValue[]>();
+        var combinations = 1;
+        for (var index = 0; index < reference.Count; index++)
+        {
+            if (reference[index].Type.Kind == MathBlockValueKind.Scalar)
+                combinations *= scalars.Length;
+            else if (reference[index].Type.Kind == MathBlockValueKind.Complex)
+                combinations *= scalars.Length * scalars.Length;
+        }
+        for (var combination = 0; combination < combinations; combination++)
+        {
+            var inputs = new MathBlockValue[reference.Count];
+            var remaining = combination;
+            var vectorIndex = 0;
+            for (var index = 0; index < reference.Count; index++)
+            {
+                var unit = reference[index].Type.Unit;
+                if (reference[index].Type.Kind == MathBlockValueKind.Scalar)
+                {
+                    inputs[index] = MathBlockValue.Scalar(scalars[remaining % scalars.Length], unit);
+                    remaining /= scalars.Length;
+                }
+                else if (reference[index].Type.Kind == MathBlockValueKind.Complex)
+                {
+                    var real = scalars[remaining % scalars.Length];
+                    remaining /= scalars.Length;
+                    inputs[index] = MathBlockValue.Complex(new Complex(real, scalars[remaining % scalars.Length]), unit);
+                    remaining /= scalars.Length;
+                }
+                else
+                {
+                    inputs[index] = MathBlockValue.Vector(vectors[vectorIndex++ % vectors.Length], unit);
+                }
+            }
+            cases.Add(inputs);
+        }
+        return [.. cases];
+    }
+
+    private static double[] CreateUnitIntervalInputs()
+    {
+        var values = new List<double> { 0d, -0d, 1d, -1d };
+        for (var index = 0; index <= 16_384; index++)
+            values.Add(-1d + (index / 8_192d));
+        // SplitMix64 with a fixed seed, mapped to [-1, 1).
+        var state = 0x9E37_79B9_7F4A_7C15ul;
+        for (var index = 0; index < 4_096; index++)
+        {
+            state += 0x9E37_79B9_7F4A_7C15ul;
+            var bits = state;
+            bits = (bits ^ (bits >> 30)) * 0xBF58_476D_1CE4_E5B9ul;
+            bits = (bits ^ (bits >> 27)) * 0x94D0_49BB_1331_11EBul;
+            bits ^= bits >> 31;
+            values.Add(((bits >> 11) * (1d / (1ul << 53)) * 2d) - 1d);
+        }
+        var nearOne = 1d;
+        for (var step = 0; step < 512; step++)
+        {
+            nearOne = Math.BitDecrement(nearOne);
+            values.Add(nearOne);
+            values.Add(-nearOne);
+        }
+        for (var exponent = 1; exponent <= 1_074; exponent++)
+        {
+            var power = Math.ScaleB(1d, -exponent);
+            values.Add(power);
+            values.Add(-power);
+            values.Add(1d - power);
+            values.Add(power - 1d);
+        }
+        values.Add(double.Epsilon * 3d);
+        values.Add(-double.Epsilon * 3d);
+        values.Add(BitConverter.Int64BitsToDouble(0x000F_FFFF_FFFF_FFFFL));
+        values.Add(-BitConverter.Int64BitsToDouble(0x000F_FFFF_FFFF_FFFFL));
+        return [.. values];
     }
 
     /// <summary>Verifies every cudablock has sub millisecond warm latency on its contract shape.</summary>

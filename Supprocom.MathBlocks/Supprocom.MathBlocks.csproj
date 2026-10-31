@@ -34,12 +34,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="libtorch-cuda-12.8-win-x64-part1" Version="[2.10.0]" />
-    <PackageReference Include="libtorch-cuda-12.8-win-x64-part8" Version="[2.10.0]" />
-    <PackageReference Include="TorchSharp-cuda-linux" Version="[0.107.0]" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Remove="Blocks\**\*.Tests.cs" />
     <Compile Include="$(IntermediateOutputPath)MathBlockCudaGeneratedSource.g.cs" AutoGen="true" Visible="false" />
     <None Include="..\README.md" Pack="true" PackagePath="README.md" />

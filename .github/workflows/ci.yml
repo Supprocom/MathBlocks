@@ -11,7 +11,8 @@ permissions:
 jobs:
   build:
     name: Build direct CUDA source contract
-    runs-on: ubuntu-latest
+    # Pinned: the NVRTC install below uses NVIDIA's ubuntu2404 repository.
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
       NUGET_PACKAGES: /tmp/mathblocks-nuget-packages
@@ -101,22 +102,55 @@ jobs:
           -c Release --no-restore --no-incremental --warnaserror
           --artifacts-path "$ARTIFACT_ROOT/product"
 
+      - name: Install the CUDA Toolkit NVRTC
+        shell: bash
+        # Network repository setup with cuda-keyring, NVIDIA CUDA Installation Guide for Linux 12.8:
+        # https://docs.nvidia.com/cuda/archive/12.8.1/cuda-installation-guide-linux/index.html
+        # Package versions and SHA-256 values, from the repository index:
+        # https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/Packages
+        # apt checks each downloaded package against that signed index.
+        run: |
+          set -euo pipefail
+          . /etc/os-release
+          if [ "$VERSION_ID" != "24.04" ]; then
+            echo "::error::The NVRTC install is pinned to NVIDIA's ubuntu2404 repository; this runner is Ubuntu $VERSION_ID."
+            exit 1
+          fi
+          repository="https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64"
+          curl -fsSLo /tmp/cuda-keyring_1.1-1_all.deb "$repository/cuda-keyring_1.1-1_all.deb"
+          echo "d2a6b11c096396d868758b86dab1823b25e14d70333f1dfa74da5ddaf6a06dba  /tmp/cuda-keyring_1.1-1_all.deb" \
+            | sha256sum --check --strict \
+            || { echo "::error::cuda-keyring_1.1-1_all.deb does not match the repository index SHA-256."; exit 1; }
+          sudo dpkg -i /tmp/cuda-keyring_1.1-1_all.deb
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends cuda-nvrtc-12-8=12.8.93-1 \
+            || { echo "::error::Installing cuda-nvrtc-12-8=12.8.93-1 failed."; exit 1; }
+          dpkg-query -W cuda-nvrtc-12-8
+          mapfile -t nvrtc < <(dpkg -L cuda-nvrtc-12-8 | grep -E '/libnvrtc\.so\.12$')
+          mapfile -t builtins < <(dpkg -L cuda-nvrtc-12-8 | grep -E '/libnvrtc-builtins\.so\.12\.8$')
+          if [ "${#nvrtc[@]}" -ne 1 ] || [ "${#builtins[@]}" -ne 1 ]; then
+            echo "::error::cuda-nvrtc-12-8 must install one libnvrtc.so.12 and one libnvrtc-builtins.so.12.8."
+            dpkg -L cuda-nvrtc-12-8
+            exit 1
+          fi
+          nvrtc_root=$(dirname "${nvrtc[0]}")
+          if [ "$(dirname "${builtins[0]}")" != "$nvrtc_root" ]; then
+            echo "::error::libnvrtc.so.12 and libnvrtc-builtins.so.12.8 are in different directories."
+            exit 1
+          fi
+          echo "NVRTC_ROOT=$nvrtc_root" >> "$GITHUB_ENV"
+
       - name: Compile generated CUDA source with NVRTC
         shell: bash
         run: |
           set -euo pipefail
-          native_root="$NUGET_PACKAGES/libtorch-cuda-12.8-linux-x64-part6/2.10.0/runtimes/linux-x64/native"
-          test -f "$native_root/libnvrtc-builtins.so"
-          mapfile -t nvrtc_libraries < <(find "$native_root" -maxdepth 1 -type f -name 'libnvrtc-*.so.12' -print)
-          test "${#nvrtc_libraries[@]}" -eq 1
           mkdir -p "$NVRTC_EVIDENCE"
-          ln -s "${nvrtc_libraries[0]}" "$NVRTC_EVIDENCE/libnvrtc.so.12"
-          ln -s "$native_root/libnvrtc-builtins.so" "$NVRTC_EVIDENCE/libnvrtc-builtins.so.12.8"
+          sha256sum "$NVRTC_ROOT"/libnvrtc*.so* > "$NVRTC_EVIDENCE/nvrtc-libraries.txt"
           cc -Wall -Wextra -Werror \
             MathBlocks.CudaSourceGenerator/Validation/NvrtcSmoke.c \
-            "${nvrtc_libraries[0]}" \
+            "$NVRTC_ROOT/libnvrtc.so.12" \
             -o "$NVRTC_EVIDENCE/nvrtc-smoke"
-          LD_LIBRARY_PATH="$NVRTC_EVIDENCE:$native_root" \
+          LD_LIBRARY_PATH="$NVRTC_ROOT" \
             "$NVRTC_EVIDENCE/nvrtc-smoke" \
             "$ARTIFACT_ROOT/product/obj/Supprocom.MathBlocks/release/MathBlockCudaGeneratedSource.cu" \
             | tee "$NVRTC_EVIDENCE/result.txt"
@@ -154,14 +188,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          native_root="$NUGET_PACKAGES/libtorch-cuda-12.8-linux-x64-part6/2.10.0/runtimes/linux-x64/native"
-          LD_LIBRARY_PATH="$NVRTC_EVIDENCE:$native_root" \
+          LD_LIBRARY_PATH="$NVRTC_ROOT" MATHBLOCKS_EXPECTED_NVRTC_VERSION=12.8 \
             dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj \
             -c Release --no-build --no-restore \
             --artifacts-path "$ARTIFACT_ROOT/tests" \
             --filter "Category=NvrtcInteropContract" \
+            --logger "console;verbosity=detailed" \
             --logger "trx;LogFileName=mathblocks-nvrtc-interop.trx" \
-            --results-directory "$TEST_RESULTS"
+            --results-directory "$TEST_RESULTS" \
+            | tee "$NVRTC_EVIDENCE/interop.log"
+          grep -oE 'NVRTC 12\.8 \([^)]+\)' "$NVRTC_EVIDENCE/interop.log" | tee "$NVRTC_EVIDENCE/nvrtc-version.txt" \
+            || { echo "::error::The NVRTC gate did not report NVRTC 12.8."; exit 1; }
 
       - name: Run the portable codec fingerprint gate
         run: >-
@@ -543,6 +580,14 @@ jobs:
 
           unzip -p "$nupkg" Supprocom.MathBlocks.nuspec \
             > "$PACKAGE_EVIDENCE/Supprocom.MathBlocks.nuspec"
+          if grep -E "<dependency[ >]" "$PACKAGE_EVIDENCE/Supprocom.MathBlocks.nuspec"; then
+            echo "The package must declare no dependency." >&2
+            exit 1
+          fi
+          if grep -E '^runtimes/' "$PACKAGE_EVIDENCE/nupkg-contents.txt"; then
+            echo "The package must contain no native files." >&2
+            exit 1
+          fi
           grep -F "branch=\"$GITHUB_REF_NAME\"" "$PACKAGE_EVIDENCE/Supprocom.MathBlocks.nuspec"
           grep -F "commit=\"$GITHUB_SHA\"" "$PACKAGE_EVIDENCE/Supprocom.MathBlocks.nuspec"
           unzip -p "$nupkg" lib/net10.0/Supprocom.MathBlocks.dll \

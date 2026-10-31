@@ -5,6 +5,9 @@ public static partial class MathBlockScalar
 
     private static double DeterministicArcTangent(double value)
     {
+        // Odd function: f(-0) = -0 and f(+0) = +0, as IEEE 754 gives it.
+        if (value == 0d)
+            return value;
         var sign = value < 0d ? -1d : 1d;
         var x = Math.Abs(value);
         var offset = 0d;
@@ -33,6 +36,9 @@ public static partial class MathBlockScalar
 
     private static double DeterministicSine(double value)
     {
+        // Odd function: f(-0) = -0 and f(+0) = +0, as IEEE 754 gives it.
+        if (value == 0d)
+            return value;
         var sign = 1d;
         var x = value;
         if (x < 0d)

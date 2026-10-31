@@ -654,25 +654,28 @@ struct MathBlockSlot
     int capacity;
 };
 
-#line 322 "ScalarModule.cs"
+#line 329 "ScalarModule.cs"
 __device__ double mathblocks_arc_cosine(double value);
 
-#line 276 "ScalarModule.cs"
+#line 521 "ScalarModule.cs"
+__device__ double mathblocks_arc_sine(double value);
+
+#line 279 "ScalarModule.cs"
 __device__ double mathblocks_arc_tangent(double value);
 
-#line 305 "ScalarModule.cs"
+#line 311 "ScalarModule.cs"
 __device__ double mathblocks_arc_tangent_2(double y, double x);
 
 #line 126 "ScalarModule.cs"
 __device__ double mathblocks_binary_logarithm(double value);
 
-#line 231 "ScalarModule.cs"
+#line 234 "ScalarModule.cs"
 __device__ double mathblocks_cosine(double value);
 
 #line 171 "ScalarModule.cs"
 __device__ double mathblocks_cube_root(double value);
 
-#line 343 "ScalarModule.cs"
+#line 350 "ScalarModule.cs"
 __device__ double mathblocks_error_function(double value);
 
 #line 58 "ScalarModule.cs"
@@ -681,7 +684,7 @@ __device__ double mathblocks_exponential(double value);
 #line 137 "ScalarModule.cs"
 __device__ double mathblocks_integer_power(double value, long long exponent);
 
-#line 332 "ScalarModule.cs"
+#line 339 "ScalarModule.cs"
 __device__ double mathblocks_inverse_hyperbolic_sine(double value);
 
 #line 117 "ScalarModule.cs"
@@ -699,7 +702,7 @@ __device__ double mathblocks_power(double value, double exponent);
 #line 28 "ScalarModule.cs"
 __device__ double mathblocks_quiet_nan();
 
-#line 363 "ScalarModule.cs"
+#line 371 "ScalarModule.cs"
 __device__ void mathblocks_scalar_dispatch(
     int opcode,
     MathBlockSlot** inputs,
@@ -712,156 +715,215 @@ __device__ double mathblocks_sine(double value);
 #line 34 "ScalarModule.cs"
 __device__ double mathblocks_square_root(double value);
 
-#line 322 "ScalarModule.cs"
+#line 329 "ScalarModule.cs"
 __device__ double mathblocks_arc_cosine(double value)
-#line 324 "ScalarModule.cs"
+#line 331 "ScalarModule.cs"
 {
-#line 325 "ScalarModule.cs"
-#line 325 "ScalarModule.cs"
+#line 332 "ScalarModule.cs"
+#line 332 "ScalarModule.cs"
     bool csharp2cuda_temp_0;
-#line 325 "ScalarModule.cs"
+#line 332 "ScalarModule.cs"
     if (!(((value) < ((-(1.0))))))
     {
-#line 325 "ScalarModule.cs"
+#line 332 "ScalarModule.cs"
         csharp2cuda_temp_0 = ((value) > (1.0));
     }
     else
     {
-#line 325 "ScalarModule.cs"
+#line 332 "ScalarModule.cs"
         csharp2cuda_temp_0 = true;
     }
     if (csharp2cuda_temp_0)
     {
-#line 326 "ScalarModule.cs"
+#line 333 "ScalarModule.cs"
         return mathblocks_quiet_nan();
     }
-#line 327 "ScalarModule.cs"
+#line 334 "ScalarModule.cs"
     return mathblocks_arc_tangent_2(mathblocks_square_root(__dmul_rn(__dsub_rn(1.0, value), __dadd_rn(1.0, value))), value);
 }
 
-#line 276 "ScalarModule.cs"
-__device__ double mathblocks_arc_tangent(double value)
-#line 278 "ScalarModule.cs"
+#line 521 "ScalarModule.cs"
+__device__ double mathblocks_arc_sine(double value)
+#line 523 "ScalarModule.cs"
 {
+#line 524 "ScalarModule.cs"
+#line 524 "ScalarModule.cs"
+    bool csharp2cuda_temp_0;
+#line 524 "ScalarModule.cs"
+    if (!(((value) < ((-(1.0))))))
+    {
+#line 524 "ScalarModule.cs"
+        csharp2cuda_temp_0 = ((value) > (1.0));
+    }
+    else
+    {
+#line 524 "ScalarModule.cs"
+        csharp2cuda_temp_0 = true;
+    }
+#line 524 "ScalarModule.cs"
+    bool csharp2cuda_temp_1;
+#line 524 "ScalarModule.cs"
+    if (!(csharp2cuda_temp_0))
+    {
+#line 524 "ScalarModule.cs"
+        csharp2cuda_temp_1 = isnan(value);
+    }
+    else
+    {
+#line 524 "ScalarModule.cs"
+        csharp2cuda_temp_1 = true;
+    }
+    if (csharp2cuda_temp_1)
+    {
+#line 525 "ScalarModule.cs"
+        return mathblocks_quiet_nan();
+    }
+#line 526 "ScalarModule.cs"
+    return mathblocks_arc_tangent_2(value, mathblocks_square_root(__dmul_rn(__dsub_rn(1.0, value), __dadd_rn(1.0, value))));
+}
+
 #line 279 "ScalarModule.cs"
+__device__ double mathblocks_arc_tangent(double value)
+#line 281 "ScalarModule.cs"
+{
+#line 283 "ScalarModule.cs"
+    if (((value) == (0.0)))
+    {
+#line 284 "ScalarModule.cs"
+        return value;
+    }
+#line 285 "ScalarModule.cs"
     double csharp2cuda_temp_0;
-#line 279 "ScalarModule.cs"
+#line 285 "ScalarModule.cs"
     if (((value) < (0.0)))
     {
-#line 279 "ScalarModule.cs"
+#line 285 "ScalarModule.cs"
         csharp2cuda_temp_0 = (-(1.0));
     }
     else
     {
-#line 279 "ScalarModule.cs"
+#line 285 "ScalarModule.cs"
         csharp2cuda_temp_0 = 1.0;
     }
-#line 279 "ScalarModule.cs"
+#line 285 "ScalarModule.cs"
     double sign = csharp2cuda_temp_0;
-#line 280 "ScalarModule.cs"
+#line 286 "ScalarModule.cs"
     double x = fabs(value);
-#line 281 "ScalarModule.cs"
+#line 287 "ScalarModule.cs"
     double offset = 0.0;
-#line 282 "ScalarModule.cs"
+#line 288 "ScalarModule.cs"
     if (((x) > (2.414213562373095)))
-#line 283 "ScalarModule.cs"
+#line 289 "ScalarModule.cs"
     {
-#line 284 "ScalarModule.cs"
-#line 284 "ScalarModule.cs"
+#line 290 "ScalarModule.cs"
+#line 290 "ScalarModule.cs"
         double* csharp2cuda_temp_1 = &(offset);
-#line 284 "ScalarModule.cs"
+#line 290 "ScalarModule.cs"
         double csharp2cuda_temp_2 = __ddiv_rn(3.141592653589793, 2.0);
         (*(csharp2cuda_temp_1) = csharp2cuda_temp_2);
-#line 285 "ScalarModule.cs"
-#line 285 "ScalarModule.cs"
+#line 291 "ScalarModule.cs"
+#line 291 "ScalarModule.cs"
         double* csharp2cuda_temp_3 = &(x);
-#line 285 "ScalarModule.cs"
+#line 291 "ScalarModule.cs"
         double csharp2cuda_temp_4 = __ddiv_rn((-(1.0)), x);
         (*(csharp2cuda_temp_3) = csharp2cuda_temp_4);
     }
     else
     {
-#line 287 "ScalarModule.cs"
+#line 293 "ScalarModule.cs"
         if (((x) > (0.41421356237309503)))
-#line 288 "ScalarModule.cs"
+#line 294 "ScalarModule.cs"
         {
-#line 289 "ScalarModule.cs"
-#line 289 "ScalarModule.cs"
+#line 295 "ScalarModule.cs"
+#line 295 "ScalarModule.cs"
             double* csharp2cuda_temp_5 = &(offset);
-#line 289 "ScalarModule.cs"
+#line 295 "ScalarModule.cs"
             double csharp2cuda_temp_6 = __ddiv_rn(3.141592653589793, 4.0);
             (*(csharp2cuda_temp_5) = csharp2cuda_temp_6);
-#line 290 "ScalarModule.cs"
-#line 290 "ScalarModule.cs"
+#line 296 "ScalarModule.cs"
+#line 296 "ScalarModule.cs"
             double* csharp2cuda_temp_7 = &(x);
-#line 290 "ScalarModule.cs"
+#line 296 "ScalarModule.cs"
             double csharp2cuda_temp_8 = __ddiv_rn(__dsub_rn(x, 1.0), __dadd_rn(x, 1.0));
             (*(csharp2cuda_temp_7) = csharp2cuda_temp_8);
         }
     }
-#line 293 "ScalarModule.cs"
+#line 299 "ScalarModule.cs"
     double z = __dmul_rn(x, x);
-#line 294 "ScalarModule.cs"
+#line 300 "ScalarModule.cs"
     double numerator = __dsub_rn(__dmul_rn(__dsub_rn(__dmul_rn(__dsub_rn(__dmul_rn(__dsub_rn(__dmul_rn((-(0.8750608600031904)), z), 16.157537187333652), z), 75.00855792314705), z), 122.88666844901361), z), 64.85021904942025);
-#line 298 "ScalarModule.cs"
+#line 304 "ScalarModule.cs"
     double denominator = __dadd_rn(__dmul_rn(__dadd_rn(__dmul_rn(__dadd_rn(__dmul_rn(__dadd_rn(__dmul_rn(__dadd_rn(z, 24.858464901423062), z), 165.02700983169885), z), 432.88106049129027), z), 485.3903996359137), z), 194.5506571482614);
-#line 302 "ScalarModule.cs"
-#line 302 "ScalarModule.cs"
+#line 308 "ScalarModule.cs"
+#line 308 "ScalarModule.cs"
     double csharp2cuda_temp_9 = __ddiv_rn(__dmul_rn(__dmul_rn(x, z), numerator), denominator);
     return __dmul_rn(sign, __dadd_rn(__dadd_rn(offset, x), csharp2cuda_temp_9));
 }
 
-#line 305 "ScalarModule.cs"
+#line 311 "ScalarModule.cs"
 __device__ double mathblocks_arc_tangent_2(double y, double x)
-#line 307 "ScalarModule.cs"
+#line 313 "ScalarModule.cs"
 {
-#line 308 "ScalarModule.cs"
+#line 314 "ScalarModule.cs"
     const double pi = 3.141592653589793;
-#line 309 "ScalarModule.cs"
+#line 315 "ScalarModule.cs"
     if (((x) > (0.0)))
     {
-#line 310 "ScalarModule.cs"
-#line 310 "ScalarModule.cs"
+#line 316 "ScalarModule.cs"
+#line 316 "ScalarModule.cs"
         double csharp2cuda_temp_0 = __ddiv_rn(y, x);
         return mathblocks_arc_tangent(csharp2cuda_temp_0);
     }
-#line 311 "ScalarModule.cs"
+#line 317 "ScalarModule.cs"
     if (((x) < (0.0)))
     {
-#line 312 "ScalarModule.cs"
-#line 312 "ScalarModule.cs"
+#line 318 "ScalarModule.cs"
+#line 318 "ScalarModule.cs"
         double csharp2cuda_temp_1;
-#line 312 "ScalarModule.cs"
-        if (((y) >= (0.0)))
+#line 318 "ScalarModule.cs"
+        if ((!(signbit(y))))
         {
-#line 313 "ScalarModule.cs"
+#line 319 "ScalarModule.cs"
             double csharp2cuda_temp_2 = __ddiv_rn(y, x);
-#line 312 "ScalarModule.cs"
+#line 318 "ScalarModule.cs"
             csharp2cuda_temp_1 = __dadd_rn(mathblocks_arc_tangent(csharp2cuda_temp_2), pi);
         }
         else
         {
-#line 314 "ScalarModule.cs"
+#line 320 "ScalarModule.cs"
             double csharp2cuda_temp_3 = __ddiv_rn(y, x);
-#line 312 "ScalarModule.cs"
+#line 318 "ScalarModule.cs"
             csharp2cuda_temp_1 = __dsub_rn(mathblocks_arc_tangent(csharp2cuda_temp_3), pi);
         }
         return csharp2cuda_temp_1;
     }
-#line 315 "ScalarModule.cs"
+#line 321 "ScalarModule.cs"
     if (((y) > (0.0)))
     {
-#line 316 "ScalarModule.cs"
+#line 322 "ScalarModule.cs"
         return __ddiv_rn(pi, 2.0);
     }
-#line 317 "ScalarModule.cs"
+#line 323 "ScalarModule.cs"
     if (((y) < (0.0)))
     {
-#line 318 "ScalarModule.cs"
+#line 324 "ScalarModule.cs"
         return __ddiv_rn((-(pi)), 2.0);
     }
-#line 319 "ScalarModule.cs"
-    return 0.0;
+#line 326 "ScalarModule.cs"
+#line 326 "ScalarModule.cs"
+    double csharp2cuda_temp_4;
+#line 326 "ScalarModule.cs"
+    if (signbit(x))
+    {
+#line 326 "ScalarModule.cs"
+        csharp2cuda_temp_4 = copysign(pi, y);
+    }
+    else
+    {
+#line 326 "ScalarModule.cs"
+        csharp2cuda_temp_4 = y;
+    }
+    return csharp2cuda_temp_4;
 }
 
 #line 126 "ScalarModule.cs"
@@ -910,91 +972,91 @@ __device__ double mathblocks_binary_logarithm(double value)
     return __ddiv_rn(mathblocks_natural_logarithm(value), 0.6931471805599453);
 }
 
-#line 231 "ScalarModule.cs"
-__device__ double mathblocks_cosine(double value)
-#line 233 "ScalarModule.cs"
-{
 #line 234 "ScalarModule.cs"
-    double x = fabs(value);
-#line 235 "ScalarModule.cs"
-    double sign = 1.0;
+__device__ double mathblocks_cosine(double value)
 #line 236 "ScalarModule.cs"
-    double csharp2cuda_temp_0 = __ddiv_rn(x, 0.7853981633974483);
-#line 236 "ScalarModule.cs"
-    double octant_value = floor(csharp2cuda_temp_0);
+{
 #line 237 "ScalarModule.cs"
-    int octant = csharp2cuda_f64_to_i32(__dsub_rn(octant_value, __dmul_rn(floor(__dmul_rn(octant_value, 0.125)), 8.0)));
+    double x = fabs(value);
 #line 238 "ScalarModule.cs"
-    if (((csharp2cuda_i32_and(octant, 1)) != (0)))
+    double sign = 1.0;
 #line 239 "ScalarModule.cs"
+    double csharp2cuda_temp_0 = __ddiv_rn(x, 0.7853981633974483);
+#line 239 "ScalarModule.cs"
+    double octant_value = floor(csharp2cuda_temp_0);
+#line 240 "ScalarModule.cs"
+    int octant = csharp2cuda_f64_to_i32(__dsub_rn(octant_value, __dmul_rn(floor(__dmul_rn(octant_value, 0.125)), 8.0)));
+#line 241 "ScalarModule.cs"
+    if (((csharp2cuda_i32_and(octant, 1)) != (0)))
+#line 242 "ScalarModule.cs"
     {
-#line 240 "ScalarModule.cs"
-#line 240 "ScalarModule.cs"
+#line 243 "ScalarModule.cs"
+#line 243 "ScalarModule.cs"
         int* csharp2cuda_temp_1 = &(octant);
         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_1));
-#line 241 "ScalarModule.cs"
-#line 241 "ScalarModule.cs"
+#line 244 "ScalarModule.cs"
+#line 244 "ScalarModule.cs"
         double* csharp2cuda_temp_2 = &(octant_value);
         (*(csharp2cuda_temp_2))++;
     }
-#line 243 "ScalarModule.cs"
-#line 243 "ScalarModule.cs"
+#line 246 "ScalarModule.cs"
+#line 246 "ScalarModule.cs"
     int* csharp2cuda_temp_3 = &(octant);
-#line 243 "ScalarModule.cs"
+#line 246 "ScalarModule.cs"
     int csharp2cuda_temp_4 = *(csharp2cuda_temp_3);
     (*(csharp2cuda_temp_3) = csharp2cuda_i32_and(csharp2cuda_temp_4, 7));
-#line 244 "ScalarModule.cs"
+#line 247 "ScalarModule.cs"
     if (((octant) > (3)))
-#line 245 "ScalarModule.cs"
+#line 248 "ScalarModule.cs"
     {
-#line 246 "ScalarModule.cs"
-#line 246 "ScalarModule.cs"
+#line 249 "ScalarModule.cs"
+#line 249 "ScalarModule.cs"
         int* csharp2cuda_temp_5 = &(octant);
-#line 246 "ScalarModule.cs"
+#line 249 "ScalarModule.cs"
         int csharp2cuda_temp_6 = *(csharp2cuda_temp_5);
         (*(csharp2cuda_temp_5) = csharp2cuda_i32_sub(csharp2cuda_temp_6, 4));
-#line 247 "ScalarModule.cs"
-#line 247 "ScalarModule.cs"
+#line 250 "ScalarModule.cs"
+#line 250 "ScalarModule.cs"
         double* csharp2cuda_temp_7 = &(sign);
         (*(csharp2cuda_temp_7) = (-(sign)));
     }
-#line 249 "ScalarModule.cs"
+#line 252 "ScalarModule.cs"
     if (((octant) > (1)))
     {
-#line 250 "ScalarModule.cs"
-#line 250 "ScalarModule.cs"
+#line 253 "ScalarModule.cs"
+#line 253 "ScalarModule.cs"
         double* csharp2cuda_temp_8 = &(sign);
         (*(csharp2cuda_temp_8) = (-(sign)));
     }
-#line 251 "ScalarModule.cs"
-    double reduced = __dsub_rn(__dsub_rn(__dsub_rn(x, __dmul_rn(octant_value, 0.7853981256484985)), __dmul_rn(octant_value, 3.774894707930798E-08)), __dmul_rn(octant_value, 2.6951514290790595E-15));
 #line 254 "ScalarModule.cs"
+    double reduced = __dsub_rn(__dsub_rn(__dsub_rn(x, __dmul_rn(octant_value, 0.7853981256484985)), __dmul_rn(octant_value, 3.774894707930798E-08)), __dmul_rn(octant_value, 2.6951514290790595E-15));
+#line 257 "ScalarModule.cs"
     double square = __dmul_rn(reduced, reduced);
-#line 255 "ScalarModule.cs"
-#line 255 "ScalarModule.cs"
+#line 258 "ScalarModule.cs"
+#line 258 "ScalarModule.cs"
     bool csharp2cuda_temp_9;
-#line 255 "ScalarModule.cs"
+#line 258 "ScalarModule.cs"
     if (!(((octant) == (1))))
     {
-#line 255 "ScalarModule.cs"
+#line 258 "ScalarModule.cs"
         csharp2cuda_temp_9 = ((octant) == (2));
     }
     else
     {
-#line 255 "ScalarModule.cs"
+#line 258 "ScalarModule.cs"
         csharp2cuda_temp_9 = true;
     }
     if (csharp2cuda_temp_9)
-#line 256 "ScalarModule.cs"
+#line 259 "ScalarModule.cs"
     {
-#line 257 "ScalarModule.cs"
+#line 260 "ScalarModule.cs"
         double sine_polynomial = __dsub_rn(__dmul_rn(__dadd_rn(__dmul_rn(__dsub_rn(__dmul_rn(__dadd_rn(__dmul_rn(__dsub_rn(__dmul_rn(1.5896230157654656E-10, square), 2.5050747762857807E-08), square), 2.7557313621385722E-06), square), 0.0001984126982958954), square), 0.008333333333322118), square), 0.1666666666666663);
-#line 264 "ScalarModule.cs"
+#line 267 "ScalarModule.cs"
         return __dmul_rn(sign, __dadd_rn(reduced, __dmul_rn(__dmul_rn(reduced, square), sine_polynomial)));
     }
-#line 266 "ScalarModule.cs"
+#line 269 "ScalarModule.cs"
     double polynomial = __dadd_rn(__dmul_rn(__dsub_rn(__dmul_rn(__dadd_rn(__dmul_rn(__dsub_rn(__dmul_rn(__dadd_rn(__dmul_rn((-(1.1358536521387682E-11)), square), 2.087570084197473E-09), square), 2.755731417929674E-07), square), 2.4801587288851704E-05), square), 0.0013888888888873056), square), 0.041666666666666595);
-#line 273 "ScalarModule.cs"
+#line 276 "ScalarModule.cs"
     return __dmul_rn(sign, __dadd_rn(__dsub_rn(1.0, __dmul_rn(0.5, square)), __dmul_rn(__dmul_rn(square, square), polynomial)));
 }
 
@@ -1039,23 +1101,23 @@ __device__ double mathblocks_cube_root(double value)
     return copysign(estimate, value);
 }
 
-#line 343 "ScalarModule.cs"
+#line 350 "ScalarModule.cs"
 __device__ double mathblocks_error_function(double value)
-#line 345 "ScalarModule.cs"
+#line 352 "ScalarModule.cs"
 {
-#line 346 "ScalarModule.cs"
+#line 354 "ScalarModule.cs"
     if (((value) == (0.0)))
     {
-#line 347 "ScalarModule.cs"
-        return 0.0;
+#line 355 "ScalarModule.cs"
+        return value;
     }
-#line 348 "ScalarModule.cs"
+#line 356 "ScalarModule.cs"
     double magnitude = fabs(value);
-#line 349 "ScalarModule.cs"
+#line 357 "ScalarModule.cs"
     double t = __ddiv_rn(1.0, __dadd_rn(1.0, __dmul_rn(0.5, magnitude)));
-#line 350 "ScalarModule.cs"
+#line 358 "ScalarModule.cs"
     double tau = __dmul_rn(t, mathblocks_exponential(__dadd_rn(__dsub_rn(__dmul_rn((-(magnitude)), magnitude), 1.26551223), __dmul_rn(t, __dadd_rn(1.00002368, __dmul_rn(t, __dadd_rn(0.37409196, __dmul_rn(t, __dadd_rn(0.09678418, __dmul_rn(t, __dadd_rn((-(0.18628806)), __dmul_rn(t, __dadd_rn(0.27886807, __dmul_rn(t, __dadd_rn((-(1.13520398)), __dmul_rn(t, __dadd_rn(1.48851587, __dmul_rn(t, __dadd_rn((-(0.82215223)), __dmul_rn(t, 0.17087277))))))))))))))))))));
-#line 360 "ScalarModule.cs"
+#line 368 "ScalarModule.cs"
     return copysign(__dsub_rn(1.0, tau), value);
 }
 
@@ -1184,19 +1246,19 @@ __device__ double mathblocks_integer_power(double value, long long exponent)
     return csharp2cuda_temp_7;
 }
 
-#line 332 "ScalarModule.cs"
+#line 339 "ScalarModule.cs"
 __device__ double mathblocks_inverse_hyperbolic_sine(double value)
-#line 334 "ScalarModule.cs"
+#line 341 "ScalarModule.cs"
 {
-#line 335 "ScalarModule.cs"
+#line 342 "ScalarModule.cs"
     if (((value) == (0.0)))
     {
-#line 336 "ScalarModule.cs"
+#line 343 "ScalarModule.cs"
         return value;
     }
-#line 337 "ScalarModule.cs"
+#line 344 "ScalarModule.cs"
     double magnitude = fabs(value);
-#line 338 "ScalarModule.cs"
+#line 345 "ScalarModule.cs"
     return copysign(mathblocks_natural_logarithm(__dadd_rn(magnitude, mathblocks_square_root(__dadd_rn(__dmul_rn(magnitude, magnitude), 1.0)))), value);
 }
 
@@ -1381,821 +1443,843 @@ __device__ double mathblocks_quiet_nan()
     return __longlong_as_double(csharp2cuda_i64_from_bits(9221120237041090560ull));
 }
 
-#line 363 "ScalarModule.cs"
+#line 371 "ScalarModule.cs"
 __device__ void mathblocks_scalar_dispatch(
     int opcode,
     MathBlockSlot** inputs,
     int input_count,
     MathBlockSlot* output)
-#line 369 "ScalarModule.cs"
+#line 377 "ScalarModule.cs"
 {
-#line 370 "ScalarModule.cs"
+#line 378 "ScalarModule.cs"
     if (((threadIdx.x) != (0)))
     {
-#line 371 "ScalarModule.cs"
+#line 379 "ScalarModule.cs"
         return;
     }
-#line 373 "ScalarModule.cs"
+#line 381 "ScalarModule.cs"
     MathBlockSlot* csharp2cuda_temp_0;
-#line 373 "ScalarModule.cs"
+#line 381 "ScalarModule.cs"
     if (((input_count) > (0)))
     {
-#line 373 "ScalarModule.cs"
+#line 381 "ScalarModule.cs"
         csharp2cuda_temp_0 = (inputs)[0];
     }
     else
     {
-#line 373 "ScalarModule.cs"
+#line 381 "ScalarModule.cs"
         csharp2cuda_temp_0 = ((MathBlockSlot*)(nullptr));
     }
-#line 373 "ScalarModule.cs"
+#line 381 "ScalarModule.cs"
     const MathBlockSlot* first = csharp2cuda_temp_0;
-#line 374 "ScalarModule.cs"
+#line 382 "ScalarModule.cs"
     MathBlockSlot* csharp2cuda_temp_1;
-#line 374 "ScalarModule.cs"
+#line 382 "ScalarModule.cs"
     if (((input_count) > (1)))
     {
-#line 374 "ScalarModule.cs"
+#line 382 "ScalarModule.cs"
         csharp2cuda_temp_1 = (inputs)[1];
     }
     else
     {
-#line 374 "ScalarModule.cs"
+#line 382 "ScalarModule.cs"
         csharp2cuda_temp_1 = ((MathBlockSlot*)(nullptr));
     }
-#line 374 "ScalarModule.cs"
+#line 382 "ScalarModule.cs"
     const MathBlockSlot* second = csharp2cuda_temp_1;
-#line 375 "ScalarModule.cs"
+#line 383 "ScalarModule.cs"
     MathBlockSlot* csharp2cuda_temp_2;
-#line 375 "ScalarModule.cs"
+#line 383 "ScalarModule.cs"
     if (((input_count) > (2)))
     {
-#line 375 "ScalarModule.cs"
+#line 383 "ScalarModule.cs"
         csharp2cuda_temp_2 = (inputs)[2];
     }
     else
     {
-#line 375 "ScalarModule.cs"
+#line 383 "ScalarModule.cs"
         csharp2cuda_temp_2 = ((MathBlockSlot*)(nullptr));
     }
-#line 375 "ScalarModule.cs"
+#line 383 "ScalarModule.cs"
     const MathBlockSlot* third = csharp2cuda_temp_2;
-#line 377 "ScalarModule.cs"
-#line 377 "ScalarModule.cs"
+#line 385 "ScalarModule.cs"
+#line 385 "ScalarModule.cs"
     double* csharp2cuda_temp_3 = &((output)->scalar_value);
     (*(csharp2cuda_temp_3) = 0.0);
-#line 378 "ScalarModule.cs"
-#line 378 "ScalarModule.cs"
+#line 386 "ScalarModule.cs"
+#line 386 "ScalarModule.cs"
     int* csharp2cuda_temp_4 = &((output)->boolean_value);
     (*(csharp2cuda_temp_4) = 0);
-#line 379 "ScalarModule.cs"
-#line 379 "ScalarModule.cs"
+#line 387 "ScalarModule.cs"
+#line 387 "ScalarModule.cs"
     int* csharp2cuda_temp_5 = &((output)->valid);
-#line 379 "ScalarModule.cs"
+#line 387 "ScalarModule.cs"
     bool csharp2cuda_temp_6;
-#line 379 "ScalarModule.cs"
+#line 387 "ScalarModule.cs"
     if (!(((((void*)(first))) == (((void*)(nullptr))))))
     {
-#line 379 "ScalarModule.cs"
+#line 387 "ScalarModule.cs"
         csharp2cuda_temp_6 = (first)->valid;
     }
     else
     {
-#line 379 "ScalarModule.cs"
+#line 387 "ScalarModule.cs"
         csharp2cuda_temp_6 = true;
     }
     (*(csharp2cuda_temp_5) = csharp2cuda_temp_6);
-#line 380 "ScalarModule.cs"
+#line 388 "ScalarModule.cs"
     if (((((void*)(second))) != (((void*)(nullptr)))))
     {
-#line 381 "ScalarModule.cs"
-#line 381 "ScalarModule.cs"
+#line 389 "ScalarModule.cs"
+#line 389 "ScalarModule.cs"
         int* csharp2cuda_temp_7 = &((output)->valid);
-#line 381 "ScalarModule.cs"
+#line 389 "ScalarModule.cs"
         bool csharp2cuda_temp_8 = (output)->valid;
-#line 381 "ScalarModule.cs"
+#line 389 "ScalarModule.cs"
         bool csharp2cuda_temp_9;
-#line 381 "ScalarModule.cs"
+#line 389 "ScalarModule.cs"
         if (csharp2cuda_temp_8)
         {
-#line 381 "ScalarModule.cs"
+#line 389 "ScalarModule.cs"
             csharp2cuda_temp_9 = (second)->valid;
         }
         else
         {
-#line 381 "ScalarModule.cs"
+#line 389 "ScalarModule.cs"
             csharp2cuda_temp_9 = false;
         }
         (*(csharp2cuda_temp_7) = csharp2cuda_temp_9);
     }
-#line 382 "ScalarModule.cs"
+#line 390 "ScalarModule.cs"
     if (((((void*)(third))) != (((void*)(nullptr)))))
     {
-#line 383 "ScalarModule.cs"
-#line 383 "ScalarModule.cs"
+#line 391 "ScalarModule.cs"
+#line 391 "ScalarModule.cs"
         int* csharp2cuda_temp_10 = &((output)->valid);
-#line 383 "ScalarModule.cs"
+#line 391 "ScalarModule.cs"
         bool csharp2cuda_temp_11 = (output)->valid;
-#line 383 "ScalarModule.cs"
+#line 391 "ScalarModule.cs"
         bool csharp2cuda_temp_12;
-#line 383 "ScalarModule.cs"
+#line 391 "ScalarModule.cs"
         if (csharp2cuda_temp_11)
         {
-#line 383 "ScalarModule.cs"
+#line 391 "ScalarModule.cs"
             csharp2cuda_temp_12 = (third)->valid;
         }
         else
         {
-#line 383 "ScalarModule.cs"
+#line 391 "ScalarModule.cs"
             csharp2cuda_temp_12 = false;
         }
         (*(csharp2cuda_temp_10) = csharp2cuda_temp_12);
     }
-#line 384 "ScalarModule.cs"
-#line 384 "ScalarModule.cs"
+#line 392 "ScalarModule.cs"
+#line 392 "ScalarModule.cs"
     bool csharp2cuda_temp_13 = (output)->valid;
     if ((!(csharp2cuda_temp_13)))
     {
-#line 385 "ScalarModule.cs"
+#line 393 "ScalarModule.cs"
         return;
     }
-#line 387 "ScalarModule.cs"
+#line 395 "ScalarModule.cs"
     double csharp2cuda_temp_14;
-#line 387 "ScalarModule.cs"
+#line 395 "ScalarModule.cs"
     if (((((void*)(first))) == (((void*)(nullptr)))))
     {
-#line 387 "ScalarModule.cs"
+#line 395 "ScalarModule.cs"
         csharp2cuda_temp_14 = 0.0;
     }
     else
     {
-#line 387 "ScalarModule.cs"
+#line 395 "ScalarModule.cs"
         csharp2cuda_temp_14 = (first)->scalar_value;
     }
-#line 387 "ScalarModule.cs"
+#line 395 "ScalarModule.cs"
     double a = csharp2cuda_temp_14;
-#line 388 "ScalarModule.cs"
+#line 396 "ScalarModule.cs"
     double csharp2cuda_temp_15;
-#line 388 "ScalarModule.cs"
+#line 396 "ScalarModule.cs"
     if (((((void*)(second))) == (((void*)(nullptr)))))
     {
-#line 388 "ScalarModule.cs"
+#line 396 "ScalarModule.cs"
         csharp2cuda_temp_15 = 0.0;
     }
     else
     {
-#line 388 "ScalarModule.cs"
+#line 396 "ScalarModule.cs"
         csharp2cuda_temp_15 = (second)->scalar_value;
     }
-#line 388 "ScalarModule.cs"
+#line 396 "ScalarModule.cs"
     double b = csharp2cuda_temp_15;
-#line 389 "ScalarModule.cs"
+#line 397 "ScalarModule.cs"
     double csharp2cuda_temp_16;
-#line 389 "ScalarModule.cs"
+#line 397 "ScalarModule.cs"
     if (((((void*)(third))) == (((void*)(nullptr)))))
     {
-#line 389 "ScalarModule.cs"
+#line 397 "ScalarModule.cs"
         csharp2cuda_temp_16 = 0.0;
     }
     else
     {
-#line 389 "ScalarModule.cs"
+#line 397 "ScalarModule.cs"
         csharp2cuda_temp_16 = (third)->scalar_value;
     }
-#line 389 "ScalarModule.cs"
+#line 397 "ScalarModule.cs"
     double c = csharp2cuda_temp_16;
-#line 390 "ScalarModule.cs"
+#line 398 "ScalarModule.cs"
     bool scalar_output = true;
-#line 392 "ScalarModule.cs"
+#line 400 "ScalarModule.cs"
     switch (opcode)
     {
-#line 394 "ScalarModule.cs"
+#line 402 "ScalarModule.cs"
         case 0:
-#line 394 "ScalarModule.cs"
-#line 394 "ScalarModule.cs"
+#line 402 "ScalarModule.cs"
+#line 402 "ScalarModule.cs"
             double* csharp2cuda_temp_17 = &((output)->scalar_value);
             (*(csharp2cuda_temp_17) = __dadd_rn(a, b));
-#line 394 "ScalarModule.cs"
+#line 402 "ScalarModule.cs"
             break;
-#line 395 "ScalarModule.cs"
+#line 403 "ScalarModule.cs"
         case 1:
-#line 395 "ScalarModule.cs"
-#line 395 "ScalarModule.cs"
+#line 403 "ScalarModule.cs"
+#line 403 "ScalarModule.cs"
             double* csharp2cuda_temp_18 = &((output)->scalar_value);
             (*(csharp2cuda_temp_18) = __dsub_rn(a, b));
-#line 395 "ScalarModule.cs"
+#line 403 "ScalarModule.cs"
             break;
-#line 396 "ScalarModule.cs"
+#line 404 "ScalarModule.cs"
         case 2:
-#line 396 "ScalarModule.cs"
-#line 396 "ScalarModule.cs"
+#line 404 "ScalarModule.cs"
+#line 404 "ScalarModule.cs"
             double* csharp2cuda_temp_19 = &((output)->scalar_value);
             (*(csharp2cuda_temp_19) = __dmul_rn(a, b));
-#line 396 "ScalarModule.cs"
+#line 404 "ScalarModule.cs"
             break;
-#line 397 "ScalarModule.cs"
+#line 405 "ScalarModule.cs"
         case 3:
-#line 397 "ScalarModule.cs"
-#line 397 "ScalarModule.cs"
+#line 405 "ScalarModule.cs"
+#line 405 "ScalarModule.cs"
             double* csharp2cuda_temp_20 = &((output)->scalar_value);
-#line 397 "ScalarModule.cs"
+#line 405 "ScalarModule.cs"
             double csharp2cuda_temp_21 = __ddiv_rn(a, b);
             (*(csharp2cuda_temp_20) = csharp2cuda_temp_21);
-#line 397 "ScalarModule.cs"
+#line 405 "ScalarModule.cs"
             break;
-#line 398 "ScalarModule.cs"
+#line 406 "ScalarModule.cs"
         case 4:
-#line 398 "ScalarModule.cs"
-#line 398 "ScalarModule.cs"
+#line 406 "ScalarModule.cs"
+#line 406 "ScalarModule.cs"
             double* csharp2cuda_temp_22 = &((output)->scalar_value);
             (*(csharp2cuda_temp_22) = (-(a)));
-#line 398 "ScalarModule.cs"
+#line 406 "ScalarModule.cs"
             break;
-#line 399 "ScalarModule.cs"
+#line 407 "ScalarModule.cs"
         case 5:
-#line 399 "ScalarModule.cs"
-#line 399 "ScalarModule.cs"
+#line 407 "ScalarModule.cs"
+#line 407 "ScalarModule.cs"
             double* csharp2cuda_temp_23 = &((output)->scalar_value);
             (*(csharp2cuda_temp_23) = fabs(a));
-#line 399 "ScalarModule.cs"
+#line 407 "ScalarModule.cs"
             break;
-#line 400 "ScalarModule.cs"
+#line 408 "ScalarModule.cs"
         case 6:
-#line 400 "ScalarModule.cs"
-#line 400 "ScalarModule.cs"
+#line 408 "ScalarModule.cs"
+#line 408 "ScalarModule.cs"
             double* csharp2cuda_temp_24 = &((output)->scalar_value);
             (*(csharp2cuda_temp_24) = ((double)(csharp2cuda_i32_sub(((((a) > (0.0))) ? 1 : 0), ((((a) < (0.0))) ? 1 : 0)))));
-#line 400 "ScalarModule.cs"
+#line 408 "ScalarModule.cs"
             break;
-#line 401 "ScalarModule.cs"
+#line 409 "ScalarModule.cs"
         case 7:
-#line 401 "ScalarModule.cs"
-#line 401 "ScalarModule.cs"
+#line 409 "ScalarModule.cs"
+#line 409 "ScalarModule.cs"
             double* csharp2cuda_temp_25 = &((output)->scalar_value);
-#line 401 "ScalarModule.cs"
+#line 409 "ScalarModule.cs"
             double csharp2cuda_temp_26;
-#line 401 "ScalarModule.cs"
+#line 409 "ScalarModule.cs"
             if (((a) > (0.0)))
             {
-#line 401 "ScalarModule.cs"
+#line 409 "ScalarModule.cs"
                 csharp2cuda_temp_26 = a;
             }
             else
             {
-#line 401 "ScalarModule.cs"
+#line 409 "ScalarModule.cs"
                 csharp2cuda_temp_26 = 0.0;
             }
             (*(csharp2cuda_temp_25) = csharp2cuda_temp_26);
-#line 401 "ScalarModule.cs"
+#line 409 "ScalarModule.cs"
             break;
-#line 402 "ScalarModule.cs"
+#line 410 "ScalarModule.cs"
         case 8:
-#line 402 "ScalarModule.cs"
-#line 402 "ScalarModule.cs"
+#line 410 "ScalarModule.cs"
+#line 410 "ScalarModule.cs"
             double* csharp2cuda_temp_27 = &((output)->scalar_value);
             (*(csharp2cuda_temp_27) = csharp2cuda_f64_minimum(a, b));
-#line 402 "ScalarModule.cs"
+#line 410 "ScalarModule.cs"
             break;
-#line 403 "ScalarModule.cs"
+#line 411 "ScalarModule.cs"
         case 9:
-#line 403 "ScalarModule.cs"
-#line 403 "ScalarModule.cs"
+#line 411 "ScalarModule.cs"
+#line 411 "ScalarModule.cs"
             double* csharp2cuda_temp_28 = &((output)->scalar_value);
             (*(csharp2cuda_temp_28) = csharp2cuda_f64_maximum(a, b));
-#line 403 "ScalarModule.cs"
+#line 411 "ScalarModule.cs"
             break;
-#line 404 "ScalarModule.cs"
+#line 412 "ScalarModule.cs"
         case 10:
-#line 404 "ScalarModule.cs"
-#line 404 "ScalarModule.cs"
+#line 412 "ScalarModule.cs"
+#line 412 "ScalarModule.cs"
             double* csharp2cuda_temp_29 = &((output)->scalar_value);
             (*(csharp2cuda_temp_29) = csharp2cuda_f64_minimum(csharp2cuda_f64_maximum(a, b), c));
-#line 404 "ScalarModule.cs"
+#line 412 "ScalarModule.cs"
             break;
-#line 405 "ScalarModule.cs"
+#line 413 "ScalarModule.cs"
         case 11:
-#line 405 "ScalarModule.cs"
-#line 405 "ScalarModule.cs"
+#line 413 "ScalarModule.cs"
+#line 413 "ScalarModule.cs"
             double* csharp2cuda_temp_30 = &((output)->scalar_value);
-#line 405 "ScalarModule.cs"
+#line 413 "ScalarModule.cs"
             double csharp2cuda_temp_31 = __ddiv_rn(1.0, a);
             (*(csharp2cuda_temp_30) = csharp2cuda_temp_31);
-#line 405 "ScalarModule.cs"
-            break;
-#line 406 "ScalarModule.cs"
-        case 12:
-#line 406 "ScalarModule.cs"
-#line 406 "ScalarModule.cs"
-            double* csharp2cuda_temp_32 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_32) = __dmul_rn(a, a));
-#line 406 "ScalarModule.cs"
-            break;
-#line 407 "ScalarModule.cs"
-        case 13:
-#line 407 "ScalarModule.cs"
-#line 407 "ScalarModule.cs"
-            double* csharp2cuda_temp_33 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_33) = __dmul_rn(__dmul_rn(a, a), a));
-#line 407 "ScalarModule.cs"
-            break;
-#line 408 "ScalarModule.cs"
-        case 14:
-#line 408 "ScalarModule.cs"
-#line 408 "ScalarModule.cs"
-            double* csharp2cuda_temp_34 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_34) = mathblocks_square_root(a));
-#line 408 "ScalarModule.cs"
-            break;
-#line 409 "ScalarModule.cs"
-        case 15:
-#line 409 "ScalarModule.cs"
-#line 409 "ScalarModule.cs"
-            double* csharp2cuda_temp_35 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_35) = mathblocks_cube_root(a));
-#line 409 "ScalarModule.cs"
-            break;
-#line 410 "ScalarModule.cs"
-        case 16:
-#line 410 "ScalarModule.cs"
-#line 410 "ScalarModule.cs"
-            double* csharp2cuda_temp_36 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_36) = mathblocks_power(a, b));
-#line 410 "ScalarModule.cs"
-            break;
-#line 411 "ScalarModule.cs"
-        case 17:
-#line 411 "ScalarModule.cs"
-#line 411 "ScalarModule.cs"
-            double* csharp2cuda_temp_37 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_37) = mathblocks_exponential(a));
-#line 411 "ScalarModule.cs"
-            break;
-#line 412 "ScalarModule.cs"
-        case 18:
-#line 412 "ScalarModule.cs"
-#line 412 "ScalarModule.cs"
-            double* csharp2cuda_temp_38 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_38) = mathblocks_natural_logarithm(a));
-#line 412 "ScalarModule.cs"
-            break;
-#line 413 "ScalarModule.cs"
-        case 19:
-#line 413 "ScalarModule.cs"
-#line 413 "ScalarModule.cs"
-            double* csharp2cuda_temp_39 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_39) = mathblocks_binary_logarithm(a));
 #line 413 "ScalarModule.cs"
             break;
 #line 414 "ScalarModule.cs"
-        case 20:
+        case 12:
+#line 414 "ScalarModule.cs"
+#line 414 "ScalarModule.cs"
+            double* csharp2cuda_temp_32 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_32) = __dmul_rn(a, a));
+#line 414 "ScalarModule.cs"
+            break;
+#line 415 "ScalarModule.cs"
+        case 13:
 #line 415 "ScalarModule.cs"
 #line 415 "ScalarModule.cs"
-            double* csharp2cuda_temp_40 = &((output)->scalar_value);
+            double* csharp2cuda_temp_33 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_33) = __dmul_rn(__dmul_rn(a, a), a));
 #line 415 "ScalarModule.cs"
-            double csharp2cuda_temp_41 = __ddiv_rn(mathblocks_natural_logarithm(a), 2.302585092994046);
-            (*(csharp2cuda_temp_40) = csharp2cuda_temp_41);
+            break;
+#line 416 "ScalarModule.cs"
+        case 14:
+#line 416 "ScalarModule.cs"
+#line 416 "ScalarModule.cs"
+            double* csharp2cuda_temp_34 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_34) = mathblocks_square_root(a));
 #line 416 "ScalarModule.cs"
             break;
 #line 417 "ScalarModule.cs"
+        case 15:
+#line 417 "ScalarModule.cs"
+#line 417 "ScalarModule.cs"
+            double* csharp2cuda_temp_35 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_35) = mathblocks_cube_root(a));
+#line 417 "ScalarModule.cs"
+            break;
+#line 418 "ScalarModule.cs"
+        case 16:
+#line 418 "ScalarModule.cs"
+#line 418 "ScalarModule.cs"
+            double* csharp2cuda_temp_36 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_36) = mathblocks_power(a, b));
+#line 418 "ScalarModule.cs"
+            break;
+#line 419 "ScalarModule.cs"
+        case 17:
+#line 419 "ScalarModule.cs"
+#line 419 "ScalarModule.cs"
+            double* csharp2cuda_temp_37 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_37) = mathblocks_exponential(a));
+#line 419 "ScalarModule.cs"
+            break;
+#line 420 "ScalarModule.cs"
+        case 18:
+#line 420 "ScalarModule.cs"
+#line 420 "ScalarModule.cs"
+            double* csharp2cuda_temp_38 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_38) = mathblocks_natural_logarithm(a));
+#line 420 "ScalarModule.cs"
+            break;
+#line 421 "ScalarModule.cs"
+        case 19:
+#line 421 "ScalarModule.cs"
+#line 421 "ScalarModule.cs"
+            double* csharp2cuda_temp_39 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_39) = mathblocks_binary_logarithm(a));
+#line 421 "ScalarModule.cs"
+            break;
+#line 422 "ScalarModule.cs"
+        case 20:
+#line 423 "ScalarModule.cs"
+#line 423 "ScalarModule.cs"
+            double* csharp2cuda_temp_40 = &((output)->scalar_value);
+#line 423 "ScalarModule.cs"
+            double csharp2cuda_temp_41 = __ddiv_rn(mathblocks_natural_logarithm(a), 2.302585092994046);
+            (*(csharp2cuda_temp_40) = csharp2cuda_temp_41);
+#line 424 "ScalarModule.cs"
+            break;
+#line 425 "ScalarModule.cs"
         case 21:
-#line 417 "ScalarModule.cs"
-#line 417 "ScalarModule.cs"
+#line 425 "ScalarModule.cs"
+#line 425 "ScalarModule.cs"
             double* csharp2cuda_temp_42 = &((output)->scalar_value);
             (*(csharp2cuda_temp_42) = mathblocks_sine(a));
-#line 417 "ScalarModule.cs"
+#line 425 "ScalarModule.cs"
             break;
-#line 418 "ScalarModule.cs"
+#line 426 "ScalarModule.cs"
         case 22:
-#line 418 "ScalarModule.cs"
-#line 418 "ScalarModule.cs"
+#line 426 "ScalarModule.cs"
+#line 426 "ScalarModule.cs"
             double* csharp2cuda_temp_43 = &((output)->scalar_value);
             (*(csharp2cuda_temp_43) = mathblocks_cosine(a));
-#line 418 "ScalarModule.cs"
+#line 426 "ScalarModule.cs"
             break;
-#line 419 "ScalarModule.cs"
+#line 427 "ScalarModule.cs"
         case 23:
-#line 419 "ScalarModule.cs"
-#line 419 "ScalarModule.cs"
+#line 427 "ScalarModule.cs"
+#line 427 "ScalarModule.cs"
             double* csharp2cuda_temp_44 = &((output)->scalar_value);
-#line 419 "ScalarModule.cs"
+#line 427 "ScalarModule.cs"
             double csharp2cuda_temp_45 = __ddiv_rn(mathblocks_sine(a), mathblocks_cosine(a));
             (*(csharp2cuda_temp_44) = csharp2cuda_temp_45);
-#line 419 "ScalarModule.cs"
+#line 427 "ScalarModule.cs"
             break;
-#line 420 "ScalarModule.cs"
+#line 428 "ScalarModule.cs"
         case 24:
-#line 420 "ScalarModule.cs"
-#line 420 "ScalarModule.cs"
+#line 428 "ScalarModule.cs"
+#line 428 "ScalarModule.cs"
             double* csharp2cuda_temp_46 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_46) = asin(a));
-#line 420 "ScalarModule.cs"
+            (*(csharp2cuda_temp_46) = mathblocks_arc_sine(a));
+#line 428 "ScalarModule.cs"
             break;
-#line 421 "ScalarModule.cs"
+#line 429 "ScalarModule.cs"
         case 25:
-#line 421 "ScalarModule.cs"
-#line 421 "ScalarModule.cs"
+#line 429 "ScalarModule.cs"
+#line 429 "ScalarModule.cs"
             double* csharp2cuda_temp_47 = &((output)->scalar_value);
             (*(csharp2cuda_temp_47) = mathblocks_arc_cosine(a));
-#line 421 "ScalarModule.cs"
+#line 429 "ScalarModule.cs"
             break;
-#line 422 "ScalarModule.cs"
+#line 430 "ScalarModule.cs"
         case 26:
-#line 422 "ScalarModule.cs"
-#line 422 "ScalarModule.cs"
+#line 430 "ScalarModule.cs"
+#line 430 "ScalarModule.cs"
             double* csharp2cuda_temp_48 = &((output)->scalar_value);
             (*(csharp2cuda_temp_48) = mathblocks_arc_tangent(a));
-#line 422 "ScalarModule.cs"
+#line 430 "ScalarModule.cs"
             break;
-#line 423 "ScalarModule.cs"
+#line 431 "ScalarModule.cs"
         case 27:
-#line 423 "ScalarModule.cs"
-#line 423 "ScalarModule.cs"
+#line 431 "ScalarModule.cs"
+#line 431 "ScalarModule.cs"
             double* csharp2cuda_temp_49 = &((output)->scalar_value);
             (*(csharp2cuda_temp_49) = mathblocks_arc_tangent_2(a, b));
-#line 423 "ScalarModule.cs"
-            break;
-#line 424 "ScalarModule.cs"
-        case 28:
-#line 425 "ScalarModule.cs"
-            {
-#line 426 "ScalarModule.cs"
-                double positive = mathblocks_exponential(a);
-#line 427 "ScalarModule.cs"
-                double negative = mathblocks_exponential((-(a)));
-#line 428 "ScalarModule.cs"
-#line 428 "ScalarModule.cs"
-                double* csharp2cuda_temp_50 = &((output)->scalar_value);
-#line 428 "ScalarModule.cs"
-                double csharp2cuda_temp_51 = __ddiv_rn(__dsub_rn(positive, negative), 2.0);
-                (*(csharp2cuda_temp_50) = csharp2cuda_temp_51);
-#line 429 "ScalarModule.cs"
-                break;
-            }
 #line 431 "ScalarModule.cs"
-        case 29:
+            break;
 #line 432 "ScalarModule.cs"
-            {
+        case 28:
 #line 433 "ScalarModule.cs"
-                double positive = mathblocks_exponential(a);
+            {
 #line 434 "ScalarModule.cs"
-                double negative = mathblocks_exponential((-(a)));
+                if (((a) == (0.0)))
 #line 435 "ScalarModule.cs"
-#line 435 "ScalarModule.cs"
-                double* csharp2cuda_temp_52 = &((output)->scalar_value);
-#line 435 "ScalarModule.cs"
-                double csharp2cuda_temp_53 = __ddiv_rn(__dadd_rn(positive, negative), 2.0);
-                (*(csharp2cuda_temp_52) = csharp2cuda_temp_53);
+                {
 #line 436 "ScalarModule.cs"
-                break;
-            }
-#line 438 "ScalarModule.cs"
-        case 30:
+#line 436 "ScalarModule.cs"
+                    double* csharp2cuda_temp_50 = &((output)->scalar_value);
+                    (*(csharp2cuda_temp_50) = a);
+#line 437 "ScalarModule.cs"
+                    break;
+                }
 #line 439 "ScalarModule.cs"
-            {
-#line 440 "ScalarModule.cs"
                 double positive = mathblocks_exponential(a);
-#line 441 "ScalarModule.cs"
+#line 440 "ScalarModule.cs"
                 double negative = mathblocks_exponential((-(a)));
+#line 441 "ScalarModule.cs"
+#line 441 "ScalarModule.cs"
+                double* csharp2cuda_temp_51 = &((output)->scalar_value);
+#line 441 "ScalarModule.cs"
+                double csharp2cuda_temp_52 = __ddiv_rn(__dsub_rn(positive, negative), 2.0);
+                (*(csharp2cuda_temp_51) = csharp2cuda_temp_52);
 #line 442 "ScalarModule.cs"
-#line 442 "ScalarModule.cs"
-                double* csharp2cuda_temp_54 = &((output)->scalar_value);
-#line 442 "ScalarModule.cs"
-                double csharp2cuda_temp_55 = __ddiv_rn(__dsub_rn(positive, negative), __dadd_rn(positive, negative));
-                (*(csharp2cuda_temp_54) = csharp2cuda_temp_55);
-#line 443 "ScalarModule.cs"
                 break;
             }
+#line 444 "ScalarModule.cs"
+        case 29:
 #line 445 "ScalarModule.cs"
-        case 31:
-#line 445 "ScalarModule.cs"
-#line 445 "ScalarModule.cs"
-            double* csharp2cuda_temp_56 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_56) = mathblocks_inverse_hyperbolic_sine(a));
-#line 445 "ScalarModule.cs"
-            break;
+            {
 #line 446 "ScalarModule.cs"
-        case 32:
+                double positive = mathblocks_exponential(a);
 #line 447 "ScalarModule.cs"
-#line 447 "ScalarModule.cs"
-            double* csharp2cuda_temp_57 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_57) = mathblocks_natural_logarithm(__dadd_rn(a, mathblocks_square_root(__dsub_rn(__dmul_rn(a, a), 1.0)))));
+                double negative = mathblocks_exponential((-(a)));
+#line 448 "ScalarModule.cs"
+#line 448 "ScalarModule.cs"
+                double* csharp2cuda_temp_53 = &((output)->scalar_value);
+#line 448 "ScalarModule.cs"
+                double csharp2cuda_temp_54 = __ddiv_rn(__dadd_rn(positive, negative), 2.0);
+                (*(csharp2cuda_temp_53) = csharp2cuda_temp_54);
 #line 449 "ScalarModule.cs"
-            break;
-#line 450 "ScalarModule.cs"
-        case 33:
-#line 450 "ScalarModule.cs"
-#line 450 "ScalarModule.cs"
-            double* csharp2cuda_temp_58 = &((output)->scalar_value);
-#line 450 "ScalarModule.cs"
-            double csharp2cuda_temp_59 = __ddiv_rn(__dmul_rn(2.0, a), __dsub_rn(1.0, a));
-            (*(csharp2cuda_temp_58) = __dmul_rn(0.5, mathblocks_log_one_plus(csharp2cuda_temp_59)));
-#line 450 "ScalarModule.cs"
-            break;
+                break;
+            }
 #line 451 "ScalarModule.cs"
-        case 34:
-#line 451 "ScalarModule.cs"
-#line 451 "ScalarModule.cs"
-            double* csharp2cuda_temp_60 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_60) = floor(a));
-#line 451 "ScalarModule.cs"
-            break;
+        case 30:
 #line 452 "ScalarModule.cs"
-        case 35:
-#line 452 "ScalarModule.cs"
-#line 452 "ScalarModule.cs"
-            double* csharp2cuda_temp_61 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_61) = ceil(a));
-#line 452 "ScalarModule.cs"
-            break;
+            {
 #line 453 "ScalarModule.cs"
-        case 36:
-#line 453 "ScalarModule.cs"
-#line 453 "ScalarModule.cs"
-            double* csharp2cuda_temp_62 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_62) = nearbyint(a));
-#line 453 "ScalarModule.cs"
-            break;
+                if (((a) == (0.0)))
 #line 454 "ScalarModule.cs"
-        case 37:
-#line 454 "ScalarModule.cs"
-#line 454 "ScalarModule.cs"
-            double* csharp2cuda_temp_63 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_63) = trunc(a));
-#line 454 "ScalarModule.cs"
-            break;
-#line 455 "ScalarModule.cs"
-        case 38:
+                {
 #line 455 "ScalarModule.cs"
 #line 455 "ScalarModule.cs"
-            double* csharp2cuda_temp_64 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_64) = fmod(a, b));
-#line 455 "ScalarModule.cs"
-            break;
+                    double* csharp2cuda_temp_55 = &((output)->scalar_value);
+                    (*(csharp2cuda_temp_55) = a);
 #line 456 "ScalarModule.cs"
-        case 39:
-#line 457 "ScalarModule.cs"
-#line 457 "ScalarModule.cs"
-            double* csharp2cuda_temp_65 = &((output)->scalar_value);
-#line 457 "ScalarModule.cs"
-            double csharp2cuda_temp_66;
-#line 457 "ScalarModule.cs"
-            if (((a) >= (0.0)))
-            {
-#line 457 "ScalarModule.cs"
-                csharp2cuda_temp_66 = __ddiv_rn(1.0, __dadd_rn(1.0, mathblocks_exponential((-(a)))));
-            }
-            else
-            {
-#line 457 "ScalarModule.cs"
-                csharp2cuda_temp_66 = __ddiv_rn(mathblocks_exponential(a), __dadd_rn(1.0, mathblocks_exponential(a)));
-            }
-            (*(csharp2cuda_temp_65) = csharp2cuda_temp_66);
+                    break;
+                }
+#line 458 "ScalarModule.cs"
+                double positive = mathblocks_exponential(a);
+#line 459 "ScalarModule.cs"
+                double negative = mathblocks_exponential((-(a)));
 #line 460 "ScalarModule.cs"
-            break;
+#line 460 "ScalarModule.cs"
+                double* csharp2cuda_temp_56 = &((output)->scalar_value);
+#line 460 "ScalarModule.cs"
+                double csharp2cuda_temp_57 = __ddiv_rn(__dsub_rn(positive, negative), __dadd_rn(positive, negative));
+                (*(csharp2cuda_temp_56) = csharp2cuda_temp_57);
 #line 461 "ScalarModule.cs"
-        case 40:
-#line 462 "ScalarModule.cs"
-#line 462 "ScalarModule.cs"
-            double* csharp2cuda_temp_67 = &((output)->scalar_value);
-#line 462 "ScalarModule.cs"
-            double csharp2cuda_temp_68 = __ddiv_rn(a, __dsub_rn(1.0, a));
-            (*(csharp2cuda_temp_67) = mathblocks_natural_logarithm(csharp2cuda_temp_68));
+                break;
+            }
+#line 463 "ScalarModule.cs"
+        case 31:
+#line 463 "ScalarModule.cs"
+#line 463 "ScalarModule.cs"
+            double* csharp2cuda_temp_58 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_58) = mathblocks_inverse_hyperbolic_sine(a));
 #line 463 "ScalarModule.cs"
             break;
 #line 464 "ScalarModule.cs"
-        case 41:
+        case 32:
 #line 465 "ScalarModule.cs"
 #line 465 "ScalarModule.cs"
-            double* csharp2cuda_temp_69 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_69) = __dadd_rn(csharp2cuda_f64_maximum(a, 0.0), mathblocks_log_one_plus(mathblocks_exponential((-(fabs(a)))))));
+            double* csharp2cuda_temp_59 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_59) = mathblocks_natural_logarithm(__dadd_rn(a, mathblocks_square_root(__dsub_rn(__dmul_rn(a, a), 1.0)))));
 #line 467 "ScalarModule.cs"
             break;
 #line 468 "ScalarModule.cs"
-        case 42:
+        case 33:
 #line 468 "ScalarModule.cs"
 #line 468 "ScalarModule.cs"
-            double* csharp2cuda_temp_70 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_70) = mathblocks_log_one_plus(a));
+            double* csharp2cuda_temp_60 = &((output)->scalar_value);
+#line 468 "ScalarModule.cs"
+            double csharp2cuda_temp_61 = __ddiv_rn(__dmul_rn(2.0, a), __dsub_rn(1.0, a));
+            (*(csharp2cuda_temp_60) = __dmul_rn(0.5, mathblocks_log_one_plus(csharp2cuda_temp_61)));
 #line 468 "ScalarModule.cs"
             break;
 #line 469 "ScalarModule.cs"
-        case 43:
+        case 34:
 #line 469 "ScalarModule.cs"
 #line 469 "ScalarModule.cs"
-            double* csharp2cuda_temp_71 = &((output)->scalar_value);
-            (*(csharp2cuda_temp_71) = mathblocks_error_function(a));
+            double* csharp2cuda_temp_62 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_62) = floor(a));
 #line 469 "ScalarModule.cs"
             break;
 #line 470 "ScalarModule.cs"
-        case 44:
+        case 35:
 #line 470 "ScalarModule.cs"
 #line 470 "ScalarModule.cs"
-            int* csharp2cuda_temp_72 = &((output)->boolean_value);
-            (*(csharp2cuda_temp_72) = ((a) == (b)));
-#line 470 "ScalarModule.cs"
-#line 470 "ScalarModule.cs"
-            bool* csharp2cuda_temp_73 = &(scalar_output);
-            (*(csharp2cuda_temp_73) = false);
+            double* csharp2cuda_temp_63 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_63) = ceil(a));
 #line 470 "ScalarModule.cs"
             break;
 #line 471 "ScalarModule.cs"
-        case 45:
+        case 36:
 #line 471 "ScalarModule.cs"
 #line 471 "ScalarModule.cs"
-            int* csharp2cuda_temp_74 = &((output)->boolean_value);
-            (*(csharp2cuda_temp_74) = ((a) != (b)));
-#line 471 "ScalarModule.cs"
-#line 471 "ScalarModule.cs"
-            bool* csharp2cuda_temp_75 = &(scalar_output);
-            (*(csharp2cuda_temp_75) = false);
+            double* csharp2cuda_temp_64 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_64) = nearbyint(a));
 #line 471 "ScalarModule.cs"
             break;
 #line 472 "ScalarModule.cs"
-        case 46:
+        case 37:
 #line 472 "ScalarModule.cs"
 #line 472 "ScalarModule.cs"
-            int* csharp2cuda_temp_76 = &((output)->boolean_value);
-            (*(csharp2cuda_temp_76) = ((a) < (b)));
-#line 472 "ScalarModule.cs"
-#line 472 "ScalarModule.cs"
-            bool* csharp2cuda_temp_77 = &(scalar_output);
-            (*(csharp2cuda_temp_77) = false);
+            double* csharp2cuda_temp_65 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_65) = trunc(a));
 #line 472 "ScalarModule.cs"
             break;
 #line 473 "ScalarModule.cs"
-        case 47:
+        case 38:
 #line 473 "ScalarModule.cs"
 #line 473 "ScalarModule.cs"
-            int* csharp2cuda_temp_78 = &((output)->boolean_value);
-            (*(csharp2cuda_temp_78) = ((a) <= (b)));
-#line 473 "ScalarModule.cs"
-#line 473 "ScalarModule.cs"
-            bool* csharp2cuda_temp_79 = &(scalar_output);
-            (*(csharp2cuda_temp_79) = false);
+            double* csharp2cuda_temp_66 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_66) = fmod(a, b));
 #line 473 "ScalarModule.cs"
             break;
 #line 474 "ScalarModule.cs"
-        case 48:
-#line 474 "ScalarModule.cs"
-#line 474 "ScalarModule.cs"
-            int* csharp2cuda_temp_80 = &((output)->boolean_value);
-            (*(csharp2cuda_temp_80) = ((a) > (b)));
-#line 474 "ScalarModule.cs"
-#line 474 "ScalarModule.cs"
-            bool* csharp2cuda_temp_81 = &(scalar_output);
-            (*(csharp2cuda_temp_81) = false);
-#line 474 "ScalarModule.cs"
-            break;
-#line 475 "ScalarModule.cs"
-        case 49:
+        case 39:
 #line 475 "ScalarModule.cs"
 #line 475 "ScalarModule.cs"
-            int* csharp2cuda_temp_82 = &((output)->boolean_value);
-            (*(csharp2cuda_temp_82) = ((a) >= (b)));
+            double* csharp2cuda_temp_67 = &((output)->scalar_value);
 #line 475 "ScalarModule.cs"
+            double csharp2cuda_temp_68;
 #line 475 "ScalarModule.cs"
-            bool* csharp2cuda_temp_83 = &(scalar_output);
-            (*(csharp2cuda_temp_83) = false);
-#line 475 "ScalarModule.cs"
-            break;
-#line 476 "ScalarModule.cs"
-        case 50:
-#line 477 "ScalarModule.cs"
-#line 477 "ScalarModule.cs"
-            int* csharp2cuda_temp_84 = &((output)->boolean_value);
-#line 477 "ScalarModule.cs"
-            bool csharp2cuda_temp_85 = (first)->boolean_value;
-#line 477 "ScalarModule.cs"
-            bool csharp2cuda_temp_86;
-#line 477 "ScalarModule.cs"
-            if (csharp2cuda_temp_85)
+            if (((a) >= (0.0)))
             {
-#line 477 "ScalarModule.cs"
-                csharp2cuda_temp_86 = (second)->boolean_value;
+#line 475 "ScalarModule.cs"
+                csharp2cuda_temp_68 = __ddiv_rn(1.0, __dadd_rn(1.0, mathblocks_exponential((-(a)))));
             }
             else
             {
-#line 477 "ScalarModule.cs"
-                csharp2cuda_temp_86 = false;
+#line 475 "ScalarModule.cs"
+                csharp2cuda_temp_68 = __ddiv_rn(mathblocks_exponential(a), __dadd_rn(1.0, mathblocks_exponential(a)));
             }
-            (*(csharp2cuda_temp_84) = csharp2cuda_temp_86);
+            (*(csharp2cuda_temp_67) = csharp2cuda_temp_68);
 #line 478 "ScalarModule.cs"
-#line 478 "ScalarModule.cs"
-            bool* csharp2cuda_temp_87 = &(scalar_output);
-            (*(csharp2cuda_temp_87) = false);
+            break;
 #line 479 "ScalarModule.cs"
-            break;
+        case 40:
 #line 480 "ScalarModule.cs"
-        case 51:
+#line 480 "ScalarModule.cs"
+            double* csharp2cuda_temp_69 = &((output)->scalar_value);
+#line 480 "ScalarModule.cs"
+            double csharp2cuda_temp_70 = __ddiv_rn(a, __dsub_rn(1.0, a));
+            (*(csharp2cuda_temp_69) = mathblocks_natural_logarithm(csharp2cuda_temp_70));
 #line 481 "ScalarModule.cs"
-#line 481 "ScalarModule.cs"
-            int* csharp2cuda_temp_88 = &((output)->boolean_value);
-#line 481 "ScalarModule.cs"
-            bool csharp2cuda_temp_89 = (first)->boolean_value;
-#line 481 "ScalarModule.cs"
-            bool csharp2cuda_temp_90;
-#line 481 "ScalarModule.cs"
-            if (!(csharp2cuda_temp_89))
-            {
-#line 481 "ScalarModule.cs"
-                csharp2cuda_temp_90 = (second)->boolean_value;
-            }
-            else
-            {
-#line 481 "ScalarModule.cs"
-                csharp2cuda_temp_90 = true;
-            }
-            (*(csharp2cuda_temp_88) = csharp2cuda_temp_90);
-#line 482 "ScalarModule.cs"
-#line 482 "ScalarModule.cs"
-            bool* csharp2cuda_temp_91 = &(scalar_output);
-            (*(csharp2cuda_temp_91) = false);
-#line 483 "ScalarModule.cs"
             break;
-#line 484 "ScalarModule.cs"
-        case 52:
+#line 482 "ScalarModule.cs"
+        case 41:
+#line 483 "ScalarModule.cs"
+#line 483 "ScalarModule.cs"
+            double* csharp2cuda_temp_71 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_71) = __dadd_rn(csharp2cuda_f64_maximum(a, 0.0), mathblocks_log_one_plus(mathblocks_exponential((-(fabs(a)))))));
 #line 485 "ScalarModule.cs"
-#line 485 "ScalarModule.cs"
-            int* csharp2cuda_temp_92 = &((output)->boolean_value);
-#line 485 "ScalarModule.cs"
-            int csharp2cuda_temp_93 = (first)->boolean_value;
-#line 485 "ScalarModule.cs"
-            int csharp2cuda_temp_94 = (second)->boolean_value;
-            (*(csharp2cuda_temp_92) = ((csharp2cuda_temp_93) != (csharp2cuda_temp_94)));
+            break;
+#line 486 "ScalarModule.cs"
+        case 42:
 #line 486 "ScalarModule.cs"
 #line 486 "ScalarModule.cs"
-            bool* csharp2cuda_temp_95 = &(scalar_output);
-            (*(csharp2cuda_temp_95) = false);
+            double* csharp2cuda_temp_72 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_72) = mathblocks_log_one_plus(a));
+#line 486 "ScalarModule.cs"
+            break;
+#line 487 "ScalarModule.cs"
+        case 43:
+#line 487 "ScalarModule.cs"
+#line 487 "ScalarModule.cs"
+            double* csharp2cuda_temp_73 = &((output)->scalar_value);
+            (*(csharp2cuda_temp_73) = mathblocks_error_function(a));
 #line 487 "ScalarModule.cs"
             break;
 #line 488 "ScalarModule.cs"
-        case 53:
+        case 44:
+#line 488 "ScalarModule.cs"
+#line 488 "ScalarModule.cs"
+            int* csharp2cuda_temp_74 = &((output)->boolean_value);
+            (*(csharp2cuda_temp_74) = ((a) == (b)));
+#line 488 "ScalarModule.cs"
+#line 488 "ScalarModule.cs"
+            bool* csharp2cuda_temp_75 = &(scalar_output);
+            (*(csharp2cuda_temp_75) = false);
+#line 488 "ScalarModule.cs"
+            break;
+#line 489 "ScalarModule.cs"
+        case 45:
 #line 489 "ScalarModule.cs"
 #line 489 "ScalarModule.cs"
-            int* csharp2cuda_temp_96 = &((output)->boolean_value);
+            int* csharp2cuda_temp_76 = &((output)->boolean_value);
+            (*(csharp2cuda_temp_76) = ((a) != (b)));
 #line 489 "ScalarModule.cs"
-            bool csharp2cuda_temp_97 = (first)->boolean_value;
-            (*(csharp2cuda_temp_96) = (!(csharp2cuda_temp_97)));
+#line 489 "ScalarModule.cs"
+            bool* csharp2cuda_temp_77 = &(scalar_output);
+            (*(csharp2cuda_temp_77) = false);
+#line 489 "ScalarModule.cs"
+            break;
+#line 490 "ScalarModule.cs"
+        case 46:
 #line 490 "ScalarModule.cs"
 #line 490 "ScalarModule.cs"
-            bool* csharp2cuda_temp_98 = &(scalar_output);
-            (*(csharp2cuda_temp_98) = false);
+            int* csharp2cuda_temp_78 = &((output)->boolean_value);
+            (*(csharp2cuda_temp_78) = ((a) < (b)));
+#line 490 "ScalarModule.cs"
+#line 490 "ScalarModule.cs"
+            bool* csharp2cuda_temp_79 = &(scalar_output);
+            (*(csharp2cuda_temp_79) = false);
+#line 490 "ScalarModule.cs"
+            break;
+#line 491 "ScalarModule.cs"
+        case 47:
+#line 491 "ScalarModule.cs"
+#line 491 "ScalarModule.cs"
+            int* csharp2cuda_temp_80 = &((output)->boolean_value);
+            (*(csharp2cuda_temp_80) = ((a) <= (b)));
+#line 491 "ScalarModule.cs"
+#line 491 "ScalarModule.cs"
+            bool* csharp2cuda_temp_81 = &(scalar_output);
+            (*(csharp2cuda_temp_81) = false);
 #line 491 "ScalarModule.cs"
             break;
 #line 492 "ScalarModule.cs"
-        case 54:
+        case 48:
+#line 492 "ScalarModule.cs"
+#line 492 "ScalarModule.cs"
+            int* csharp2cuda_temp_82 = &((output)->boolean_value);
+            (*(csharp2cuda_temp_82) = ((a) > (b)));
+#line 492 "ScalarModule.cs"
+#line 492 "ScalarModule.cs"
+            bool* csharp2cuda_temp_83 = &(scalar_output);
+            (*(csharp2cuda_temp_83) = false);
+#line 492 "ScalarModule.cs"
+            break;
+#line 493 "ScalarModule.cs"
+        case 49:
 #line 493 "ScalarModule.cs"
 #line 493 "ScalarModule.cs"
-            double* csharp2cuda_temp_99 = &((output)->scalar_value);
+            int* csharp2cuda_temp_84 = &((output)->boolean_value);
+            (*(csharp2cuda_temp_84) = ((a) >= (b)));
 #line 493 "ScalarModule.cs"
-            bool csharp2cuda_temp_100 = (first)->boolean_value;
 #line 493 "ScalarModule.cs"
-            double csharp2cuda_temp_101;
+            bool* csharp2cuda_temp_85 = &(scalar_output);
+            (*(csharp2cuda_temp_85) = false);
 #line 493 "ScalarModule.cs"
-            if (csharp2cuda_temp_100)
+            break;
+#line 494 "ScalarModule.cs"
+        case 50:
+#line 495 "ScalarModule.cs"
+#line 495 "ScalarModule.cs"
+            int* csharp2cuda_temp_86 = &((output)->boolean_value);
+#line 495 "ScalarModule.cs"
+            bool csharp2cuda_temp_87 = (first)->boolean_value;
+#line 495 "ScalarModule.cs"
+            bool csharp2cuda_temp_88;
+#line 495 "ScalarModule.cs"
+            if (csharp2cuda_temp_87)
             {
-#line 493 "ScalarModule.cs"
-                csharp2cuda_temp_101 = (second)->scalar_value;
+#line 495 "ScalarModule.cs"
+                csharp2cuda_temp_88 = (second)->boolean_value;
             }
             else
             {
-#line 493 "ScalarModule.cs"
-                csharp2cuda_temp_101 = (third)->scalar_value;
+#line 495 "ScalarModule.cs"
+                csharp2cuda_temp_88 = false;
             }
-            (*(csharp2cuda_temp_99) = csharp2cuda_temp_101);
-#line 494 "ScalarModule.cs"
+            (*(csharp2cuda_temp_86) = csharp2cuda_temp_88);
+#line 496 "ScalarModule.cs"
+#line 496 "ScalarModule.cs"
+            bool* csharp2cuda_temp_89 = &(scalar_output);
+            (*(csharp2cuda_temp_89) = false);
+#line 497 "ScalarModule.cs"
             break;
-#line 495 "ScalarModule.cs"
+#line 498 "ScalarModule.cs"
+        case 51:
+#line 499 "ScalarModule.cs"
+#line 499 "ScalarModule.cs"
+            int* csharp2cuda_temp_90 = &((output)->boolean_value);
+#line 499 "ScalarModule.cs"
+            bool csharp2cuda_temp_91 = (first)->boolean_value;
+#line 499 "ScalarModule.cs"
+            bool csharp2cuda_temp_92;
+#line 499 "ScalarModule.cs"
+            if (!(csharp2cuda_temp_91))
+            {
+#line 499 "ScalarModule.cs"
+                csharp2cuda_temp_92 = (second)->boolean_value;
+            }
+            else
+            {
+#line 499 "ScalarModule.cs"
+                csharp2cuda_temp_92 = true;
+            }
+            (*(csharp2cuda_temp_90) = csharp2cuda_temp_92);
+#line 500 "ScalarModule.cs"
+#line 500 "ScalarModule.cs"
+            bool* csharp2cuda_temp_93 = &(scalar_output);
+            (*(csharp2cuda_temp_93) = false);
+#line 501 "ScalarModule.cs"
+            break;
+#line 502 "ScalarModule.cs"
+        case 52:
+#line 503 "ScalarModule.cs"
+#line 503 "ScalarModule.cs"
+            int* csharp2cuda_temp_94 = &((output)->boolean_value);
+#line 503 "ScalarModule.cs"
+            int csharp2cuda_temp_95 = (first)->boolean_value;
+#line 503 "ScalarModule.cs"
+            int csharp2cuda_temp_96 = (second)->boolean_value;
+            (*(csharp2cuda_temp_94) = ((csharp2cuda_temp_95) != (csharp2cuda_temp_96)));
+#line 504 "ScalarModule.cs"
+#line 504 "ScalarModule.cs"
+            bool* csharp2cuda_temp_97 = &(scalar_output);
+            (*(csharp2cuda_temp_97) = false);
+#line 505 "ScalarModule.cs"
+            break;
+#line 506 "ScalarModule.cs"
+        case 53:
+#line 507 "ScalarModule.cs"
+#line 507 "ScalarModule.cs"
+            int* csharp2cuda_temp_98 = &((output)->boolean_value);
+#line 507 "ScalarModule.cs"
+            bool csharp2cuda_temp_99 = (first)->boolean_value;
+            (*(csharp2cuda_temp_98) = (!(csharp2cuda_temp_99)));
+#line 508 "ScalarModule.cs"
+#line 508 "ScalarModule.cs"
+            bool* csharp2cuda_temp_100 = &(scalar_output);
+            (*(csharp2cuda_temp_100) = false);
+#line 509 "ScalarModule.cs"
+            break;
+#line 510 "ScalarModule.cs"
+        case 54:
+#line 511 "ScalarModule.cs"
+#line 511 "ScalarModule.cs"
+            double* csharp2cuda_temp_101 = &((output)->scalar_value);
+#line 511 "ScalarModule.cs"
+            bool csharp2cuda_temp_102 = (first)->boolean_value;
+#line 511 "ScalarModule.cs"
+            double csharp2cuda_temp_103;
+#line 511 "ScalarModule.cs"
+            if (csharp2cuda_temp_102)
+            {
+#line 511 "ScalarModule.cs"
+                csharp2cuda_temp_103 = (second)->scalar_value;
+            }
+            else
+            {
+#line 511 "ScalarModule.cs"
+                csharp2cuda_temp_103 = (third)->scalar_value;
+            }
+            (*(csharp2cuda_temp_101) = csharp2cuda_temp_103);
+#line 512 "ScalarModule.cs"
+            break;
+#line 513 "ScalarModule.cs"
         default:
-#line 495 "ScalarModule.cs"
-#line 495 "ScalarModule.cs"
-            int* csharp2cuda_temp_102 = &((output)->valid);
-            (*(csharp2cuda_temp_102) = 0);
-#line 495 "ScalarModule.cs"
+#line 513 "ScalarModule.cs"
+#line 513 "ScalarModule.cs"
+            int* csharp2cuda_temp_104 = &((output)->valid);
+            (*(csharp2cuda_temp_104) = 0);
+#line 513 "ScalarModule.cs"
             return;
     }
-#line 498 "ScalarModule.cs"
-#line 498 "ScalarModule.cs"
-    bool csharp2cuda_temp_103;
-#line 498 "ScalarModule.cs"
+#line 516 "ScalarModule.cs"
+#line 516 "ScalarModule.cs"
+    bool csharp2cuda_temp_105;
+#line 516 "ScalarModule.cs"
     if (scalar_output)
     {
-#line 498 "ScalarModule.cs"
-        double csharp2cuda_temp_104 = (output)->scalar_value;
-#line 498 "ScalarModule.cs"
-        csharp2cuda_temp_103 = (!(isfinite(csharp2cuda_temp_104)));
+#line 516 "ScalarModule.cs"
+        double csharp2cuda_temp_106 = (output)->scalar_value;
+#line 516 "ScalarModule.cs"
+        csharp2cuda_temp_105 = (!(isfinite(csharp2cuda_temp_106)));
     }
     else
     {
-#line 498 "ScalarModule.cs"
-        csharp2cuda_temp_103 = false;
+#line 516 "ScalarModule.cs"
+        csharp2cuda_temp_105 = false;
     }
-    if (csharp2cuda_temp_103)
+    if (csharp2cuda_temp_105)
     {
-#line 499 "ScalarModule.cs"
-#line 499 "ScalarModule.cs"
-        int* csharp2cuda_temp_105 = &((output)->valid);
-        (*(csharp2cuda_temp_105) = 0);
+#line 517 "ScalarModule.cs"
+#line 517 "ScalarModule.cs"
+        int* csharp2cuda_temp_107 = &((output)->valid);
+        (*(csharp2cuda_temp_107) = 0);
     }
 }
 
@@ -2203,92 +2287,98 @@ __device__ void mathblocks_scalar_dispatch(
 __device__ double mathblocks_sine(double value)
 #line 185 "ScalarModule.cs"
 {
-#line 186 "ScalarModule.cs"
-    double sign = 1.0;
 #line 187 "ScalarModule.cs"
-    double x = value;
-#line 188 "ScalarModule.cs"
-    if (((x) < (0.0)))
-#line 189 "ScalarModule.cs"
+    if (((value) == (0.0)))
     {
+#line 188 "ScalarModule.cs"
+        return value;
+    }
+#line 189 "ScalarModule.cs"
+    double sign = 1.0;
 #line 190 "ScalarModule.cs"
-#line 190 "ScalarModule.cs"
+    double x = value;
+#line 191 "ScalarModule.cs"
+    if (((x) < (0.0)))
+#line 192 "ScalarModule.cs"
+    {
+#line 193 "ScalarModule.cs"
+#line 193 "ScalarModule.cs"
         double* csharp2cuda_temp_0 = &(sign);
         (*(csharp2cuda_temp_0) = (-(1.0)));
-#line 191 "ScalarModule.cs"
-#line 191 "ScalarModule.cs"
+#line 194 "ScalarModule.cs"
+#line 194 "ScalarModule.cs"
         double* csharp2cuda_temp_1 = &(x);
         (*(csharp2cuda_temp_1) = (-(x)));
     }
-#line 193 "ScalarModule.cs"
-    double csharp2cuda_temp_2 = __ddiv_rn(x, 0.7853981633974483);
-#line 193 "ScalarModule.cs"
-    double octant_value = floor(csharp2cuda_temp_2);
-#line 194 "ScalarModule.cs"
-    int octant = csharp2cuda_f64_to_i32(__dsub_rn(octant_value, __dmul_rn(floor(__dmul_rn(octant_value, 0.125)), 8.0)));
-#line 195 "ScalarModule.cs"
-    if (((csharp2cuda_i32_and(octant, 1)) != (0)))
 #line 196 "ScalarModule.cs"
+    double csharp2cuda_temp_2 = __ddiv_rn(x, 0.7853981633974483);
+#line 196 "ScalarModule.cs"
+    double octant_value = floor(csharp2cuda_temp_2);
+#line 197 "ScalarModule.cs"
+    int octant = csharp2cuda_f64_to_i32(__dsub_rn(octant_value, __dmul_rn(floor(__dmul_rn(octant_value, 0.125)), 8.0)));
+#line 198 "ScalarModule.cs"
+    if (((csharp2cuda_i32_and(octant, 1)) != (0)))
+#line 199 "ScalarModule.cs"
     {
-#line 197 "ScalarModule.cs"
-#line 197 "ScalarModule.cs"
+#line 200 "ScalarModule.cs"
+#line 200 "ScalarModule.cs"
         int* csharp2cuda_temp_3 = &(octant);
         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_3));
-#line 198 "ScalarModule.cs"
-#line 198 "ScalarModule.cs"
+#line 201 "ScalarModule.cs"
+#line 201 "ScalarModule.cs"
         double* csharp2cuda_temp_4 = &(octant_value);
         (*(csharp2cuda_temp_4))++;
     }
-#line 200 "ScalarModule.cs"
-#line 200 "ScalarModule.cs"
+#line 203 "ScalarModule.cs"
+#line 203 "ScalarModule.cs"
     int* csharp2cuda_temp_5 = &(octant);
-#line 200 "ScalarModule.cs"
+#line 203 "ScalarModule.cs"
     int csharp2cuda_temp_6 = *(csharp2cuda_temp_5);
     (*(csharp2cuda_temp_5) = csharp2cuda_i32_and(csharp2cuda_temp_6, 7));
-#line 201 "ScalarModule.cs"
+#line 204 "ScalarModule.cs"
     if (((octant) > (3)))
-#line 202 "ScalarModule.cs"
+#line 205 "ScalarModule.cs"
     {
-#line 203 "ScalarModule.cs"
-#line 203 "ScalarModule.cs"
+#line 206 "ScalarModule.cs"
+#line 206 "ScalarModule.cs"
         double* csharp2cuda_temp_7 = &(sign);
         (*(csharp2cuda_temp_7) = (-(sign)));
-#line 204 "ScalarModule.cs"
-#line 204 "ScalarModule.cs"
+#line 207 "ScalarModule.cs"
+#line 207 "ScalarModule.cs"
         int* csharp2cuda_temp_8 = &(octant);
-#line 204 "ScalarModule.cs"
+#line 207 "ScalarModule.cs"
         int csharp2cuda_temp_9 = *(csharp2cuda_temp_8);
         (*(csharp2cuda_temp_8) = csharp2cuda_i32_sub(csharp2cuda_temp_9, 4));
     }
-#line 206 "ScalarModule.cs"
-    double reduced = __dsub_rn(__dsub_rn(__dsub_rn(x, __dmul_rn(octant_value, 0.7853981256484985)), __dmul_rn(octant_value, 3.774894707930798E-08)), __dmul_rn(octant_value, 2.6951514290790595E-15));
 #line 209 "ScalarModule.cs"
+    double reduced = __dsub_rn(__dsub_rn(__dsub_rn(x, __dmul_rn(octant_value, 0.7853981256484985)), __dmul_rn(octant_value, 3.774894707930798E-08)), __dmul_rn(octant_value, 2.6951514290790595E-15));
+#line 212 "ScalarModule.cs"
     double square = __dmul_rn(reduced, reduced);
-#line 210 "ScalarModule.cs"
-#line 210 "ScalarModule.cs"
+#line 213 "ScalarModule.cs"
+#line 213 "ScalarModule.cs"
     bool csharp2cuda_temp_10;
-#line 210 "ScalarModule.cs"
+#line 213 "ScalarModule.cs"
     if (!(((octant) == (1))))
     {
-#line 210 "ScalarModule.cs"
+#line 213 "ScalarModule.cs"
         csharp2cuda_temp_10 = ((octant) == (2));
     }
     else
     {
-#line 210 "ScalarModule.cs"
+#line 213 "ScalarModule.cs"
         csharp2cuda_temp_10 = true;
     }
     if (csharp2cuda_temp_10)
-#line 211 "ScalarModule.cs"
+#line 214 "ScalarModule.cs"
     {
-#line 212 "ScalarModule.cs"
+#line 215 "ScalarModule.cs"
         double polynomial = __dadd_rn(__dmul_rn(__dsub_rn(__dmul_rn(__dadd_rn(__dmul_rn(__dsub_rn(__dmul_rn(__dadd_rn(__dmul_rn((-(1.1358536521387682E-11)), square), 2.087570084197473E-09), square), 2.755731417929674E-07), square), 2.4801587288851704E-05), square), 0.0013888888888873056), square), 0.041666666666666595);
-#line 219 "ScalarModule.cs"
+#line 222 "ScalarModule.cs"
         return __dmul_rn(sign, __dadd_rn(__dsub_rn(1.0, __dmul_rn(0.5, square)), __dmul_rn(__dmul_rn(square, square), polynomial)));
     }
-#line 221 "ScalarModule.cs"
+#line 224 "ScalarModule.cs"
     double sine_polynomial = __dsub_rn(__dmul_rn(__dadd_rn(__dmul_rn(__dsub_rn(__dmul_rn(__dadd_rn(__dmul_rn(__dsub_rn(__dmul_rn(1.5896230157654656E-10, square), 2.5050747762857807E-08), square), 2.7557313621385722E-06), square), 0.0001984126982958954), square), 0.008333333333322118), square), 0.1666666666666663);
-#line 228 "ScalarModule.cs"
+#line 231 "ScalarModule.cs"
     return __dmul_rn(sign, __dadd_rn(reduced, __dmul_rn(__dmul_rn(reduced, square), sine_polynomial)));
 }
 

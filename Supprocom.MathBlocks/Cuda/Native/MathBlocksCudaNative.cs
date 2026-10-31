@@ -9,15 +9,12 @@ internal static class MathBlocksCudaNative
     private static readonly Lock contextLock = new();
     private static IntPtr primaryContext;
 
+    // Logical import name; the resolver maps it to the NVRTC that MathBlocksNvrtcLoader found.
+    private const string Nvrtc = "nvrtc";
+
     static MathBlocksCudaNative()
     {
         NativeLibrary.SetDllImportResolver(typeof(MathBlocksCudaNative).Assembly, ResolveNativeLibrary);
-        if (OperatingSystem.IsWindows())
-        {
-            var nativeDirectory = Path.Combine(AppContext.BaseDirectory, "runtimes", "win-x64", "native");
-            if (Directory.Exists(nativeDirectory))
-                _ = Kernel32.SetDllDirectory(nativeDirectory);
-        }
     }
 
     public static bool IsAvailable()
@@ -85,6 +82,8 @@ internal static class MathBlocksCudaNative
         string architecture,
         bool fusedMultiplyAdd)
     {
+        // Loads NVRTC, or throws the requirement message, before the first NVRTC import binds.
+        _ = MathBlocksNvrtcLoader.Library;
         ThrowIfFailed(nvrtcCreateProgram(out var program, source, name, 0, IntPtr.Zero, IntPtr.Zero), "nvrtcCreateProgram");
         try
         {
@@ -162,12 +161,12 @@ internal static class MathBlocksCudaNative
         Assembly assembly,
         DllImportSearchPath? searchPath)
     {
+        if (string.Equals(libraryName, Nvrtc, StringComparison.Ordinal))
+            return MathBlocksNvrtcLoader.TryGetHandle(out var nvrtc) ? nvrtc : IntPtr.Zero;
         if (OperatingSystem.IsWindows())
             return IntPtr.Zero;
         if (string.Equals(libraryName, "nvcuda.dll", StringComparison.Ordinal))
             return LoadNativeLibrary("libcuda.so.1", "libcuda.so");
-        if (string.Equals(libraryName, "nvrtc64_120_0.dll", StringComparison.Ordinal))
-            return LoadNativeLibrary("libnvrtc.so.13", "libnvrtc.so.12", "libnvrtc.so");
         return IntPtr.Zero;
     }
 
@@ -177,13 +176,6 @@ internal static class MathBlocksCudaNative
             if (NativeLibrary.TryLoad(name, out var handle))
                 return handle;
         return IntPtr.Zero;
-    }
-
-    private static class Kernel32
-    {
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool SetDllDirectory(string directory);
     }
 
     internal enum NvrtcResult
@@ -364,7 +356,7 @@ internal static class MathBlocksCudaNative
     [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int cuGraphDestroy(IntPtr graph);
 
-    [DllImport("nvrtc64_120_0.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi,
+    [DllImport(Nvrtc, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi,
         BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private static extern NvrtcResult nvrtcCreateProgram(
         out IntPtr program,
@@ -374,25 +366,25 @@ internal static class MathBlocksCudaNative
         IntPtr headers,
         IntPtr includeNames);
 
-    [DllImport("nvrtc64_120_0.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi,
+    [DllImport(Nvrtc, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi,
         BestFitMapping = false, ThrowOnUnmappableChar = true)]
     private static extern NvrtcResult nvrtcCompileProgram(
         IntPtr program,
         int optionCount,
         [In, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] IntPtr[] options);
 
-    [DllImport("nvrtc64_120_0.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(Nvrtc, CallingConvention = CallingConvention.Cdecl)]
     private static extern NvrtcResult nvrtcGetPTXSize(IntPtr program, out UIntPtr size);
 
-    [DllImport("nvrtc64_120_0.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(Nvrtc, CallingConvention = CallingConvention.Cdecl)]
     private static extern NvrtcResult nvrtcGetPTX(IntPtr program, byte[] ptx);
 
-    [DllImport("nvrtc64_120_0.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(Nvrtc, CallingConvention = CallingConvention.Cdecl)]
     private static extern NvrtcResult nvrtcGetProgramLogSize(IntPtr program, out UIntPtr size);
 
-    [DllImport("nvrtc64_120_0.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(Nvrtc, CallingConvention = CallingConvention.Cdecl)]
     private static extern NvrtcResult nvrtcGetProgramLog(IntPtr program, byte[] log);
 
-    [DllImport("nvrtc64_120_0.dll", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(Nvrtc, CallingConvention = CallingConvention.Cdecl)]
     private static extern NvrtcResult nvrtcDestroyProgram(ref IntPtr program);
 }

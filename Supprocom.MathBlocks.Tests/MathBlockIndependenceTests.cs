@@ -17,7 +17,7 @@ public sealed partial class MathBlockIndependenceTests
     private static readonly MarkdownPipeline ReadmePipeline =
         new MarkdownPipelineBuilder().UsePipeTables().Build();
 
-    /// <summary>Verifies production project has no project reference or unapproved managed dependencies.</summary>
+    /// <summary>Verifies production project has no project reference, package reference, or packed native file.</summary>
     [Fact]
     public void ProductionProjectHasNoProjectReferenceOrUnapprovedManagedDependencies()
     {
@@ -26,21 +26,11 @@ public sealed partial class MathBlockIndependenceTests
         var document = XDocument.Load(projectPath);
 
         Assert.Empty(document.Descendants("ProjectReference"));
-        Assert.Equal(
-            [
-                "TorchSharp-cuda-linux@[0.107.0]",
-                "libtorch-cuda-12.8-win-x64-part1@[2.10.0]",
-                "libtorch-cuda-12.8-win-x64-part8@[2.10.0]"
-            ],
-            document.Descendants("PackageReference")
-                .Select(reference =>
-                    $"{reference.Attribute("Include")!.Value}@{reference.Attribute("Version")!.Value}")
-                .Order(StringComparer.Ordinal), StringComparer.Ordinal);
-        Assert.All(document.Descendants("PackageReference"), reference =>
-        {
-            Assert.Null(reference.Attribute("Condition"));
-            Assert.Null(reference.Parent!.Attribute("Condition"));
-        });
+        // CUDA uses the installed driver and toolkit NVRTC; the package declares no native dependency.
+        Assert.Empty(document.Descendants("PackageReference"));
+        Assert.DoesNotContain(
+            document.Descendants().Attributes("PackagePath"),
+            path => path.Value.StartsWith("runtimes", StringComparison.OrdinalIgnoreCase));
         Assert.All(typeof(MathBlockCatalog).Assembly.GetReferencedAssemblies(), reference =>
         {
             var name = reference.Name ?? string.Empty;

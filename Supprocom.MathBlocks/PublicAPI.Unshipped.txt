@@ -85,3 +85,9 @@ Supprocom.MathBlocks.MathBlockWindowBatchResult.Values.get -> Supprocom.MathBloc
 static Supprocom.MathBlocks.MathBlocksWindowBatch.Evaluate(Supprocom.MathBlocks.MathBlockValue series, string! formIdentity, System.Collections.Generic.IReadOnlyList<int>! widths, double fill) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
 static Supprocom.MathBlocks.MathBlocksWindowBatch.Evaluate(Supprocom.MathBlocks.MathBlockValue series, string! formIdentity, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! parameters, System.Collections.Generic.IReadOnlyList<int>! widths, double fill) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
 static Supprocom.MathBlocks.MathBlocksWindowBatch.EvaluateWithValidity(string! formIdentity, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! inputs) -> Supprocom.MathBlocks.MathBlockWindowBatchResult!
+Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary
+Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary.Path.get -> string!
+Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary.Major.get -> int
+Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary.Minor.get -> int
+override Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary.ToString() -> string!
+static Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary.Current.get -> Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary!

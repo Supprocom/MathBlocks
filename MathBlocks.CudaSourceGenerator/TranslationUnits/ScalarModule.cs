@@ -183,6 +183,9 @@ internal static unsafe class ScalarModule
     [CudaDevice]
     private static double mathblocks_sine(double value)
     {
+        // Odd function: f(-0) = -0 and f(+0) = +0, as IEEE 754 gives it.
+        if (value == 0.0)
+            return value;
         double sign = 1.0;
         double x = value;
         if (x < 0.0)
@@ -276,6 +279,9 @@ internal static unsafe class ScalarModule
     [CudaDevice]
     private static double mathblocks_arc_tangent(double value)
     {
+        // Odd function: f(-0) = -0 and f(+0) = +0, as IEEE 754 gives it.
+        if (value == 0.0)
+            return value;
         double sign = value < 0.0 ? -1.0 : 1.0;
         double x = Math.Abs(value);
         double offset = 0.0;
@@ -309,14 +315,15 @@ internal static unsafe class ScalarModule
         if (x > 0.0)
             return mathblocks_arc_tangent(y / x);
         if (x < 0.0)
-            return y >= 0.0
+            return !Cuda.SignBit(y)
                 ? mathblocks_arc_tangent(y / x) + pi
                 : mathblocks_arc_tangent(y / x) - pi;
         if (y > 0.0)
             return pi / 2.0;
         if (y < 0.0)
             return -pi / 2.0;
-        return 0.0;
+        // Both are zeros (IEEE 754, C99 Annex F): atan2(±0, +0) = ±0 and atan2(±0, -0) = ±pi.
+        return Cuda.SignBit(x) ? Math.CopySign(pi, y) : y;
     }
 
     [CudaDevice]
@@ -343,8 +350,9 @@ internal static unsafe class ScalarModule
     [CudaDevice]
     private static double mathblocks_error_function(double value)
     {
+        // Odd function: f(-0) = -0 and f(+0) = +0, as IEEE 754 gives it.
         if (value == 0.0)
-            return 0.0;
+            return value;
         double magnitude = Math.Abs(value);
         double t = 1.0 / (1.0 + 0.5 * magnitude);
         double tau = t * mathblocks_exponential(
@@ -417,12 +425,17 @@ internal static unsafe class ScalarModule
             case 21: output->scalar_value = mathblocks_sine(a); break;
             case 22: output->scalar_value = mathblocks_cosine(a); break;
             case 23: output->scalar_value = mathblocks_sine(a) / mathblocks_cosine(a); break;
-            case 24: output->scalar_value = Math.Asin(a); break;
+            case 24: output->scalar_value = mathblocks_arc_sine(a); break;
             case 25: output->scalar_value = mathblocks_arc_cosine(a); break;
             case 26: output->scalar_value = mathblocks_arc_tangent(a); break;
             case 27: output->scalar_value = mathblocks_arc_tangent_2(a, b); break;
             case 28:
             {
+                if (a == 0.0)
+                {
+                    output->scalar_value = a;
+                    break;
+                }
                 double positive = mathblocks_exponential(a);
                 double negative = mathblocks_exponential(-a);
                 output->scalar_value = (positive - negative) / 2.0;
@@ -437,6 +450,11 @@ internal static unsafe class ScalarModule
             }
             case 30:
             {
+                if (a == 0.0)
+                {
+                    output->scalar_value = a;
+                    break;
+                }
                 double positive = mathblocks_exponential(a);
                 double negative = mathblocks_exponential(-a);
                 output->scalar_value = (positive - negative) / (positive + negative);
@@ -497,5 +515,16 @@ internal static unsafe class ScalarModule
 
         if (scalar_output && !double.IsFinite(output->scalar_value))
             output->valid = 0;
+    }
+
+    // Mirrors MathBlockPrimitives.Asin, so CoreCLR and CUDA use the same algorithm.
+    [CudaDevice]
+    private static double mathblocks_arc_sine(double value)
+    {
+        if (value < -1.0 || value > 1.0 || double.IsNaN(value))
+            return mathblocks_quiet_nan();
+        return mathblocks_arc_tangent_2(
+            value,
+            mathblocks_square_root((1.0 - value) * (1.0 + value)));
     }
 }
