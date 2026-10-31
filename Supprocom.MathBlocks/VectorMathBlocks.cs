@@ -59,6 +59,8 @@ public static partial class MathBlockVectorMath
 
 internal static partial class VectorMathBlocks
 {
+    private const string RowCountsDiffer = "The input row counts must be equal.";
+
     private static readonly MathBlockValue sampleVector = MathBlockValue.Vector([1d, 2d, 3d, 4d]);
     private static readonly MathBlockValue secondVector = MathBlockValue.Vector([4d, 3d, 2d, 1d]);
 
@@ -84,7 +86,10 @@ internal static partial class VectorMathBlocks
         identifier, 2, resolver,
         inputs =>
         {
+            // An empty vector's type has no length, so the resolver cannot reject it beside a longer vector.
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
+            if (inputs[0].AsVector().Count != inputs[1].AsVector().Count)
+                return MathBlockValue.Invalid(type, RowCountsDiffer);
             return MathBlockValue.Vector(function(inputs[0].AsVector(), inputs[1].AsVector()), type.Unit, true);
         },
         [sampleVector, secondVector], MathBlockValue.Vector(expected), 1e-9, 64);
@@ -138,7 +143,9 @@ internal static partial class VectorMathBlocks
         Func<IReadOnlyList<double>, IReadOnlyList<double>, bool[]> function,
         bool[] expected) => MathBlockOperationFactory.Create(
         identifier, 2, VectorComparisonType,
-        inputs => MathBlockValue.BooleanVector(function(inputs[0].AsVector(), inputs[1].AsVector()), true),
+        inputs => inputs[0].AsVector().Count == inputs[1].AsVector().Count
+            ? MathBlockValue.BooleanVector(function(inputs[0].AsVector(), inputs[1].AsVector()), true)
+            : MathBlockOperationFactory.Invalid(VectorComparisonType, inputs, RowCountsDiffer),
         [sampleVector, secondVector], MathBlockValue.BooleanVector(expected), performanceIterations: 64);
 
     private static MathBlockOperation CreateBooleanVectorBinary(
@@ -150,6 +157,8 @@ internal static partial class VectorMathBlocks
         {
             var left = inputs[0].AsBooleanVector();
             var right = inputs[1].AsBooleanVector();
+            if (left.Count != right.Count)
+                return MathBlockOperationFactory.Invalid(BooleanVectorBinaryType, inputs, RowCountsDiffer);
             var result = new bool[left.Count];
             for (var index = 0; index < result.Length; index++)
                 result[index] = function(left[index], right[index]);

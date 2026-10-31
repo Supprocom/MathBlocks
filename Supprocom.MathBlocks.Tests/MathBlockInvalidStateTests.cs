@@ -33,7 +33,22 @@ public sealed class MathBlockInvalidStateTests
             ["survival.product-limit/empty-events"] = ("survival.product-limit@1", () => [Vector(), Vector(4d, 3d)]),
             ["transport.minimum-assignment/too-large"] = ("transport.minimum-assignment@1", () => [MathBlockValue.Matrix(new MathBlockMatrix(21, 21, Enumerable.Range(0, 441).Select(value => (double)(value % 7))))]),
             ["transport.monotone-coupling/empty-source"] = ("transport.monotone-coupling@1", () => [Vector(), Vector(0.5d, 0.5d)]),
-            ["vector.gather/index-outside"] = ("vector.gather@1", () => [Vector(), Vector(3d, 1d)])
+            ["vector.gather/index-outside"] = ("vector.gather@1", () => [Vector(), Vector(3d, 1d)]),
+
+            // An empty vector beside a longer one: the result was a valid value of the wrong length.
+            ["vector.add/empty-left"] = ("vector.add@1", () => [Vector(), Vector(4d, 3d, 2d, 1d)]),
+            ["vector.subtract/empty-left"] = ("vector.subtract@1", () => [Vector(), Vector(4d, 3d, 2d, 1d)]),
+            ["vector.multiply/empty-left"] = ("vector.multiply@1", () => [Vector(), Vector(4d, 3d, 2d, 1d)]),
+            ["vector.divide/empty-left"] = ("vector.divide@1", () => [Vector(), Vector(4d, 3d, 2d, 1d)]),
+            ["vector.equal/empty-left"] = ("vector.equal@1", () => [Vector(), Vector(4d, 3d, 2d, 1d)]),
+            ["vector.greater-than/empty-left"] = ("vector.greater-than@1", () => [Vector(), Vector(4d, 3d, 2d, 1d)]),
+            ["vector.less-than/empty-left"] = ("vector.less-than@1", () => [Vector(), Vector(4d, 3d, 2d, 1d)]),
+            ["boolean-vector.and/empty-left"] = ("boolean-vector.and@1", () => [Booleans(), Booleans(true, false, true)]),
+            ["boolean-vector.or/empty-left"] = ("boolean-vector.or@1", () => [Booleans(), Booleans(true, false, true)]),
+            ["boolean-vector.xor/empty-left"] = ("boolean-vector.xor@1", () => [Booleans(), Booleans(true, false, true)]),
+            ["vector.select/empty-mask"] = ("vector.select@1", () => [Booleans(), Vector(1d, 2d), Vector(3d, 4d)]),
+            ["complex-vector.create/empty-real"] = ("complex-vector.create@1", () => [Vector(), Vector(2d, 4d)]),
+            ["matrix.stack-rows/empty-first"] = ("matrix.stack-rows@1", () => [Vector(), Vector(3d, 4d)])
         };
 
     /// <summary>Gets the out-of-domain case names.</summary>
@@ -68,6 +83,8 @@ public sealed class MathBlockInvalidStateTests
     private static MathBlockValue Scalar(double value) => MathBlockValue.Scalar(value);
 
     private static MathBlockValue Vector(params double[] values) => MathBlockValue.Vector(values);
+
+    private static MathBlockValue Booleans(params bool[] values) => MathBlockValue.BooleanVector(values);
 
     private static MathBlockValue ComplexVector(params Complex[] values) => MathBlockValue.ComplexVector(values);
 
