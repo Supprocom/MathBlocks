@@ -5,6 +5,7 @@ internal static partial class GraphMathBlocks
     internal static class GraphPageRankV1Block
     {
         internal const string Identity = "graph.page-rank@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreatePageRank();
         private static MathBlockOperation CreatePageRank() => MathBlockOperationFactory.Create("graph.page-rank", 3, types =>
         {

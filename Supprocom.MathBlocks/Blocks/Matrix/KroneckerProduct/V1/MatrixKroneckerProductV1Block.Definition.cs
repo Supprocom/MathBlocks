@@ -5,6 +5,7 @@ internal static partial class StructuralMathBlocks
     internal static class MatrixKroneckerProductV1Block
     {
         internal const string Identity = "matrix.kronecker-product@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateKronecker();
         private static MathBlockOperation CreateKronecker() => MathBlockOperationFactory.Create("matrix.kronecker-product", 2, types =>
         {

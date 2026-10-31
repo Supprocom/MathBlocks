@@ -5,6 +5,7 @@ internal static partial class StatisticalMathBlocks
     internal static class StatisticsAutocorrelationV1Block
     {
         internal const string Identity = "statistics.autocorrelation@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateAutocorrelation();
         private static MathBlockOperation CreateAutocorrelation() => MathBlockOperationFactory.Create("statistics.autocorrelation", 2, types =>
         {

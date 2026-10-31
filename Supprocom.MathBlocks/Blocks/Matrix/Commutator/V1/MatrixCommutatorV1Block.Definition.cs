@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class MatrixCommutatorV1Block
     {
         internal const string Identity = "matrix.commutator@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateCommutator();
         private static MathBlockOperation CreateCommutator()
         {

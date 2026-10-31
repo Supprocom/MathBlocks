@@ -5,6 +5,7 @@ internal static partial class PathMathBlocks
     internal static class TransformDiscreteFourierV1Block
     {
         internal const string Identity = "transform.discrete-fourier@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateDft();
         private static MathBlockOperation CreateDft() => MathBlockOperationFactory.Create("transform.discrete-fourier", 1, types =>
         {

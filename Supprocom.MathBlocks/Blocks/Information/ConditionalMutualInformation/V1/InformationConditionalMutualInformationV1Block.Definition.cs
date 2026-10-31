@@ -5,6 +5,7 @@ internal static partial class ProbabilityMathBlocks
     internal static class InformationConditionalMutualInformationV1Block
     {
         internal const string Identity = "information.conditional-mutual-information@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateConditionalMutualInformation();
         private static MathBlockOperation CreateConditionalMutualInformation()
         {

@@ -5,6 +5,7 @@ internal static partial class GraphMathBlocks
     internal static class GraphHodgeResidualNormV1Block
     {
         internal const string Identity = "graph.hodge-residual-norm@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateHodgeResidual();
         private static MathBlockOperation CreateHodgeResidual() => MathBlockOperationFactory.Create("graph.hodge-residual-norm", 2, types =>
         {

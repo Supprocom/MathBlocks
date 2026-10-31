@@ -5,6 +5,7 @@ internal static partial class VectorMathBlocks
     internal static class VectorSliceV1Block
     {
         internal const string Identity = "vector.slice@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateSlice();
         private static MathBlockOperation CreateSlice() => MathBlockOperationFactory.Create("vector.slice", 3, VectorTwoScalarVectorType, inputs =>
         {

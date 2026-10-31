@@ -5,6 +5,7 @@ internal static partial class TransportMathBlocks
     internal static class TransportUniformWassersteinV1Block
     {
         internal const string Identity = "transport.uniform-wasserstein@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateUniformWasserstein();
         private static MathBlockOperation CreateUniformWasserstein() => MathBlockOperationFactory.Create("transport.uniform-wasserstein", 3, types =>
         {

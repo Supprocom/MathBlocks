@@ -5,6 +5,7 @@ internal static partial class GraphMathBlocks
     internal static class GraphConductanceV1Block
     {
         internal const string Identity = "graph.conductance@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateConductance();
         private static MathBlockOperation CreateConductance() => MathBlockOperationFactory.Create("graph.conductance", 2, types =>
         {

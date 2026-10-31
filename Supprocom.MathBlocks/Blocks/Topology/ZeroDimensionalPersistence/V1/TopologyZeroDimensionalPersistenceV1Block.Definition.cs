@@ -5,6 +5,7 @@ internal static partial class GeometryMathBlocks
     internal static class TopologyZeroDimensionalPersistenceV1Block
     {
         internal const string Identity = "topology.zero-dimensional-persistence@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateZeroDimensionalPersistence();
         private static MathBlockOperation CreateZeroDimensionalPersistence() => MathBlockOperationFactory.Create("topology.zero-dimensional-persistence", 1, types =>
         {

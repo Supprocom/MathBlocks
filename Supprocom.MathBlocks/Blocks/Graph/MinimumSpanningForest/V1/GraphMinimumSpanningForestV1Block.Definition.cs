@@ -5,6 +5,7 @@ internal static partial class GraphMathBlocks
     internal static class GraphMinimumSpanningForestV1Block
     {
         internal const string Identity = "graph.minimum-spanning-forest@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateMinimumSpanningForest();
         private static MathBlockOperation CreateMinimumSpanningForest() => MathBlockOperationFactory.Create("graph.minimum-spanning-forest", 1, types =>
         {

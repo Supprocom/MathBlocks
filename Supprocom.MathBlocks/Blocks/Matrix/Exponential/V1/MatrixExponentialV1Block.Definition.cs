@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class MatrixExponentialV1Block
     {
         internal const string Identity = "matrix.exponential@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateMatrixExponential();
         private static MathBlockOperation CreateMatrixExponential() => MathBlockOperationFactory.Create("matrix.exponential", 1, types =>
         {

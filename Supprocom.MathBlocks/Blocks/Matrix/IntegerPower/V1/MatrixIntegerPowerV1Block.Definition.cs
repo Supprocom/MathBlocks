@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class MatrixIntegerPowerV1Block
     {
         internal const string Identity = "matrix.integer-power@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateMatrixPower();
         private static MathBlockOperation CreateMatrixPower() => MathBlockOperationFactory.Create("matrix.integer-power", 2, types =>
         {

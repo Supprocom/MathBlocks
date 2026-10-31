@@ -5,6 +5,7 @@ internal static partial class MatrixMathBlocks
     internal static class PolynomialEvaluateV1Block
     {
         internal const string Identity = "polynomial.evaluate@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreatePolynomialEvaluate();
         private static MathBlockOperation CreatePolynomialEvaluate() => MathBlockOperationFactory.Create("polynomial.evaluate", 2, types =>
         {

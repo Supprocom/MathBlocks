@@ -5,6 +5,7 @@ internal static partial class TransportMathBlocks
     internal static class TransportMinimumAssignmentV1Block
     {
         internal const string Identity = "transport.minimum-assignment@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateMinimumAssignment();
         private static MathBlockOperation CreateMinimumAssignment() => MathBlockOperationFactory.Create("transport.minimum-assignment", 1, types =>
         {

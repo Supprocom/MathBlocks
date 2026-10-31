@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class CooperativeShapleyValuesV1Block
     {
         internal const string Identity = "cooperative.shapley-values@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateShapley();
         private static MathBlockOperation CreateShapley() => MathBlockOperationFactory.Create("cooperative.shapley-values", 1, types =>
         {

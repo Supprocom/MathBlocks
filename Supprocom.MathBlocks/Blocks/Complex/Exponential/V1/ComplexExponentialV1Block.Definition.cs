@@ -5,6 +5,7 @@ internal static partial class ComplexMathBlocks
     internal static class ComplexExponentialV1Block
     {
         internal const string Identity = "complex.exponential@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateUnary("complex.exponential", MathBlockComplex.Exponential, new Complex(0d, 0d), new Complex(1d, 0d), DimensionlessComplexUnary);
     }
 }

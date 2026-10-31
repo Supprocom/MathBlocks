@@ -5,6 +5,7 @@ internal static partial class TransportMathBlocks
     internal static class TransportCouplingCostV1Block
     {
         internal const string Identity = "transport.coupling-cost@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateCouplingCost();
         private static MathBlockOperation CreateCouplingCost() => MathBlockOperationFactory.Create("transport.coupling-cost", 2, types =>
         {

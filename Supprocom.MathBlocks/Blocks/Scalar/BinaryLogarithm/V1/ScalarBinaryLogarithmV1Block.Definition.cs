@@ -5,6 +5,7 @@ internal static partial class ScalarMathBlocks
     internal static class ScalarBinaryLogarithmV1Block
     {
         internal const string Identity = "scalar.binary-logarithm@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create()
         {
             var operations = new List<MathBlockOperation>(1);

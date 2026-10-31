@@ -5,6 +5,7 @@ internal static partial class StructuralMathBlocks
     internal static class GraphFromDirectedAdjacencyV1Block
     {
         internal const string Identity = "graph.from-directed-adjacency@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateGraphFromAdjacency();
         private static MathBlockOperation CreateGraphFromAdjacency() => MathBlockOperationFactory.Create("graph.from-directed-adjacency", 1, types =>
         {

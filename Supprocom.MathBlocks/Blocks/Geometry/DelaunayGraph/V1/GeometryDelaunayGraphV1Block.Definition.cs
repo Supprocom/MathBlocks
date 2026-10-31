@@ -5,6 +5,7 @@ internal static partial class GeometryMathBlocks
     internal static class GeometryDelaunayGraphV1Block
     {
         internal const string Identity = "geometry.delaunay-graph@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateDelaunay();
         private static MathBlockOperation CreateDelaunay() => MathBlockOperationFactory.Create("geometry.delaunay-graph", 1, types =>
         {

@@ -5,6 +5,7 @@ internal static partial class PathMathBlocks
     internal static class PathLeadLagTransformV1Block
     {
         internal const string Identity = "path.lead-lag-transform@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Forward;
         internal static MathBlockOperation Create() => CreateLeadLag();
         private static MathBlockOperation CreateLeadLag() => MathBlockOperationFactory.Create("path.lead-lag-transform", 1, types =>
         {

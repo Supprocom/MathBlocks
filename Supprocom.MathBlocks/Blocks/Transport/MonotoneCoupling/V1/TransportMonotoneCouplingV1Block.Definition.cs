@@ -5,6 +5,7 @@ internal static partial class TransportMathBlocks
     internal static class TransportMonotoneCouplingV1Block
     {
         internal const string Identity = "transport.monotone-coupling@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateMonotoneCoupling();
         private static MathBlockOperation CreateMonotoneCoupling() => MathBlockOperationFactory.Create("transport.monotone-coupling", 2, types =>
         {

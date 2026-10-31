@@ -5,6 +5,7 @@ internal static partial class VectorMathBlocks
     internal static class VectorQuantileV1Block
     {
         internal const string Identity = "vector.quantile@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateQuantile();
         private static MathBlockOperation CreateQuantile() => MathBlockOperationFactory.Create("vector.quantile", 2, VectorScalarReductionType, inputs =>
         {

@@ -5,6 +5,7 @@ internal static partial class StructuralMathBlocks
     internal static class BooleanVectorTrueIndicesV1Block
     {
         internal const string Identity = "boolean-vector.true-indices@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateTrueIndices();
         private static MathBlockOperation CreateTrueIndices() => MathBlockOperationFactory.Create("boolean-vector.true-indices", 1, types =>
         {

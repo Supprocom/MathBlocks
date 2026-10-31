@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class ComplexMatrixPickV1Block
     {
         internal const string Identity = "complex-matrix.pick@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreatePickMatrix();
         private static MathBlockOperation CreatePickMatrix() => MathBlockOperationFactory.Create("complex-matrix.pick", 2, types =>
         {

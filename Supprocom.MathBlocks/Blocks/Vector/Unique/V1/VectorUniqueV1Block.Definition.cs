@@ -5,6 +5,7 @@ internal static partial class StructuralMathBlocks
     internal static class VectorUniqueV1Block
     {
         internal const string Identity = "vector.unique@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateUnique();
         private static MathBlockOperation CreateUnique() => MathBlockOperationFactory.Create("vector.unique", 1, types =>
         {

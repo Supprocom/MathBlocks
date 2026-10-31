@@ -5,6 +5,7 @@ internal static partial class TransportMathBlocks
     internal static class TransportSinkhornCouplingV1Block
     {
         internal const string Identity = "transport.sinkhorn-coupling@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateSinkhorn();
         private static MathBlockOperation CreateSinkhorn()
         {

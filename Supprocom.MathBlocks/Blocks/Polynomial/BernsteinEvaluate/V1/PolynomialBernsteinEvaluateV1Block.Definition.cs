@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class PolynomialBernsteinEvaluateV1Block
     {
         internal const string Identity = "polynomial.bernstein-evaluate@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateBernstein();
         private static MathBlockOperation CreateBernstein() => MathBlockOperationFactory.Create("polynomial.bernstein-evaluate", 2, types =>
         {

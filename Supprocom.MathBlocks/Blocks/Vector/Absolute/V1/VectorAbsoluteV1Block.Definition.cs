@@ -5,6 +5,7 @@ internal static partial class VectorMathBlocks
     internal static class VectorAbsoluteV1Block
     {
         internal const string Identity = "vector.absolute@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Pointwise;
         internal static MathBlockOperation Create() => CreateVectorUnary("vector.absolute", MathBlockVectorMath.Absolute, [-1d, 2d, -3d], [1d, 2d, 3d], SameVectorUnary);
     }
 }

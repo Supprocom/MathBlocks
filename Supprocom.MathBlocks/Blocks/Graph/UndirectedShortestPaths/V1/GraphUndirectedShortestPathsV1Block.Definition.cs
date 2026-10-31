@@ -5,6 +5,7 @@ internal static partial class GraphMathBlocks
     internal static class GraphUndirectedShortestPathsV1Block
     {
         internal const string Identity = "graph.undirected-shortest-paths@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateShortestPaths();
         private static MathBlockOperation CreateShortestPaths() => MathBlockOperationFactory.Create("graph.undirected-shortest-paths", 2, types =>
         {

@@ -5,6 +5,7 @@ internal static partial class PathMathBlocks
     internal static class PathSignatureLevelOneV1Block
     {
         internal const string Identity = "path.signature-level-one@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateSignatureOne();
         private static MathBlockOperation CreateSignatureOne()
         {

@@ -5,6 +5,7 @@ internal static partial class ProbabilityMathBlocks
     internal static class SpecialRegularizedIncompleteBetaV1Block
     {
         internal const string Identity = "special.regularized-incomplete-beta@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateIncompleteBeta();
         private static MathBlockOperation CreateIncompleteBeta() => MathBlockOperationFactory.Create("special.regularized-incomplete-beta", 3, types =>
         {

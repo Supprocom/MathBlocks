@@ -5,6 +5,7 @@ internal static partial class VectorMathBlocks
     internal static class VectorLinspaceV1Block
     {
         internal const string Identity = "vector.linspace@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateLinspace();
         private static MathBlockOperation CreateLinspace() => MathBlockOperationFactory.Create("vector.linspace", 3, LinspaceType, inputs =>
         {

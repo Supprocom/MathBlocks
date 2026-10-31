@@ -3,3 +3,25 @@ Supprocom.MathBlocks.MathBlockFormulaMappingKind.None = 0 -> Supprocom.MathBlock
 static Supprocom.MathBlocks.MathRational.Add(Supprocom.MathBlocks.MathRational left, Supprocom.MathBlocks.MathRational right) -> Supprocom.MathBlocks.MathRational
 static Supprocom.MathBlocks.MathRational.Multiply(Supprocom.MathBlocks.MathRational left, Supprocom.MathBlocks.MathRational right) -> Supprocom.MathBlocks.MathRational
 static Supprocom.MathBlocks.MathRational.Subtract(Supprocom.MathBlocks.MathRational left, Supprocom.MathBlocks.MathRational right) -> Supprocom.MathBlocks.MathRational
+Supprocom.MathBlocks.MathBlockCausality
+Supprocom.MathBlocks.MathBlockCausality.Expanding = 2 -> Supprocom.MathBlocks.MathBlockCausality
+Supprocom.MathBlocks.MathBlockCausality.Forward = 4 -> Supprocom.MathBlocks.MathBlockCausality
+Supprocom.MathBlocks.MathBlockCausality.NotSeries = 5 -> Supprocom.MathBlocks.MathBlockCausality
+Supprocom.MathBlocks.MathBlockCausality.Pointwise = 0 -> Supprocom.MathBlocks.MathBlockCausality
+Supprocom.MathBlocks.MathBlockCausality.Trailing = 1 -> Supprocom.MathBlocks.MathBlockCausality
+Supprocom.MathBlocks.MathBlockCausality.WholeSeries = 3 -> Supprocom.MathBlocks.MathBlockCausality
+Supprocom.MathBlocks.MathBlockCausalityInfo
+Supprocom.MathBlocks.MathBlockCausalityInfo.Kind.get -> Supprocom.MathBlocks.MathBlockCausality
+Supprocom.MathBlocks.MathBlockCausalityInfo.WarmUpRows(int width) -> int
+Supprocom.MathBlocks.MathBlockCausalityInfo.WidthInputIndex.get -> int?
+Supprocom.MathBlocks.MathBlockOperation.Causality.get -> Supprocom.MathBlocks.MathBlockCausalityInfo!
+Supprocom.MathBlocks.MathBlockOperation.MathBlockOperation(string! identifier, int version, int arity, Supprocom.MathBlocks.MathBlockTypeResolver! typeResolver, Supprocom.MathBlocks.MathBlockEvaluator! evaluator, System.Collections.Generic.IEnumerable<Supprocom.MathBlocks.MathBlockRegressionCase!>! regressionCases, Supprocom.MathBlocks.MathBlockPerformanceCase! performanceCase, Supprocom.MathBlocks.MathBlockCausalityInfo! causality) -> void
+Supprocom.MathBlocks.MathBlockProgram.Causality.get -> Supprocom.MathBlocks.MathBlockCausality
+Supprocom.MathBlocks.MathBlockRegistry.CausalityFingerprint.get -> string!
+override Supprocom.MathBlocks.MathBlockCausalityInfo.ToString() -> string!
+static Supprocom.MathBlocks.MathBlockCausalityInfo.Expanding.get -> Supprocom.MathBlocks.MathBlockCausalityInfo!
+static Supprocom.MathBlocks.MathBlockCausalityInfo.Forward.get -> Supprocom.MathBlocks.MathBlockCausalityInfo!
+static Supprocom.MathBlocks.MathBlockCausalityInfo.NotSeries.get -> Supprocom.MathBlocks.MathBlockCausalityInfo!
+static Supprocom.MathBlocks.MathBlockCausalityInfo.Pointwise.get -> Supprocom.MathBlocks.MathBlockCausalityInfo!
+static Supprocom.MathBlocks.MathBlockCausalityInfo.Trailing(int widthInputIndex) -> Supprocom.MathBlocks.MathBlockCausalityInfo!
+static Supprocom.MathBlocks.MathBlockCausalityInfo.WholeSeries.get -> Supprocom.MathBlocks.MathBlockCausalityInfo!

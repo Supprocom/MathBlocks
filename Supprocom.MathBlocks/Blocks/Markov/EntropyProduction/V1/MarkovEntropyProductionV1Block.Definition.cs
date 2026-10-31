@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class MarkovEntropyProductionV1Block
     {
         internal const string Identity = "markov.entropy-production@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateEntropyProduction();
         private static MathBlockOperation CreateEntropyProduction() => MathBlockOperationFactory.Create("markov.entropy-production", 2, types =>
         {

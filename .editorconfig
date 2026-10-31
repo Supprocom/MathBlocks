@@ -165,6 +165,9 @@ dotnet_diagnostic.MA0051.severity = none
 [Supprocom.MathBlocks/Cuda/MathBlockCudaFeatureIndex.cs]
 dotnet_diagnostic.MA0051.severity = none
 
+[Supprocom.MathBlocks/MathBlockCausalityIndex.cs]
+dotnet_diagnostic.MA0051.severity = none
+
 [Supprocom.MathBlocks/Cuda/MathBlockCudaGraphEdgeDescriptor.cs]
 dotnet_diagnostic.CA1815.severity = none
 

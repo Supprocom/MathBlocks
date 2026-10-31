@@ -5,6 +5,7 @@ internal static partial class StructuralMathBlocks
     internal static class ComplexVectorCreateV1Block
     {
         internal const string Identity = "complex-vector.create@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Pointwise;
         internal static MathBlockOperation Create() => CreateComplexVector();
         private static MathBlockOperation CreateComplexVector() => MathBlockOperationFactory.Create("complex-vector.create", 2, types =>
         {

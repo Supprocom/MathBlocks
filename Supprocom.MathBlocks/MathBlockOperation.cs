@@ -5,8 +5,12 @@ public sealed class MathBlockOperation
 {
     private readonly MathBlockTypeResolver typeResolver;
     private readonly MathBlockEvaluator evaluator;
+    private readonly MathBlockCausalityInfo? causality;
 
     /// <summary>Creates a versioned operation with type and evaluation contracts.</summary>
+    /// <remarks>
+    /// An operation created by this constructor has no causality label, so reading <see cref="Causality"/> throws.
+    /// </remarks>
     public MathBlockOperation(
         string identifier,
         int version,
@@ -15,6 +19,34 @@ public sealed class MathBlockOperation
         MathBlockEvaluator evaluator,
         IEnumerable<MathBlockRegressionCase> regressionCases,
         MathBlockPerformanceCase performanceCase)
+        : this(identifier, version, arity, typeResolver, evaluator, regressionCases, performanceCase, null, false)
+    {
+    }
+
+    /// <summary>Creates a versioned operation with type and evaluation contracts and a causality label.</summary>
+    public MathBlockOperation(
+        string identifier,
+        int version,
+        int arity,
+        MathBlockTypeResolver typeResolver,
+        MathBlockEvaluator evaluator,
+        IEnumerable<MathBlockRegressionCase> regressionCases,
+        MathBlockPerformanceCase performanceCase,
+        MathBlockCausalityInfo causality)
+        : this(identifier, version, arity, typeResolver, evaluator, regressionCases, performanceCase, causality, true)
+    {
+    }
+
+    private MathBlockOperation(
+        string identifier,
+        int version,
+        int arity,
+        MathBlockTypeResolver typeResolver,
+        MathBlockEvaluator evaluator,
+        IEnumerable<MathBlockRegressionCase> regressionCases,
+        MathBlockPerformanceCase performanceCase,
+        MathBlockCausalityInfo? causality,
+        bool requireCausality)
     {
         Identifier = RequireIdentifier(identifier);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(version);
@@ -31,6 +63,13 @@ public sealed class MathBlockOperation
         if (RegressionCases.Count == 0)
             throw new ArgumentException("Each operation requires regression evidence.", nameof(regressionCases));
         PerformanceCase = performanceCase;
+        if (requireCausality)
+        {
+            ArgumentNullException.ThrowIfNull(causality);
+            if (causality.WidthInputIndex is { } widthInputIndex && widthInputIndex >= arity)
+                throw new ArgumentException("The width input index is outside the operation arity.", nameof(causality));
+        }
+        this.causality = causality;
     }
 
     /// <summary>Gets the identifier value.</summary>
@@ -45,6 +84,10 @@ public sealed class MathBlockOperation
     public IReadOnlyList<MathBlockRegressionCase> RegressionCases { get; }
     /// <summary>Gets the performance case value.</summary>
     public MathBlockPerformanceCase PerformanceCase { get; }
+    /// <summary>Gets which input rows the operation's output reads.</summary>
+    /// <exception cref="InvalidOperationException">The operation was created without a causality label.</exception>
+    public MathBlockCausalityInfo Causality =>
+        causality ?? throw new InvalidOperationException($"Operation '{Identity}' has no causality label.");
 
     /// <summary>Validates input types and resolves the operation output type.</summary>
     public MathBlockType ResolveOutputType(IReadOnlyList<MathBlockType> inputTypes)

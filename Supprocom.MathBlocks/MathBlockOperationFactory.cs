@@ -18,7 +18,8 @@ internal static class MathBlockOperationFactory
             typeResolver,
             evaluator,
             [new MathBlockRegressionCase("reference", sampleInputs, sampleOutput, tolerance)],
-            new MathBlockPerformanceCase(sampleInputs, performanceIterations));
+            new MathBlockPerformanceCase(sampleInputs, performanceIterations),
+            MathBlockCausalityIndex.Resolve($"{identifier}@1"));
 
     public static MathBlockOperation ScalarUnary(
         string identifier,

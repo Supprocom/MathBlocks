@@ -5,6 +5,7 @@ internal static partial class PathMathBlocks
     internal static class PathLongestTrueRunV1Block
     {
         internal const string Identity = "path.longest-true-run@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateLongestRun();
         private static MathBlockOperation CreateLongestRun() => MathBlockOperationFactory.Create("path.longest-true-run", 1, types =>
         {

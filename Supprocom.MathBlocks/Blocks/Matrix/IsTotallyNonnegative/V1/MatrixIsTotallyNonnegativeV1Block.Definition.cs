@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class MatrixIsTotallyNonnegativeV1Block
     {
         internal const string Identity = "matrix.is-totally-nonnegative@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateMatrixBoolean("matrix.is-totally-nonnegative", MathBlockAdvanced.IsTotallyNonnegative, MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1d, 1d, 1d, 2d])), true);
         private static MathBlockOperation CreateMatrixBoolean(string identifier, Func<MathBlockMatrix, bool> function, MathBlockValue sample, bool expected) => MathBlockOperationFactory.Create(identifier, 1, types =>
         {

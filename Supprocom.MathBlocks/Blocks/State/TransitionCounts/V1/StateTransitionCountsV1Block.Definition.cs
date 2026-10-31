@@ -5,6 +5,7 @@ internal static partial class PathMathBlocks
     internal static class StateTransitionCountsV1Block
     {
         internal const string Identity = "state.transition-counts@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateTransitionCounts();
         private static MathBlockOperation CreateTransitionCounts() => MathBlockOperationFactory.Create("state.transition-counts", 2, types =>
         {

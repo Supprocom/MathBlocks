@@ -5,6 +5,7 @@ internal static partial class ProbabilityMathBlocks
     internal static class PolynomialElementarySymmetricV1Block
     {
         internal const string Identity = "polynomial.elementary-symmetric@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateElementarySymmetric();
         private static MathBlockOperation CreateElementarySymmetric() => MathBlockOperationFactory.Create("polynomial.elementary-symmetric", 2, types =>
         {

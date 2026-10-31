@@ -5,6 +5,7 @@ internal static partial class VectorMathBlocks
     internal static class SequenceRollingQuantileV1Block
     {
         internal const string Identity = "sequence.rolling-quantile@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Trailing(1);
         internal static MathBlockOperation Create() => CreateRollingQuantile();
         private static MathBlockOperation CreateRollingQuantile() => MathBlockOperationFactory.Create("sequence.rolling-quantile", 3, VectorTwoScalarVectorType, inputs =>
         {

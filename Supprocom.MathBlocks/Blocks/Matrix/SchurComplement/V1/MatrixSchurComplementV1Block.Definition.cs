@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class MatrixSchurComplementV1Block
     {
         internal const string Identity = "matrix.schur-complement@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateSchurComplement();
         private static MathBlockOperation CreateSchurComplement() => MathBlockOperationFactory.Create("matrix.schur-complement", 2, types =>
         {

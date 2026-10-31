@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class MatrixPrincipalMinorsV1Block
     {
         internal const string Identity = "matrix.principal-minors@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreatePrincipalMinors();
         private static MathBlockOperation CreatePrincipalMinors() => MathBlockOperationFactory.Create("matrix.principal-minors", 1, types =>
         {
