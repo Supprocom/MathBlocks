@@ -17,7 +17,8 @@ internal static class MathBlockCausalityChecks
 
     private static readonly Domain[] VectorDomains =
     [
-        Domain.Real, Domain.Positive, Domain.Unit, Domain.SmallMass, Domain.Count, Domain.Index, Domain.Probability
+        Domain.Real, Domain.Positive, Domain.Unit, Domain.SmallMass, Domain.Count, Domain.Index, Domain.Integer,
+        Domain.Probability
     ];
 
     // A causal operation whose input must be a whole probability distribution has no proper prefix in its domain,
@@ -29,7 +30,7 @@ internal static class MathBlockCausalityChecks
 
     private static readonly Domain[] VectorDomainsWithWhole =
     [
-        Domain.Real, Domain.Positive, Domain.Unit, Domain.SmallMass, Domain.Count, Domain.Index,
+        Domain.Real, Domain.Positive, Domain.Unit, Domain.SmallMass, Domain.Count, Domain.Index, Domain.Integer,
         Domain.Sorted, Domain.Probability
     ];
 
@@ -41,6 +42,7 @@ internal static class MathBlockCausalityChecks
         SmallMass,
         Count,
         Index,
+        Integer,
         Sorted,
         Probability,
         Boolean,
@@ -377,6 +379,10 @@ internal static class MathBlockCausalityChecks
                 MathBlockValueKind.ComplexVector => [Domain.Complex],
                 _ => vectorDomains
             };
+        // For the causal check, a plan whose output rows all hold the same value is kept only as a fallback: an
+        // integer-domain operation lifted over real-valued rows, for example, returns its fill value on every row,
+        // so no perturbation could change a row and the check would pass whatever the operation reads.
+        Plan? fallback = null;
         foreach (var domains in Combinations(choices, uniformOnly: choices.Length > 2))
         {
             var plan = new Plan(domains);
@@ -386,10 +392,31 @@ internal static class MathBlockCausalityChecks
             foreach (var length in context.CandidateLengths)
                 if (IsValidEverywhere(context, plan, length))
                     lengths.Add(length);
-            if (lengths.Count >= minimumLengths)
-                return plan.WithLengths([.. lengths]);
+            if (lengths.Count < minimumLengths)
+                continue;
+            var candidate = plan.WithLengths([.. lengths]);
+            if (!requirePerturbableRows || RowsVary(context, candidate))
+                return candidate;
+            fallback ??= candidate;
         }
-        return null;
+        return fallback;
+    }
+
+    private static bool RowsVary(Context context, Plan plan)
+    {
+        foreach (var length in plan.Lengths)
+            foreach (var width in context.Widths(length))
+                for (var seed = 0; seed < SeedCount; seed++)
+                {
+                    var random = new Random(Seed(context.Operation.Identity, length, width, seed));
+                    var output = context.Evaluate(plan.Generate(random, length), width);
+                    if (!output.IsValid || !IsSeriesKind(output.Type.Kind))
+                        continue;
+                    for (var row = 1; row < SeriesLength(output); row++)
+                        if (!RowEquals(output, 0, output, row))
+                            return true;
+                }
+        return false;
     }
 
     private static bool IsValidEverywhere(Context context, Plan plan, int length)
@@ -750,6 +777,9 @@ internal static class MathBlockCausalityChecks
             Domain.SmallMass => Uniform(random, 0.2d, 0.8d) / length,
             Domain.Count => random.Next(4),
             Domain.Index => random.Next(length),
+            // Integers on both sides of zero, so an integer-only operation is valid on some rows and invalid on
+            // others, and so is its validity sibling.
+            Domain.Integer => random.Next(-2, 6),
             _ => throw new InvalidOperationException($"Domain '{domain}' has no independent rows.")
         };
 
