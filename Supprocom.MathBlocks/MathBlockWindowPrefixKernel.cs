@@ -1,16 +1,9 @@
 namespace Supprocom.MathBlocks;
 
-// The kernel of one window-prefix.* form and its sibling.
+// The kernel of one window-prefix.* form and its sibling. The exact sliding sums depend on the width, so there is
+// no width-independent preparation: each width runs its own pass.
 internal sealed class MathBlockWindowPrefixKernel(MathBlockWindowPrefixStatistic statistic) : MathBlockWindowKernel
 {
-    internal override object? Prepare(IReadOnlyList<MathBlockValue> inputs)
-    {
-        var x = inputs[0].AsVector().Span;
-        return statistic is MathBlockWindowPrefixStatistic.Sum or MathBlockWindowPrefixStatistic.Mean
-            ? MathBlockWindowPrefix.PrepareSum(x)
-            : MathBlockWindowPrefix.PrepareVariance(x);
-    }
-
     internal override void Run(
         object? prepared,
         IReadOnlyList<MathBlockValue> inputs,
@@ -20,12 +13,13 @@ internal sealed class MathBlockWindowPrefixKernel(MathBlockWindowPrefixStatistic
         double[]? values,
         bool[]? valid)
     {
+        var x = inputs[0].AsVector().Span;
         switch (statistic)
         {
             case MathBlockWindowPrefixStatistic.Sum:
             case MathBlockWindowPrefixStatistic.Mean:
                 MathBlockWindowPrefix.RunSum(
-                    (MathBlockWindowPrefix.SumPrefix)prepared!,
+                    x,
                     count,
                     width,
                     statistic == MathBlockWindowPrefixStatistic.Mean,
@@ -35,7 +29,7 @@ internal sealed class MathBlockWindowPrefixKernel(MathBlockWindowPrefixStatistic
                 break;
             default:
                 MathBlockWindowPrefix.RunVariance(
-                    (MathBlockWindowPrefix.VariancePrefix)prepared!,
+                    x,
                     count,
                     width,
                     statistic is MathBlockWindowPrefixStatistic.SampleVariance

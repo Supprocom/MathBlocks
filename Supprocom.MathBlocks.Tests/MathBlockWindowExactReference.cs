@@ -68,6 +68,55 @@ internal sealed class MathBlockWindowExactReference
     public double ShiftedWindowAbsoluteSum(int row, int width) =>
         ToDouble(BigInteger.Abs(WindowSum(shiftedSum, row, width)), BigInteger.One, Scale);
 
+    // The window sum and mean rounded to the nearest double, ties to even.
+    public double RoundedSum(int row, int width) => Round(WindowSum(sum, row, width), BigInteger.One, Scale);
+
+    public double RoundedMean(int row, int width) => Round(WindowSum(sum, row, width), width, Scale);
+
+    // mean^2 for the window.
+    public double MeanSquare(int row, int width)
+    {
+        var s = WindowSum(sum, row, width);
+        return ToDouble(s * s, (BigInteger)width * width, 2 * Scale);
+    }
+
+    // numerator / (denominator 2^binaryScale) rounded to the nearest double, ties to even, including subnormals.
+    public static double Round(BigInteger numerator, BigInteger denominator, int binaryScale)
+    {
+        if (numerator.IsZero)
+            return 0d;
+        var negative = numerator.Sign < 0;
+        var magnitude = BigInteger.Abs(numerator);
+        // quotient = floor(magnitude 2^k / denominator) has 61 or 62 bits; value = (quotient + fraction) 2^(-k - scale).
+        var k = 61 - (int)(magnitude.GetBitLength() - denominator.GetBitLength());
+        var scaled = k >= 0 ? magnitude << k : magnitude;
+        var divisor = k >= 0 ? denominator : denominator << -k;
+        var quotient = BigInteger.DivRem(scaled, divisor, out var remainder);
+        var unitExponent = -k - binaryScale;
+        var most = (int)quotient.GetBitLength() - 1 + unitExponent;
+        var least = Math.Max(most - 52, -1074);
+        var drop = least - unitExponent;
+        BigInteger significand;
+        bool round;
+        bool sticky;
+        if (drop <= 0)
+        {
+            significand = quotient << -drop;
+            round = false;
+            sticky = !remainder.IsZero;
+        }
+        else
+        {
+            significand = quotient >> drop;
+            round = !((quotient >> (drop - 1)) & BigInteger.One).IsZero;
+            sticky = !(quotient & ((BigInteger.One << (drop - 1)) - 1)).IsZero || !remainder.IsZero;
+        }
+        if (round && (sticky || !significand.IsEven))
+            significand += 1;
+        var result = Math.ScaleB((double)significand, least);
+        return negative ? -result : result;
+    }
+
     // (mean - x_0)^2 for the window.
     public double ShiftedMeanSquare(int row, int width)
     {

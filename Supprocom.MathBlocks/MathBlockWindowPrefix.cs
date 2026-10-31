@@ -1,103 +1,49 @@
 namespace Supprocom.MathBlocks;
 
-// The window-prefix.* forms: window statistics from prefix sums, O(n) for any width. The prefix pass runs once per
-// series in index order, so a batch shares it across widths; each width then reads two prefixes per row.
+// Window sums, means, variances and standard deviations from exact sliding sums. Per series and width, one
+// MathBlockExactAccumulator (Neal 2015) carries the exact window sum S1 = sum x and one the exact S2 = sum x^2:
+// each row adds x[t] (and x[t]^2 as an exact Dekker product pair) and subtracts x[t - w] the same way. The sums are
+// exact, so they don't drift and don't depend on rows before the window, and every rounding below acts on exact
+// window values: a row's bits depend only on its window's values.
 //
-// Prefix sums are double-double, kept as Sum2 does (Ogita, Rump and Oishi, "Accurate sum and dot product", SIAM J.
-// Sci. Comput. 26(6), 2005): Hi[t] is the recursive sum of the high parts, each step an error-free TwoSum (Knuth,
-// TAOCP vol. 2, 4.2.2; Moller 1965), and Lo[t] the recursive sum of the TwoSum errors and the inputs' low parts.
-// Hi[t] + Lo[t] is the prefix through row t; the prefix before row 0 is 0.
+// - sum: RN(S1), the exact window sum correctly rounded (ties to even).
+// - mean: RN(S1 / w), the exact window sum divided by w and correctly rounded, by exact long division.
+// - variance: S1 and S2 rounded to double-doubles (h = RN(S), l = RN(S - h)), M = S2 - S1^2 / w evaluated in
+//   double-double and rounded once, then M / w (population) or M / (w - 1) (sample).
+// - standard deviation: the square root of that variance.
+// A window whose values all compare equal has variance +0 exactly. The double-double steps don't cancel to 0 on
+// their own (w x^2 needs up to 108 bits), so a sliding count of value changes identifies those windows. M at or below
+// 0, possible only when kappa > 1 / (13 u^2), is set to 0.
 //
-// A window value is the double-double difference P[t] - P[t - w]: TwoSum of the high parts, plus the difference of
-// the low parts. The sum rounds it once to double; the mean divides that sum by w.
+// No shift is applied. With exact sums the only cancellation left is in S2 - S1^2 / w, which kappa below measures;
+// a shift by an earlier row (such as x[0]) would make the bits depend on that row, and a shift by a window value
+// would need exact products of the shift with S1.
 //
-// The variance forms use prefixes of d = x - x[0] and d^2. d is the exact double-double TwoSum(x, -x[0]) and d^2 is
-// formed with Dekker's error-free product (Dekker 1971), whose split needs no FMA. Per window, S1 = sum d and
-// S2 = sum d^2 as double-doubles, and M = S2 - S1^2 / w is evaluated in double-double and rounded once. The shift by
-// x[0] and the double-double evaluation counter the cancellation of the one-pass formula (Chan, Golub and LeVeque,
-// "Algorithms for computing the sample variance", 1983). Then the population variance is M / w, the sample variance
-// M / (w - 1) and the standard deviations their square roots, by MathBlockPrimitives.Sqrt as in the statistics
-// sources (Newton steps, not correctly rounded; its last step is within 3u/2 + O(u^2) of the exact root). A window whose values all compare equal has variance
-// exactly 0: the prefix differences carry rounding from earlier rows and don't cancel to 0 on their own, so a count
-// of value changes identifies those windows. M below 0, which the rounding of the prefixes can give for a window
-// whose variance is tiny next to the earlier rows, is set to 0.
+// Rows are computed when the result is finite, so a window whose S2, S1^2 or sum overflows holds the fill. The
+// sample forms need w >= 2.
 //
-// A row is computed when its result is finite. A prefix that overflows makes the later rows non-finite, so they hold
-// the fill. The sample forms need w >= 2.
+// Guarantees (u = 2^-53; v the exact window variance, population or sample; m the exact window mean;
+// kappa = 1 + m^2 / v_population; assuming S2 and S1^2 are 0 or within [2^-968, 2^1023], so no double-double step
+// underflows or overflows):
+// - sum and mean: correctly rounded.
+// - variance: v = 0 gives +0; otherwise |v^ - v| <= 2u v + 18 u^2 kappa v. The u^2 kappa terms, relative to
+//   S2 = w v_population kappa: 1 from rounding S2 to a double-double, 2 from S1 (squared), 6 for the double-double
+//   square (Square), 4 for the division by w (DivideByInteger), total 13; then 3 u^2 v for the accurate
+//   double-double subtraction (Joldes, Muller and Popescu, ACM TOMS 44(2), 2017, Algorithm 6) and u^2 v from the two
+//   final roundings, 4 <= 4 kappa; 17, and 1 more for the O(u^3 kappa) products of these.
+// - standard deviation, B the variance bound and a correctly rounded square root:
+//   |sigma^ - sigma| <= min(B / (sqrt(max(v - B, 0)) + sqrt(v)), sqrt(B)) + u sqrt(v + B).
+//   The square root is MathBlockPrimitives.Sqrt (as in the statistics sources). It is not correctly rounded today
+//   (Newton steps, within 3u/2 + O(u^2)); until it is, the last term is (3u/2 + 4u^2) sqrt(v + B).
 //
-// Error bounds (u = 2^-53, gamma(k) = k u / (1 - k u), t the row, X_t = sum_{i <= t} |x_i|):
-// - sum: |s^ - s| <= u |s| + gamma(2t)^2 X_t.
-// - mean: |m^ - m| <= (1 + u) B_sum / w + u |m|.
-// - variance, v the exact window variance (population, or sample with w - 1), m its mean, c = x[0],
-//   kappa = 1 + (m - c)^2 / v_population, D_t = sum_{i <= t} |d_i|, Q_t = sum_{i <= t} d_i^2, H(Y) = gamma(2t + 6)^2 Y:
-//   |v^ - v| <= 2u v + 27 u^2 kappa v + h_t, with h_t = (1 + 3u) [H(Q_t) + (2 |S1| + H(D_t)) H(D_t) / w] / q,
-//   q = w for the population and w - 1 for the sample variance.
-//   The constant 27 sums the relative errors of the window terms: 6u^2 for each d^2, u^2 and 2u^2 from the
-//   differences of S2 and S1, 6u^2 for S1^2, 4u^2 for the division by w, 3u^2 for the double-double subtraction
-//   (Joldes, Muller and Popescu, ACM TOMS 44(2), 2017, Algorithm 6) and 4u^2 for the two roundings, with kappa >= 1.
-//   h_t bounds the rounding of the prefix sums, which depends on every row up to t, not only on the window.
-// - standard deviation: with B the variance bound,
-//   |sigma^ - sigma| <= min(B / (sqrt(max(v - B, 0)) + sqrt(v)), sqrt(B)) + (3u/2 + 4u^2) sqrt(v + B).
-//
-// The code is plain loops over arrays with no allocation inside a loop, so a per-thread CUDA function can mirror it.
-// Every operation is a single IEEE operation in a fixed order; nothing relies on FMA.
+// The code is plain loops with no allocation inside a loop and no FMA, so a per-thread CUDA function can mirror it.
 internal static class MathBlockWindowPrefix
 {
     // 2^27 + 1, Dekker's (Veltkamp's) splitting constant for binary64.
     private const double Splitter = 134_217_729d;
 
-    internal static SumPrefix PrepareSum(ReadOnlySpan<double> x)
-    {
-        var count = x.Length;
-        var hi = new double[count];
-        var lo = new double[count];
-        var high = 0d;
-        var low = 0d;
-        for (var row = 0; row < count; row++)
-        {
-            TwoSum(high, x[row], out high, out var error);
-            low += error;
-            hi[row] = high;
-            lo[row] = low;
-        }
-        return new SumPrefix(hi, lo);
-    }
-
-    internal static VariancePrefix PrepareVariance(ReadOnlySpan<double> x)
-    {
-        var count = x.Length;
-        var firstHi = new double[count];
-        var firstLo = new double[count];
-        var secondHi = new double[count];
-        var secondLo = new double[count];
-        var changes = new int[count];
-        var shift = x[0];
-        var high1 = 0d;
-        var low1 = 0d;
-        var high2 = 0d;
-        var low2 = 0d;
-        var changeCount = 0;
-        for (var row = 0; row < count; row++)
-        {
-            TwoSum(x[row], -shift, out var dh, out var dl);
-            Square(dh, dl, out var sh, out var sl);
-            TwoSum(high1, dh, out high1, out var error1);
-            low1 += error1 + dl;
-            TwoSum(high2, sh, out high2, out var error2);
-            low2 += error2 + sl;
-            if (row > 0 && x[row] != x[row - 1])
-                changeCount++;
-            firstHi[row] = high1;
-            firstLo[row] = low1;
-            secondHi[row] = high2;
-            secondLo[row] = low2;
-            changes[row] = changeCount;
-        }
-        return new VariancePrefix(firstHi, firstLo, secondHi, secondLo, changes);
-    }
-
     internal static void RunSum(
-        SumPrefix prefix,
+        ReadOnlySpan<double> x,
         int count,
         int width,
         bool mean,
@@ -105,23 +51,28 @@ internal static class MathBlockWindowPrefix
         double[]? values,
         bool[]? valid)
     {
+        var sum = new MathBlockExactAccumulator();
         for (var row = 0; row < count; row++)
         {
+            sum.Add(x[row], false);
+            if (row >= width)
+                sum.Add(x[row - width], true);
             if (row < width - 1)
             {
                 Store(values, valid, row, fill, 0d, false);
                 continue;
             }
-            Difference(prefix.Hi, prefix.Lo, row, width, out var high, out var low);
-            var result = high + low;
+            double result;
             if (mean)
-                result /= width;
+                result = sum.ReadQuotient(width);
+            else
+                sum.ReadDoubleDouble(out result, out _);
             Store(values, valid, row, fill, result, double.IsFinite(result));
         }
     }
 
     internal static void RunVariance(
-        VariancePrefix prefix,
+        ReadOnlySpan<double> x,
         int count,
         int width,
         bool sample,
@@ -130,25 +81,38 @@ internal static class MathBlockWindowPrefix
         double[]? values,
         bool[]? valid)
     {
+        var first = new MathBlockExactAccumulator();
+        var second = new MathBlockExactAccumulator();
         var divisor = sample ? width - 1d : width;
+        // The number of rows i in the window, after its first row, with x[i] != x[i - 1].
+        var changes = 0;
         for (var row = 0; row < count; row++)
         {
+            first.Add(x[row], false);
+            second.AddSquare(x[row], false);
+            if (row > 0 && x[row] != x[row - 1])
+                changes++;
+            if (row >= width)
+            {
+                first.Add(x[row - width], true);
+                second.AddSquare(x[row - width], true);
+                if (row - width + 1 > 0 && x[row - width + 1] != x[row - width])
+                    changes--;
+            }
             if (row < width - 1)
             {
                 Store(values, valid, row, fill, 0d, false);
                 continue;
             }
             double moment;
-            if (prefix.Changes[row] - prefix.Changes[row - width + 1] == 0)
+            if (changes == 0)
             {
                 moment = 0d;
             }
             else
             {
-                Difference(prefix.FirstHi, prefix.FirstLo, row, width, out var s1h, out var s1l);
-                TwoSum(s1h, s1l, out s1h, out s1l);
-                Difference(prefix.SecondHi, prefix.SecondLo, row, width, out var s2h, out var s2l);
-                TwoSum(s2h, s2l, out s2h, out s2l);
+                first.ReadDoubleDouble(out var s1h, out var s1l);
+                second.ReadDoubleDouble(out var s2h, out var s2l);
                 Square(s1h, s1l, out var qh, out var ql);
                 DivideByInteger(qh, ql, width, out var rh, out var rl);
                 moment = SubtractRounded(s2h, s2l, rh, rl);
@@ -163,7 +127,7 @@ internal static class MathBlockWindowPrefix
     }
 
     // Knuth's TwoSum: s = fl(a + b) and s + e = a + b exactly, for any finite a and b whose sum doesn't overflow.
-    internal static void TwoSum(double a, double b, out double s, out double e)
+    private static void TwoSum(double a, double b, out double s, out double e)
     {
         s = a + b;
         var bVirtual = s - a;
@@ -225,48 +189,11 @@ internal static class MathBlockWindowPrefix
         return zh;
     }
 
-    // P[row] - P[row - width] as an unnormalized double-double: the exact difference of the high parts, with the
-    // difference of the low parts added to its error term.
-    private static void Difference(double[] hi, double[] lo, int row, int width, out double high, out double low)
-    {
-        var start = row - width;
-        var startHi = start >= 0 ? hi[start] : 0d;
-        var startLo = start >= 0 ? lo[start] : 0d;
-        TwoSum(hi[row], -startHi, out high, out var error);
-        low = error + (lo[row] - startLo);
-    }
-
     private static void Store(double[]? values, bool[]? valid, int row, double fill, double value, bool computed)
     {
         if (values is not null)
             values[row] = computed ? value : fill;
         if (valid is not null)
             valid[row] = computed;
-    }
-
-    internal sealed class SumPrefix(double[] hi, double[] lo)
-    {
-        internal double[] Hi { get; } = hi;
-
-        internal double[] Lo { get; } = lo;
-    }
-
-    internal sealed class VariancePrefix(
-        double[] firstHi,
-        double[] firstLo,
-        double[] secondHi,
-        double[] secondLo,
-        int[] changes)
-    {
-        internal double[] FirstHi { get; } = firstHi;
-
-        internal double[] FirstLo { get; } = firstLo;
-
-        internal double[] SecondHi { get; } = secondHi;
-
-        internal double[] SecondLo { get; } = secondLo;
-
-        // Changes[t] counts the rows i in 1 .. t with x[i] != x[i - 1].
-        internal int[] Changes { get; } = changes;
     }
 }

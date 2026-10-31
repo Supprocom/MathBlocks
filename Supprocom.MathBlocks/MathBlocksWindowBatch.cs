@@ -6,7 +6,7 @@ namespace Supprocom.MathBlocks;
 /// <c>window.vector.maximum@1</c>, <c>window.vector.arg-minimum@1</c>, <c>window.vector.arg-maximum@1</c>,
 /// <c>window.vector.median@1</c> and <c>window.vector.quantile@1</c>. Every result is bit-identical, including its
 /// type and invalid state, to evaluating the form's operation alone with the same inputs. Work that depends only on
-/// the series, such as the prefix sums of the <c>window-prefix.*</c> forms, is done once per call.
+/// the series is done once per call.
 /// </remarks>
 public static class MathBlocksWindowBatch
 {

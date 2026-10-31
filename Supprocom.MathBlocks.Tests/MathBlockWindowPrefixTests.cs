@@ -34,16 +34,27 @@ public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
 
     /// <summary>
     /// Verifies a window whose values are all equal has variance and standard deviation +0 exactly, also after
-    /// varied rows, whose rounding stays in the prefix sums.
+    /// varied rows.
     /// </summary>
     [Fact]
     public void WindowsOfEqualValuesHaveExactlyZeroVariance()
     {
+        // Runs of 60 equal values with full significands and magnitudes from 1e-50 to 1e50, where the double-double
+        // steps alone leave a nonzero M about a third of the time, between varied rows; and a run of signed zeros.
         var random = new Random(5);
-        var values = new double[400];
+        var values = new double[4_000];
+        var constant = 0d;
         for (var row = 0; row < values.Length; row++)
-            values[row] = row is >= 150 and < 200 ? 1_000.1d : row is >= 300 and < 310 ? -0d : 1_000d + random.NextDouble() * 3d;
-        values[305] = 0d;
+        {
+            if (row % 80 == 0)
+                constant = (random.NextDouble() * 2d - 1d) * Math.Pow(10d, random.Next(-50, 51));
+            values[row] = row % 80 < 60 ? constant : 1_000d + random.NextDouble() * 3d;
+        }
+        values[160] = -1.0101787042252373e+32d;
+        for (var row = 161; row < 220; row++)
+            values[row] = values[160];
+        for (var row = 300; row < 310; row++)
+            values[row] = row == 305 ? 0d : -0d;
         var x = MathBlockValue.Vector(values);
         foreach (var name in new[] { "population-variance", "sample-variance", "population-standard-deviation", "sample-standard-deviation" })
         {
@@ -52,10 +63,10 @@ public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
                 var result = PrefixForm(name).Evaluate(x, MathBlockValue.Scalar(width), MathBlockValue.Scalar(Sentinel)).AsVector();
                 for (var row = width - 1; row < values.Length; row++)
                 {
-                    var constant = true;
+                    var equal = true;
                     for (var index = row - width + 1; index <= row; index++)
-                        constant &= values[index] == values[row];
-                    if (constant)
+                        equal &= values[index] == values[row];
+                    if (equal)
                         Assert.True(BitConverter.DoubleToInt64Bits(result[row]) == 0L, $"{name} w={width} row {row}: {result[row]:R}");
                 }
             }
@@ -100,16 +111,74 @@ public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
         }
     }
 
-    /// <summary>Verifies a prefix that overflows fills every later row and marks it not computed.</summary>
+    /// <summary>
+    /// Verifies only a window whose sum overflows holds the fill: the exact sums recover after it, and a window of
+    /// huge values with a representable sum is computed.
+    /// </summary>
     [Fact]
-    public void RowsAfterAPrefixOverflowHoldTheFill()
+    public void OnlyWindowsWhoseResultOverflowsHoldTheFill()
     {
-        var x = MathBlockValue.Vector([1e308d, 1e308d, 1d, 2d, 3d]);
-        var sum = PrefixForm("sum").Evaluate(x, MathBlockValue.Scalar(1d), MathBlockValue.Scalar(Sentinel)).AsVector().ToArray();
-        var valid = PrefixValidity("sum").Evaluate(x, MathBlockValue.Scalar(1d)).AsBooleanVector().ToArray();
+        var x = MathBlockValue.Vector([1e308d, 1e308d, -1e308d, 2d, 3d]);
+        var sum = PrefixForm("sum").Evaluate(x, MathBlockValue.Scalar(2d), MathBlockValue.Scalar(Sentinel)).AsVector().ToArray();
+        var valid = PrefixValidity("sum").Evaluate(x, MathBlockValue.Scalar(2d)).AsBooleanVector().ToArray();
+        var wide = PrefixForm("sum").Evaluate(x, MathBlockValue.Scalar(3d), MathBlockValue.Scalar(Sentinel)).AsVector().ToArray();
 
-        Assert.Equal([1e308d, Sentinel, Sentinel, Sentinel, Sentinel], sum);
-        Assert.Equal([true, false, false, false, false], valid);
+        Assert.Equal([Sentinel, Sentinel, 0d, -1e308d, 5d], sum);
+        Assert.Equal([false, false, true, true, true], valid);
+        Assert.Equal([Sentinel, Sentinel, 1e308d, 1e308d - 1e308d + 2d, -1e308d + 5d], wide);
+    }
+
+    /// <summary>
+    /// Verifies every form's and sibling's rows depend only on the window: changing every row before row n/2 (also
+    /// row 0) leaves every row whose window starts at n/2 or later bit-identical, on the spike, random-walk and
+    /// near-constant families.
+    /// </summary>
+    [Fact]
+    public void RowsDependOnlyOnTheirWindow()
+    {
+        const int count = 4_000;
+        var failures = new List<string>();
+        foreach (var family in new[] { "spike", "random-walk", "near-constant", "offset-1e9" })
+        {
+            var first = CreateFamily(family, count, 11);
+            var second = CreateFamily(family, count, 12);
+            Array.Copy(first, count / 2, second, count / 2, count - count / 2);
+            foreach (var width in new[] { 2, 17, 96 })
+            {
+                foreach (var name in PrefixNames)
+                {
+                    var a = PrefixForm(name).Evaluate(MathBlockValue.Vector(first), MathBlockValue.Scalar(width), MathBlockValue.Scalar(Sentinel)).AsVector().ToArray();
+                    var b = PrefixForm(name).Evaluate(MathBlockValue.Vector(second), MathBlockValue.Scalar(width), MathBlockValue.Scalar(Sentinel)).AsVector().ToArray();
+                    var va = PrefixValidity(name).Evaluate(MathBlockValue.Vector(first), MathBlockValue.Scalar(width)).AsBooleanVector().ToArray();
+                    var vb = PrefixValidity(name).Evaluate(MathBlockValue.Vector(second), MathBlockValue.Scalar(width)).AsBooleanVector().ToArray();
+                    var changed = 0;
+                    for (var row = count / 2 + width - 1; row < count; row++)
+                    {
+                        if (BitConverter.DoubleToInt64Bits(a[row]) != BitConverter.DoubleToInt64Bits(b[row]) || va[row] != vb[row])
+                            changed++;
+                    }
+                    if (changed != 0)
+                        failures.Add($"{family} {name} w={width}: {changed} rows changed");
+                }
+            }
+        }
+
+        Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures));
+    }
+
+    /// <summary>Verifies M5's causality property check accepts the Trailing label of every form and sibling.</summary>
+    [Fact]
+    [Trait("Category", "CausalityContract")]
+    public void TheCausalityCheckAcceptsTheTrailingLabels()
+    {
+        var failures = new List<string>();
+        foreach (var name in PrefixNames)
+        {
+            failures.AddRange(MathBlockCausalityChecks.Check(PrefixForm(name)));
+            failures.AddRange(MathBlockCausalityChecks.Check(PrefixValidity(name)));
+        }
+
+        Assert.True(failures.Count == 0, MathBlockCausalityChecks.Format(failures));
     }
 
     /// <summary>Verifies the declared types carry the series length and the result unit, and the fill must match it.</summary>
@@ -174,11 +243,14 @@ public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
         return values;
     }
 
-    // Checks every computed row of the six forms at one width against the exact reference. Appends one report line per
-    // form with the worst ratio of error to the stated bound and, for the variance forms, to the bound without the
-    // prefix history term (the form written in design section 3), and the worst relative error. Only the stated bound
-    // is asserted: the design form omits the rounding of the prefix sums over the rows before the window, which the
-    // spike family exceeds at any length and the other families exceed at 302,893 rows.
+    // The square-root error MathBlockPrimitives.Sqrt reaches today (Newton steps, within 3u/2 + O(u^2) of the
+    // root). With a correctly rounded square root it is u, and the standard-deviation bound below tightens with it.
+    private static readonly double SquareRootError = 1.5d * Unit + 4d * Unit * Unit;
+
+    // Checks every computed row of the six forms at one width against the exact reference: the sum and the mean
+    // equal the exact values correctly rounded, bit for bit; the variances and deviations are within their stated
+    // bounds, and constant windows give +0. Appends one report line per form with the worst ratio of error to the
+    // bound (for the sum and the mean, to u times the exact value) and the worst relative error.
     internal static List<string> CheckBounds(string family, double[] x, int width, List<string> report)
     {
         var failures = new List<string>();
@@ -197,9 +269,7 @@ public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
             var computed = validity.AsBooleanVector().ToArray();
             var expectComputed = !(width == 1 && name.StartsWith("sample-", StringComparison.Ordinal));
             var worst = 0d;
-            var worstDesign = 0d;
             var worstRow = -1;
-            var worstDesignRow = -1;
             var worstRelative = 0d;
             var worstRelativeRow = -1;
             for (var row = width - 1; row < x.Length; row++)
@@ -210,7 +280,7 @@ public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
                     failures.Add($"{where}: computed {computed[row]}, expected {expectComputed}");
                     continue;
                 }
-                if (!expectComputed || !Measure(reference, name, values[row], row, width, where, failures, out var error, out var bound, out var designBound))
+                if (!expectComputed || !Measure(reference, name, values[row], row, width, where, failures, out var error, out var bound, out var exact))
                     continue;
                 var ratio = Ratio(error, bound);
                 if (!(ratio <= 1d))
@@ -221,26 +291,20 @@ public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
                 }
                 if (ratio > worst)
                     (worst, worstRow) = (ratio, row);
-                var designRatio = Ratio(error, designBound);
-                if (designRatio > worstDesign)
-                    (worstDesign, worstDesignRow) = (designRatio, row);
-                var relative = Ratio(error, Math.Abs(Exact(reference, name, row, width)));
+                var relative = Ratio(error, Math.Abs(exact));
                 if (relative > worstRelative)
                     (worstRelative, worstRelativeRow) = (relative, row);
             }
-            var design = name.EndsWith("variance", StringComparison.Ordinal) || name.EndsWith("deviation", StringComparison.Ordinal)
-                ? worstDesign.ToString("G6", CultureInfo.InvariantCulture)
-                : "n/a";
             report.Add(string.Create(
                 CultureInfo.InvariantCulture,
-                $"{family}\tn={x.Length}\tw={width}\t{name}\tworst-ratio={worst:G6}\trow={worstRow}\tworst-design-form-ratio={design}\trow={worstDesignRow}\tworst-relative-error={worstRelative:G6}\trow={worstRelativeRow}"));
+                $"{family}\tn={x.Length}\tw={width}\t{name}\tworst-ratio={worst:G6}\trow={worstRow}\tworst-relative-error={worstRelative:G6}\trow={worstRelativeRow}"));
         }
         return failures;
     }
 
-    // The exact error of one computed row and its bounds. Returns false for a constant window, whose variance must be
-    // +0 exactly, after recording a failure when it isn't. The design-form bound is the variance bound without the
-    // prefix history term, and the stated bound for the sum and the mean.
+    // The exact error of one computed row, its bound and the exact value. The sum and the mean must equal the
+    // correctly rounded exact value (a failure is recorded otherwise) and report their error against u |exact|.
+    // Returns false for a constant window, whose variance must be +0 exactly.
     private static bool Measure(
         MathBlockWindowExactReference reference,
         string name,
@@ -251,99 +315,71 @@ public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
         List<string> failures,
         out double error,
         out double bound,
-        out double designBound)
+        out double exact)
     {
         var sample = name.StartsWith("sample-", StringComparison.Ordinal);
         switch (name)
         {
             case "sum":
-                error = reference.SumError(value, row, width);
-                bound = designBound = SumBound(reference, row, width);
-                return true;
             case "mean":
-                error = reference.MeanError(value, row, width);
-                bound = designBound = (1d + Unit) * SumBound(reference, row, width) / width +
-                                      Unit * Math.Abs(reference.Sum(row, width) / width);
-                return true;
+                {
+                    var mean = string.Equals(name, "mean", StringComparison.Ordinal);
+                    var rounded = mean ? reference.RoundedMean(row, width) : reference.RoundedSum(row, width);
+                    if (BitConverter.DoubleToInt64Bits(value) != BitConverter.DoubleToInt64Bits(rounded))
+                        failures.Add($"{where}: {value:R}, expected the correctly rounded {rounded:R}");
+                    error = mean ? reference.MeanError(value, row, width) : reference.SumError(value, row, width);
+                    exact = mean ? reference.Sum(row, width) / width : reference.Sum(row, width);
+                    bound = Unit * Math.Abs(exact);
+                    return true;
+                }
         }
         if (reference.VarianceIsZero(row, width))
         {
             if (BitConverter.DoubleToInt64Bits(value) != 0L)
                 failures.Add($"{where}: {value:R} on a constant window, expected +0");
-            error = bound = designBound = 0d;
+            error = bound = exact = 0d;
             return false;
         }
         var variance = reference.Variance(row, width, sample);
-        VarianceBounds(reference, row, width, sample, variance, out var full, out var design);
+        var varianceBound = VarianceBound(reference, row, width, sample, variance);
         if (name.EndsWith("standard-deviation", StringComparison.Ordinal))
         {
             error = reference.StandardDeviationError(value, row, width, sample);
-            bound = DeviationBound(variance, full);
-            designBound = DeviationBound(variance, design);
+            bound = DeviationBound(variance, varianceBound);
+            exact = Math.Sqrt(variance);
         }
         else
         {
             error = reference.VarianceError(value, row, width, sample);
-            bound = full;
-            designBound = design;
+            bound = varianceBound;
+            exact = variance;
         }
         return true;
-    }
-
-    private static double Exact(MathBlockWindowExactReference reference, string name, int row, int width)
-    {
-        var sample = name.StartsWith("sample-", StringComparison.Ordinal);
-        return name switch
-        {
-            "sum" => reference.Sum(row, width),
-            "mean" => reference.Sum(row, width) / width,
-            _ when name.EndsWith("standard-deviation", StringComparison.Ordinal) => Math.Sqrt(reference.Variance(row, width, sample)),
-            _ => reference.Variance(row, width, sample)
-        };
     }
 
     private static double Ratio(double error, double bound) =>
         bound > 0d ? error / bound : error == 0d ? 0d : double.PositiveInfinity;
 
-    // u |s| + gamma(2t)^2 sum_{i <= t} |x_i|.
-    internal static double SumBound(MathBlockWindowExactReference reference, int row, int width)
-    {
-        var gamma = MathBlockWindowExactReference.Gamma(2d * row);
-        return Unit * Math.Abs(reference.Sum(row, width)) + gamma * gamma * reference.AbsoluteHistory(row);
-    }
-
-    // design = 2u v + 27 u^2 kappa v; full = design + the prefix history term h_t.
-    internal static void VarianceBounds(
+    // 2u v + 18 u^2 kappa v, kappa = 1 + m^2 / v_population.
+    internal static double VarianceBound(
         MathBlockWindowExactReference reference,
         int row,
         int width,
         bool sample,
-        double variance,
-        out double full,
-        out double design)
+        double variance)
     {
         var populationVariance = sample ? variance * (width - 1) / width : variance;
-        var kappa = 1d + reference.ShiftedMeanSquare(row, width) / populationVariance;
-        design = 2d * Unit * variance + 27d * Unit * Unit * kappa * variance;
-        var gamma = MathBlockWindowExactReference.Gamma(2d * row + 6d);
-        var historyFirst = gamma * gamma * reference.ShiftedAbsoluteHistory(row);
-        var historySecond = gamma * gamma * reference.ShiftedSquareHistory(row);
-        var divisor = sample ? width - 1d : width;
-        var history = (1d + 3d * Unit) *
-                      (historySecond + (2d * reference.ShiftedWindowAbsoluteSum(row, width) + historyFirst) * historyFirst / width) /
-                      divisor;
-        full = design + history;
+        var kappa = 1d + reference.MeanSquare(row, width) / populationVariance;
+        return 2d * Unit * variance + 18d * Unit * Unit * kappa * variance;
     }
 
-    // min(B / (sqrt(max(v - B, 0)) + sqrt(v)), sqrt(B)) + (3u/2 + 4u^2) sqrt(v + B). The forms take the root with
-    // MathBlockPrimitives.Sqrt, whose Newton steps end within 3u/2 + O(u^2) of the exact root, not with a correctly
-    // rounded square root.
+    // min(B / (sqrt(max(v - B, 0)) + sqrt(v)), sqrt(B)) + e sqrt(v + B), e the square-root error.
     internal static double DeviationBound(double variance, double varianceBound)
     {
         var root = Math.Sqrt(variance);
         var lower = Math.Sqrt(Math.Max(variance - varianceBound, 0d));
         var difference = Math.Min(varianceBound / (lower + root), Math.Sqrt(varianceBound));
-        return difference + (1.5d * Unit + 4d * Unit * Unit) * Math.Sqrt(variance + varianceBound);
+        return difference + SquareRootError * Math.Sqrt(variance + varianceBound);
     }
 
     private static double Normal(Random random)
