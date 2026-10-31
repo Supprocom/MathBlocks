@@ -19,12 +19,16 @@ namespace Supprocom.MathBlocks;
 // a shift by an earlier row (such as x[0]) would make the bits depend on that row, and a shift by a window value
 // would need exact products of the shift with S1.
 //
-// Rows are computed when the result is finite, so a window whose S2, S1^2 or sum overflows holds the fill. The
-// sample forms need w >= 2.
+// Rows are computed when the result is finite, so a window whose sum overflows holds the fill. The sample forms need
+// w >= 2. The double-double steps keep their accuracy only while every value they round is 0 or at least 2^-968, so
+// that its low part and its Dekker error term are normal numbers, and every value Dekker's split takes is at most
+// 2^996, so that the split doesn't overflow. A variance or deviation row is not computed unless S2 and S1^2 are 0 or
+// within [2^-968, the largest double], S1^2 / w is 0 or within [2^-968, 2^996] and M is 0 or at least 2^-968:
+// roughly, unless the window's values lie between 1e-146 and 1e149 in magnitude. Outside the range an overflow
+// already gives NaN, but an underflow would give a finite, inaccurate value. The check is a few comparisons per row.
 //
 // Guarantees (u = 2^-53; v the exact window variance, population or sample; m the exact window mean;
-// kappa = 1 + m^2 / v_population; assuming S2 and S1^2 are 0 or within [2^-968, 2^1023], so no double-double step
-// underflows or overflows):
+// kappa = 1 + m^2 / v_population):
 // - sum and mean: correctly rounded.
 // - variance: v = 0 gives +0; otherwise |v^ - v| <= 2u v + 18 u^2 kappa v. The u^2 kappa terms, relative to
 //   S2 = w v_population kappa: 1 from rounding S2 to a double-double, 2 from S1 (squared), 6 for the double-double
@@ -41,6 +45,12 @@ internal static class MathBlockWindowAccurate
 {
     // 2^27 + 1, Dekker's (Veltkamp's) splitting constant for binary64.
     private const double Splitter = 134_217_729d;
+
+    // 2^-968: from here up, a double-double's low part (2^-54 below its high part) is a normal number.
+    private static readonly double SmallestAccurate = BitConverter.Int64BitsToDouble(55L << 52);
+
+    // 2^996: up to here, Dekker's split (a times 2^27 + 1) doesn't overflow.
+    private static readonly double LargestSplit = BitConverter.Int64BitsToDouble(2019L << 52);
 
     internal static void RunSum(
         ReadOnlySpan<double> x,
@@ -116,7 +126,10 @@ internal static class MathBlockWindowAccurate
                 Square(s1h, s1l, out var qh, out var ql);
                 DivideByInteger(qh, ql, width, out var rh, out var rl);
                 moment = SubtractRounded(s2h, s2l, rh, rl);
-                if (moment <= 0d)
+                if (!InRange(s2h, double.MaxValue) || !InRange(qh, double.MaxValue) || !InRange(rh, LargestSplit) ||
+                    (moment > 0d && moment < SmallestAccurate))
+                    moment = double.NaN;
+                else if (moment <= 0d)
                     moment = 0d;
             }
             var result = moment / divisor;
@@ -125,6 +138,10 @@ internal static class MathBlockWindowAccurate
             Store(values, valid, row, fill, result, double.IsFinite(result));
         }
     }
+
+    // Whether value is 0 or within [2^-968, largest]; false for an infinity or NaN.
+    private static bool InRange(double value, double largest) =>
+        value == 0d || (Math.Abs(value) >= SmallestAccurate && Math.Abs(value) <= largest);
 
     // Knuth's TwoSum: s = fl(a + b) and s + e = a + b exactly, for any finite a and b whose sum doesn't overflow.
     private static void TwoSum(double a, double b, out double s, out double e)

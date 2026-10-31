@@ -12,13 +12,16 @@ namespace Supprocom.MathBlocks;
 /// <item><description><c>window-accurate.mean@1</c>: the exact window sum divided by the width, correctly
 /// rounded.</description></item>
 /// <item><description><c>window-accurate.population-variance@1</c> and <c>window-accurate.sample-variance@1</c>:
-/// +0 when every value of the window compares equal, otherwise within 2u v + 18 u^2 kappa v of the exact variance,
-/// when no double-double step underflows or overflows.</description></item>
+/// +0 when every value of the window compares equal, otherwise within 2u v + 18 u^2 kappa v of the exact variance.
+/// Valid input range: a row is computed only when S2 = sum x^2 and S1^2 are 0 or within [2^-968, the largest
+/// double], S1^2 / w is 0 or within [2^-968, 2^996] and the rounded S2 - S1^2 / w is 0 or at least 2^-968, roughly
+/// windows of values between 1e-146 and 1e149 in magnitude; other rows hold the fill and the sibling is
+/// false.</description></item>
 /// <item><description><c>window-accurate.population-standard-deviation@1</c> and
 /// <c>window-accurate.sample-standard-deviation@1</c>: the square root of that variance, within
 /// min(B / (sqrt(max(v - B, 0)) + sqrt(v)), sqrt(B)) + u sqrt(v + B) of the exact deviation, B the variance bound,
 /// for a correctly rounded square root (the current MathBlockPrimitives.Sqrt needs 3u/2 + 4u^2 in place of
-/// u).</description></item>
+/// u). Same valid input range as the variances.</description></item>
 /// </list>
 /// <para>Each form has the length, warm-up and fill rules of the window lift; a row whose result is not finite holds
 /// the fill. Its source operation supplies the types (the result unit and the fill unit); the rows and the derivation
