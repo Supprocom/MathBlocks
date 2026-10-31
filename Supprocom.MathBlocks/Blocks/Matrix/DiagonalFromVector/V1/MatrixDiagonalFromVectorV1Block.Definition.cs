@@ -5,6 +5,7 @@ internal static partial class StructuralMathBlocks
     internal static class MatrixDiagonalFromVectorV1Block
     {
         internal const string Identity = "matrix.diagonal-from-vector@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateDiagonalMatrix();
         private static MathBlockOperation CreateDiagonalMatrix() => MathBlockOperationFactory.Create("matrix.diagonal-from-vector", 1, types =>
         {

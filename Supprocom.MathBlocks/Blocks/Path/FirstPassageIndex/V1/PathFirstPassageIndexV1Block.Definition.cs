@@ -5,6 +5,7 @@ internal static partial class PathMathBlocks
     internal static class PathFirstPassageIndexV1Block
     {
         internal const string Identity = "path.first-passage-index@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateFirstPassage();
         private static MathBlockOperation CreateFirstPassage() => MathBlockOperationFactory.Create("path.first-passage-index", 3, types =>
         {

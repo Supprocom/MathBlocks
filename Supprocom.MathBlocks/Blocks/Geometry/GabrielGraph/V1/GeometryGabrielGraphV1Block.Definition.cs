@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class GeometryGabrielGraphV1Block
     {
         internal const string Identity = "geometry.gabriel-graph@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateGabrielGraph();
         private static MathBlockOperation CreateGabrielGraph() => MathBlockOperationFactory.Create("geometry.gabriel-graph", 1, types =>
         {

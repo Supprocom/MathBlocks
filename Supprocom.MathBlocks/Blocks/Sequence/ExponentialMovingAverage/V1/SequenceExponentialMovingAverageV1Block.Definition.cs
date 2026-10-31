@@ -5,6 +5,7 @@ internal static partial class VectorMathBlocks
     internal static class SequenceExponentialMovingAverageV1Block
     {
         internal const string Identity = "sequence.exponential-moving-average@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Expanding;
         internal static MathBlockOperation Create() => CreateEma();
         private static MathBlockOperation CreateEma() => MathBlockOperationFactory.Create("sequence.exponential-moving-average", 2, VectorScalarVectorType, inputs =>
         {

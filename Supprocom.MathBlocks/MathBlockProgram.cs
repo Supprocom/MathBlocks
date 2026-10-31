@@ -51,6 +51,33 @@ public sealed class MathBlockProgram
 
     /// <summary>Gets the fingerprint value.</summary>
     public string Fingerprint { get; }
+
+    /// <summary>Gets the weakest causality kind over the program's operation nodes.</summary>
+    /// <remarks>
+    /// From weakest to strongest the kinds are Forward, WholeSeries, Expanding, Trailing and Pointwise. NotSeries
+    /// operations have no row semantics and do not weaken a program that has series operations; a program whose
+    /// operations are all NotSeries, or that has no operation node, is NotSeries.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">An operation in the program has no causality label.</exception>
+    public MathBlockCausality Causality
+    {
+        get
+        {
+            var result = MathBlockCausality.NotSeries;
+            for (var index = 0; index < nodes.Length; index++)
+            {
+                var operation = nodes[index].Operation;
+                if (operation is null)
+                    continue;
+                var kind = operation.Causality.Kind;
+                if (kind == MathBlockCausality.NotSeries)
+                    continue;
+                if (result == MathBlockCausality.NotSeries || kind > result)
+                    result = kind;
+            }
+            return result;
+        }
+    }
     /// <summary>Gets the string value.</summary>
     public IReadOnlyDictionary<string, MathBlockType> Inputs => inputTypes;
     /// <summary>Gets the string value.</summary>

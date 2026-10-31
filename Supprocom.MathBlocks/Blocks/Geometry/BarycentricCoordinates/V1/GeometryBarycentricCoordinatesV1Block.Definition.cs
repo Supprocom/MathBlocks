@@ -5,6 +5,7 @@ internal static partial class GeometryMathBlocks
     internal static class GeometryBarycentricCoordinatesV1Block
     {
         internal const string Identity = "geometry.barycentric-coordinates@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateBarycentric();
         private static MathBlockOperation CreateBarycentric() => MathBlockOperationFactory.Create("geometry.barycentric-coordinates", 2, types =>
         {

@@ -5,6 +5,7 @@ internal static partial class PathMathBlocks
     internal static class PathRunLengthEncodeV1Block
     {
         internal const string Identity = "path.run-length-encode@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateRunLength();
         private static MathBlockOperation CreateRunLength() => MathBlockOperationFactory.Create("path.run-length-encode", 1, types =>
         {

@@ -5,6 +5,7 @@ internal static partial class PathMathBlocks
     internal static class PathDynamicTimeWarpingV1Block
     {
         internal const string Identity = "path.dynamic-time-warping@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateDynamicTimeWarping();
         private static MathBlockOperation CreateDynamicTimeWarping() => MathBlockOperationFactory.Create("path.dynamic-time-warping", 2, types =>
         {

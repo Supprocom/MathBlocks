@@ -5,6 +5,7 @@ internal static partial class StructuralMathBlocks
     internal static class VectorPairV1Block
     {
         internal const string Identity = "vector.pair@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreatePair();
         private static MathBlockOperation CreatePair() => MathBlockOperationFactory.Create("vector.pair", 2, types =>
         {

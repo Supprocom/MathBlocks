@@ -5,6 +5,7 @@ internal static partial class ProbabilityMathBlocks
     internal static class InformationMutualInformationV1Block
     {
         internal const string Identity = "information.mutual-information@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateMutualInformation();
         private static MathBlockOperation CreateMutualInformation()
         {

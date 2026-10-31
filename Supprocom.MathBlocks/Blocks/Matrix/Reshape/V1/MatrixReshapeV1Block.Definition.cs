@@ -5,6 +5,7 @@ internal static partial class StructuralMathBlocks
     internal static class MatrixReshapeV1Block
     {
         internal const string Identity = "matrix.reshape@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateReshape();
         private static MathBlockOperation CreateReshape() => MathBlockOperationFactory.Create("matrix.reshape", 3, types =>
         {

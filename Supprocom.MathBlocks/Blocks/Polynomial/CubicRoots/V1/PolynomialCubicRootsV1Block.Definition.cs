@@ -5,6 +5,7 @@ internal static partial class MatrixMathBlocks
     internal static class PolynomialCubicRootsV1Block
     {
         internal const string Identity = "polynomial.cubic-roots@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateCubicRoots();
         private static MathBlockOperation CreateCubicRoots() => MathBlockOperationFactory.Create("polynomial.cubic-roots", 1, types =>
         {

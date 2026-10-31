@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class CapacityChoquetIntegralV1Block
     {
         internal const string Identity = "capacity.choquet-integral@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateChoquet();
         private static MathBlockOperation CreateChoquet() => MathBlockOperationFactory.Create("capacity.choquet-integral", 2, types =>
         {

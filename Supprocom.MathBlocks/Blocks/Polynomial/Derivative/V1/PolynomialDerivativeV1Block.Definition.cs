@@ -5,6 +5,7 @@ internal static partial class MatrixMathBlocks
     internal static class PolynomialDerivativeV1Block
     {
         internal const string Identity = "polynomial.derivative@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Pointwise;
         internal static MathBlockOperation Create() => CreatePolynomialDerivative();
         private static MathBlockOperation CreatePolynomialDerivative() => MathBlockOperationFactory.Create("polynomial.derivative", 1, types =>
         {

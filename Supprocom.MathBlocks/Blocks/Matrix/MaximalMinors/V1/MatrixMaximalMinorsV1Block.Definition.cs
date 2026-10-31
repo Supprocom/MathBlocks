@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class MatrixMaximalMinorsV1Block
     {
         internal const string Identity = "matrix.maximal-minors@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateMaximalMinors();
         private static MathBlockOperation CreateMaximalMinors() => MathBlockOperationFactory.Create("matrix.maximal-minors", 1, types =>
         {

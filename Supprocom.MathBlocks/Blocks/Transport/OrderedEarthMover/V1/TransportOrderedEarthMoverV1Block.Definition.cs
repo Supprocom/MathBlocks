@@ -5,6 +5,7 @@ internal static partial class TransportMathBlocks
     internal static class TransportOrderedEarthMoverV1Block
     {
         internal const string Identity = "transport.ordered-earth-mover@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateOrderedEarthMover();
         private static MathBlockOperation CreateOrderedEarthMover() => MathBlockOperationFactory.Create("transport.ordered-earth-mover", 2, types =>
         {

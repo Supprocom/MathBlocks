@@ -5,6 +5,7 @@ internal static partial class GeometryMathBlocks
     internal static class GeometryHalfspaceDepthV1Block
     {
         internal const string Identity = "geometry.halfspace-depth@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateHalfspaceDepth();
         private static MathBlockOperation CreateHalfspaceDepth() => MathBlockOperationFactory.Create("geometry.halfspace-depth", 2, types =>
         {

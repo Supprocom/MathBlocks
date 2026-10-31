@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class CapacityIsSubmodularV1Block
     {
         internal const string Identity = "capacity.is-submodular@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateSetFunctionBoolean("capacity.is-submodular", MathBlockAdvanced.IsSubmodular, true);
         private static MathBlockOperation CreateSetFunctionBoolean(string identifier, Func<IReadOnlyList<double>, bool> function, bool expected) => MathBlockOperationFactory.Create(identifier, 1, types =>
         {

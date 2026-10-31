@@ -5,6 +5,7 @@ internal static partial class PathMathBlocks
     internal static class PathHysteresisV1Block
     {
         internal const string Identity = "path.hysteresis@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Expanding;
         internal static MathBlockOperation Create() => CreateHysteresis();
         private static MathBlockOperation CreateHysteresis() => MathBlockOperationFactory.Create("path.hysteresis", 3, types =>
         {

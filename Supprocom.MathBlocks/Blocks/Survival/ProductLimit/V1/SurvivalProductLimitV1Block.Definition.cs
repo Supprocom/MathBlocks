@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class SurvivalProductLimitV1Block
     {
         internal const string Identity = "survival.product-limit@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Expanding;
         internal static MathBlockOperation Create() => CreateProductLimit();
         private static MathBlockOperation CreateProductLimit() => MathBlockOperationFactory.Create("survival.product-limit", 2, types =>
         {

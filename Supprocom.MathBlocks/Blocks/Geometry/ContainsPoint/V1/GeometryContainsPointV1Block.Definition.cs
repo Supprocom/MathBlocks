@@ -5,6 +5,7 @@ internal static partial class GeometryMathBlocks
     internal static class GeometryContainsPointV1Block
     {
         internal const string Identity = "geometry.contains-point@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateContains();
         private static MathBlockOperation CreateContains() => MathBlockOperationFactory.Create("geometry.contains-point", 2, types =>
         {

@@ -5,6 +5,7 @@ internal static partial class TransportMathBlocks
     internal static class TransportWeightedWasserstein1V1Block
     {
         internal const string Identity = "transport.weighted-wasserstein-1@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateWeightedWasserstein();
         private static MathBlockOperation CreateWeightedWasserstein() => MathBlockOperationFactory.Create("transport.weighted-wasserstein-1", 4, types =>
         {

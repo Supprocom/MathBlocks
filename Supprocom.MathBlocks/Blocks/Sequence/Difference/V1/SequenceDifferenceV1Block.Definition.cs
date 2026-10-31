@@ -5,6 +5,7 @@ internal static partial class VectorMathBlocks
     internal static class SequenceDifferenceV1Block
     {
         internal const string Identity = "sequence.difference@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Expanding;
         internal static MathBlockOperation Create() => CreateDifference();
         private static MathBlockOperation CreateDifference() => MathBlockOperationFactory.Create("sequence.difference", 2, VectorScalarVectorType, inputs =>
         {

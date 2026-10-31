@@ -5,6 +5,7 @@ internal static partial class PathMathBlocks
     internal static class PathRecurrenceRateV1Block
     {
         internal const string Identity = "path.recurrence-rate@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateRecurrenceRate();
         private static MathBlockOperation CreateRecurrenceRate() => MathBlockOperationFactory.Create("path.recurrence-rate", 2, types =>
         {

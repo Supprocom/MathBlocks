@@ -5,6 +5,7 @@ internal static partial class MatrixMathBlocks
     internal static class MatrixIdentityV1Block
     {
         internal const string Identity = "matrix.identity@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateIdentity();
         private static MathBlockOperation CreateIdentity() => MathBlockOperationFactory.Create("matrix.identity", 1, types =>
         {

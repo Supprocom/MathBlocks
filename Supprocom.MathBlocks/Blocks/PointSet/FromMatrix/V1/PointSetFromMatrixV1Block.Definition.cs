@@ -5,6 +5,7 @@ internal static partial class StructuralMathBlocks
     internal static class PointSetFromMatrixV1Block
     {
         internal const string Identity = "point-set.from-matrix@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreatePointSetFromMatrix();
         private static MathBlockOperation CreatePointSetFromMatrix() => MathBlockOperationFactory.Create("point-set.from-matrix", 1, types =>
         {

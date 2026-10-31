@@ -5,6 +5,7 @@ internal static partial class StructuralMathBlocks
     internal static class VectorGatherV1Block
     {
         internal const string Identity = "vector.gather@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Forward;
         internal static MathBlockOperation Create() => CreateGather();
         private static MathBlockOperation CreateGather() => MathBlockOperationFactory.Create("vector.gather", 2, types =>
         {

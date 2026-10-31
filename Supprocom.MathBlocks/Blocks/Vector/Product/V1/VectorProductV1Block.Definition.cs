@@ -5,6 +5,7 @@ internal static partial class VectorMathBlocks
     internal static class VectorProductV1Block
     {
         internal const string Identity = "vector.product@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateReduction("vector.product", MathBlockVectorMath.Product, 24d, ProductReductionType);
     }
 }

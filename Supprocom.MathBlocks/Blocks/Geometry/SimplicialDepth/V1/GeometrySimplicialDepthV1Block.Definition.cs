@@ -5,6 +5,7 @@ internal static partial class AdvancedMathBlocks
     internal static class GeometrySimplicialDepthV1Block
     {
         internal const string Identity = "geometry.simplicial-depth@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateSimplicialDepth();
         private static MathBlockOperation CreateSimplicialDepth() => MathBlockOperationFactory.Create("geometry.simplicial-depth", 2, types =>
         {

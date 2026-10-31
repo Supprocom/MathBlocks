@@ -5,6 +5,7 @@ internal static partial class StatisticalMathBlocks
     internal static class StatisticsHistogramV1Block
     {
         internal const string Identity = "statistics.histogram@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateHistogram();
         private static MathBlockOperation CreateHistogram() => MathBlockOperationFactory.Create("statistics.histogram", 2, types =>
         {

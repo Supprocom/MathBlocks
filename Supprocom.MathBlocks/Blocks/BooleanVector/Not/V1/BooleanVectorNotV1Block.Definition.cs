@@ -5,6 +5,7 @@ internal static partial class VectorMathBlocks
     internal static class BooleanVectorNotV1Block
     {
         internal const string Identity = "boolean-vector.not@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Pointwise;
         internal static MathBlockOperation Create() => BooleanVectorNotV1BlockCpu.Create();
     }
 }

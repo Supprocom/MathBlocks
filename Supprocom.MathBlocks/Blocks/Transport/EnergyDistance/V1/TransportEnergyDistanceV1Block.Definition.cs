@@ -5,6 +5,7 @@ internal static partial class TransportMathBlocks
     internal static class TransportEnergyDistanceV1Block
     {
         internal const string Identity = "transport.energy-distance@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateEnergyDistance();
         private static MathBlockOperation CreateEnergyDistance() => MathBlockOperationFactory.Create("transport.energy-distance", 2, types =>
         {

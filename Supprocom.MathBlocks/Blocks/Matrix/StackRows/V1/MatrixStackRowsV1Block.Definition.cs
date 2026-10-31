@@ -5,6 +5,7 @@ internal static partial class StructuralMathBlocks
     internal static class MatrixStackRowsV1Block
     {
         internal const string Identity = "matrix.stack-rows@1";
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateStackRows();
         private static MathBlockOperation CreateStackRows() => MathBlockOperationFactory.Create("matrix.stack-rows", 2, types =>
         {
