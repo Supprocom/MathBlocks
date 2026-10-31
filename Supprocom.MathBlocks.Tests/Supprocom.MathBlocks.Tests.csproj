@@ -28,6 +28,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Golden\Fused\*.cu" Link="Golden\%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\openmath\v1\*.*"
           Link="openmath\v1\%(Filename)%(Extension)"
           CopyToOutputDirectory="PreserveNewest" />
