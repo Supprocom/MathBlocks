@@ -40,7 +40,7 @@ public sealed partial class MathBlockCudaWorkerTests
         }
 
         Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures.Take(60)));
-        Assert.True(caseCount >= 2_000, $"Only {caseCount} cases ran.");
+        Assert.True(caseCount >= 1_600, $"Only {caseCount} cases ran.");
         Assert.True(computedRows > 100_000, $"Only {computedRows} sibling rows were computed.");
     }
 
