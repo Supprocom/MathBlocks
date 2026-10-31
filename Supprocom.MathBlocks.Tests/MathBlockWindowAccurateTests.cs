@@ -129,6 +129,35 @@ public sealed class MathBlockWindowAccurateTests(ITestOutputHelper output)
     }
 
     /// <summary>
+    /// Verifies variance and deviation rows whose double-double steps would underflow (S2, S1^2, S1^2 / w or M below
+    /// 2^-968) or overflow (S1^2 / w above 2^996, or S1^2 not finite) hold the fill and are marked not computed,
+    /// while the sum and the mean of the same windows and windows inside the range stay computed.
+    /// </summary>
+    [Fact]
+    public void RowsOutsideTheDoubleDoubleRangeHoldTheFill()
+    {
+        var tiny = MathBlockValue.Vector([1e-160d, 2e-160d, 3e-160d, 4e-160d]);
+        var huge = MathBlockValue.Vector([5e153d, 5.1e153d, 5e153d, 5.1e153d]);
+        var large = MathBlockValue.Vector([1e150d, 1.1e150d, 1e150d, 1.1e150d]);
+        var inside = MathBlockValue.Vector([1e-100d, 2e-100d, 1e149d, 1.1e149d]);
+        var width = MathBlockValue.Scalar(2d);
+        foreach (var name in new[] { "population-variance", "sample-variance", "population-standard-deviation", "sample-standard-deviation" })
+        {
+            Assert.Equal(
+                [Sentinel, Sentinel, Sentinel, Sentinel],
+                AccurateForm(name).Evaluate(tiny, width, MathBlockValue.Scalar(Sentinel)).AsVector().ToArray());
+            Assert.Equal([false, false, false, false], AccurateValidity(name).Evaluate(tiny, width).AsBooleanVector().ToArray());
+            Assert.Equal(
+                [false, false, false, false],
+                AccurateValidity(name).Evaluate(huge, MathBlockValue.Scalar(3d)).AsBooleanVector().ToArray());
+            Assert.Equal([false, false, false, false], AccurateValidity(name).Evaluate(large, width).AsBooleanVector().ToArray());
+            Assert.Equal([false, true, true, true], AccurateValidity(name).Evaluate(inside, width).AsBooleanVector().ToArray());
+        }
+        foreach (var name in new[] { "sum", "mean" })
+            Assert.Equal([false, true, true, true], AccurateValidity(name).Evaluate(tiny, width).AsBooleanVector().ToArray());
+    }
+
+    /// <summary>
     /// Verifies every form's and sibling's rows depend only on the window: changing every row before row n/2 (also
     /// row 0) leaves every row whose window starts at n/2 or later bit-identical, on the spike, random-walk and
     /// near-constant families.
