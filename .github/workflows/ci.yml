@@ -175,6 +175,19 @@ jobs:
           --logger "trx;LogFileName=mathblocks-portable.trx"
           --results-directory "$TEST_RESULTS"
 
+      # Release gate: every catalog operation must have a CUDA implementation. It runs only where a release is
+      # made, on main, on tags and on pull requests into main; feature branches may hold CoreCLR-only forms while
+      # their CUDA side is being written.
+      - name: Run the CUDA release gate
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.base_ref == 'main'
+        run: >-
+          dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj
+          -c Release --no-build --no-restore
+          --artifacts-path "$ARTIFACT_ROOT/tests"
+          --filter "Category=ReleaseGate"
+          --logger "trx;LogFileName=mathblocks-release-gate.trx"
+          --results-directory "$TEST_RESULTS"
+
       - name: Run the CUDA source contract gate without a device
         run: >-
           dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj
