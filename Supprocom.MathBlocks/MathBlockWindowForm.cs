@@ -6,7 +6,7 @@ namespace Supprocom.MathBlocks;
 // value; the validity sibling marks exactly the rows that were computed.
 // A form with a kernel computes its rows with the kernel instead of evaluating the source on each window. The
 // type, length, width and fill rules stay those of the lift. For the window.* forms the kernel gives the same bits
-// as the direct lift; the window-prefix.* forms use the source only for their types.
+// as the direct lift; the window-accurate.* forms use the source only for their types.
 internal sealed class MathBlockWindowForm
 {
     private readonly MathBlockOperation source;

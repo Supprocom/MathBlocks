@@ -2,17 +2,22 @@ namespace Supprocom.MathBlocks;
 
 /// <summary>Evaluates trailing-window forms over many widths, or with their validity rows, in one CoreCLR pass.</summary>
 /// <remarks>
-/// The supported forms are the <c>window-prefix.*</c> forms and <c>window.vector.minimum@1</c>,
-/// <c>window.vector.maximum@1</c>, <c>window.vector.arg-minimum@1</c>, <c>window.vector.arg-maximum@1</c>,
-/// <c>window.vector.median@1</c> and <c>window.vector.quantile@1</c>. Every result is bit-identical, including its
-/// type and invalid state, to evaluating the form's operation alone with the same inputs. Work that depends only on
-/// the series is done once per call.
+/// <para>The supported forms are <c>window.vector.minimum@1</c>, <c>window.vector.maximum@1</c>,
+/// <c>window.vector.arg-minimum@1</c>, <c>window.vector.arg-maximum@1</c>, <c>window.vector.median@1</c> and
+/// <c>window.vector.quantile@1</c>, which give the bits of their source on each window, and the six
+/// <c>window-accurate.*</c> forms: <c>window-accurate.sum@1</c> and <c>window-accurate.mean@1</c>, the exact window
+/// sum and mean correctly rounded, and <c>window-accurate.population-variance@1</c>,
+/// <c>window-accurate.sample-variance@1</c>, <c>window-accurate.population-standard-deviation@1</c> and
+/// <c>window-accurate.sample-standard-deviation@1</c>, within the stated bound of the exact window variance and
+/// deviation.</para>
+/// <para>Every result is bit-identical, including its type and invalid state, to evaluating the form's operation
+/// alone with the same inputs. Work that depends only on the series is done once per call.</para>
 /// </remarks>
 public static class MathBlocksWindowBatch
 {
     /// <summary>Evaluates a window form without scalar parameters at each width, on CoreCLR.</summary>
     /// <param name="series">The series input of the form.</param>
-    /// <param name="formIdentity">The form identity, for example <c>window-prefix.sum@1</c>.</param>
+    /// <param name="formIdentity">The form identity, for example <c>window-accurate.sum@1</c>.</param>
     /// <param name="widths">The widths, each evaluated as the form's width input.</param>
     /// <param name="fill">The fill value, in the unit of the form's result.</param>
     /// <returns>One vector per width, in the order of <paramref name="widths"/>.</returns>
@@ -85,7 +90,7 @@ public static class MathBlocksWindowBatch
     }
 
     /// <summary>Evaluates a window form and its validity sibling from one CoreCLR pass.</summary>
-    /// <param name="formIdentity">The form identity, for example <c>window-prefix.mean@1</c>.</param>
+    /// <param name="formIdentity">The form identity, for example <c>window-accurate.mean@1</c>.</param>
     /// <param name="inputs">The form's inputs, ending with the width and the fill.</param>
     /// <returns>
     /// The form's result and the sibling's result for the same inputs without the fill. Each is bit-identical to

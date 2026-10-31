@@ -1,32 +1,53 @@
 namespace Supprocom.MathBlocks;
 
-// The six window-prefix.* forms (x, width, fill) and their window-prefix-valid.* siblings (x, width). Each form has
-// the length, warm-up and fill rules of the window lift. Its source operation supplies the types (the result unit
-// and the fill unit); the rows come from MathBlockWindowPrefix, whose error bounds are stated there.
-internal static class WindowPrefixMathBlocks
+/// <summary>
+/// The six <c>window-accurate.*</c> forms <c>(x, width, fill)</c> and their <c>window-accurate-valid.*</c> siblings
+/// <c>(x, width)</c>, computed from exact sliding window sums. Row t depends only on rows t - width + 1 .. t.
+/// </summary>
+/// <remarks>
+/// <para>Guarantees, with u = 2^-53, v the exact window variance, m the exact window mean and
+/// kappa = 1 + m^2 / v (population variance):</para>
+/// <list type="bullet">
+/// <item><description><c>window-accurate.sum@1</c>: the exact window sum, correctly rounded.</description></item>
+/// <item><description><c>window-accurate.mean@1</c>: the exact window sum divided by the width, correctly
+/// rounded.</description></item>
+/// <item><description><c>window-accurate.population-variance@1</c> and <c>window-accurate.sample-variance@1</c>:
+/// +0 when every value of the window compares equal, otherwise within 2u v + 18 u^2 kappa v of the exact variance,
+/// when no double-double step underflows or overflows.</description></item>
+/// <item><description><c>window-accurate.population-standard-deviation@1</c> and
+/// <c>window-accurate.sample-standard-deviation@1</c>: the square root of that variance, within
+/// min(B / (sqrt(max(v - B, 0)) + sqrt(v)), sqrt(B)) + u sqrt(v + B) of the exact deviation, B the variance bound,
+/// for a correctly rounded square root (the current MathBlockPrimitives.Sqrt needs 3u/2 + 4u^2 in place of
+/// u).</description></item>
+/// </list>
+/// <para>Each form has the length, warm-up and fill rules of the window lift; a row whose result is not finite holds
+/// the fill. Its source operation supplies the types (the result unit and the fill unit); the rows and the derivation
+/// of the bounds are in MathBlockWindowAccurate.</para>
+/// </remarks>
+internal static class WindowAccurateMathBlocks
 {
-    internal const string FormFamily = "window-prefix";
-    internal const string ValidityFamily = "window-prefix-valid";
+    internal const string FormFamily = "window-accurate";
+    internal const string ValidityFamily = "window-accurate-valid";
 
     private static readonly MathBlockValue Level = MathBlockValue.Vector([2d, 2d, 2d, 5d, 1d, 4d]);
 
     // Name, type source and regression rows for the sample Level at width 3; NaN marks a filled row.
-    private static readonly PrefixDefinition[] Definitions =
+    private static readonly AccurateDefinition[] Definitions =
     [
-        new("sum", MathBlockWindowPrefixStatistic.Sum, VectorMathBlocks.VectorSumV1Block.Create,
+        new("sum", MathBlockWindowAccurateStatistic.Sum, VectorMathBlocks.VectorSumV1Block.Create,
             [double.NaN, double.NaN, 6d, 9d, 8d, 10d]),
-        new("mean", MathBlockWindowPrefixStatistic.Mean, VectorMathBlocks.VectorMeanV1Block.Create,
+        new("mean", MathBlockWindowAccurateStatistic.Mean, VectorMathBlocks.VectorMeanV1Block.Create,
             [double.NaN, double.NaN, 2d, 3d, 8d / 3d, 10d / 3d]),
-        new("population-variance", MathBlockWindowPrefixStatistic.PopulationVariance,
+        new("population-variance", MathBlockWindowAccurateStatistic.PopulationVariance,
             StatisticalMathBlocks.StatisticsPopulationVarianceV1Block.Create,
             [double.NaN, double.NaN, 0d, 2d, 78d / 27d, 78d / 27d]),
-        new("sample-variance", MathBlockWindowPrefixStatistic.SampleVariance,
+        new("sample-variance", MathBlockWindowAccurateStatistic.SampleVariance,
             StatisticalMathBlocks.StatisticsSampleVarianceV1Block.Create,
             [double.NaN, double.NaN, 0d, 3d, 78d / 18d, 78d / 18d]),
-        new("population-standard-deviation", MathBlockWindowPrefixStatistic.PopulationStandardDeviation,
+        new("population-standard-deviation", MathBlockWindowAccurateStatistic.PopulationStandardDeviation,
             StatisticalMathBlocks.StatisticsPopulationStandardDeviationV1Block.Create,
             [double.NaN, double.NaN, 0d, Math.Sqrt(2d), Math.Sqrt(78d / 27d), Math.Sqrt(78d / 27d)]),
-        new("sample-standard-deviation", MathBlockWindowPrefixStatistic.SampleStandardDeviation,
+        new("sample-standard-deviation", MathBlockWindowAccurateStatistic.SampleStandardDeviation,
             StatisticalMathBlocks.StatisticsSampleStandardDeviationV1Block.Create,
             [double.NaN, double.NaN, 0d, Math.Sqrt(3d), Math.Sqrt(78d / 18d), Math.Sqrt(78d / 18d)])
     ];
@@ -41,7 +62,7 @@ internal static class WindowPrefixMathBlocks
                 definition.TypeSource(),
                 MathBlockWindowLift.Scalar,
                 [true],
-                new MathBlockWindowPrefixKernel(definition.Statistic));
+                new MathBlockWindowAccurateKernel(definition.Statistic));
             result[index] = new MathBlockWindowEntry(
                 form,
                 CreateForm(definition, form),
@@ -50,7 +71,7 @@ internal static class WindowPrefixMathBlocks
         return result;
     }
 
-    private static MathBlockOperation CreateForm(PrefixDefinition definition, MathBlockWindowForm form)
+    private static MathBlockOperation CreateForm(AccurateDefinition definition, MathBlockWindowForm form)
     {
         var unit = form.ResolveResultUnit([Level.Type]);
         var expected = new double[definition.Expected.Length];
@@ -72,7 +93,7 @@ internal static class WindowPrefixMathBlocks
             MathBlockCausalityInfo.Trailing(form.FormArity - 2));
     }
 
-    private static MathBlockOperation CreateValidity(PrefixDefinition definition, MathBlockWindowForm form)
+    private static MathBlockOperation CreateValidity(AccurateDefinition definition, MathBlockWindowForm form)
     {
         var expected = new bool[definition.Expected.Length];
         for (var index = 0; index < expected.Length; index++)
@@ -88,9 +109,9 @@ internal static class WindowPrefixMathBlocks
             causality: MathBlockCausalityInfo.Trailing(form.ValidityArity - 1));
     }
 
-    private sealed record PrefixDefinition(
+    private sealed record AccurateDefinition(
         string Name,
-        MathBlockWindowPrefixStatistic Statistic,
+        MathBlockWindowAccurateStatistic Statistic,
         Func<MathBlockOperation> TypeSource,
         double[] Expected);
 }

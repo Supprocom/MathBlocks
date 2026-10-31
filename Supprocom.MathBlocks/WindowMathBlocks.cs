@@ -129,7 +129,7 @@ internal static class WindowMathBlocks
     private static readonly Lazy<MathBlockWindowEntry[]> entries = new(CreateEntries);
     private static readonly Lazy<MathBlockRegistry> directReference = new(CreateDirectReference);
 
-    // Every window.*, window-valid.*, window-prefix.* and window-prefix-valid.* operation with its form. The
+    // Every window.*, window-valid.*, window-accurate.* and window-accurate-valid.* operation with its form. The
     // operations are the instances registered in MathBlockCatalog.Windowed.
     internal static IReadOnlyList<MathBlockWindowEntry> Entries => entries.Value;
 
@@ -169,12 +169,12 @@ internal static class WindowMathBlocks
     private static MathBlockWindowEntry[] CreateEntries()
     {
         var sources = Sources;
-        var prefix = WindowPrefixMathBlocks.CreateEntries();
-        var result = new MathBlockWindowEntry[sources.Length + prefix.Length];
+        var accurate = WindowAccurateMathBlocks.CreateEntries();
+        var result = new MathBlockWindowEntry[sources.Length + accurate.Length];
         for (var index = 0; index < sources.Length; index++)
             result[index] = CreateEntry(sources[index], direct: false);
-        for (var index = 0; index < prefix.Length; index++)
-            result[sources.Length + index] = prefix[index];
+        for (var index = 0; index < accurate.Length; index++)
+            result[sources.Length + index] = accurate[index];
         return result;
     }
 

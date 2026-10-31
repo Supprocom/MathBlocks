@@ -1,6 +1,6 @@
 namespace Supprocom.MathBlocks;
 
-internal enum MathBlockWindowPrefixStatistic
+internal enum MathBlockWindowAccurateStatistic
 {
     Sum,
     Mean,

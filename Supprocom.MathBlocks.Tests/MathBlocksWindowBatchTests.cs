@@ -13,7 +13,7 @@ public sealed class MathBlocksWindowBatchTests
     public static TheoryData<string> Identities =>
     [
         .. KernelSources.Select(source => $"window.{source}@1"),
-        .. PrefixNames.Select(name => $"window-prefix.{name}@1")
+        .. AccurateNames.Select(name => $"window-accurate.{name}@1")
     ];
 
     /// <summary>
@@ -83,7 +83,7 @@ public sealed class MathBlocksWindowBatchTests
     public void AnInvalidSeriesGivesTheFormsInvalidResult()
     {
         var series = MathBlockValue.Invalid(MathBlockType.Vector(), "upstream");
-        foreach (var identity in new[] { "window-prefix.sum@1", "window.vector.minimum@1" })
+        foreach (var identity in new[] { "window-accurate.sum@1", "window.vector.minimum@1" })
         {
             var results = MathBlocksWindowBatch.Evaluate(series, identity, [2, 3], Sentinel);
             foreach (var (width, result) in new[] { 2, 3 }.Zip(results))
@@ -103,7 +103,7 @@ public sealed class MathBlocksWindowBatchTests
         foreach (var identity in new[]
                  {
                      "window.vector.sum@1", "window.statistics.population-variance@1", "window-valid.vector.minimum@1",
-                     "window-prefix-valid.sum@1", "vector.minimum@1", "window-prefix.sum", "window-prefix.sum@2"
+                     "window-accurate-valid.sum@1", "vector.minimum@1", "window-accurate.sum", "window-accurate.sum@2"
                  })
         {
             var exception = Assert.Throws<ArgumentException>(() => MathBlocksWindowBatch.Evaluate(series, identity, [2], 0d));
@@ -116,7 +116,7 @@ public sealed class MathBlocksWindowBatchTests
         var quantile = Assert.Throws<ArgumentException>(() => MathBlocksWindowBatch.Evaluate(series, "window.vector.quantile@1", [2], 0d));
         Assert.Contains("'window.vector.quantile@1'", quantile.Message, StringComparison.Ordinal);
         Assert.Throws<ArgumentException>(
-            () => MathBlocksWindowBatch.Evaluate(series, "window-prefix.mean@1", [MathBlockValue.Scalar(0.5d)], [2], 0d));
+            () => MathBlocksWindowBatch.Evaluate(series, "window-accurate.mean@1", [MathBlockValue.Scalar(0.5d)], [2], 0d));
     }
 
     internal static MathBlockOperation Resolve(string identity) =>
@@ -125,8 +125,8 @@ public sealed class MathBlocksWindowBatchTests
     internal static string SiblingIdentifier(string identity)
     {
         var identifier = identity[..identity.LastIndexOf('@')];
-        return identifier.StartsWith("window-prefix.", StringComparison.Ordinal)
-            ? $"window-prefix-valid.{identifier["window-prefix.".Length..]}"
+        return identifier.StartsWith("window-accurate.", StringComparison.Ordinal)
+            ? $"window-accurate-valid.{identifier["window-accurate.".Length..]}"
             : $"window-valid.{identifier["window.".Length..]}";
     }
 

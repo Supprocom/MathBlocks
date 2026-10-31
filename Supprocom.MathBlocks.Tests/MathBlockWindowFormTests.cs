@@ -16,7 +16,7 @@ public sealed class MathBlockWindowFormTests
         [.. Windowed.Operations.Select(operation => operation.Identity)];
 
     /// <summary>
-    /// Verifies the window registry holds exactly the 53 design forms, the six prefix forms and their siblings.
+    /// Verifies the window registry holds exactly the 53 design forms, the six accurate forms and their siblings.
     /// </summary>
     [Fact]
     public void WindowRegistryHoldsTheDesignFormsAndSiblingsOutsideStandard()
@@ -25,8 +25,8 @@ public sealed class MathBlockWindowFormTests
         Assert.Equal(53, SourceIdentifiers.Distinct(StringComparer.Ordinal).Count());
         var expected = SourceIdentifiers
             .SelectMany(source => new[] { $"window.{source}@1", $"window-valid.{source}@1" })
-            .Concat(MathBlockWindowM2TestSupport.PrefixNames
-                .SelectMany(name => new[] { $"window-prefix.{name}@1", $"window-prefix-valid.{name}@1" }))
+            .Concat(MathBlockWindowM2TestSupport.AccurateNames
+                .SelectMany(name => new[] { $"window-accurate.{name}@1", $"window-accurate-valid.{name}@1" }))
             .Order(StringComparer.Ordinal);
         Assert.Equal(expected, Windowed.Operations.Select(operation => operation.Identity), StringComparer.Ordinal);
         foreach (var source in SourceIdentifiers)

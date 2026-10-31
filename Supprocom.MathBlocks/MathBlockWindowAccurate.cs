@@ -1,10 +1,10 @@
 namespace Supprocom.MathBlocks;
 
-// Window sums, means, variances and standard deviations from exact sliding sums. Per series and width, one
-// MathBlockExactAccumulator (Neal 2015) carries the exact window sum S1 = sum x and one the exact S2 = sum x^2:
-// each row adds x[t] (and x[t]^2 as an exact Dekker product pair) and subtracts x[t - w] the same way. The sums are
-// exact, so they don't drift and don't depend on rows before the window, and every rounding below acts on exact
-// window values: a row's bits depend only on its window's values.
+// The window-accurate.* forms: window sums, means, variances and standard deviations from exact sliding sums. Per
+// series and width, one MathBlockExactAccumulator (Neal 2015) carries the exact window sum S1 = sum x and one the
+// exact S2 = sum x^2: each row adds x[t] (and x[t]^2 as an exact Dekker product pair) and subtracts x[t - w] the
+// same way. The sums are exact, so they don't drift and don't depend on rows before the window, and every rounding
+// below acts on exact window values: a row's bits depend only on its window's values.
 //
 // - sum: RN(S1), the exact window sum correctly rounded (ties to even).
 // - mean: RN(S1 / w), the exact window sum divided by w and correctly rounded, by exact long division.
@@ -37,7 +37,7 @@ namespace Supprocom.MathBlocks;
 //   (Newton steps, within 3u/2 + O(u^2)); until it is, the last term is (3u/2 + 4u^2) sqrt(v + B).
 //
 // The code is plain loops with no allocation inside a loop and no FMA, so a per-thread CUDA function can mirror it.
-internal static class MathBlockWindowPrefix
+internal static class MathBlockWindowAccurate
 {
     // 2^27 + 1, Dekker's (Veltkamp's) splitting constant for binary64.
     private const double Splitter = 134_217_729d;

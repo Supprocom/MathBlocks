@@ -4,8 +4,8 @@ using static Supprocom.MathBlocks.Tests.MathBlockWindowM2TestSupport;
 
 namespace Supprocom.MathBlocks.Tests;
 
-/// <summary>Verifies the window-prefix.* forms against exact window sums and variances.</summary>
-public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
+/// <summary>Verifies the window-accurate.* forms against exact window sums and variances.</summary>
+public sealed class MathBlockWindowAccurateTests(ITestOutputHelper output)
 {
     private const double Sentinel = -7_777.5d;
 
@@ -60,7 +60,7 @@ public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
         {
             foreach (var width in new[] { 2, 7, 10, 50 })
             {
-                var result = PrefixForm(name).Evaluate(x, MathBlockValue.Scalar(width), MathBlockValue.Scalar(Sentinel)).AsVector();
+                var result = AccurateForm(name).Evaluate(x, MathBlockValue.Scalar(width), MathBlockValue.Scalar(Sentinel)).AsVector();
                 for (var row = width - 1; row < values.Length; row++)
                 {
                     var equal = true;
@@ -85,14 +85,14 @@ public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
         for (var row = 0; row < values.Length; row++)
             values[row] = row is >= 20 and < 30 ? 2d : random.NextDouble() * 10d;
         var x = MathBlockValue.Vector(values);
-        foreach (var name in PrefixNames)
+        foreach (var name in AccurateNames)
         {
             foreach (var width in new[] { 1, 2, 5, 64 })
             {
-                var form = PrefixForm(name);
+                var form = AccurateForm(name);
                 var unit = form.ResolveOutputType([x.Type, MathBlockType.Scalar(), MathBlockType.Scalar()]).Unit;
                 var first = form.Evaluate(x, MathBlockValue.Scalar(width), MathBlockValue.Scalar(Sentinel, unit)).AsVector().ToArray();
-                var valid = PrefixValidity(name).Evaluate(x, MathBlockValue.Scalar(width)).AsBooleanVector().ToArray();
+                var valid = AccurateValidity(name).Evaluate(x, MathBlockValue.Scalar(width)).AsBooleanVector().ToArray();
                 var sampleWidthOne = width == 1 && name.StartsWith("sample-", StringComparison.Ordinal);
                 for (var row = 0; row < values.Length; row++)
                 {
@@ -119,9 +119,9 @@ public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
     public void OnlyWindowsWhoseResultOverflowsHoldTheFill()
     {
         var x = MathBlockValue.Vector([1e308d, 1e308d, -1e308d, 2d, 3d]);
-        var sum = PrefixForm("sum").Evaluate(x, MathBlockValue.Scalar(2d), MathBlockValue.Scalar(Sentinel)).AsVector().ToArray();
-        var valid = PrefixValidity("sum").Evaluate(x, MathBlockValue.Scalar(2d)).AsBooleanVector().ToArray();
-        var wide = PrefixForm("sum").Evaluate(x, MathBlockValue.Scalar(3d), MathBlockValue.Scalar(Sentinel)).AsVector().ToArray();
+        var sum = AccurateForm("sum").Evaluate(x, MathBlockValue.Scalar(2d), MathBlockValue.Scalar(Sentinel)).AsVector().ToArray();
+        var valid = AccurateValidity("sum").Evaluate(x, MathBlockValue.Scalar(2d)).AsBooleanVector().ToArray();
+        var wide = AccurateForm("sum").Evaluate(x, MathBlockValue.Scalar(3d), MathBlockValue.Scalar(Sentinel)).AsVector().ToArray();
 
         Assert.Equal([Sentinel, Sentinel, 0d, -1e308d, 5d], sum);
         Assert.Equal([false, false, true, true, true], valid);
@@ -145,12 +145,12 @@ public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
             Array.Copy(first, count / 2, second, count / 2, count - count / 2);
             foreach (var width in new[] { 2, 17, 96 })
             {
-                foreach (var name in PrefixNames)
+                foreach (var name in AccurateNames)
                 {
-                    var a = PrefixForm(name).Evaluate(MathBlockValue.Vector(first), MathBlockValue.Scalar(width), MathBlockValue.Scalar(Sentinel)).AsVector().ToArray();
-                    var b = PrefixForm(name).Evaluate(MathBlockValue.Vector(second), MathBlockValue.Scalar(width), MathBlockValue.Scalar(Sentinel)).AsVector().ToArray();
-                    var va = PrefixValidity(name).Evaluate(MathBlockValue.Vector(first), MathBlockValue.Scalar(width)).AsBooleanVector().ToArray();
-                    var vb = PrefixValidity(name).Evaluate(MathBlockValue.Vector(second), MathBlockValue.Scalar(width)).AsBooleanVector().ToArray();
+                    var a = AccurateForm(name).Evaluate(MathBlockValue.Vector(first), MathBlockValue.Scalar(width), MathBlockValue.Scalar(Sentinel)).AsVector().ToArray();
+                    var b = AccurateForm(name).Evaluate(MathBlockValue.Vector(second), MathBlockValue.Scalar(width), MathBlockValue.Scalar(Sentinel)).AsVector().ToArray();
+                    var va = AccurateValidity(name).Evaluate(MathBlockValue.Vector(first), MathBlockValue.Scalar(width)).AsBooleanVector().ToArray();
+                    var vb = AccurateValidity(name).Evaluate(MathBlockValue.Vector(second), MathBlockValue.Scalar(width)).AsBooleanVector().ToArray();
                     var changed = 0;
                     for (var row = count / 2 + width - 1; row < count; row++)
                     {
@@ -172,10 +172,10 @@ public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
     public void TheCausalityCheckAcceptsTheTrailingLabels()
     {
         var failures = new List<string>();
-        foreach (var name in PrefixNames)
+        foreach (var name in AccurateNames)
         {
-            failures.AddRange(MathBlockCausalityChecks.Check(PrefixForm(name)));
-            failures.AddRange(MathBlockCausalityChecks.Check(PrefixValidity(name)));
+            failures.AddRange(MathBlockCausalityChecks.Check(AccurateForm(name)));
+            failures.AddRange(MathBlockCausalityChecks.Check(AccurateValidity(name)));
         }
 
         Assert.True(failures.Count == 0, MathBlockCausalityChecks.Format(failures));
@@ -190,29 +190,29 @@ public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
         var x = MathBlockValue.Vector([1d, 2d, 4d, 8d], unit);
         var width = MathBlockValue.Scalar(2d);
 
-        Assert.Equal(MathBlockType.Vector(unit, 4), PrefixForm("mean").Evaluate(x, width, MathBlockValue.Scalar(0d, unit)).Type);
+        Assert.Equal(MathBlockType.Vector(unit, 4), AccurateForm("mean").Evaluate(x, width, MathBlockValue.Scalar(0d, unit)).Type);
         Assert.Equal(
             MathBlockType.Vector(squared, 4),
-            PrefixForm("sample-variance").Evaluate(x, width, MathBlockValue.Scalar(0d, squared)).Type);
+            AccurateForm("sample-variance").Evaluate(x, width, MathBlockValue.Scalar(0d, squared)).Type);
         Assert.Equal(
             MathBlockType.Vector(unit, 4),
-            PrefixForm("sample-standard-deviation").Evaluate(x, width, MathBlockValue.Scalar(0d, unit)).Type);
-        Assert.Equal(MathBlockType.BooleanVector(4), PrefixValidity("sum").Evaluate(x, width).Type);
-        Assert.Throws<InvalidOperationException>(() => PrefixForm("population-variance").Evaluate(x, width, MathBlockValue.Scalar(0d, unit)));
-        Assert.False(PrefixForm("sum").Evaluate(x, MathBlockValue.Scalar(5d), MathBlockValue.Scalar(0d, unit)).IsValid);
-        Assert.False(PrefixForm("sum").Evaluate(x, MathBlockValue.Scalar(1.5d), MathBlockValue.Scalar(0d, unit)).IsValid);
+            AccurateForm("sample-standard-deviation").Evaluate(x, width, MathBlockValue.Scalar(0d, unit)).Type);
+        Assert.Equal(MathBlockType.BooleanVector(4), AccurateValidity("sum").Evaluate(x, width).Type);
+        Assert.Throws<InvalidOperationException>(() => AccurateForm("population-variance").Evaluate(x, width, MathBlockValue.Scalar(0d, unit)));
+        Assert.False(AccurateForm("sum").Evaluate(x, MathBlockValue.Scalar(5d), MathBlockValue.Scalar(0d, unit)).IsValid);
+        Assert.False(AccurateForm("sum").Evaluate(x, MathBlockValue.Scalar(1.5d), MathBlockValue.Scalar(0d, unit)).IsValid);
     }
 
-    /// <summary>Verifies every prefix form and sibling is labelled Trailing with the width input.</summary>
+    /// <summary>Verifies every accurate form and sibling is labelled Trailing with the width input.</summary>
     [Fact]
     public void FormsAndSiblingsAreLabelledTrailingWithTheWidthInput()
     {
-        foreach (var name in PrefixNames)
+        foreach (var name in AccurateNames)
         {
-            Assert.Equal(MathBlockCausality.Trailing, PrefixForm(name).Causality.Kind);
-            Assert.Equal(1, PrefixForm(name).Causality.WidthInputIndex);
-            Assert.Equal(MathBlockCausality.Trailing, PrefixValidity(name).Causality.Kind);
-            Assert.Equal(1, PrefixValidity(name).Causality.WidthInputIndex);
+            Assert.Equal(MathBlockCausality.Trailing, AccurateForm(name).Causality.Kind);
+            Assert.Equal(1, AccurateForm(name).Causality.WidthInputIndex);
+            Assert.Equal(MathBlockCausality.Trailing, AccurateValidity(name).Causality.Kind);
+            Assert.Equal(1, AccurateValidity(name).Causality.WidthInputIndex);
         }
     }
 
@@ -256,10 +256,10 @@ public sealed class MathBlockWindowPrefixTests(ITestOutputHelper output)
         var failures = new List<string>();
         var reference = new MathBlockWindowExactReference(x);
         var series = MathBlockValue.Vector(x);
-        foreach (var name in PrefixNames)
+        foreach (var name in AccurateNames)
         {
-            var value = PrefixForm(name).Evaluate(series, MathBlockValue.Scalar(width), MathBlockValue.Scalar(Sentinel));
-            var validity = PrefixValidity(name).Evaluate(series, MathBlockValue.Scalar(width));
+            var value = AccurateForm(name).Evaluate(series, MathBlockValue.Scalar(width), MathBlockValue.Scalar(Sentinel));
+            var validity = AccurateValidity(name).Evaluate(series, MathBlockValue.Scalar(width));
             if (!value.IsValid || !validity.IsValid)
             {
                 failures.Add($"{family} {name} w={width}: invalid output ({value.InvalidReason ?? validity.InvalidReason})");

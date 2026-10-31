@@ -18,8 +18,8 @@ internal static class MathBlockWindowM2TestSupport
         "vector.minimum", "vector.maximum", "vector.arg-minimum", "vector.arg-maximum", "vector.median", "vector.quantile"
     ];
 
-    // The six window-prefix.* names.
-    public static readonly string[] PrefixNames =
+    // The six window-accurate.* names.
+    public static readonly string[] AccurateNames =
     [
         "sum", "mean", "population-variance", "sample-variance", "population-standard-deviation",
         "sample-standard-deviation"
@@ -31,10 +31,10 @@ internal static class MathBlockWindowM2TestSupport
 
     public static MathBlockOperation DirectValidity(string source) => DirectReference.Get($"window-valid.{source}");
 
-    public static MathBlockOperation PrefixForm(string name) => MathBlockWindowTestSupport.Windowed.Get($"window-prefix.{name}");
+    public static MathBlockOperation AccurateForm(string name) => MathBlockWindowTestSupport.Windowed.Get($"window-accurate.{name}");
 
-    public static MathBlockOperation PrefixValidity(string name) =>
-        MathBlockWindowTestSupport.Windowed.Get($"window-prefix-valid.{name}");
+    public static MathBlockOperation AccurateValidity(string name) =>
+        MathBlockWindowTestSupport.Windowed.Get($"window-accurate-valid.{name}");
 
     // Describes the first difference between two values: type, invalid state and reason, then row bits.
     public static string? Difference(MathBlockValue expected, MathBlockValue actual)

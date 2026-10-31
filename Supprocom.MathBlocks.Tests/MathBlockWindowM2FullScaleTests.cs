@@ -14,7 +14,7 @@ public sealed class MathBlockWindowM2FullScaleTests(ITestOutputHelper output)
     public static TheoryData<string> Sources => [.. KernelSources];
 
     /// <summary>Gets the input families of the exactness tests.</summary>
-    public static TheoryData<string> Families => MathBlockWindowPrefixTests.Families;
+    public static TheoryData<string> Families => MathBlockWindowAccurateTests.Families;
 
     /// <summary>
     /// Verifies the kernel forms and siblings equal the direct lift bit for bit at 302,893 rows and widths 2, 17 and
@@ -42,19 +42,19 @@ public sealed class MathBlockWindowM2FullScaleTests(ITestOutputHelper output)
     }
 
     /// <summary>
-    /// Verifies every computed row of the six prefix forms is within its stated bound at 302,893 rows and widths 2,
+    /// Verifies every computed row of the six accurate forms is within its stated bound at 302,893 rows and widths 2,
     /// 17 and 96.
     /// </summary>
     [Theory]
     [MemberData(nameof(Families))]
     [Trait("Category", "WindowFullScale")]
-    public void PrefixErrorsStayWithinTheStatedBounds(string family)
+    public void AccurateErrorsStayWithinTheStatedBounds(string family)
     {
-        var x = MathBlockWindowPrefixTests.CreateFamily(family, FullLength, 302_893);
+        var x = MathBlockWindowAccurateTests.CreateFamily(family, FullLength, 302_893);
         var report = new List<string>();
         var failures = new List<string>();
         foreach (var width in Widths)
-            failures.AddRange(MathBlockWindowPrefixTests.CheckBounds(family, x, width, report));
+            failures.AddRange(MathBlockWindowAccurateTests.CheckBounds(family, x, width, report));
         output.WriteLine(string.Join(Environment.NewLine, report));
 
         Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures.Take(40)));
@@ -65,7 +65,7 @@ public sealed class MathBlockWindowM2FullScaleTests(ITestOutputHelper output)
     [Trait("Category", "WindowFullScale")]
     public void BatchEqualsEachFormEvaluatedAlone()
     {
-        var x = MathBlockValue.Vector(MathBlockWindowPrefixTests.CreateFamily("random-walk", FullLength, 7));
+        var x = MathBlockValue.Vector(MathBlockWindowAccurateTests.CreateFamily("random-walk", FullLength, 7));
         foreach (var identity in MathBlocksWindowBatchTests.Identities)
         {
             var operation = MathBlocksWindowBatchTests.Resolve(identity);
