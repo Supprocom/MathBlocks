@@ -6,7 +6,7 @@ using Supprocom.MathBlocks.Cuda;
 namespace Supprocom.MathBlocks.Tests;
 
 /// <summary>Contains regression tests for Math Block Cuda Worker Tests.</summary>
-public sealed class MathBlockCudaWorkerTests
+public sealed partial class MathBlockCudaWorkerTests
 {
     /// <summary>Verifies the NVRTC P/Invoke path compiles UTF-8 options without a CUDA device.</summary>
     [Fact]
