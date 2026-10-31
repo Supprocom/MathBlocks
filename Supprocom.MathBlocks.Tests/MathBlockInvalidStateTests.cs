@@ -48,7 +48,13 @@ public sealed class MathBlockInvalidStateTests
             ["boolean-vector.xor/empty-left"] = ("boolean-vector.xor@1", () => [Booleans(), Booleans(true, false, true)]),
             ["vector.select/empty-mask"] = ("vector.select@1", () => [Booleans(), Vector(1d, 2d), Vector(3d, 4d)]),
             ["complex-vector.create/empty-real"] = ("complex-vector.create@1", () => [Vector(), Vector(2d, 4d)]),
-            ["matrix.stack-rows/empty-first"] = ("matrix.stack-rows@1", () => [Vector(), Vector(3d, 4d)])
+            ["matrix.stack-rows/empty-first"] = ("matrix.stack-rows@1", () => [Vector(), Vector(3d, 4d)]),
+
+            // Results that overflow, which threw from the point and graph-edge validation.
+            ["geometry.centroid/overflow"] = ("geometry.centroid@1", () => [Points((1.7e308d, 0d), (1.7e308d, 0d))]),
+            ["geometry.delaunay-graph/overflow"] = ("geometry.delaunay-graph@1", () => [Points((0d, 0d), (1e200d, 0d), (0d, 1e200d))]),
+            ["geometry.gabriel-graph/overflow"] = ("geometry.gabriel-graph@1", () => [Points((0d, 0d), (1e200d, 0d), (0d, 1e200d))]),
+            ["topology.zero-dimensional-persistence/overflow"] = ("topology.zero-dimensional-persistence@1", () => [Points((0d, 0d), (1e200d, 0d), (0d, 1e200d))])
         };
 
     /// <summary>Gets the out-of-domain case names.</summary>

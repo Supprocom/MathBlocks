@@ -12,7 +12,9 @@ public static partial class MathBlockGeometry
         for (var left = 0; left < points.Count; left++)
             for (var right = left + 1; right < points.Count; right++)
                 edges.Add(new MathBlockGraphEdge(left, right, Distance(points[left], points[right])));
-        var forest = MathBlockGraphMath.MinimumSpanningForest(new MathBlockGraph(points.Count, edges));
+        // The pairs are not validated as a graph: a non-finite distance outside the forest leaves the result
+        // finite, and one inside it is returned as a non-finite weight.
+        var forest = MathBlockGraphMath.MinimumSpanningEdges(points.Count, edges);
         var weights = new double[forest.Count];
         for (var index = 0; index < forest.Count; index++)
             weights[index] = forest[index].Weight;
