@@ -217,7 +217,7 @@ public sealed class MathBlockElementwiseFormTests
                     var row = pick % 2 == 0 && computedRows.Length > 0
                         ? computedRows[random.Next(computedRows.Length)]
                         : random.Next(count);
-                    var others = Perturb(source, arguments, other => other != row, random);
+                    var others = Perturb(arguments, other => other != row, random);
                     var otherForm = Form(source).Evaluate([.. others, MathBlockValue.Scalar(Sentinel)]).AsVector();
                     var otherFlags = Validity(source).Evaluate(others).AsBooleanVector();
                     if (BitConverter.DoubleToInt64Bits(otherForm[row]) != BitConverter.DoubleToInt64Bits(form[row]) ||
@@ -226,7 +226,7 @@ public sealed class MathBlockElementwiseFormTests
                         failures.Add($"{source} [{DescribeMask(source, mask)}] row {row} changed when every other row was perturbed: " +
                                      $"{form[row]:R}/{flags[row]} became {otherForm[row]:R}/{otherFlags[row]}.");
                     }
-                    var own = Perturb(source, arguments, other => other == row, random);
+                    var own = Perturb(arguments, other => other == row, random);
                     var ownForm = Form(source).Evaluate([.. own, MathBlockValue.Scalar(Sentinel)]).AsVector();
                     if (BitConverter.DoubleToInt64Bits(ownForm[row]) != BitConverter.DoubleToInt64Bits(form[row]))
                         ownRowChanges++;
@@ -389,21 +389,22 @@ public sealed class MathBlockElementwiseFormTests
     }
 
     /// <summary>
-    /// Verifies a clamp row with the lower limit above the upper limit throws as the scalar source does: the
-    /// CoreCLR scalar.clamp evaluator calls Math.Clamp, which throws ArgumentException instead of returning an
-    /// invalid result.
+    /// Verifies a clamp row with the lower limit above the upper limit is a source-invalid row, as the scalar
+    /// source returns an invalid result: the form holds the fill there and the sibling marks it false.
     /// </summary>
     [Fact]
-    public void ClampWithLowerAboveUpperThrowsAsTheSourceDoes()
+    public void ClampWithLowerAboveUpperFillsTheRow()
     {
         var clamp = MathBlockCatalog.Standard.Get("scalar.clamp");
-        Assert.Throws<ArgumentException>(() =>
-            clamp.Evaluate(MathBlockValue.Scalar(1d), MathBlockValue.Scalar(3d), MathBlockValue.Scalar(2d)));
-        Assert.Throws<ArgumentException>(() => Form("scalar.clamp").Evaluate(
-            MathBlockValue.Vector([1d, 2d]),
-            MathBlockValue.Vector([0d, 3d]),
-            MathBlockValue.Scalar(2d),
-            MathBlockValue.Scalar(0d)));
+        Assert.False(clamp.Evaluate(MathBlockValue.Scalar(1d), MathBlockValue.Scalar(3d), MathBlockValue.Scalar(2d)).IsValid);
+        MathBlockValue[] arguments = [MathBlockValue.Vector([1d, 2d, -1d]), MathBlockValue.Vector([0d, 3d, -0d]), MathBlockValue.Scalar(2d)];
+
+        var form = Form("scalar.clamp").Evaluate([.. arguments, MathBlockValue.Scalar(-7d)]);
+        var validity = Validity("scalar.clamp").Evaluate(arguments);
+
+        Assert.Equal([1d, -7d, -0d], form.AsVector().ToArray());
+        Assert.Equal(long.MinValue, BitConverter.DoubleToInt64Bits(form.AsVector()[2]));
+        Assert.Equal([true, false, true], validity.AsBooleanVector().ToArray());
     }
 
     /// <summary>Verifies concurrent evaluations of one form are independent and identical.</summary>

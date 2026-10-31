@@ -386,7 +386,16 @@ internal static unsafe class ScalarModule
             case 7: result = a > 0.0 ? a : 0.0; break;
             case 8: result = Math.Min(a, b); break;
             case 9: result = Math.Max(a, b); break;
-            case 10: result = Math.Min(Math.Max(a, b), c); break;
+            case 10:
+                // Math.Clamp's rule: a lower limit above the upper limit is invalid; otherwise the value unless it
+                // compares below the lower or above the upper limit, so a zero value keeps its sign at zero limits.
+                if (b > c)
+                {
+                    *value = 0.0;
+                    return false;
+                }
+                result = a < b ? b : a > c ? c : a;
+                break;
             case 11: result = 1.0 / a; break;
             case 12: result = a * a; break;
             case 13: result = a * a * a; break;

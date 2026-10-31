@@ -76,11 +76,6 @@ internal static class MathBlockElementwiseTestSupport
                 rows[index][row] = Draw(random);
         }
 
-        // scalar.clamp rejects a lower limit above the upper limit by throwing (its CoreCLR evaluator calls
-        // Math.Clamp), so its arguments keep lower <= upper on every row; ClampWithLowerAboveUpper covers the throw.
-        if (string.Equals(source, "scalar.clamp", StringComparison.Ordinal))
-            OrderClampLimits(rows[1], rows[2]);
-
         var arguments = new MathBlockValue[arity];
         for (var index = 0; index < arity; index++)
         {
@@ -92,9 +87,8 @@ internal static class MathBlockElementwiseTestSupport
     }
 
     // Returns a copy of the arguments with every vector row for which perturbRow holds redrawn from the same value
-    // mix. Scalar arguments stay fixed, and clamp rows keep lower <= upper; a row that already satisfies that
-    // order is left unchanged by the reordering, so unperturbed rows keep their bits.
-    public static MathBlockValue[] Perturb(string source, MathBlockValue[] arguments, Func<int, bool> perturbRow, Random random)
+    // mix. Scalar arguments stay fixed, so unperturbed rows keep their bits.
+    public static MathBlockValue[] Perturb(MathBlockValue[] arguments, Func<int, bool> perturbRow, Random random)
     {
         var rows = new double[arguments.Length][];
         for (var index = 0; index < arguments.Length; index++)
@@ -109,41 +103,12 @@ internal static class MathBlockElementwiseTestSupport
                 if (perturbRow(row))
                     rows[index][row] = Draw(random);
         }
-        if (string.Equals(source, "scalar.clamp", StringComparison.Ordinal))
-            OrderClampLimits(rows[1], rows[2]);
         var result = new MathBlockValue[arguments.Length];
         for (var index = 0; index < arguments.Length; index++)
             result[index] = arguments[index].Type.Kind == MathBlockValueKind.Vector
                 ? MathBlockValue.Vector(rows[index], arguments[index].Type.Unit)
                 : arguments[index];
         return result;
-    }
-
-    private static void OrderClampLimits(double[] lower, double[] upper)
-    {
-        var count = Math.Max(lower.Length, upper.Length);
-        if (lower.Length == 1 && upper.Length == 1)
-        {
-            if (lower[0] > upper[0])
-                (lower[0], upper[0]) = (upper[0], lower[0]);
-            return;
-        }
-        for (var row = 0; row < count; row++)
-        {
-            if (lower.Length == count && upper.Length == count)
-            {
-                if (lower[row] > upper[row])
-                    (lower[row], upper[row]) = (upper[row], lower[row]);
-            }
-            else if (lower.Length == count)
-            {
-                lower[row] = Math.Min(lower[row], upper[0]);
-            }
-            else
-            {
-                upper[row] = Math.Max(upper[row], lower[0]);
-            }
-        }
     }
 
     private static double Draw(Random random)
