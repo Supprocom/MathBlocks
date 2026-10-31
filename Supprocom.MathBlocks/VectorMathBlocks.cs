@@ -82,13 +82,14 @@ internal static partial class VectorMathBlocks
         string identifier,
         Func<IReadOnlyList<double>, IReadOnlyList<double>, double[]> function,
         double[] expected,
-        MathBlockTypeResolver resolver) => MathBlockOperationFactory.Create(
+        MathBlockTypeResolver resolver,
+        bool sameLength = true) => MathBlockOperationFactory.Create(
         identifier, 2, resolver,
         inputs =>
         {
             // An empty vector's type has no length, so the resolver cannot reject it beside a longer vector.
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
-            if (inputs[0].AsVector().Count != inputs[1].AsVector().Count)
+            if (sameLength && inputs[0].AsVector().Count != inputs[1].AsVector().Count)
                 return MathBlockValue.Invalid(type, RowCountsDiffer);
             return MathBlockValue.Vector(function(inputs[0].AsVector(), inputs[1].AsVector()), type.Unit, true);
         },
