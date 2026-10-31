@@ -54,7 +54,8 @@ public sealed class MathBlockWindowCudaPlanTests
     /// <summary>
     /// Verifies the plan gives each thread the scratch of the planned width and fits all slices of the grid in the
     /// 256 MiB budget: Theil-Sen w(w - 1), pseudomedian w(w + 1), distance correlation, MAD and Spearman 2w, the
-    /// order statistics and geometric mean w, every other source none.
+    /// order statistics and geometric mean w, every other source none. The median and quantile threads each take a
+    /// block of max(2w, 32) rows, so their grid is smaller.
     /// </summary>
     [Theory]
     [InlineData("statistics.theil-sen-slope", 302_893, 96, 261_488_640)]
@@ -63,7 +64,8 @@ public sealed class MathBlockWindowCudaPlanTests
     [InlineData("statistics.interquartile-range", 1_000, 17, 139_264)]
     [InlineData("statistics.median-absolute-deviation", 1_000, 17, 278_528)]
     [InlineData("statistics.spearman-correlation", 1_000, 17, 278_528)]
-    [InlineData("vector.quantile", 1_000, 17, 139_264)]
+    [InlineData("vector.quantile", 1_000, 17, 17_408)]
+    [InlineData("vector.median", 302_893, 96, 1_277_952)]
     [InlineData("vector.geometric-mean", 1_000, 17, 139_264)]
     [InlineData("statistics.theil-sen-slope", 6, 3, 6_144)]
     [InlineData("statistics.theil-sen-slope", 6, 1, 0)]

@@ -4,8 +4,9 @@ using static Supprocom.MathBlocks.Tests.MathBlockWindowTestSupport;
 
 namespace Supprocom.MathBlocks.Tests;
 
-// CoreCLR/CUDA parity of the window-accurate forms and siblings, and of the median and quantile forms on the same
-// inputs: value bits, type, shape and invalid state of the CUDA output equal the CoreCLR result.
+// CoreCLR/CUDA parity of the window-accurate forms and siblings, and of the median and quantile forms whose CUDA
+// threads slide a sorted window over a block of rows: value bits, type, shape and invalid state of the CUDA output
+// equal the CoreCLR result on the same inputs.
 public sealed partial class MathBlockCudaWorkerTests
 {
     /// <summary>Gets the input families of the window-accurate parity tests.</summary>

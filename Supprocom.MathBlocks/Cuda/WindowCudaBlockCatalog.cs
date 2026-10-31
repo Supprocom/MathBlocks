@@ -165,13 +165,14 @@ internal static class WindowCudaBlockCatalog
         _ => 0
     };
 
-    // Rows each thread evaluates. The window-accurate sources slide their state over a block of consecutive rows
-    // after adding the width - 1 rows before it, so a block of twice the width (at least 32 rows) keeps that
-    // start-up below half of the work; without a plan-time width the block is 256 rows. The other sources evaluate
-    // one row per thread. The block size changes only the speed: every row's bits are those of the sequential pass.
+    // Rows each thread evaluates. The median, the quantile and the window-accurate sources slide their state over a
+    // block of consecutive rows after adding the width - 1 rows before it, so a block of twice the width (at least
+    // 32 rows) keeps that start-up below half of the work; without a plan-time width the block is 256 rows. The
+    // other sources evaluate one row per thread. The block size changes only the speed: every row's bits are those
+    // of the sequential pass.
     internal static long RowsPerThread(int source, long? width)
     {
-        if (source < 53)
+        if (source is not (47 or 48 or >= 53))
             return 1;
         if (width is not { } planned)
             return 256;

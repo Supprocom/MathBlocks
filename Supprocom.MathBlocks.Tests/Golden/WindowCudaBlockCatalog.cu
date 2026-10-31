@@ -651,7 +651,7 @@ __device__ void mathblocks_window_accurate_rows(
     int* boolean_result,
     long long* scratch);
 
-#line 1195 "WindowModule.cs"
+#line 1278 "WindowModule.cs"
 __device__ void mathblocks_window_dispatch(
     int opcode,
     MathBlockSlot** inputs,
@@ -723,10 +723,10 @@ __device__ double* mathblocks_window_merge_sort(double* values, double* buffer, 
 #line 607 "WindowModule.cs"
 __device__ double mathblocks_window_power_of_two(int exponent);
 
-#line 1079 "WindowModule.cs"
+#line 1145 "WindowModule.cs"
 __device__ void mathblocks_window_publish(MathBlockSlot* output, bool valid, int count, int thread);
 
-#line 1095 "WindowModule.cs"
+#line 1161 "WindowModule.cs"
 __device__ void mathblocks_window_run(
     int opcode,
     MathBlockSlot** inputs,
@@ -744,6 +744,19 @@ __device__ double mathblocks_window_scratch_median(double* scratch, int count);
 
 #line 169 "WindowModule.cs"
 __device__ int mathblocks_window_series_count(int source);
+
+#line 1084 "WindowModule.cs"
+__device__ void mathblocks_window_sorted_rows(
+    const double* x,
+    int width,
+    double probability,
+    int first_row,
+    int last_row,
+    double fill,
+    bool sibling,
+    double* result,
+    int* boolean_result,
+    double* sorted);
 
 #line 136 "WindowModule.cs"
 __device__ int mathblocks_window_source_arity(int source);
@@ -1181,15 +1194,15 @@ __device__ void mathblocks_window_accurate_rows(
     }
 }
 
-#line 1195 "WindowModule.cs"
+#line 1278 "WindowModule.cs"
 __device__ void mathblocks_window_dispatch(
     int opcode,
     MathBlockSlot** inputs,
     int input_count,
     MathBlockSlot* output)
-#line 1201 "WindowModule.cs"
+#line 1284 "WindowModule.cs"
 {
-#line 1202 "WindowModule.cs"
+#line 1285 "WindowModule.cs"
     mathblocks_window_run(opcode, inputs, input_count, output, threadIdx.x, blockDim.x, csharp2cuda_i32_neg(1));
 }
 
@@ -2577,69 +2590,69 @@ __device__ double mathblocks_window_power_of_two(int exponent)
     return __longlong_as_double(csharp2cuda_i64_shl(((long long)(csharp2cuda_i32_add(exponent, 1023))), 52));
 }
 
-#line 1079 "WindowModule.cs"
+#line 1145 "WindowModule.cs"
 __device__ void mathblocks_window_publish(MathBlockSlot* output, bool valid, int count, int thread)
-#line 1081 "WindowModule.cs"
+#line 1147 "WindowModule.cs"
 {
-#line 1082 "WindowModule.cs"
+#line 1148 "WindowModule.cs"
     if (((thread) != (0)))
     {
-#line 1083 "WindowModule.cs"
+#line 1149 "WindowModule.cs"
         return;
     }
-#line 1084 "WindowModule.cs"
-#line 1084 "WindowModule.cs"
+#line 1150 "WindowModule.cs"
+#line 1150 "WindowModule.cs"
     double* csharp2cuda_temp_0 = &((output)->scalar_value);
     (*(csharp2cuda_temp_0) = 0.0);
-#line 1085 "WindowModule.cs"
-#line 1085 "WindowModule.cs"
+#line 1151 "WindowModule.cs"
+#line 1151 "WindowModule.cs"
     int* csharp2cuda_temp_1 = &((output)->boolean_value);
     (*(csharp2cuda_temp_1) = 0);
-#line 1086 "WindowModule.cs"
-#line 1086 "WindowModule.cs"
+#line 1152 "WindowModule.cs"
+#line 1152 "WindowModule.cs"
     int* csharp2cuda_temp_2 = &((output)->columns);
     (*(csharp2cuda_temp_2) = 0);
-#line 1087 "WindowModule.cs"
-#line 1087 "WindowModule.cs"
+#line 1153 "WindowModule.cs"
+#line 1153 "WindowModule.cs"
     int* csharp2cuda_temp_3 = &((output)->rows);
-#line 1087 "WindowModule.cs"
+#line 1153 "WindowModule.cs"
     int csharp2cuda_temp_4;
-#line 1087 "WindowModule.cs"
+#line 1153 "WindowModule.cs"
     if (valid)
     {
-#line 1087 "WindowModule.cs"
+#line 1153 "WindowModule.cs"
         csharp2cuda_temp_4 = count;
     }
     else
     {
-#line 1087 "WindowModule.cs"
+#line 1153 "WindowModule.cs"
         csharp2cuda_temp_4 = 0;
     }
     (*(csharp2cuda_temp_3) = csharp2cuda_temp_4);
-#line 1088 "WindowModule.cs"
-#line 1088 "WindowModule.cs"
+#line 1154 "WindowModule.cs"
+#line 1154 "WindowModule.cs"
     int* csharp2cuda_temp_5 = &((output)->count);
-#line 1088 "WindowModule.cs"
+#line 1154 "WindowModule.cs"
     int csharp2cuda_temp_6;
-#line 1088 "WindowModule.cs"
+#line 1154 "WindowModule.cs"
     if (valid)
     {
-#line 1088 "WindowModule.cs"
+#line 1154 "WindowModule.cs"
         csharp2cuda_temp_6 = count;
     }
     else
     {
-#line 1088 "WindowModule.cs"
+#line 1154 "WindowModule.cs"
         csharp2cuda_temp_6 = 0;
     }
     (*(csharp2cuda_temp_5) = csharp2cuda_temp_6);
-#line 1089 "WindowModule.cs"
-#line 1089 "WindowModule.cs"
+#line 1155 "WindowModule.cs"
+#line 1155 "WindowModule.cs"
     int* csharp2cuda_temp_7 = &((output)->valid);
     (*(csharp2cuda_temp_7) = valid);
 }
 
-#line 1095 "WindowModule.cs"
+#line 1161 "WindowModule.cs"
 __device__ void mathblocks_window_run(
     int opcode,
     MathBlockSlot** inputs,
@@ -2648,487 +2661,537 @@ __device__ void mathblocks_window_run(
     int thread,
     int threads,
     int scratch_capacity)
-#line 1104 "WindowModule.cs"
+#line 1170 "WindowModule.cs"
 {
-#line 1105 "WindowModule.cs"
+#line 1171 "WindowModule.cs"
     int source = csharp2cuda_i32_div(opcode, 2);
-#line 1106 "WindowModule.cs"
+#line 1172 "WindowModule.cs"
     int csharp2cuda_temp_0 = csharp2cuda_i32_rem(opcode, 2);
-#line 1106 "WindowModule.cs"
+#line 1172 "WindowModule.cs"
     bool sibling = ((csharp2cuda_temp_0) != (0));
-#line 1107 "WindowModule.cs"
+#line 1173 "WindowModule.cs"
     int arity = mathblocks_window_source_arity(source);
-#line 1108 "WindowModule.cs"
+#line 1174 "WindowModule.cs"
     int series = mathblocks_window_series_count(source);
-#line 1109 "WindowModule.cs"
+#line 1175 "WindowModule.cs"
     bool csharp2cuda_temp_1;
-#line 1109 "WindowModule.cs"
+#line 1175 "WindowModule.cs"
     if (((opcode) >= (0)))
     {
-#line 1109 "WindowModule.cs"
+#line 1175 "WindowModule.cs"
         csharp2cuda_temp_1 = ((source) < (59));
     }
     else
     {
-#line 1109 "WindowModule.cs"
+#line 1175 "WindowModule.cs"
         csharp2cuda_temp_1 = false;
     }
-#line 1109 "WindowModule.cs"
+#line 1175 "WindowModule.cs"
     bool csharp2cuda_temp_2;
-#line 1109 "WindowModule.cs"
+#line 1175 "WindowModule.cs"
     if (csharp2cuda_temp_1)
     {
-#line 1109 "WindowModule.cs"
+#line 1175 "WindowModule.cs"
         int csharp2cuda_temp_3;
-#line 1109 "WindowModule.cs"
+#line 1175 "WindowModule.cs"
         if (sibling)
         {
-#line 1109 "WindowModule.cs"
+#line 1175 "WindowModule.cs"
             csharp2cuda_temp_3 = 1;
         }
         else
         {
-#line 1109 "WindowModule.cs"
+#line 1175 "WindowModule.cs"
             csharp2cuda_temp_3 = 2;
         }
-#line 1109 "WindowModule.cs"
+#line 1175 "WindowModule.cs"
         csharp2cuda_temp_2 = ((input_count) == (csharp2cuda_i32_add(arity, csharp2cuda_temp_3)));
     }
     else
     {
-#line 1109 "WindowModule.cs"
+#line 1175 "WindowModule.cs"
         csharp2cuda_temp_2 = false;
     }
-#line 1109 "WindowModule.cs"
+#line 1175 "WindowModule.cs"
     bool valid = csharp2cuda_temp_2;
-#line 1110 "WindowModule.cs"
+#line 1176 "WindowModule.cs"
     {
-#line 1110 "WindowModule.cs"
+#line 1176 "WindowModule.cs"
         int index = 0;
         while (true)
         {
-#line 1110 "WindowModule.cs"
+#line 1176 "WindowModule.cs"
             bool csharp2cuda_temp_5;
-#line 1110 "WindowModule.cs"
+#line 1176 "WindowModule.cs"
             if (valid)
             {
-#line 1110 "WindowModule.cs"
+#line 1176 "WindowModule.cs"
                 csharp2cuda_temp_5 = ((index) < (input_count));
             }
             else
             {
-#line 1110 "WindowModule.cs"
+#line 1176 "WindowModule.cs"
                 csharp2cuda_temp_5 = false;
             }
             if (!(csharp2cuda_temp_5))
                 break;
-#line 1111 "WindowModule.cs"
-#line 1111 "WindowModule.cs"
+#line 1177 "WindowModule.cs"
+#line 1177 "WindowModule.cs"
             MathBlockSlot* csharp2cuda_temp_6 = (inputs)[index];
-#line 1111 "WindowModule.cs"
+#line 1177 "WindowModule.cs"
             bool csharp2cuda_temp_7;
-#line 1111 "WindowModule.cs"
+#line 1177 "WindowModule.cs"
             if (!(((((void*)(csharp2cuda_temp_6))) == (((void*)(nullptr))))))
             {
-#line 1111 "WindowModule.cs"
+#line 1177 "WindowModule.cs"
                 MathBlockSlot* csharp2cuda_temp_8 = (inputs)[index];
-#line 1111 "WindowModule.cs"
+#line 1177 "WindowModule.cs"
                 bool csharp2cuda_temp_9 = (csharp2cuda_temp_8)->valid;
-#line 1111 "WindowModule.cs"
+#line 1177 "WindowModule.cs"
                 csharp2cuda_temp_7 = (!(csharp2cuda_temp_9));
             }
             else
             {
-#line 1111 "WindowModule.cs"
+#line 1177 "WindowModule.cs"
                 csharp2cuda_temp_7 = true;
             }
             if (csharp2cuda_temp_7)
             {
-#line 1112 "WindowModule.cs"
-#line 1112 "WindowModule.cs"
+#line 1178 "WindowModule.cs"
+#line 1178 "WindowModule.cs"
                 bool* csharp2cuda_temp_10 = &(valid);
                 (*(csharp2cuda_temp_10) = false);
             }
-#line 1110 "WindowModule.cs"
+#line 1176 "WindowModule.cs"
             int* csharp2cuda_temp_4 = &(index);
             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_4));
         }
     }
-#line 1113 "WindowModule.cs"
+#line 1179 "WindowModule.cs"
     if ((!(valid)))
-#line 1114 "WindowModule.cs"
+#line 1180 "WindowModule.cs"
     {
-#line 1115 "WindowModule.cs"
+#line 1181 "WindowModule.cs"
         mathblocks_window_publish(output, false, 0, thread);
-#line 1116 "WindowModule.cs"
+#line 1182 "WindowModule.cs"
         return;
     }
-#line 1119 "WindowModule.cs"
+#line 1185 "WindowModule.cs"
     MathBlockSlot* csharp2cuda_temp_11;
-#line 1119 "WindowModule.cs"
+#line 1185 "WindowModule.cs"
     if (((input_count) > (0)))
     {
-#line 1119 "WindowModule.cs"
+#line 1185 "WindowModule.cs"
         csharp2cuda_temp_11 = (inputs)[0];
     }
     else
     {
-#line 1119 "WindowModule.cs"
+#line 1185 "WindowModule.cs"
         csharp2cuda_temp_11 = ((MathBlockSlot*)(nullptr));
     }
-#line 1119 "WindowModule.cs"
+#line 1185 "WindowModule.cs"
     const MathBlockSlot* first = csharp2cuda_temp_11;
-#line 1120 "WindowModule.cs"
+#line 1186 "WindowModule.cs"
     MathBlockSlot* csharp2cuda_temp_12;
-#line 1120 "WindowModule.cs"
+#line 1186 "WindowModule.cs"
     if (((series) > (1)))
     {
-#line 1120 "WindowModule.cs"
+#line 1186 "WindowModule.cs"
         csharp2cuda_temp_12 = (inputs)[1];
     }
     else
     {
-#line 1120 "WindowModule.cs"
+#line 1186 "WindowModule.cs"
         csharp2cuda_temp_12 = ((MathBlockSlot*)(nullptr));
     }
-#line 1120 "WindowModule.cs"
+#line 1186 "WindowModule.cs"
     const MathBlockSlot* second = csharp2cuda_temp_12;
-#line 1121 "WindowModule.cs"
+#line 1187 "WindowModule.cs"
     MathBlockSlot* csharp2cuda_temp_13;
-#line 1121 "WindowModule.cs"
+#line 1187 "WindowModule.cs"
     if (((arity) > (series)))
     {
-#line 1121 "WindowModule.cs"
+#line 1187 "WindowModule.cs"
         csharp2cuda_temp_13 = (inputs)[series];
     }
     else
     {
-#line 1121 "WindowModule.cs"
+#line 1187 "WindowModule.cs"
         csharp2cuda_temp_13 = ((MathBlockSlot*)(nullptr));
     }
-#line 1121 "WindowModule.cs"
+#line 1187 "WindowModule.cs"
     const MathBlockSlot* first_parameter = csharp2cuda_temp_13;
-#line 1122 "WindowModule.cs"
+#line 1188 "WindowModule.cs"
     MathBlockSlot* csharp2cuda_temp_14;
-#line 1122 "WindowModule.cs"
+#line 1188 "WindowModule.cs"
     if (((arity) > (csharp2cuda_i32_add(series, 1))))
     {
-#line 1122 "WindowModule.cs"
+#line 1188 "WindowModule.cs"
         csharp2cuda_temp_14 = (inputs)[csharp2cuda_i32_add(series, 1)];
     }
     else
     {
-#line 1122 "WindowModule.cs"
+#line 1188 "WindowModule.cs"
         csharp2cuda_temp_14 = ((MathBlockSlot*)(nullptr));
     }
-#line 1122 "WindowModule.cs"
+#line 1188 "WindowModule.cs"
     const MathBlockSlot* second_parameter = csharp2cuda_temp_14;
-#line 1123 "WindowModule.cs"
+#line 1189 "WindowModule.cs"
     MathBlockSlot* csharp2cuda_temp_15 = (inputs)[arity];
-#line 1123 "WindowModule.cs"
+#line 1189 "WindowModule.cs"
     const MathBlockSlot* width_input = csharp2cuda_temp_15;
-#line 1124 "WindowModule.cs"
+#line 1190 "WindowModule.cs"
     MathBlockSlot* csharp2cuda_temp_16;
-#line 1124 "WindowModule.cs"
+#line 1190 "WindowModule.cs"
     if (sibling)
     {
-#line 1124 "WindowModule.cs"
+#line 1190 "WindowModule.cs"
         csharp2cuda_temp_16 = ((MathBlockSlot*)(nullptr));
     }
     else
     {
-#line 1124 "WindowModule.cs"
+#line 1190 "WindowModule.cs"
         csharp2cuda_temp_16 = (inputs)[csharp2cuda_i32_add(arity, 1)];
     }
-#line 1124 "WindowModule.cs"
+#line 1190 "WindowModule.cs"
     const MathBlockSlot* fill_input = csharp2cuda_temp_16;
-#line 1125 "WindowModule.cs"
+#line 1191 "WindowModule.cs"
     int count = (first)->count;
-#line 1126 "WindowModule.cs"
+#line 1192 "WindowModule.cs"
     int width = 0;
-#line 1127 "WindowModule.cs"
-#line 1127 "WindowModule.cs"
+#line 1193 "WindowModule.cs"
+#line 1193 "WindowModule.cs"
     bool csharp2cuda_temp_17;
-#line 1127 "WindowModule.cs"
+#line 1193 "WindowModule.cs"
     if (((((void*)(second))) != (((void*)(nullptr)))))
     {
-#line 1127 "WindowModule.cs"
+#line 1193 "WindowModule.cs"
         int csharp2cuda_temp_18 = (second)->count;
-#line 1127 "WindowModule.cs"
+#line 1193 "WindowModule.cs"
         csharp2cuda_temp_17 = ((csharp2cuda_temp_18) != (count));
     }
     else
     {
-#line 1127 "WindowModule.cs"
+#line 1193 "WindowModule.cs"
         csharp2cuda_temp_17 = false;
     }
     if (csharp2cuda_temp_17)
     {
-#line 1128 "WindowModule.cs"
-#line 1128 "WindowModule.cs"
+#line 1194 "WindowModule.cs"
+#line 1194 "WindowModule.cs"
         bool* csharp2cuda_temp_19 = &(valid);
         (*(csharp2cuda_temp_19) = false);
     }
-#line 1129 "WindowModule.cs"
-#line 1129 "WindowModule.cs"
+#line 1195 "WindowModule.cs"
+#line 1195 "WindowModule.cs"
     double csharp2cuda_temp_20 = (width_input)->scalar_value;
-#line 1129 "WindowModule.cs"
+#line 1195 "WindowModule.cs"
     int* csharp2cuda_temp_21 = &(width);
-#line 1129 "WindowModule.cs"
+#line 1195 "WindowModule.cs"
     bool csharp2cuda_temp_22 = mathblocks_sequence_positive_integer(csharp2cuda_temp_20, csharp2cuda_temp_21);
-#line 1129 "WindowModule.cs"
+#line 1195 "WindowModule.cs"
     bool csharp2cuda_temp_23;
-#line 1129 "WindowModule.cs"
+#line 1195 "WindowModule.cs"
     if (!((!(csharp2cuda_temp_22))))
     {
-#line 1129 "WindowModule.cs"
+#line 1195 "WindowModule.cs"
         csharp2cuda_temp_23 = ((width) > (count));
     }
     else
     {
-#line 1129 "WindowModule.cs"
+#line 1195 "WindowModule.cs"
         csharp2cuda_temp_23 = true;
     }
     if (csharp2cuda_temp_23)
     {
-#line 1130 "WindowModule.cs"
-#line 1130 "WindowModule.cs"
+#line 1196 "WindowModule.cs"
+#line 1196 "WindowModule.cs"
         bool* csharp2cuda_temp_24 = &(valid);
         (*(csharp2cuda_temp_24) = false);
     }
-#line 1131 "WindowModule.cs"
-#line 1131 "WindowModule.cs"
+#line 1197 "WindowModule.cs"
+#line 1197 "WindowModule.cs"
     int csharp2cuda_temp_25 = (output)->capacity;
     if (((count) > (csharp2cuda_temp_25)))
     {
-#line 1132 "WindowModule.cs"
-#line 1132 "WindowModule.cs"
+#line 1198 "WindowModule.cs"
+#line 1198 "WindowModule.cs"
         bool* csharp2cuda_temp_26 = &(valid);
         (*(csharp2cuda_temp_26) = false);
     }
-#line 1133 "WindowModule.cs"
+#line 1199 "WindowModule.cs"
     long long csharp2cuda_temp_27;
-#line 1133 "WindowModule.cs"
+#line 1199 "WindowModule.cs"
     if (valid)
     {
-#line 1133 "WindowModule.cs"
+#line 1199 "WindowModule.cs"
         csharp2cuda_temp_27 = mathblocks_window_scratch_count(source, width);
     }
     else
     {
-#line 1133 "WindowModule.cs"
+#line 1199 "WindowModule.cs"
         csharp2cuda_temp_27 = ((long long)(0));
     }
-#line 1133 "WindowModule.cs"
+#line 1199 "WindowModule.cs"
     long long required = csharp2cuda_temp_27;
-#line 1134 "WindowModule.cs"
+#line 1200 "WindowModule.cs"
     long long csharp2cuda_temp_28;
-#line 1134 "WindowModule.cs"
+#line 1200 "WindowModule.cs"
     if (((scratch_capacity) < (0)))
     {
-#line 1134 "WindowModule.cs"
+#line 1200 "WindowModule.cs"
         csharp2cuda_temp_28 = required;
     }
     else
     {
-#line 1134 "WindowModule.cs"
+#line 1200 "WindowModule.cs"
         csharp2cuda_temp_28 = ((long long)(scratch_capacity));
     }
-#line 1134 "WindowModule.cs"
+#line 1200 "WindowModule.cs"
     long long capacity = csharp2cuda_temp_28;
-#line 1135 "WindowModule.cs"
-#line 1135 "WindowModule.cs"
+#line 1201 "WindowModule.cs"
+#line 1201 "WindowModule.cs"
     bool csharp2cuda_temp_29;
-#line 1135 "WindowModule.cs"
+#line 1201 "WindowModule.cs"
     if (!(((required) > (capacity))))
     {
-#line 1135 "WindowModule.cs"
+#line 1201 "WindowModule.cs"
         bool csharp2cuda_temp_30;
-#line 1135 "WindowModule.cs"
+#line 1201 "WindowModule.cs"
         if (((required) > (((long long)(0)))))
         {
-#line 1135 "WindowModule.cs"
+#line 1201 "WindowModule.cs"
             unsigned long long csharp2cuda_temp_31 = (output)->scratch_pointer;
-#line 1135 "WindowModule.cs"
+#line 1201 "WindowModule.cs"
             csharp2cuda_temp_30 = ((csharp2cuda_temp_31) == (((unsigned long long)(0))));
         }
         else
         {
-#line 1135 "WindowModule.cs"
+#line 1201 "WindowModule.cs"
             csharp2cuda_temp_30 = false;
         }
-#line 1135 "WindowModule.cs"
+#line 1201 "WindowModule.cs"
         csharp2cuda_temp_29 = csharp2cuda_temp_30;
     }
     else
     {
-#line 1135 "WindowModule.cs"
+#line 1201 "WindowModule.cs"
         csharp2cuda_temp_29 = true;
     }
     if (csharp2cuda_temp_29)
     {
-#line 1136 "WindowModule.cs"
-#line 1136 "WindowModule.cs"
+#line 1202 "WindowModule.cs"
+#line 1202 "WindowModule.cs"
         bool* csharp2cuda_temp_32 = &(valid);
         (*(csharp2cuda_temp_32) = false);
     }
-#line 1137 "WindowModule.cs"
+#line 1203 "WindowModule.cs"
     mathblocks_window_publish(output, valid, count, thread);
-#line 1138 "WindowModule.cs"
+#line 1204 "WindowModule.cs"
     if ((!(valid)))
     {
-#line 1139 "WindowModule.cs"
+#line 1205 "WindowModule.cs"
         return;
     }
-#line 1141 "WindowModule.cs"
+#line 1207 "WindowModule.cs"
     double csharp2cuda_temp_33;
-#line 1141 "WindowModule.cs"
+#line 1207 "WindowModule.cs"
     if (sibling)
     {
-#line 1141 "WindowModule.cs"
+#line 1207 "WindowModule.cs"
         csharp2cuda_temp_33 = 0.0;
     }
     else
     {
-#line 1141 "WindowModule.cs"
+#line 1207 "WindowModule.cs"
         csharp2cuda_temp_33 = (fill_input)->scalar_value;
     }
-#line 1141 "WindowModule.cs"
+#line 1207 "WindowModule.cs"
     double fill = csharp2cuda_temp_33;
-#line 1142 "WindowModule.cs"
+#line 1208 "WindowModule.cs"
     unsigned long long csharp2cuda_temp_34 = (first)->data_pointer;
-#line 1142 "WindowModule.cs"
+#line 1208 "WindowModule.cs"
     const double* a = ((double*)(csharp2cuda_temp_34));
-#line 1143 "WindowModule.cs"
+#line 1209 "WindowModule.cs"
     unsigned long long csharp2cuda_temp_35 = (first)->data_pointer;
-#line 1143 "WindowModule.cs"
+#line 1209 "WindowModule.cs"
     const int* flags = ((int*)(csharp2cuda_temp_35));
-#line 1144 "WindowModule.cs"
+#line 1210 "WindowModule.cs"
     double* csharp2cuda_temp_36;
-#line 1144 "WindowModule.cs"
+#line 1210 "WindowModule.cs"
     if (((((void*)(second))) == (((void*)(nullptr)))))
     {
-#line 1144 "WindowModule.cs"
+#line 1210 "WindowModule.cs"
         csharp2cuda_temp_36 = ((double*)(nullptr));
     }
     else
     {
-#line 1144 "WindowModule.cs"
+#line 1210 "WindowModule.cs"
         unsigned long long csharp2cuda_temp_37 = (second)->data_pointer;
-#line 1144 "WindowModule.cs"
+#line 1210 "WindowModule.cs"
         csharp2cuda_temp_36 = ((double*)(csharp2cuda_temp_37));
     }
-#line 1144 "WindowModule.cs"
+#line 1210 "WindowModule.cs"
     const double* b = csharp2cuda_temp_36;
-#line 1145 "WindowModule.cs"
+#line 1211 "WindowModule.cs"
     unsigned long long csharp2cuda_temp_38 = (output)->data_pointer;
-#line 1145 "WindowModule.cs"
+#line 1211 "WindowModule.cs"
     double* result = ((double*)(csharp2cuda_temp_38));
-#line 1146 "WindowModule.cs"
+#line 1212 "WindowModule.cs"
     unsigned long long csharp2cuda_temp_39 = (output)->data_pointer;
-#line 1146 "WindowModule.cs"
+#line 1212 "WindowModule.cs"
     int* boolean_result = ((int*)(csharp2cuda_temp_39));
-#line 1147 "WindowModule.cs"
+#line 1213 "WindowModule.cs"
     unsigned long long csharp2cuda_temp_40 = (output)->scratch_pointer;
-#line 1147 "WindowModule.cs"
+#line 1213 "WindowModule.cs"
     double* scratch = csharp2cuda_pointer_add(((double*)(csharp2cuda_temp_40)), csharp2cuda_i32_mul(thread, csharp2cuda_i32_from_bits(capacity)));
-#line 1148 "WindowModule.cs"
-    if (((source) >= (53)))
-#line 1149 "WindowModule.cs"
+#line 1214 "WindowModule.cs"
+#line 1214 "WindowModule.cs"
+    bool csharp2cuda_temp_41;
+#line 1214 "WindowModule.cs"
+    if (!(((source) == (47))))
     {
-#line 1151 "WindowModule.cs"
+#line 1214 "WindowModule.cs"
+        csharp2cuda_temp_41 = ((source) == (48));
+    }
+    else
+    {
+#line 1214 "WindowModule.cs"
+        csharp2cuda_temp_41 = true;
+    }
+#line 1214 "WindowModule.cs"
+    bool csharp2cuda_temp_42;
+#line 1214 "WindowModule.cs"
+    if (!(csharp2cuda_temp_41))
+    {
+#line 1214 "WindowModule.cs"
+        csharp2cuda_temp_42 = ((source) >= (53));
+    }
+    else
+    {
+#line 1214 "WindowModule.cs"
+        csharp2cuda_temp_42 = true;
+    }
+    if (csharp2cuda_temp_42)
+#line 1215 "WindowModule.cs"
+    {
+#line 1217 "WindowModule.cs"
         long long rows_per_thread = csharp2cuda_i64_div(csharp2cuda_i64_sub(csharp2cuda_i64_add(((long long)(count)), ((long long)(threads))), ((long long)(1))), ((long long)(threads)));
-#line 1152 "WindowModule.cs"
+#line 1218 "WindowModule.cs"
         long long first_row = csharp2cuda_i64_mul(((long long)(thread)), rows_per_thread);
-#line 1153 "WindowModule.cs"
+#line 1219 "WindowModule.cs"
         if (((first_row) >= (((long long)(count)))))
         {
-#line 1154 "WindowModule.cs"
+#line 1220 "WindowModule.cs"
             return;
         }
-#line 1155 "WindowModule.cs"
-        long long csharp2cuda_temp_41;
-#line 1155 "WindowModule.cs"
+#line 1221 "WindowModule.cs"
+        long long csharp2cuda_temp_43;
+#line 1221 "WindowModule.cs"
         if (((csharp2cuda_i64_sub(((long long)(count)), first_row)) < (rows_per_thread)))
         {
-#line 1155 "WindowModule.cs"
-            csharp2cuda_temp_41 = ((long long)(count));
+#line 1221 "WindowModule.cs"
+            csharp2cuda_temp_43 = ((long long)(count));
         }
         else
         {
-#line 1155 "WindowModule.cs"
-            csharp2cuda_temp_41 = csharp2cuda_i64_add(first_row, rows_per_thread);
+#line 1221 "WindowModule.cs"
+            csharp2cuda_temp_43 = csharp2cuda_i64_add(first_row, rows_per_thread);
         }
-#line 1155 "WindowModule.cs"
-        long long last_row = csharp2cuda_temp_41;
-#line 1156 "WindowModule.cs"
-        mathblocks_window_accurate_rows(source, a, width, csharp2cuda_i32_from_bits(first_row), csharp2cuda_i32_from_bits(last_row), fill, sibling, result, boolean_result, ((long long*)(scratch)));
-#line 1167 "WindowModule.cs"
+#line 1221 "WindowModule.cs"
+        long long last_row = csharp2cuda_temp_43;
+#line 1222 "WindowModule.cs"
+        if (((source) >= (53)))
+#line 1223 "WindowModule.cs"
+        {
+#line 1224 "WindowModule.cs"
+            mathblocks_window_accurate_rows(source, a, width, csharp2cuda_i32_from_bits(first_row), csharp2cuda_i32_from_bits(last_row), fill, sibling, result, boolean_result, ((long long*)(scratch)));
+        }
+        else
+#line 1237 "WindowModule.cs"
+        {
+#line 1238 "WindowModule.cs"
+#line 1241 "WindowModule.cs"
+            double csharp2cuda_temp_44;
+#line 1241 "WindowModule.cs"
+            if (((source) == (47)))
+            {
+#line 1241 "WindowModule.cs"
+                csharp2cuda_temp_44 = 0.5;
+            }
+            else
+            {
+#line 1241 "WindowModule.cs"
+                csharp2cuda_temp_44 = (first_parameter)->scalar_value;
+            }
+            mathblocks_window_sorted_rows(a, width, csharp2cuda_temp_44, csharp2cuda_i32_from_bits(first_row), csharp2cuda_i32_from_bits(last_row), fill, sibling, result, boolean_result, scratch);
+        }
+#line 1250 "WindowModule.cs"
         return;
     }
-#line 1169 "WindowModule.cs"
+#line 1252 "WindowModule.cs"
     {
-#line 1169 "WindowModule.cs"
+#line 1252 "WindowModule.cs"
         int end = thread;
         while (true)
         {
             if (!(((end) < (count))))
                 break;
-#line 1170 "WindowModule.cs"
+#line 1253 "WindowModule.cs"
             {
-#line 1171 "WindowModule.cs"
+#line 1254 "WindowModule.cs"
                 bool row_valid = false;
-#line 1172 "WindowModule.cs"
+#line 1255 "WindowModule.cs"
                 double value = 0.0;
-#line 1173 "WindowModule.cs"
+#line 1256 "WindowModule.cs"
                 if (((end) >= (csharp2cuda_i32_sub(width, 1))))
-#line 1174 "WindowModule.cs"
+#line 1257 "WindowModule.cs"
                 {
-#line 1176 "WindowModule.cs"
+#line 1259 "WindowModule.cs"
                     int start = csharp2cuda_i32_add(csharp2cuda_i32_sub(end, width), 1);
-#line 1177 "WindowModule.cs"
-#line 1177 "WindowModule.cs"
-                    bool* csharp2cuda_temp_44 = &(row_valid);
-#line 1186 "WindowModule.cs"
-                    double* csharp2cuda_temp_45 = &(value);
-#line 1177 "WindowModule.cs"
-                    bool csharp2cuda_temp_46 = mathblocks_window_value(source, csharp2cuda_pointer_add(a, start), csharp2cuda_pointer_add(b, start), csharp2cuda_pointer_add(flags, start), width, first_parameter, second_parameter, scratch, csharp2cuda_temp_45);
-                    (*(csharp2cuda_temp_44) = csharp2cuda_temp_46);
+#line 1260 "WindowModule.cs"
+#line 1260 "WindowModule.cs"
+                    bool* csharp2cuda_temp_47 = &(row_valid);
+#line 1269 "WindowModule.cs"
+                    double* csharp2cuda_temp_48 = &(value);
+#line 1260 "WindowModule.cs"
+                    bool csharp2cuda_temp_49 = mathblocks_window_value(source, csharp2cuda_pointer_add(a, start), csharp2cuda_pointer_add(b, start), csharp2cuda_pointer_add(flags, start), width, first_parameter, second_parameter, scratch, csharp2cuda_temp_48);
+                    (*(csharp2cuda_temp_47) = csharp2cuda_temp_49);
                 }
-#line 1188 "WindowModule.cs"
+#line 1271 "WindowModule.cs"
                 if (sibling)
                 {
-#line 1189 "WindowModule.cs"
-#line 1189 "WindowModule.cs"
-                    int* csharp2cuda_temp_47 = &((boolean_result)[end]);
-                    (*(csharp2cuda_temp_47) = row_valid);
+#line 1272 "WindowModule.cs"
+#line 1272 "WindowModule.cs"
+                    int* csharp2cuda_temp_50 = &((boolean_result)[end]);
+                    (*(csharp2cuda_temp_50) = row_valid);
                 }
                 else
                 {
-#line 1191 "WindowModule.cs"
-#line 1191 "WindowModule.cs"
-                    double* csharp2cuda_temp_48 = &((result)[end]);
-#line 1191 "WindowModule.cs"
-                    double csharp2cuda_temp_49;
-#line 1191 "WindowModule.cs"
+#line 1274 "WindowModule.cs"
+#line 1274 "WindowModule.cs"
+                    double* csharp2cuda_temp_51 = &((result)[end]);
+#line 1274 "WindowModule.cs"
+                    double csharp2cuda_temp_52;
+#line 1274 "WindowModule.cs"
                     if (row_valid)
                     {
-#line 1191 "WindowModule.cs"
-                        csharp2cuda_temp_49 = value;
+#line 1274 "WindowModule.cs"
+                        csharp2cuda_temp_52 = value;
                     }
                     else
                     {
-#line 1191 "WindowModule.cs"
-                        csharp2cuda_temp_49 = fill;
+#line 1274 "WindowModule.cs"
+                        csharp2cuda_temp_52 = fill;
                     }
-                    (*(csharp2cuda_temp_48) = csharp2cuda_temp_49);
+                    (*(csharp2cuda_temp_51) = csharp2cuda_temp_52);
                 }
             }
-#line 1169 "WindowModule.cs"
-            int* csharp2cuda_temp_42 = &(end);
-#line 1169 "WindowModule.cs"
-            int csharp2cuda_temp_43 = *(csharp2cuda_temp_42);
-            (*(csharp2cuda_temp_42) = csharp2cuda_i32_add(csharp2cuda_temp_43, threads));
+#line 1252 "WindowModule.cs"
+            int* csharp2cuda_temp_45 = &(end);
+#line 1252 "WindowModule.cs"
+            int csharp2cuda_temp_46 = *(csharp2cuda_temp_45);
+            (*(csharp2cuda_temp_45) = csharp2cuda_i32_add(csharp2cuda_temp_46, threads));
         }
     }
 }
@@ -3218,6 +3281,243 @@ __device__ int mathblocks_window_series_count(int source)
         default:
 #line 188 "WindowModule.cs"
             return 1;
+    }
+}
+
+#line 1084 "WindowModule.cs"
+__device__ void mathblocks_window_sorted_rows(
+    const double* x,
+    int width,
+    double probability,
+    int first_row,
+    int last_row,
+    double fill,
+    bool sibling,
+    double* result,
+    int* boolean_result,
+    double* sorted)
+#line 1096 "WindowModule.cs"
+{
+#line 1097 "WindowModule.cs"
+    bool csharp2cuda_temp_0;
+#line 1097 "WindowModule.cs"
+    if (!(((probability) < (0.0))))
+    {
+#line 1097 "WindowModule.cs"
+        csharp2cuda_temp_0 = ((probability) > (1.0));
+    }
+    else
+    {
+#line 1097 "WindowModule.cs"
+        csharp2cuda_temp_0 = true;
+    }
+#line 1097 "WindowModule.cs"
+    bool probability_valid = (!(csharp2cuda_temp_0));
+#line 1098 "WindowModule.cs"
+    int csharp2cuda_temp_1;
+#line 1098 "WindowModule.cs"
+    if (((csharp2cuda_i32_add(csharp2cuda_i32_sub(first_row, width), 1)) < (0)))
+    {
+#line 1098 "WindowModule.cs"
+        csharp2cuda_temp_1 = 0;
+    }
+    else
+    {
+#line 1098 "WindowModule.cs"
+        csharp2cuda_temp_1 = csharp2cuda_i32_add(csharp2cuda_i32_sub(first_row, width), 1);
+    }
+#line 1098 "WindowModule.cs"
+    int begin = csharp2cuda_temp_1;
+#line 1099 "WindowModule.cs"
+    int size = 0;
+#line 1100 "WindowModule.cs"
+    {
+#line 1100 "WindowModule.cs"
+        int row = begin;
+        while (true)
+        {
+            if (!(((row) < (last_row))))
+                break;
+#line 1101 "WindowModule.cs"
+            {
+#line 1102 "WindowModule.cs"
+                if (((csharp2cuda_i32_sub(row, width)) >= (begin)))
+#line 1103 "WindowModule.cs"
+                {
+#line 1104 "WindowModule.cs"
+                    double leaving = (x)[csharp2cuda_i32_sub(row, width)];
+#line 1105 "WindowModule.cs"
+                    int low = 0;
+#line 1106 "WindowModule.cs"
+                    int high = size;
+#line 1107 "WindowModule.cs"
+                    while (true)
+                    {
+                        if (!(((low) < (high))))
+                            break;
+#line 1108 "WindowModule.cs"
+                        {
+#line 1109 "WindowModule.cs"
+                            int middle = csharp2cuda_i32_div(csharp2cuda_i32_add(low, high), 2);
+#line 1110 "WindowModule.cs"
+#line 1110 "WindowModule.cs"
+                            double csharp2cuda_temp_3 = (sorted)[middle];
+                            if (((csharp2cuda_temp_3) < (leaving)))
+                            {
+#line 1111 "WindowModule.cs"
+#line 1111 "WindowModule.cs"
+                                int* csharp2cuda_temp_4 = &(low);
+                                (*(csharp2cuda_temp_4) = csharp2cuda_i32_add(middle, 1));
+                            }
+                            else
+                            {
+#line 1113 "WindowModule.cs"
+#line 1113 "WindowModule.cs"
+                                int* csharp2cuda_temp_5 = &(high);
+                                (*(csharp2cuda_temp_5) = middle);
+                            }
+                        }
+                    }
+#line 1115 "WindowModule.cs"
+                    {
+#line 1115 "WindowModule.cs"
+                        int index = low;
+                        while (true)
+                        {
+                            if (!(((index) < (csharp2cuda_i32_sub(size, 1)))))
+                                break;
+#line 1116 "WindowModule.cs"
+#line 1116 "WindowModule.cs"
+                            double* csharp2cuda_temp_7 = &((sorted)[index]);
+#line 1116 "WindowModule.cs"
+                            double csharp2cuda_temp_8 = (sorted)[csharp2cuda_i32_add(index, 1)];
+                            (*(csharp2cuda_temp_7) = csharp2cuda_temp_8);
+#line 1115 "WindowModule.cs"
+                            int* csharp2cuda_temp_6 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_6));
+                        }
+                    }
+#line 1117 "WindowModule.cs"
+#line 1117 "WindowModule.cs"
+                    int* csharp2cuda_temp_9 = &(size);
+                    csharp2cuda_i32_post_decrement(*(csharp2cuda_temp_9));
+                }
+#line 1119 "WindowModule.cs"
+                double entering = (x)[row];
+#line 1120 "WindowModule.cs"
+                int position = size;
+#line 1121 "WindowModule.cs"
+                while (true)
+                {
+#line 1121 "WindowModule.cs"
+                    bool csharp2cuda_temp_10;
+#line 1121 "WindowModule.cs"
+                    if (((position) > (0)))
+                    {
+#line 1121 "WindowModule.cs"
+                        double csharp2cuda_temp_11 = (sorted)[csharp2cuda_i32_sub(position, 1)];
+#line 1121 "WindowModule.cs"
+                        csharp2cuda_temp_10 = ((csharp2cuda_temp_11) > (entering));
+                    }
+                    else
+                    {
+#line 1121 "WindowModule.cs"
+                        csharp2cuda_temp_10 = false;
+                    }
+                    if (!(csharp2cuda_temp_10))
+                        break;
+#line 1122 "WindowModule.cs"
+                    {
+#line 1123 "WindowModule.cs"
+#line 1123 "WindowModule.cs"
+                        double* csharp2cuda_temp_12 = &((sorted)[position]);
+#line 1123 "WindowModule.cs"
+                        double csharp2cuda_temp_13 = (sorted)[csharp2cuda_i32_sub(position, 1)];
+                        (*(csharp2cuda_temp_12) = csharp2cuda_temp_13);
+#line 1124 "WindowModule.cs"
+#line 1124 "WindowModule.cs"
+                        int* csharp2cuda_temp_14 = &(position);
+                        csharp2cuda_i32_post_decrement(*(csharp2cuda_temp_14));
+                    }
+                }
+#line 1126 "WindowModule.cs"
+#line 1126 "WindowModule.cs"
+                double* csharp2cuda_temp_15 = &((sorted)[position]);
+                (*(csharp2cuda_temp_15) = entering);
+#line 1127 "WindowModule.cs"
+#line 1127 "WindowModule.cs"
+                int* csharp2cuda_temp_16 = &(size);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_16));
+#line 1128 "WindowModule.cs"
+                if (((row) < (first_row)))
+                {
+#line 1129 "WindowModule.cs"
+                    goto csharp2cuda_for_continue_1;
+                }
+#line 1130 "WindowModule.cs"
+                bool computed = false;
+#line 1131 "WindowModule.cs"
+                double value = 0.0;
+#line 1132 "WindowModule.cs"
+#line 1132 "WindowModule.cs"
+                bool csharp2cuda_temp_17;
+#line 1132 "WindowModule.cs"
+                if (((row) >= (csharp2cuda_i32_sub(width, 1))))
+                {
+#line 1132 "WindowModule.cs"
+                    csharp2cuda_temp_17 = probability_valid;
+                }
+                else
+                {
+#line 1132 "WindowModule.cs"
+                    csharp2cuda_temp_17 = false;
+                }
+                if (csharp2cuda_temp_17)
+#line 1133 "WindowModule.cs"
+                {
+#line 1134 "WindowModule.cs"
+#line 1134 "WindowModule.cs"
+                    double* csharp2cuda_temp_18 = &(value);
+                    (*(csharp2cuda_temp_18) = mathblocks_statistics_sorted_quantile(sorted, width, probability));
+#line 1135 "WindowModule.cs"
+#line 1135 "WindowModule.cs"
+                    bool* csharp2cuda_temp_19 = &(computed);
+                    (*(csharp2cuda_temp_19) = isfinite(value));
+                }
+#line 1137 "WindowModule.cs"
+                if (sibling)
+                {
+#line 1138 "WindowModule.cs"
+#line 1138 "WindowModule.cs"
+                    int* csharp2cuda_temp_20 = &((boolean_result)[row]);
+                    (*(csharp2cuda_temp_20) = computed);
+                }
+                else
+                {
+#line 1140 "WindowModule.cs"
+#line 1140 "WindowModule.cs"
+                    double* csharp2cuda_temp_21 = &((result)[row]);
+#line 1140 "WindowModule.cs"
+                    double csharp2cuda_temp_22;
+#line 1140 "WindowModule.cs"
+                    if (computed)
+                    {
+#line 1140 "WindowModule.cs"
+                        csharp2cuda_temp_22 = value;
+                    }
+                    else
+                    {
+#line 1140 "WindowModule.cs"
+                        csharp2cuda_temp_22 = fill;
+                    }
+                    (*(csharp2cuda_temp_21) = csharp2cuda_temp_22);
+                }
+            }
+            csharp2cuda_for_continue_1:
+#line 1100 "WindowModule.cs"
+            int* csharp2cuda_temp_2 = &(row);
+            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_2));
+        }
     }
 }
 

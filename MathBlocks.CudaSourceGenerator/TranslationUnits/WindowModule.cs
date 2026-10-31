@@ -7,8 +7,8 @@ using Supprocom.CSharp2CUDA;
 // or a window-accurate source (53 .. 58). Every thread checks the inputs itself and then evaluates its rows: the
 // window kernel passes the grid-wide thread index and count, the device dispatch path the thread index in the
 // block. Most sources take the rows end = thread, thread + threads, ..., and row end >= width - 1 calls the
-// source's per-thread function on rows end - width + 1 .. end of each series. The window-accurate sources give
-// each thread one block of consecutive rows and slide their state through it.
+// source's per-thread function on rows end - width + 1 .. end of each series. The median, the quantile and the
+// window-accurate sources give each thread one block of consecutive rows and slide their state through it.
 // Warm-up rows and rows whose result is invalid hold the fill (form) or false (sibling).
 [TranspileToCUDA]
 internal static unsafe class WindowModule
@@ -1075,6 +1075,72 @@ internal static unsafe class WindowModule
         }
     }
 
+    // The rows first_row .. last_row - 1 of window.vector.median (source 47) and window.vector.quantile (48) from a
+    // sorted copy of the window that slides with the rows. The source's stable insertion sort orders the window by
+    // (value, index) with -0 equal to +0; a new row has the largest index, so it goes after every value that does
+    // not compare greater, and the leaving row has the smallest, so it is the first value that does not compare
+    // lower than it. The sorted copy therefore equals the source's sorted window on every row, and the quantile is
+    // the source's expression on it.
+    [CudaDevice]
+    private static void mathblocks_window_sorted_rows(
+        [CudaReadOnly] double* x,
+        int width,
+        double probability,
+        int first_row,
+        int last_row,
+        double fill,
+        bool sibling,
+        double* result,
+        CudaInt32* boolean_result,
+        double* sorted)
+    {
+        bool probability_valid = !(probability < 0.0 || probability > 1.0);
+        int begin = first_row - width + 1 < 0 ? 0 : first_row - width + 1;
+        int size = 0;
+        for (int row = begin; row < last_row; row++)
+        {
+            if (row - width >= begin)
+            {
+                double leaving = x[row - width];
+                int low = 0;
+                int high = size;
+                while (low < high)
+                {
+                    int middle = (low + high) / 2;
+                    if (sorted[middle] < leaving)
+                        low = middle + 1;
+                    else
+                        high = middle;
+                }
+                for (int index = low; index < size - 1; index++)
+                    sorted[index] = sorted[index + 1];
+                size--;
+            }
+            double entering = x[row];
+            int position = size;
+            while (position > 0 && sorted[position - 1] > entering)
+            {
+                sorted[position] = sorted[position - 1];
+                position--;
+            }
+            sorted[position] = entering;
+            size++;
+            if (row < first_row)
+                continue;
+            bool computed = false;
+            double value = 0.0;
+            if (row >= width - 1 && probability_valid)
+            {
+                value = mathblocks_statistics_sorted_quantile(sorted, width, probability);
+                computed = double.IsFinite(value);
+            }
+            if (sibling)
+                boolean_result[row] = computed;
+            else
+                result[row] = computed ? value : fill;
+        }
+    }
+
     // Thread 0 writes the output header; the other threads only write rows.
     [CudaDevice]
     private static void mathblocks_window_publish(MathBlockSlot* output, bool valid, int count, int thread)
@@ -1145,7 +1211,7 @@ internal static unsafe class WindowModule
         double* result = (double*)output->data_pointer;
         CudaInt32* boolean_result = (CudaInt32*)output->data_pointer;
         double* scratch = (double*)output->scratch_pointer + thread * (int)capacity;
-        if (source >= 53)
+        if (source == 47 || source == 48 || source >= 53)
         {
             // These sources slide a state over consecutive rows, so each thread owns one block of rows.
             long rows_per_thread = ((long)count + threads - 1) / threads;
@@ -1153,17 +1219,34 @@ internal static unsafe class WindowModule
             if (first_row >= count)
                 return;
             long last_row = count - first_row < rows_per_thread ? count : first_row + rows_per_thread;
-            mathblocks_window_accurate_rows(
-                source,
-                a,
-                width,
-                (int)first_row,
-                (int)last_row,
-                fill,
-                sibling,
-                result,
-                boolean_result,
-                (long*)scratch);
+            if (source >= 53)
+            {
+                mathblocks_window_accurate_rows(
+                    source,
+                    a,
+                    width,
+                    (int)first_row,
+                    (int)last_row,
+                    fill,
+                    sibling,
+                    result,
+                    boolean_result,
+                    (long*)scratch);
+            }
+            else
+            {
+                mathblocks_window_sorted_rows(
+                    a,
+                    width,
+                    source == 47 ? 0.5 : first_parameter->scalar_value,
+                    (int)first_row,
+                    (int)last_row,
+                    fill,
+                    sibling,
+                    result,
+                    boolean_result,
+                    scratch);
+            }
             return;
         }
         for (int end = thread; end < count; end += threads)
