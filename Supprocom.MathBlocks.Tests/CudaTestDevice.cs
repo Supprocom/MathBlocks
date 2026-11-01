@@ -1,3 +1,5 @@
+using Supprocom.MathBlocks.Cuda;
+
 namespace Supprocom.MathBlocks.Tests;
 
 /// <summary>

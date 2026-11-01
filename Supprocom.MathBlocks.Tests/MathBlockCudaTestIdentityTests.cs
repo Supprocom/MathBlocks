@@ -11,12 +11,13 @@ namespace Supprocom.MathBlocks.Tests;
 /// of an operation identity (a known family prefix, dotted words, optional <c>@version</c>, optional <c>/case</c> suffix) and requires it to be a
 /// CUDA operation of the device module and an operation of the Standard catalog.
 /// </summary>
-public sealed class MathBlockCudaTestIdentityTests
+public sealed partial class MathBlockCudaTestIdentityTests
 {
-    private static readonly Regex Literal = new("\"([a-z][a-z0-9-]*(?:\\.[a-z0-9-]+)+)(@[0-9]+)?(?:/[^\"]*)?\"", RegexOptions.CultureInvariant, TimeSpan.FromSeconds(10));
+    [GeneratedRegex("\"(?<name>[a-z][a-z0-9-]*(?:\\.[a-z0-9-]+)+)(?<version>@[0-9]+)?(?:/[^\"]*)?\"", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 10_000)]
+    private static partial Regex Literal();
 
-    // String literals that have the shape of an identity but are not one: file names and similar.
-    private static readonly HashSet<string> NotIdentities = new(StringComparer.Ordinal) { "base-opcode-dispatch.cu" };
+    // String literals that have the shape of an identity but are not a contract identity: a file name, and the window batch test's own version 2 operation.
+    private static readonly HashSet<string> NotIdentities = new(StringComparer.Ordinal) { "base-opcode-dispatch.cu", "window-accurate.sum" };
 
     /// <summary>Verifies every identity named in the CUDA test sources is a CUDA operation.</summary>
     [Fact]
@@ -30,12 +31,12 @@ public sealed class MathBlockCudaTestIdentityTests
         foreach (var file in CudaTestSources())
         {
             var text = File.ReadAllText(file);
-            foreach (Match match in Literal.Matches(text))
+            foreach (Match match in Literal().Matches(text))
             {
-                var name = match.Groups[1].Value;
+                var name = match.Groups["name"].Value;
                 if (NotIdentities.Contains(name) || !families.Contains(name[..name.IndexOf('.', StringComparison.Ordinal)]))
                     continue;
-                var identity = match.Groups[2].Success ? name + match.Groups[2].Value : name + "@1";
+                var identity = match.Groups["version"].Success ? name + match.Groups["version"].Value : name + "@1";
                 checkedNames.Add(identity);
                 if (!contracts.Contains(identity))
                     missing.Add($"{identity} ({Path.GetFileName(file)})");
@@ -43,7 +44,7 @@ public sealed class MathBlockCudaTestIdentityTests
         }
 
         Assert.True(checkedNames.Count > 100, $"Only {checkedNames.Count} identities were found in the CUDA test sources.");
-        Assert.Empty(missing);
+        Assert.True(missing.Count == 0, "These identities named in the CUDA test data are not CUDA operations: " + string.Join("; ", missing));
         foreach (var identity in checkedNames.Where(item => !item.StartsWith("window", StringComparison.Ordinal)))
             Assert.NotNull(MathBlockCatalog.Standard.Get(identity[..identity.IndexOf('@', StringComparison.Ordinal)], 1));
     }
@@ -52,9 +53,10 @@ public sealed class MathBlockCudaTestIdentityTests
     {
         var directory = Path.GetDirectoryName(sourceFile)!;
         return Directory.EnumerateFiles(directory, "*.cs", SearchOption.TopDirectoryOnly)
-            .Where(file => !string.Equals(Path.GetFileName(file), "MathBlockCudaTestIdentityTests.cs", StringComparison.Ordinal))
             .Where(file =>
             {
+                if (string.Equals(Path.GetFileName(file), "MathBlockCudaTestIdentityTests.cs", StringComparison.Ordinal))
+                    return false;
                 var text = File.ReadAllText(file);
                 return text.Contains("CudaTestDevice.Available", StringComparison.Ordinal) ||
                     text.Contains("MathBlockCudaDeviceModule", StringComparison.Ordinal) ||
