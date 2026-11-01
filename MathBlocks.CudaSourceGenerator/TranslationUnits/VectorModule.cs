@@ -32,6 +32,9 @@ internal static unsafe class VectorModule
     [CudaExternal(IsPure = true)]
     private static double mathblocks_square_root(double value) => throw new NotSupportedException();
 
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_quiet_nan() => throw new NotSupportedException();
+
     [CudaDevice]
     private static double mathblocks_minimum(double first, double second)
     {
@@ -369,7 +372,8 @@ internal static unsafe class VectorModule
         }
         variance /= count;
         *mean = average;
-        *deviation = mathblocks_square_root(variance);
+        // A variance that overflowed would divide every difference by an infinity and give zeros; NaN (invalid) instead.
+        *deviation = double.IsFinite(variance) ? mathblocks_square_root(variance) : mathblocks_quiet_nan();
     }
 
     [CudaDevice(Name = "mathblocks_vector_dispatch")]

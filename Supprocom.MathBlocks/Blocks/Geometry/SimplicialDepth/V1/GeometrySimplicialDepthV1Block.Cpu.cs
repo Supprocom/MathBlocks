@@ -16,7 +16,13 @@ public static partial class MathBlockAdvanced
                 for (var third = second + 1; third < sample.Count; third++)
                 {
                     total++;
+                    // A degenerate triangle holds no point. For any other triangle a coordinate that is not finite (an overflowing
+                    // denominator or numerator) makes the depth not finite (invalid); a NaN would fail both bounds and count as outside.
+                    if (MathBlockGeometry.BarycentricDenominator(sample[first], sample[second], sample[third]) == 0d)
+                        continue;
                     var coordinates = MathBlockGeometry.BarycentricCoordinates(point, sample[first], sample[second], sample[third]);
+                    if (!MathBlockCollectionPrimitives.All(coordinates, Math.IsFinite))
+                        return Math.NaN;
                     if (MathBlockCollectionPrimitives.All(coordinates, value => value >= 0d && value <= 1d))
                         containing++;
                 }

@@ -43,6 +43,9 @@ internal static unsafe class StatisticsModule
 
     [CudaExternal(IsPure = true)]
     private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_quiet_nan() => throw new NotSupportedException();
     [CudaDevice]
     private static double mathblocks_statistics_mean([CudaReadOnly] double* values, int count)
     {
@@ -78,15 +81,51 @@ internal static unsafe class StatisticsModule
         return sum / count;
     }
 
+    // covariance / variance, or NaN (invalid) when the variance overflowed: dividing by an infinity would give a finite zero.
+    [CudaDevice]
+    private static double mathblocks_statistics_quotient_by_variance(double covariance, double variance)
+    {
+        if (!double.IsFinite(variance))
+            return mathblocks_quiet_nan();
+        return covariance / variance;
+    }
+
+    // covariance / (sd(left) * sd(right)), or NaN (invalid) when a variance or the product of the two standard deviations overflowed.
+    [CudaDevice]
+    private static double mathblocks_statistics_correlation_value(double covariance, double left_variance, double right_variance)
+    {
+        if (!double.IsFinite(left_variance) || !double.IsFinite(right_variance))
+            return mathblocks_quiet_nan();
+        double denominator = mathblocks_square_root(left_variance) * mathblocks_square_root(right_variance);
+        if (!double.IsFinite(denominator))
+            return mathblocks_quiet_nan();
+        return covariance / denominator;
+    }
+
+    // The distance correlation from the three moments, or NaN (invalid) when a moment or the product of the two variances overflowed.
+    [CudaDevice]
+    private static double mathblocks_statistics_distance_correlation_value(
+        double covariance_square,
+        double left_variance_square,
+        double right_variance_square)
+    {
+        double denominator = mathblocks_square_root(left_variance_square * right_variance_square);
+        if (!double.IsFinite(covariance_square) || !double.IsFinite(left_variance_square) ||
+            !double.IsFinite(right_variance_square) || !double.IsFinite(denominator))
+            return mathblocks_quiet_nan();
+        return mathblocks_square_root(covariance_square / denominator);
+    }
+
     [CudaDevice]
     private static double mathblocks_statistics_pearson(
         [CudaReadOnly] double* left,
         [CudaReadOnly] double* right,
         int count)
     {
-        return mathblocks_statistics_population_covariance(left, right, count) /
-            (mathblocks_square_root(mathblocks_statistics_population_variance(left, count)) *
-             mathblocks_square_root(mathblocks_statistics_population_variance(right, count)));
+        return mathblocks_statistics_correlation_value(
+            mathblocks_statistics_population_covariance(left, right, count),
+            mathblocks_statistics_population_variance(left, count),
+            mathblocks_statistics_population_variance(right, count));
     }
 
     [CudaExternal]
@@ -442,9 +481,8 @@ internal static unsafe class StatisticsModule
                     covariance_square /= count * count;
                     left_variance_square /= count * count;
                     right_variance_square /= count * count;
-                    output->scalar_value = mathblocks_square_root(
-                        covariance_square /
-                        mathblocks_square_root(left_variance_square * right_variance_square));
+                    output->scalar_value = mathblocks_statistics_distance_correlation_value(
+                        covariance_square, left_variance_square, right_variance_square);
                     break;
                 }
                 case 4:
@@ -515,21 +553,22 @@ internal static unsafe class StatisticsModule
                     }
                     else if (opcode == 9)
                     {
-                        output->scalar_value = covariance /
-                            mathblocks_statistics_population_variance(a, first->count);
+                        output->scalar_value = mathblocks_statistics_quotient_by_variance(
+                            covariance, mathblocks_statistics_population_variance(a, first->count));
                     }
                     else if (opcode == 7)
                     {
-                        double slope = covariance /
-                            mathblocks_statistics_population_variance(a, first->count);
+                        double slope = mathblocks_statistics_quotient_by_variance(
+                            covariance, mathblocks_statistics_population_variance(a, first->count));
                         output->scalar_value = mathblocks_statistics_mean(b, first->count) -
                             slope * mathblocks_statistics_mean(a, first->count);
                     }
                     else
                     {
-                        double correlation = covariance /
-                            (mathblocks_square_root(mathblocks_statistics_population_variance(a, first->count)) *
-                             mathblocks_square_root(mathblocks_statistics_population_variance(b, first->count)));
+                        double correlation = mathblocks_statistics_correlation_value(
+                            covariance,
+                            mathblocks_statistics_population_variance(a, first->count),
+                            mathblocks_statistics_population_variance(b, first->count));
                         output->scalar_value = opcode == 8 ? correlation * correlation : correlation;
                     }
                     break;

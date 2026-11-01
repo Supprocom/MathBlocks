@@ -33,6 +33,9 @@ public static partial class MathBlockGeometry
             {
                 var cross = vectors[pivot].X * vectors[index].Y - vectors[pivot].Y * vectors[index].X;
                 var dot = vectors[pivot].X * vectors[index].X + vectors[pivot].Y * vectors[index].Y;
+                // A NaN (inf - inf, 0 * inf from an overflowing product) fails both tests and would count the point as outside.
+                if (Math.IsNaN(cross) || Math.IsNaN(dot))
+                    return Math.NaN;
                 if (cross > 0d || cross == 0d && dot > 0d)
                     count++;
             }

@@ -15,7 +15,8 @@ public static partial class MathBlockVectorMath
         }
 
         variance /= values.Count;
-        var deviation = Math.Sqrt(variance);
+        // A variance that overflows would divide every difference by an infinity and give zeros; every element is then NaN (invalid).
+        var deviation = Math.IsFinite(variance) ? Math.Sqrt(variance) : Math.NaN;
         return Map(values, value => (value - mean) / deviation);
     }
 }

@@ -58,6 +58,30 @@ public sealed class MathBlockInvalidStateTests
             ["geometry.gabriel-graph/overflow"] = ("geometry.gabriel-graph@1", () => [Points((0d, 0d), (1e200d, 0d), (0d, 1e200d))]),
             ["topology.zero-dimensional-persistence/overflow"] = ("topology.zero-dimensional-persistence@1", () => [Points((0d, 0d), (1e200d, 0d), (0d, 1e200d))]),
 
+            // An intermediate that overflows makes the result invalid. A variance, a standard-deviation product or a distance moment
+            // that is infinity used to divide a finite value and give a valid zero (or a valid near-zero) where the true value is not zero.
+            ["statistics.pearson-correlation/variance-overflow"] = ("statistics.pearson-correlation@1", () =>
+                [Vector(1d, 2d, 3d, 4d), Vector(-7.143571252424402d, 1.791250087206395e308d, 7.274205695928337d, -9.877113669855383d)]),
+            ["statistics.distance-correlation/moment-overflow"] = ("statistics.distance-correlation@1", () =>
+                [Vector(-2.2078367837649733e302d, -6.343768537094183d, -5.8364683556946435d), Vector(-1.0680179441064644e-294d, 36.84280271658108d, 0.9048608060071095d)]),
+            ["statistics.linear-slope/variance-overflow"] = ("statistics.linear-slope@1", () =>
+                [Vector(7.114245152862294d, -2.2078367837649733e302d, -728.0038665276926d, 4.224291341469105d), Vector(0.4953195529423522d, 0.7783700051634825d, 118d, -720.3804674671959d)]),
+            ["statistics.linear-intercept/variance-overflow"] = ("statistics.linear-intercept@1", () =>
+                [Vector(7.114245152862294d, -2.2078367837649733e302d, -728.0038665276926d, 4.224291341469105d), Vector(0.4953195529423522d, 0.7783700051634825d, 118d, -720.3804674671959d)]),
+            ["statistics.linear-r-squared/variance-overflow"] = ("statistics.linear-r-squared@1", () =>
+                [Vector(1.337705117e-315d, -3.22983270795382e-299d, -17.27875959474386d, -0.8325065752238905d), Vector(-3.496470870518605d, -11.96980468906019d, 5.458565798214325e303d, -729.5969940812662d)]),
+            ["statistics.autocorrelation/variance-overflow"] = ("statistics.autocorrelation@1", () =>
+                [Vector(4.388899255034951e304d, -4.440892098500626e-16d, -22.450293565523026d, 0.0037950201825623286d), Scalar(2d)]),
+            ["vector.standardize/variance-overflow"] = ("vector.standardize@1", () =>
+                [Vector(1.7954044555660155e308d, -4.507602767758473e239d, 710.0904103212077d)]),
+            ["geometry.simplicial-depth/coordinate-overflow"] = ("geometry.simplicial-depth@1", () =>
+                [Points((698.0421626654253d, 0.7817012842080717d), (-22.194671885609296d, 1.7972928048203887e308d), (-3.80572792044629d, -708.0863943344233d)),
+                    Points((-0.9999999999999934d, 7.274205695928337d))]),
+            ["geometry.barycentric-coordinates/denominator-overflow"] = ("geometry.barycentric-coordinates@1", () =>
+                [Points((1d, 1d)), Points((1e200d, 0d), (0d, 1e200d), (0d, 0d))]),
+            ["geometry.halfspace-depth/nan-cross-product"] = ("geometry.halfspace-depth@1", () =>
+                [Points((1e200d, 1e200d), (2e200d, 2e200d)), Points((0d, 0d))]),
+
             // A row norm that overflows asked for int.MaxValue squarings.
             ["matrix.exponential/overflowing-norm"] = ("matrix.exponential@1", () => [Matrix(2, 2, 1.7e308d, 1.7e308d, 0d, 0d)]),
 
