@@ -1092,7 +1092,7 @@ internal static unsafe class MatrixModule
             int size = first->rows;
             if (size != first->columns ||
                 !mathblocks_nonnegative_integer(second->scalar_value, &iterations) ||
-                iterations <= 0 || scratch == null)
+                iterations <= 0 || iterations > 10000 || scratch == null)
             {
                 output->valid = 0;
                 return;
@@ -1287,7 +1287,7 @@ internal static unsafe class MatrixModule
         {
             int iterations = 0;
             if (!mathblocks_nonnegative_integer(second->scalar_value, &iterations) ||
-                iterations <= 0 || scratch == null)
+                iterations <= 0 || iterations > 10000 || scratch == null)
             {
                 output->valid = 0;
                 return;
