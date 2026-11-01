@@ -161,7 +161,7 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
     [Fact]
     public void CoreCLRFilledRowsHoldTheFillBitsAndAreNotValid()
     {
-        var builder = new MathBlockProgramBuilder(WithElementwise.Value);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var x = builder.Input("x", MathBlockType.Vector());
         var fill = builder.Input("fill", MathBlockType.Scalar());
         var logit = builder.Apply("elementwise.scalar.logit", 1, x, fill);
@@ -195,7 +195,7 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
     public void CoreCLRElementwiseFormsKeepUnits()
     {
         var metre = MathBlockUnit.Basis0;
-        var builder = new MathBlockProgramBuilder(WithElementwise.Value);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var x = builder.Input("x", MathBlockType.Vector(metre));
         var lower = builder.Input("lower", MathBlockType.Scalar(metre));
         var upper = builder.Input("upper", MathBlockType.Vector(metre));
@@ -229,7 +229,7 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
             Assert.Equal(MathBlockCausality.Pointwise, operation.Causality.Kind);
             var sibling = operation.Identifier.StartsWith("elementwise-valid.", StringComparison.Ordinal);
             var source = operation.Identifier[(sibling ? "elementwise-valid." : "elementwise.").Length..];
-            var builder = new MathBlockProgramBuilder(WithElementwise.Value);
+            var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
             var arguments = Enumerable.Range(0, SourceArity(source))
                 .Select(index => builder.Input($"x{index}", MathBlockType.Vector())).ToList();
             if (!sibling)
@@ -280,7 +280,7 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
         Dictionary<string, MathBlockValue> Validity)> CreateEdgeCases(string source, int mask)
     {
         var arity = SourceArity(source);
-        var builder = new MathBlockProgramBuilder(WithElementwise.Value);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var arguments = new int[arity];
         for (var index = 0; index < arity; index++)
             arguments[index] = builder.Input(
@@ -342,7 +342,7 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
     // sibling, and a form whose argument is another form.
     internal static (MathBlockProgram Program, MathBlockFusedExpression Fused) CreateInvalidStateProgram()
     {
-        var builder = new MathBlockProgramBuilder(WithElementwise.Value);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var x = builder.Input("x", MathBlockType.Vector());
         var y = builder.Input("y", MathBlockType.Vector());
         var s = builder.Input("s", MathBlockType.Scalar());

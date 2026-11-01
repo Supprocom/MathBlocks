@@ -5,7 +5,7 @@ namespace Supprocom.MathBlocks.Tests;
 /// <summary>Verifies the release requirement that every catalog operation has a CUDA implementation.</summary>
 public sealed class MathBlockReleaseGateTests
 {
-    /// <summary>Checks that every Standard, window and elementwise operation is covered by the CUDA module.</summary>
+    /// <summary>Checks that every Standard operation, the window and elementwise forms included, is covered by the CUDA module.</summary>
     [Fact]
     [Trait("Category", "ReleaseGate")]
     public void EveryCatalogOperationHasACUDAImplementation()
@@ -14,8 +14,6 @@ public sealed class MathBlockReleaseGateTests
             MathBlockCudaDeviceModule.Operations.Select(contract => contract.Identity),
             StringComparer.Ordinal);
         var missing = MathBlockCatalog.Standard.Operations
-            .Concat(MathBlockWindowTestSupport.Windowed.Operations)
-            .Concat(MathBlockElementwiseTestSupport.Elementwise.Operations)
             .Select(operation => operation.Identity)
             .Where(identity => !cudaIdentities.Contains(identity))
             .Order(StringComparer.Ordinal)

@@ -828,7 +828,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         {
             throw new InvalidOperationException($"CUDA operation identity '{identity}' is invalid.");
         }
-        return MathBlockCatalog.Cuda.Get(identity[..separator], version);
+        return MathBlockCatalog.Standard.Get(identity[..separator], version);
     }
 
     // Keep all static-domain checks together to compare every family consistently.

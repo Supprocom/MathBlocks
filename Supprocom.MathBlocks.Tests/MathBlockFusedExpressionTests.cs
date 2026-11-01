@@ -390,9 +390,7 @@ public sealed class MathBlockFusedExpressionTests
             Reject((_, x) => x, MathBlockType.Scalar()).Message,
             StringComparison.Ordinal);
 
-        var window = MathBlockWindowTestSupport.Form("vector.sum");
-        var windowed = new MathBlockRegistry(MathBlockCatalog.Standard.Operations.Append(window));
-        var windowBuilder = new MathBlockProgramBuilder(windowed);
+        var windowBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var series = windowBuilder.Input("x", MathBlockType.Vector());
         windowBuilder.Output("y", windowBuilder.Apply("window.vector.sum", 1, series,
             windowBuilder.Constant(MathBlockValue.Scalar(3d)), windowBuilder.Constant(MathBlockValue.Scalar(0d))));
@@ -421,19 +419,28 @@ public sealed class MathBlockFusedExpressionTests
         Assert.Contains("Operation node 1 (vector.add@1) is not the MathBlockCatalog.Standard operation", exception.Message, StringComparison.Ordinal);
     }
 
-    /// <summary>Every Pointwise Standard operation is either fusable or excluded with a stated reason.</summary>
+    /// <summary>
+    /// Every Pointwise Standard operation is either fusable or excluded with a stated reason: the 28 per-block
+    /// Pointwise operations and the 82 elementwise forms, which are fused through their row form.
+    /// </summary>
     [Fact]
     public void EveryPointwiseStandardOperationIsFusableOrExcludedWithAReason()
     {
         var supported = Operations.Select(operation => operation.Identity + "@1").ToHashSet(StringComparer.Ordinal);
+        var elementwise = MathBlockElementwiseTestSupport.Elementwise.Operations
+            .Select(operation => operation.Identity)
+            .ToHashSet(StringComparer.Ordinal);
         var pointwise = MathBlockCatalog.Standard.Operations
             .Where(operation => operation.Causality.Kind == MathBlockCausality.Pointwise)
             .Select(operation => operation.Identity)
             .ToArray();
-        Assert.Equal(28, pointwise.Length);
+        Assert.Equal(110, pointwise.Length);
+        Assert.Equal(82, elementwise.Count);
+        Assert.All(elementwise, identity => Assert.Contains(identity, pointwise, StringComparer.Ordinal));
         Assert.Equal(
             ["polynomial.derivative@1", "vector.append@1"],
-            pointwise.Where(identity => !supported.Contains(identity)).Order(StringComparer.Ordinal),
+            pointwise.Where(identity => !supported.Contains(identity) && !elementwise.Contains(identity))
+                .Order(StringComparer.Ordinal),
             StringComparer.Ordinal);
         Assert.All(supported, identity => Assert.Contains(identity, pointwise, StringComparer.Ordinal));
     }

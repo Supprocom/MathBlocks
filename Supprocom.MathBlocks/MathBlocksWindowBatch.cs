@@ -190,7 +190,7 @@ public static class MathBlocksWindowBatch
         var fillValue = MathBlockValue.Scalar(fill, entry.Form.ResolveResultUnit(sourceTypes));
         var operation = entry.FormOperation;
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal) { ["series"] = series, ["fill"] = fillValue };
-        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Cuda);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var nodes = new int[operation.Arity];
         nodes[0] = builder.Input("series", series.Type);
         for (var index = 0; index < parameterCount; index++)
@@ -242,7 +242,7 @@ public static class MathBlocksWindowBatch
                 nameof(inputs));
         }
         var named = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal);
-        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Cuda);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var nodes = new int[inputs.Count];
         for (var index = 0; index < inputs.Count; index++)
         {

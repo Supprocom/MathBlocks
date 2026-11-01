@@ -2,17 +2,12 @@ using System.Reflection;
 
 namespace Supprocom.MathBlocks.Tests;
 
-// The window forms are CoreCLR-only on this branch and stay out of MathBlockCatalog.Standard, so the tests reach
-// their internal registry by reflection, as other tests reach internal CUDA entry points.
+// The window forms' own internal registry (the same instances MathBlockCatalog.Standard registers), reached by
+// reflection, as other tests reach internal CUDA entry points.
 internal static class MathBlockWindowTestSupport
 {
     private static readonly Lazy<MathBlockRegistry> windowed = new(() => (MathBlockRegistry)typeof(MathBlockCatalog)
         .GetProperty("Windowed", BindingFlags.NonPublic | BindingFlags.Static)!
-        .GetValue(null)!);
-
-    // Standard plus the window forms that have a CUDA feature: the operations the CUDA module and worker cover.
-    private static readonly Lazy<MathBlockRegistry> cuda = new(() => (MathBlockRegistry)typeof(MathBlockCatalog)
-        .GetProperty("Cuda", BindingFlags.NonPublic | BindingFlags.Static)!
         .GetValue(null)!);
 
     // The 53 sources of design section 2 (D5), in design order.
@@ -39,8 +34,6 @@ internal static class MathBlockWindowTestSupport
     ];
 
     public static MathBlockRegistry Windowed => windowed.Value;
-
-    public static MathBlockRegistry Cuda => cuda.Value;
 
     public static MathBlockOperation Form(string source) => Windowed.Get($"window.{source}");
 

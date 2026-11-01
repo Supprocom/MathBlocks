@@ -369,7 +369,7 @@ public sealed partial class MathBlockCudaWorkerTests
         MathBlockValue[] prototype,
         MathBlockValue[] inputs)
     {
-        var builder = new MathBlockProgramBuilder(MathBlockWindowTestSupport.Cuda);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var nodes = prototype.Select((input, index) => builder.Input($"input-{index}", input.Type)).ToArray();
         var program = builder.Output("result", builder.Apply(operation.Identifier, operation.Version, nodes)).Build();
         using var compiled = worker.Compile(program, NameWindowInputs(prototype));

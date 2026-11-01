@@ -12,7 +12,7 @@ public sealed class MathBlockElementwiseCudaPlanTests
 
     /// <summary>
     /// Verifies each elementwise form and sibling has a family 12 contract with opcode 2 * source + sibling, a
-    /// block of 128 threads and the arity of the CoreCLR form, while the forms stay outside Standard.
+    /// block of 128 threads and the arity of the CoreCLR form.
     /// </summary>
     [Fact]
     public void ElementwiseCUDAContractsUseFamilyTwelveWithOpcodeTwiceTheSourcePlusSibling()
@@ -35,9 +35,10 @@ public sealed class MathBlockElementwiseCudaPlanTests
             82,
             MathBlockCudaDeviceModule.Operations.Count(contract => contract.Family == MathBlockCudaOperationFamily.Elementwise));
         Assert.Equal(537, MathBlocksCUDAWorker.SupportedBlockIdentities.Count);
-        Assert.DoesNotContain(
-            MathBlockCatalog.Standard.Operations,
-            operation => operation.Identifier.StartsWith("elementwise", StringComparison.Ordinal));
+        Assert.Equal(
+            82,
+            MathBlockCatalog.Standard.Operations.Count(operation =>
+                operation.Identifier.StartsWith("elementwise", StringComparison.Ordinal)));
     }
 
     /// <summary>

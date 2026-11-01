@@ -153,7 +153,7 @@ public sealed class MathBlockCudaOperationContract
                 nameof(prototypeInputs));
         }
 
-        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Cuda);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var indexes = new int[prototypeInputs.Count];
         var prototypes = new Dictionary<string, MathBlockValue>(prototypeInputs.Count, StringComparer.Ordinal);
         for (var index = 0; index < prototypeInputs.Count; index++)

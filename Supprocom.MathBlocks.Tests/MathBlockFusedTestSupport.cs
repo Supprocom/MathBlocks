@@ -32,11 +32,6 @@ internal static class MathBlockFusedTestSupport
         1e300, -1e300, double.MaxValue, -double.MaxValue, 3d, -8d, 1e-300, 4.9e-324 * 3
     ];
 
-    // Standard together with the elementwise forms, which stay outside Standard on this branch. The instances are
-    // the registries' own, so the fused expression accepts them.
-    public static readonly Lazy<MathBlockRegistry> WithElementwise = new(() => new MathBlockRegistry(
-        MathBlockCatalog.Standard.Operations.Concat(MathBlockElementwiseTestSupport.Elementwise.Operations)));
-
     public enum Regime
     {
         Benign,
@@ -53,8 +48,7 @@ internal static class MathBlockFusedTestSupport
         int outputs,
         int elementwisePercent = 0)
     {
-        var builder = new MathBlockProgramBuilder(
-            elementwisePercent > 0 ? WithElementwise.Value : MathBlockCatalog.Standard);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var byKind = new Dictionary<char, List<int>>
         {
             ['N'] = [],
@@ -250,7 +244,7 @@ internal static class MathBlockFusedTestSupport
         var at = identity.LastIndexOf('@');
         var name = at < 0 ? identity : identity[..at];
         var version = at < 0 ? 1 : int.Parse(identity[(at + 1)..], System.Globalization.CultureInfo.InvariantCulture);
-        return WithElementwise.Value.Get(name, version);
+        return MathBlockCatalog.Standard.Get(name, version);
     }
 
     public static void AssertSameValue(MathBlockValue expected, MathBlockValue actual, string context)

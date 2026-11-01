@@ -63,7 +63,7 @@ public static class MathBlockCudaDeviceModule
     {
         var source = CreateSource();
         var sourceFingerprint = MathBlockCudaContractHash.Create(source);
-        var registryOperations = MathBlockCatalog.Cuda.Operations;
+        var registryOperations = MathBlockCatalog.Standard.Operations;
         var contracts = new MathBlockCudaOperationContract[registryOperations.Count];
         var contractsByIdentity = new Dictionary<string, MathBlockCudaOperationContract>(
             registryOperations.Count,

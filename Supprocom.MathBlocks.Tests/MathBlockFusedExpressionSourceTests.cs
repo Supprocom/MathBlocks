@@ -76,7 +76,7 @@ public sealed class MathBlockFusedExpressionSourceTests
 
     internal static MathBlockProgram CreateGoldenProgram()
     {
-        var builder = new MathBlockProgramBuilder(MathBlockFusedTestSupport.WithElementwise.Value);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var x = builder.Input("x", MathBlockType.Vector());
         var y = builder.Input("y", MathBlockType.Vector());
         var mask = builder.Input("mask", MathBlockType.BooleanVector());

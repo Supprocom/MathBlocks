@@ -46,9 +46,10 @@ public sealed class MathBlockWindowCudaPlanTests
             118,
             MathBlockCudaDeviceModule.Operations.Count(contract => contract.Family == MathBlockCudaOperationFamily.Window));
         Assert.Equal(537, MathBlocksCUDAWorker.SupportedBlockIdentities.Count);
-        Assert.DoesNotContain(
-            MathBlockCatalog.Standard.Operations,
-            operation => operation.Identifier.StartsWith("window", StringComparison.Ordinal));
+        Assert.Equal(
+            118,
+            MathBlockCatalog.Standard.Operations.Count(operation =>
+                operation.Identifier.StartsWith("window", StringComparison.Ordinal)));
     }
 
     /// <summary>

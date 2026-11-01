@@ -180,9 +180,7 @@ public sealed class MathBlockInvalidStateTests
     [Trait("Category", "InvalidState")]
     public void EveryOperationReturnsAValueForOutOfDomainInputs()
     {
-        var operations = MathBlockCatalog.Standard.Operations
-            .Concat(MathBlockWindowTestSupport.Windowed.Operations)
-            .Concat(MathBlockElementwiseTestSupport.Elementwise.Operations);
+        var operations = MathBlockCatalog.Standard.Operations;
         var failures = new SortedDictionary<string, string>(StringComparer.Ordinal);
         var evaluations = 0;
         foreach (var operation in operations)

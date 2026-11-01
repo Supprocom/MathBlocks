@@ -2,8 +2,8 @@ using System.Reflection;
 
 namespace Supprocom.MathBlocks.Tests;
 
-// The elementwise forms are CoreCLR-only on this branch and stay out of MathBlockCatalog.Standard, so the tests
-// reach their internal registry by reflection, as the window tests do.
+// The elementwise forms' own internal registry (the same instances MathBlockCatalog.Standard registers), reached
+// by reflection, as the window tests do.
 internal static class MathBlockElementwiseTestSupport
 {
     private static readonly Lazy<MathBlockRegistry> elementwise = new(() => (MathBlockRegistry)typeof(MathBlockCatalog)

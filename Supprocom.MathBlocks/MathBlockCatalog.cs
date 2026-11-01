@@ -5,47 +5,30 @@ public static class MathBlockCatalog
 {
     private static readonly Lazy<MathBlockRegistry> standard = new(CreateStandard);
     private static readonly Lazy<MathBlockRegistry> windowed = new(CreateWindowed);
-    private static readonly Lazy<MathBlockRegistry> cuda = new(CreateCuda);
     private static readonly Lazy<MathBlockRegistry> elementwise = new(CreateElementwise);
 
     /// <summary>Gets the standard value.</summary>
     public static MathBlockRegistry Standard => standard.Value;
 
-    // The window.*, window-valid.*, window-accurate.* and window-accurate-valid.* forms stay outside Standard until
-    // they are registered there.
+    // The window.*, window-valid.*, window-accurate.* and window-accurate-valid.* forms, generated from the
+    // WindowMathBlocks and WindowAccurateMathBlocks tables. Standard registers these same instances.
     internal static MathBlockRegistry Windowed => windowed.Value;
 
-    // CUDA plans, contracts and kernels resolve operations from Standard and the window and elementwise forms that
-    // have a CUDA feature, so those forms have CUDA support without being part of Standard.
-    internal static MathBlockRegistry Cuda => cuda.Value;
-
-    // The elementwise.* and elementwise-valid.* forms stay outside Standard until they are registered there.
+    // The elementwise.* and elementwise-valid.* forms, generated from the ElementwiseMathBlocks table. Standard
+    // registers these same instances.
     internal static MathBlockRegistry Elementwise => elementwise.Value;
 
+    // The per-block operations, then the table-generated window and elementwise forms.
     private static MathBlockRegistry CreateStandard()
-        => new(MathBlockFeatureIndex.CreateOperations());
+    {
+        var operations = new List<MathBlockOperation>(MathBlockFeatureIndex.CreateOperations());
+        operations.AddRange(Windowed.Operations);
+        operations.AddRange(Elementwise.Operations);
+        return new MathBlockRegistry(operations);
+    }
 
     private static MathBlockRegistry CreateWindowed()
         => new(WindowMathBlocks.CreateOperations());
-
-    private static MathBlockRegistry CreateCuda()
-    {
-        var supported = new HashSet<string>(
-            Supprocom.MathBlocks.Cuda.MathBlockCudaFeatureIndex.SupportedIdentities, StringComparer.Ordinal);
-        var operations = new List<MathBlockOperation>(Standard.Operations);
-        foreach (var operation in Windowed.Operations)
-        {
-            if (supported.Contains(operation.Identity))
-                operations.Add(operation);
-        }
-        foreach (var operation in Elementwise.Operations)
-        {
-            if (supported.Contains(operation.Identity))
-                operations.Add(operation);
-        }
-
-        return new MathBlockRegistry(operations);
-    }
 
     private static MathBlockRegistry CreateElementwise()
         => new(ElementwiseMathBlocks.CreateOperations());

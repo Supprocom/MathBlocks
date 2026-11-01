@@ -6,7 +6,11 @@ namespace Supprocom.MathBlocks.Tests;
 /// <summary>Contains regression tests for Math Block Feature Folder Tests.</summary>
 public sealed class MathBlockFeatureFolderTests
 {
-    /// <summary>Verifies every block owns one definition cpucudaand test file.</summary>
+    /// <summary>
+    /// Verifies every per-block Standard operation owns one definition, CoreCLR, CUDA and test file, and that the
+    /// rest of Standard is exactly the window and elementwise forms generated from their tables, which no block
+    /// definition declares.
+    /// </summary>
     [Fact]
     public void EveryBlockOwnsOneDefinitionCPUCUDAAndTestFile()
     {
@@ -16,9 +20,18 @@ public sealed class MathBlockFeatureFolderTests
         var cpuImplementations = Directory.GetFiles(blocksRoot, "*.Cpu.cs", SearchOption.AllDirectories);
         var cudaBindings = Directory.GetFiles(blocksRoot, "*.Cuda.cs", SearchOption.AllDirectories);
         var tests = Directory.GetFiles(blocksRoot, "*.Tests.cs", SearchOption.AllDirectories);
+        var generated = MathBlockWindowTestSupport.Windowed.Operations
+            .Concat(MathBlockElementwiseTestSupport.Elementwise.Operations)
+            .ToArray();
+        Assert.All(generated, operation =>
+            Assert.Same(operation, MathBlockCatalog.Standard.Get(operation.Identifier, operation.Version)));
+        var generatedIdentities = generated.Select(operation => operation.Identity).ToHashSet(StringComparer.Ordinal);
+        Assert.Equal(generated.Length, generatedIdentities.Count);
         var registered = MathBlockCatalog.Standard.Operations
             .Select(operation => operation.Identity)
+            .Where(identity => !generatedIdentities.Contains(identity))
             .ToHashSet(StringComparer.Ordinal);
+        Assert.Equal(MathBlockCatalog.Standard.Operations.Count, registered.Count + generated.Length);
 
         Assert.Equal(registered.Count, definitions.Length);
         Assert.Equal(registered.Count, cpuImplementations.Length);
@@ -43,7 +56,7 @@ public sealed class MathBlockFeatureFolderTests
         }
 
         Assert.Equal(
-            MathBlockWindowTestSupport.Cuda.Operations
+            MathBlockCatalog.Standard.Operations
                 .Select(operation => operation.Identity)
                 .Order(StringComparer.Ordinal),
             MathBlocksCUDAWorker.SupportedBlockIdentities.Order(StringComparer.Ordinal));

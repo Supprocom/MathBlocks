@@ -17,10 +17,10 @@ public sealed class MathBlockElementwiseFormTests
 
     /// <summary>
     /// Verifies the registry holds exactly one form and one sibling per scalar-only Standard operation that has no
-    /// Pointwise vector form of the same name, outside Standard.
+    /// Pointwise vector form of the same name, and that Standard registers the same instances.
     /// </summary>
     [Fact]
-    public void ElementwiseRegistryHoldsTheDesignFormsAndSiblingsOutsideStandard()
+    public void ElementwiseRegistryHoldsTheDesignFormsAndSiblingsInStandard()
     {
         var standard = MathBlockCatalog.Standard.Operations;
         var scalarOnly = standard
@@ -63,10 +63,8 @@ public sealed class MathBlockElementwiseFormTests
             Assert.Equal(SourceArity(source), Validity(source).Arity);
         }
 
-        Assert.Equal(337, standard.Count);
-        Assert.DoesNotContain(
-            standard,
-            operation => operation.Identifier.StartsWith("elementwise", StringComparison.Ordinal));
+        Assert.All(Elementwise.Operations, operation =>
+            Assert.Same(operation, MathBlockCatalog.Standard.Get(operation.Identifier, operation.Version)));
     }
 
     /// <summary>Checks each elementwise operation's regression and performance contract on CoreCLR.</summary>

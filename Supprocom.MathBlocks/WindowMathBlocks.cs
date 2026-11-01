@@ -130,7 +130,7 @@ internal static class WindowMathBlocks
     private static readonly Lazy<MathBlockRegistry> directReference = new(CreateDirectReference);
 
     // Every window.*, window-valid.*, window-accurate.* and window-accurate-valid.* operation with its form. The
-    // operations are the instances registered in MathBlockCatalog.Windowed.
+    // operations are the instances registered in MathBlockCatalog.Windowed and MathBlockCatalog.Standard.
     internal static IReadOnlyList<MathBlockWindowEntry> Entries => entries.Value;
 
     // The window.* and window-valid.* forms evaluated by the direct lift on every row, including the forms that have

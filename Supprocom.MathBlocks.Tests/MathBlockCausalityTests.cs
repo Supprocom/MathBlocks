@@ -9,15 +9,25 @@ namespace Supprocom.MathBlocks.Tests;
 public sealed class MathBlockCausalityTests
 {
     private const string StandardCausalityFingerprint =
-        "08ebbaf1d6ae091edef0fac05a0ce513b2841c2008efc0e17bdb99757b17adbe";
+        "3d25163eb2f29ef0eddb85d7cdd40bdd1144515bdc172a02cc62b4fd962fbe32";
 
-    /// <summary>Verifies every standard operation has an explicit causality label.</summary>
+    /// <summary>
+    /// Verifies every standard operation has an explicit causality label: in its block definition for the 337
+    /// per-block operations, and from the lift for the table-generated forms (Trailing on the width for the window
+    /// families, Pointwise for the elementwise families).
+    /// </summary>
     [Fact]
     [Trait("Category", "CausalityContract")]
     public void EveryStandardOperationHasACausalityLabel()
     {
         var operations = MathBlockCatalog.Standard.Operations;
-        Assert.Equal(337, operations.Count);
+        var windowed = MathBlockWindowTestSupport.Windowed.Operations;
+        var elementwise = MathBlockElementwiseTestSupport.Elementwise.Operations;
+        Assert.Equal(537, operations.Count);
+        Assert.Equal(118, windowed.Count);
+        Assert.Equal(82, elementwise.Count);
+        Assert.All(windowed, operation => Assert.Equal(MathBlockCausality.Trailing, operation.Causality.Kind));
+        Assert.All(elementwise, operation => Assert.Equal(MathBlockCausality.Pointwise, operation.Causality.Kind));
         Assert.All(operations, operation =>
         {
             var causality = operation.Causality;
@@ -37,7 +47,7 @@ public sealed class MathBlockCausalityTests
 
         var blocksRoot = Path.Combine(FindRepositoryRoot(), "Supprocom.MathBlocks", "Blocks");
         var definitions = Directory.GetFiles(blocksRoot, "*.Definition.cs", SearchOption.AllDirectories);
-        Assert.Equal(operations.Count, definitions.Length);
+        Assert.Equal(operations.Count - windowed.Count - elementwise.Count, definitions.Length);
         Assert.All(definitions, definition => Assert.Contains(
             "internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.",
             File.ReadAllText(definition),

@@ -16,10 +16,11 @@ public sealed class MathBlockWindowFormTests
         [.. Windowed.Operations.Select(operation => operation.Identity)];
 
     /// <summary>
-    /// Verifies the window registry holds exactly the 53 design forms, the six accurate forms and their siblings.
+    /// Verifies the window registry holds exactly the 53 design forms, the six accurate forms and their siblings, and
+    /// that Standard registers the same instances.
     /// </summary>
     [Fact]
-    public void WindowRegistryHoldsTheDesignFormsAndSiblingsOutsideStandard()
+    public void WindowRegistryHoldsTheDesignFormsAndSiblingsInStandard()
     {
         Assert.Equal(53, SourceIdentifiers.Length);
         Assert.Equal(53, SourceIdentifiers.Distinct(StringComparer.Ordinal).Count());
@@ -36,10 +37,8 @@ public sealed class MathBlockWindowFormTests
             Assert.Equal(arity + 1, Validity(source).Arity);
         }
 
-        Assert.Equal(337, MathBlockCatalog.Standard.Operations.Count);
-        Assert.DoesNotContain(
-            MathBlockCatalog.Standard.Operations,
-            operation => operation.Identifier.StartsWith("window", StringComparison.Ordinal));
+        Assert.All(Windowed.Operations, operation =>
+            Assert.Same(operation, MathBlockCatalog.Standard.Get(operation.Identifier, operation.Version)));
     }
 
     /// <summary>Checks each window operation's regression and performance contract on CoreCLR.</summary>

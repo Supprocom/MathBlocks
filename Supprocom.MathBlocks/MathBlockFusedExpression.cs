@@ -329,7 +329,7 @@ public sealed class MathBlockFusedExpression
         if (!MathBlockFusedOperations.TryResolve(identity, out var fused))
             throw new ArgumentException(
                 $"Operation node {index} ({identity}) has no fused row form.", nameof(program));
-        if (!TryGetStandard(operation, fused, out var standard) || !ReferenceEquals(standard, operation))
+        if (!IsStandard(operation))
             throw new ArgumentException(
                 $"Operation node {index} ({identity}) is not the MathBlockCatalog.Standard operation.",
                 nameof(program));
@@ -384,29 +384,16 @@ public sealed class MathBlockFusedExpression
             nameof(program));
     }
 
-    // The elementwise forms stay outside Standard until they are registered there, so their own registry
-    // instances are accepted as well.
-    private static bool TryGetStandard(
-        MathBlockOperation operation,
-        MathBlockFusedOperation fused,
-        out MathBlockOperation standard)
+    private static bool IsStandard(MathBlockOperation operation)
     {
-        foreach (var registry in fused.IsElementwise
-                     ? new[] { MathBlockCatalog.Standard, MathBlockCatalog.Elementwise }
-                     : [MathBlockCatalog.Standard])
+        try
         {
-            try
-            {
-                standard = registry.Get(operation.Identifier, operation.Version);
-                if (ReferenceEquals(standard, operation))
-                    return true;
-            }
-            catch (KeyNotFoundException)
-            {
-            }
+            return ReferenceEquals(MathBlockCatalog.Standard.Get(operation.Identifier, operation.Version), operation);
         }
-        standard = operation;
-        return false;
+        catch (KeyNotFoundException)
+        {
+            return false;
+        }
     }
 
     // The common row count of the valid vector inputs. Invalid inputs carry no rows; when every vector input is
