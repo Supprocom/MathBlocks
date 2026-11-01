@@ -95,8 +95,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     public int HostToDeviceBytesPerExecution => arenaSize;
     /// <summary>Gets the device to host bytes per execution value.</summary>
     public int DeviceToHostBytesPerExecution => downloadArenaSize;
-    /// <summary>Gets the cpu node dispatch count value.</summary>
-    public int CpuNodeDispatchCount => 0;
+    /// <summary>Gets the number of nodes dispatched on CoreCLR.</summary>
+    public int CoreCLRNodeDispatchCount => 0;
 
     // Keep allocation, graph construction, and rollback in one auditable transaction.
 #pragma warning disable MA0051

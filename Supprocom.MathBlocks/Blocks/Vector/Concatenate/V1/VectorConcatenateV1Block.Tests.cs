@@ -10,7 +10,7 @@ public sealed class VectorConcatenateV1BlockTests
 
     /// <summary>Checks the <c>vector.concatenate@1</c> operation contract.</summary>
     [Fact]
-    public void CPUWorkerConcatenatesUnequalVectorLengths()
+    public void CoreCLRWorkerConcatenatesUnequalVectorLengths()
     {
         var leftValue = MathBlockValue.Vector([1d, 2d, 3d]);
         var rightValue = MathBlockValue.Vector([4d]);

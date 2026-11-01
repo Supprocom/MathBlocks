@@ -96,7 +96,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
         compiled.ExecuteResident();
 
-        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        Assert.Equal(0, compiled.CoreCLRNodeDispatchCount);
         Assert.Equal(0, compiled.HostOutputReadCount);
         Assert.Equal(1, compiled.GraphInstantiationCount);
         Assert.Equal(1, compiled.GraphLaunchCount);
@@ -281,7 +281,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         var outputs = compiled.ReadOutputs();
 
         Assert.Equal(0, compiled.OperationNodeCount);
-        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        Assert.Equal(0, compiled.CoreCLRNodeDispatchCount);
         Assert.Equal(1, compiled.GraphLaunchCount);
         Assert.Equal(1, compiled.SynchronizationCount);
         Assert.Equal(1, compiled.HostToDeviceTransferCount);
@@ -314,7 +314,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         Assert.Equal(48, compiled.DeviceToHostBytesPerExecution);
         Assert.Equal(1, compiled.HostToDeviceTransferCount);
         Assert.Equal(1, compiled.DeviceToHostTransferCount);
-        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        Assert.Equal(0, compiled.CoreCLRNodeDispatchCount);
     }
 
     /// <summary>Verifies cudaconditional mutual information scratch preserves the following output slot.</summary>
@@ -591,7 +591,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
             AssertExact(cpu["quantile"], cuda["quantile"]);
             Assert.Single(cuda["median"].AsVector());
             Assert.Single(cuda["quantile"].AsVector());
-            Assert.Equal(0, compiled.CpuNodeDispatchCount);
+            Assert.Equal(0, compiled.CoreCLRNodeDispatchCount);
         }
 
         Assert.True(
@@ -766,7 +766,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
                 Assert.Equal(1, compiled.GraphLaunchCount);
                 Assert.Equal(1, compiled.SynchronizationCount);
                 Assert.Equal(1, compiled.DeviceToHostTransferCount);
-                Assert.Equal(0, compiled.CpuNodeDispatchCount);
+                Assert.Equal(0, compiled.CoreCLRNodeDispatchCount);
             }
         }
     }
@@ -1187,7 +1187,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         Assert.Equal(1, compiled.SynchronizationCount);
         Assert.Equal(1, compiled.HostToDeviceTransferCount);
         Assert.Equal(1, compiled.DeviceToHostTransferCount);
-        Assert.Equal(0, compiled.CpuNodeDispatchCount);
+        Assert.Equal(0, compiled.CoreCLRNodeDispatchCount);
     }
 
     private static IEnumerable<MathBlockRegressionCase> CreateParityCases(MathBlockOperation operation)

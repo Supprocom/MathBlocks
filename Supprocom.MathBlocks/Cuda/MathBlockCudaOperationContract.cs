@@ -130,16 +130,16 @@ public sealed class MathBlockCudaOperationContract
     }
 #pragma warning restore CA1024
 
-    /// <summary>Resolves the output type using the shared CPU/CUDA type contract.</summary>
+    /// <summary>Resolves the output type using the shared CoreCLR/CUDA type contract.</summary>
     public MathBlockType ResolveOutputType(IReadOnlyList<MathBlockType> inputTypes) =>
         operation.ResolveOutputType(inputTypes);
 
-    /// <summary>Evaluates the operation on the CPU with positional values.</summary>
-    public MathBlockValue EvaluateCPU(params MathBlockValue[] inputs) =>
+    /// <summary>Evaluates the operation on CoreCLR with positional values.</summary>
+    public MathBlockValue EvaluateCoreCLR(params MathBlockValue[] inputs) =>
         operation.Evaluate(inputs);
 
-    /// <summary>Evaluates the operation on the CPU with a read-only input list.</summary>
-    public MathBlockValue EvaluateCPU(IReadOnlyList<MathBlockValue> inputs) =>
+    /// <summary>Evaluates the operation on CoreCLR with a read-only input list.</summary>
+    public MathBlockValue EvaluateCoreCLR(IReadOnlyList<MathBlockValue> inputs) =>
         operation.Evaluate(inputs);
 
     /// <summary>Plans CUDA shape, capacity, and scratch storage for inputs.</summary>

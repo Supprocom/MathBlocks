@@ -90,7 +90,7 @@ public sealed class MathBlockProgram
     /// <summary>Evaluates the typed graph with named input values.</summary>
     public IReadOnlyDictionary<string, MathBlockValue> Evaluate(
         IReadOnlyDictionary<string, MathBlockValue> inputs) =>
-        MathBlocksCPUWorker.Shared.Execute(this, inputs);
+        MathBlocksCoreCLRWorker.Shared.Execute(this, inputs);
 
     internal Node[] Nodes => nodes;
     internal IReadOnlyList<int[]> OperationLevels => operationLevels;

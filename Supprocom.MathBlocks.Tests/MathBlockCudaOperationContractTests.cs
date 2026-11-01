@@ -104,7 +104,7 @@ public sealed class MathBlockCudaOperationContractTests
                 Assert.True(
                     contractCase.Plan.OutputCapacity >= PayloadCount(regression.Expected),
                     $"{contract.Identity}/{regression.Name}: planned capacity {contractCase.Plan.OutputCapacity}.");
-                var actual = contract.EvaluateCPU(regression.Inputs);
+                var actual = contract.EvaluateCoreCLR(regression.Inputs);
                 Assert.True(
                     actual.ApproximatelyEquals(regression.Expected, regression.Tolerance),
                     $"{contract.Identity}/{regression.Name}: CPU contract result differs.");

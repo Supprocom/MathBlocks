@@ -224,7 +224,7 @@ internal static class MathBlockFusedTestSupport
     private const string FormPrefix = "elementwise.";
     private const string SiblingPrefix = "elementwise-valid.";
 
-    // Every node's unfused value, each operation evaluated on its inputs' values as MathBlocksCPUWorker does.
+    // Every node's unfused value, each operation evaluated on its inputs' values as MathBlocksCoreCLRWorker does.
     public static MathBlockValue[] EvaluateNodes(MathBlockProgram program, IReadOnlyDictionary<string, MathBlockValue> inputs)
     {
         var values = new MathBlockValue[program.PlanNodes.Count];

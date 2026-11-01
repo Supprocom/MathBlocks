@@ -93,7 +93,7 @@ public sealed class MathBlockProgramTests
             .Output("result", "quotient")
             .Build();
 
-        var result = new MathBlocksCPUWorker().Execute(formula, new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
+        var result = new MathBlocksCoreCLRWorker().Execute(formula, new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
             ["first"] = MathBlockValue.Scalar(6d),
             ["second"] = MathBlockValue.Scalar(2d),
@@ -104,9 +104,9 @@ public sealed class MathBlockProgramTests
         Assert.Equal(8d, result["result"].AsScalar());
     }
 
-    /// <summary>Verifies cpuworker runs independent formula branches in parallel async.</summary>
+    /// <summary>Verifies the CoreCLR worker runs independent formula branches in parallel async.</summary>
     [Fact]
-    public async Task CPUWorkerRunsIndependentFormulaBranchesInParallelAsync()
+    public async Task CoreCLRWorkerRunsIndependentFormulaBranchesInParallelAsync()
     {
         using var entered = new CountdownEvent(2);
         using var release = new ManualResetEventSlim();
@@ -136,7 +136,7 @@ public sealed class MathBlockProgramTests
         var right = builder.Apply("test.right", inputs: [input]);
         var sum = builder.Apply("scalar.add", inputs: [left, right]);
         var program = builder.Output("sum", sum).Build();
-        var worker = new MathBlocksCPUWorker(2);
+        var worker = new MathBlocksCoreCLRWorker(2);
 
         var execution = System.Threading.Tasks.Task.Run(() => worker.Execute(
             program,
@@ -148,12 +148,12 @@ public sealed class MathBlockProgramTests
         Assert.Equal(6d, (await execution)["sum"].AsScalar());
     }
 
-    /// <summary>Verifies cpuworker is safe for concurrent executions.</summary>
+    /// <summary>Verifies the CoreCLR worker is safe for concurrent executions.</summary>
     [Fact]
-    public void CPUWorkerIsSafeForConcurrentExecutions()
+    public void CoreCLRWorkerIsSafeForConcurrentExecutions()
     {
         var program = BuildAffineProgram(2d);
-        var worker = new MathBlocksCPUWorker();
+        var worker = new MathBlocksCoreCLRWorker();
 
         Parallel.For(0, 1_000, index =>
         {
@@ -187,8 +187,8 @@ public sealed class MathBlockProgramTests
             ["input"] = MathBlockValue.Vector([1d, 2d, 3d, 4d])
         };
 
-        var serial = new MathBlocksCPUWorker(1).Execute(program, inputs);
-        var parallel = new MathBlocksCPUWorker(2).Execute(program, inputs);
+        var serial = new MathBlocksCoreCLRWorker(1).Execute(program, inputs);
+        var parallel = new MathBlocksCoreCLRWorker(2).Execute(program, inputs);
 
         var expected = new Dictionary<string, double[]>(StringComparer.Ordinal)
         {

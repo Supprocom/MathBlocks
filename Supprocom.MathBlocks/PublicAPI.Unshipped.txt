@@ -95,3 +95,19 @@ Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary.Major.get -> int
 Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary.Minor.get -> int
 override Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary.ToString() -> string!
 static Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary.Current.get -> Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary!
+*REMOVED*static Supprocom.MathBlocks.MathBlocksCPUWorker.Shared.get -> Supprocom.MathBlocks.MathBlocksCPUWorker!
+*REMOVED*Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.EvaluateCPU(params Supprocom.MathBlocks.MathBlockValue[]! inputs) -> Supprocom.MathBlocks.MathBlockValue
+*REMOVED*Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.EvaluateCPU(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! inputs) -> Supprocom.MathBlocks.MathBlockValue
+*REMOVED*Supprocom.MathBlocks.Cuda.MathBlocksCUDAProgram.CpuNodeDispatchCount.get -> int
+*REMOVED*Supprocom.MathBlocks.MathBlocksCPUWorker
+*REMOVED*Supprocom.MathBlocks.MathBlocksCPUWorker.Execute(Supprocom.MathBlocks.MathBlockProgram! program, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs) -> System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>!
+*REMOVED*Supprocom.MathBlocks.MathBlocksCPUWorker.MathBlocksCPUWorker(int maximumConcurrency = -1) -> void
+*REMOVED*Supprocom.MathBlocks.MathBlocksCPUWorker.MaximumConcurrency.get -> int
+static Supprocom.MathBlocks.MathBlocksCoreCLRWorker.Shared.get -> Supprocom.MathBlocks.MathBlocksCoreCLRWorker!
+Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.EvaluateCoreCLR(params Supprocom.MathBlocks.MathBlockValue[]! inputs) -> Supprocom.MathBlocks.MathBlockValue
+Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.EvaluateCoreCLR(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! inputs) -> Supprocom.MathBlocks.MathBlockValue
+Supprocom.MathBlocks.Cuda.MathBlocksCUDAProgram.CoreCLRNodeDispatchCount.get -> int
+Supprocom.MathBlocks.MathBlocksCoreCLRWorker
+Supprocom.MathBlocks.MathBlocksCoreCLRWorker.Execute(Supprocom.MathBlocks.MathBlockProgram! program, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs) -> System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>!
+Supprocom.MathBlocks.MathBlocksCoreCLRWorker.MathBlocksCoreCLRWorker(int maximumConcurrency = -1) -> void
+Supprocom.MathBlocks.MathBlocksCoreCLRWorker.MaximumConcurrency.get -> int
