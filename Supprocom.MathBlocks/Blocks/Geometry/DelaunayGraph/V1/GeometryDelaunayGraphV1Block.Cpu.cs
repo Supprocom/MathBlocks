@@ -6,6 +6,12 @@ public static partial class MathBlockGeometry
     public static MathBlockGraph DelaunayGraph(IReadOnlyList<MathBlockPoint> points)
     {
         ArgumentNullException.ThrowIfNull(points);
+        return new MathBlockGraph(points.Count, DelaunayEdges(points));
+    }
+
+    // The Delaunay edges before graph validation, whose weights are not finite when a distance overflows.
+    internal static MathBlockGraphEdge[] DelaunayEdges(IReadOnlyList<MathBlockPoint> points)
+    {
         var edges = new List<(int Left, int Right)>();
         for (var first = 0; first < points.Count; first++)
         {
@@ -59,7 +65,7 @@ public static partial class MathBlockGeometry
                 edge.Right,
                 Distance(points[edge.Left], points[edge.Right]));
         }
-        return new MathBlockGraph(points.Count, result);
+        return result;
     }
 
     private static int CompareDelaunayPoints(MathBlockPoint left, MathBlockPoint right)

@@ -171,7 +171,8 @@ public sealed class MathBlockCudaOperationContract
         MathBlocksCUDAProgram.ValidateProgram(program);
         var layout = MathBlocksCUDAProgram.ResolvePayloadLayout(program.PlanNodes, prototypes);
         var outputNode = program.PlanNodes[output];
-        var scratchBytes = MathBlocksCUDAProgram.ResolveScratchBytes(
+        // An always-invalid output (inputs outside the domain for this plan) has no payload and no scratch.
+        var scratchBytes = MathBlocksCUDAProgram.ResolveScratchBytesOrMarkInvalid(
             outputNode,
             program.PlanNodes,
             layout);

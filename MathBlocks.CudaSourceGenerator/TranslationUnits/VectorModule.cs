@@ -490,7 +490,10 @@ internal static unsafe class VectorModule
                     double end = second->scalar_value;
                     double step = output->count == 1 ? 0.0 : (end - start) / (output->count - 1);
                     for (int index = thread; index < output->count; index += Cuda.BlockDim.X)
+                    {
                         result[index] = index == output->count - 1 ? end : start + step * index;
+                        if (!double.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
+                    }
                 }
                 break;
             case 22:

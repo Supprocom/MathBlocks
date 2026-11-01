@@ -145,12 +145,9 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         }
         foreach (var node in program.PlanNodes)
         {
-            if (node.Kind != MathBlockProgramNodeKind.Operation)
+            if (node.Kind != MathBlockProgramNodeKind.Operation || payloadLayout.AlwaysInvalid[node.Index])
                 continue;
-            var scratchBytes = ResolveScratchBytes(
-                node,
-                program.PlanNodes,
-                payloadLayout);
+            var scratchBytes = ResolveScratchBytesOrMarkInvalid(node, program.PlanNodes, payloadLayout);
             if (scratchBytes == 0)
                 continue;
             scratchOffsets[node.Index] = AlignArenaOffset(plannedArenaSize);
@@ -259,7 +256,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 "cuGraphAddMemcpyNode(mathblocks upload)");
             foreach (var node in program.PlanNodes)
             {
-                if (node.Kind != MathBlockProgramNodeKind.Operation)
+                if (node.Kind != MathBlockProgramNodeKind.Operation || payloadLayout.AlwaysInvalid[node.Index])
                     continue;
                 var kernel = MathBlocksCudaKernelModule.Resolve(node.OperationIdentity!);
                 var launch = kernel.RowStriped
@@ -454,13 +451,15 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             {
                 outputs.Add(
                     output.Key,
-                    MathBlockCudaValueCodec.ReadValue(
-                        downloadArena,
-                        checked(slotOffsets[output.Value] - downloadArenaOffset),
-                        payloadOffsets[output.Value] < 0
-                            ? -1
-                            : checked(payloadOffsets[output.Value] - downloadArenaOffset),
-                        resolvedTypes[output.Value]));
+                    program.PlannedOutput(
+                        output.Value,
+                        MathBlockCudaValueCodec.ReadValue(
+                            downloadArena,
+                            checked(slotOffsets[output.Value] - downloadArenaOffset),
+                            payloadOffsets[output.Value] < 0
+                                ? -1
+                                : checked(payloadOffsets[output.Value] - downloadArenaOffset),
+                            resolvedTypes[output.Value])));
                 HostOutputReadCount++;
             }
             return outputs;
@@ -556,6 +555,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         var shapeColumns = new int[nodes.Count];
         var exactValues = new MathBlockValue?[nodes.Count];
         var candidateTypes = new MathBlockType[nodes.Count];
+        var alwaysInvalid = new bool[nodes.Count];
         var published = new bool[nodes.Count];
         if (activeNodes is not null && activeNodes.Count != nodes.Count)
             throw new ArgumentException("The CUDA active-node count is inconsistent.", nameof(activeNodes));
@@ -592,41 +592,59 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             }
 
             MathBlockType resolvedType;
-            if (node.Kind == MathBlockProgramNodeKind.Operation)
+            int capacity;
+            MathBlockCudaShapeAuthority shape;
+            try
             {
-                var operation = ResolveOperation(node.OperationIdentity!);
-                resolvedType = operation.ResolveOutputType(inputTypes);
-                ValidateStaticOperation(
+                if (node.Kind == MathBlockProgramNodeKind.Operation)
+                {
+                    // An operation with an always-invalid input is always invalid.
+                    for (var inputIndex = 0; inputIndex < node.Inputs.Count; inputIndex++)
+                        if (alwaysInvalid[node.Inputs[inputIndex]])
+                            throw new StaticDomainException($"CUDA node {node.Index} has an always-invalid input.");
+                    var operation = ResolveOperation(node.OperationIdentity!);
+                    resolvedType = operation.ResolveOutputType(inputTypes);
+                    ValidateStaticOperation(
+                        node,
+                        inputCapacities,
+                        inputShapeRows,
+                        inputExactValues);
+                }
+                else
+                {
+                    resolvedType = node.Type;
+                }
+
+                capacity = ResolvePayloadCapacity(
                     node,
+                    nodes,
                     inputCapacities,
                     inputShapeRows,
+                    inputShapeColumns,
+                    prototypeInputs,
+                    inputCapacityOverrides,
+                    inputExactValues);
+                if (capacity < 0)
+                    throw new InvalidOperationException($"CUDA payload capacity for node {node.Index} is negative.");
+                shape = ResolveShapeAuthority(
+                    node,
+                    capacity,
+                    inputCapacities,
+                    inputShapeRows,
+                    inputShapeColumns,
+                    prototypeInputs,
+                    inputShapeOverrides,
                     inputExactValues);
             }
-            else
+            catch (StaticDomainException) when (node.Kind == MathBlockProgramNodeKind.Operation)
             {
-                resolvedType = node.Type;
+                // No payload and no kernel: the slot header stays invalid on every execution, and the result has
+                // the planned type.
+                alwaysInvalid[node.Index] = true;
+                candidateTypes[node.Index] = node.Type;
+                published[node.Index] = true;
+                continue;
             }
-
-            var capacity = ResolvePayloadCapacity(
-                node,
-                nodes,
-                inputCapacities,
-                inputShapeRows,
-                inputShapeColumns,
-                prototypeInputs,
-                inputCapacityOverrides,
-                inputExactValues);
-            if (capacity < 0)
-                throw new InvalidOperationException($"CUDA payload capacity for node {node.Index} is negative.");
-            var shape = ResolveShapeAuthority(
-                node,
-                capacity,
-                inputCapacities,
-                inputShapeRows,
-                inputShapeColumns,
-                prototypeInputs,
-                inputShapeOverrides,
-                inputExactValues);
             if (node.Kind == MathBlockProgramNodeKind.Operation &&
                 ((WindowCudaBlockCatalog.IsWindowIdentity(node.OperationIdentity) &&
                     WindowSeriesLengthsDiffer(inputTypes, inputShapeRows)) ||
@@ -667,7 +685,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             shapeRows,
             shapeColumns,
             exactValues,
-            candidateTypes);
+            candidateTypes,
+            alwaysInvalid);
     }
 
 #pragma warning restore MA0051
@@ -1071,7 +1090,26 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     private static void RequireDomain(bool condition, MathBlockProgramNode node, string domain)
     {
         if (!condition)
-            throw new InvalidOperationException($"CUDA static {domain} authority rejected node {node.Index}.");
+            throw new StaticDomainException($"CUDA static {domain} authority rejected node {node.Index}.");
+    }
+
+    // A node whose inputs are outside the operation domain for every execution of the compiled program. It compiles
+    // to an always-invalid node, as CoreCLR returns an invalid value for those inputs at run time.
+    private sealed class StaticDomainException : InvalidOperationException
+    {
+        public StaticDomainException()
+        {
+        }
+
+        public StaticDomainException(string message)
+            : base(message)
+        {
+        }
+
+        public StaticDomainException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
     }
 
     // The capacity decision table is intentionally exhaustive and contiguous.
@@ -1166,7 +1204,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             {
                 var rows = RequireInputShapeRows(node, 0, inputShapeRows);
                 if (rows < 0 || rows > 20)
-                    throw new InvalidOperationException("CUDA principal-minor shape is outside the operation domain.");
+                    throw new StaticDomainException("CUDA principal-minor shape is outside the operation domain.");
                 return checked((1 << rows) - 1);
             }
             if (string.Equals(identity, "matrix.maximal-minors@1", StringComparison.Ordinal))
@@ -1184,7 +1222,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             {
                 var count = inputCapacities[0];
                 if (count < 0 || count > 20)
-                    throw new InvalidOperationException("CUDA subset-sum shape is outside the operation domain.");
+                    throw new StaticDomainException("CUDA subset-sum shape is outside the operation domain.");
                 return checked((1 << count) - 1);
             }
             if (string.Equals(identity, "sequence.convolution@1", StringComparison.Ordinal))
@@ -1275,7 +1313,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             {
                 var count = inputCapacities[0];
                 if (count <= 0 || (count & (count - 1)) != 0)
-                    throw new InvalidOperationException("CUDA Shapley shape is outside the operation domain.");
+                    throw new StaticDomainException("CUDA Shapley shape is outside the operation domain.");
                 var players = 0;
                 while (count > 1)
                 {
@@ -1636,6 +1674,26 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     private static int ResolvePayloadBytes(MathBlockValueKind kind, int capacity) =>
         MathBlockCudaValueCodec.GetPayloadByteCount(kind, capacity);
 
+    // The scratch an operation node needs, or 0 for an always-invalid node, which a scratch rule outside the
+    // operation domain also makes (its consumers read the invalid slot at run time).
+    internal static int ResolveScratchBytesOrMarkInvalid(
+        MathBlockProgramNode node,
+        IReadOnlyList<MathBlockProgramNode> nodes,
+        MathBlockCudaPayloadLayout payloadLayout)
+    {
+        if (payloadLayout.AlwaysInvalid[node.Index])
+            return 0;
+        try
+        {
+            return ResolveScratchBytes(node, nodes, payloadLayout);
+        }
+        catch (StaticDomainException)
+        {
+            payloadLayout.AlwaysInvalid[node.Index] = true;
+            return 0;
+        }
+    }
+
     internal static int ResolveScratchBytes(
         MathBlockProgramNode node,
         IReadOnlyList<MathBlockProgramNode> nodes,
@@ -1814,7 +1872,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     private static int ResolveAssignmentScratch(int size)
     {
         if (size < 0 || size > 20)
-            throw new InvalidOperationException("CUDA assignment shape is outside the operation domain.");
+            throw new StaticDomainException("CUDA assignment shape is outside the operation domain.");
         return checked(2 * (1 << size));
     }
 

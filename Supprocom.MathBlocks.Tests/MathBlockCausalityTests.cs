@@ -112,6 +112,29 @@ public sealed class MathBlockCausalityTests
         Assert.Contains(failures, failure => failure.Contains(expectedReason, StringComparison.Ordinal));
     }
 
+    /// <summary>
+    /// Verifies the property check rejects a broken lift of an integer-domain operation, in which row t reads row
+    /// t - 1 of the first vector argument. Over real-valued rows these forms return the fill value on every row (and
+    /// their validity siblings return false on every row), so the check has to choose integer rows to see the shift.
+    /// </summary>
+    [Theory]
+    [Trait("Category", "CausalityContract")]
+    [InlineData("combinatorics.ballot-count")]
+    [InlineData("combinatorics.binomial-coefficient")]
+    [InlineData("combinatorics.factorial")]
+    [InlineData("probability.poisson-cdf")]
+    public void PropertyCheckRejectsABrokenLiftOfAnIntegerDomainOperation(string source)
+    {
+        foreach (var form in new[] { MathBlockElementwiseTestSupport.Form(source), MathBlockElementwiseTestSupport.Validity(source) })
+        {
+            Assert.Empty(MathBlockCausalityChecks.Check(form));
+
+            var failures = MathBlockCausalityChecks.Check(ShiftFirstVectorArgument(form));
+
+            Assert.True(failures.Count != 0, $"The check accepted a shifted {form.Identity}.");
+        }
+    }
+
     /// <summary>Verifies the reverse check rejects a causal operation labelled WholeSeries.</summary>
     [Fact]
     [Trait("Category", "CausalityContract")]
@@ -234,6 +257,30 @@ public sealed class MathBlockCausalityTests
             source.RegressionCases,
             source.PerformanceCase,
             causality);
+
+    // Row t of the result reads row t - 1 (row 0 for t = 0) of the first vector argument, still labelled Pointwise.
+    private static MathBlockOperation ShiftFirstVectorArgument(MathBlockOperation source) =>
+        new(
+            source.Identifier,
+            source.Version,
+            source.Arity,
+            source.ResolveOutputType,
+            inputs =>
+            {
+                var shifted = inputs.ToArray();
+                var index = Array.FindIndex(shifted, input => input.IsValid && input.Type.Kind == MathBlockValueKind.Vector);
+                if (index >= 0)
+                {
+                    var values = shifted[index].AsVector();
+                    shifted[index] = MathBlockValue.Vector(
+                        Enumerable.Range(0, values.Count).Select(row => values[Math.Max(0, row - 1)]),
+                        shifted[index].Type.Unit);
+                }
+                return source.Evaluate(shifted);
+            },
+            source.RegressionCases,
+            source.PerformanceCase,
+            MathBlockCausalityInfo.Pointwise);
 
     private static string FindRepositoryRoot([CallerFilePath] string sourceFile = "")
     {

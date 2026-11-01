@@ -6,8 +6,15 @@ public static partial class MathBlockGraphMath
     public static MathBlockGraph MinimumSpanningForest(MathBlockGraph graph)
     {
         ArgumentNullException.ThrowIfNull(graph);
-        var parent = MathBlockCollectionPrimitives.Range(graph.VertexCount);
-        var rank = new byte[graph.VertexCount];
+        return new MathBlockGraph(graph.VertexCount, MinimumSpanningEdges(graph.VertexCount, graph));
+    }
+
+    // Kruskal's forest over an edge list that a MathBlockGraph has not validated, so a caller can take a forest of
+    // edges with non-finite weights and decide what such a forest means.
+    internal static List<MathBlockGraphEdge> MinimumSpanningEdges(int vertexCount, IReadOnlyList<MathBlockGraphEdge> graph)
+    {
+        var parent = MathBlockCollectionPrimitives.Range(vertexCount);
+        var rank = new byte[vertexCount];
         var selected = new List<MathBlockGraphEdge>();
         var edges = MathBlockCollectionPrimitives.SortedCopy(
             graph,
@@ -41,6 +48,6 @@ public static partial class MathBlockGraphMath
             selected.Add(edge);
         }
 
-        return new MathBlockGraph(graph.VertexCount, selected);
+        return selected;
     }
 }

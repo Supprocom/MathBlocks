@@ -7,7 +7,9 @@ internal static partial class AdvancedMathBlocks
         internal const string Identity = "matrix.maximal-minors@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateMaximalMinors();
-        private static MathBlockOperation CreateMaximalMinors() => MathBlockOperationFactory.Create("matrix.maximal-minors", 1, types =>
+        private static MathBlockOperation CreateMaximalMinors() => MathBlockOperationFactory.Create("matrix.maximal-minors", 1, MaximalMinorsType, inputs => inputs[0].AsMatrix().Rows <= inputs[0].AsMatrix().Columns && inputs[0].AsMatrix().Columns <= 20 ? MathBlockValue.Vector(MathBlockAdvanced.MaximalMinors(inputs[0].AsMatrix()), inputs[0].Type.Unit.Pow(new MathRational(inputs[0].AsMatrix().Rows)), true) : MathBlockOperationFactory.Invalid(MaximalMinorsType, inputs, "The matrix shape is outside the operation domain."), [MathBlockValue.Matrix(new MathBlockMatrix(2, 3, [1d, 0d, 1d, 0d, 1d, 1d]))], MathBlockValue.Vector([1d, 1d, -1d]), performanceIterations: 4);
+
+        private static MathBlockType MaximalMinorsType(IReadOnlyList<MathBlockType> types)
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Matrix);
             if (types[0].Rows != 0 && types[0].Columns != 0 && types[0].Rows > types[0].Columns)
@@ -15,6 +17,6 @@ internal static partial class AdvancedMathBlocks
             if (types[0].Rows == 0 && !types[0].Unit.IsDimensionless)
                 throw new InvalidOperationException("A dimensional minor requires a known order.");
             return MathBlockType.Vector(types[0].Unit.Pow(new MathRational(types[0].Rows)));
-        }, inputs => inputs[0].AsMatrix().Rows <= inputs[0].AsMatrix().Columns && inputs[0].AsMatrix().Columns <= 20 ? MathBlockValue.Vector(MathBlockAdvanced.MaximalMinors(inputs[0].AsMatrix()), inputs[0].Type.Unit.Pow(new MathRational(inputs[0].AsMatrix().Rows)), true) : MathBlockValue.Invalid(MathBlockType.Vector(), "The matrix shape is outside the operation domain."), [MathBlockValue.Matrix(new MathBlockMatrix(2, 3, [1d, 0d, 1d, 0d, 1d, 1d]))], MathBlockValue.Vector([1d, 1d, -1d]), performanceIterations: 4);
+        }
     }
 }

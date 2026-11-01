@@ -110,25 +110,16 @@ internal static class MathBlockPrimitives
         return Round(value);
     }
 
+    // IEEE 754 requires the square root to be correctly rounded, so the base library's Math.Sqrt (the hardware
+    // instruction) and CUDA's double sqrt give the same bits for every input. It is the one member of the base
+    // library's Math class that the library calls.
     public static double Sqrt(double value)
     {
         if (value == 0d || IsPositiveInfinity(value))
             return value;
         if (value < 0d || IsNaN(value))
             return QuietNaN();
-
-        var scaled = value;
-        var correction = 1d;
-        if ((ToBits(scaled) & 0x7ff0_0000_0000_0000ul) == 0ul)
-        {
-            scaled *= FromBits(0x4350_0000_0000_0000ul);
-            correction = FromBits(0x3e40_0000_0000_0000ul);
-        }
-
-        var estimate = FromBits((ToBits(scaled) >> 1) + 0x1ff8_0000_0000_0000ul);
-        for (var iteration = 0; iteration < 7; iteration++)
-            estimate = 0.5d * (estimate + scaled / estimate);
-        return estimate * correction;
+        return System.Math.Sqrt(value);
     }
 
     public static int ILogB(double value)

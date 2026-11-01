@@ -17,7 +17,8 @@ internal static class MathBlockCausalityChecks
 
     private static readonly Domain[] VectorDomains =
     [
-        Domain.Real, Domain.Positive, Domain.Unit, Domain.SmallMass, Domain.Count, Domain.Index, Domain.Probability
+        Domain.Real, Domain.Positive, Domain.Unit, Domain.SmallMass, Domain.Count, Domain.Index, Domain.Integer,
+        Domain.Probability
     ];
 
     // A causal operation whose input must be a whole probability distribution has no proper prefix in its domain,
@@ -29,7 +30,7 @@ internal static class MathBlockCausalityChecks
 
     private static readonly Domain[] VectorDomainsWithWhole =
     [
-        Domain.Real, Domain.Positive, Domain.Unit, Domain.SmallMass, Domain.Count, Domain.Index,
+        Domain.Real, Domain.Positive, Domain.Unit, Domain.SmallMass, Domain.Count, Domain.Index, Domain.Integer,
         Domain.Sorted, Domain.Probability
     ];
 
@@ -41,6 +42,7 @@ internal static class MathBlockCausalityChecks
         SmallMass,
         Count,
         Index,
+        Integer,
         Sorted,
         Probability,
         Boolean,
@@ -302,7 +304,7 @@ internal static class MathBlockCausalityChecks
             samples[index + 1] = context.Operation.RegressionCases[index].Inputs;
         foreach (var sample in samples)
         {
-            var baseline = EvaluateOrInvalid(context.Operation, sample.ToArray());
+            var baseline = context.Operation.Evaluate(sample.ToArray());
             if (!baseline.IsValid)
                 continue;
             var length = SeriesLength(sample[context.SeriesInputs[0]]);
@@ -314,7 +316,7 @@ internal static class MathBlockCausalityChecks
                     {
                         var inputs = sample.ToArray();
                         inputs[input] = changed;
-                        var result = EvaluateOrInvalid(context.Operation, inputs);
+                        var result = context.Operation.Evaluate(inputs);
                         if (!result.IsValid)
                             continue;
                         if (!IsSeriesKind(baseline.Type.Kind))
@@ -336,22 +338,22 @@ internal static class MathBlockCausalityChecks
         return false;
     }
 
-    /// <summary>Evaluates an operation, treating an out-of-domain input that the operation rejects by throwing as invalid.</summary>
+    /// <summary>Evaluates an operation, treating inputs whose types the operation rejects as outside its domain.</summary>
     /// <remarks>
-    /// Some operations return an invalid value whose shape differs from the declared output type when an input is
-    /// outside their domain (for example a set function whose length is not a power of two), and
-    /// <see cref="MathBlockOperation.Evaluate(IReadOnlyList{MathBlockValue})"/> reports that mismatch by throwing.
+    /// A generated length can disagree with a parameter of fixed shape, such as a graph's vertex count, and the
+    /// type resolver rejects that combination. Past type resolution, evaluation must return a value.
     /// </remarks>
-    private static MathBlockValue EvaluateOrInvalid(MathBlockOperation operation, MathBlockValue[] inputs)
+    private static MathBlockValue EvaluateTyped(MathBlockOperation operation, MathBlockValue[] inputs)
     {
         try
         {
-            return operation.Evaluate(inputs);
+            operation.ResolveOutputType(Array.ConvertAll(inputs, input => input.Type));
         }
         catch (InvalidOperationException exception)
         {
             return MathBlockValue.Invalid(MathBlockType.Scalar(), exception.Message);
         }
+        return operation.Evaluate(inputs);
     }
 
     private static bool Changed(MathBlockValue baseline, MathBlockValue result, int length, int resultLength)
@@ -377,6 +379,10 @@ internal static class MathBlockCausalityChecks
                 MathBlockValueKind.ComplexVector => [Domain.Complex],
                 _ => vectorDomains
             };
+        // For the causal check, a plan whose output rows all hold the same value is kept only as a fallback: an
+        // integer-domain operation lifted over real-valued rows, for example, returns its fill value on every row,
+        // so no perturbation could change a row and the check would pass whatever the operation reads.
+        Plan? fallback = null;
         foreach (var domains in Combinations(choices, uniformOnly: choices.Length > 2))
         {
             var plan = new Plan(domains);
@@ -386,10 +392,31 @@ internal static class MathBlockCausalityChecks
             foreach (var length in context.CandidateLengths)
                 if (IsValidEverywhere(context, plan, length))
                     lengths.Add(length);
-            if (lengths.Count >= minimumLengths)
-                return plan.WithLengths([.. lengths]);
+            if (lengths.Count < minimumLengths)
+                continue;
+            var candidate = plan.WithLengths([.. lengths]);
+            if (!requirePerturbableRows || RowsVary(context, candidate))
+                return candidate;
+            fallback ??= candidate;
         }
-        return null;
+        return fallback;
+    }
+
+    private static bool RowsVary(Context context, Plan plan)
+    {
+        foreach (var length in plan.Lengths)
+            foreach (var width in context.Widths(length))
+                for (var seed = 0; seed < SeedCount; seed++)
+                {
+                    var random = new Random(Seed(context.Operation.Identity, length, width, seed));
+                    var output = context.Evaluate(plan.Generate(random, length), width);
+                    if (!output.IsValid || !IsSeriesKind(output.Type.Kind))
+                        continue;
+                    for (var row = 1; row < SeriesLength(output); row++)
+                        if (!RowEquals(output, 0, output, row))
+                            return true;
+                }
+        return false;
     }
 
     private static bool IsValidEverywhere(Context context, Plan plan, int length)
@@ -534,7 +561,7 @@ internal static class MathBlockCausalityChecks
                 inputs[SeriesInputs[index]] = series[index].ToValue(Template[SeriesInputs[index]].Type.Unit);
             if (Operation.Causality.WidthInputIndex is { } widthIndex)
                 inputs[widthIndex] = MathBlockValue.Scalar(width, Template[widthIndex].Type.Unit);
-            return EvaluateOrInvalid(Operation, inputs);
+            return EvaluateTyped(Operation, inputs);
         }
     }
 
@@ -750,6 +777,9 @@ internal static class MathBlockCausalityChecks
             Domain.SmallMass => Uniform(random, 0.2d, 0.8d) / length,
             Domain.Count => random.Next(4),
             Domain.Index => random.Next(length),
+            // Integers on both sides of zero, so an integer-only operation is valid on some rows and invalid on
+            // others, and so is its validity sibling.
+            Domain.Integer => random.Next(-2, 6),
             _ => throw new InvalidOperationException($"Domain '{domain}' has no independent rows.")
         };
 

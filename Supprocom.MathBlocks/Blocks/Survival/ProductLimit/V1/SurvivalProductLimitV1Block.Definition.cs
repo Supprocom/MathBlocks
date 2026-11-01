@@ -7,19 +7,21 @@ internal static partial class AdvancedMathBlocks
         internal const string Identity = "survival.product-limit@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Expanding;
         internal static MathBlockOperation Create() => CreateProductLimit();
-        private static MathBlockOperation CreateProductLimit() => MathBlockOperationFactory.Create("survival.product-limit", 2, types =>
-        {
-            var vectors = MathBlockTypeRules.SameBinary(types, MathBlockValueKind.Vector);
-            return MathBlockType.Vector(length: vectors.Rows);
-        }, inputs => AreProductLimitInputsValid(inputs[0].AsVector(), inputs[1].AsVector())
+        private static MathBlockOperation CreateProductLimit() => MathBlockOperationFactory.Create("survival.product-limit", 2, ProductLimitType, inputs => AreProductLimitInputsValid(inputs[0].AsVector(), inputs[1].AsVector())
             ? MathBlockValue.Vector(
                 MathBlockAdvanced.ProductLimitSurvival(inputs[0].AsVector(), inputs[1].AsVector()),
                 default,
                 true)
-            : MathBlockValue.Invalid(MathBlockType.Vector(), "The vectors are outside the operation domain."),
+            : MathBlockOperationFactory.Invalid(ProductLimitType, inputs, "The vectors are outside the operation domain."),
             [MathBlockValue.Vector([1d, 1d]), MathBlockValue.Vector([4d, 3d])],
             MathBlockValue.Vector([0.75d, 0.5d]),
             performanceIterations: 8);
+
+        private static MathBlockType ProductLimitType(IReadOnlyList<MathBlockType> types)
+        {
+            var vectors = MathBlockTypeRules.SameBinary(types, MathBlockValueKind.Vector);
+            return MathBlockType.Vector(length: vectors.Rows);
+        }
 
         private static bool AreProductLimitInputsValid(
             Supprocom.MathBlocks.MathBlockVector events,

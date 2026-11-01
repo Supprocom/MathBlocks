@@ -708,7 +708,7 @@ public sealed class MathBlockFusedExpression
             if (nodes[node].Kind != MathBlockProgramBuilder.NodeKind.Operation)
                 output = values[node];
             else if (!valid[node])
-                output = MathBlockValue.Invalid(types[node], reasons[node]!);
+                output = program.PlannedOutput(node, MathBlockValue.Invalid(types[node], reasons[node]!));
             else if (columns[index] is double[] numbers)
                 output = MathBlockValue.Vector(numbers, types[node].Unit, true);
             else

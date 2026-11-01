@@ -32,6 +32,9 @@ internal static unsafe class SequencePathModule
     [CudaExternal(IsPure = true)]
     private static double mathblocks_square_root(double value) => throw new NotSupportedException();
 
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_maximum(double first, double second) => throw new NotSupportedException();
+
     public struct MathBlockSequencePathRun
     {
         public int start;
@@ -473,11 +476,12 @@ internal static unsafe class SequencePathModule
         double decline = 0.0;
         for (int index = 1; index < count; index++)
         {
-            maximum = maximum > values[index] ? maximum : values[index];
+            // The owned maximum, which mirrors CoreCLR's MathBlockPrimitives.Max for signed zeros and NaN.
+            maximum = mathblocks_maximum(maximum, values[index]);
             double candidate = !relative
                 ? maximum - values[index]
                 : (maximum - values[index]) / maximum;
-            decline = decline > candidate ? decline : candidate;
+            decline = mathblocks_maximum(decline, candidate);
         }
         *value = decline;
         return double.IsFinite(decline);
@@ -618,7 +622,10 @@ internal static unsafe class SequencePathModule
                 Cuda.SyncThreads();
                 lag = (int)output->scalar_value;
                 for (int index = thread; output->valid && index < output->count; index += Cuda.BlockDim.X)
+                {
                     result[index] = a[index + lag] - a[index];
+                    if (!double.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
+                }
                 break;
             }
             case 2:
@@ -692,6 +699,8 @@ internal static unsafe class SequencePathModule
                             for (int index = 0; index < output->count; index++)
                                 result[index] *= scale;
                         }
+                        for (int index = 0; index < output->count; index++)
+                            if (!double.IsFinite(result[index])) output->valid = 0;
                     }
                 }
                 break;
@@ -1018,6 +1027,8 @@ internal static unsafe class SequencePathModule
                                 result[index] = scratch[index];
                             length = half;
                         }
+                        for (int index = 0; index < first->count; index++)
+                            if (!double.IsFinite(result[index])) output->valid = 0;
                     }
                 }
                 break;
@@ -1048,7 +1059,10 @@ internal static unsafe class SequencePathModule
                         }
                         double scale = 1.0 / mathblocks_square_root((double)first->count);
                         for (int index = 0; index < first->count; index++)
+                        {
                             result[index] *= scale;
+                            if (!double.IsFinite(result[index])) output->valid = 0;
+                        }
                     }
                 }
                 break;
@@ -1267,7 +1281,10 @@ internal static unsafe class SequencePathModule
                     else
                     {
                         for (int column = 0; column < first->columns; column++)
+                        {
                             result[column] = a[(first->rows - 1) * first->columns + column] - a[column];
+                            if (!double.IsFinite(result[column])) output->valid = 0;
+                        }
                     }
                 }
                 break;
@@ -1315,6 +1332,8 @@ internal static unsafe class SequencePathModule
                                 level_one[left] += increment[left];
                             }
                         }
+                        for (int index = 0; index < count; index++)
+                            if (!double.IsFinite(result[index])) output->valid = 0;
                     }
                 }
                 break;
@@ -1351,6 +1370,8 @@ internal static unsafe class SequencePathModule
                             for (int column = 0; column < dimension; column++)
                                 cumulative[column] += increment[column];
                         }
+                        for (int index = 0; index < dimension * dimension; index++)
+                            if (!double.IsFinite(result[index])) output->valid = 0;
                     }
                 }
                 break;

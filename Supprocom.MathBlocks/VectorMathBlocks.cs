@@ -59,6 +59,8 @@ public static partial class MathBlockVectorMath
 
 internal static partial class VectorMathBlocks
 {
+    private const string RowCountsDiffer = "The input row counts must be equal.";
+
     private static readonly MathBlockValue sampleVector = MathBlockValue.Vector([1d, 2d, 3d, 4d]);
     private static readonly MathBlockValue secondVector = MathBlockValue.Vector([4d, 3d, 2d, 1d]);
 
@@ -80,11 +82,15 @@ internal static partial class VectorMathBlocks
         string identifier,
         Func<IReadOnlyList<double>, IReadOnlyList<double>, double[]> function,
         double[] expected,
-        MathBlockTypeResolver resolver) => MathBlockOperationFactory.Create(
+        MathBlockTypeResolver resolver,
+        bool sameLength = true) => MathBlockOperationFactory.Create(
         identifier, 2, resolver,
         inputs =>
         {
+            // An empty vector's type has no length, so the resolver cannot reject it beside a longer vector.
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
+            if (sameLength && inputs[0].AsVector().Count != inputs[1].AsVector().Count)
+                return MathBlockValue.Invalid(type, RowCountsDiffer);
             return MathBlockValue.Vector(function(inputs[0].AsVector(), inputs[1].AsVector()), type.Unit, true);
         },
         [sampleVector, secondVector], MathBlockValue.Vector(expected), 1e-9, 64);
@@ -120,25 +126,51 @@ internal static partial class VectorMathBlocks
         string identifier,
         Func<IReadOnlyList<double>, int, double[]> function,
         double[] expected,
-        bool squaredOutput) => MathBlockOperationFactory.Create(
-        identifier, 2, VectorScalarVectorType,
-        inputs =>
+        bool squaredOutput)
+    {
+        MathBlockTypeResolver resolver = squaredOutput ? VectorScalarSquaredVectorType : VectorScalarVectorType;
+        return WithConstantWindowLength(MathBlockOperationFactory.Create(
+            identifier, 2, resolver,
+            inputs =>
+            {
+                var width = RequirePositiveInteger(inputs[1].AsScalar());
+                var values = inputs[0].AsVector();
+                var unit = squaredOutput ? inputs[0].Type.Unit.Pow(new MathRational(2)) : inputs[0].Type.Unit;
+                return width <= values.Count
+                    ? MathBlockValue.Vector(function(values, width), unit, true)
+                    : MathBlockOperationFactory.Invalid(resolver, inputs, "The width is outside the sequence domain.");
+            },
+            [sampleVector, MathBlockValue.Scalar(2d)], MathBlockValue.Vector(expected), 1e-9, 32), retainedRows: 1);
+    }
+
+    // A rolling operation over n rows with width w returns n - w + 1 rows, and a difference with lag w returns
+    // n - w. When input 0's length and a constant input 1 are known at build time and in the domain, the program
+    // builder declares that length, so a binary vector operation rejects a mismatched length at build time. Any
+    // other width keeps the length unknown, and the evaluator returns an invalid value for it.
+    internal static MathBlockOperation WithConstantWindowLength(MathBlockOperation operation, int retainedRows)
+    {
+        operation.ConstantRefinement = (type, types, constants) =>
         {
-            var width = RequirePositiveInteger(inputs[1].AsScalar());
-            var values = inputs[0].AsVector();
-            var unit = squaredOutput ? inputs[0].Type.Unit.Pow(new MathRational(2)) : inputs[0].Type.Unit;
-            return width <= values.Count
-                ? MathBlockValue.Vector(function(values, width), unit, true)
-                : MathBlockValue.Invalid(MathBlockType.Vector(unit), "The width is outside the sequence domain.");
-        },
-        [sampleVector, MathBlockValue.Scalar(2d)], MathBlockValue.Vector(expected), 1e-9, 32);
+            var count = types[0].Rows;
+            if (count <= 0 || constants[1] is not { } constant)
+                return type;
+            var width = constant.AsScalar();
+            if (width < 1d || width > count || width != Math.Truncate(width))
+                return type;
+            var rows = count - (int)width + retainedRows;
+            return rows > 0 ? type with { Rows = rows } : type;
+        };
+        return operation;
+    }
 
     private static MathBlockOperation CreateVectorComparison(
         string identifier,
         Func<IReadOnlyList<double>, IReadOnlyList<double>, bool[]> function,
         bool[] expected) => MathBlockOperationFactory.Create(
         identifier, 2, VectorComparisonType,
-        inputs => MathBlockValue.BooleanVector(function(inputs[0].AsVector(), inputs[1].AsVector()), true),
+        inputs => inputs[0].AsVector().Count == inputs[1].AsVector().Count
+            ? MathBlockValue.BooleanVector(function(inputs[0].AsVector(), inputs[1].AsVector()), true)
+            : MathBlockOperationFactory.Invalid(VectorComparisonType, inputs, RowCountsDiffer),
         [sampleVector, secondVector], MathBlockValue.BooleanVector(expected), performanceIterations: 64);
 
     private static MathBlockOperation CreateBooleanVectorBinary(
@@ -150,6 +182,8 @@ internal static partial class VectorMathBlocks
         {
             var left = inputs[0].AsBooleanVector();
             var right = inputs[1].AsBooleanVector();
+            if (left.Count != right.Count)
+                return MathBlockOperationFactory.Invalid(BooleanVectorBinaryType, inputs, RowCountsDiffer);
             var result = new bool[left.Count];
             for (var index = 0; index < result.Length; index++)
                 result[index] = function(left[index], right[index]);
@@ -263,6 +297,10 @@ internal static partial class VectorMathBlocks
         MathBlockTypeRules.RequireDimensionless(types[1]);
         return MathBlockType.Vector(types[0].Unit);
     }
+
+    // The rolling variance is in the square of the input unit.
+    private static MathBlockType VectorScalarSquaredVectorType(IReadOnlyList<MathBlockType> types) =>
+        MathBlockType.Vector(VectorScalarVectorType(types).Unit.Pow(new MathRational(2)));
 
     private static MathBlockType VectorTwoScalarVectorType(IReadOnlyList<MathBlockType> types)
     {

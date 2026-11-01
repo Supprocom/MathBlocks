@@ -89,6 +89,11 @@ public sealed class MathBlockOperation
     public MathBlockCausalityInfo Causality =>
         causality ?? throw new InvalidOperationException($"Operation '{Identity}' has no causality label.");
 
+    // Refines the resolved output type from the inputs that are program constants (null for every other input), for
+    // an operation whose output shape depends on an input value, such as a rolling window's width. The program
+    // builder applies it, so a length that follows from constants is part of the node type at build time.
+    internal Func<MathBlockType, IReadOnlyList<MathBlockType>, IReadOnlyList<MathBlockValue?>, MathBlockType>? ConstantRefinement { get; set; }
+
     /// <summary>Validates input types and resolves the operation output type.</summary>
     public MathBlockType ResolveOutputType(IReadOnlyList<MathBlockType> inputTypes)
     {
@@ -148,7 +153,9 @@ public sealed class MathBlockOperation
             throw new InvalidOperationException(
                 $"Operation '{Identity}' returned '{result.Type}', but its declared type is '{outputType}'.");
         }
-        return result;
+        // An invalid result has exactly the declared type for these inputs, as on CUDA, so a value factory that
+        // keeps a computed length (a nonfinite vector, for example) does not add shape the declared type lacks.
+        return result.IsValid || result.Type == outputType ? result : MathBlockValue.Invalid(outputType, result.InvalidReason!);
     }
 
     private void RequireArity(int actual)

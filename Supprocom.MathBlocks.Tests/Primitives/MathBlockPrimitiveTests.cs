@@ -3,12 +3,12 @@ namespace Supprocom.MathBlocks.Tests;
 /// <summary>Contains regression tests for Math Block Primitive Tests.</summary>
 public sealed class MathBlockPrimitiveTests
 {
-    /// <summary>Verifies square root has stable owned bits.</summary>
+    /// <summary>Verifies square root has the correctly rounded bits.</summary>
     [Theory]
-    [InlineData(0.125d, 0x3fd6a09e667f3bccL)]
-    [InlineData(0.5d, 0x3fe6a09e667f3bccL)]
+    [InlineData(0.125d, 0x3fd6a09e667f3bcdL)]
+    [InlineData(0.5d, 0x3fe6a09e667f3bcdL)]
     [InlineData(1d, 0x3ff0000000000000L)]
-    [InlineData(2.5d, 0x3ff94c583ada5b52L)]
+    [InlineData(2.5d, 0x3ff94c583ada5b53L)]
     public void SquareRootHasStableOwnedBits(double input, long expectedBits) =>
         Assert.Equal(expectedBits, BitConverter.DoubleToInt64Bits(MathBlockScalar.SquareRoot(input)));
 

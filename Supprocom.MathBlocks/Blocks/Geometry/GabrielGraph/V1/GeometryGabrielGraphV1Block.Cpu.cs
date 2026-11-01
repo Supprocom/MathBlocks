@@ -7,6 +7,12 @@ public static partial class MathBlockAdvanced
     public static MathBlockGraph GabrielGraph(IReadOnlyList<MathBlockPoint> points)
     {
         ArgumentNullException.ThrowIfNull(points);
+        return new MathBlockGraph(points.Count, GabrielEdges(points));
+    }
+
+    // The Gabriel edges before graph validation, whose weights are not finite when a distance overflows.
+    internal static List<MathBlockGraphEdge> GabrielEdges(IReadOnlyList<MathBlockPoint> points)
+    {
         var edges = new List<MathBlockGraphEdge>();
         for (var left = 0; left < points.Count; left++)
         {
@@ -29,6 +35,6 @@ public static partial class MathBlockAdvanced
             }
         }
 
-        return new MathBlockGraph(points.Count, edges);
+        return edges;
     }
 }

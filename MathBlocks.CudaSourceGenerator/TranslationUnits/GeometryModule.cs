@@ -34,6 +34,9 @@ internal static unsafe class GeometryModule
 
     [CudaExternal(IsPure = true)]
     private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static bool mathblocks_probability_distribution([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
     public struct MathBlockGeometryEdge
     {
         public int from;
@@ -298,6 +301,7 @@ internal static unsafe class GeometryModule
                     }
                     result[0] /= first->count;
                     result[1] /= first->count;
+                    if (!double.IsFinite(result[0]) || !double.IsFinite(result[1])) output->valid = 0;
                     break;
                 case 2:
                     if (first->count != 3)
@@ -519,6 +523,7 @@ internal static unsafe class GeometryModule
                             edges[edge_count].from = left;
                             edges[edge_count].to = right;
                             edges[edge_count].weight = mathblocks_geometry_distance(a, left, a, right);
+                            if (!double.IsFinite(edges[edge_count].weight)) output->valid = 0;
                             edge_count++;
                         }
                     }
@@ -588,7 +593,9 @@ internal static unsafe class GeometryModule
                         output->scalar_value = mathblocks_geometry_distance(a, 0, b, 0);
                     break;
                 case 9:
-                    if (first->count <= 0 || first->count != second->count)
+                    if (first->count <= 0 || first->count != second->count ||
+                        !mathblocks_probability_distribution(a, first->count) ||
+                        !mathblocks_probability_distribution(b, second->count))
                     {
                         output->valid = 0;
                         break;
@@ -641,6 +648,7 @@ internal static unsafe class GeometryModule
                             edges[edge_count].from = left;
                             edges[edge_count].to = right;
                             edges[edge_count].weight = 2.0 * radius;
+                            if (!double.IsFinite(edges[edge_count].weight)) output->valid = 0;
                             edge_count++;
                         }
                     }
@@ -892,6 +900,8 @@ internal static unsafe class GeometryModule
                         result[selected++] = edges[index].weight;
                     }
                     mathblocks_sequence_set_vector_shape(output, selected);
+                    for (int index = 0; index < selected; index++)
+                        if (!double.IsFinite(result[index])) output->valid = 0;
                     break;
                 }
             }
