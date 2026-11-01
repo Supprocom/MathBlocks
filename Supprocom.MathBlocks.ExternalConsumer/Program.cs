@@ -29,12 +29,12 @@ internal static class Program
         }
 
         var contracts = MathBlockCudaDeviceModule.Operations;
-        Require(contracts.Count == 337, "The external contract must contain 337 operations.");
+        Require(contracts.Count == 537, "The external contract must contain 537 operations.");
         Require(
             contracts.Select(contract => contract.Identity).SequenceEqual(
                 MathBlockCatalog.Standard.Operations.Select(operation => operation.Identity),
                 StringComparer.Ordinal),
-            "The CPU and CUDA operation identities differ.");
+            "The CoreCLR and CUDA operation identities differ.");
         Require(
             contracts.All(contract => contract.Arity <= MaximumArity),
             "An operation exceeds the external kernel arity.");
@@ -235,7 +235,7 @@ internal static class Program
     {
         var regression = contract.RegressionCases[0];
         var plan = contract.PlanCUDA(regression.Inputs);
-        var expected = contract.EvaluateCPU(regression.Inputs);
+        var expected = contract.EvaluateCoreCLR(regression.Inputs);
         Require(
             plan.OutputType.Accepts(expected.Type),
             $"The output type plan failed for '{contract.Identity}'.");
@@ -493,7 +493,7 @@ internal static class Program
             if (!IsExact(item.Expected, actual))
             {
                 failures.Add(
-                    $"{item.Contract.Identity}: CPU={Describe(item.Expected)}, CUDA={Describe(actual)}");
+                    $"{item.Contract.Identity}: CoreCLR={Describe(item.Expected)}, CUDA={Describe(actual)}");
             }
         }
 
