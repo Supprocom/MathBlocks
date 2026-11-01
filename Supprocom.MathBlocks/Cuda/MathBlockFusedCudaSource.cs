@@ -118,9 +118,14 @@ internal static class MathBlockFusedCudaSource
         var arguments = new string[step.Arguments.Length];
         for (var index = 0; index < arguments.Length; index++)
             arguments[index] = Register(expression, step.Arguments[index]);
+        builder.Append("    // node ").Append(node).Append(' ').Append(step.Operation.Identity).Append('\n');
+        if (step.Operation.IsElementwise)
+        {
+            AppendElementwiseStep(builder, expression, step, arguments);
+            return;
+        }
         var expressionText = MathBlockFusedOperations.CudaExpression(step.Operation.Opcode, arguments);
         var bit = "0x" + (1ul << expression.MaskBit(step.Node)).ToString("x", CultureInfo.InvariantCulture) + "ULL";
-        builder.Append("    // node ").Append(node).Append(' ').Append(step.Operation.Identity).Append('\n');
         switch (step.Operation.Result)
         {
             case MathBlockFusedKind.Number:
@@ -138,20 +143,67 @@ internal static class MathBlockFusedCudaSource
                 break;
         }
         if (expression.ContributingInputs(step.Node) != 0)
+            AppendRowValidity(builder, expression, step, null);
+    }
+
+    // An elementwise row: k<i> is whether the source's per-row device function (the one the elementwise kernel
+    // calls) computed the row, v<i> its value. A form selects the fill where k<i> is 0 and is valid only where it is
+    // 1; its values stay finite, so it sets no mask bit. The sibling's row is k<i> itself.
+    private static void AppendElementwiseStep(
+        StringBuilder builder,
+        MathBlockFusedExpression expression,
+        MathBlockFusedExpression.Step step,
+        string[] arguments)
+    {
+        var node = Number(step.Node);
+        var sourceArity = step.Lift!.Source.Arity;
+        var sourceArguments = new string[3];
+        for (var index = 0; index < sourceArguments.Length; index++)
+            sourceArguments[index] = index < sourceArity ? arguments[index] : "0.0";
+        builder.Append("    double v").Append(node).Append(" = 0.0;\n")
+            .Append("    const int k").Append(node).Append(" = ")
+            .Append(MathBlockFusedOperations.CudaElementwiseRow(
+                step.Operation.ElementwiseSource,
+                arguments.AsSpan(0, sourceArity),
+                sourceArguments,
+                "&v" + node))
+            .Append(";\n");
+        if (step.Operation.Opcode == MathBlockFusedOpcode.ElementwiseValidity)
         {
-            builder.Append("    const int r").Append(node).Append(" = ");
-            var first = true;
-            foreach (var argument in step.Arguments)
-            {
-                if (expression.ContributingInputs(argument) == 0)
-                    continue;
-                if (!first)
-                    builder.Append(" & ");
-                builder.Append('r').Append(Number(argument));
-                first = false;
-            }
-            builder.Append(";\n");
+            builder.Append("    const int b").Append(node).Append(" = k").Append(node).Append(";\n");
+            AppendRowValidity(builder, expression, step, null);
         }
+        else
+        {
+            builder.Append("    const double n").Append(node).Append(" = ")
+                .Append(MathBlockFusedOperations.CudaFillSelect("k" + node, "v" + node, arguments[^1]))
+                .Append(";\n");
+            AppendRowValidity(builder, expression, step, "k" + node);
+        }
+    }
+
+    // r<i>: the AND of the row validity of the arguments that a vector input reaches, and of the computed flag of
+    // an elementwise form.
+    private static void AppendRowValidity(
+        StringBuilder builder,
+        MathBlockFusedExpression expression,
+        MathBlockFusedExpression.Step step,
+        string? computed)
+    {
+        builder.Append("    const int r").Append(Number(step.Node)).Append(" = ");
+        var first = true;
+        foreach (var argument in step.Arguments)
+        {
+            if (expression.ContributingInputs(argument) == 0)
+                continue;
+            if (!first)
+                builder.Append(" & ");
+            builder.Append('r').Append(Number(argument));
+            first = false;
+        }
+        if (computed is not null)
+            builder.Append(first ? "" : " & ").Append(computed);
+        builder.Append(";\n");
     }
 
     private static void AppendKernel(StringBuilder builder, MathBlockFusedExpression expression)

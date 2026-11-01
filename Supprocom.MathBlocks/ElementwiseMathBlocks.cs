@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Supprocom.MathBlocks;
 
 internal static class ElementwiseMathBlocks
@@ -94,6 +96,13 @@ internal static class ElementwiseMathBlocks
             [0.0d, 0.15625d, 0.6875000000000009d, 1.0d, double.NaN, double.NaN])
     ];
 
+    // The lift behind each form and sibling operation instance, so the fused expression evaluates their rows with
+    // the same row function.
+    private static readonly ConditionalWeakTable<MathBlockOperation, MathBlockElementwiseForm> lifts = new();
+
+    internal static bool TryGetLift(MathBlockOperation operation, out MathBlockElementwiseForm form) =>
+        lifts.TryGetValue(operation, out form!);
+
     internal static MathBlockOperation[] CreateOperations()
     {
         var sources = Sources;
@@ -117,7 +126,7 @@ internal static class ElementwiseMathBlocks
             expected[index] = double.IsNaN(definition.Expected[index]) ? SampleFill : definition.Expected[index];
         var outputUnit = form.ResolveSourceUnit(MathBlockCollectionPrimitives.Map(definition.Sample, value => value.Type));
         sample[^1] = MathBlockValue.Scalar(SampleFill, outputUnit);
-        return MathBlockOperationFactory.Create(
+        var operation = MathBlockOperationFactory.Create(
             $"{FormFamily}.{form.Source.Identifier}",
             form.FormArity,
             form.FormTypeResolver,
@@ -127,6 +136,8 @@ internal static class ElementwiseMathBlocks
             1e-12,
             64,
             MathBlockCausalityInfo.Pointwise);
+        lifts.Add(operation, form);
+        return operation;
     }
 
     private static MathBlockOperation CreateValidity(ElementwiseSource definition)
@@ -135,7 +146,7 @@ internal static class ElementwiseMathBlocks
         var expected = new bool[definition.Expected.Length];
         for (var index = 0; index < expected.Length; index++)
             expected[index] = !double.IsNaN(definition.Expected[index]);
-        return MathBlockOperationFactory.Create(
+        var operation = MathBlockOperationFactory.Create(
             $"{ValidityFamily}.{form.Source.Identifier}",
             form.ValidityArity,
             form.ValidityTypeResolver,
@@ -144,6 +155,8 @@ internal static class ElementwiseMathBlocks
             MathBlockValue.BooleanVector(expected),
             performanceIterations: 64,
             causality: MathBlockCausalityInfo.Pointwise);
+        lifts.Add(operation, form);
+        return operation;
     }
 
     // Create builds an independent instance of the source operation; Sample holds the source arguments (vectors

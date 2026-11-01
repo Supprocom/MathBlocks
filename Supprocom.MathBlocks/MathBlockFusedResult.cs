@@ -18,8 +18,9 @@ public sealed class MathBlockFusedResult
 
     /// <summary>Gets each output's row validity by output name, as a Boolean vector.</summary>
     /// <remarks>
-    /// Row t is true when row t of every contributing vector input is valid according to its validity input. An
-    /// input without a validity input is valid in every row.
+    /// Row t is true when row t of every contributing vector input is valid according to its validity input, and no
+    /// <c>elementwise.*</c> form on the path to the output holds its fill at row t. An input without a validity input
+    /// is valid in every row.
     /// </remarks>
     public IReadOnlyDictionary<string, MathBlockValue> Validity { get; }
 
