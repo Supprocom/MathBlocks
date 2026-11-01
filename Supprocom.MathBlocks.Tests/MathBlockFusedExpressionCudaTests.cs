@@ -20,6 +20,39 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
         var cases = CreateCases();
+        var (ran, valid, _) = AssertCudaCases(cases, fusedMultiplyAdd);
+        output.WriteLine($"fmad={fusedMultiplyAdd}: {ran} cases, {valid} valid outputs compared bit for bit.");
+    }
+
+    /// <summary>
+    /// Fused programs with elementwise forms and siblings: the CUDA kernel equals EvaluateCoreCLR bit for bit,
+    /// including invalid state, reasons, row validity and the invalid mask, and equals the generic dispatcher's values
+    /// and validity, under --fmad=false and --fmad=true. The cases are every form and sibling under every broadcast
+    /// mask on edge rows, every source at the full row count, random programs and invalid inputs.
+    /// </summary>
+    [Theory]
+    [Trait("Category", "CudaExecution")]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CUDAFusedElementwiseKernelEqualsCoreCLRAndTheGenericDispatcherBitForBit(bool fusedMultiplyAdd)
+    {
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        var cases = CreateElementwiseCases(out var expected);
+        var (ran, valid, filled) = AssertCudaCases(cases, fusedMultiplyAdd);
+        output.WriteLine($"fmad={fusedMultiplyAdd}: {ran} elementwise cases, {valid} valid outputs and {filled} " +
+                         "filled rows of valid outputs compared bit for bit.");
+        Assert.Equal(expected, ran);
+        // Guards against cases that never reach the fill select: filled rows of valid outputs were compared.
+        Assert.True(filled > 0, "No filled row of a valid output was compared.");
+    }
+
+    // Runs the cases in one NVRTC program and compares each with EvaluateCoreCLR and the generic dispatcher. Returns
+    // the cases compared, the valid outputs and the rows of valid outputs that are not valid in their row validity.
+    private (int Ran, int Valid, long Filled) AssertCudaCases(
+        (string Name, MathBlockFusedExpression Expression, Dictionary<string, MathBlockValue> Inputs,
+            Dictionary<string, MathBlockValue>? Validity)[] cases,
+        bool fusedMultiplyAdd)
+    {
         var expressions = cases.Select(item => item.Expression).ToArray();
         var distinct = expressions.DistinctBy(expression => expression.Fingerprint, StringComparer.Ordinal);
         var source = string.Concat(distinct.Select(expression => expression.CudaSource + "\n"));
@@ -35,6 +68,8 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
 
         var worker = new MathBlocksCUDAWorker();
         var valid = 0;
+        var filled = 0L;
+        var ran = 0;
         for (var index = 0; index < cases.Length; index++)
         {
             var (name, expression, inputs, validity) = cases[index];
@@ -47,9 +82,14 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
                 AssertSameValue(value, results[index].Outputs[outputName], $"{context} output {outputName}");
                 AssertSameValue(reference.Validity[outputName], results[index].Validity[outputName], $"{context} validity {outputName}");
                 if (value.IsValid)
+                {
                     caseValid++;
+                    if (reference.Validity[outputName].IsValid)
+                        filled += reference.Validity[outputName].AsBooleanVector().Count(flag => !flag);
+                }
             }
             valid += caseValid;
+            ran++;
             output.WriteLine($"{context}: {caseValid} of {reference.Outputs.Count} outputs valid");
 
             using var generic = worker.Compile(expression.Program, inputs);
@@ -80,7 +120,7 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
                     AssertSamePayload(other, value, $"{context} output {outputName} against the generic dispatcher");
             }
         }
-        output.WriteLine($"fmad={fusedMultiplyAdd}: {cases.Length} cases, {valid} valid outputs compared bit for bit.");
+        return (ran, valid, filled);
     }
 
     /// <summary>Times the fused kernel against the generic dispatcher at the full row count.</summary>
@@ -94,9 +134,32 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
     public void CUDAFusedKernelTimingAtFullRowCount()
     {
         Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
-        const int repeats = 10;
         var random = new Random(4);
-        var program = CreateRandomProgram(random, 4, 1, 1, 64, 4);
+        TimeAtFullRowCount(CreateRandomProgram(random, 4, 1, 1, 64, 4), random);
+    }
+
+    /// <summary>
+    /// Times the fused kernel against the generic dispatcher at the full row count, for random programs of 64
+    /// operation nodes of which about half are elementwise forms and siblings.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "CudaExecution")]
+    [Trait("Category", "Performance")]
+    public void CUDAFusedElementwiseKernelTimingAtFullRowCount()
+    {
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        foreach (var seed in new[] { 5, 6 })
+        {
+            var random = new Random(seed);
+            TimeAtFullRowCount(CreateRandomProgram(random, 4, 1, 1, 64, 4, elementwisePercent: 50), random);
+        }
+    }
+
+    // Both times have the inputs already on the device and exclude downloads: the fused time is one kernel launch
+    // and synchronization, and the generic time is one launch of the resident graph and its synchronization.
+    private void TimeAtFullRowCount(MathBlockProgram program, Random random)
+    {
+        const int repeats = 10;
         var expression = MathBlockFusedExpression.Create(program);
         var inputs = CreateInputs(program, FullRows, Regime.Benign, random);
         RunCuda(
@@ -121,7 +184,9 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
             dispatched[repeat] = watch.Elapsed.TotalMilliseconds;
         }
         var ratios = fused.Zip(dispatched, (left, right) => left / right).ToArray();
-        output.WriteLine($"{expression.MaskNodeIndexes.Count} operation nodes, {FullRows} rows, {repeats} repeats");
+        var elementwise = program.PlanNodes.Count(node =>
+            node.OperationIdentity?.StartsWith("elementwise", StringComparison.Ordinal) == true);
+        output.WriteLine($"{expression.MaskNodeIndexes.Count} operation nodes ({elementwise} elementwise), {FullRows} rows, {repeats} repeats");
         output.WriteLine($"fused kernel ms: {Spread(fused)}");
         output.WriteLine($"generic dispatcher graph ms: {Spread(dispatched)}");
         output.WriteLine($"fused / generic, per repeat: {Spread(ratios)}");
@@ -188,6 +253,78 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
 
         foreach (var (identity, arguments, _) in Operations)
             AddAdversarialCases(cases, identity, arguments);
+        return [.. cases];
+    }
+
+    // Every form and sibling under every broadcast mask on the edge cases of the CoreCLR tests; every source with
+    // every argument a vector at the full row count; random programs with elementwise forms, a fifth of them at the
+    // full row count; and the invalid-state cases. expected is the number of cases the generators produce.
+    private static (string Name, MathBlockFusedExpression Expression, Dictionary<string, MathBlockValue> Inputs,
+        Dictionary<string, MathBlockValue>? Validity)[] CreateElementwiseCases(out int expected)
+    {
+        var cases = new List<(string, MathBlockFusedExpression, Dictionary<string, MathBlockValue>, Dictionary<string, MathBlockValue>?)>();
+        expected = 0;
+        foreach (var source in MathBlockElementwiseTestSupport.SourceIdentifiers)
+        {
+            foreach (var mask in MathBlockElementwiseTestSupport.BroadcastMasks(source))
+            {
+                MathBlockFusedExpression? fused = null;
+                foreach (var (name, program, inputs, validity) in MathBlockFusedExpressionElementwiseTests.CreateEdgeCases(source, mask))
+                {
+                    fused ??= MathBlockFusedExpression.Create(program);
+                    cases.Add((name, fused, inputs, validity));
+                }
+                expected += MathBlockFusedExpressionElementwiseTests.EdgeCasesPerMask;
+            }
+
+            var vectors = (1 << MathBlockElementwiseTestSupport.SourceArity(source)) - 1;
+            var edge = MathBlockFusedExpressionElementwiseTests.CreateEdgeCases(source, vectors).First();
+            var arguments = MathBlockElementwiseTestSupport.CreateArguments(source, FullRows, vectors, 61_000 + source.Length);
+            var full = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
+            {
+                ["other"] = MathBlockValue.Vector(Enumerable.Range(0, FullRows).Select(row => row % 1_000 * 0.25d).ToArray()),
+                ["fill"] = MathBlockValue.Scalar(-0d)
+            };
+            for (var index = 0; index < arguments.Length; index++)
+                full[$"a{index}"] = arguments[index];
+            var fullValidity = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
+            {
+                ["a0"] = MathBlockValue.BooleanVector(Enumerable.Range(0, FullRows).Select(row => row % 13 != 5))
+            };
+            cases.Add(($"{source} all vectors, {FullRows} rows", MathBlockFusedExpression.Create(edge.Program), full, fullValidity));
+            expected++;
+        }
+
+        const int trials = 40;
+        var random = new Random(612);
+        for (var trial = 0; trial < trials; trial++)
+        {
+            var regime = (Regime)(trial % 3);
+            var rows = trial < trials / 5 ? FullRows : random.Next(1, 500);
+            var preferValid = trial % 3 != 2;
+            for (var attempt = 0; ; attempt++)
+            {
+                var program = CreateRandomProgram(
+                    random, random.Next(1, 7), random.Next(0, 3), random.Next(0, 3),
+                    random.Next(1, MathBlockFusedExpression.MaximumOperationNodes + 1),
+                    random.Next(1, MathBlockFusedExpression.MaximumOutputs + 1),
+                    elementwisePercent: 40);
+                var fused = MathBlockFusedExpression.Create(program);
+                var inputs = CreateInputs(program, rows, regime, random);
+                var validity = CreateValidity(program, rows, random);
+                if (preferValid && attempt < 40 &&
+                    !fused.EvaluateCoreCLR(inputs, validity).Outputs.Values.Any(value => value.IsValid))
+                    continue;
+                cases.Add(($"elementwise random {trial} ({regime}, {rows} rows)", fused, inputs, validity));
+                break;
+            }
+        }
+        expected += trials;
+
+        var (_, invalidState) = MathBlockFusedExpressionElementwiseTests.CreateInvalidStateProgram();
+        expected += MathBlockFusedExpressionElementwiseTests.CreateInvalidStateCases().Count();
+        foreach (var (name, inputs) in MathBlockFusedExpressionElementwiseTests.CreateInvalidStateCases())
+            cases.Add(($"invalid state {name}", invalidState, inputs, null));
         return [.. cases];
     }
 

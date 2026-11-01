@@ -44,6 +44,12 @@
 //   bit 25 node 30 complex-vector.magnitude@1
 //   bit 26 node 31 vector.add@1
 //   bit 27 node 32 vector.add@1
+//   bit 28 node 34 elementwise.scalar.arc-tangent-2@1
+//   bit 29 node 35 elementwise.probability.normal-cdf@1
+//   bit 30 node 36 elementwise.scalar.clamp@1
+//   bit 31 node 37 elementwise-valid.special.beta@1
+//   bit 32 node 38 vector.add@1
+//   bit 33 node 39 boolean-vector.and@1
 __device__ void mathblocks_fused_<fused-fingerprint>(
     const void* const* inputs,
     const double* scalars,
@@ -56,6 +62,7 @@ __device__ void mathblocks_fused_<fused-fingerprint>(
     unsigned long long invalid = 0ULL;
     const double n3 = scalars[0];
     const double n4 = __longlong_as_double((long long)0xbfe0000000000000ULL);
+    const double n33 = __longlong_as_double((long long)0xbff0000000000000ULL);
     const double n0 = ((const double*)inputs[0])[row];
     const int r0 = validity == 0 || validity[0] == 0 || validity[0][row] != 0;
     const double n1 = ((const double*)inputs[1])[row];
@@ -167,10 +174,37 @@ __device__ void mathblocks_fused_<fused-fingerprint>(
     const double n32 = __dadd_rn(n31, n30);
     if (!isfinite(n32)) invalid |= 0x8000000ULL;
     const int r32 = r31 & r30;
-    outputs[0] = n32;
-    output_validity[0] = r32;
-    outputs[1] = b25 ? 1.0 : 0.0;
-    output_validity[1] = r25;
+    // node 34 elementwise.scalar.arc-tangent-2@1
+    double v34 = 0.0;
+    const int k34 = isfinite(n32) && isfinite(n3) && mathblocks_elementwise_row_value(mathblocks_elementwise_source_opcode(8), n32, n3, 0.0, &v34);
+    const double n34 = k34 ? v34 : n33;
+    const int r34 = r32 & k34;
+    // node 35 elementwise.probability.normal-cdf@1
+    double v35 = 0.0;
+    const int k35 = isfinite(n34) && mathblocks_elementwise_row_value(mathblocks_elementwise_source_opcode(3), n34, 0.0, 0.0, &v35);
+    const double n35 = k35 ? v35 : n33;
+    const int r35 = r34 & k35;
+    // node 36 elementwise.scalar.clamp@1
+    double v36 = 0.0;
+    const int k36 = isfinite(n35) && isfinite(n4) && isfinite(n1) && mathblocks_elementwise_row_value(mathblocks_elementwise_source_opcode(12), n35, n4, n1, &v36);
+    const double n36 = k36 ? v36 : n33;
+    const int r36 = r35 & r1 & k36;
+    // node 37 elementwise-valid.special.beta@1
+    double v37 = 0.0;
+    const int k37 = isfinite(n0) && isfinite(n1) && mathblocks_elementwise_row_value(mathblocks_elementwise_source_opcode(37), n0, n1, 0.0, &v37);
+    const int b37 = k37;
+    const int r37 = r0 & r1;
+    // node 38 vector.add@1
+    const double n38 = __dadd_rn(n32, n36);
+    if (!isfinite(n38)) invalid |= 0x100000000ULL;
+    const int r38 = r32 & r36;
+    // node 39 boolean-vector.and@1
+    const int b39 = b25 && b37;
+    const int r39 = r25 & r37;
+    outputs[0] = n38;
+    output_validity[0] = r38;
+    outputs[1] = b39 ? 1.0 : 0.0;
+    output_validity[1] = r39;
     outputs[2] = n1;
     output_validity[2] = r1;
     outputs[3] = n18;
