@@ -98,13 +98,14 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     /// <summary>Gets the number of nodes dispatched on CoreCLR.</summary>
     public int CoreCLRNodeDispatchCount => 0;
 
-    // Keep allocation, graph construction, and rollback in one auditable transaction.
+    // The planning of Create up to (not including) its first device call: it validates the program, resolves every node's payload
+    // layout from the prototype inputs, and lays out the arena (payloads, input pointers, scratch). It throws what Create throws
+    // before it touches the device, so a GPU-free caller can run it for any program.
 #pragma warning disable MA0051
-    internal static MathBlocksCUDAProgram Create(
+    internal static ArenaPlan PlanArena(
         MathBlockProgram program,
         IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs)
     {
-        MathBlocksCudaNative.EnsureContext();
         ValidateProgram(program);
 
         var plannedSlotOffsets = new int[program.PlanNodes.Count];
@@ -113,8 +114,6 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         var plannedPayloadCapacities = payloadLayout.Capacities;
         var plannedInputPointerOffsets = CreateFilledIntArray(program.PlanNodes.Count, -1);
         var scratchOffsets = CreateFilledIntArray(program.PlanNodes.Count, -1);
-        var plannedGraphNodes = new IntPtr[program.PlanNodes.Count];
-        var arguments = new List<KernelArgumentStorage>();
 
         var outputNodeIndexes = new bool[program.PlanNodes.Count];
         foreach (var outputNodeIndex in program.OutputNodeIndexes.Values)
@@ -160,6 +159,47 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 AllocateNode(node);
         plannedArenaSize = AlignArenaOffset(plannedArenaSize);
         var plannedDownloadArenaSize = checked(plannedArenaSize - plannedDownloadArenaOffset);
+        return new ArenaPlan(
+            plannedSlotOffsets,
+            plannedPayloadOffsets,
+            payloadLayout,
+            plannedInputPointerOffsets,
+            scratchOffsets,
+            plannedArenaSize,
+            plannedDownloadArenaOffset,
+            plannedDownloadArenaSize);
+    }
+#pragma warning restore MA0051
+
+    internal sealed record ArenaPlan(
+        int[] SlotOffsets,
+        int[] PayloadOffsets,
+        MathBlockCudaPayloadLayout Layout,
+        int[] InputPointerOffsets,
+        int[] ScratchOffsets,
+        int ArenaSize,
+        int DownloadArenaOffset,
+        int DownloadArenaSize);
+
+    // Keep allocation, graph construction, and rollback in one auditable transaction.
+#pragma warning disable MA0051
+    internal static MathBlocksCUDAProgram Create(
+        MathBlockProgram program,
+        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs)
+    {
+        MathBlocksCudaNative.EnsureContext();
+        var arenaPlan = PlanArena(program, prototypeInputs);
+        var plannedSlotOffsets = arenaPlan.SlotOffsets;
+        var plannedPayloadOffsets = arenaPlan.PayloadOffsets;
+        var payloadLayout = arenaPlan.Layout;
+        var plannedPayloadCapacities = payloadLayout.Capacities;
+        var plannedInputPointerOffsets = arenaPlan.InputPointerOffsets;
+        var scratchOffsets = arenaPlan.ScratchOffsets;
+        var plannedArenaSize = arenaPlan.ArenaSize;
+        var plannedDownloadArenaOffset = arenaPlan.DownloadArenaOffset;
+        var plannedDownloadArenaSize = arenaPlan.DownloadArenaSize;
+        var plannedGraphNodes = new IntPtr[program.PlanNodes.Count];
+        var arguments = new List<KernelArgumentStorage>();
 
         var allocatedDeviceArena = 0ul;
         var allocatedUploadArena = IntPtr.Zero;
@@ -594,6 +634,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             MathBlockType resolvedType;
             int capacity;
             MathBlockCudaShapeAuthority shape;
+            MathBlockValue? exactValue;
             try
             {
                 if (node.Kind == MathBlockProgramNodeKind.Operation)
@@ -635,6 +676,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                     prototypeInputs,
                     inputShapeOverrides,
                     inputExactValues);
+                exactValue = ResolveExactValue(node, prototypeInputs, inputExactValues);
             }
             catch (StaticDomainException) when (node.Kind == MathBlockProgramNodeKind.Operation)
             {
@@ -670,10 +712,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             shapeRows[node.Index] = shape.Rows;
             shapeColumns[node.Index] = shape.Columns;
             candidateTypes[node.Index] = resolvedType;
-            exactValues[node.Index] = ResolveExactValue(
-                node,
-                prototypeInputs,
-                inputExactValues);
+            exactValues[node.Index] = exactValue;
             published[node.Index] = true;
         }
 
