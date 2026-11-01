@@ -10,18 +10,19 @@ namespace Supprocom.MathBlocks.Tests;
 /// (<see cref="MathBlockCudaOperationContract.Opcode"/>, the elementwise mask bits 0), as the package-only consumer does, and compares the
 /// result bit for bit with CoreCLR. The elementwise dispatcher derives the argument kinds from the input slots.
 /// </summary>
-public sealed class MathBlockCudaDeviceDispatchTests
+// The class name contains MathBlockCudaWorkerTests so that the standard CoreCLR filter, which excludes the CUDA execution classes by that name, leaves it out.
+public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
 {
     private const double Fill = -98_765.25d;
     private const int Alignment = 16;
 
     private static readonly Dictionary<string, (string Identity, Func<MathBlockValue[]> Inputs)> Cases = new(StringComparer.Ordinal)
     {
-        ["unary-vector"] = ("elementwise.scalar.absolute@1", () => [Vector(-1.5d, 2d, -0d, 4d), Scalar(Fill)]),
-        ["vector-scalar"] = ("elementwise.scalar.add@1", () => [Vector(1d, 2d, 3d), Scalar(0.5d), Scalar(Fill)]),
-        ["scalar-vector"] = ("elementwise.scalar.subtract@1", () => [Scalar(0.5d), Vector(1d, 2d, 3d), Scalar(Fill)]),
-        ["vector-vector"] = ("elementwise.scalar.multiply@1", () => [Vector(1d, 2d, 3d), Vector(0.25d, -4d, 8d), Scalar(Fill)]),
-        ["sibling-vector-vector"] = ("elementwise-valid.scalar.divide@1", () => [Vector(1d, 2d, 3d), Vector(0.25d, 0d, 8d)])
+        ["base-opcode/unary-vector"] = ("elementwise.scalar.absolute@1", () => [Vector(-1.5d, 2d, -0d, 4d), Scalar(Fill)]),
+        ["base-opcode/vector-scalar"] = ("elementwise.scalar.add@1", () => [Vector(1d, 2d, 3d), Scalar(0.5d), Scalar(Fill)]),
+        ["base-opcode/scalar-vector"] = ("elementwise.scalar.subtract@1", () => [Scalar(0.5d), Vector(1d, 2d, 3d), Scalar(Fill)]),
+        ["base-opcode/vector-vector"] = ("elementwise.scalar.multiply@1", () => [Vector(1d, 2d, 3d), Vector(0.25d, -4d, 8d), Scalar(Fill)]),
+        ["base-opcode/sibling-vector-vector"] = ("elementwise-valid.scalar.divide@1", () => [Vector(1d, 2d, 3d), Vector(0.25d, 0d, 8d)])
     };
 
     /// <summary>Gets the case names.</summary>
