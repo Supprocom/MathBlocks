@@ -168,6 +168,16 @@ public sealed partial class MathBlockCudaWorkerTests
         return values;
     }
 
+    // Max(4w, 1024) rows of -0.0 and +0.0 (seven in eight rows), with 1 and -1 as the remaining rows.
+    private static double[] CreateMixedZeroSeries(int width)
+    {
+        var random = new Random(4100 + width);
+        var values = new double[Math.Max(4 * width, 8 * 128)];
+        for (var row = 0; row < values.Length; row++)
+            values[row] = random.Next(16) switch { 0 => 1d, 1 => -1d, var pick => pick % 2 == 0 ? -0d : 0d };
+        return values;
+    }
+
     // Each window-accurate form and sibling, the median form and sibling, and the quantile form and sibling at
     // probabilities 0, 0.25, 0.9 and 1, on one series and width.
     private static IEnumerable<WindowCase> AccurateSeriesCases(string name, double[] values, int width)
@@ -225,7 +235,6 @@ public sealed partial class MathBlockCudaWorkerTests
             ("large", [1e150d, 1.1e150d, 1e150d, 1.1e150d], [2]),
             ("inside", [1e-100d, 2e-100d, 1e149d, 1.1e149d], [2]),
             ("subnormal", [5e-324d, -5e-324d, 1e-310d, 2.5e-308d, -1e-320d, 0d, double.Epsilon, 3e-320d, -2.2e-308d, 7e-315d], [1, 2, 3, 10]),
-            ("signed zeros", [-0d, 0d, -0d, -0d, 0d, 1d, -0d, 0d], [1, 2, 3, 8]),
             ("square underflow", [5e-324d, -5e-324d, 1e-140d, -1e-140d, 1e-170d, 0d, 0d, -0d], [2, 3]),
             ("constant", [.. Enumerable.Repeat(-1.0101787042252373e+32d, 20), 1d, 2d], [2, 7, 20]),
             ("extremes", [double.MaxValue, double.Epsilon, -double.MaxValue, 1d, -double.Epsilon, 1e-300d, 1e300d], [1, 2, 3, 7])
@@ -234,6 +243,14 @@ public sealed partial class MathBlockCudaWorkerTests
             foreach (var width in widths)
                 foreach (var item in AccurateSeriesCases($"{name} w={width}", values, width))
                     yield return item;
+
+        // Windows that mix -0.0 and +0.0 with a few ones. A thread removes a value only from its second row on, and a
+        // launch of up to 128 rows gives every thread one row; so each series has at least 4w rows and at least eight
+        // rows for each of the 128 threads of a one-block launch. A removal then has to pick the leaving zero's own
+        // bit pattern among equal values, which the 8-row series of the first version never exercised.
+        foreach (var width in new[] { 1, 2, 3, 8, 17 })
+            foreach (var item in AccurateSeriesCases($"signed zeros w={width}", CreateMixedZeroSeries(width), width))
+                yield return item;
 
         // A fill equal to a computed value; run-time widths above n, non-integer, and wider or narrower than the
         // planned width (the accumulator scratch does not depend on the width).
