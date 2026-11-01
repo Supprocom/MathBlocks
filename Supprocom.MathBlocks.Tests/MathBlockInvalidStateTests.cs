@@ -34,6 +34,8 @@ public sealed class MathBlockInvalidStateTests
             ["transport.minimum-assignment/too-large"] = ("transport.minimum-assignment@1", () => [MathBlockValue.Matrix(new MathBlockMatrix(21, 21, Enumerable.Range(0, 441).Select(value => (double)(value % 7))))]),
             ["transport.monotone-coupling/empty-source"] = ("transport.monotone-coupling@1", () => [Vector(), Vector(0.5d, 0.5d)]),
             ["vector.gather/index-outside"] = ("vector.gather@1", () => [Vector(), Vector(3d, 1d)]),
+            ["transform.haar/not-a-power-of-two"] = ("transform.haar@1", () => [Vector(1d, 2d, 3d)]),
+            ["transport.assignment-cost/non-integer-index"] = ("transport.assignment-cost@1", () => [Matrix(2, 2, 3d, 1d, 1d, 3d), Vector(0.5d, 1d)]),
 
             // An empty vector beside a longer one: the result was a valid value of the wrong length.
             ["vector.add/empty-left"] = ("vector.add@1", () => [Vector(), Vector(4d, 3d, 2d, 1d)]),
