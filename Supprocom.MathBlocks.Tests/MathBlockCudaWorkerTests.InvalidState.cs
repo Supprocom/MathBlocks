@@ -335,6 +335,14 @@ public sealed partial class MathBlockCudaWorkerTests
             ["matrix.exponential/trace-overflow"] = () => Standalone(
                 "matrix.exponential",
                 MatrixValue(2, 2, 3.4292183174601395e201d, -2.799680927722256e101d, 8.572068857490139e301d, -1.0737128770591469d)),
+            // A NaN inside the owned maximum (inf - inf from overflowing pairwise means) is invalid on both sides, and the sign of a zero tie
+            // in a max-plus or min-plus product is the owned maximum's and minimum's.
+            ["transport.energy-distance/nan-squared"] = () => Standalone(
+                "transport.energy-distance", Values(-1.7e308d, 1.7e308d), Values(0d, 0d)),
+            ["tropical.max-plus-multiply/zero-tie-sign"] = () => Standalone(
+                "tropical.max-plus-multiply", MatrixValue(1, 2, 0d, -0d), MatrixValue(2, 1, 0d, -0d)),
+            ["tropical.min-plus-multiply/zero-tie-sign"] = () => Standalone(
+                "tropical.min-plus-multiply", MatrixValue(1, 2, -0d, 0d), MatrixValue(2, 1, -0d, 0d)),
             ["path.maximum-relative-decline/signed-zero"] = () => Standalone("path.maximum-relative-decline", Values(-1d, -1d, -2d)),
             // The windows whose running peak is 0 followed by 0 (rows 4 and 5) are invalid on both sides.
             ["window-valid.path.maximum-relative-decline/zero-maximum"] = () => WindowFormCase(

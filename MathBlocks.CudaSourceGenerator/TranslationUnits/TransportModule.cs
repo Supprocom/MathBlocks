@@ -49,6 +49,12 @@ internal static unsafe class TransportModule
 
     [CudaExternal(IsPure = true)]
     private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_maximum(double first, double second) => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_minimum(double first, double second) => throw new NotSupportedException();
     [CudaExternal]
     private static void mathblocks_statistics_sort_copy([CudaReadOnly] double* values, int count, double* result, bool descending) => throw new NotSupportedException();
 
@@ -158,7 +164,8 @@ internal static unsafe class TransportModule
                     double right_within = mathblocks_transport_mean_pairwise(
                         b, second->count, b, second->count);
                     double squared = 2.0 * cross - left_within - right_within;
-                    output->scalar_value = mathblocks_square_root(squared > 0.0 ? squared : 0.0);
+                    // The owned maximum, as CoreCLR: a NaN (inf - inf from overflowing pairwise means) stays NaN and the result is invalid.
+                    output->scalar_value = mathblocks_square_root(mathblocks_maximum(squared, 0.0));
                     break;
                 }
                 case 3:
@@ -387,9 +394,10 @@ internal static unsafe class TransportModule
                             {
                                 double candidate = a[row * first->columns + inner] +
                                     b[inner * second->columns + column];
+                                // The owned maximum and minimum, as CoreCLR (the sign of a zero tie).
                                 selected = opcode == 9
-                                    ? (selected > candidate ? selected : candidate)
-                                    : (selected < candidate ? selected : candidate);
+                                    ? mathblocks_maximum(selected, candidate)
+                                    : mathblocks_minimum(selected, candidate);
                             }
                             result[row * second->columns + column] = selected;
                         }

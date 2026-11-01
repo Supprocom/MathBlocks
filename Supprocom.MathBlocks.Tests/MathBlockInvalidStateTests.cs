@@ -105,6 +105,9 @@ public sealed class MathBlockInvalidStateTests
             ["matrix.exponential/trace-overflow"] = ("matrix.exponential@1", () =>
                 [Matrix(2, 2, 3.4292183174601395e201d, -2.799680927722256e101d, 8.572068857490139e301d, -1.0737128770591469d)]),
 
+            // The squared energy distance is NaN (inf - inf of overflowing pairwise means): CoreCLR's owned maximum propagates it.
+            ["transport.energy-distance/nan-squared"] = ("transport.energy-distance@1", () => [Vector(-1.7e308d, 1.7e308d), Vector(0d, 0d)]),
+
             // A row norm that overflows asked for int.MaxValue squarings.
             ["matrix.exponential/overflowing-norm"] = ("matrix.exponential@1", () => [Matrix(2, 2, 1.7e308d, 1.7e308d, 0d, 0d)]),
 
@@ -232,6 +235,17 @@ public sealed class MathBlockInvalidStateTests
         Assert.True(operation.Evaluate(Matrix(2, 2, 1.0d, 0d, 0d, 1d)).IsValid);
         Assert.False(operation.Evaluate(Matrix(2, 2, 1500d, 0d, 0d, 0d)).IsValid);
         Assert.False(operation.Evaluate(Matrix(2, 2, 3.4292183174601395e201d, -2.799680927722256e101d, 8.572068857490139e301d, -1.0737128770591469d)).IsValid);
+    }
+
+    /// <summary>Verifies the sign of a zero tie in a max-plus and a min-plus product is the owned maximum's and minimum's.</summary>
+    [Fact]
+    [Trait("Category", "InvalidState")]
+    public void TropicalProductsKeepTheSignOfAZeroTieOfTheOwnedMaximumAndMinimum()
+    {
+        var maximum = MathBlockCatalog.Standard.Get("tropical.max-plus-multiply").Evaluate(Matrix(1, 2, 0d, -0d), Matrix(2, 1, 0d, -0d));
+        Assert.Equal(0L, BitConverter.DoubleToInt64Bits(maximum.AsMatrix()[0, 0]));
+        var minimum = MathBlockCatalog.Standard.Get("tropical.min-plus-multiply").Evaluate(Matrix(1, 2, -0d, 0d), Matrix(2, 1, -0d, 0d));
+        Assert.Equal(long.MinValue, BitConverter.DoubleToInt64Bits(minimum.AsMatrix()[0, 0]));
     }
 
     /// <summary>Verifies the rolling variance is in the square of the input unit.</summary>

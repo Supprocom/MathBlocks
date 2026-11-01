@@ -50,6 +50,9 @@ internal static unsafe class MatrixModule
     [CudaExternal(IsPure = true)]
     private static double mathblocks_square_root(double value) => throw new NotSupportedException();
 
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_maximum(double first, double second) => throw new NotSupportedException();
+
     [CudaDevice]
     private static void mathblocks_matrix_shape(MathBlockSlot* output, int rows, int columns)
     {
@@ -1323,7 +1326,8 @@ internal static unsafe class MatrixModule
             }
             mathblocks_matrix_symmetric_eigenvalues(gram, size, work, eigenvalues, eigenvalues + size);
             double largest = eigenvalues[size - 1];
-            if (largest < 0.0) largest = 0.0;
+            // The owned maximum, as CoreCLR's Math.Max(0, largest): NaN propagates and a negative zero becomes +0.
+            largest = mathblocks_maximum(0.0, largest);
             output->scalar_value = mathblocks_square_root(largest);
             if (!double.IsFinite(output->scalar_value)) output->valid = 0;
         }
