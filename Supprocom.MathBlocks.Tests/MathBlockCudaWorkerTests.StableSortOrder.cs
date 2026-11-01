@@ -66,6 +66,10 @@ public sealed partial class MathBlockCudaWorkerTests
             return MathBlockValue.Vector(raw.Select(value => value / total).ToArray());
         }
 
+        // One point in ten from the tied pool (duplicates, signed zeros, collinear points), the rest distinct: the old sorted
+        // insertion of the points costs a move for every smaller point already inserted.
+        double HullCoordinate(int index) => index % 10 == 0 ? Tied() : (random.NextDouble() * 2d - 1d) * 4d;
+
         switch (source)
         {
             case "inequality.lorenz-curve":
@@ -77,7 +81,7 @@ public sealed partial class MathBlockCudaWorkerTests
                     MathBlockValue.Vector(Enumerable.Range(0, BitcoinRows).Select(_ => Tied()).ToArray()), Weights(BitcoinRows)
                 ];
             case "geometry.convex-hull":
-                return [MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Range(0, BitcoinRows).Select(_ => new MathBlockPoint(Tied(), Tied())).ToArray()))];
+                return [MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Range(0, BitcoinRows).Select(index => new MathBlockPoint(HullCoordinate(index), HullCoordinate(index))).ToArray()))];
             case "topology.zero-dimensional-persistence":
                 return [MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Range(0, 2_000).Select(_ => new MathBlockPoint(Tied() + random.NextDouble() * 1e-3d, Tied())).ToArray()))];
             case "graph.minimum-spanning-forest":
