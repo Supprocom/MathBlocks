@@ -156,8 +156,8 @@ internal static class WindowCudaBlockCatalog
     // 64-bit words for the sum and mean, two for the variances and deviations, whatever the width.
     internal static long ScratchDoubles(int source, long width) => source switch
     {
-        3 or 44 or 47 or 48 => width,
-        2 or 8 or 21 => width * 2,
+        44 or 47 or 48 => width,
+        2 or 3 or 8 or 21 => width * 2,
         22 => width * (width - 1),
         15 => width * (width + 1),
         53 or 54 => 285,

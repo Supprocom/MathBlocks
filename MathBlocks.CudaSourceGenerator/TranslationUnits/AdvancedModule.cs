@@ -106,24 +106,8 @@ internal static unsafe class AdvancedModule
         return true;
     }
 
-    [CudaDevice]
-    private static void mathblocks_advanced_sort_descending(
-        [CudaReadOnly] double* values,
-        int count,
-        double* result)
-    {
-        for (int index = 0; index < count; index++)
-        {
-            double value = values[index];
-            int position = index;
-            while (position > 0 && result[position - 1] < value)
-            {
-                result[position] = result[position - 1];
-                position--;
-            }
-            result[position] = value;
-        }
-    }
+    [CudaExternal]
+    private static void mathblocks_statistics_sort_copy([CudaReadOnly] double* values, int count, double* result, bool descending) => throw new NotSupportedException();
 
     [CudaDevice(Name = "mathblocks_advanced_dispatch")]
     private static void mathblocks_advanced(
@@ -421,8 +405,8 @@ internal static unsafe class AdvancedModule
                 {
                     double* left_sorted = scratch;
                     double* right_sorted = scratch + first->count;
-                    mathblocks_advanced_sort_descending(a, first->count, left_sorted);
-                    mathblocks_advanced_sort_descending(b, first->count, right_sorted);
+                    mathblocks_statistics_sort_copy(a, first->count, left_sorted, true);
+                    mathblocks_statistics_sort_copy(b, first->count, right_sorted, true);
                     double left_sum = 0.0;
                     double right_sum = 0.0;
                     bool majorizes = true;

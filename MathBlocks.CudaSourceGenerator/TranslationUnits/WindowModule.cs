@@ -64,7 +64,10 @@ internal static unsafe class WindowModule
     private static double mathblocks_statistics_pearson([CudaReadOnly] double* left, [CudaReadOnly] double* right, int count) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static void mathblocks_statistics_sort_copy([CudaReadOnly] double* values, int count, double* result) => throw new NotSupportedException();
+    private static void mathblocks_statistics_sort_copy([CudaReadOnly] double* values, int count, double* result, bool descending) => throw new NotSupportedException();
+
+    [CudaExternal]
+    private static double* mathblocks_stable_merge_sort(double* values, double* buffer, int count, bool descending) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
     private static double mathblocks_statistics_sorted_quantile([CudaReadOnly] double* sorted, int count, double probability) => throw new NotSupportedException();
@@ -197,12 +200,12 @@ internal static unsafe class WindowModule
         long count = width;
         switch (source)
         {
-            case 3:
             case 44:
             case 47:
             case 48:
                 return count;
             case 2:
+            case 3:
             case 8:
             case 21:
                 return count * 2;
@@ -221,37 +224,6 @@ internal static unsafe class WindowModule
             default:
                 return 0;
         }
-    }
-
-    // Stable bottom-up merge sort of count values, alternating between values and buffer. Returns the array that
-    // holds the sorted values. Equal values, -0.0 and +0.0 among them, keep their input order, so the result is
-    // the array the source's stable sort produces.
-    [CudaDevice]
-    private static double* mathblocks_window_merge_sort(double* values, double* buffer, int count)
-    {
-        double* source = values;
-        double* target = buffer;
-        for (int width = 1; width < count; width += width)
-        {
-            for (int start = 0; start < count; start += width + width)
-            {
-                int middle = start + width < count ? start + width : count;
-                int end = middle + width < count ? middle + width : count;
-                int left = start;
-                int right = middle;
-                int position = start;
-                while (left < middle && right < end)
-                    target[position++] = source[right] < source[left] ? source[right++] : source[left++];
-                while (left < middle)
-                    target[position++] = source[left++];
-                while (right < end)
-                    target[position++] = source[right++];
-            }
-            double* sorted = target;
-            target = source;
-            source = sorted;
-        }
-        return source;
     }
 
     // Row means of the count x count distance matrix |values[row] - values[column]| and its total mean, summed in
@@ -324,7 +296,7 @@ internal static unsafe class WindowModule
     [CudaDevice]
     private static double mathblocks_window_scratch_median(double* scratch, int count)
     {
-        double* sorted = mathblocks_window_merge_sort(scratch, scratch + count, count);
+        double* sorted = mathblocks_stable_merge_sort(scratch, scratch + count, count, false);
         return mathblocks_statistics_sorted_quantile(sorted, count, 0.5);
     }
 
@@ -382,7 +354,7 @@ internal static unsafe class WindowModule
             case 3:
                 if (count <= 0 || scratch == null)
                     return false;
-                mathblocks_statistics_sort_copy(a, count, scratch);
+                mathblocks_statistics_sort_copy(a, count, scratch, false);
                 *value =
                     mathblocks_statistics_sorted_quantile(scratch, count, 0.75) -
                     mathblocks_statistics_sorted_quantile(scratch, count, 0.25);
@@ -432,11 +404,11 @@ internal static unsafe class WindowModule
                     return false;
                 double* sorted = scratch;
                 double* deviations = scratch + count;
-                mathblocks_statistics_sort_copy(a, count, sorted);
+                mathblocks_statistics_sort_copy(a, count, sorted, false);
                 double median = mathblocks_statistics_sorted_quantile(sorted, count, 0.5);
                 for (int index = 0; index < count; index++)
                     deviations[index] = Math.Abs(a[index] - median);
-                mathblocks_statistics_sort_copy(deviations, count, sorted);
+                mathblocks_statistics_sort_copy(deviations, count, sorted, false);
                 *value = mathblocks_statistics_sorted_quantile(sorted, count, 0.5);
                 break;
             }

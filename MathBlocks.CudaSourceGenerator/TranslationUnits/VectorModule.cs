@@ -132,6 +132,60 @@ internal static unsafe class VectorModule
         }
     }
 
+    // Stable bottom-up merge sort of count values, alternating between values and buffer (count doubles each). Returns
+    // the array that holds the sorted values. Equal values, -0.0 and +0.0 among them, keep their input order, so the
+    // result is the array the source's stable sort (SortedCopy) produces; descending takes the larger value first
+    // and keeps the input order of equal ones. This is the one sort helper of the device source; it sits in the
+    // second translation unit so that every later unit can declare it external.
+    [CudaDevice]
+    private static double* mathblocks_stable_merge_sort(double* values, double* buffer, int count, bool descending)
+    {
+        double* source = values;
+        double* target = buffer;
+        for (int width = 1; width < count; width += width)
+        {
+            for (int start = 0; start < count; start += width + width)
+            {
+                int middle = start + width < count ? start + width : count;
+                int end = middle + width < count ? middle + width : count;
+                int left = start;
+                int right = middle;
+                int position = start;
+                while (left < middle && right < end)
+                {
+                    bool take_right = descending ? source[right] > source[left] : source[right] < source[left];
+                    target[position++] = take_right ? source[right++] : source[left++];
+                }
+                while (left < middle)
+                    target[position++] = source[left++];
+                while (right < end)
+                    target[position++] = source[right++];
+            }
+            double* sorted = target;
+            target = source;
+            source = sorted;
+        }
+        return source;
+    }
+
+    // Copies count values into result and sorts them there with the merge sort, using buffer (count doubles) as the
+    // other array.
+    [CudaDevice]
+    private static void mathblocks_stable_sort_into(
+        [CudaReadOnly] double* values,
+        int count,
+        double* result,
+        double* buffer,
+        bool descending)
+    {
+        for (int index = 0; index < count; index++)
+            result[index] = values[index];
+        double* sorted = mathblocks_stable_merge_sort(result, buffer, count, descending);
+        if (sorted != result)
+            for (int index = 0; index < count; index++)
+                result[index] = sorted[index];
+    }
+
     // Stable insertion sort of count values into sorted.
     [CudaDevice]
     private static void mathblocks_sort_copy_values(
@@ -152,16 +206,19 @@ internal static unsafe class VectorModule
         }
     }
 
+    // vector.sort: the stable merge sort of the source's SortedCopy. The sorted values end in the output's data (or in
+    // the scratch when the output has no data pointer); the scratch holds 2 * count doubles, the other array of the merge.
     [CudaDevice]
     private static void mathblocks_copy_and_sort(
         [CudaReadOnly] MathBlockSlot* input,
         MathBlockSlot* output)
     {
-        double* scratch = (double*)(output->data_pointer != 0
-            ? output->data_pointer
-            : output->scratch_pointer);
+        double* scratch = (double*)output->scratch_pointer;
         double* source = Cuda.ReadOnly((double*)input->data_pointer);
-        mathblocks_sort_copy_values(source, input->count, scratch);
+        if (output->data_pointer != 0)
+            mathblocks_stable_sort_into(source, input->count, (double*)output->data_pointer, scratch, false);
+        else
+            mathblocks_stable_sort_into(source, input->count, scratch, scratch + input->count, false);
     }
 
     // Sorts count values into sorted and interpolates the quantile at probability.
@@ -182,17 +239,25 @@ internal static unsafe class VectorModule
         return sorted[lower] * (1.0 - weight) + sorted[upper] * weight;
     }
 
+    // vector.median and vector.quantile: the quantile of the stable merge sort of the input, held in the scratch
+    // (2 * count doubles).
     [CudaDevice]
     private static double mathblocks_quantile(
         [CudaReadOnly] MathBlockSlot* input,
         MathBlockSlot* output,
         double probability)
     {
-        double* scratch = (double*)(output->data_pointer != 0
-            ? output->data_pointer
-            : output->scratch_pointer);
+        double* sorted = (double*)output->scratch_pointer;
         double* source = Cuda.ReadOnly((double*)input->data_pointer);
-        return mathblocks_quantile_values(source, input->count, scratch, probability);
+        int count = input->count;
+        mathblocks_stable_sort_into(source, count, sorted, sorted + count, false);
+        if (count == 1)
+            return sorted[0];
+        double position = probability * (count - 1);
+        int lower = (int)Math.Floor(position);
+        int upper = (int)Math.Ceiling(position);
+        double weight = position - lower;
+        return sorted[lower] * (1.0 - weight) + sorted[upper] * weight;
     }
 
     [CudaDevice]

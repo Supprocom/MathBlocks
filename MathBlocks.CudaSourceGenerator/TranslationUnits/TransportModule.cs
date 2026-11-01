@@ -49,24 +49,8 @@ internal static unsafe class TransportModule
 
     [CudaExternal(IsPure = true)]
     private static double mathblocks_square_root(double value) => throw new NotSupportedException();
-    [CudaDevice]
-    private static void mathblocks_transport_sort_values(
-        [CudaReadOnly] double* values,
-        int count,
-        double* result)
-    {
-        for (int index = 0; index < count; index++)
-        {
-            double value = values[index];
-            int position = index;
-            while (position > 0 && result[position - 1] > value)
-            {
-                result[position] = result[position - 1];
-                position--;
-            }
-            result[position] = value;
-        }
-    }
+    [CudaExternal]
+    private static void mathblocks_statistics_sort_copy([CudaReadOnly] double* values, int count, double* result, bool descending) => throw new NotSupportedException();
 
     [CudaDevice]
     private static void mathblocks_transport_sort_indices(
@@ -350,8 +334,8 @@ internal static unsafe class TransportModule
                 {
                     double* left_sorted = scratch;
                     double* right_sorted = scratch + first->count;
-                    mathblocks_transport_sort_values(a, first->count, left_sorted);
-                    mathblocks_transport_sort_values(b, second->count, right_sorted);
+                    mathblocks_statistics_sort_copy(a, first->count, left_sorted, false);
+                    mathblocks_statistics_sort_copy(b, second->count, right_sorted, false);
                     double sum = 0.0;
                     for (int index = 0; index < first->count; index++)
                         sum += mathblocks_power(

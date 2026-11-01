@@ -1807,9 +1807,10 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 "statistics.covariance-matrix@1" => columns,
                 "statistics.distance-correlation@1" => checked(firstCount * firstCount * 2 + firstCount),
                 "statistics.median-absolute-deviation@1" => checked(firstCount * 2),
-                "statistics.pseudomedian@1" => checked(firstCount * (firstCount + 1) / 2),
+                "statistics.pseudomedian@1" => checked(firstCount * (firstCount + 1)),
+                "statistics.interquartile-range@1" or "vector.median@1" or "vector.quantile@1" or "vector.sort@1" => checked(firstCount * 2),
                 "statistics.spearman-correlation@1" => checked(firstCount * 2),
-                "statistics.theil-sen-slope@1" => checked(firstCount * (firstCount - 1) / 2),
+                "statistics.theil-sen-slope@1" => checked(firstCount * (firstCount - 1)),
                 "geometry.convex-hull@1" => checked(firstCount * 6),
                 "geometry.delaunay-graph@1" => checked(firstCount * firstCount + firstCount),
                 "geometry.discrete-frechet-distance@1" => checked(
@@ -1827,13 +1828,13 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 "capacity.choquet-integral@1" => firstCount,
                 "markov.stationary-distribution@1" => rows,
                 "order.isotonic-regression@1" => checked(firstCount * 3),
-                "order.majorizes@1" => checked(firstCount * 2),
+                "order.majorizes@1" => checked(firstCount * 3),
                 "shape.greatest-convex-minorant@1" or
                     "shape.is-completely-monotone@1" or
                     "shape.least-concave-majorant@1" => firstCount,
                 "transport.minimum-assignment@1" => ResolveAssignmentScratch(rows),
                 "transport.sinkhorn-coupling@1" => checked(firstCount + rows + columns),
-                "transport.uniform-wasserstein@1" => checked(firstCount * 2),
+                "transport.uniform-wasserstein@1" => checked(firstCount * 3),
                 "transport.weighted-wasserstein-1@1" => checked(
                     firstCount + inputCapacities[2]),
                 _ => 0

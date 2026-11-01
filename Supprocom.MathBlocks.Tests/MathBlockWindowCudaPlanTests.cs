@@ -62,7 +62,7 @@ public sealed class MathBlockWindowCudaPlanTests
     [InlineData("statistics.theil-sen-slope", 302_893, 96, 261_488_640)]
     [InlineData("statistics.pseudomedian", 302_893, 96, 266_993_664)]
     [InlineData("statistics.distance-correlation", 302_893, 96, 268_369_920)]
-    [InlineData("statistics.interquartile-range", 1_000, 17, 139_264)]
+    [InlineData("statistics.interquartile-range", 1_000, 17, 278_528)]
     [InlineData("statistics.median-absolute-deviation", 1_000, 17, 278_528)]
     [InlineData("statistics.spearman-correlation", 1_000, 17, 278_528)]
     [InlineData("vector.quantile", 1_000, 17, 17_408)]

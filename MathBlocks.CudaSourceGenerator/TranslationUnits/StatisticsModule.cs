@@ -89,39 +89,21 @@ internal static unsafe class StatisticsModule
              mathblocks_square_root(mathblocks_statistics_population_variance(right, count)));
     }
 
+    [CudaExternal]
+    private static double* mathblocks_stable_merge_sort(double* values, double* buffer, int count, bool descending) => throw new NotSupportedException();
+
+    [CudaExternal]
+    private static void mathblocks_stable_sort_into([CudaReadOnly] double* values, int count, double* result, double* buffer, bool descending) => throw new NotSupportedException();
+
+    // The same with the buffer in the count doubles after result: result needs 2 * count doubles.
     [CudaDevice]
     private static void mathblocks_statistics_sort_copy(
         [CudaReadOnly] double* values,
         int count,
-        double* result)
+        double* result,
+        bool descending)
     {
-        for (int index = 0; index < count; index++)
-        {
-            double value = values[index];
-            int position = index;
-            while (position > 0 && result[position - 1] > value)
-            {
-                result[position] = result[position - 1];
-                position--;
-            }
-            result[position] = value;
-        }
-    }
-
-    [CudaDevice]
-    private static void mathblocks_statistics_sort_in_place(double* values, int count)
-    {
-        for (int index = 1; index < count; index++)
-        {
-            double value = values[index];
-            int position = index;
-            while (position > 0 && values[position - 1] > value)
-            {
-                values[position] = values[position - 1];
-                position--;
-            }
-            values[position] = value;
-        }
+        mathblocks_stable_sort_into(values, count, result, result + count, descending);
     }
 
     [CudaDevice]
@@ -142,8 +124,8 @@ internal static unsafe class StatisticsModule
     [CudaDevice]
     private static double mathblocks_statistics_median(double* values, int count)
     {
-        mathblocks_statistics_sort_in_place(values, count);
-        return mathblocks_statistics_sorted_quantile(values, count, 0.5);
+        double* sorted = mathblocks_stable_merge_sort(values, values + count, count, false);
+        return mathblocks_statistics_sorted_quantile(sorted, count, 0.5);
     }
 
     [CudaDevice]
@@ -501,7 +483,7 @@ internal static unsafe class StatisticsModule
                         output->valid = 0;
                         break;
                     }
-                    mathblocks_statistics_sort_copy(a, first->count, scratch);
+                    mathblocks_statistics_sort_copy(a, first->count, scratch, false);
                     output->scalar_value =
                         mathblocks_statistics_sorted_quantile(scratch, first->count, 0.75) -
                         mathblocks_statistics_sorted_quantile(scratch, first->count, 0.25);
@@ -561,11 +543,11 @@ internal static unsafe class StatisticsModule
                     }
                     double* sorted = scratch;
                     double* deviations = scratch + first->count;
-                    mathblocks_statistics_sort_copy(a, first->count, sorted);
+                    mathblocks_statistics_sort_copy(a, first->count, sorted, false);
                     double median = mathblocks_statistics_sorted_quantile(sorted, first->count, 0.5);
                     for (int index = 0; index < first->count; index++)
                         deviations[index] = Math.Abs(a[index] - median);
-                    mathblocks_statistics_sort_copy(deviations, first->count, sorted);
+                    mathblocks_statistics_sort_copy(deviations, first->count, sorted, false);
                     output->scalar_value = mathblocks_statistics_sorted_quantile(sorted, first->count, 0.5);
                     break;
                 }
