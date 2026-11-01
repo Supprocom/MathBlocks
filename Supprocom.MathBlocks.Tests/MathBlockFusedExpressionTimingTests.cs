@@ -30,20 +30,35 @@ public sealed class MathBlockFusedExpressionTimingTests(ITestOutputHelper output
             var inputs = CreateInputs(program, FullRows, Regime.Benign, random);
             fused.EvaluateCoreCLR(inputs);
             program.Evaluate(inputs);
+            // Fused and unfused alternate per repeat, so host load affects both sides alike.
             const int repeats = 5;
-            var watch = Stopwatch.StartNew();
+            var fusedTimes = new double[repeats];
+            var unfusedTimes = new double[repeats];
             for (var repeat = 0; repeat < repeats; repeat++)
+            {
+                var watch = Stopwatch.StartNew();
                 fused.EvaluateCoreCLR(inputs);
-            var fusedTime = watch.Elapsed.TotalMilliseconds / repeats;
-            watch.Restart();
-            for (var repeat = 0; repeat < repeats; repeat++)
+                fusedTimes[repeat] = watch.Elapsed.TotalMilliseconds;
+                watch.Restart();
                 program.Evaluate(inputs);
-            var unfusedTime = watch.Elapsed.TotalMilliseconds / repeats;
+                unfusedTimes[repeat] = watch.Elapsed.TotalMilliseconds;
+            }
+            var ratios = fusedTimes.Zip(unfusedTimes, (left, right) => left / right).ToArray();
             var elementwise = program.PlanNodes.Count(node =>
                 node.OperationIdentity?.StartsWith("elementwise", StringComparison.Ordinal) == true);
-            output.WriteLine(
-                $"{operations} operation nodes ({elementwise} elementwise), {FullRows} rows: fused {fusedTime:F1} ms, " +
-                $"unfused {unfusedTime:F1} ms");
+            output.WriteLine($"{operations} operation nodes ({elementwise} elementwise), {FullRows} rows, {repeats} repeats");
+            output.WriteLine($"  fused ms: {Spread(fusedTimes)}");
+            output.WriteLine($"  unfused ms: {Spread(unfusedTimes)}");
+            output.WriteLine($"  fused / unfused, per repeat: {Spread(ratios)}");
         }
+    }
+
+    private static string Spread(double[] values)
+    {
+        var sorted = values.Order().ToArray();
+        var median = (sorted[(sorted.Length - 1) / 2] + sorted[sorted.Length / 2]) / 2d;
+        return string.Create(
+            System.Globalization.CultureInfo.InvariantCulture,
+            $"min {sorted[0]:F3}, median {median:F3}, max {sorted[^1]:F3}");
     }
 }
