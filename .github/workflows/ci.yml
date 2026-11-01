@@ -536,9 +536,9 @@ jobs:
         run: |
           set -euo pipefail
           mapfile -t nupkgs < <(find "$PACKAGE_EVIDENCE" -maxdepth 1 -type f \
-            -name 'Supprocom.MathBlocks.0.5.2.nupkg' -print)
+            -name 'Supprocom.MathBlocks.0.6.0.nupkg' -print)
           mapfile -t snupkgs < <(find "$PACKAGE_EVIDENCE" -maxdepth 1 -type f \
-            -name 'Supprocom.MathBlocks.0.5.2.snupkg' -print)
+            -name 'Supprocom.MathBlocks.0.6.0.snupkg' -print)
           test "${#nupkgs[@]}" -eq 1
           test "${#snupkgs[@]}" -eq 1
           nupkg="${nupkgs[0]}"

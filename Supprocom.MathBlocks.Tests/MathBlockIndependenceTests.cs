@@ -161,9 +161,9 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Contains("formula/v1/* text eol=lf", attributes, StringComparison.Ordinal);
     }
 
-    /// <summary>Verifies public release metadata declares the 051 contract.</summary>
+    /// <summary>Verifies public release metadata declares the 0.6.0 contract.</summary>
     [Fact]
-    public void PublicReleaseMetadataDeclaresThe052Contract()
+    public void PublicReleaseMetadataDeclaresThe060Contract()
     {
         var root = FindRepositoryRoot();
         var projectPath = Path.Combine(root, "Supprocom.MathBlocks", "Supprocom.MathBlocks.csproj");
@@ -179,7 +179,7 @@ public sealed partial class MathBlockIndependenceTests
         var developmentGuide = File.ReadAllText(
             Path.Combine(root, "docs", "development.md"));
 
-        Assert.Equal("0.5.2", document.Descendants("Version").Single().Value);
+        Assert.Equal("0.6.0", document.Descendants("Version").Single().Value);
         Assert.Equal("AGPL-3.0-only", document.Descendants("PackageLicenseExpression").Single().Value);
         Assert.Equal("true", document.Descendants("PublishRepositoryUrl").Single().Value);
         Assert.Contains(
@@ -190,7 +190,7 @@ public sealed partial class MathBlockIndependenceTests
             "337-operation OpenMath and Content MathML interchange",
             document.Descendants("PackageReleaseNotes").Single().Value,
             StringComparison.Ordinal);
-        Assert.Equal(new Version(0, 5, 2, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
+        Assert.Equal(new Version(0, 6, 0, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
         Assert.Contains("## Build a program", readme, StringComparison.Ordinal);
         Assert.Contains("## Exchange formulas", readme, StringComparison.Ordinal);
         Assert.Contains("## Choose an API", readme, StringComparison.Ordinal);
