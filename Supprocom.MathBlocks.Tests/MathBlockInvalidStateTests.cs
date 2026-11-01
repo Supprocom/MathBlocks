@@ -60,13 +60,6 @@ public sealed class MathBlockInvalidStateTests
             ["matrix.exponential/overflowing-norm"] = ("matrix.exponential@1", () => [Matrix(2, 2, 1.7e308d, 1.7e308d, 0d, 0d)])
         };
 
-    // Inputs that reach Math.Clamp with lower > upper, which throws; scalar.clamp's invalid result is not part of
-    // this test.
-    private static readonly HashSet<string> ClampIdentities = new(StringComparer.Ordinal)
-    {
-        "scalar.clamp@1", "elementwise.scalar.clamp@1", "elementwise-valid.scalar.clamp@1"
-    };
-
     private static readonly double[] ScalarVariants =
         [0d, -0d, -1d, 1d, 2d, 0.5d, -0.5d, 3d, 21d, 65537d, 1e308d, -1e308d, 1e-310d, 4097d, 1_000_001d];
 
@@ -183,8 +176,6 @@ public sealed class MathBlockInvalidStateTests
                 }
                 catch (Exception exception) when (exception is not OutOfMemoryException)
                 {
-                    if (exception is ArgumentException && ClampIdentities.Contains(operation.Identity))
-                        continue;
                     failures.TryAdd(operation.Identity, $"{exception.GetType().Name}: {exception.Message} ({Describe(inputs)})");
                 }
             }
