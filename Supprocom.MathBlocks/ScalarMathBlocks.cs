@@ -135,8 +135,16 @@ public static partial class MathBlockScalar
         if (value < -745.13321910194110842d)
             return 0d;
 
+        var result = ReduceExponential(value, out var exponent);
+        return Math.ScaleB(result, exponent);
+    }
+
+    // exp(value) = result * 2^exponent, with result near 1: the range reduction and rational approximation of
+    // DeterministicExponential before the final scaling.
+    private static double ReduceExponential(double value, out int exponent)
+    {
         var exponentValue = Math.Floor(1.44269504088896340736d * value + 0.5d);
-        var exponent = (int)exponentValue;
+        exponent = (int)exponentValue;
         var reduced = value - exponentValue * 0.693359375d;
         reduced -= exponentValue * -0.000212194440054690582768d;
         var square = reduced * reduced;
@@ -145,8 +153,7 @@ public static partial class MathBlockScalar
         var denominator = (((
             0.00000300198505138664455042d * square + 0.00252448340349684104192d) * square +
             0.227265548208155028766d) * square + 2d);
-        var result = 1d + 2d * numerator / (denominator - numerator);
-        return Math.ScaleB(result, exponent);
+        return 1d + 2d * numerator / (denominator - numerator);
     }
 
     private static double DeterministicNaturalLogarithm(double value)
