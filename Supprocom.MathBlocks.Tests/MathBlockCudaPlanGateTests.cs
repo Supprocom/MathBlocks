@@ -7,7 +7,7 @@ namespace Supprocom.MathBlocks.Tests;
 /// Verifies without a CUDA device that the CUDA planner accepts the programs the CUDA tests compile from prototype inputs:
 /// it runs <c>MathBlocksCUDAProgram.PlanArena</c>, the planning of <c>Create</c> up to its first device call (the program
 /// validation, every node's payload layout including the constant folding of scalar nodes, the arena and the scratch), and
-/// the plan must not throw. A plan that throws here would fail the GPU test at its <c>Compile</c> call before any kernel runs.
+/// the plan must not throw. A plan that throws here would fail the CUDA test at its <c>Compile</c> call before any kernel runs.
 /// </summary>
 public sealed class MathBlockCudaPlanGateTests
 {

@@ -100,7 +100,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
 
     // The planning of Create up to (not including) its first device call: it validates the program, resolves every node's payload
     // layout from the prototype inputs, and lays out the arena (payloads, input pointers, scratch). It throws what Create throws
-    // before it touches the device, so a GPU-free caller can run it for any program.
+    // before it touches the device, so a caller without a device can run it for any program.
 #pragma warning disable MA0051
     internal static ArenaPlan PlanArena(
         MathBlockProgram program,
