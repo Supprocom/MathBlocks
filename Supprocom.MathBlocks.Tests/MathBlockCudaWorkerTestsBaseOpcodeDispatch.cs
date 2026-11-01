@@ -18,11 +18,13 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
 
     private static readonly Dictionary<string, (string Identity, Func<MathBlockValue[]> Inputs)> Cases = new(StringComparer.Ordinal)
     {
-        ["base-opcode/unary-vector"] = ("elementwise.scalar.absolute@1", () => [Vector(-1.5d, 2d, -0d, 4d), Scalar(Fill)]),
-        ["base-opcode/vector-scalar"] = ("elementwise.scalar.add@1", () => [Vector(1d, 2d, 3d), Scalar(0.5d), Scalar(Fill)]),
-        ["base-opcode/scalar-vector"] = ("elementwise.scalar.subtract@1", () => [Scalar(0.5d), Vector(1d, 2d, 3d), Scalar(Fill)]),
-        ["base-opcode/vector-vector"] = ("elementwise.scalar.multiply@1", () => [Vector(1d, 2d, 3d), Vector(0.25d, -4d, 8d), Scalar(Fill)]),
-        ["base-opcode/sibling-vector-vector"] = ("elementwise-valid.scalar.divide@1", () => [Vector(1d, 2d, 3d), Vector(0.25d, 0d, 8d)])
+        ["base-opcode/unary-vector"] = ("elementwise.scalar.negate@1", () => [Vector(-1.5d, 2d, -0d, 4d), Scalar(Fill)]),
+        ["base-opcode/vector-scalar"] = ("elementwise.scalar.maximum@1", () => [Vector(1d, 2d, 3d), Scalar(0.5d), Scalar(Fill)]),
+        ["base-opcode/scalar-vector"] = ("elementwise.scalar.minimum@1", () => [Scalar(0.5d), Vector(1d, 2d, 3d), Scalar(Fill)]),
+        ["base-opcode/vector-vector"] = ("elementwise.scalar.maximum@1", () => [Vector(1d, 2d, 3d), Vector(0.25d, -4d, 8d), Scalar(Fill)]),
+        ["base-opcode/sibling-vector-vector"] = ("elementwise-valid.scalar.maximum@1", () => [Vector(1d, 2d, 3d), Vector(0.25d, -4d, 8d)]),
+        // Rows outside the domain of logit: invalid on CoreCLR, so the fill path of the dispatcher is checked too.
+        ["base-opcode/unary-vector-invalid-rows"] = ("elementwise.scalar.logit@1", () => [Vector(0.25d, 2d, 0.5d, -1d), Scalar(Fill)])
     };
 
     /// <summary>Gets the case names.</summary>
