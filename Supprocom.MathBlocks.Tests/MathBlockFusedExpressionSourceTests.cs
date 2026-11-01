@@ -48,6 +48,21 @@ public sealed class MathBlockFusedExpressionSourceTests
                     expression.Contains(plain, StringComparison.Ordinal) && !line.Contains("blockIdx", StringComparison.Ordinal),
                     $"Plain floating-point arithmetic in: {line}");
         }
+        foreach (var row in new[]
+                 {
+                     "const int k34 = isfinite(n32) && isfinite(n3) && mathblocks_elementwise_row_value(" +
+                     "mathblocks_elementwise_source_opcode(8), n32, n3, 0.0, &v34);",
+                     "const double n34 = k34 ? v34 : n33;",
+                     "const int r34 = r32 & k34;",
+                     "mathblocks_elementwise_source_opcode(3), n34, 0.0, 0.0, &v35);",
+                     "mathblocks_elementwise_source_opcode(12), n35, n4, n1, &v36);",
+                     "const int r36 = r35 & r1 & k36;",
+                     "const int b37 = k37;",
+                     "const int r37 = r0 & r1;"
+                 })
+            Assert.Contains(row, source, StringComparison.Ordinal);
+        var elementwise = body[body.IndexOf("// node 34", StringComparison.Ordinal)..body.IndexOf("// node 38", StringComparison.Ordinal)];
+        Assert.DoesNotContain("invalid |= 0x", elementwise, StringComparison.Ordinal);
         Assert.Contains($"__device__ void {fused.CudaFunctionName}(", source, StringComparison.Ordinal);
         Assert.Contains($"extern \"C\" __global__ void {fused.CudaKernelName}(", source, StringComparison.Ordinal);
         Assert.Equal(source, MathBlockFusedExpression.Create(CreateGoldenProgram()).CudaSource);
@@ -61,7 +76,7 @@ public sealed class MathBlockFusedExpressionSourceTests
 
     internal static MathBlockProgram CreateGoldenProgram()
     {
-        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var builder = new MathBlockProgramBuilder(MathBlockFusedTestSupport.WithElementwise.Value);
         var x = builder.Input("x", MathBlockType.Vector());
         var y = builder.Input("y", MathBlockType.Vector());
         var mask = builder.Input("mask", MathBlockType.BooleanVector());
@@ -94,6 +109,16 @@ public sealed class MathBlockFusedExpressionSourceTests
         var imaginary = builder.Apply("complex-vector.imaginary", 1, complex);
         var magnitude = builder.Apply("complex-vector.magnitude", 1, complex);
         var total = builder.Apply("vector.add", 1, builder.Apply("vector.add", 1, real, imaginary), magnitude);
-        return builder.Output("total", total).Output("flag", not).Output("y", y).Output("power", power).Build();
+
+        // Elementwise forms of both CUDA per-row functions (Scalar and Probability), with broadcast scalars in
+        // the second and third masks, a form of a form, and a sibling.
+        var fill = builder.Constant(MathBlockValue.Scalar(-1d));
+        var angle = builder.Apply("elementwise.scalar.arc-tangent-2", 1, total, exponent, fill);
+        var cdf = builder.Apply("elementwise.probability.normal-cdf", 1, angle, fill);
+        var clamped = builder.Apply("elementwise.scalar.clamp", 1, cdf, half, y, fill);
+        var computed = builder.Apply("elementwise-valid.special.beta", 1, x, y);
+        var final = builder.Apply("vector.add", 1, total, clamped);
+        var flag = builder.Apply("boolean-vector.and", 1, not, computed);
+        return builder.Output("total", final).Output("flag", flag).Output("y", y).Output("power", power).Build();
     }
 }

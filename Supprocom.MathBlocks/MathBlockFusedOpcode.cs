@@ -27,5 +27,7 @@ internal enum MathBlockFusedOpcode
     ComplexVectorCreate,
     ComplexVectorReal,
     ComplexVectorImaginary,
-    ComplexVectorMagnitude
+    ComplexVectorMagnitude,
+    ElementwiseForm,
+    ElementwiseValidity
 }

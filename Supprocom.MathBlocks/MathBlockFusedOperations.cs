@@ -1,3 +1,5 @@
+using Supprocom.MathBlocks.Cuda;
+
 namespace Supprocom.MathBlocks;
 
 // The pointwise operations a fused expression evaluates per row. Each CoreCLR row function is the per-element
@@ -10,7 +12,9 @@ internal static class MathBlockFusedOperations
     private const MathBlockFusedKind Flag = MathBlockFusedKind.Flag;
     private const MathBlockFusedKind Complex = MathBlockFusedKind.Complex;
 
-    private static readonly MathBlockFusedOperation[] operations =
+    private static readonly MathBlockFusedOperation[] operations = [.. CreatePointwiseOperations(), .. CreateElementwiseOperations()];
+
+    private static MathBlockFusedOperation[] CreatePointwiseOperations() =>
     [
         new("vector.absolute@1", MathBlockFusedOpcode.VectorAbsolute, Number, Number),
         new("vector.add-scalar@1", MathBlockFusedOpcode.VectorAddScalar, Number, Number, Scalar),
@@ -39,6 +43,13 @@ internal static class MathBlockFusedOperations
         new("complex-vector.imaginary@1", MathBlockFusedOpcode.ComplexVectorImaginary, Number, Complex),
         new("complex-vector.magnitude@1", MathBlockFusedOpcode.ComplexVectorMagnitude, Number, Complex)
     ];
+
+    // The elementwise.* forms and elementwise-valid.* siblings, from the CUDA elementwise catalog: contract opcode
+    // 2 * source + sibling.
+    private static MathBlockFusedOperation[] CreateElementwiseOperations() =>
+        MathBlockCollectionPrimitives.Map(
+            ElementwiseCudaBlockCatalog.Features,
+            feature => new MathBlockFusedOperation(feature.Identity, feature.Opcode / 2, feature.Opcode % 2 != 0));
 
     private static readonly Dictionary<string, MathBlockFusedOperation> byIdentity = CreateIndex();
 
@@ -134,6 +145,30 @@ internal static class MathBlockFusedOperations
         MathBlockFusedOpcode.ComplexVectorMagnitude => $"mathblocks_complex_magnitude({arguments[0]})",
         _ => throw new InvalidOperationException($"Fused opcode '{opcode}' has no CUDA expression.")
     };
+
+    // The CUDA test of one elementwise row: every argument is finite and the source's per-row function computes it.
+    // mathblocks_elementwise_row_value and mathblocks_elementwise_source_opcode are the functions the elementwise
+    // kernel calls, so the row's value and computed flag are the kernel's. A nonfinite argument (a row of a node
+    // that is invalid as a whole) is not computed, as on CoreCLR, where it is not a valid scalar.
+    public static string CudaElementwiseRow(
+        int source,
+        ReadOnlySpan<string> arguments,
+        string[] sourceArguments,
+        string value)
+    {
+        var text = new System.Text.StringBuilder();
+        foreach (ref readonly var argument in arguments)
+            text.Append("isfinite(").Append(argument).Append(") && ");
+        text.Append("mathblocks_elementwise_row_value(mathblocks_elementwise_source_opcode(")
+            .Append(source.ToString(System.Globalization.CultureInfo.InvariantCulture)).Append("), ")
+            .Append(sourceArguments[0]).Append(", ").Append(sourceArguments[1]).Append(", ")
+            .Append(sourceArguments[2]).Append(", ").Append(value).Append(')');
+        return text.ToString();
+    }
+
+    // The fill select of an elementwise form row: the source value where the row is computed, the fill otherwise.
+    public static string CudaFillSelect(string computed, string value, string fill) =>
+        $"{computed} ? {value} : {fill}";
 
     private static Dictionary<string, MathBlockFusedOperation> CreateIndex()
     {

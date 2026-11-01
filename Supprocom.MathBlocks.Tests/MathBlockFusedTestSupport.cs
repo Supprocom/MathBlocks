@@ -32,6 +32,11 @@ internal static class MathBlockFusedTestSupport
         1e300, -1e300, double.MaxValue, -double.MaxValue, 3d, -8d, 1e-300, 4.9e-324 * 3
     ];
 
+    // Standard together with the elementwise forms, which stay outside Standard on this branch. The instances are
+    // the registries' own, so the fused expression accepts them.
+    public static readonly Lazy<MathBlockRegistry> WithElementwise = new(() => new MathBlockRegistry(
+        MathBlockCatalog.Standard.Operations.Concat(MathBlockElementwiseTestSupport.Elementwise.Operations)));
+
     public enum Regime
     {
         Benign,
@@ -45,9 +50,11 @@ internal static class MathBlockFusedTestSupport
         int booleanInputs,
         int scalarInputs,
         int operations,
-        int outputs)
+        int outputs,
+        int elementwisePercent = 0)
     {
-        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var builder = new MathBlockProgramBuilder(
+            elementwisePercent > 0 ? WithElementwise.Value : MathBlockCatalog.Standard);
         var byKind = new Dictionary<char, List<int>>
         {
             ['N'] = [],
@@ -66,6 +73,15 @@ internal static class MathBlockFusedTestSupport
         var created = new List<(int Node, char Kind)>();
         while (created.Count < operations)
         {
+            if (elementwisePercent > 0 && random.Next(100) < elementwisePercent)
+            {
+                if (byKind['N'].Count == 0)
+                    continue;
+                var (elementwise, kind) = ApplyRandomElementwise(builder, random, byKind);
+                byKind[kind].Add(elementwise);
+                created.Add((elementwise, kind));
+                continue;
+            }
             var (identity, arguments, result) = Operations[random.Next(Operations.Length)];
             if (arguments.Any(kind => byKind[kind].Count == 0))
                 continue;
@@ -85,6 +101,28 @@ internal static class MathBlockFusedTestSupport
         for (var index = 0; index < chosen.Count; index++)
             builder.Output($"y{index}", chosen[index]);
         return builder.Build();
+    }
+
+    // An elementwise form (three in four) or sibling of a random source, with a random broadcast mask: argument k is a
+    // Vector row when bit k is set and a scalar node otherwise. A form's fill is a scalar node.
+    public static (int Node, char Kind) ApplyRandomElementwise(
+        MathBlockProgramBuilder builder,
+        Random random,
+        Dictionary<char, List<int>> byKind)
+    {
+        var sources = MathBlockElementwiseTestSupport.SourceIdentifiers;
+        var source = sources[random.Next(sources.Length)];
+        var arity = MathBlockElementwiseTestSupport.SourceArity(source);
+        var mask = random.Next(1, 1 << arity);
+        var sibling = random.Next(4) == 0;
+        var inputs = new List<int>();
+        for (var index = 0; index < arity; index++)
+            inputs.Add(PickNode(random, byKind[(mask >> index & 1) != 0 ? 'N' : 'S']));
+        if (!sibling)
+            inputs.Add(PickNode(random, byKind['S']));
+        var node = builder.Apply(
+            (sibling ? "elementwise-valid." : "elementwise.") + source, 1, [.. inputs]);
+        return (node, sibling ? 'B' : 'N');
     }
 
     public static Dictionary<string, MathBlockValue> CreateInputs(
@@ -136,10 +174,14 @@ internal static class MathBlockFusedTestSupport
     }
 
     // The unfused reference for an output's row validity: the boolean-vector.and@1 combination of the validity
-    // inputs of the vector inputs that reach the output, in input node order.
-    public static MathBlockValue CombineValidity(
+    // inputs of the vector inputs that reach the output, in input node order, and then of the elementwise-valid.*
+    // sibling of every elementwise.* form on the path to the output, in node order. An invalid validity input gives
+    // its reason. When a form on the path is invalid as a whole, so is its sibling and the output itself; the
+    // reference is then undefined and null.
+    public static MathBlockValue? CombineValidity(
         MathBlockProgram program,
         string output,
+        IReadOnlyDictionary<string, MathBlockValue> inputs,
         IReadOnlyDictionary<string, MathBlockValue> validity,
         int rows)
     {
@@ -149,21 +191,66 @@ internal static class MathBlockFusedTestSupport
         while (pending.Count > 0)
         {
             var node = program.PlanNodes[pending.Pop()];
-            if (node.Kind == MathBlockProgramNodeKind.Input && node.Type.Kind != MathBlockValueKind.Scalar)
-                reached.Add(node.Index);
+            reached.Add(node.Index);
             foreach (var input in node.Inputs)
                 pending.Push(input);
         }
 
         var and = MathBlockCatalog.Standard.Get("boolean-vector.and");
         MathBlockValue? combined = null;
-        foreach (var node in reached)
+        foreach (var index in reached)
         {
-            if (!validity.TryGetValue(program.PlanNodes[node].Name!, out var value))
+            var node = program.PlanNodes[index];
+            if (node.Kind != MathBlockProgramNodeKind.Input || node.Type.Kind == MathBlockValueKind.Scalar)
+                continue;
+            if (!validity.TryGetValue(node.Name!, out var value))
                 continue;
             combined = combined is { } previous ? and.Evaluate(previous, value) : value;
         }
+        if (combined is { IsValid: false })
+            return combined;
+
+        MathBlockValue[]? values = null;
+        foreach (var index in reached)
+        {
+            var node = program.PlanNodes[index];
+            if (node.OperationIdentity is not { } identity ||
+                !identity.StartsWith(FormPrefix, StringComparison.Ordinal))
+                continue;
+            values ??= EvaluateNodes(program, inputs);
+            var sibling = Operation(SiblingPrefix + identity[FormPrefix.Length..]);
+            var flags = sibling.Evaluate([.. node.Inputs.Take(node.Inputs.Count - 1).Select(input => values[input])]);
+            if (!flags.IsValid)
+                return null;
+            combined = combined is { } previous ? and.Evaluate(previous, flags) : flags;
+        }
         return combined ?? MathBlockValue.BooleanVector(new bool[rows].Select(_ => true));
+    }
+
+    private const string FormPrefix = "elementwise.";
+    private const string SiblingPrefix = "elementwise-valid.";
+
+    // Every node's unfused value, each operation evaluated on its inputs' values as MathBlocksCPUWorker does.
+    public static MathBlockValue[] EvaluateNodes(MathBlockProgram program, IReadOnlyDictionary<string, MathBlockValue> inputs)
+    {
+        var values = new MathBlockValue[program.PlanNodes.Count];
+        foreach (var node in program.PlanNodes)
+            values[node.Index] = node.Kind switch
+            {
+                MathBlockProgramNodeKind.Input => inputs[node.Name!],
+                MathBlockProgramNodeKind.Constant => node.Value,
+                _ => Operation(node.OperationIdentity!).Evaluate([.. node.Inputs.Select(input => values[input])])
+            };
+        return values;
+    }
+
+    // The registry instance of an operation identity such as vector.add@1 or elementwise.scalar.cosine@1.
+    public static MathBlockOperation Operation(string identity)
+    {
+        var at = identity.LastIndexOf('@');
+        var name = at < 0 ? identity : identity[..at];
+        var version = at < 0 ? 1 : int.Parse(identity[(at + 1)..], System.Globalization.CultureInfo.InvariantCulture);
+        return WithElementwise.Value.Get(name, version);
     }
 
     public static void AssertSameValue(MathBlockValue expected, MathBlockValue actual, string context)
@@ -201,8 +288,9 @@ internal static class MathBlockFusedTestSupport
         }
     }
 
-    // Checks a fused result against the unfused program and the and@1 combination of the validity inputs.
-    public static void AssertMatchesUnfused(
+    // Checks a fused result against the unfused program and the and@1 combination of the validity inputs and the
+    // elementwise siblings. Returns the number of outputs whose row validity has no unfused reference.
+    public static int AssertMatchesUnfused(
         MathBlockProgram program,
         IReadOnlyDictionary<string, MathBlockValue> inputs,
         IReadOnlyDictionary<string, MathBlockValue> validity,
@@ -217,14 +305,26 @@ internal static class MathBlockFusedTestSupport
                 : value.AsBooleanVector().Count)
             .FirstOrDefault();
         Assert.Equal(expected.Count, result.Outputs.Count);
+        var undefined = 0;
         foreach (var (name, value) in expected)
         {
             AssertSameValue(value, result.Outputs[name], $"{context} output {name}");
-            AssertSameValue(
-                CombineValidity(program, name, validity, rows),
-                result.Validity[name],
-                $"{context} validity {name}");
+            if (CombineValidity(program, name, inputs, validity, rows) is { } reference)
+            {
+                AssertSameValue(reference, result.Validity[name], $"{context} validity {name}");
+            }
+            else
+            {
+                // A form on the path is invalid as a whole, so the output is too and its row validity has no
+                // unfused reference; only its shape is checked.
+                Assert.False(value.IsValid, $"{context} output {name}: valid, but a form on its path is invalid.");
+                Assert.True(
+                    result.Validity[name].Type == MathBlockType.BooleanVector(rows),
+                    $"{context} validity {name}: type {result.Validity[name].Type}.");
+                undefined++;
+            }
         }
+        return undefined;
     }
 
     public static MathBlockFusedResult[] RunCuda(

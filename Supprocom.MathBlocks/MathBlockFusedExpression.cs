@@ -17,6 +17,11 @@ namespace Supprocom.MathBlocks;
 /// that mask by walking the program in node order: a node with an invalid input takes the first invalid input's
 /// reason, and a node whose own bit is set takes its operation's nonfinite reason.
 /// </para>
+/// <para>
+/// An <c>elementwise.*</c> form holds its fill in each row whose source result is invalid, and that row is not valid
+/// in the row validity of the outputs it reaches. Its values stay finite, so it never sets its mask bit. An
+/// <c>elementwise-valid.*</c> sibling gives whether each row was computed. Scalar arguments are broadcast to every row.
+/// </para>
 /// </remarks>
 public sealed class MathBlockFusedExpression
 {
@@ -324,31 +329,84 @@ public sealed class MathBlockFusedExpression
         if (!MathBlockFusedOperations.TryResolve(identity, out var fused))
             throw new ArgumentException(
                 $"Operation node {index} ({identity}) has no fused row form.", nameof(program));
-        if (!TryGetStandard(operation, out var standard) || !ReferenceEquals(standard, operation))
+        if (!TryGetStandard(operation, fused, out var standard) || !ReferenceEquals(standard, operation))
             throw new ArgumentException(
                 $"Operation node {index} ({identity}) is not the MathBlockCatalog.Standard operation.",
                 nameof(program));
+        if (fused.IsElementwise)
+            return CreateElementwiseStep(program, index, fused, kinds);
         for (var argument = 0; argument < node.Inputs.Length; argument++)
             if (kinds[node.Inputs[argument]] != fused.Arguments[argument])
-                throw new ArgumentException(
-                    $"Operation node {index} ({identity}) input {argument} (node {node.Inputs[argument]}) has " +
-                    $"kind {program.Nodes[node.Inputs[argument]].Type.Kind}, which its fused row form does not take.",
-                    nameof(program));
+                throw RejectArgument(program, index, argument);
         return new Step(index, fused, MathBlockCollectionPrimitives.Copy(node.Inputs));
     }
 
-    private static bool TryGetStandard(MathBlockOperation operation, out MathBlockOperation standard)
+    // Source arguments are Number rows or broadcast Scalars, at least one a Number; a form's fill is a Scalar. Each
+    // row passes the arguments to the lift's row function as scalars of their nodes' units.
+    private static Step CreateElementwiseStep(
+        MathBlockProgram program,
+        int index,
+        MathBlockFusedOperation fused,
+        MathBlockFusedKind[] kinds)
     {
-        try
+        var node = program.Nodes[index];
+        if (!ElementwiseMathBlocks.TryGetLift(node.Operation!, out var lift))
+            throw new ArgumentException(
+                $"Operation node {index} ({fused.Identity}) has no elementwise lift.", nameof(program));
+        var sourceArity = lift.Source.Arity;
+        var rows = 0;
+        for (var argument = 0; argument < node.Inputs.Length; argument++)
         {
-            standard = MathBlockCatalog.Standard.Get(operation.Identifier, operation.Version);
-            return true;
+            var kind = kinds[node.Inputs[argument]];
+            if (argument >= sourceArity ? kind != MathBlockFusedKind.Scalar
+                    : kind is not (MathBlockFusedKind.Number or MathBlockFusedKind.Scalar))
+                throw RejectArgument(program, index, argument);
+            if (argument < sourceArity && kind == MathBlockFusedKind.Number)
+                rows++;
         }
-        catch (KeyNotFoundException)
+        if (rows == 0 || sourceArity > 3)
+            throw new ArgumentException(
+                $"Operation node {index} ({fused.Identity}) has no vector argument or more than three source " +
+                "arguments, which its fused row form does not take.",
+                nameof(program));
+        var units = new MathBlockUnit[sourceArity];
+        for (var argument = 0; argument < sourceArity; argument++)
+            units[argument] = program.Nodes[node.Inputs[argument]].Type.Unit;
+        return new Step(index, fused, MathBlockCollectionPrimitives.Copy(node.Inputs), lift, units);
+    }
+
+    private static ArgumentException RejectArgument(MathBlockProgram program, int index, int argument)
+    {
+        var node = program.Nodes[index];
+        return new ArgumentException(
+            $"Operation node {index} ({node.Operation!.Identity}) input {argument} (node {node.Inputs[argument]}) " +
+            $"has kind {program.Nodes[node.Inputs[argument]].Type.Kind}, which its fused row form does not take.",
+            nameof(program));
+    }
+
+    // The elementwise forms stay outside Standard until they are registered there, so their own registry
+    // instances are accepted as well.
+    private static bool TryGetStandard(
+        MathBlockOperation operation,
+        MathBlockFusedOperation fused,
+        out MathBlockOperation standard)
+    {
+        foreach (var registry in fused.IsElementwise
+                     ? new[] { MathBlockCatalog.Standard, MathBlockCatalog.Elementwise }
+                     : [MathBlockCatalog.Standard])
         {
-            standard = operation;
-            return false;
+            try
+            {
+                standard = registry.Get(operation.Identifier, operation.Version);
+                if (ReferenceEquals(standard, operation))
+                    return true;
+            }
+            catch (KeyNotFoundException)
+            {
+            }
         }
+        standard = operation;
+        return false;
     }
 
     // The common row count of the valid vector inputs. Invalid inputs carry no rows; when every vector input is
@@ -464,6 +522,10 @@ public sealed class MathBlockFusedExpression
         var flag = new bool[count];
         var complex = new Complex[count];
         var rowValid = new bool[count];
+        var rowArguments = new MathBlockValue[steps.Length][];
+        for (var stepIndex = 0; stepIndex < steps.Length; stepIndex++)
+            if (steps[stepIndex].Lift is { } lift)
+                rowArguments[stepIndex] = new MathBlockValue[lift.Source.Arity];
         foreach (var node in scalarNodes)
         {
             number[node] = values[node].IsValid ? values[node].AsScalar() : 0d;
@@ -488,7 +550,10 @@ public sealed class MathBlockFusedExpression
 
             for (var stepIndex = 0; stepIndex < steps.Length; stepIndex++)
             {
-                if (!EvaluateStep(steps[stepIndex], number, flag, complex, rowValid))
+                var step = steps[stepIndex];
+                if (step.Lift is not null)
+                    EvaluateElementwiseStep(step, rowArguments[stepIndex], number, flag, rowValid);
+                else if (!EvaluateStep(step, number, flag, complex, rowValid))
                     mask |= 1ul << stepIndex;
             }
 
@@ -545,6 +610,37 @@ public sealed class MathBlockFusedExpression
             valid &= rowValid[argument];
         rowValid[node] = valid;
         return finite;
+    }
+
+    // Evaluates one elementwise form or sibling for the current row with the lift's row function. A form's row is the
+    // source value when computed and the fill otherwise, and is valid only when computed; the sibling's row is
+    // whether it was computed. An argument that is not finite (a row of a node that is invalid as a whole) makes the
+    // row not computed, as the CUDA row code does.
+    private static void EvaluateElementwiseStep(
+        Step step,
+        MathBlockValue[] rowArguments,
+        double[] number,
+        bool[] flag,
+        bool[] rowValid)
+    {
+        var arguments = step.Arguments;
+        var node = step.Node;
+        for (var argument = 0; argument < rowArguments.Length; argument++)
+            rowArguments[argument] = MathBlockValue.Scalar(number[arguments[argument]], step.ArgumentUnits![argument]);
+        var computed = step.Lift!.EvaluateRow(rowArguments, out var value);
+        var valid = true;
+        foreach (var argument in arguments)
+            valid &= rowValid[argument];
+        if (step.Operation.Opcode == MathBlockFusedOpcode.ElementwiseValidity)
+        {
+            flag[node] = computed;
+        }
+        else
+        {
+            number[node] = computed ? value : number[arguments[^1]];
+            valid &= computed;
+        }
+        rowValid[node] = valid;
     }
 
     // Walks the program in node order, as the unfused evaluation does, to give each node its type and invalid
@@ -652,15 +748,26 @@ public sealed class MathBlockFusedExpression
 
     internal sealed class Step
     {
-        public Step(int node, MathBlockFusedOperation operation, int[] arguments)
+        public Step(
+            int node,
+            MathBlockFusedOperation operation,
+            int[] arguments,
+            MathBlockElementwiseForm? lift = null,
+            MathBlockUnit[]? argumentUnits = null)
         {
             Node = node;
             Operation = operation;
             Arguments = arguments;
+            Lift = lift;
+            ArgumentUnits = argumentUnits;
         }
 
         public int Node { get; }
         public MathBlockFusedOperation Operation { get; }
         public int[] Arguments { get; }
+
+        // The lift of an elementwise form or sibling, and the units of its source arguments; null otherwise.
+        public MathBlockElementwiseForm? Lift { get; }
+        public MathBlockUnit[]? ArgumentUnits { get; }
     }
 }
