@@ -5,7 +5,7 @@ using Supprocom.CSharp2CUDA;
 
 // Elementwise forms of the 41 scalar sources. Opcode 2 * source + sibling + 128 * mask, with source the index in
 // the elementwise source list and bit k of mask set when argument k is a vector (the other arguments are
-// broadcast scalars). Every thread checks the inputs itself and then evaluates the rows thread, thread + threads,
+// broadcast scalars). A mask of 0 in the opcode is derived from the input slots (a slot with elements is a vector). Every thread checks the inputs itself and then evaluates the rows thread, thread + threads,
 // ...: the elementwise kernel passes the grid-wide thread index and count, the device dispatch path the thread
 // index in the block. Row i calls the source's per-row function, the one its scalar operation uses, on row i of
 // every vector argument and the scalar arguments; rows whose source result is invalid hold the fill (form) or
@@ -148,13 +148,22 @@ internal static unsafe class ElementwiseModule
         int thread,
         int threads)
     {
-        int mask = opcode / 128;
+        int passed_mask = opcode / 128;
         int form = opcode % 128;
         int source = form / 2;
         bool sibling = form % 2 != 0;
         int arity = mathblocks_elementwise_source_arity(source);
+        // The argument kinds come from the input slots: a slot with elements (count > 0) is a vector, and a scalar has count 0 in the value
+        // ABI. So the base opcode (mask bits 0) is enough; a consumer need not pass the mask. An empty vector has count 0 as a scalar does, so
+        // a passed mask may still mark a slot with count 0 as a vector (the worker path does), and then the passed mask decides for that
+        // slot. A slot with elements whose bit the passed mask leaves clear contradicts the inputs: the result is invalid.
+        int derived_mask = 0;
+        for (int index = 0; index < arity && index < input_count; index++)
+            if (inputs[index] != null && inputs[index]->count > 0)
+                derived_mask |= 1 << index;
+        int mask = passed_mask == 0 ? derived_mask : passed_mask;
         bool valid = opcode >= 0 && source < 41 && mask > 0 && mask < (1 << arity) &&
-            input_count == arity + (sibling ? 0 : 1);
+            (derived_mask & ~mask) == 0 && input_count == arity + (sibling ? 0 : 1);
         for (int index = 0; valid && index < input_count; index++)
             if (inputs[index] == null || !inputs[index]->valid)
                 valid = false;

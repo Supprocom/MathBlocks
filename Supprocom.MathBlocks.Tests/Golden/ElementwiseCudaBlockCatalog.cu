@@ -641,7 +641,7 @@ static __device__ __forceinline__ short csharp2cuda_i16_post_decrement(short& ta
 #line 120 "ElementwiseModule.cs"
 __device__ double mathblocks_elementwise_argument(const MathBlockSlot* slot, bool vector, int row);
 
-#line 203 "ElementwiseModule.cs"
+#line 212 "ElementwiseModule.cs"
 __device__ void mathblocks_elementwise_dispatch(
     int opcode,
     MathBlockSlot** inputs,
@@ -698,15 +698,15 @@ __device__ double mathblocks_elementwise_argument(const MathBlockSlot* slot, boo
     return csharp2cuda_temp_0;
 }
 
-#line 203 "ElementwiseModule.cs"
+#line 212 "ElementwiseModule.cs"
 __device__ void mathblocks_elementwise_dispatch(
     int opcode,
     MathBlockSlot** inputs,
     int input_count,
     MathBlockSlot* output)
-#line 209 "ElementwiseModule.cs"
+#line 218 "ElementwiseModule.cs"
 {
-#line 210 "ElementwiseModule.cs"
+#line 219 "ElementwiseModule.cs"
     mathblocks_elementwise_run(opcode, inputs, input_count, output, threadIdx.x, blockDim.x);
 }
 
@@ -804,7 +804,7 @@ __device__ void mathblocks_elementwise_run(
 #line 150 "ElementwiseModule.cs"
 {
 #line 151 "ElementwiseModule.cs"
-    int mask = csharp2cuda_i32_div(opcode, 128);
+    int passed_mask = csharp2cuda_i32_div(opcode, 128);
 #line 152 "ElementwiseModule.cs"
     int form = csharp2cuda_i32_rem(opcode, 128);
 #line 153 "ElementwiseModule.cs"
@@ -815,345 +815,430 @@ __device__ void mathblocks_elementwise_run(
     bool sibling = ((csharp2cuda_temp_0) != (0));
 #line 155 "ElementwiseModule.cs"
     int arity = mathblocks_elementwise_source_arity(source);
-#line 156 "ElementwiseModule.cs"
-    bool csharp2cuda_temp_1;
-#line 156 "ElementwiseModule.cs"
+#line 160 "ElementwiseModule.cs"
+    int derived_mask = 0;
+#line 161 "ElementwiseModule.cs"
+    {
+#line 161 "ElementwiseModule.cs"
+        int index = 0;
+        while (true)
+        {
+#line 161 "ElementwiseModule.cs"
+            bool csharp2cuda_temp_2;
+#line 161 "ElementwiseModule.cs"
+            if (((index) < (arity)))
+            {
+#line 161 "ElementwiseModule.cs"
+                csharp2cuda_temp_2 = ((index) < (input_count));
+            }
+            else
+            {
+#line 161 "ElementwiseModule.cs"
+                csharp2cuda_temp_2 = false;
+            }
+            if (!(csharp2cuda_temp_2))
+                break;
+#line 162 "ElementwiseModule.cs"
+#line 162 "ElementwiseModule.cs"
+            MathBlockSlot* csharp2cuda_temp_3 = (inputs)[index];
+#line 162 "ElementwiseModule.cs"
+            bool csharp2cuda_temp_4;
+#line 162 "ElementwiseModule.cs"
+            if (((((void*)(csharp2cuda_temp_3))) != (((void*)(nullptr)))))
+            {
+#line 162 "ElementwiseModule.cs"
+                MathBlockSlot* csharp2cuda_temp_5 = (inputs)[index];
+#line 162 "ElementwiseModule.cs"
+                int csharp2cuda_temp_6 = (csharp2cuda_temp_5)->count;
+#line 162 "ElementwiseModule.cs"
+                csharp2cuda_temp_4 = ((csharp2cuda_temp_6) > (0));
+            }
+            else
+            {
+#line 162 "ElementwiseModule.cs"
+                csharp2cuda_temp_4 = false;
+            }
+            if (csharp2cuda_temp_4)
+            {
+#line 163 "ElementwiseModule.cs"
+#line 163 "ElementwiseModule.cs"
+                int* csharp2cuda_temp_7 = &(derived_mask);
+#line 163 "ElementwiseModule.cs"
+                int csharp2cuda_temp_8 = *(csharp2cuda_temp_7);
+                (*(csharp2cuda_temp_7) = csharp2cuda_i32_or(csharp2cuda_temp_8, csharp2cuda_i32_shl(1, index)));
+            }
+#line 161 "ElementwiseModule.cs"
+            int* csharp2cuda_temp_1 = &(index);
+            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_1));
+        }
+    }
+#line 164 "ElementwiseModule.cs"
+    int csharp2cuda_temp_9;
+#line 164 "ElementwiseModule.cs"
+    if (((passed_mask) == (0)))
+    {
+#line 164 "ElementwiseModule.cs"
+        csharp2cuda_temp_9 = derived_mask;
+    }
+    else
+    {
+#line 164 "ElementwiseModule.cs"
+        csharp2cuda_temp_9 = passed_mask;
+    }
+#line 164 "ElementwiseModule.cs"
+    int mask = csharp2cuda_temp_9;
+#line 165 "ElementwiseModule.cs"
+    bool csharp2cuda_temp_10;
+#line 165 "ElementwiseModule.cs"
     if (((opcode) >= (0)))
     {
-#line 156 "ElementwiseModule.cs"
-        csharp2cuda_temp_1 = ((source) < (41));
+#line 165 "ElementwiseModule.cs"
+        csharp2cuda_temp_10 = ((source) < (41));
     }
     else
     {
-#line 156 "ElementwiseModule.cs"
-        csharp2cuda_temp_1 = false;
+#line 165 "ElementwiseModule.cs"
+        csharp2cuda_temp_10 = false;
     }
-#line 156 "ElementwiseModule.cs"
-    bool csharp2cuda_temp_2;
-#line 156 "ElementwiseModule.cs"
-    if (csharp2cuda_temp_1)
+#line 165 "ElementwiseModule.cs"
+    bool csharp2cuda_temp_11;
+#line 165 "ElementwiseModule.cs"
+    if (csharp2cuda_temp_10)
     {
-#line 156 "ElementwiseModule.cs"
-        csharp2cuda_temp_2 = ((mask) > (0));
-    }
-    else
-    {
-#line 156 "ElementwiseModule.cs"
-        csharp2cuda_temp_2 = false;
-    }
-#line 156 "ElementwiseModule.cs"
-    bool csharp2cuda_temp_3;
-#line 156 "ElementwiseModule.cs"
-    if (csharp2cuda_temp_2)
-    {
-#line 156 "ElementwiseModule.cs"
-        csharp2cuda_temp_3 = ((mask) < (csharp2cuda_i32_shl(1, arity)));
+#line 165 "ElementwiseModule.cs"
+        csharp2cuda_temp_11 = ((mask) > (0));
     }
     else
     {
-#line 156 "ElementwiseModule.cs"
-        csharp2cuda_temp_3 = false;
+#line 165 "ElementwiseModule.cs"
+        csharp2cuda_temp_11 = false;
     }
-#line 156 "ElementwiseModule.cs"
-    bool csharp2cuda_temp_4;
-#line 156 "ElementwiseModule.cs"
-    if (csharp2cuda_temp_3)
+#line 165 "ElementwiseModule.cs"
+    bool csharp2cuda_temp_12;
+#line 165 "ElementwiseModule.cs"
+    if (csharp2cuda_temp_11)
     {
-#line 157 "ElementwiseModule.cs"
-        int csharp2cuda_temp_5;
-#line 157 "ElementwiseModule.cs"
+#line 165 "ElementwiseModule.cs"
+        csharp2cuda_temp_12 = ((mask) < (csharp2cuda_i32_shl(1, arity)));
+    }
+    else
+    {
+#line 165 "ElementwiseModule.cs"
+        csharp2cuda_temp_12 = false;
+    }
+#line 165 "ElementwiseModule.cs"
+    bool csharp2cuda_temp_13;
+#line 165 "ElementwiseModule.cs"
+    if (csharp2cuda_temp_12)
+    {
+#line 165 "ElementwiseModule.cs"
+        csharp2cuda_temp_13 = ((csharp2cuda_i32_and(derived_mask, csharp2cuda_i32_not(mask))) == (0));
+    }
+    else
+    {
+#line 165 "ElementwiseModule.cs"
+        csharp2cuda_temp_13 = false;
+    }
+#line 165 "ElementwiseModule.cs"
+    bool csharp2cuda_temp_14;
+#line 165 "ElementwiseModule.cs"
+    if (csharp2cuda_temp_13)
+    {
+#line 166 "ElementwiseModule.cs"
+        int csharp2cuda_temp_15;
+#line 166 "ElementwiseModule.cs"
         if (sibling)
         {
-#line 157 "ElementwiseModule.cs"
-            csharp2cuda_temp_5 = 0;
+#line 166 "ElementwiseModule.cs"
+            csharp2cuda_temp_15 = 0;
         }
         else
         {
-#line 157 "ElementwiseModule.cs"
-            csharp2cuda_temp_5 = 1;
+#line 166 "ElementwiseModule.cs"
+            csharp2cuda_temp_15 = 1;
         }
-#line 156 "ElementwiseModule.cs"
-        csharp2cuda_temp_4 = ((input_count) == (csharp2cuda_i32_add(arity, csharp2cuda_temp_5)));
+#line 165 "ElementwiseModule.cs"
+        csharp2cuda_temp_14 = ((input_count) == (csharp2cuda_i32_add(arity, csharp2cuda_temp_15)));
     }
     else
     {
-#line 156 "ElementwiseModule.cs"
-        csharp2cuda_temp_4 = false;
+#line 165 "ElementwiseModule.cs"
+        csharp2cuda_temp_14 = false;
     }
-#line 156 "ElementwiseModule.cs"
-    bool valid = csharp2cuda_temp_4;
-#line 158 "ElementwiseModule.cs"
+#line 165 "ElementwiseModule.cs"
+    bool valid = csharp2cuda_temp_14;
+#line 167 "ElementwiseModule.cs"
     {
-#line 158 "ElementwiseModule.cs"
+#line 167 "ElementwiseModule.cs"
         int index = 0;
         while (true)
         {
-#line 158 "ElementwiseModule.cs"
-            bool csharp2cuda_temp_7;
-#line 158 "ElementwiseModule.cs"
+#line 167 "ElementwiseModule.cs"
+            bool csharp2cuda_temp_17;
+#line 167 "ElementwiseModule.cs"
             if (valid)
             {
-#line 158 "ElementwiseModule.cs"
-                csharp2cuda_temp_7 = ((index) < (input_count));
+#line 167 "ElementwiseModule.cs"
+                csharp2cuda_temp_17 = ((index) < (input_count));
             }
             else
             {
-#line 158 "ElementwiseModule.cs"
-                csharp2cuda_temp_7 = false;
+#line 167 "ElementwiseModule.cs"
+                csharp2cuda_temp_17 = false;
             }
-            if (!(csharp2cuda_temp_7))
+            if (!(csharp2cuda_temp_17))
                 break;
-#line 159 "ElementwiseModule.cs"
-#line 159 "ElementwiseModule.cs"
-            MathBlockSlot* csharp2cuda_temp_8 = (inputs)[index];
-#line 159 "ElementwiseModule.cs"
-            bool csharp2cuda_temp_9;
-#line 159 "ElementwiseModule.cs"
-            if (!(((((void*)(csharp2cuda_temp_8))) == (((void*)(nullptr))))))
+#line 168 "ElementwiseModule.cs"
+#line 168 "ElementwiseModule.cs"
+            MathBlockSlot* csharp2cuda_temp_18 = (inputs)[index];
+#line 168 "ElementwiseModule.cs"
+            bool csharp2cuda_temp_19;
+#line 168 "ElementwiseModule.cs"
+            if (!(((((void*)(csharp2cuda_temp_18))) == (((void*)(nullptr))))))
             {
-#line 159 "ElementwiseModule.cs"
-                MathBlockSlot* csharp2cuda_temp_10 = (inputs)[index];
-#line 159 "ElementwiseModule.cs"
-                bool csharp2cuda_temp_11 = (csharp2cuda_temp_10)->valid;
-#line 159 "ElementwiseModule.cs"
-                csharp2cuda_temp_9 = (!(csharp2cuda_temp_11));
+#line 168 "ElementwiseModule.cs"
+                MathBlockSlot* csharp2cuda_temp_20 = (inputs)[index];
+#line 168 "ElementwiseModule.cs"
+                bool csharp2cuda_temp_21 = (csharp2cuda_temp_20)->valid;
+#line 168 "ElementwiseModule.cs"
+                csharp2cuda_temp_19 = (!(csharp2cuda_temp_21));
             }
             else
             {
-#line 159 "ElementwiseModule.cs"
-                csharp2cuda_temp_9 = true;
+#line 168 "ElementwiseModule.cs"
+                csharp2cuda_temp_19 = true;
             }
-            if (csharp2cuda_temp_9)
+            if (csharp2cuda_temp_19)
             {
-#line 160 "ElementwiseModule.cs"
-#line 160 "ElementwiseModule.cs"
-                bool* csharp2cuda_temp_12 = &(valid);
-                (*(csharp2cuda_temp_12) = false);
+#line 169 "ElementwiseModule.cs"
+#line 169 "ElementwiseModule.cs"
+                bool* csharp2cuda_temp_22 = &(valid);
+                (*(csharp2cuda_temp_22) = false);
             }
-#line 158 "ElementwiseModule.cs"
-            int* csharp2cuda_temp_6 = &(index);
-            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_6));
+#line 167 "ElementwiseModule.cs"
+            int* csharp2cuda_temp_16 = &(index);
+            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_16));
         }
     }
-#line 161 "ElementwiseModule.cs"
+#line 170 "ElementwiseModule.cs"
     int count = -1;
-#line 162 "ElementwiseModule.cs"
+#line 171 "ElementwiseModule.cs"
     {
-#line 162 "ElementwiseModule.cs"
+#line 171 "ElementwiseModule.cs"
         int index = 0;
         while (true)
         {
-#line 162 "ElementwiseModule.cs"
-            bool csharp2cuda_temp_14;
-#line 162 "ElementwiseModule.cs"
+#line 171 "ElementwiseModule.cs"
+            bool csharp2cuda_temp_24;
+#line 171 "ElementwiseModule.cs"
             if (valid)
             {
-#line 162 "ElementwiseModule.cs"
-                csharp2cuda_temp_14 = ((index) < (arity));
+#line 171 "ElementwiseModule.cs"
+                csharp2cuda_temp_24 = ((index) < (arity));
             }
             else
             {
-#line 162 "ElementwiseModule.cs"
-                csharp2cuda_temp_14 = false;
+#line 171 "ElementwiseModule.cs"
+                csharp2cuda_temp_24 = false;
             }
-            if (!(csharp2cuda_temp_14))
+            if (!(csharp2cuda_temp_24))
                 break;
-#line 163 "ElementwiseModule.cs"
+#line 172 "ElementwiseModule.cs"
             {
-#line 164 "ElementwiseModule.cs"
+#line 173 "ElementwiseModule.cs"
                 if (((csharp2cuda_i32_and(mask, csharp2cuda_i32_shl(1, index))) == (0)))
                 {
-#line 165 "ElementwiseModule.cs"
-                    goto csharp2cuda_for_continue_1;
+#line 174 "ElementwiseModule.cs"
+                    goto csharp2cuda_for_continue_2;
                 }
-#line 166 "ElementwiseModule.cs"
+#line 175 "ElementwiseModule.cs"
                 if (((count) < (0)))
                 {
-#line 167 "ElementwiseModule.cs"
-#line 167 "ElementwiseModule.cs"
-                    int* csharp2cuda_temp_15 = &(count);
-#line 167 "ElementwiseModule.cs"
-                    MathBlockSlot* csharp2cuda_temp_16 = (inputs)[index];
-#line 167 "ElementwiseModule.cs"
-                    int csharp2cuda_temp_17 = (csharp2cuda_temp_16)->count;
-                    (*(csharp2cuda_temp_15) = csharp2cuda_temp_17);
+#line 176 "ElementwiseModule.cs"
+#line 176 "ElementwiseModule.cs"
+                    int* csharp2cuda_temp_25 = &(count);
+#line 176 "ElementwiseModule.cs"
+                    MathBlockSlot* csharp2cuda_temp_26 = (inputs)[index];
+#line 176 "ElementwiseModule.cs"
+                    int csharp2cuda_temp_27 = (csharp2cuda_temp_26)->count;
+                    (*(csharp2cuda_temp_25) = csharp2cuda_temp_27);
                 }
                 else
                 {
-#line 168 "ElementwiseModule.cs"
-#line 168 "ElementwiseModule.cs"
-                    MathBlockSlot* csharp2cuda_temp_18 = (inputs)[index];
-#line 168 "ElementwiseModule.cs"
-                    int csharp2cuda_temp_19 = (csharp2cuda_temp_18)->count;
-                    if (((csharp2cuda_temp_19) != (count)))
+#line 177 "ElementwiseModule.cs"
+#line 177 "ElementwiseModule.cs"
+                    MathBlockSlot* csharp2cuda_temp_28 = (inputs)[index];
+#line 177 "ElementwiseModule.cs"
+                    int csharp2cuda_temp_29 = (csharp2cuda_temp_28)->count;
+                    if (((csharp2cuda_temp_29) != (count)))
                     {
-#line 169 "ElementwiseModule.cs"
-#line 169 "ElementwiseModule.cs"
-                        bool* csharp2cuda_temp_20 = &(valid);
-                        (*(csharp2cuda_temp_20) = false);
+#line 178 "ElementwiseModule.cs"
+#line 178 "ElementwiseModule.cs"
+                        bool* csharp2cuda_temp_30 = &(valid);
+                        (*(csharp2cuda_temp_30) = false);
                     }
                 }
             }
-            csharp2cuda_for_continue_1:
-#line 162 "ElementwiseModule.cs"
-            int* csharp2cuda_temp_13 = &(index);
-            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_13));
+            csharp2cuda_for_continue_2:
+#line 171 "ElementwiseModule.cs"
+            int* csharp2cuda_temp_23 = &(index);
+            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_23));
         }
     }
-#line 171 "ElementwiseModule.cs"
-#line 171 "ElementwiseModule.cs"
-    bool csharp2cuda_temp_21;
-#line 171 "ElementwiseModule.cs"
+#line 180 "ElementwiseModule.cs"
+#line 180 "ElementwiseModule.cs"
+    bool csharp2cuda_temp_31;
+#line 180 "ElementwiseModule.cs"
     if (valid)
     {
-#line 171 "ElementwiseModule.cs"
-        int csharp2cuda_temp_22 = (output)->capacity;
-#line 171 "ElementwiseModule.cs"
-        csharp2cuda_temp_21 = ((count) > (csharp2cuda_temp_22));
+#line 180 "ElementwiseModule.cs"
+        int csharp2cuda_temp_32 = (output)->capacity;
+#line 180 "ElementwiseModule.cs"
+        csharp2cuda_temp_31 = ((count) > (csharp2cuda_temp_32));
     }
     else
     {
-#line 171 "ElementwiseModule.cs"
-        csharp2cuda_temp_21 = false;
+#line 180 "ElementwiseModule.cs"
+        csharp2cuda_temp_31 = false;
     }
-    if (csharp2cuda_temp_21)
+    if (csharp2cuda_temp_31)
     {
-#line 172 "ElementwiseModule.cs"
-#line 172 "ElementwiseModule.cs"
-        bool* csharp2cuda_temp_23 = &(valid);
-        (*(csharp2cuda_temp_23) = false);
+#line 181 "ElementwiseModule.cs"
+#line 181 "ElementwiseModule.cs"
+        bool* csharp2cuda_temp_33 = &(valid);
+        (*(csharp2cuda_temp_33) = false);
     }
-#line 173 "ElementwiseModule.cs"
+#line 182 "ElementwiseModule.cs"
     mathblocks_elementwise_publish(output, valid, count, thread);
-#line 174 "ElementwiseModule.cs"
+#line 183 "ElementwiseModule.cs"
     if ((!(valid)))
     {
-#line 175 "ElementwiseModule.cs"
+#line 184 "ElementwiseModule.cs"
         return;
     }
-#line 177 "ElementwiseModule.cs"
-    MathBlockSlot* csharp2cuda_temp_24 = (inputs)[0];
-#line 177 "ElementwiseModule.cs"
-    const MathBlockSlot* first = csharp2cuda_temp_24;
-#line 178 "ElementwiseModule.cs"
-    MathBlockSlot* csharp2cuda_temp_25;
-#line 178 "ElementwiseModule.cs"
+#line 186 "ElementwiseModule.cs"
+    MathBlockSlot* csharp2cuda_temp_34 = (inputs)[0];
+#line 186 "ElementwiseModule.cs"
+    const MathBlockSlot* first = csharp2cuda_temp_34;
+#line 187 "ElementwiseModule.cs"
+    MathBlockSlot* csharp2cuda_temp_35;
+#line 187 "ElementwiseModule.cs"
     if (((arity) > (1)))
     {
-#line 178 "ElementwiseModule.cs"
-        csharp2cuda_temp_25 = (inputs)[1];
+#line 187 "ElementwiseModule.cs"
+        csharp2cuda_temp_35 = (inputs)[1];
     }
     else
     {
-#line 178 "ElementwiseModule.cs"
-        csharp2cuda_temp_25 = ((MathBlockSlot*)(nullptr));
+#line 187 "ElementwiseModule.cs"
+        csharp2cuda_temp_35 = ((MathBlockSlot*)(nullptr));
     }
-#line 178 "ElementwiseModule.cs"
-    const MathBlockSlot* second = csharp2cuda_temp_25;
-#line 179 "ElementwiseModule.cs"
-    MathBlockSlot* csharp2cuda_temp_26;
-#line 179 "ElementwiseModule.cs"
+#line 187 "ElementwiseModule.cs"
+    const MathBlockSlot* second = csharp2cuda_temp_35;
+#line 188 "ElementwiseModule.cs"
+    MathBlockSlot* csharp2cuda_temp_36;
+#line 188 "ElementwiseModule.cs"
     if (((arity) > (2)))
     {
-#line 179 "ElementwiseModule.cs"
-        csharp2cuda_temp_26 = (inputs)[2];
+#line 188 "ElementwiseModule.cs"
+        csharp2cuda_temp_36 = (inputs)[2];
     }
     else
     {
-#line 179 "ElementwiseModule.cs"
-        csharp2cuda_temp_26 = ((MathBlockSlot*)(nullptr));
+#line 188 "ElementwiseModule.cs"
+        csharp2cuda_temp_36 = ((MathBlockSlot*)(nullptr));
     }
-#line 179 "ElementwiseModule.cs"
-    const MathBlockSlot* third = csharp2cuda_temp_26;
-#line 180 "ElementwiseModule.cs"
+#line 188 "ElementwiseModule.cs"
+    const MathBlockSlot* third = csharp2cuda_temp_36;
+#line 189 "ElementwiseModule.cs"
     bool first_vector = ((csharp2cuda_i32_and(mask, 1)) != (0));
-#line 181 "ElementwiseModule.cs"
+#line 190 "ElementwiseModule.cs"
     bool second_vector = ((csharp2cuda_i32_and(mask, 2)) != (0));
-#line 182 "ElementwiseModule.cs"
+#line 191 "ElementwiseModule.cs"
     bool third_vector = ((csharp2cuda_i32_and(mask, 4)) != (0));
-#line 183 "ElementwiseModule.cs"
-    double csharp2cuda_temp_27;
-#line 183 "ElementwiseModule.cs"
+#line 192 "ElementwiseModule.cs"
+    double csharp2cuda_temp_37;
+#line 192 "ElementwiseModule.cs"
     if (sibling)
     {
-#line 183 "ElementwiseModule.cs"
-        csharp2cuda_temp_27 = 0.0;
+#line 192 "ElementwiseModule.cs"
+        csharp2cuda_temp_37 = 0.0;
     }
     else
     {
-#line 183 "ElementwiseModule.cs"
-        MathBlockSlot* csharp2cuda_temp_28 = (inputs)[arity];
-#line 183 "ElementwiseModule.cs"
-        csharp2cuda_temp_27 = (csharp2cuda_temp_28)->scalar_value;
+#line 192 "ElementwiseModule.cs"
+        MathBlockSlot* csharp2cuda_temp_38 = (inputs)[arity];
+#line 192 "ElementwiseModule.cs"
+        csharp2cuda_temp_37 = (csharp2cuda_temp_38)->scalar_value;
     }
-#line 183 "ElementwiseModule.cs"
-    double fill = csharp2cuda_temp_27;
-#line 184 "ElementwiseModule.cs"
+#line 192 "ElementwiseModule.cs"
+    double fill = csharp2cuda_temp_37;
+#line 193 "ElementwiseModule.cs"
     int source_opcode = mathblocks_elementwise_source_opcode(source);
-#line 185 "ElementwiseModule.cs"
-    unsigned long long csharp2cuda_temp_29 = (output)->data_pointer;
-#line 185 "ElementwiseModule.cs"
-    double* result = ((double*)(csharp2cuda_temp_29));
-#line 186 "ElementwiseModule.cs"
-    unsigned long long csharp2cuda_temp_30 = (output)->data_pointer;
-#line 186 "ElementwiseModule.cs"
-    int* boolean_result = ((int*)(csharp2cuda_temp_30));
-#line 187 "ElementwiseModule.cs"
+#line 194 "ElementwiseModule.cs"
+    unsigned long long csharp2cuda_temp_39 = (output)->data_pointer;
+#line 194 "ElementwiseModule.cs"
+    double* result = ((double*)(csharp2cuda_temp_39));
+#line 195 "ElementwiseModule.cs"
+    unsigned long long csharp2cuda_temp_40 = (output)->data_pointer;
+#line 195 "ElementwiseModule.cs"
+    int* boolean_result = ((int*)(csharp2cuda_temp_40));
+#line 196 "ElementwiseModule.cs"
     {
-#line 187 "ElementwiseModule.cs"
+#line 196 "ElementwiseModule.cs"
         int row = thread;
         while (true)
         {
             if (!(((row) < (count))))
                 break;
-#line 188 "ElementwiseModule.cs"
+#line 197 "ElementwiseModule.cs"
             {
-#line 189 "ElementwiseModule.cs"
+#line 198 "ElementwiseModule.cs"
                 double value = 0.0;
-#line 192 "ElementwiseModule.cs"
-                double csharp2cuda_temp_33 = mathblocks_elementwise_argument(first, first_vector, row);
-#line 193 "ElementwiseModule.cs"
-                double csharp2cuda_temp_34 = mathblocks_elementwise_argument(second, second_vector, row);
-#line 194 "ElementwiseModule.cs"
-                double csharp2cuda_temp_35 = mathblocks_elementwise_argument(third, third_vector, row);
-#line 195 "ElementwiseModule.cs"
-                double* csharp2cuda_temp_36 = &(value);
-#line 190 "ElementwiseModule.cs"
-                bool row_valid = mathblocks_elementwise_row_value(source_opcode, csharp2cuda_temp_33, csharp2cuda_temp_34, csharp2cuda_temp_35, csharp2cuda_temp_36);
-#line 196 "ElementwiseModule.cs"
+#line 201 "ElementwiseModule.cs"
+                double csharp2cuda_temp_43 = mathblocks_elementwise_argument(first, first_vector, row);
+#line 202 "ElementwiseModule.cs"
+                double csharp2cuda_temp_44 = mathblocks_elementwise_argument(second, second_vector, row);
+#line 203 "ElementwiseModule.cs"
+                double csharp2cuda_temp_45 = mathblocks_elementwise_argument(third, third_vector, row);
+#line 204 "ElementwiseModule.cs"
+                double* csharp2cuda_temp_46 = &(value);
+#line 199 "ElementwiseModule.cs"
+                bool row_valid = mathblocks_elementwise_row_value(source_opcode, csharp2cuda_temp_43, csharp2cuda_temp_44, csharp2cuda_temp_45, csharp2cuda_temp_46);
+#line 205 "ElementwiseModule.cs"
                 if (sibling)
                 {
-#line 197 "ElementwiseModule.cs"
-#line 197 "ElementwiseModule.cs"
-                    int* csharp2cuda_temp_37 = &((boolean_result)[row]);
-                    (*(csharp2cuda_temp_37) = row_valid);
+#line 206 "ElementwiseModule.cs"
+#line 206 "ElementwiseModule.cs"
+                    int* csharp2cuda_temp_47 = &((boolean_result)[row]);
+                    (*(csharp2cuda_temp_47) = row_valid);
                 }
                 else
                 {
-#line 199 "ElementwiseModule.cs"
-#line 199 "ElementwiseModule.cs"
-                    double* csharp2cuda_temp_38 = &((result)[row]);
-#line 199 "ElementwiseModule.cs"
-                    double csharp2cuda_temp_39;
-#line 199 "ElementwiseModule.cs"
+#line 208 "ElementwiseModule.cs"
+#line 208 "ElementwiseModule.cs"
+                    double* csharp2cuda_temp_48 = &((result)[row]);
+#line 208 "ElementwiseModule.cs"
+                    double csharp2cuda_temp_49;
+#line 208 "ElementwiseModule.cs"
                     if (row_valid)
                     {
-#line 199 "ElementwiseModule.cs"
-                        csharp2cuda_temp_39 = value;
+#line 208 "ElementwiseModule.cs"
+                        csharp2cuda_temp_49 = value;
                     }
                     else
                     {
-#line 199 "ElementwiseModule.cs"
-                        csharp2cuda_temp_39 = fill;
+#line 208 "ElementwiseModule.cs"
+                        csharp2cuda_temp_49 = fill;
                     }
-                    (*(csharp2cuda_temp_38) = csharp2cuda_temp_39);
+                    (*(csharp2cuda_temp_48) = csharp2cuda_temp_49);
                 }
             }
-#line 187 "ElementwiseModule.cs"
-            int* csharp2cuda_temp_31 = &(row);
-#line 187 "ElementwiseModule.cs"
-            int csharp2cuda_temp_32 = *(csharp2cuda_temp_31);
-            (*(csharp2cuda_temp_31) = csharp2cuda_i32_add(csharp2cuda_temp_32, threads));
+#line 196 "ElementwiseModule.cs"
+            int* csharp2cuda_temp_41 = &(row);
+#line 196 "ElementwiseModule.cs"
+            int csharp2cuda_temp_42 = *(csharp2cuda_temp_41);
+            (*(csharp2cuda_temp_41) = csharp2cuda_i32_add(csharp2cuda_temp_42, threads));
         }
     }
 }
