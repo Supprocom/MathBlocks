@@ -36,7 +36,7 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
     public void CUDADeviceDispatchWithTheBaseOpcodeGivesTheCoreCLRResult(string name)
     {
         ArgumentException.ThrowIfNullOrEmpty(name);
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var (identity, create) = Cases[name];
         var inputs = create();
         var contract = MathBlockCudaDeviceModule.GetOperation(identity);

@@ -21,7 +21,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [Trait("Category", "WindowCuda")]
     public void CUDAWindowFormsMatchTheCoreCLRLiftOnSamplesAndEdgeCases()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var worker = new MathBlocksCUDAWorker();
         var failures = new List<string>();
         var caseCount = 0;
@@ -54,7 +54,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [Trait("Category", "WindowCuda")]
     public void CUDAWindowOrderStatisticsPreserveSignedZeroBits()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var worker = new MathBlocksCUDAWorker();
         var failures = new List<string>();
         foreach (var (source, width) in new[]
@@ -95,7 +95,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [Trait("Category", "WindowCudaFullScale")]
     public void CUDAWindowFormsMatchTheCoreCLRLiftAtFullLength(string source)
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var worker = new MathBlocksCUDAWorker();
         var failures = new List<string>();
         var computedWidths = 0;

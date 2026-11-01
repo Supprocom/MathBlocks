@@ -31,7 +31,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [Trait("Category", "CudaStableSort")]
     public async Task CUDAWholeInputSortsFinishInTimeAndMatchCoreCLRAsync(string source)
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var inputs = CreateWholeInputSortInputs(source);
         var (program, _) = Standalone(source, inputs);
         var named = inputs.Select((input, index) => (Name: $"input-{index}", Input: input))

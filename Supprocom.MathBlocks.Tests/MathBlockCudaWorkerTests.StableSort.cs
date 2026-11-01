@@ -27,7 +27,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [Trait("Category", "CudaStableSort")]
     public async Task CUDAPairOrderStatisticsFinishInTimeAndMatchCoreCLRAsync(string source, int rows)
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var failures = new List<string>();
         foreach (var (name, inputs) in CreatePairOrderCases(source, rows))
         {

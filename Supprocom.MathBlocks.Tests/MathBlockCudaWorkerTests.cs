@@ -83,7 +83,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     [Fact]
     public void CUDAFormulaReplaysOneResidentGraphWithParallelBranches()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var program = CreateParallelFormula();
         using var compiled = new MathBlocksCUDAWorker().Compile(program);
         compiled.UploadInputs(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
@@ -123,7 +123,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     [Fact]
     public void CUDAProgramQueuesResidentReplaysBeforeOneSynchronization()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         using var compiled = new MathBlocksCUDAWorker().Compile(CreateParallelFormula());
         compiled.UploadInputs(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
@@ -222,7 +222,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     [Fact]
     public void CUDAArenaRoundTripsEveryValueKindWithOneUploadAndOneDownload()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var unit = MathBlockUnit.Basis0;
         var values = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
@@ -296,7 +296,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     [Fact]
     public void CUDAScalarReductionScratchRemainsOutsideTheDownloadRegion()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var values = MathBlockValue.Vector([4d, 1d, 3d, 2d]);
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var input = builder.Input("values", values.Type);
@@ -321,7 +321,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     [Fact]
     public void CUDAConditionalMutualInformationScratchPreservesTheFollowingOutputSlot()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
             ["guard"] = MathBlockValue.Scalar(123_456.75d),
@@ -360,7 +360,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     [Fact]
     public void CUDADynamicRepeatCapacityPropagatesThroughBooleanNodes()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
             ["value"] = MathBlockValue.Scalar(2d),
@@ -401,7 +401,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     [Fact]
     public void CUDADynamicSliceCapacityPropagatesThroughConcatenateAndReduction()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
             ["values"] = MathBlockValue.Vector([1d, 2d, 3d, 4d, 5d, 6d]),
@@ -464,7 +464,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     [Fact]
     public void CUDARollingOrderStatisticsPreserveSignedZeroBits()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var negativeZero = BitConverter.Int64BitsToDouble(long.MinValue);
         Verify(
             [negativeZero, negativeZero, negativeZero, negativeZero, negativeZero],
@@ -539,7 +539,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     [Trait("Category", "Performance")]
     public void CUDARollingOrderStatisticsAreExactAndScaleSubquadratically()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var measurements = new List<double>();
         foreach (var count in new[] { 2_048, 4_096, 8_192 })
         {
@@ -775,7 +775,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     [Fact]
     public void CUDAProgramIsSafeForConcurrentAtomicExecutions()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var program = new MathBlockFormulaBuilder(MathBlockCatalog.Standard)
             .Input("left", MathBlockType.Scalar())
             .Input("right", MathBlockType.Scalar())
@@ -806,7 +806,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     [Fact]
     public void EverySupportedCUDABlockMatchesItsCPURegressionOutputExactly()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var failures = new List<string>();
         var parityCaseCount = 0;
         var worker = new MathBlocksCUDAWorker();
@@ -856,7 +856,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     [InlineData("scalar.arc-cosine")]
     public void CUDAInverseSineAndCosineMatchCoreCLRBitForBitAcrossTheDomain(string identifier)
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var operation = MathBlockCatalog.Standard.Get(identifier, 1);
         var unit = operation.RegressionCases[0].Inputs[0].Type.Unit;
         var values = CreateUnitIntervalInputs();
@@ -937,7 +937,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     [MemberData(nameof(SignedZeroParityOperations))]
     public void CUDASignedZeroMatchesCoreCLRBitForBit(string identifier)
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var operation = MathBlockCatalog.Standard.Get(identifier);
         var cases = CreateSignedZeroCases(operation);
         // Compile from a case with a finite CoreCLR result: MathBlocksCUDAProgram constant-folds the prototype.
@@ -1079,7 +1079,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     [Trait("Category", "Performance")]
     public void EveryCUDABlockHasSubMillisecondWarmLatencyOnItsContractShape()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         const int batchCount = 21;
         const int iterations = 16;
         var failures = new List<string>();
@@ -1134,7 +1134,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     [Trait("Category", "Performance")]
     public void ResidentCUDAFormulaHasSubMillisecondWarmLatency()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         using var compiled = new MathBlocksCUDAWorker().Compile(CreateParallelFormula());
         compiled.UploadInputs(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {

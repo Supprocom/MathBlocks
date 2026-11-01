@@ -18,7 +18,7 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
     [InlineData(true)]
     public void CUDAFusedKernelEqualsCoreCLRAndTheGenericDispatcherBitForBit(bool fusedMultiplyAdd)
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var cases = CreateCases();
         var (ran, valid, _) = AssertCudaCases(cases, fusedMultiplyAdd);
         output.WriteLine($"fmad={fusedMultiplyAdd}: {ran} cases, {valid} valid outputs compared bit for bit.");
@@ -36,7 +36,7 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
     [InlineData(true)]
     public void CUDAFusedElementwiseKernelEqualsCoreCLRAndTheGenericDispatcherBitForBit(bool fusedMultiplyAdd)
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var cases = CreateElementwiseCases(out var expected);
         var (ran, valid, filled) = AssertCudaCases(cases, fusedMultiplyAdd);
         output.WriteLine($"fmad={fusedMultiplyAdd}: {ran} elementwise cases, {valid} valid outputs and {filled} " +
@@ -154,7 +154,7 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
     [Trait("Category", "Performance")]
     public void CUDAFusedKernelTimingAtFullRowCount()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var random = new Random(4);
         TimeAtFullRowCount(CreateRandomProgram(random, 4, 1, 1, 64, 4), random);
     }
@@ -168,7 +168,7 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
     [Trait("Category", "Performance")]
     public void CUDAFusedElementwiseKernelTimingAtFullRowCount()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         foreach (var seed in new[] { 5, 6 })
         {
             var random = new Random(seed);

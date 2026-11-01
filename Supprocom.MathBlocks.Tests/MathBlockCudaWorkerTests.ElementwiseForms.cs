@@ -29,7 +29,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [Trait("Category", "ElementwiseCuda")]
     public void CUDAElementwiseFormsMatchTheCoreCLRLiftOnSamplesAndEdgeCases()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var worker = new MathBlocksCUDAWorker();
         var failures = new List<string>();
         var caseCount = 0;
@@ -71,7 +71,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [Trait("Category", "ElementwiseCudaFullScale")]
     public void CUDAElementwiseFormsMatchTheCoreCLRLiftAtFullLength(string source)
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var worker = new MathBlocksCUDAWorker();
         var failures = new List<string>();
         var computedRows = 0;
@@ -108,7 +108,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [Trait("Category", "ElementwiseCuda")]
     public void CUDAClampFollowsTheMathClampRuleAtSignedZerosAndInvalidLimits()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         double[][] cases =
         [
             [-0d, 0d, 0d], [-0d, 0d, 1d], [-0d, 0d, 0.5d], [0d, 0d, -0d], [0d, -0d, -0d], [0d, -1d, -0d],
@@ -153,7 +153,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [InlineData("special.regularized-incomplete-beta")]
     public void CUDALogGammaOperationsMatchCoreCLRBitForBitAtNonIntegerArguments(string identifier)
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var operation = MathBlockCatalog.Standard.Get(identifier, 1);
         var cases = new List<MathBlockValue[]>();
         static MathBlockValue Scalar(double value) => MathBlockValue.Scalar(value);
@@ -220,7 +220,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [InlineData("probability.poisson-pmf")]
     public void CUDASubnormalExponentialResultsMatchCoreCLRBitForBit(string identifier)
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var operation = MathBlockCatalog.Standard.Get(identifier, 1);
         var cases = new List<MathBlockValue[]>();
         for (var index = 0; index < 4_000; index++)

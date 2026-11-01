@@ -116,7 +116,7 @@ public sealed class MathBlockCudaOperationContractTests
     [Fact]
     public void CUDADeviceModuleCompilesAConsumerOwnedNestedKernel()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var add = MathBlockCudaDeviceModule.GetOperation("scalar.add@1");
         var multiply = MathBlockCudaDeviceModule.GetOperation("scalar.multiply@1");
         var source = $$"""

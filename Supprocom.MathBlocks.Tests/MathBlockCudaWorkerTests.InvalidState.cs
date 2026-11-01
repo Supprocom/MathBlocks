@@ -117,7 +117,7 @@ public sealed partial class MathBlockCudaWorkerTests
     public void CUDAOverflowGivesTheCoreCLRInvalidValue(string name)
     {
         ArgumentException.ThrowIfNullOrEmpty(name);
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         VerifyOverflowCase(name, OverflowCases[name]);
     }
 
@@ -128,7 +128,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [Fact]
     public void CUDAMatrixExponentialOfAnOverflowingNormIsInvalid()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         VerifyOverflowCase(
             "matrix.exponential",
             Single(
@@ -152,7 +152,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [MemberData(nameof(EmptyPointSetOperations))]
     public void CUDAEmptyPointSetGivesTheCoreCLRResult(string identifier)
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var operation = MathBlockCatalog.Standard.Get(identifier);
         var inputs = operation.RegressionCases[0].Inputs
             .Select(input => input.Type.Kind == MathBlockValueKind.PointSet
@@ -200,7 +200,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [MemberData(nameof(ValueDependentShapeOperations))]
     public void CUDAInvalidResultHasTheCoreCLRType(string identifier)
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var operation = MathBlockCatalog.Standard.Get(identifier);
         var sample = operation.RegressionCases[0].Inputs.ToArray();
         Assert.True(operation.Evaluate(sample).IsValid, $"{identifier}: the sample is not valid.");
@@ -286,7 +286,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [Fact]
     public void CUDAInvalidProgramOutputHasItsPlannedType()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var program = MathBlockProgramTests.BuildRollingLogarithmProgram();
         var inputs = MathBlockProgramTests.RollingLogarithmInputs();
         var prototype = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
@@ -450,7 +450,7 @@ public sealed partial class MathBlockCudaWorkerTests
     public void CUDAProgramCompiledFromItsInputsGivesTheCoreCLRResult(string name)
     {
         ArgumentException.ThrowIfNullOrEmpty(name);
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var (program, inputs) = SelfCompiledCases[name]();
         var named = inputs.Select((input, index) => (Name: $"input-{index}", Input: input))
             .ToDictionary(item => item.Name, item => item.Input, StringComparer.Ordinal);

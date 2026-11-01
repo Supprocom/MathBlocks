@@ -23,7 +23,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [Trait("Category", "WindowCuda")]
     public void CUDAWindowAccurateFormsMatchCoreCLROnSamplesAndEdgeCases()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var worker = new MathBlocksCUDAWorker();
         var failures = new List<string>();
         var cases = CreateAccurateCases().ToArray();
@@ -58,7 +58,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [Trait("Category", "WindowCudaFullScale")]
     public void CUDAWindowAccurateFormsMatchCoreCLRAtFullLength(string family)
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var worker = new MathBlocksCUDAWorker();
         var failures = new List<string>();
         var values = CreateAccurateFamily(family, WindowFullLength, 41);
@@ -91,7 +91,7 @@ public sealed partial class MathBlockCudaWorkerTests
     [Trait("Category", "WindowCuda")]
     public void CUDAWindowBatchEqualsEachFormEvaluatedAlone()
     {
-        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var worker = new MathBlocksCUDAWorker();
         var failures = new List<string>();
         int[] widths = [1, 2, 3, 17, 96, 400];
