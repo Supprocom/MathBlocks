@@ -303,6 +303,70 @@ public sealed partial class MathBlockCudaWorkerTests
         Assert.True(IsExact(coreclr, cuda), $"CoreCLR={DescribeBits(coreclr)} ({coreclr.Type}), CUDA={DescribeBits(cuda)} ({cuda.Type})");
     }
 
+    // Programs compiled from their own inputs (so the CUDA plan has those exact shapes and values), where CoreCLR and
+    // CUDA disagreed: domain checks that one side lacked, and the sign of a zero from the maximum.
+    private static readonly Dictionary<string, Func<(MathBlockProgram Program, MathBlockValue[] Inputs)>> SelfCompiledCases =
+        new(StringComparer.Ordinal)
+        {
+            ["transform.haar/length-3"] = () => Standalone("transform.haar", Values(1d, 2d, 3d)),
+            ["transport.assignment-cost/non-integer-index"] = () => Standalone(
+                "transport.assignment-cost", MatrixValue(2, 2, 3d, 1d, 1d, 3d), Values(0.5d, 1d)),
+            ["geometry.fisher-rao-distance/not-distributions"] = () => Standalone(
+                "geometry.fisher-rao-distance", Values(-0.5d, -0.5d), Values(-0d, -1d)),
+            ["path.maximum-relative-decline/signed-zero"] = () => Standalone("path.maximum-relative-decline", Values(-1d, -1d, -2d)),
+            ["window-valid.path.maximum-relative-decline/zero-maximum"] = () => WindowFormCase(
+                "window-valid.path.maximum-relative-decline", Values(-0d, 2d, 0d, -0d, 0d, 1.25d)),
+            ["window.path.maximum-relative-decline/zero-maximum"] = () => WindowFormCase(
+                "window.path.maximum-relative-decline", Values(-0d, 2d, 0d, -0d, 0d, 1.25d))
+        };
+
+    /// <summary>Gets the self-compiled case names.</summary>
+    public static TheoryData<string> SelfCompiledCaseNames => [.. SelfCompiledCases.Keys.Order(StringComparer.Ordinal)];
+
+    /// <summary>
+    /// Verifies a program compiled from its own inputs gives the CoreCLR result on CUDA, bit for bit, with the same
+    /// validity and type.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(SelfCompiledCaseNames))]
+    public void CUDAProgramCompiledFromItsInputsGivesTheCoreCLRResult(string name)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        var (program, inputs) = SelfCompiledCases[name]();
+        var named = inputs.Select((input, index) => (Name: $"input-{index}", Input: input))
+            .ToDictionary(item => item.Name, item => item.Input, StringComparer.Ordinal);
+        var coreclr = program.Evaluate(named)["result"];
+        using var compiled = new MathBlocksCUDAWorker().Compile(program, named);
+        var cuda = compiled.Execute(named)["result"];
+
+        Assert.True(
+            IsExact(coreclr, cuda),
+            $"{name}: CoreCLR={DescribeBits(coreclr)} ({coreclr.Type}), CUDA={DescribeBits(cuda)} ({cuda.Type})");
+    }
+
+    private static (MathBlockProgram Program, MathBlockValue[] Inputs) Standalone(string identifier, params MathBlockValue[] inputs) =>
+        Single(MathBlockCatalog.Standard, identifier, inputs);
+
+    // A window form over the vector with its sample's other arguments (the width, and the fill for a form).
+    private static (MathBlockProgram Program, MathBlockValue[] Inputs) WindowFormCase(string identifier, MathBlockValue vector)
+    {
+        var operation = MathBlockWindowTestSupport.Windowed.Get(identifier);
+        var inputs = operation.RegressionCases[0].Inputs.ToArray();
+        inputs[0] = vector;
+        inputs[1] = MathBlockValue.Scalar(3d, inputs[1].Type.Unit);
+        return Single(MathBlockWindowTestSupport.Windowed, identifier, inputs);
+    }
+
+    private static (MathBlockProgram Program, MathBlockValue[] Inputs) Single(MathBlockRegistry registry, string identifier, MathBlockValue[] inputs)
+    {
+        var builder = new MathBlockProgramBuilder(registry);
+        var nodes = inputs.Select((input, index) => builder.Input($"input-{index}", input.Type)).ToArray();
+        return (builder.Output("result", builder.Apply(identifier, 1, nodes)).Build(), inputs);
+    }
+
+    private static MathBlockValue Values(params double[] values) => MathBlockValue.Vector(values);
+
     private static void VerifyOverflowCase(string name, OverflowCase overflow)
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);

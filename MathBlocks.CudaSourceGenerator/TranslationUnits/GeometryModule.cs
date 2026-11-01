@@ -34,6 +34,9 @@ internal static unsafe class GeometryModule
 
     [CudaExternal(IsPure = true)]
     private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static bool mathblocks_probability_distribution([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
     public struct MathBlockGeometryEdge
     {
         public int from;
@@ -590,7 +593,9 @@ internal static unsafe class GeometryModule
                         output->scalar_value = mathblocks_geometry_distance(a, 0, b, 0);
                     break;
                 case 9:
-                    if (first->count <= 0 || first->count != second->count)
+                    if (first->count <= 0 || first->count != second->count ||
+                        !mathblocks_probability_distribution(a, first->count) ||
+                        !mathblocks_probability_distribution(b, second->count))
                     {
                         output->valid = 0;
                         break;

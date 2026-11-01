@@ -32,6 +32,9 @@ internal static unsafe class SequencePathModule
     [CudaExternal(IsPure = true)]
     private static double mathblocks_square_root(double value) => throw new NotSupportedException();
 
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_maximum(double first, double second) => throw new NotSupportedException();
+
     public struct MathBlockSequencePathRun
     {
         public int start;
@@ -473,11 +476,12 @@ internal static unsafe class SequencePathModule
         double decline = 0.0;
         for (int index = 1; index < count; index++)
         {
-            maximum = maximum > values[index] ? maximum : values[index];
+            // The owned maximum, which mirrors CoreCLR's MathBlockPrimitives.Max for signed zeros and NaN.
+            maximum = mathblocks_maximum(maximum, values[index]);
             double candidate = !relative
                 ? maximum - values[index]
                 : (maximum - values[index]) / maximum;
-            decline = decline > candidate ? decline : candidate;
+            decline = mathblocks_maximum(decline, candidate);
         }
         *value = decline;
         return double.IsFinite(decline);
