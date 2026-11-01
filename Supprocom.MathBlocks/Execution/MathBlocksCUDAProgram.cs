@@ -1770,77 +1770,16 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         }
         if (inputTypes.Length != 0)
         {
-            var firstCount = inputCapacities[0];
-            var rows = inputShapeRows[0];
-            var columns = inputShapeColumns[0];
+            long firstCount = inputCapacities[0];
+            long rows = inputShapeRows[0];
+            long columns = inputShapeColumns[0];
             if (RequiresScratchRows(identity) && rows <= 0)
                 throw new InvalidOperationException($"CUDA scratch row authority is unavailable for '{identity}'.");
             if (RequiresScratchColumns(identity) && columns <= 0)
                 throw new InvalidOperationException($"CUDA scratch column authority is unavailable for '{identity}'.");
-            var doubleCount = identity switch
-            {
-                "matrix.determinant@1" or "matrix.rank@1" or
-                    "matrix.is-positive-definite@1" => firstCount,
-                "matrix.solve@1" or "matrix.inverse@1" => checked(firstCount + rows * 2),
-                "matrix.symmetric-eigenvalues@1" or
-                    "matrix.smallest-symmetric-eigenvalue@1" or
-                    "matrix.largest-symmetric-eigenvalue@1" => checked(firstCount + rows),
-                "matrix.integer-power@1" => checked(firstCount * 2),
-                "matrix.exponential@1" => checked(firstCount * 3),
-                "matrix.is-totally-nonnegative@1" or
-                    "matrix.principal-minors@1" => checked(firstCount * 2),
-                "matrix.maximal-minors@1" => checked(firstCount * 3),
-                "matrix.perron-vector@1" or "matrix.perron-value@1" => checked(rows * 3),
-                "matrix.spectral-norm@1" => checked(columns * columns * 2 + columns),
-                "matrix.schur-complement@1" => checked(firstCount * 10),
-                "polynomial.elementary-symmetric@1" => checked(firstCount + 1),
-                "information.jensen-shannon@1" => firstCount,
-                "information.mutual-information@1" => checked(rows + columns),
-                "information.conditional-mutual-information@1" => checked(firstCount * 3),
-                "sequence.rolling-maximum@1" or
-                    "sequence.rolling-minimum@1" or
-                    "transform.haar@1" => firstCount,
-                "path.dynamic-time-warping@1" => checked(
-                    2 * (inputCapacities[1] + 1)),
-                "path.signature-level-two@1" => checked(columns * 2),
-                "path.signature-level-three@1" => checked(columns * columns + columns * 2),
-                "statistics.covariance-matrix@1" => columns,
-                "statistics.distance-correlation@1" => checked(firstCount * firstCount * 2 + firstCount),
-                "statistics.median-absolute-deviation@1" => checked(firstCount * 2),
-                "statistics.pseudomedian@1" => checked(firstCount * (firstCount + 1)),
-                "statistics.interquartile-range@1" or "vector.median@1" or "vector.quantile@1" or "vector.sort@1" => checked(firstCount * 2),
-                "statistics.spearman-correlation@1" => checked(firstCount * 2),
-                "statistics.theil-sen-slope@1" => checked(firstCount * (firstCount - 1)),
-                "geometry.convex-hull@1" => checked(firstCount * 6),
-                "geometry.delaunay-graph@1" => checked(firstCount * firstCount + firstCount),
-                "geometry.discrete-frechet-distance@1" => checked(
-                    firstCount * inputCapacities[1]),
-                "topology.zero-dimensional-persistence@1" => checked(
-                    firstCount * (firstCount - 1) + firstCount * 2),
-                "graph.algebraic-connectivity@1" => checked(rows * rows * 2 + rows),
-                "graph.connected-component-count@1" or "graph.is-connected@1" => checked(rows * 2),
-                "graph.hodge-potential@1" => checked(
-                    2 * (rows - 1) * (rows - 1) + 2 * (rows - 1)),
-                "graph.minimum-spanning-forest@1" => checked(firstCount * 2 + rows * 2),
-                "graph.page-rank@1" => checked(rows * 2),
-                "graph.triangle-count@1" => checked(rows * rows),
-                "graph.undirected-shortest-paths@1" => rows,
-                "capacity.choquet-integral@1" => firstCount,
-                "markov.stationary-distribution@1" => rows,
-                "order.isotonic-regression@1" => checked(firstCount * 3),
-                "order.majorizes@1" => checked(firstCount * 3),
-                "shape.greatest-convex-minorant@1" or
-                    "shape.is-completely-monotone@1" or
-                    "shape.least-concave-majorant@1" => firstCount,
-                "transport.minimum-assignment@1" => ResolveAssignmentScratch(rows),
-                "transport.sinkhorn-coupling@1" => checked(firstCount + rows + columns),
-                "transport.uniform-wasserstein@1" => checked(firstCount * 3),
-                "transport.weighted-wasserstein-1@1" => checked(
-                    firstCount + inputCapacities[2]),
-                _ => 0
-            };
+            var doubleCount = ResolveScratchDoubles(identity, firstCount, rows, columns, inputCapacities);
             if (doubleCount != 0)
-                return checked(doubleCount * sizeof(double));
+                return ToScratchBytes(identity, doubleCount, firstCount);
         }
         if (outputType.Kind is not MathBlockValueKind.Scalar and not MathBlockValueKind.Boolean)
             return 0;
@@ -1852,6 +1791,113 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 bytes = inputBytes;
         }
         return bytes;
+    }
+
+    // Scratch doubles that depend on the first input's row count alone: the merge sorts hold the data and the other array
+    // of the merge (the pair forms sort n(n+1)/2 or n(n-1)/2 elements, twice that with the other array).
+    private static long? ScratchDoublesOfRows(string identity, long n) => identity switch
+    {
+        "statistics.pseudomedian@1" => checked(n * (n + 1)),
+        "statistics.theil-sen-slope@1" => checked(n * (n - 1)),
+        "statistics.interquartile-range@1" or "statistics.median-absolute-deviation@1" or "vector.median@1" or
+            "vector.quantile@1" or "vector.sort@1" => checked(n * 2),
+        "inequality.lorenz-curve@1" => n,
+        "order.majorizes@1" or "transport.uniform-wasserstein@1" => checked(n * 3),
+        "geometry.convex-hull@1" => checked(n * 8),
+        "topology.zero-dimensional-persistence@1" => checked(n * (n - 1) * 2 + n * 2),
+        _ => null
+    };
+
+    // The largest row count whose scratch fits the int byte count of the plan, or null when the rule is not a function of the rows.
+    private static long? MaximumScratchRows(string identity)
+    {
+        if (ScratchDoublesOfRows(identity, 1) is null)
+            return null;
+        long low = 1;
+        long high = int.MaxValue;
+        while (low < high)
+        {
+            var middle = low + ((high - low + 1) / 2);
+            if (ScratchDoublesOfRows(identity, middle) is { } doubles && doubles <= int.MaxValue / sizeof(double))
+                low = middle;
+            else
+                high = middle - 1;
+        }
+
+        return low;
+    }
+
+    private static int ToScratchBytes(string identity, long doubleCount, long rows)
+    {
+        var bytes = checked(doubleCount * sizeof(double));
+        if (bytes <= int.MaxValue)
+            return (int)bytes;
+        throw MaximumScratchRows(identity) is { } maximum
+            ? new InvalidOperationException(string.Create(
+                System.Globalization.CultureInfo.InvariantCulture,
+                $"{identity}: CUDA supports at most {maximum:N0} rows (scratch byte count); got {rows:N0}."))
+            : new InvalidOperationException(string.Create(
+                System.Globalization.CultureInfo.InvariantCulture,
+                $"{identity}: the CUDA scratch of {bytes:N0} bytes for this shape exceeds the supported {int.MaxValue:N0} bytes."));
+    }
+
+    private static long ResolveScratchDoubles(string identity, long firstCount, long rows, long columns, int[] inputCapacities)
+    {
+        if (ScratchDoublesOfRows(identity, firstCount) is { } byRows)
+            return byRows;
+        return identity switch
+        {
+            "matrix.determinant@1" or "matrix.rank@1" or
+                "matrix.is-positive-definite@1" => firstCount,
+            "matrix.solve@1" or "matrix.inverse@1" => checked(firstCount + rows * 2),
+            "matrix.symmetric-eigenvalues@1" or
+                "matrix.smallest-symmetric-eigenvalue@1" or
+                "matrix.largest-symmetric-eigenvalue@1" => checked(firstCount + rows * 2),
+            "matrix.integer-power@1" => checked(firstCount * 2),
+            "matrix.exponential@1" => checked(firstCount * 3),
+            "matrix.is-totally-nonnegative@1" or
+                "matrix.principal-minors@1" => checked(firstCount * 2),
+            "matrix.maximal-minors@1" => checked(firstCount * 3),
+            "matrix.perron-vector@1" or "matrix.perron-value@1" => checked(rows * 3),
+            "matrix.spectral-norm@1" => checked(columns * columns * 2 + columns * 2),
+            "matrix.schur-complement@1" => checked(firstCount * 10),
+            "polynomial.elementary-symmetric@1" => checked(firstCount + 1),
+            "information.jensen-shannon@1" => firstCount,
+            "information.mutual-information@1" => checked(rows + columns),
+            "information.conditional-mutual-information@1" => checked(firstCount * 3),
+            "sequence.rolling-maximum@1" or
+                "sequence.rolling-minimum@1" or
+                "transform.haar@1" => firstCount,
+            "path.dynamic-time-warping@1" => checked(
+                2 * (inputCapacities[1] + 1)),
+            "path.signature-level-two@1" => checked(columns * 2),
+            "path.signature-level-three@1" => checked(columns * columns + columns * 2),
+            "statistics.covariance-matrix@1" => columns,
+            "statistics.distance-correlation@1" => checked(firstCount * firstCount * 2 + firstCount),
+            "statistics.spearman-correlation@1" => checked(firstCount * 2),
+            "geometry.delaunay-graph@1" => checked(firstCount * firstCount + firstCount),
+            "geometry.discrete-frechet-distance@1" => checked(
+                firstCount * inputCapacities[1]),
+            "graph.algebraic-connectivity@1" => checked(rows * rows * 2 + rows * 2),
+            "graph.connected-component-count@1" or "graph.is-connected@1" => checked(rows * 2),
+            "graph.hodge-potential@1" => checked(
+                2 * (rows - 1) * (rows - 1) + 2 * (rows - 1)),
+            "graph.minimum-spanning-forest@1" => checked(firstCount * 4 + rows * 2),
+            "graph.page-rank@1" => checked(rows * 2),
+            "graph.triangle-count@1" => checked(rows * rows),
+            "graph.undirected-shortest-paths@1" => rows,
+            "capacity.choquet-integral@1" => firstCount,
+            "markov.stationary-distribution@1" => rows,
+            "order.isotonic-regression@1" => checked(firstCount * 3),
+            "shape.greatest-convex-minorant@1" or
+                "shape.is-completely-monotone@1" or
+                "shape.least-concave-majorant@1" => firstCount,
+            "transport.minimum-assignment@1" => ResolveAssignmentScratch(checked((int)rows)),
+            "transport.sinkhorn-coupling@1" => checked(firstCount + rows + columns),
+            "transport.weighted-wasserstein-1@1" => checked(
+                firstCount + inputCapacities[2]),
+            _ => 0
+        };
     }
 
     private static bool RequiresScratchRows(string identity) => (string.Equals(identity, "matrix.solve@1", StringComparison.Ordinal) || string.Equals(identity, "matrix.inverse@1", StringComparison.Ordinal) || string.Equals(identity, "matrix.symmetric-eigenvalues@1", StringComparison.Ordinal) || string.Equals(identity, "matrix.smallest-symmetric-eigenvalue@1", StringComparison.Ordinal) || string.Equals(identity, "matrix.largest-symmetric-eigenvalue@1", StringComparison.Ordinal) || string.Equals(identity, "matrix.perron-vector@1", StringComparison.Ordinal) || string.Equals(identity, "matrix.perron-value@1", StringComparison.Ordinal) || string.Equals(identity, "information.mutual-information@1", StringComparison.Ordinal) || string.Equals(identity, "graph.algebraic-connectivity@1", StringComparison.Ordinal) || string.Equals(identity, "graph.connected-component-count@1", StringComparison.Ordinal) || string.Equals(identity, "graph.is-connected@1", StringComparison.Ordinal) || string.Equals(identity, "graph.hodge-potential@1", StringComparison.Ordinal) || string.Equals(identity, "graph.minimum-spanning-forest@1", StringComparison.Ordinal) || string.Equals(identity, "graph.page-rank@1", StringComparison.Ordinal) || string.Equals(identity, "graph.triangle-count@1", StringComparison.Ordinal) || string.Equals(identity, "graph.undirected-shortest-paths@1", StringComparison.Ordinal) || string.Equals(identity, "markov.stationary-distribution@1", StringComparison.Ordinal) || string.Equals(identity, "transport.minimum-assignment@1", StringComparison.Ordinal) || string.Equals(identity, "transport.sinkhorn-coupling@1", StringComparison.Ordinal));
@@ -1939,15 +1985,16 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         var perThread = WindowCudaBlockCatalog.ScratchDoubles(source, width);
         if (perThread == 0L)
             return new WindowLaunch((int)rowBlocks, 0, 0);
-        var blockBytes = checked(perThread * sizeof(double) * blockSize);
+        if (perThread > int.MaxValue / (sizeof(double) * blockSize))
+        {
+            throw new InvalidOperationException(string.Create(
+                System.Globalization.CultureInfo.InvariantCulture,
+                $"{identity}: CUDA supports widths of at most {WindowCudaBlockCatalog.MaximumWidth(source):N0} for this operation (scratch byte count); got {width:N0}."));
+        }
+        var blockBytes = perThread * sizeof(double) * blockSize;
         var budgetBlocks = WindowCudaBlockCatalog.ScratchBudgetBytes / blockBytes;
         var gridX = budgetBlocks < 1L ? 1L : budgetBlocks < rowBlocks ? budgetBlocks : rowBlocks;
-        var bytes = checked(blockBytes * gridX);
-        if (perThread > int.MaxValue || bytes > int.MaxValue)
-        {
-            throw new InvalidOperationException(
-                $"CUDA window scratch for {identity} exceeds the supported resource range.");
-        }
+        var bytes = blockBytes * gridX;
         return new WindowLaunch((int)gridX, (int)perThread, (int)bytes);
     }
 

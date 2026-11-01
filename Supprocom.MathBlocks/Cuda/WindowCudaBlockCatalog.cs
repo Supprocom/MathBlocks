@@ -165,6 +165,27 @@ internal static class WindowCudaBlockCatalog
         _ => 0
     };
 
+    // The largest width whose scratch for one block of threads fits the int byte count of the plan (the plan needs at least
+    // one block); a source whose scratch does not depend on the width has no limit.
+    internal static long MaximumWidth(int source)
+    {
+        if (ScratchDoubles(source, 1) == 0)
+            return int.MaxValue;
+        long limit = int.MaxValue / (sizeof(double) * (long)BlockSize);
+        long low = 1;
+        long high = int.MaxValue;
+        while (low < high)
+        {
+            var middle = low + ((high - low + 1) / 2);
+            if (ScratchDoubles(source, middle) <= limit)
+                low = middle;
+            else
+                high = middle - 1;
+        }
+
+        return low;
+    }
+
     // Rows each thread evaluates. The median, the quantile and the window-accurate sources slide their state over a
     // block of consecutive rows after adding the width - 1 rows before it, so a block of twice the width (at least
     // 32 rows) keeps that start-up below half of the work; without a plan-time width the block is 256 rows. The

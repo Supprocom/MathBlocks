@@ -206,6 +206,43 @@ internal static unsafe class VectorModule
         }
     }
 
+    // The indices 0 .. count - 1 in the stable ascending order of keys (equal keys keep the index order), the order of
+    // SortedIndices; buffer holds count ints. The sorted order ends in order.
+    [CudaDevice]
+    private static void mathblocks_stable_index_order([CudaReadOnly] double* keys, int count, int* order, int* buffer)
+    {
+        for (int index = 0; index < count; index++)
+            order[index] = index;
+        int* source = order;
+        int* target = buffer;
+        for (int width = 1; width < count; width += width)
+        {
+            for (int start = 0; start < count; start += width + width)
+            {
+                int middle = start + width < count ? start + width : count;
+                int end = middle + width < count ? middle + width : count;
+                int left = start;
+                int right = middle;
+                int position = start;
+                while (left < middle && right < end)
+                {
+                    bool take_right = keys[source[right]] < keys[source[left]];
+                    target[position++] = take_right ? source[right++] : source[left++];
+                }
+                while (left < middle)
+                    target[position++] = source[left++];
+                while (right < end)
+                    target[position++] = source[right++];
+            }
+            int* sorted = target;
+            target = source;
+            source = sorted;
+        }
+        if (source != order)
+            for (int index = 0; index < count; index++)
+                order[index] = source[index];
+    }
+
     // vector.sort: the stable merge sort of the source's SortedCopy. The sorted values end in the output's data (or in
     // the scratch when the output has no data pointer); the scratch holds 2 * count doubles, the other array of the merge.
     [CudaDevice]

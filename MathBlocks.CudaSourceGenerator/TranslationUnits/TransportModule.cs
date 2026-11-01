@@ -52,23 +52,8 @@ internal static unsafe class TransportModule
     [CudaExternal]
     private static void mathblocks_statistics_sort_copy([CudaReadOnly] double* values, int count, double* result, bool descending) => throw new NotSupportedException();
 
-    [CudaDevice]
-    private static void mathblocks_transport_sort_indices(
-        [CudaReadOnly] double* locations,
-        int count,
-        int* result)
-    {
-        for (int index = 0; index < count; index++)
-        {
-            int position = index;
-            while (position > 0 && locations[result[position - 1]] > locations[index])
-            {
-                result[position] = result[position - 1];
-                position--;
-            }
-            result[position] = index;
-        }
-    }
+    [CudaExternal]
+    private static void mathblocks_stable_index_order([CudaReadOnly] double* keys, int count, int* order, int* buffer) => throw new NotSupportedException();
 
     [CudaDevice]
     private static double mathblocks_transport_mean_pairwise(
@@ -358,8 +343,10 @@ internal static unsafe class TransportModule
                 {
                     int* left_order = (int*)scratch;
                     int* right_order = left_order + first->count;
-                    mathblocks_transport_sort_indices(a, first->count, left_order);
-                    mathblocks_transport_sort_indices(c, third->count, right_order);
+                    int* left_buffer = right_order + third->count;
+                    int* right_buffer = left_buffer + first->count;
+                    mathblocks_stable_index_order(a, first->count, left_order, left_buffer);
+                    mathblocks_stable_index_order(c, third->count, right_order, right_buffer);
                     int left_index = 0;
                     int right_index = 0;
                     double left_remaining = b[left_order[0]];

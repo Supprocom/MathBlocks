@@ -21,7 +21,7 @@ internal static unsafe class GraphModule
     }
 
     [CudaExternal]
-    private static void mathblocks_matrix_symmetric_eigenvalues([CudaReadOnly] double* source, int size, double* work, double* eigenvalues) => throw new NotSupportedException();
+    private static void mathblocks_matrix_symmetric_eigenvalues([CudaReadOnly] double* source, int size, double* work, double* eigenvalues, double* buffer) => throw new NotSupportedException();
 
     [CudaExternal]
     private static bool mathblocks_matrix_try_solve([CudaReadOnly] double* matrix, [CudaReadOnly] double* right, int size, double* augmented, double* solution) => throw new NotSupportedException();
@@ -48,6 +48,43 @@ internal static unsafe class GraphModule
         public int from;
         public int to;
         public double weight;
+    }
+
+    // The count edges in the stable order of mathblocks_graph_edge_less (a strict total order: weight, then from, then to),
+    // merged between edges and buffer (count edges each). The sorted edges end in edges.
+    [CudaDevice]
+    private static void mathblocks_graph_sort_edges(MathBlockGraphKernelEdge* edges, MathBlockGraphKernelEdge* buffer, int count)
+    {
+        MathBlockGraphKernelEdge* source = edges;
+        MathBlockGraphKernelEdge* target = buffer;
+        for (int width = 1; width < count; width += width)
+        {
+            for (int start = 0; start < count; start += width + width)
+            {
+                int middle = start + width < count ? start + width : count;
+                int end = middle + width < count ? middle + width : count;
+                int left = start;
+                int right = middle;
+                int position = start;
+                while (left < middle && right < end)
+                {
+                    if (mathblocks_graph_edge_less(source[right], source[left]))
+                        target[position++] = source[right++];
+                    else
+                        target[position++] = source[left++];
+                }
+                while (left < middle)
+                    target[position++] = source[left++];
+                while (right < end)
+                    target[position++] = source[right++];
+            }
+            MathBlockGraphKernelEdge* sorted = target;
+            target = source;
+            source = sorted;
+        }
+        if (source != edges)
+            for (int index = 0; index < count; index++)
+                edges[index] = source[index];
     }
 
     [CudaDevice]
@@ -189,7 +226,8 @@ internal static unsafe class GraphModule
                         laplacian,
                         vertex_count,
                         work,
-                        eigenvalues);
+                        eigenvalues,
+                        eigenvalues + vertex_count);
                     output->scalar_value = eigenvalues[1];
                     break;
                 }
@@ -379,18 +417,8 @@ internal static unsafe class GraphModule
                     MathBlockGraphKernelEdge* work = (MathBlockGraphKernelEdge*)scratch;
                     for (int index = 0; index < first->count; index++)
                         work[index] = edges[index];
-                    for (int index = 1; index < first->count; index++)
-                    {
-                        MathBlockGraphKernelEdge value = work[index];
-                        int position = index;
-                        while (position > 0 && mathblocks_graph_edge_less(value, work[position - 1]))
-                        {
-                            work[position] = work[position - 1];
-                            position--;
-                        }
-                        work[position] = value;
-                    }
-                    int* parent = (int*)(work + first->count);
+                    mathblocks_graph_sort_edges(work, work + first->count, first->count);
+                    int* parent = (int*)(work + 2 * first->count);
                     byte* rank = (byte*)(parent + vertex_count);
                     for (int index = 0; index < vertex_count; index++)
                     {

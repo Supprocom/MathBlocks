@@ -192,23 +192,94 @@ internal static unsafe class GeometryModule
         return left < right;
     }
 
+    // The point indices 0 .. count - 1 in the stable order of mathblocks_geometry_point_less; buffer holds count ints.
     [CudaDevice]
-    private static void mathblocks_geometry_sort_indices(
+    private static void mathblocks_geometry_index_order(
         [CudaReadOnly] double* points,
         int count,
-        int* indices)
+        int* order,
+        int* buffer)
     {
         for (int index = 0; index < count; index++)
+            order[index] = index;
+        int* source = order;
+        int* target = buffer;
+        for (int width = 1; width < count; width += width)
         {
-            int value = index;
-            int position = index;
-            while (position > 0 && mathblocks_geometry_point_less(points, value, indices[position - 1]))
+            for (int start = 0; start < count; start += width + width)
             {
-                indices[position] = indices[position - 1];
-                position--;
+                int middle = start + width < count ? start + width : count;
+                int end = middle + width < count ? middle + width : count;
+                int left = start;
+                int right = middle;
+                int position = start;
+                while (left < middle && right < end)
+                {
+                    bool take_right = mathblocks_geometry_point_less(points, source[right], source[left]);
+                    target[position++] = take_right ? source[right++] : source[left++];
+                }
+                while (left < middle)
+                    target[position++] = source[left++];
+                while (right < end)
+                    target[position++] = source[right++];
             }
-            indices[position] = value;
+            int* sorted = target;
+            target = source;
+            source = sorted;
         }
+        if (source != order)
+            for (int index = 0; index < count; index++)
+                order[index] = source[index];
+    }
+
+    // The count (x, y) pairs of points in the stable lexicographic order of the source's CompareHullPoints (x, then y;
+    // -0.0 and +0.0 compare equal and keep their input order), merged between points and buffer (2 * count doubles each).
+    // The sorted pairs end in points.
+    [CudaDevice]
+    private static void mathblocks_geometry_sort_points(double* points, double* buffer, int count)
+    {
+        double* source = points;
+        double* target = buffer;
+        for (int width = 1; width < count; width += width)
+        {
+            for (int start = 0; start < count; start += width + width)
+            {
+                int middle = start + width < count ? start + width : count;
+                int end = middle + width < count ? middle + width : count;
+                int left = start;
+                int right = middle;
+                int position = start;
+                while (left < middle && right < end)
+                {
+                    bool take_right = source[2 * right] < source[2 * left] ||
+                        (source[2 * right] == source[2 * left] && source[2 * right + 1] < source[2 * left + 1]);
+                    int from = take_right ? right++ : left++;
+                    target[2 * position] = source[2 * from];
+                    target[2 * position + 1] = source[2 * from + 1];
+                    position++;
+                }
+                while (left < middle)
+                {
+                    target[2 * position] = source[2 * left];
+                    target[2 * position + 1] = source[2 * left + 1];
+                    position++;
+                    left++;
+                }
+                while (right < end)
+                {
+                    target[2 * position] = source[2 * right];
+                    target[2 * position + 1] = source[2 * right + 1];
+                    position++;
+                    right++;
+                }
+            }
+            double* sorted = target;
+            target = source;
+            source = sorted;
+        }
+        if (source != points)
+            for (int index = 0; index < 2 * count; index++)
+                points[index] = source[index];
     }
 
     [CudaDevice]
@@ -236,6 +307,43 @@ internal static unsafe class GeometryModule
         if (right.from < left.from)
             return false;
         return left.to < right.to;
+    }
+
+    // The count edges in the stable order of mathblocks_geometry_edge_less (a strict total order: weight, then from, then
+    // to), merged between edges and buffer (count edges each). The sorted edges end in edges.
+    [CudaDevice]
+    private static void mathblocks_geometry_sort_edges(MathBlockGeometryEdge* edges, MathBlockGeometryEdge* buffer, int count)
+    {
+        MathBlockGeometryEdge* source = edges;
+        MathBlockGeometryEdge* target = buffer;
+        for (int width = 1; width < count; width += width)
+        {
+            for (int start = 0; start < count; start += width + width)
+            {
+                int middle = start + width < count ? start + width : count;
+                int end = middle + width < count ? middle + width : count;
+                int left = start;
+                int right = middle;
+                int position = start;
+                while (left < middle && right < end)
+                {
+                    if (mathblocks_geometry_edge_less(source[right], source[left]))
+                        target[position++] = source[right++];
+                    else
+                        target[position++] = source[left++];
+                }
+                while (left < middle)
+                    target[position++] = source[left++];
+                while (right < end)
+                    target[position++] = source[right++];
+            }
+            MathBlockGeometryEdge* sorted = target;
+            target = source;
+            source = sorted;
+        }
+        if (source != edges)
+            for (int index = 0; index < count; index++)
+                edges[index] = source[index];
     }
 
     [CudaDevice(Name = "mathblocks_geometry_dispatch")]
@@ -360,30 +468,19 @@ internal static unsafe class GeometryModule
                     }
                 {
                     double* sorted = scratch;
-                    double* hull = scratch + first->count * 2;
+                    double* hull = scratch + first->count * 4;
+                    for (int index = 0; index < first->count * 2; index++)
+                        sorted[index] = a[index];
+                    mathblocks_geometry_sort_points(sorted, scratch + first->count * 2, first->count);
                     int unique_count = 0;
                     for (int index = 0; index < first->count; index++)
                     {
-                        double x = a[2 * index];
-                        double y = a[2 * index + 1];
-                        int position = unique_count;
-                        while (position > 0 &&
-                               (sorted[2 * (position - 1)] > x ||
-                                (sorted[2 * (position - 1)] == x &&
-                                 sorted[2 * (position - 1) + 1] > y)))
-                            position--;
-                        if (position < unique_count && sorted[2 * position] == x &&
-                            sorted[2 * position + 1] == y)
-                        {
+                        double x = sorted[2 * index];
+                        double y = sorted[2 * index + 1];
+                        if (unique_count > 0 && sorted[2 * (unique_count - 1)] == x && sorted[2 * (unique_count - 1) + 1] == y)
                             continue;
-                        }
-                        for (int move = unique_count; move > position; move--)
-                        {
-                            sorted[2 * move] = sorted[2 * (move - 1)];
-                            sorted[2 * move + 1] = sorted[2 * (move - 1) + 1];
-                        }
-                        sorted[2 * position] = x;
-                        sorted[2 * position + 1] = y;
+                        sorted[2 * unique_count] = x;
+                        sorted[2 * unique_count + 1] = y;
                         unique_count++;
                     }
                     int count = 0;
@@ -492,7 +589,7 @@ internal static unsafe class GeometryModule
                             edge_count += adjacency[left * count + right];
                     if (edge_count == 0)
                     {
-                        mathblocks_geometry_sort_indices(a, count, ordered);
+                        mathblocks_geometry_index_order(a, count, ordered, ordered + count);
                         for (int index = 1; index < count; index++)
                         {
                             int left = ordered[index - 1] < ordered[index]
@@ -863,18 +960,8 @@ internal static unsafe class GeometryModule
                             edges[edge_count].weight = mathblocks_geometry_distance(a, left, a, right);
                             edge_count++;
                         }
-                    for (int index = 1; index < edge_count; index++)
-                    {
-                        MathBlockGeometryEdge value = edges[index];
-                        int position = index;
-                        while (position > 0 && mathblocks_geometry_edge_less(value, edges[position - 1]))
-                        {
-                            edges[position] = edges[position - 1];
-                            position--;
-                        }
-                        edges[position] = value;
-                    }
-                    int* parent = (int*)(edges + edge_capacity);
+                    mathblocks_geometry_sort_edges(edges, edges + edge_capacity, edge_count);
+                    int* parent = (int*)(edges + 2 * edge_capacity);
                     byte* rank = (byte*)(parent + vertex_count);
                     for (int index = 0; index < vertex_count; index++)
                     {

@@ -270,12 +270,16 @@ internal static unsafe class MatrixModule
         return true;
     }
 
+    [CudaExternal]
+    private static double* mathblocks_stable_merge_sort(double* values, double* buffer, int count, bool descending) => throw new NotSupportedException();
+
     [CudaDevice]
     private static void mathblocks_matrix_symmetric_eigenvalues(
         [CudaReadOnly] double* source,
         int size,
         double* work,
-        double* eigenvalues)
+        double* eigenvalues,
+        double* buffer)
     {
         mathblocks_matrix_copy(source, work, size * size);
         for (int iteration = 0; iteration < 64 * size * size; iteration++)
@@ -328,17 +332,11 @@ internal static unsafe class MatrixModule
         }
         for (int index = 0; index < size; index++)
             eigenvalues[index] = work[index * size + index];
-        for (int index = 1; index < size; index++)
-        {
-            double value = eigenvalues[index];
-            int position = index;
-            while (position > 0 && eigenvalues[position - 1] > value)
-            {
-                eigenvalues[position] = eigenvalues[position - 1];
-                position--;
-            }
-            eigenvalues[position] = value;
-        }
+        // Ascending, as the source's StableMergeSort; buffer holds size doubles.
+        double* sorted = mathblocks_stable_merge_sort(eigenvalues, buffer, size, false);
+        if (sorted != eigenvalues)
+            for (int index = 0; index < size; index++)
+                eigenvalues[index] = sorted[index];
     }
 
     [CudaDevice]
@@ -1044,7 +1042,7 @@ internal static unsafe class MatrixModule
                 return;
             }
             if (opcode == 43) mathblocks_set_vector_shape(output, size);
-            mathblocks_matrix_symmetric_eigenvalues(a, size, scratch, eigenvalues);
+            mathblocks_matrix_symmetric_eigenvalues(a, size, scratch, eigenvalues, scratch + first->count + (opcode == 43 ? 0 : size));
             if (opcode == 33) output->scalar_value = eigenvalues[size - 1];
             else if (opcode == 40) output->scalar_value = eigenvalues[0];
             for (int index = 0; index < size; index++)
@@ -1307,7 +1305,7 @@ internal static unsafe class MatrixModule
                     gram[row * size + column] = sum;
                 }
             }
-            mathblocks_matrix_symmetric_eigenvalues(gram, size, work, eigenvalues);
+            mathblocks_matrix_symmetric_eigenvalues(gram, size, work, eigenvalues, eigenvalues + size);
             double largest = eigenvalues[size - 1];
             if (largest < 0.0) largest = 0.0;
             output->scalar_value = mathblocks_square_root(largest);

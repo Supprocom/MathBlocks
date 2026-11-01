@@ -107,6 +107,9 @@ internal static unsafe class AdvancedModule
     }
 
     [CudaExternal]
+    private static double* mathblocks_stable_merge_sort(double* values, double* buffer, int count, bool descending) => throw new NotSupportedException();
+
+    [CudaExternal]
     private static void mathblocks_statistics_sort_copy([CudaReadOnly] double* values, int count, double* result, bool descending) => throw new NotSupportedException();
 
     [CudaDevice(Name = "mathblocks_advanced_dispatch")]
@@ -282,22 +285,19 @@ internal static unsafe class AdvancedModule
                 }
                 case 7:
                     mathblocks_sequence_set_vector_shape(output, first->count + 1);
-                    if (first->count <= 0)
+                    if (first->count <= 0 || scratch == null)
                     {
                         output->valid = 0;
                         break;
                     }
                     result[0] = 0.0;
                     for (int index = 0; index < first->count; index++)
+                        result[index + 1] = a[index];
                     {
-                        double value = a[index];
-                        int position = index;
-                        while (position > 0 && result[position] > value)
-                        {
-                            result[position + 1] = result[position];
-                            position--;
-                        }
-                        result[position + 1] = value;
+                        double* sorted = mathblocks_stable_merge_sort(result + 1, scratch, first->count, false);
+                        if (sorted != result + 1)
+                            for (int index = 0; index < first->count; index++)
+                                result[index + 1] = sorted[index];
                     }
                 {
                     double total = mathblocks_compensated_sum(result + 1, first->count);
