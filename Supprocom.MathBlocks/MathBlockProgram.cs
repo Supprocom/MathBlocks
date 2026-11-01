@@ -135,10 +135,17 @@ public sealed class MathBlockProgram
         for (var index = 0; index < outputs.Length; index++)
         {
             var output = outputs[index];
-            result.Add(output.Name, values[output.NodeIndex]);
+            result.Add(output.Name, PlannedOutput(output.NodeIndex, values[output.NodeIndex]));
         }
         return result;
     }
+
+    // An invalid operation output has the node's planned type, the type the program resolved at build time. That is
+    // the type the CUDA read path also gives it, since an intermediate value's run-time shape is not downloaded.
+    internal MathBlockValue PlannedOutput(int nodeIndex, MathBlockValue value) =>
+        value.IsValid || nodes[nodeIndex].Kind != MathBlockProgramBuilder.NodeKind.Operation || value.Type == nodes[nodeIndex].Type
+            ? value
+            : MathBlockValue.Invalid(nodes[nodeIndex].Type, value.InvalidReason!);
 
     private static int[][] CreateOperationLevels(Node[] source)
     {

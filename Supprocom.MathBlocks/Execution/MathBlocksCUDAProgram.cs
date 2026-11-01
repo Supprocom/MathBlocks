@@ -13,8 +13,6 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     private readonly int[] payloadOffsets;
     private readonly int[] payloadCapacities;
     private readonly MathBlockType[] resolvedTypes;
-    // The types of the input values in the staging buffers, from the prototype and then each upload.
-    private readonly MathBlockType[] stagedInputTypes;
     private readonly int[] inputPointerOffsets;
     private readonly IntPtr[] graphNodes;
     private readonly List<KernelArgumentStorage> kernelArguments;
@@ -49,18 +47,9 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         IntPtr stream,
         IntPtr graph,
         IntPtr executable,
-        bool inputsUploaded,
-        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs)
+        bool inputsUploaded)
     {
         this.program = program;
-        stagedInputTypes = new MathBlockType[program.PlanNodes.Count];
-        foreach (var node in program.PlanNodes)
-        {
-            stagedInputTypes[node.Index] = node.Kind == MathBlockProgramNodeKind.Input &&
-                prototypeInputs is not null && prototypeInputs.TryGetValue(node.Name!, out var prototype)
-                ? prototype.Type
-                : node.Type;
-        }
         this.slotOffsets = slotOffsets;
         this.payloadOffsets = payloadOffsets;
         this.payloadCapacities = payloadCapacities;
@@ -343,8 +332,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 createdStream,
                 createdGraph,
                 createdExecutable,
-                InputsAreStaged(program, prototypeInputs),
-                prototypeInputs);
+                InputsAreStaged(program, prototypeInputs));
         }
         catch
         {
@@ -398,7 +386,6 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                     0ul,
                     payloadCapacities[node.Index],
                     value);
-                stagedInputTypes[node.Index] = value.Type;
                 HostInputWriteCount++;
             }
             inputsUploaded = true;
@@ -463,58 +450,22 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             if (executionInFlight)
                 SynchronizeCore();
             var outputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal);
-            var read = new MathBlockValue?[program.PlanNodes.Count];
             foreach (var output in program.OutputNodeIndexes)
             {
-                read[output.Value] = MathBlockCudaValueCodec.ReadValue(
-                    downloadArena,
-                    checked(slotOffsets[output.Value] - downloadArenaOffset),
-                    payloadOffsets[output.Value] < 0
-                        ? -1
-                        : checked(payloadOffsets[output.Value] - downloadArenaOffset),
-                    resolvedTypes[output.Value]);
-                HostOutputReadCount++;
-            }
-            foreach (var output in program.OutputNodeIndexes)
-            {
-                var value = read[output.Value]!.Value;
                 outputs.Add(
                     output.Key,
-                    value.IsValid
-                        ? value
-                        : MathBlockValue.Invalid(ResolveInvalidType(output.Value, read), value.InvalidReason!));
+                    program.PlannedOutput(
+                        output.Value,
+                        MathBlockCudaValueCodec.ReadValue(
+                            downloadArena,
+                            checked(slotOffsets[output.Value] - downloadArenaOffset),
+                            payloadOffsets[output.Value] < 0
+                                ? -1
+                                : checked(payloadOffsets[output.Value] - downloadArenaOffset),
+                            resolvedTypes[output.Value])));
+                HostOutputReadCount++;
             }
             return outputs;
-        }
-    }
-
-    // An invalid result has the type the operation resolves for its run-time input types, as CoreCLR's Evaluate
-    // gives it, rather than the slot's planned shape (a capacity where the shape depends on input values). Program
-    // inputs have the staged values' types and constants their values' types; a producer that is also an output has
-    // the type read for it, and any other producer, whose slot is not downloaded, its program type.
-    private MathBlockType ResolveInvalidType(int nodeIndex, MathBlockValue?[] read)
-    {
-        var node = program.PlanNodes[nodeIndex];
-        if (node.Kind != MathBlockProgramNodeKind.Operation)
-            return resolvedTypes[nodeIndex];
-        var inputTypes = new MathBlockType[node.Inputs.Count];
-        for (var index = 0; index < inputTypes.Length; index++)
-        {
-            var producer = program.PlanNodes[node.Inputs[index]];
-            inputTypes[index] = producer.Kind switch
-            {
-                MathBlockProgramNodeKind.Input => stagedInputTypes[producer.Index],
-                MathBlockProgramNodeKind.Constant => producer.Value.Type,
-                _ => read[producer.Index] is { } value ? value.Type : producer.Type
-            };
-        }
-        try
-        {
-            return ResolveOperation(node.OperationIdentity!).ResolveOutputType(inputTypes);
-        }
-        catch (InvalidOperationException)
-        {
-            return resolvedTypes[nodeIndex];
         }
     }
 

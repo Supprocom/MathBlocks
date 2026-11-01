@@ -229,6 +229,7 @@ public sealed partial class MathBlockCudaWorkerTests
                     var count = value.AsVector().Count;
                     alternatives.Add(MathBlockValue.Vector(Enumerable.Range(0, count).Select(index => index % 2 == 0 ? 1.7e308d : -1.7e308d), unit));
                     alternatives.Add(MathBlockValue.Vector(Enumerable.Repeat(1e200d, count), unit));
+                    alternatives.Add(MathBlockValue.Vector(Enumerable.Repeat(1.7e308d, count), unit));
                     alternatives.Add(MathBlockValue.Vector(Enumerable.Range(0, count).Select(index => -1d - index), unit));
                     alternatives.Add(MathBlockValue.Vector(Enumerable.Range(0, count).Select(index => 0.5d + index), unit));
                     alternatives.Add(MathBlockValue.Vector(new double[count], unit));
@@ -236,12 +237,15 @@ public sealed partial class MathBlockCudaWorkerTests
                 case MathBlockValueKind.Matrix:
                     var matrix = value.AsMatrix();
                     alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Repeat(1e200d, matrix.Rows * matrix.Columns)), unit));
+                    alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Range(0, matrix.Rows * matrix.Columns).Select(index => (index * 7 % 3 - 1) * 1e200d + index)), unit));
+                    alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Range(0, matrix.Rows * matrix.Columns).Select(index => index / matrix.Columns == index % matrix.Columns ? 1e200d : 0d)), unit));
                     alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Range(0, matrix.Rows * matrix.Columns).Select(index => -1d - index)), unit));
                     alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Range(0, matrix.Rows * matrix.Columns).Select(index => 0.5d + index)), unit));
                     break;
                 case MathBlockValueKind.PointSet:
                     var points = value.AsPointSet().Count;
                     alternatives.Add(MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Range(0, points).Select(index => new MathBlockPoint(index % 2 == 0 ? 1.7e308d : -1.7e308d, index * 1e200d))), unit));
+                    alternatives.Add(MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Repeat(new MathBlockPoint(1.7e308d, 1.7e308d), points)), unit));
                     break;
             }
             for (var variant = 0; variant < alternatives.Count; variant++)
@@ -254,6 +258,30 @@ public sealed partial class MathBlockCudaWorkerTests
                 yield return inputs;
             }
         }
+    }
+
+    /// <summary>
+    /// Verifies an invalid output of a multi-node program has the CoreCLR type on CUDA, its planned type, where the
+    /// intermediate rolling sum has a run-time length the plan does not know.
+    /// </summary>
+    [Fact]
+    public void CUDAInvalidProgramOutputHasItsPlannedType()
+    {
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        var program = MathBlockProgramTests.BuildRollingLogarithmProgram();
+        var inputs = MathBlockProgramTests.RollingLogarithmInputs();
+        var prototype = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
+        {
+            ["values"] = MathBlockValue.Vector([1d, 2d, 3d, 4d]),
+            ["width"] = MathBlockValue.Scalar(2d)
+        };
+        var coreclr = program.Evaluate(inputs)["logarithm"];
+        using var compiled = new MathBlocksCUDAWorker().Compile(program, prototype);
+        Assert.True(IsExact(program.Evaluate(prototype)["logarithm"], compiled.Execute(prototype)["logarithm"]), "The finite case differs.");
+        var cuda = compiled.Execute(inputs)["logarithm"];
+
+        Assert.False(coreclr.IsValid);
+        Assert.True(IsExact(coreclr, cuda), $"CoreCLR={DescribeBits(coreclr)} ({coreclr.Type}), CUDA={DescribeBits(cuda)} ({cuda.Type})");
     }
 
     private static void VerifyOverflowCase(string name, OverflowCase overflow)

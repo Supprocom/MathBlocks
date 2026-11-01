@@ -267,6 +267,39 @@ public sealed class MathBlockProgramTests
         }
     }
 
+    /// <summary>
+    /// Verifies an invalid program output has its node's planned type, even where an intermediate value has a
+    /// longer run-time shape: the rolling sum's width is an input, so its length is unknown when the program is
+    /// built, and the logarithm of a negative window sum is invalid.
+    /// </summary>
+    [Fact]
+    public void InvalidProgramOutputHasItsPlannedType()
+    {
+        var program = BuildRollingLogarithmProgram();
+        var outputs = program.Evaluate(RollingLogarithmInputs());
+
+        Assert.False(outputs["logarithm"].IsValid);
+        Assert.Equal(program.Outputs["logarithm"], outputs["logarithm"].Type);
+        Assert.Equal(0, program.Outputs["logarithm"].Rows);
+    }
+
+    // input -> sequence.rolling-sum(input, width) -> vector.natural-logarithm, with the width as a program input.
+    internal static MathBlockProgram BuildRollingLogarithmProgram()
+    {
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var values = builder.Input("values", MathBlockType.Vector(length: 4));
+        var width = builder.Input("width", MathBlockType.Scalar());
+        var sums = builder.Apply("sequence.rolling-sum", inputs: [values, width]);
+        return builder.Output("logarithm", builder.Apply("vector.natural-logarithm", inputs: [sums])).Build();
+    }
+
+    internal static Dictionary<string, MathBlockValue> RollingLogarithmInputs() =>
+        new(StringComparer.Ordinal)
+        {
+            ["values"] = MathBlockValue.Vector([1d, -5d, 1d, 1d]),
+            ["width"] = MathBlockValue.Scalar(2d)
+        };
+
     private static MathBlockProgram BuildAffineProgram(double constant)
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
