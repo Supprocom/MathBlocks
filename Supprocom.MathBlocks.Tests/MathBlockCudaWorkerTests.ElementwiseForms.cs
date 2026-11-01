@@ -142,9 +142,10 @@ public sealed partial class MathBlockCudaWorkerTests
 
     /// <summary>
     /// Verifies the scalar operations built on the Lanczos log-gamma give the CoreCLR bits on CUDA on dense grids of
-    /// non-integer arguments: log-gamma on (0, 10] in steps of 1/64 and on the reflection branch (-3, 0.5),
-    /// beta on a 40 x 40 grid of (0, 10] and pairs with one argument in (-3, 0.5), and the regularized
-    /// incomplete beta on a grid of x in (0, 1) and parameters in (0, 10].
+    /// non-integer, non-dyadic arguments (offsets of 0.1 and 0.3, so the shifts round): log-gamma on (0, 10] in
+    /// steps of 1/64 and on the reflection branch (-3, 0.5), beta on a 40 x 40 grid of (0, 10] and pairs with one
+    /// argument in (-3, 0.5), and the regularized incomplete beta on a grid of x in (0, 1) and parameters in
+    /// (0, 10], plus parameters that are subnormal, where the exponential of the front factor is subnormal.
     /// </summary>
     [Theory]
     [InlineData("special.log-gamma")]
@@ -160,22 +161,26 @@ public sealed partial class MathBlockCudaWorkerTests
         {
             case 1:
                 for (var index = 0; index < 640; index++)
-                    cases.Add([Scalar(index / 64d + 1d / 1024d)]);
+                    cases.Add([Scalar((index + 0.1d) / 64d)]);
                 for (var index = 0; index < 224; index++)
-                    cases.Add([Scalar(-3d + (index + 0.5d) / 64d)]);
+                    cases.Add([Scalar(-3d + (index + 0.3d) / 64d)]);
                 break;
             case 2:
                 for (var left = 0; left < 40; left++)
                     for (var right = 0; right < 40; right++)
-                        cases.Add([Scalar((left + 0.5d) / 4d), Scalar((right + 0.3d) / 4d)]);
+                        cases.Add([Scalar((left + 0.1d) / 4d), Scalar((right + 0.3d) / 4d)]);
                 for (var index = 0; index < 224; index++)
-                    cases.Add([Scalar(-3d + (index + 0.5d) / 64d), Scalar(1.7d + index / 32d)]);
+                    cases.Add([Scalar(-3d + (index + 0.3d) / 64d), Scalar(1.7d + index / 32d)]);
                 break;
             default:
                 for (var x = 0; x < 10; x++)
                     for (var left = 0; left < 15; left++)
                         for (var right = 0; right < 15; right++)
                             cases.Add([Scalar((x + 0.5d) / 10d), Scalar((left + 0.5d) / 1.5d), Scalar((right + 0.3d) / 1.5d)]);
+                foreach (var tiny in new[] { 5.86594004457162E-309d, 5.996723829767073E-309d, 1e-310d, 1.5e-308d })
+                    for (var x = 0; x < 40; x++)
+                        for (var left = 0; left < 5; left++)
+                            cases.Add([Scalar((x + 0.5d) / 40d), Scalar((left + 0.3d) / 2d), Scalar(tiny)]);
                 break;
         }
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
@@ -201,6 +206,56 @@ public sealed partial class MathBlockCudaWorkerTests
             failures.Count == 0,
             $"{identifier}: {failures.Count} of {cases.Count} cases differ. First 10: {string.Join("; ", failures.Take(10))}");
         Assert.True(valid > 600, $"{identifier}: only {valid} cases were valid.");
+    }
+
+    /// <summary>
+    /// Verifies operations whose exponential result is subnormal give the CoreCLR bits on CUDA: the exponential
+    /// and the logistic on 4,000 non-dyadic points of (-745.1, -707.6), the power of 0.5 to non-integer exponents in
+    /// (1022, 1075), and the Poisson probability at rates in (708, 745).
+    /// </summary>
+    [Theory]
+    [InlineData("scalar.exponential")]
+    [InlineData("scalar.logistic")]
+    [InlineData("scalar.power")]
+    [InlineData("probability.poisson-pmf")]
+    public void CUDASubnormalExponentialResultsMatchCoreCLRBitForBit(string identifier)
+    {
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        var operation = MathBlockCatalog.Standard.Get(identifier, 1);
+        var cases = new List<MathBlockValue[]>();
+        for (var index = 0; index < 4_000; index++)
+        {
+            var fraction = (index + 0.1d) / 4_000d;
+            cases.Add(identifier switch
+            {
+                "scalar.power" => [MathBlockValue.Scalar(0.5d), MathBlockValue.Scalar(1022d + 53d * fraction)],
+                "probability.poisson-pmf" => [MathBlockValue.Scalar(708d + 37d * fraction), MathBlockValue.Scalar(index % 4)],
+                _ => [MathBlockValue.Scalar(-745.1d + 37.5d * fraction)]
+            });
+        }
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var nodes = cases[0].Select((input, index) => builder.Input($"input-{index}", input.Type)).ToArray();
+        var program = builder.Output("result", builder.Apply(operation.Identifier, operation.Version, nodes)).Build();
+        using var compiled = new MathBlocksCUDAWorker().Compile(program, NameWindowInputs(cases[0]));
+        var failures = new List<string>();
+        var subnormal = 0;
+        for (var index = 0; index < cases.Count; index++)
+        {
+            var inputs = cases[index];
+            var coreclr = operation.Evaluate(inputs);
+            compiled.UploadInputs(NameWindowInputs(inputs));
+            compiled.ExecuteResident();
+            var cuda = compiled.ReadOutputs()["result"];
+            if (coreclr.IsValid && coreclr.AsScalar() != 0d && Math.Abs(coreclr.AsScalar()) < 2.2250738585072014E-308d)
+                subnormal++;
+            if (!IsExact(coreclr, cuda))
+                failures.Add($"({string.Join(", ", inputs.Select(DescribeBits))}): CoreCLR={DescribeBits(coreclr)}, CUDA={DescribeBits(cuda)}");
+        }
+
+        Assert.True(
+            failures.Count == 0,
+            $"{identifier}: {failures.Count} of {cases.Count} cases differ. First 10: {string.Join("; ", failures.Take(10))}");
+        Assert.True(subnormal > 1_000, $"{identifier}: only {subnormal} results were subnormal.");
     }
 
     private static IEnumerable<ElementwiseCase> CreateElementwiseCases(string source)
