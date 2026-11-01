@@ -432,6 +432,7 @@ internal static unsafe class ProbabilityModule
                 for (int index = 0; index < first->count; index++)
                     if ((mask & (1 << index)) != 0) sum += a[index];
                 result[mask - 1] = sum;
+                if (!double.IsFinite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
             }
             return;
         }
@@ -448,7 +449,10 @@ internal static unsafe class ProbabilityModule
             else
             {
                 for (int index = thread + 1; index < first->count; index += Cuda.BlockDim.X)
+                {
                     result[index - 1] = index * a[index];
+                    if (!double.IsFinite(result[index - 1])) Cuda.AtomicExchange(ref output->valid, 0);
+                }
             }
             return;
         }
@@ -770,6 +774,7 @@ internal static unsafe class ProbabilityModule
                     scratch[degree] += a[value_index] * scratch[degree - 1];
             }
             output->scalar_value = scratch[order];
+            if (!double.IsFinite(output->scalar_value)) output->valid = 0;
             return;
         }
 

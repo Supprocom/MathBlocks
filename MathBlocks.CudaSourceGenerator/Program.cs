@@ -51,7 +51,7 @@ internal static class Program
         var fullBytes = Encoding.UTF8.GetBytes(fullSource);
         var fullHash = Convert.ToHexString(SHA256.HashData(fullBytes));
         const string expectedFullHash =
-            "F3096223C62C011850688E74365A214A4CB0AA7308E9FC4B7463304D055E48D2";
+            "5F53B9285F3E8E0AE4915D6005418BB08B76A1B939654E0750F96F0BCB2FF446";
         if (!string.Equals(fullHash, expectedFullHash, StringComparison.Ordinal))
             throw new InvalidOperationException(
                 $"Full CUDA source hash mismatch. Expected {expectedFullHash}, actual {fullHash}.");

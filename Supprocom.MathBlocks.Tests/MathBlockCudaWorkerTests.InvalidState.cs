@@ -74,6 +74,25 @@ public sealed partial class MathBlockCudaWorkerTests
             "topology.zero-dimensional-persistence",
             [PointValues((0d, 0d), (1d, 0d), (0d, 1d))],
             [PointValues((0d, 0d), (1e200d, 0d), (0d, 1e200d))]),
+        ["combinatorics.nonempty-subset-sums"] = Single(
+            "combinatorics.nonempty-subset-sums",
+            [MathBlockValue.Vector([1d, 2d])],
+            [MathBlockValue.Vector([1.7e308d, 1.7e308d])]),
+        ["polynomial.derivative"] = Single(
+            "polynomial.derivative",
+            [MathBlockValue.Vector([1d, 2d, 3d])],
+            [MathBlockValue.Vector([1d, 1.7e308d, 1.7e308d])]),
+        // A scalar result, which the host read invalidates; a device consumer saw a valid infinity.
+        ["polynomial.elementary-symmetric/consumed"] = new(
+            builder =>
+            {
+                var values = builder.Input("input-0", MathBlockType.Vector(length: 2));
+                var order = builder.Input("input-1", MathBlockType.Scalar());
+                var symmetric = builder.Apply("polynomial.elementary-symmetric", 1, values, order);
+                return builder.Apply("scalar.greater-than", 1, symmetric, builder.Constant(MathBlockValue.Scalar(1d)));
+            },
+            [MathBlockValue.Vector([1d, 2d]), MathBlockValue.Scalar(2d)],
+            [MathBlockValue.Vector([1e200d, 1e200d]), MathBlockValue.Scalar(2d)]),
         // complex.magnitude is a scalar, which the host read invalidates; a device consumer saw a valid infinity.
         ["complex.magnitude/consumed"] = new(
             builder =>
