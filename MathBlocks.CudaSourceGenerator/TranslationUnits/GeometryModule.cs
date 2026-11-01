@@ -26,6 +26,9 @@ internal static unsafe class GeometryModule
     [CudaExternal(IsPure = true)]
     private static double mathblocks_positive_infinity() => throw new NotSupportedException();
 
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_quiet_nan() => throw new NotSupportedException();
+
     [CudaExternal]
     private static void mathblocks_sequence_set_matrix_shape(MathBlockSlot* output, int rows, int columns) => throw new NotSupportedException();
 
@@ -70,6 +73,23 @@ internal static unsafe class GeometryModule
             right[2 * right_index + 1]);
     }
 
+    // Whether the turn at the middle point is not a left turn. A NaN cross product (inf - inf from overflowing products) sets overflow.
+    [CudaDevice]
+    private static bool mathblocks_geometry_not_left_turn(
+        int* overflow,
+        double origin_x,
+        double origin_y,
+        double left_x,
+        double left_y,
+        double right_x,
+        double right_y)
+    {
+        double cross = mathblocks_geometry_cross(origin_x, origin_y, left_x, left_y, right_x, right_y);
+        if (double.IsNaN(cross))
+            *overflow = 1;
+        return cross <= 0.0;
+    }
+
     [CudaDevice]
     private static double mathblocks_geometry_cross(
         double origin_x,
@@ -108,6 +128,19 @@ internal static unsafe class GeometryModule
     }
 
     [CudaDevice]
+    private static double mathblocks_geometry_barycentric_denominator(
+        double first_x,
+        double first_y,
+        double second_x,
+        double second_y,
+        double third_x,
+        double third_y)
+    {
+        return (second_y - third_y) * (first_x - third_x) +
+               (third_x - second_x) * (first_y - third_y);
+    }
+
+    [CudaDevice]
     private static void mathblocks_geometry_barycentric(
         double point_x,
         double point_y,
@@ -119,8 +152,16 @@ internal static unsafe class GeometryModule
         double third_y,
         double* result)
     {
-        double denominator = (second_y - third_y) * (first_x - third_x) +
-                             (third_x - second_x) * (first_y - third_y);
+        double denominator = mathblocks_geometry_barycentric_denominator(
+            first_x, first_y, second_x, second_y, third_x, third_y);
+        // A denominator that overflowed would divide the numerators by an infinity and give finite weights near zero.
+        if (!double.IsFinite(denominator))
+        {
+            result[0] = mathblocks_quiet_nan();
+            result[1] = mathblocks_quiet_nan();
+            result[2] = mathblocks_quiet_nan();
+            return;
+        }
         double first_weight = ((second_y - third_y) * (point_x - third_x) +
                                (third_x - second_x) * (point_y - third_y)) / denominator;
         double second_weight = ((third_y - first_y) * (point_x - third_x) +
@@ -450,11 +491,15 @@ internal static unsafe class GeometryModule
                             inside = true;
                             break;
                         }
-                        if ((left_y > point_y) != (right_y > point_y) &&
-                            point_x < (right_x - left_x) * (point_y - left_y) /
-                                      (right_y - left_y) + left_x)
+                        if ((left_y > point_y) != (right_y > point_y))
                         {
-                            inside = !inside;
+                            // The crossing lies between the edge's end points, so it is finite unless a product overflowed.
+                            double crossing = (right_x - left_x) * (point_y - left_y) /
+                                              (right_y - left_y) + left_x;
+                            if (!double.IsFinite(crossing))
+                                output->valid = 0;
+                            if (point_x < crossing)
+                                inside = !inside;
                         }
                     }
                     output->boolean_value = inside ? 1 : 0;
@@ -484,6 +529,7 @@ internal static unsafe class GeometryModule
                         unique_count++;
                     }
                     int count = 0;
+                    int hull_overflow = 0;
                     if (unique_count <= 1)
                     {
                         count = unique_count;
@@ -497,10 +543,11 @@ internal static unsafe class GeometryModule
                     {
                         for (int index = 0; index < unique_count; index++)
                         {
-                            while (count >= 2 && mathblocks_geometry_cross(
+                            while (count >= 2 && mathblocks_geometry_not_left_turn(
+                                &hull_overflow,
                                 hull[2 * (count - 2)], hull[2 * (count - 2) + 1],
                                 hull[2 * (count - 1)], hull[2 * (count - 1) + 1],
-                                sorted[2 * index], sorted[2 * index + 1]) <= 0.0)
+                                sorted[2 * index], sorted[2 * index + 1]))
                             {
                                 count--;
                             }
@@ -511,10 +558,11 @@ internal static unsafe class GeometryModule
                         int lower_count = count;
                         for (int index = unique_count - 2; index >= 0; index--)
                         {
-                            while (count > lower_count && mathblocks_geometry_cross(
+                            while (count > lower_count && mathblocks_geometry_not_left_turn(
+                                &hull_overflow,
                                 hull[2 * (count - 2)], hull[2 * (count - 2) + 1],
                                 hull[2 * (count - 1)], hull[2 * (count - 1) + 1],
-                                sorted[2 * index], sorted[2 * index + 1]) <= 0.0)
+                                sorted[2 * index], sorted[2 * index + 1]))
                             {
                                 count--;
                             }
@@ -524,6 +572,8 @@ internal static unsafe class GeometryModule
                         }
                         count--;
                     }
+                    if (hull_overflow != 0)
+                        output->valid = 0;
                     output->rows = count;
                     output->count = count;
                     if (count > output->capacity)
@@ -795,6 +845,9 @@ internal static unsafe class GeometryModule
                                 continue;
                             double cross = pivot_x * y - pivot_y * x;
                             double dot = pivot_x * x + pivot_y * y;
+                            // A NaN (inf - inf, 0 * inf from an overflowing product) fails both tests and would count the point as outside.
+                            if (double.IsNaN(cross) || double.IsNaN(dot))
+                                output->valid = 0;
                             if (cross > 0.0 || (cross == 0.0 && dot > 0.0))
                                 count++;
                         }
@@ -899,12 +952,21 @@ internal static unsafe class GeometryModule
                             for (int three = two + 1; three < first->count; three++)
                             {
                                 total++;
+                                // A degenerate triangle holds no point; a coordinate that is not finite makes the depth invalid.
+                                if (mathblocks_geometry_barycentric_denominator(
+                                        a[2 * one], a[2 * one + 1],
+                                        a[2 * two], a[2 * two + 1],
+                                        a[2 * three], a[2 * three + 1]) == 0.0)
+                                    continue;
                                 mathblocks_geometry_barycentric(
                                     b[0], b[1],
                                     a[2 * one], a[2 * one + 1],
                                     a[2 * two], a[2 * two + 1],
                                     a[2 * three], a[2 * three + 1],
                                     coordinates);
+                                if (!double.IsFinite(coordinates[0]) || !double.IsFinite(coordinates[1]) ||
+                                    !double.IsFinite(coordinates[2]))
+                                    output->valid = 0;
                                 if (coordinates[0] >= 0.0 && coordinates[0] <= 1.0 &&
                                     coordinates[1] >= 0.0 && coordinates[1] <= 1.0 &&
                                     coordinates[2] >= 0.0 && coordinates[2] <= 1.0)

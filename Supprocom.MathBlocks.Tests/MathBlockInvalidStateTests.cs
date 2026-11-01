@@ -58,6 +58,53 @@ public sealed class MathBlockInvalidStateTests
             ["geometry.gabriel-graph/overflow"] = ("geometry.gabriel-graph@1", () => [Points((0d, 0d), (1e200d, 0d), (0d, 1e200d))]),
             ["topology.zero-dimensional-persistence/overflow"] = ("topology.zero-dimensional-persistence@1", () => [Points((0d, 0d), (1e200d, 0d), (0d, 1e200d))]),
 
+            // An intermediate that overflows makes the result invalid. A variance, a standard-deviation product or a distance moment
+            // that is infinity used to divide a finite value and give a valid zero (or a valid near-zero) where the true value is not zero.
+            ["statistics.pearson-correlation/variance-overflow"] = ("statistics.pearson-correlation@1", () =>
+                [Vector(1d, 2d, 3d, 4d), Vector(-7.143571252424402d, 1.791250087206395e308d, 7.274205695928337d, -9.877113669855383d)]),
+            ["statistics.distance-correlation/moment-overflow"] = ("statistics.distance-correlation@1", () =>
+                [Vector(-2.2078367837649733e302d, -6.343768537094183d, -5.8364683556946435d), Vector(-1.0680179441064644e-294d, 36.84280271658108d, 0.9048608060071095d)]),
+            ["statistics.linear-slope/variance-overflow"] = ("statistics.linear-slope@1", () =>
+                [Vector(7.114245152862294d, -2.2078367837649733e302d, -728.0038665276926d, 4.224291341469105d), Vector(0.4953195529423522d, 0.7783700051634825d, 118d, -720.3804674671959d)]),
+            ["statistics.linear-intercept/variance-overflow"] = ("statistics.linear-intercept@1", () =>
+                [Vector(7.114245152862294d, -2.2078367837649733e302d, -728.0038665276926d, 4.224291341469105d), Vector(0.4953195529423522d, 0.7783700051634825d, 118d, -720.3804674671959d)]),
+            ["statistics.linear-r-squared/variance-overflow"] = ("statistics.linear-r-squared@1", () =>
+                [Vector(1.337705117e-315d, -3.22983270795382e-299d, -17.27875959474386d, -0.8325065752238905d), Vector(-3.496470870518605d, -11.96980468906019d, 5.458565798214325e303d, -729.5969940812662d)]),
+            ["statistics.autocorrelation/variance-overflow"] = ("statistics.autocorrelation@1", () =>
+                [Vector(4.388899255034951e304d, -4.440892098500626e-16d, -22.450293565523026d, 0.0037950201825623286d), Scalar(2d)]),
+            ["vector.standardize/variance-overflow"] = ("vector.standardize@1", () =>
+                [Vector(1.7954044555660155e308d, -4.507602767758473e239d, 710.0904103212077d)]),
+            ["geometry.simplicial-depth/coordinate-overflow"] = ("geometry.simplicial-depth@1", () =>
+                [Points((698.0421626654253d, 0.7817012842080717d), (-22.194671885609296d, 1.7972928048203887e308d), (-3.80572792044629d, -708.0863943344233d)),
+                    Points((-0.9999999999999934d, 7.274205695928337d))]),
+            ["geometry.barycentric-coordinates/denominator-overflow"] = ("geometry.barycentric-coordinates@1", () =>
+                [Points((1d, 1d)), Points((1e200d, 0d), (0d, 1e200d), (0d, 0d))]),
+            ["geometry.halfspace-depth/nan-cross-product"] = ("geometry.halfspace-depth@1", () =>
+                [Points((1e200d, 1e200d), (2e200d, 2e200d)), Points((0d, 0d))]),
+
+            // A NaN operand gives NaN from the owned Max and Min (IEEE 754-2019), so an intermediate that is NaN makes the result invalid.
+            // A zero peak followed by a zero is 0 / 0 (as a zero peak followed by a negative value is already invalid).
+            ["path.maximum-relative-decline/zero-peak-then-zero"] = ("path.maximum-relative-decline@1", () => [Vector(0d, -0d, 0.5d)]),
+            ["path.maximum-relative-decline/zero-peak-then-later-decline"] = ("path.maximum-relative-decline@1", () => [Vector(0d, 0d, 3d, 1d)]),
+            // A zero Lipschitz constant times an overflowing distance is 0 * infinity.
+            ["extension.mcshane/zero-lipschitz-overflowing-distance"] = ("extension.mcshane@1", () =>
+                [Vector(-1.7e308d, 0d), Vector(-5d, 3d), Vector(1.7e308d), Scalar(0d)]),
+            ["extension.whitney/zero-lipschitz-overflowing-distance"] = ("extension.whitney@1", () =>
+                [Vector(-1.7e308d, 0d), Vector(5d, -3d), Vector(1.7e308d), Scalar(0d)]),
+
+            // The remaining overflow victims: a division by an infinity (a squared divisor, a slope's difference), a NaN cross product and a trace
+            // beyond ln(DBL_MAX) + ln(n) / 2 (the scaling and squaring of dense#596 collapsed to valid zeros without a non-finite value).
+            ["complex.divide/divisor-overflow"] = ("complex.divide@1", () =>
+                [MathBlockValue.Complex(new Complex(1d, 1d)), MathBlockValue.Complex(new Complex(1e200d, 1e200d))]),
+            ["geometry.contains-point/crossing-overflow"] = ("geometry.contains-point@1", () =>
+                [Points((-1e200d, -1e200d), (1e200d, -1e200d), (1e200d, 1e200d)), Points((2e199d, 1e199d))]),
+            ["geometry.convex-hull/nan-cross-product"] = ("geometry.convex-hull@1", () =>
+                [Points((0d, 0d), (1e200d, 1e200d), (2e200d, 2e200d))]),
+            ["statistics.theil-sen-slope/difference-overflow"] = ("statistics.theil-sen-slope@1", () =>
+                [Vector(-1.7e308d, 1.7e308d), Vector(1d, 2d)]),
+            ["matrix.exponential/trace-overflow"] = ("matrix.exponential@1", () =>
+                [Matrix(2, 2, 3.4292183174601395e201d, -2.799680927722256e101d, 8.572068857490139e301d, -1.0737128770591469d)]),
+
             // A row norm that overflows asked for int.MaxValue squarings.
             ["matrix.exponential/overflowing-norm"] = ("matrix.exponential@1", () => [Matrix(2, 2, 1.7e308d, 1.7e308d, 0d, 0d)]),
 
@@ -86,7 +133,8 @@ public sealed class MathBlockInvalidStateTests
     {
         // CUDA sizes this result by an upper bound, C(columns, min(rows, columns / 2)), not the exact count
         // C(columns, rows), so no declared length would equal its slot shape for every matrix shape.
-        ["matrix.maximal-minors@1"] = "the minor count is C(columns, rows), which the resolver does not compute"
+        ["matrix.maximal-minors@1"] = "the minor count is C(columns, rows), which the resolver does not compute",
+        ["geometry.convex-hull@1"] = "the number of hull vertices depends on the points, not on their count"
     };
 
     /// <summary>Gets the out-of-domain case names.</summary>
@@ -154,6 +202,36 @@ public sealed class MathBlockInvalidStateTests
             }
         }
         Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures));
+    }
+
+    /// <summary>
+    /// Verifies a window whose running peak is 0 followed by 0 (0 / 0) is invalid in both window forms, as a zero peak followed by a
+    /// negative value is; the windows with a positive peak are valid.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "InvalidState")]
+    public void RelativeDeclineWindowsWithAZeroPeakFollowedByZeroAreInvalid()
+    {
+        var series = Vector(-0d, 2d, 0d, -0d, 0d, 1.25d);
+        var validity = MathBlockCatalog.Standard.Get("window-valid.path.maximum-relative-decline").Evaluate(series, Scalar(3d));
+        Assert.Equal([false, false, true, true, false, false], validity.AsBooleanVector());
+        var form = MathBlockCatalog.Standard.Get("window.path.maximum-relative-decline").Evaluate(series, Scalar(3d), Scalar(-1d));
+        Assert.Equal([-1d, -1d, 1d, 1d, -1d, -1d], form.AsVector());
+    }
+
+    /// <summary>
+    /// Verifies the trace bound of matrix.exponential: the result is invalid when trace / n exceeds ln(DBL_MAX) + ln(n) / 2 (the Hadamard form; the
+    /// bound with ln(n) is also valid and stricter) and a trace below it still gives a valid result.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "InvalidState")]
+    public void MatrixExponentialIsInvalidAboveTheTraceBoundAndValidBelowIt()
+    {
+        var operation = MathBlockCatalog.Standard.Get("matrix.exponential");
+        Assert.True(operation.Evaluate(Matrix(2, 2, 700d, 0d, 0d, 0d)).IsValid);
+        Assert.True(operation.Evaluate(Matrix(2, 2, 1.0d, 0d, 0d, 1d)).IsValid);
+        Assert.False(operation.Evaluate(Matrix(2, 2, 1500d, 0d, 0d, 0d)).IsValid);
+        Assert.False(operation.Evaluate(Matrix(2, 2, 3.4292183174601395e201d, -2.799680927722256e101d, 8.572068857490139e301d, -1.0737128770591469d)).IsValid);
     }
 
     /// <summary>Verifies the rolling variance is in the square of the input unit.</summary>

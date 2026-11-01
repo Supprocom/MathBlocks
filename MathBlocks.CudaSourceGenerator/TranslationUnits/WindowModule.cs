@@ -61,6 +61,15 @@ internal static unsafe class WindowModule
     private static double mathblocks_statistics_population_covariance([CudaReadOnly] double* left, [CudaReadOnly] double* right, int count) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
+    private static double mathblocks_statistics_quotient_by_variance(double covariance, double variance) => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_statistics_correlation_value(double covariance, double left_variance, double right_variance) => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_statistics_distance_correlation_value(double covariance_square, double left_variance_square, double right_variance_square) => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
     private static double mathblocks_statistics_pearson([CudaReadOnly] double* left, [CudaReadOnly] double* right, int count) => throw new NotSupportedException();
 
     [CudaExternal]
@@ -286,9 +295,8 @@ internal static unsafe class WindowModule
         covariance_square /= count * count;
         left_variance_square /= count * count;
         right_variance_square /= count * count;
-        *value = mathblocks_square_root(
-            covariance_square /
-            mathblocks_square_root(left_variance_square * right_variance_square));
+        *value = mathblocks_statistics_distance_correlation_value(
+            covariance_square, left_variance_square, right_variance_square);
         return double.IsFinite(*value);
     }
 
@@ -379,21 +387,22 @@ internal static unsafe class WindowModule
                 }
                 else if (source == 7)
                 {
-                    *value = covariance /
-                        mathblocks_statistics_population_variance(a, count);
+                    *value = mathblocks_statistics_quotient_by_variance(
+                        covariance, mathblocks_statistics_population_variance(a, count));
                 }
                 else if (source == 5)
                 {
-                    double slope = covariance /
-                        mathblocks_statistics_population_variance(a, count);
+                    double slope = mathblocks_statistics_quotient_by_variance(
+                        covariance, mathblocks_statistics_population_variance(a, count));
                     *value = mathblocks_statistics_mean(b, count) -
                         slope * mathblocks_statistics_mean(a, count);
                 }
                 else
                 {
-                    double correlation = covariance /
-                        (mathblocks_square_root(mathblocks_statistics_population_variance(a, count)) *
-                         mathblocks_square_root(mathblocks_statistics_population_variance(b, count)));
+                    double correlation = mathblocks_statistics_correlation_value(
+                        covariance,
+                        mathblocks_statistics_population_variance(a, count),
+                        mathblocks_statistics_population_variance(b, count));
                     *value = source == 6 ? correlation * correlation : correlation;
                 }
                 break;
@@ -456,7 +465,7 @@ internal static unsafe class WindowModule
             case 22:
             {
                 int slope_count = mathblocks_statistics_pair_slopes(a, b, count, scratch);
-                if (slope_count == 0)
+                if (slope_count <= 0)
                     return false;
                 *value = mathblocks_window_scratch_median(scratch, slope_count);
                 break;

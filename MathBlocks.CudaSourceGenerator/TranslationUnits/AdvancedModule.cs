@@ -30,6 +30,12 @@ internal static unsafe class AdvancedModule
     private static double mathblocks_positive_infinity() => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
+    private static double mathblocks_minimum(double first, double second) => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_maximum(double first, double second) => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
     private static bool mathblocks_probability_distribution([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
 
     [CudaExternal]
@@ -261,9 +267,11 @@ internal static unsafe class AdvancedModule
                             double candidate = opcode == 4
                                 ? b[index] + fourth->scalar_value * Math.Abs(c[query] - a[index])
                                 : b[index] - fourth->scalar_value * Math.Abs(c[query] - a[index]);
+                            // The owned minimum and maximum, as CoreCLR: a NaN candidate (0 * infinity from a zero Lipschitz constant and an
+                            // overflowing distance) makes the result NaN (invalid), and the sign of a zero is the same.
                             selected = opcode == 4
-                                ? (selected < candidate ? selected : candidate)
-                                : (selected > candidate ? selected : candidate);
+                                ? mathblocks_minimum(selected, candidate)
+                                : mathblocks_maximum(selected, candidate);
                         }
                         result[query] = selected;
                     }

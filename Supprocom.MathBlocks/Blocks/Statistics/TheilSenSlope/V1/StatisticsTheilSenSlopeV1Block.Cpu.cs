@@ -13,8 +13,17 @@ public static partial class MathBlockStatistics
             for (var second = first + 1; second < x.Count; second++)
             {
                 var difference = x[second] - x[first];
+                // An overflowing difference, rise or slope would divide by an infinity (a zero slope) or put an infinity in the median; the result is not finite.
+                if (!Math.IsFinite(difference))
+                    return Math.NaN;
                 if (difference != 0d)
-                    slopes.Add((y[second] - y[first]) / difference);
+                {
+                    var rise = y[second] - y[first];
+                    var slope = rise / difference;
+                    if (!Math.IsFinite(rise) || !Math.IsFinite(slope))
+                        return Math.NaN;
+                    slopes.Add(slope);
+                }
             }
         }
 

@@ -7,6 +7,18 @@ internal static partial class GeometryMathBlocks
         internal const string Identity = "geometry.convex-hull@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateConvexHull();
-        private static MathBlockOperation CreateConvexHull() => MathBlockOperationFactory.Create("geometry.convex-hull", 1, SamePointSet, inputs => inputs[0].AsPointSet().Count > 0 ? MathBlockValue.PointSet(new MathBlockPointSet(MathBlockGeometry.ConvexHull(inputs[0].AsPointSet())), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.PointSet(inputs[0].Type.Unit), "The point set is empty."), [MathBlockValue.PointSet(new MathBlockPointSet([new(0d, 0d), new(1d, 0d), new(0.5d, 0.5d), new(1d, 1d), new(0d, 1d)]))], square, performanceIterations: 4);
+        private static MathBlockValue HullOrInvalid(IReadOnlyList<MathBlockValue> inputs)
+        {
+            try
+            {
+                return MathBlockValue.PointSet(new MathBlockPointSet(MathBlockGeometry.ConvexHull(inputs[0].AsPointSet())), inputs[0].Type.Unit);
+            }
+            catch (OverflowException)
+            {
+                return MathBlockOperationFactory.Invalid(SamePointSet, inputs, "A cross product overflowed.");
+            }
+        }
+
+        private static MathBlockOperation CreateConvexHull() => MathBlockOperationFactory.Create("geometry.convex-hull", 1, SamePointSet, inputs => inputs[0].AsPointSet().Count > 0 ? HullOrInvalid(inputs) : MathBlockValue.Invalid(MathBlockType.PointSet(inputs[0].Type.Unit), "The point set is empty."), [MathBlockValue.PointSet(new MathBlockPointSet([new(0d, 0d), new(1d, 0d), new(0.5d, 0.5d), new(1d, 1d), new(0d, 1d)]))], square, performanceIterations: 4);
     }
 }

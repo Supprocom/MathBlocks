@@ -25,6 +25,11 @@ public static partial class MathBlockStatistics
         covarianceSquare /= count * count;
         leftVarianceSquare /= count * count;
         rightVarianceSquare /= count * count;
-        return Math.Sqrt(covarianceSquare / Math.Sqrt(leftVarianceSquare * rightVarianceSquare));
+        // A moment or a product of the two variances that overflows would divide by an infinity and give a finite zero;
+        // the result is then not finite (invalid).
+        var denominator = Math.Sqrt(leftVarianceSquare * rightVarianceSquare);
+        if (!Math.IsFinite(covarianceSquare) || !Math.IsFinite(leftVarianceSquare) || !Math.IsFinite(rightVarianceSquare) || !Math.IsFinite(denominator))
+            return Math.NaN;
+        return Math.Sqrt(covarianceSquare / denominator);
     }
 }

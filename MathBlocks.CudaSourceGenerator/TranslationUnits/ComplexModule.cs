@@ -24,6 +24,9 @@ internal static unsafe class ComplexModule
     private static double mathblocks_square_root(double value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
+    private static double mathblocks_quiet_nan() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
     private static double mathblocks_arc_tangent_2(double left, double right) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
@@ -85,6 +88,9 @@ internal static unsafe class ComplexModule
         MathBlockComplexValue right)
     {
         double denominator = right.real * right.real + right.imaginary * right.imaginary;
+        // A squared magnitude that overflowed would divide both parts by an infinity and give zeros; NaN (invalid) instead.
+        if (!double.IsFinite(denominator))
+            return mathblocks_complex_make(mathblocks_quiet_nan(), mathblocks_quiet_nan());
         return mathblocks_complex_make(
             (left.real * right.real + left.imaginary * right.imaginary) / denominator,
             (left.imaginary * right.real - left.real * right.imaginary) / denominator);

@@ -314,11 +314,90 @@ public sealed partial class MathBlockCudaWorkerTests
                 "transport.assignment-cost", MatrixValue(2, 2, 3d, 1d, 1d, 3d), Values(0.5d, 1d)),
             ["geometry.fisher-rao-distance/not-distributions"] = () => Standalone(
                 "geometry.fisher-rao-distance", Values(-0.5d, -0.5d), Values(-0d, -1d)),
+            // A running peak of 0 followed by 0 is 0 / 0, which the owned maximum now propagates: invalid on both sides.
+            ["path.maximum-relative-decline/zero-peak-then-zero"] = () => Standalone("path.maximum-relative-decline", Values(0d, -0d, 0.5d)),
+            ["path.maximum-relative-decline/zero-peak-then-later-decline"] = () => Standalone("path.maximum-relative-decline", Values(0d, 0d, 3d, 1d)),
+            // A zero Lipschitz constant times an overflowing distance is 0 * infinity, a NaN term: invalid on both sides.
+            ["extension.mcshane/zero-lipschitz-overflowing-distance"] = () => Standalone(
+                "extension.mcshane", Values(-1.7e308d, 0d), Values(-5d, 3d), Values(1.7e308d), MathBlockValue.Scalar(0d)),
+            ["extension.whitney/zero-lipschitz-overflowing-distance"] = () => Standalone(
+                "extension.whitney", Values(-1.7e308d, 0d), Values(5d, -3d), Values(1.7e308d), MathBlockValue.Scalar(0d)),
+            // The remaining overflow victims, invalid on both sides.
+            ["complex.divide/divisor-overflow"] = () => Standalone(
+                "complex.divide", MathBlockValue.Complex(new Complex(1d, 1d)), MathBlockValue.Complex(new Complex(1e200d, 1e200d))),
+            ["geometry.contains-point/crossing-overflow"] = () => Standalone(
+                "geometry.contains-point",
+                PointValues((-1e200d, -1e200d), (1e200d, -1e200d), (1e200d, 1e200d)), PointValues((2e199d, 1e199d))),
+            ["geometry.convex-hull/nan-cross-product"] = () => Standalone(
+                "geometry.convex-hull", PointValues((0d, 0d), (1e200d, 1e200d), (2e200d, 2e200d))),
+            ["statistics.theil-sen-slope/difference-overflow"] = () => Standalone(
+                "statistics.theil-sen-slope", Values(-1.7e308d, 1.7e308d), Values(1d, 2d)),
+            ["matrix.exponential/trace-overflow"] = () => Standalone(
+                "matrix.exponential",
+                MatrixValue(2, 2, 3.4292183174601395e201d, -2.799680927722256e101d, 8.572068857490139e301d, -1.0737128770591469d)),
             ["path.maximum-relative-decline/signed-zero"] = () => Standalone("path.maximum-relative-decline", Values(-1d, -1d, -2d)),
+            // The windows whose running peak is 0 followed by 0 (rows 4 and 5) are invalid on both sides.
             ["window-valid.path.maximum-relative-decline/zero-maximum"] = () => WindowFormCase(
                 "window-valid.path.maximum-relative-decline", Values(-0d, 2d, 0d, -0d, 0d, 1.25d)),
             ["window.path.maximum-relative-decline/zero-maximum"] = () => WindowFormCase(
                 "window.path.maximum-relative-decline", Values(-0d, 2d, 0d, -0d, 0d, 1.25d)),
+            // An intermediate that overflows makes the result invalid on both sides (a variance, a standard-deviation product or a
+            // distance moment that is an infinity used to divide a finite value and give a valid zero on both).
+            ["statistics.pearson-correlation/variance-overflow"] = () => Standalone(
+                "statistics.pearson-correlation", Values(1d, 2d, 3d, 4d),
+                Values(-7.143571252424402d, 1.791250087206395e308d, 7.274205695928337d, -9.877113669855383d)),
+            ["statistics.distance-correlation/moment-overflow"] = () => Standalone(
+                "statistics.distance-correlation",
+                Values(-2.2078367837649733e302d, -6.343768537094183d, -5.8364683556946435d),
+                Values(-1.0680179441064644e-294d, 36.84280271658108d, 0.9048608060071095d)),
+            ["statistics.linear-slope/variance-overflow"] = () => Standalone(
+                "statistics.linear-slope",
+                Values(7.114245152862294d, -2.2078367837649733e302d, -728.0038665276926d, 4.224291341469105d),
+                Values(0.4953195529423522d, 0.7783700051634825d, 118d, -720.3804674671959d)),
+            ["statistics.linear-intercept/variance-overflow"] = () => Standalone(
+                "statistics.linear-intercept",
+                Values(7.114245152862294d, -2.2078367837649733e302d, -728.0038665276926d, 4.224291341469105d),
+                Values(0.4953195529423522d, 0.7783700051634825d, 118d, -720.3804674671959d)),
+            ["statistics.linear-r-squared/variance-overflow"] = () => Standalone(
+                "statistics.linear-r-squared",
+                Values(1.337705117e-315d, -3.22983270795382e-299d, -17.27875959474386d, -0.8325065752238905d),
+                Values(-3.496470870518605d, -11.96980468906019d, 5.458565798214325e303d, -729.5969940812662d)),
+            ["statistics.autocorrelation/variance-overflow"] = () => Standalone(
+                "statistics.autocorrelation",
+                Values(4.388899255034951e304d, -4.440892098500626e-16d, -22.450293565523026d, 0.0037950201825623286d),
+                MathBlockValue.Scalar(2d)),
+            ["vector.standardize/variance-overflow"] = () => Standalone(
+                "vector.standardize", Values(1.7954044555660155e308d, -4.507602767758473e239d, 710.0904103212077d)),
+            ["geometry.simplicial-depth/coordinate-overflow"] = () => Standalone(
+                "geometry.simplicial-depth",
+                PointValues((698.0421626654253d, 0.7817012842080717d), (-22.194671885609296d, 1.7972928048203887e308d), (-3.80572792044629d, -708.0863943344233d)),
+                PointValues((-0.9999999999999934d, 7.274205695928337d))),
+            ["geometry.barycentric-coordinates/denominator-overflow"] = () => Standalone(
+                "geometry.barycentric-coordinates",
+                PointValues((1d, 1d)), PointValues((1e200d, 0d), (0d, 1e200d), (0d, 0d))),
+            ["geometry.halfspace-depth/nan-cross-product"] = () => Standalone(
+                "geometry.halfspace-depth", PointValues((1e200d, 1e200d), (2e200d, 2e200d)), PointValues((0d, 0d))),
+            // The window forms apply the same rule to every window (the first window with an overflowing variance is invalid).
+            ["window.statistics.pearson-correlation/variance-overflow"] = () => WindowSeriesCase(
+                "window.statistics.pearson-correlation",
+                Values(1d, 2d, 3d, 4d, 5d, 6d), Values(-7.143571252424402d, 1.791250087206395e308d, 7.274205695928337d, -9.877113669855383d, 2d, 3d)),
+            ["window-valid.statistics.distance-correlation/moment-overflow"] = () => WindowSeriesCase(
+                "window-valid.statistics.distance-correlation",
+                Values(-2.2078367837649733e302d, -6.343768537094183d, -5.8364683556946435d, 1d, 2d, 3d),
+                Values(-1.0680179441064644e-294d, 36.84280271658108d, 0.9048608060071095d, 5d, 6d, 8d)),
+            ["window.statistics.linear-slope/variance-overflow"] = () => WindowSeriesCase(
+                "window.statistics.linear-slope",
+                Values(7.114245152862294d, -2.2078367837649733e302d, -728.0038665276926d, 4.224291341469105d, 1d, 2d),
+                Values(0.4953195529423522d, 0.7783700051634825d, 118d, -720.3804674671959d, 3d, 4d)),
+            ["window-valid.statistics.linear-r-squared/variance-overflow"] = () => WindowSeriesCase(
+                "window-valid.statistics.linear-r-squared",
+                Values(1.337705117e-315d, -3.22983270795382e-299d, -17.27875959474386d, -0.8325065752238905d, 1d, 2d),
+                Values(-3.496470870518605d, -11.96980468906019d, 5.458565798214325e303d, -729.5969940812662d, 3d, 4d)),
+            ["window.statistics.autocorrelation/variance-overflow"] = () => WindowSeriesCase(
+                "window.statistics.autocorrelation",
+                Values(4.388899255034951e304d, -4.440892098500626e-16d, -22.450293565523026d, 0.0037950201825623286d, 1d, 2d)),
+            ["window.vector.standardize/variance-overflow"] = () => WindowSeriesCase(
+                "window.vector.standardize", Values(1.7954044555660155e308d, -4.507602767758473e239d, 710.0904103212077d, 1d, 2d, 4d)),
             ["combinatorics.nonempty-subset-sums/21-values"] = () => Standalone(
                 "combinatorics.nonempty-subset-sums", Values([.. Enumerable.Range(1, 21).Select(value => (double)value)])),
             ["cooperative.shapley-values/length-3"] = () => Standalone("cooperative.shapley-values", Values(1d, 2d, 3d)),
@@ -386,6 +465,16 @@ public sealed partial class MathBlockCudaWorkerTests
         var inputs = operation.RegressionCases[0].Inputs.ToArray();
         inputs[0] = vector;
         inputs[1] = MathBlockValue.Scalar(3d, inputs[1].Type.Unit);
+        return Single(MathBlockWindowTestSupport.Windowed, identifier, inputs);
+    }
+
+    // A window form over series that replace the leading inputs of its sample (the sample's other arguments are kept).
+    private static (MathBlockProgram Program, MathBlockValue[] Inputs) WindowSeriesCase(string identifier, params MathBlockValue[] series)
+    {
+        var operation = MathBlockWindowTestSupport.Windowed.Get(identifier);
+        var inputs = operation.RegressionCases[0].Inputs.ToArray();
+        for (var index = 0; index < series.Length; index++)
+            inputs[index] = series[index];
         return Single(MathBlockWindowTestSupport.Windowed, identifier, inputs);
     }
 

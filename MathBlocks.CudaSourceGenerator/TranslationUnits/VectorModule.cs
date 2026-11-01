@@ -32,9 +32,15 @@ internal static unsafe class VectorModule
     [CudaExternal(IsPure = true)]
     private static double mathblocks_square_root(double value) => throw new NotSupportedException();
 
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_quiet_nan() => throw new NotSupportedException();
+
+    // IEEE 754-2019 minimum and maximum, as MathBlockPrimitives.Min and Max: a NaN operand gives NaN, and -0 is less than +0.
     [CudaDevice]
     private static double mathblocks_minimum(double first, double second)
     {
+        if (double.IsNaN(first) || double.IsNaN(second))
+            return mathblocks_quiet_nan();
         if (first < second)
             return first;
         if (second < first)
@@ -47,6 +53,8 @@ internal static unsafe class VectorModule
     [CudaDevice]
     private static double mathblocks_maximum(double first, double second)
     {
+        if (double.IsNaN(first) || double.IsNaN(second))
+            return mathblocks_quiet_nan();
         if (first > second)
             return first;
         if (second > first)
@@ -369,7 +377,8 @@ internal static unsafe class VectorModule
         }
         variance /= count;
         *mean = average;
-        *deviation = mathblocks_square_root(variance);
+        // A variance that overflowed would divide every difference by an infinity and give zeros; NaN (invalid) instead.
+        *deviation = double.IsFinite(variance) ? mathblocks_square_root(variance) : mathblocks_quiet_nan();
     }
 
     [CudaDevice(Name = "mathblocks_vector_dispatch")]

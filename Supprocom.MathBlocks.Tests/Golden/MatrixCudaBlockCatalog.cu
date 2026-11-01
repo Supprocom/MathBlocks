@@ -3346,2159 +3346,2195 @@ __device__ void mathblocks_matrix_dispatch(
 #line 874 "MatrixModule.cs"
             return;
         }
-#line 876 "MatrixModule.cs"
-        int csharp2cuda_temp_353;
-#line 876 "MatrixModule.cs"
-        if (((norm) > (1.0)))
-        {
-#line 876 "MatrixModule.cs"
-            csharp2cuda_temp_353 = csharp2cuda_f64_to_i32(ceil(mathblocks_binary_logarithm(norm)));
-        }
-        else
-        {
-#line 876 "MatrixModule.cs"
-            csharp2cuda_temp_353 = 0;
-        }
-#line 876 "MatrixModule.cs"
-        int scaling = csharp2cuda_temp_353;
-#line 877 "MatrixModule.cs"
-        if (((scaling) < (0)))
-        {
-#line 877 "MatrixModule.cs"
-#line 877 "MatrixModule.cs"
-            int* csharp2cuda_temp_354 = &(scaling);
-            (*(csharp2cuda_temp_354) = 0);
-        }
 #line 878 "MatrixModule.cs"
-        double scale = mathblocks_power(2.0, ((double)(csharp2cuda_i32_neg(scaling))));
+        double trace = 0.0;
 #line 879 "MatrixModule.cs"
-        double* scaled = scratch;
-#line 880 "MatrixModule.cs"
-        double* term = csharp2cuda_pointer_add(scratch, count);
-#line 881 "MatrixModule.cs"
-        double* temporary = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_mul(count, 2));
-#line 882 "MatrixModule.cs"
         {
-#line 882 "MatrixModule.cs"
-            int index = 0;
-            while (true)
-            {
-                if (!(((index) < (count))))
-                    break;
-#line 883 "MatrixModule.cs"
-                {
-#line 884 "MatrixModule.cs"
-#line 884 "MatrixModule.cs"
-                    double* csharp2cuda_temp_356 = &((scaled)[index]);
-#line 884 "MatrixModule.cs"
-                    double csharp2cuda_temp_357 = (a)[index];
-                    (*(csharp2cuda_temp_356) = __dmul_rn(csharp2cuda_temp_357, scale));
-#line 885 "MatrixModule.cs"
-#line 885 "MatrixModule.cs"
-                    double* csharp2cuda_temp_358 = &((result)[index]);
-                    (*(csharp2cuda_temp_358) = 0.0);
-#line 886 "MatrixModule.cs"
-#line 886 "MatrixModule.cs"
-                    double* csharp2cuda_temp_359 = &((term)[index]);
-                    (*(csharp2cuda_temp_359) = 0.0);
-                }
-#line 882 "MatrixModule.cs"
-                int* csharp2cuda_temp_355 = &(index);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_355));
-            }
-        }
-#line 888 "MatrixModule.cs"
-        {
-#line 888 "MatrixModule.cs"
+#line 879 "MatrixModule.cs"
             int index = 0;
             while (true)
             {
                 if (!(((index) < (size))))
                     break;
-#line 889 "MatrixModule.cs"
-                {
-#line 890 "MatrixModule.cs"
-#line 890 "MatrixModule.cs"
-                    double* csharp2cuda_temp_361 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)]);
-                    (*(csharp2cuda_temp_361) = 1.0);
-#line 891 "MatrixModule.cs"
-#line 891 "MatrixModule.cs"
-                    double* csharp2cuda_temp_362 = &((term)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)]);
-                    (*(csharp2cuda_temp_362) = 1.0);
-                }
-#line 888 "MatrixModule.cs"
-                int* csharp2cuda_temp_360 = &(index);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_360));
+#line 880 "MatrixModule.cs"
+#line 880 "MatrixModule.cs"
+                double* csharp2cuda_temp_354 = &(trace);
+#line 880 "MatrixModule.cs"
+                double csharp2cuda_temp_355 = *(csharp2cuda_temp_354);
+#line 880 "MatrixModule.cs"
+                double csharp2cuda_temp_356 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)];
+                (*(csharp2cuda_temp_354) = __dadd_rn(csharp2cuda_temp_355, csharp2cuda_temp_356));
+#line 879 "MatrixModule.cs"
+                int* csharp2cuda_temp_353 = &(index);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_353));
             }
         }
-#line 893 "MatrixModule.cs"
+#line 881 "MatrixModule.cs"
+#line 881 "MatrixModule.cs"
+        double csharp2cuda_temp_357 = __ddiv_rn(trace, ((double)(size)));
+        if (((csharp2cuda_temp_357) > (__dadd_rn(709.782712893384, __dmul_rn(0.5, __dmul_rn(mathblocks_binary_logarithm(((double)(size))), 0.6931471805599453))))))
+#line 882 "MatrixModule.cs"
         {
+#line 883 "MatrixModule.cs"
+#line 883 "MatrixModule.cs"
+            int* csharp2cuda_temp_358 = &((output)->valid);
+            (*(csharp2cuda_temp_358) = 0);
+#line 884 "MatrixModule.cs"
+            return;
+        }
+#line 886 "MatrixModule.cs"
+        int csharp2cuda_temp_359;
+#line 886 "MatrixModule.cs"
+        if (((norm) > (1.0)))
+        {
+#line 886 "MatrixModule.cs"
+            csharp2cuda_temp_359 = csharp2cuda_f64_to_i32(ceil(mathblocks_binary_logarithm(norm)));
+        }
+        else
+        {
+#line 886 "MatrixModule.cs"
+            csharp2cuda_temp_359 = 0;
+        }
+#line 886 "MatrixModule.cs"
+        int scaling = csharp2cuda_temp_359;
+#line 887 "MatrixModule.cs"
+        if (((scaling) < (0)))
+        {
+#line 887 "MatrixModule.cs"
+#line 887 "MatrixModule.cs"
+            int* csharp2cuda_temp_360 = &(scaling);
+            (*(csharp2cuda_temp_360) = 0);
+        }
+#line 888 "MatrixModule.cs"
+        double scale = mathblocks_power(2.0, ((double)(csharp2cuda_i32_neg(scaling))));
+#line 889 "MatrixModule.cs"
+        double* scaled = scratch;
+#line 890 "MatrixModule.cs"
+        double* term = csharp2cuda_pointer_add(scratch, count);
+#line 891 "MatrixModule.cs"
+        double* temporary = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_mul(count, 2));
+#line 892 "MatrixModule.cs"
+        {
+#line 892 "MatrixModule.cs"
+            int index = 0;
+            while (true)
+            {
+                if (!(((index) < (count))))
+                    break;
 #line 893 "MatrixModule.cs"
+                {
+#line 894 "MatrixModule.cs"
+#line 894 "MatrixModule.cs"
+                    double* csharp2cuda_temp_362 = &((scaled)[index]);
+#line 894 "MatrixModule.cs"
+                    double csharp2cuda_temp_363 = (a)[index];
+                    (*(csharp2cuda_temp_362) = __dmul_rn(csharp2cuda_temp_363, scale));
+#line 895 "MatrixModule.cs"
+#line 895 "MatrixModule.cs"
+                    double* csharp2cuda_temp_364 = &((result)[index]);
+                    (*(csharp2cuda_temp_364) = 0.0);
+#line 896 "MatrixModule.cs"
+#line 896 "MatrixModule.cs"
+                    double* csharp2cuda_temp_365 = &((term)[index]);
+                    (*(csharp2cuda_temp_365) = 0.0);
+                }
+#line 892 "MatrixModule.cs"
+                int* csharp2cuda_temp_361 = &(index);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_361));
+            }
+        }
+#line 898 "MatrixModule.cs"
+        {
+#line 898 "MatrixModule.cs"
+            int index = 0;
+            while (true)
+            {
+                if (!(((index) < (size))))
+                    break;
+#line 899 "MatrixModule.cs"
+                {
+#line 900 "MatrixModule.cs"
+#line 900 "MatrixModule.cs"
+                    double* csharp2cuda_temp_367 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)]);
+                    (*(csharp2cuda_temp_367) = 1.0);
+#line 901 "MatrixModule.cs"
+#line 901 "MatrixModule.cs"
+                    double* csharp2cuda_temp_368 = &((term)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)]);
+                    (*(csharp2cuda_temp_368) = 1.0);
+                }
+#line 898 "MatrixModule.cs"
+                int* csharp2cuda_temp_366 = &(index);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_366));
+            }
+        }
+#line 903 "MatrixModule.cs"
+        {
+#line 903 "MatrixModule.cs"
             int order = 1;
             while (true)
             {
                 if (!(((order) <= (48))))
                     break;
-#line 894 "MatrixModule.cs"
+#line 904 "MatrixModule.cs"
                 {
-#line 895 "MatrixModule.cs"
+#line 905 "MatrixModule.cs"
                     mathblocks_matrix_multiply_square(term, scaled, size, temporary);
-#line 896 "MatrixModule.cs"
+#line 906 "MatrixModule.cs"
                     double order_scale = __ddiv_rn(1.0, ((double)(order)));
-#line 897 "MatrixModule.cs"
+#line 907 "MatrixModule.cs"
                     {
-#line 897 "MatrixModule.cs"
+#line 907 "MatrixModule.cs"
                         int index = 0;
                         while (true)
                         {
                             if (!(((index) < (count))))
                                 break;
-#line 898 "MatrixModule.cs"
+#line 908 "MatrixModule.cs"
                             {
-#line 899 "MatrixModule.cs"
-#line 899 "MatrixModule.cs"
-                                double* csharp2cuda_temp_365 = &((term)[index]);
-#line 899 "MatrixModule.cs"
-                                double csharp2cuda_temp_366 = (temporary)[index];
-                                (*(csharp2cuda_temp_365) = __dmul_rn(csharp2cuda_temp_366, order_scale));
-#line 900 "MatrixModule.cs"
-#line 900 "MatrixModule.cs"
-                                double* csharp2cuda_temp_367 = &((result)[index]);
-#line 900 "MatrixModule.cs"
-                                double csharp2cuda_temp_368 = *(csharp2cuda_temp_367);
-#line 900 "MatrixModule.cs"
-                                double csharp2cuda_temp_369 = (term)[index];
-                                (*(csharp2cuda_temp_367) = __dadd_rn(csharp2cuda_temp_368, csharp2cuda_temp_369));
+#line 909 "MatrixModule.cs"
+#line 909 "MatrixModule.cs"
+                                double* csharp2cuda_temp_371 = &((term)[index]);
+#line 909 "MatrixModule.cs"
+                                double csharp2cuda_temp_372 = (temporary)[index];
+                                (*(csharp2cuda_temp_371) = __dmul_rn(csharp2cuda_temp_372, order_scale));
+#line 910 "MatrixModule.cs"
+#line 910 "MatrixModule.cs"
+                                double* csharp2cuda_temp_373 = &((result)[index]);
+#line 910 "MatrixModule.cs"
+                                double csharp2cuda_temp_374 = *(csharp2cuda_temp_373);
+#line 910 "MatrixModule.cs"
+                                double csharp2cuda_temp_375 = (term)[index];
+                                (*(csharp2cuda_temp_373) = __dadd_rn(csharp2cuda_temp_374, csharp2cuda_temp_375));
                             }
-#line 897 "MatrixModule.cs"
-                            int* csharp2cuda_temp_364 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_364));
+#line 907 "MatrixModule.cs"
+                            int* csharp2cuda_temp_370 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_370));
                         }
                     }
                 }
-#line 893 "MatrixModule.cs"
-                int* csharp2cuda_temp_363 = &(order);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_363));
+#line 903 "MatrixModule.cs"
+                int* csharp2cuda_temp_369 = &(order);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_369));
             }
         }
-#line 903 "MatrixModule.cs"
+#line 913 "MatrixModule.cs"
         {
-#line 903 "MatrixModule.cs"
+#line 913 "MatrixModule.cs"
             int iteration = 0;
             while (true)
             {
                 if (!(((iteration) < (scaling))))
                     break;
-#line 904 "MatrixModule.cs"
+#line 914 "MatrixModule.cs"
                 {
-#line 905 "MatrixModule.cs"
+#line 915 "MatrixModule.cs"
                     mathblocks_matrix_multiply_square(result, result, size, temporary);
-#line 906 "MatrixModule.cs"
+#line 916 "MatrixModule.cs"
                     mathblocks_matrix_copy(temporary, result, count);
                 }
-#line 903 "MatrixModule.cs"
-                int* csharp2cuda_temp_370 = &(iteration);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_370));
+#line 913 "MatrixModule.cs"
+                int* csharp2cuda_temp_376 = &(iteration);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_376));
             }
         }
-#line 908 "MatrixModule.cs"
+#line 918 "MatrixModule.cs"
         {
-#line 908 "MatrixModule.cs"
+#line 918 "MatrixModule.cs"
             int index = 0;
             while (true)
             {
                 if (!(((index) < (count))))
                     break;
-#line 909 "MatrixModule.cs"
-#line 909 "MatrixModule.cs"
-                double csharp2cuda_temp_372 = (result)[index];
-                if ((!(isfinite(csharp2cuda_temp_372))))
+#line 919 "MatrixModule.cs"
+#line 919 "MatrixModule.cs"
+                double csharp2cuda_temp_378 = (result)[index];
+                if ((!(isfinite(csharp2cuda_temp_378))))
                 {
-#line 909 "MatrixModule.cs"
-#line 909 "MatrixModule.cs"
-                    int* csharp2cuda_temp_373 = &((output)->valid);
-                    (*(csharp2cuda_temp_373) = 0);
+#line 919 "MatrixModule.cs"
+#line 919 "MatrixModule.cs"
+                    int* csharp2cuda_temp_379 = &((output)->valid);
+                    (*(csharp2cuda_temp_379) = 0);
                 }
-#line 908 "MatrixModule.cs"
-                int* csharp2cuda_temp_371 = &(index);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_371));
+#line 918 "MatrixModule.cs"
+                int* csharp2cuda_temp_377 = &(index);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_377));
             }
         }
-#line 910 "MatrixModule.cs"
+#line 920 "MatrixModule.cs"
         return;
     }
-#line 913 "MatrixModule.cs"
+#line 923 "MatrixModule.cs"
     if (((opcode) == (28)))
-#line 914 "MatrixModule.cs"
+#line 924 "MatrixModule.cs"
     {
-#line 915 "MatrixModule.cs"
+#line 925 "MatrixModule.cs"
         int exponent = 0;
-#line 916 "MatrixModule.cs"
-#line 916 "MatrixModule.cs"
-        int csharp2cuda_temp_374 = (first)->rows;
-#line 916 "MatrixModule.cs"
-        int csharp2cuda_temp_375 = (first)->columns;
-#line 916 "MatrixModule.cs"
-        bool csharp2cuda_temp_376;
-#line 916 "MatrixModule.cs"
-        if (!(((csharp2cuda_temp_374) != (csharp2cuda_temp_375))))
+#line 926 "MatrixModule.cs"
+#line 926 "MatrixModule.cs"
+        int csharp2cuda_temp_380 = (first)->rows;
+#line 926 "MatrixModule.cs"
+        int csharp2cuda_temp_381 = (first)->columns;
+#line 926 "MatrixModule.cs"
+        bool csharp2cuda_temp_382;
+#line 926 "MatrixModule.cs"
+        if (!(((csharp2cuda_temp_380) != (csharp2cuda_temp_381))))
         {
-#line 917 "MatrixModule.cs"
-            double csharp2cuda_temp_377 = (second)->scalar_value;
-#line 917 "MatrixModule.cs"
-            int* csharp2cuda_temp_378 = &(exponent);
-#line 917 "MatrixModule.cs"
-            bool csharp2cuda_temp_379 = mathblocks_nonnegative_integer(csharp2cuda_temp_377, csharp2cuda_temp_378);
-#line 916 "MatrixModule.cs"
-            csharp2cuda_temp_376 = (!(csharp2cuda_temp_379));
+#line 927 "MatrixModule.cs"
+            double csharp2cuda_temp_383 = (second)->scalar_value;
+#line 927 "MatrixModule.cs"
+            int* csharp2cuda_temp_384 = &(exponent);
+#line 927 "MatrixModule.cs"
+            bool csharp2cuda_temp_385 = mathblocks_nonnegative_integer(csharp2cuda_temp_383, csharp2cuda_temp_384);
+#line 926 "MatrixModule.cs"
+            csharp2cuda_temp_382 = (!(csharp2cuda_temp_385));
         }
         else
         {
-#line 916 "MatrixModule.cs"
-            csharp2cuda_temp_376 = true;
+#line 926 "MatrixModule.cs"
+            csharp2cuda_temp_382 = true;
         }
-#line 916 "MatrixModule.cs"
-        bool csharp2cuda_temp_380;
-#line 916 "MatrixModule.cs"
-        if (!(csharp2cuda_temp_376))
+#line 926 "MatrixModule.cs"
+        bool csharp2cuda_temp_386;
+#line 926 "MatrixModule.cs"
+        if (!(csharp2cuda_temp_382))
         {
-#line 916 "MatrixModule.cs"
-            csharp2cuda_temp_380 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 926 "MatrixModule.cs"
+            csharp2cuda_temp_386 = ((((void*)(scratch))) == (((void*)(nullptr))));
         }
         else
         {
-#line 916 "MatrixModule.cs"
-            csharp2cuda_temp_380 = true;
+#line 926 "MatrixModule.cs"
+            csharp2cuda_temp_386 = true;
         }
-        if (csharp2cuda_temp_380)
-#line 919 "MatrixModule.cs"
+        if (csharp2cuda_temp_386)
+#line 929 "MatrixModule.cs"
         {
-#line 920 "MatrixModule.cs"
-#line 920 "MatrixModule.cs"
-            int* csharp2cuda_temp_381 = &((output)->valid);
-            (*(csharp2cuda_temp_381) = 0);
-#line 921 "MatrixModule.cs"
+#line 930 "MatrixModule.cs"
+#line 930 "MatrixModule.cs"
+            int* csharp2cuda_temp_387 = &((output)->valid);
+            (*(csharp2cuda_temp_387) = 0);
+#line 931 "MatrixModule.cs"
             return;
         }
-#line 923 "MatrixModule.cs"
+#line 933 "MatrixModule.cs"
         int size = (first)->rows;
-#line 924 "MatrixModule.cs"
+#line 934 "MatrixModule.cs"
         int count = (first)->count;
-#line 925 "MatrixModule.cs"
+#line 935 "MatrixModule.cs"
         mathblocks_matrix_shape(output, size, size);
-#line 926 "MatrixModule.cs"
+#line 936 "MatrixModule.cs"
         double* power = scratch;
-#line 927 "MatrixModule.cs"
+#line 937 "MatrixModule.cs"
         double* temporary = csharp2cuda_pointer_add(scratch, count);
-#line 928 "MatrixModule.cs"
+#line 938 "MatrixModule.cs"
         mathblocks_matrix_copy(a, power, count);
-#line 929 "MatrixModule.cs"
+#line 939 "MatrixModule.cs"
         {
-#line 929 "MatrixModule.cs"
+#line 939 "MatrixModule.cs"
             int index = 0;
             while (true)
             {
                 if (!(((index) < (count))))
                     break;
-#line 930 "MatrixModule.cs"
-#line 930 "MatrixModule.cs"
-                double* csharp2cuda_temp_383 = &((result)[index]);
-                (*(csharp2cuda_temp_383) = 0.0);
-#line 929 "MatrixModule.cs"
-                int* csharp2cuda_temp_382 = &(index);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_382));
+#line 940 "MatrixModule.cs"
+#line 940 "MatrixModule.cs"
+                double* csharp2cuda_temp_389 = &((result)[index]);
+                (*(csharp2cuda_temp_389) = 0.0);
+#line 939 "MatrixModule.cs"
+                int* csharp2cuda_temp_388 = &(index);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_388));
             }
         }
-#line 931 "MatrixModule.cs"
+#line 941 "MatrixModule.cs"
         {
-#line 931 "MatrixModule.cs"
+#line 941 "MatrixModule.cs"
             int index = 0;
             while (true)
             {
                 if (!(((index) < (size))))
                     break;
-#line 932 "MatrixModule.cs"
-#line 932 "MatrixModule.cs"
-                double* csharp2cuda_temp_385 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)]);
-                (*(csharp2cuda_temp_385) = 1.0);
-#line 931 "MatrixModule.cs"
-                int* csharp2cuda_temp_384 = &(index);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_384));
+#line 942 "MatrixModule.cs"
+#line 942 "MatrixModule.cs"
+                double* csharp2cuda_temp_391 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)]);
+                (*(csharp2cuda_temp_391) = 1.0);
+#line 941 "MatrixModule.cs"
+                int* csharp2cuda_temp_390 = &(index);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_390));
             }
         }
-#line 933 "MatrixModule.cs"
+#line 943 "MatrixModule.cs"
         while (true)
         {
             if (!(((exponent) > (0))))
                 break;
-#line 934 "MatrixModule.cs"
+#line 944 "MatrixModule.cs"
             {
-#line 935 "MatrixModule.cs"
+#line 945 "MatrixModule.cs"
                 if (((csharp2cuda_i32_and(exponent, 1)) != (0)))
-#line 936 "MatrixModule.cs"
+#line 946 "MatrixModule.cs"
                 {
-#line 937 "MatrixModule.cs"
+#line 947 "MatrixModule.cs"
                     mathblocks_matrix_multiply_square(result, power, size, temporary);
-#line 938 "MatrixModule.cs"
+#line 948 "MatrixModule.cs"
                     mathblocks_matrix_copy(temporary, result, count);
                 }
-#line 940 "MatrixModule.cs"
-#line 940 "MatrixModule.cs"
-                int* csharp2cuda_temp_386 = &(exponent);
-#line 940 "MatrixModule.cs"
-                int csharp2cuda_temp_387 = *(csharp2cuda_temp_386);
-                (*(csharp2cuda_temp_386) = csharp2cuda_i32_shr(csharp2cuda_temp_387, 1));
-#line 941 "MatrixModule.cs"
+#line 950 "MatrixModule.cs"
+#line 950 "MatrixModule.cs"
+                int* csharp2cuda_temp_392 = &(exponent);
+#line 950 "MatrixModule.cs"
+                int csharp2cuda_temp_393 = *(csharp2cuda_temp_392);
+                (*(csharp2cuda_temp_392) = csharp2cuda_i32_shr(csharp2cuda_temp_393, 1));
+#line 951 "MatrixModule.cs"
                 if (((exponent) > (0)))
-#line 942 "MatrixModule.cs"
+#line 952 "MatrixModule.cs"
                 {
-#line 943 "MatrixModule.cs"
+#line 953 "MatrixModule.cs"
                     mathblocks_matrix_multiply_square(power, power, size, temporary);
-#line 944 "MatrixModule.cs"
+#line 954 "MatrixModule.cs"
                     mathblocks_matrix_copy(temporary, power, count);
                 }
             }
         }
-#line 947 "MatrixModule.cs"
+#line 957 "MatrixModule.cs"
         {
-#line 947 "MatrixModule.cs"
+#line 957 "MatrixModule.cs"
             int index = 0;
             while (true)
             {
                 if (!(((index) < (count))))
                     break;
-#line 948 "MatrixModule.cs"
-#line 948 "MatrixModule.cs"
-                double csharp2cuda_temp_389 = (result)[index];
-                if ((!(isfinite(csharp2cuda_temp_389))))
+#line 958 "MatrixModule.cs"
+#line 958 "MatrixModule.cs"
+                double csharp2cuda_temp_395 = (result)[index];
+                if ((!(isfinite(csharp2cuda_temp_395))))
                 {
-#line 948 "MatrixModule.cs"
-#line 948 "MatrixModule.cs"
-                    int* csharp2cuda_temp_390 = &((output)->valid);
-                    (*(csharp2cuda_temp_390) = 0);
+#line 958 "MatrixModule.cs"
+#line 958 "MatrixModule.cs"
+                    int* csharp2cuda_temp_396 = &((output)->valid);
+                    (*(csharp2cuda_temp_396) = 0);
                 }
-#line 947 "MatrixModule.cs"
-                int* csharp2cuda_temp_388 = &(index);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_388));
+#line 957 "MatrixModule.cs"
+                int* csharp2cuda_temp_394 = &(index);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_394));
             }
         }
-#line 949 "MatrixModule.cs"
+#line 959 "MatrixModule.cs"
         return;
     }
-#line 952 "MatrixModule.cs"
+#line 962 "MatrixModule.cs"
     if (((opcode) == (29)))
-#line 953 "MatrixModule.cs"
+#line 963 "MatrixModule.cs"
     {
-#line 954 "MatrixModule.cs"
+#line 964 "MatrixModule.cs"
         int size = (first)->rows;
-#line 955 "MatrixModule.cs"
-#line 955 "MatrixModule.cs"
-        int csharp2cuda_temp_391 = (first)->columns;
-#line 955 "MatrixModule.cs"
-        bool csharp2cuda_temp_392;
-#line 955 "MatrixModule.cs"
-        if (!(((size) != (csharp2cuda_temp_391))))
+#line 965 "MatrixModule.cs"
+#line 965 "MatrixModule.cs"
+        int csharp2cuda_temp_397 = (first)->columns;
+#line 965 "MatrixModule.cs"
+        bool csharp2cuda_temp_398;
+#line 965 "MatrixModule.cs"
+        if (!(((size) != (csharp2cuda_temp_397))))
         {
-#line 955 "MatrixModule.cs"
-            csharp2cuda_temp_392 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 965 "MatrixModule.cs"
+            csharp2cuda_temp_398 = ((((void*)(scratch))) == (((void*)(nullptr))));
         }
         else
         {
-#line 955 "MatrixModule.cs"
-            csharp2cuda_temp_392 = true;
+#line 965 "MatrixModule.cs"
+            csharp2cuda_temp_398 = true;
         }
-        if (csharp2cuda_temp_392)
-#line 956 "MatrixModule.cs"
+        if (csharp2cuda_temp_398)
+#line 966 "MatrixModule.cs"
         {
-#line 957 "MatrixModule.cs"
-#line 957 "MatrixModule.cs"
-            int* csharp2cuda_temp_393 = &((output)->valid);
-            (*(csharp2cuda_temp_393) = 0);
-#line 958 "MatrixModule.cs"
+#line 967 "MatrixModule.cs"
+#line 967 "MatrixModule.cs"
+            int* csharp2cuda_temp_399 = &((output)->valid);
+            (*(csharp2cuda_temp_399) = 0);
+#line 968 "MatrixModule.cs"
             return;
         }
-#line 960 "MatrixModule.cs"
+#line 970 "MatrixModule.cs"
         mathblocks_matrix_shape(output, size, size);
-#line 961 "MatrixModule.cs"
+#line 971 "MatrixModule.cs"
         double* augmented = scratch;
-#line 962 "MatrixModule.cs"
+#line 972 "MatrixModule.cs"
         double* solution = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_mul(size, csharp2cuda_i32_add(size, 1)));
-#line 963 "MatrixModule.cs"
+#line 973 "MatrixModule.cs"
         {
-#line 963 "MatrixModule.cs"
+#line 973 "MatrixModule.cs"
             int column = 0;
             while (true)
             {
                 if (!(((column) < (size))))
                     break;
-#line 964 "MatrixModule.cs"
+#line 974 "MatrixModule.cs"
                 {
-#line 965 "MatrixModule.cs"
-#line 965 "MatrixModule.cs"
-                    bool csharp2cuda_temp_395 = mathblocks_matrix_try_solve_basis(a, size, column, augmented, solution);
-                    if ((!(csharp2cuda_temp_395)))
-#line 966 "MatrixModule.cs"
+#line 975 "MatrixModule.cs"
+#line 975 "MatrixModule.cs"
+                    bool csharp2cuda_temp_401 = mathblocks_matrix_try_solve_basis(a, size, column, augmented, solution);
+                    if ((!(csharp2cuda_temp_401)))
+#line 976 "MatrixModule.cs"
                     {
-#line 967 "MatrixModule.cs"
-#line 967 "MatrixModule.cs"
-                        int* csharp2cuda_temp_396 = &((output)->valid);
-                        (*(csharp2cuda_temp_396) = 0);
-#line 968 "MatrixModule.cs"
+#line 977 "MatrixModule.cs"
+#line 977 "MatrixModule.cs"
+                        int* csharp2cuda_temp_402 = &((output)->valid);
+                        (*(csharp2cuda_temp_402) = 0);
+#line 978 "MatrixModule.cs"
                         return;
                     }
-#line 970 "MatrixModule.cs"
+#line 980 "MatrixModule.cs"
                     {
-#line 970 "MatrixModule.cs"
+#line 980 "MatrixModule.cs"
                         int row = 0;
                         while (true)
                         {
                             if (!(((row) < (size))))
                                 break;
-#line 971 "MatrixModule.cs"
-#line 971 "MatrixModule.cs"
-                            double* csharp2cuda_temp_398 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
-#line 971 "MatrixModule.cs"
-                            double csharp2cuda_temp_399 = (solution)[row];
-                            (*(csharp2cuda_temp_398) = csharp2cuda_temp_399);
-#line 970 "MatrixModule.cs"
-                            int* csharp2cuda_temp_397 = &(row);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_397));
+#line 981 "MatrixModule.cs"
+#line 981 "MatrixModule.cs"
+                            double* csharp2cuda_temp_404 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
+#line 981 "MatrixModule.cs"
+                            double csharp2cuda_temp_405 = (solution)[row];
+                            (*(csharp2cuda_temp_404) = csharp2cuda_temp_405);
+#line 980 "MatrixModule.cs"
+                            int* csharp2cuda_temp_403 = &(row);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_403));
                         }
                     }
                 }
-#line 963 "MatrixModule.cs"
-                int* csharp2cuda_temp_394 = &(column);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_394));
+#line 973 "MatrixModule.cs"
+                int* csharp2cuda_temp_400 = &(column);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_400));
             }
         }
-#line 973 "MatrixModule.cs"
-        return;
-    }
-#line 976 "MatrixModule.cs"
-    if (((opcode) == (30)))
-#line 977 "MatrixModule.cs"
-    {
-#line 978 "MatrixModule.cs"
-#line 978 "MatrixModule.cs"
-        int* csharp2cuda_temp_400 = &((output)->boolean_value);
-#line 978 "MatrixModule.cs"
-        int csharp2cuda_temp_401 = (first)->rows;
-#line 978 "MatrixModule.cs"
-        int csharp2cuda_temp_402 = (first)->columns;
-#line 978 "MatrixModule.cs"
-        bool csharp2cuda_temp_403;
-#line 978 "MatrixModule.cs"
-        if (((csharp2cuda_temp_401) == (csharp2cuda_temp_402)))
-        {
-#line 978 "MatrixModule.cs"
-            csharp2cuda_temp_403 = ((((void*)(scratch))) != (((void*)(nullptr))));
-        }
-        else
-        {
-#line 978 "MatrixModule.cs"
-            csharp2cuda_temp_403 = false;
-        }
-#line 978 "MatrixModule.cs"
-        bool csharp2cuda_temp_404;
-#line 978 "MatrixModule.cs"
-        if (csharp2cuda_temp_403)
-        {
-#line 979 "MatrixModule.cs"
-            int csharp2cuda_temp_405 = (first)->rows;
-#line 978 "MatrixModule.cs"
-            csharp2cuda_temp_404 = mathblocks_matrix_is_positive_definite(a, csharp2cuda_temp_405, scratch);
-        }
-        else
-        {
-#line 978 "MatrixModule.cs"
-            csharp2cuda_temp_404 = false;
-        }
-        (*(csharp2cuda_temp_400) = csharp2cuda_temp_404);
-#line 980 "MatrixModule.cs"
-        return;
-    }
 #line 983 "MatrixModule.cs"
-    if (((opcode) == (31)))
-#line 984 "MatrixModule.cs"
-    {
-#line 985 "MatrixModule.cs"
-#line 985 "MatrixModule.cs"
-        int* csharp2cuda_temp_406 = &((output)->boolean_value);
-#line 985 "MatrixModule.cs"
-        int csharp2cuda_temp_407 = (first)->rows;
-#line 985 "MatrixModule.cs"
-        int csharp2cuda_temp_408 = (first)->columns;
-#line 985 "MatrixModule.cs"
-        int csharp2cuda_temp_409 = mathblocks_matrix_is_symmetric(a, csharp2cuda_temp_407, csharp2cuda_temp_408);
-        (*(csharp2cuda_temp_406) = csharp2cuda_temp_409);
-#line 986 "MatrixModule.cs"
         return;
     }
-#line 989 "MatrixModule.cs"
-    if (((opcode) == (32)))
-#line 990 "MatrixModule.cs"
+#line 986 "MatrixModule.cs"
+    if (((opcode) == (30)))
+#line 987 "MatrixModule.cs"
     {
-#line 991 "MatrixModule.cs"
-#line 991 "MatrixModule.cs"
-        int csharp2cuda_temp_410 = (first)->rows;
-#line 991 "MatrixModule.cs"
-        bool csharp2cuda_temp_411;
-#line 991 "MatrixModule.cs"
-        if (!(((csharp2cuda_temp_410) > (8))))
+#line 988 "MatrixModule.cs"
+#line 988 "MatrixModule.cs"
+        int* csharp2cuda_temp_406 = &((output)->boolean_value);
+#line 988 "MatrixModule.cs"
+        int csharp2cuda_temp_407 = (first)->rows;
+#line 988 "MatrixModule.cs"
+        int csharp2cuda_temp_408 = (first)->columns;
+#line 988 "MatrixModule.cs"
+        bool csharp2cuda_temp_409;
+#line 988 "MatrixModule.cs"
+        if (((csharp2cuda_temp_407) == (csharp2cuda_temp_408)))
         {
-#line 991 "MatrixModule.cs"
-            int csharp2cuda_temp_412 = (first)->columns;
-#line 991 "MatrixModule.cs"
-            csharp2cuda_temp_411 = ((csharp2cuda_temp_412) > (8));
+#line 988 "MatrixModule.cs"
+            csharp2cuda_temp_409 = ((((void*)(scratch))) != (((void*)(nullptr))));
         }
         else
         {
-#line 991 "MatrixModule.cs"
-            csharp2cuda_temp_411 = true;
+#line 988 "MatrixModule.cs"
+            csharp2cuda_temp_409 = false;
         }
-#line 991 "MatrixModule.cs"
-        bool csharp2cuda_temp_413;
-#line 991 "MatrixModule.cs"
-        if (!(csharp2cuda_temp_411))
+#line 988 "MatrixModule.cs"
+        bool csharp2cuda_temp_410;
+#line 988 "MatrixModule.cs"
+        if (csharp2cuda_temp_409)
         {
-#line 991 "MatrixModule.cs"
-            csharp2cuda_temp_413 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 989 "MatrixModule.cs"
+            int csharp2cuda_temp_411 = (first)->rows;
+#line 988 "MatrixModule.cs"
+            csharp2cuda_temp_410 = mathblocks_matrix_is_positive_definite(a, csharp2cuda_temp_411, scratch);
         }
         else
         {
-#line 991 "MatrixModule.cs"
-            csharp2cuda_temp_413 = true;
+#line 988 "MatrixModule.cs"
+            csharp2cuda_temp_410 = false;
         }
-        if (csharp2cuda_temp_413)
-#line 992 "MatrixModule.cs"
-        {
+        (*(csharp2cuda_temp_406) = csharp2cuda_temp_410);
+#line 990 "MatrixModule.cs"
+        return;
+    }
 #line 993 "MatrixModule.cs"
-#line 993 "MatrixModule.cs"
-            int* csharp2cuda_temp_414 = &((output)->valid);
-            (*(csharp2cuda_temp_414) = 0);
+    if (((opcode) == (31)))
 #line 994 "MatrixModule.cs"
+    {
+#line 995 "MatrixModule.cs"
+#line 995 "MatrixModule.cs"
+        int* csharp2cuda_temp_412 = &((output)->boolean_value);
+#line 995 "MatrixModule.cs"
+        int csharp2cuda_temp_413 = (first)->rows;
+#line 995 "MatrixModule.cs"
+        int csharp2cuda_temp_414 = (first)->columns;
+#line 995 "MatrixModule.cs"
+        int csharp2cuda_temp_415 = mathblocks_matrix_is_symmetric(a, csharp2cuda_temp_413, csharp2cuda_temp_414);
+        (*(csharp2cuda_temp_412) = csharp2cuda_temp_415);
+#line 996 "MatrixModule.cs"
+        return;
+    }
+#line 999 "MatrixModule.cs"
+    if (((opcode) == (32)))
+#line 1000 "MatrixModule.cs"
+    {
+#line 1001 "MatrixModule.cs"
+#line 1001 "MatrixModule.cs"
+        int csharp2cuda_temp_416 = (first)->rows;
+#line 1001 "MatrixModule.cs"
+        bool csharp2cuda_temp_417;
+#line 1001 "MatrixModule.cs"
+        if (!(((csharp2cuda_temp_416) > (8))))
+        {
+#line 1001 "MatrixModule.cs"
+            int csharp2cuda_temp_418 = (first)->columns;
+#line 1001 "MatrixModule.cs"
+            csharp2cuda_temp_417 = ((csharp2cuda_temp_418) > (8));
+        }
+        else
+        {
+#line 1001 "MatrixModule.cs"
+            csharp2cuda_temp_417 = true;
+        }
+#line 1001 "MatrixModule.cs"
+        bool csharp2cuda_temp_419;
+#line 1001 "MatrixModule.cs"
+        if (!(csharp2cuda_temp_417))
+        {
+#line 1001 "MatrixModule.cs"
+            csharp2cuda_temp_419 = ((((void*)(scratch))) == (((void*)(nullptr))));
+        }
+        else
+        {
+#line 1001 "MatrixModule.cs"
+            csharp2cuda_temp_419 = true;
+        }
+        if (csharp2cuda_temp_419)
+#line 1002 "MatrixModule.cs"
+        {
+#line 1003 "MatrixModule.cs"
+#line 1003 "MatrixModule.cs"
+            int* csharp2cuda_temp_420 = &((output)->valid);
+            (*(csharp2cuda_temp_420) = 0);
+#line 1004 "MatrixModule.cs"
             return;
         }
-#line 996 "MatrixModule.cs"
+#line 1006 "MatrixModule.cs"
         double* submatrix = scratch;
-#line 997 "MatrixModule.cs"
-        int csharp2cuda_temp_415 = (first)->count;
-#line 997 "MatrixModule.cs"
-        double* work = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_415);
-#line 998 "MatrixModule.cs"
-#line 998 "MatrixModule.cs"
-        int* csharp2cuda_temp_416 = &((output)->boolean_value);
-        (*(csharp2cuda_temp_416) = 1);
-#line 999 "MatrixModule.cs"
+#line 1007 "MatrixModule.cs"
+        int csharp2cuda_temp_421 = (first)->count;
+#line 1007 "MatrixModule.cs"
+        double* work = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_421);
+#line 1008 "MatrixModule.cs"
+#line 1008 "MatrixModule.cs"
+        int* csharp2cuda_temp_422 = &((output)->boolean_value);
+        (*(csharp2cuda_temp_422) = 1);
+#line 1009 "MatrixModule.cs"
         {
-#line 999 "MatrixModule.cs"
+#line 1009 "MatrixModule.cs"
             int order = 1;
             while (true)
             {
-#line 999 "MatrixModule.cs"
-                bool csharp2cuda_temp_418 = (output)->boolean_value;
-#line 999 "MatrixModule.cs"
-                bool csharp2cuda_temp_419;
-#line 999 "MatrixModule.cs"
-                if (csharp2cuda_temp_418)
+#line 1009 "MatrixModule.cs"
+                bool csharp2cuda_temp_424 = (output)->boolean_value;
+#line 1009 "MatrixModule.cs"
+                bool csharp2cuda_temp_425;
+#line 1009 "MatrixModule.cs"
+                if (csharp2cuda_temp_424)
                 {
-#line 1000 "MatrixModule.cs"
-                    int csharp2cuda_temp_420 = (first)->rows;
-#line 1000 "MatrixModule.cs"
-                    int csharp2cuda_temp_421 = (first)->columns;
-#line 1000 "MatrixModule.cs"
-                    int csharp2cuda_temp_422;
-#line 1000 "MatrixModule.cs"
-                    if (((csharp2cuda_temp_420) < (csharp2cuda_temp_421)))
+#line 1010 "MatrixModule.cs"
+                    int csharp2cuda_temp_426 = (first)->rows;
+#line 1010 "MatrixModule.cs"
+                    int csharp2cuda_temp_427 = (first)->columns;
+#line 1010 "MatrixModule.cs"
+                    int csharp2cuda_temp_428;
+#line 1010 "MatrixModule.cs"
+                    if (((csharp2cuda_temp_426) < (csharp2cuda_temp_427)))
                     {
-#line 1000 "MatrixModule.cs"
-                        csharp2cuda_temp_422 = (first)->rows;
+#line 1010 "MatrixModule.cs"
+                        csharp2cuda_temp_428 = (first)->rows;
                     }
                     else
                     {
-#line 1000 "MatrixModule.cs"
-                        csharp2cuda_temp_422 = (first)->columns;
+#line 1010 "MatrixModule.cs"
+                        csharp2cuda_temp_428 = (first)->columns;
                     }
-#line 999 "MatrixModule.cs"
-                    csharp2cuda_temp_419 = ((order) <= (csharp2cuda_temp_422));
+#line 1009 "MatrixModule.cs"
+                    csharp2cuda_temp_425 = ((order) <= (csharp2cuda_temp_428));
                 }
                 else
                 {
-#line 999 "MatrixModule.cs"
-                    csharp2cuda_temp_419 = false;
+#line 1009 "MatrixModule.cs"
+                    csharp2cuda_temp_425 = false;
                 }
-                if (!(csharp2cuda_temp_419))
+                if (!(csharp2cuda_temp_425))
                     break;
-#line 1001 "MatrixModule.cs"
+#line 1011 "MatrixModule.cs"
                 {
-#line 1002 "MatrixModule.cs"
-                    int csharp2cuda_temp_423 = (first)->rows;
-#line 1002 "MatrixModule.cs"
-                    int row_limit = csharp2cuda_i32_shl(1, csharp2cuda_temp_423);
-#line 1003 "MatrixModule.cs"
-                    int csharp2cuda_temp_424 = (first)->columns;
-#line 1003 "MatrixModule.cs"
-                    int column_limit = csharp2cuda_i32_shl(1, csharp2cuda_temp_424);
-#line 1004 "MatrixModule.cs"
+#line 1012 "MatrixModule.cs"
+                    int csharp2cuda_temp_429 = (first)->rows;
+#line 1012 "MatrixModule.cs"
+                    int row_limit = csharp2cuda_i32_shl(1, csharp2cuda_temp_429);
+#line 1013 "MatrixModule.cs"
+                    int csharp2cuda_temp_430 = (first)->columns;
+#line 1013 "MatrixModule.cs"
+                    int column_limit = csharp2cuda_i32_shl(1, csharp2cuda_temp_430);
+#line 1014 "MatrixModule.cs"
                     {
-#line 1004 "MatrixModule.cs"
+#line 1014 "MatrixModule.cs"
                         int row_mask = 1;
                         while (true)
                         {
-#line 1004 "MatrixModule.cs"
-                            bool csharp2cuda_temp_426 = (output)->boolean_value;
-#line 1004 "MatrixModule.cs"
-                            bool csharp2cuda_temp_427;
-#line 1004 "MatrixModule.cs"
-                            if (csharp2cuda_temp_426)
+#line 1014 "MatrixModule.cs"
+                            bool csharp2cuda_temp_432 = (output)->boolean_value;
+#line 1014 "MatrixModule.cs"
+                            bool csharp2cuda_temp_433;
+#line 1014 "MatrixModule.cs"
+                            if (csharp2cuda_temp_432)
                             {
-#line 1004 "MatrixModule.cs"
-                                csharp2cuda_temp_427 = ((row_mask) < (row_limit));
+#line 1014 "MatrixModule.cs"
+                                csharp2cuda_temp_433 = ((row_mask) < (row_limit));
                             }
                             else
                             {
-#line 1004 "MatrixModule.cs"
-                                csharp2cuda_temp_427 = false;
+#line 1014 "MatrixModule.cs"
+                                csharp2cuda_temp_433 = false;
                             }
-                            if (!(csharp2cuda_temp_427))
+                            if (!(csharp2cuda_temp_433))
                                 break;
-#line 1005 "MatrixModule.cs"
+#line 1015 "MatrixModule.cs"
                             {
-#line 1006 "MatrixModule.cs"
+#line 1016 "MatrixModule.cs"
                                 if (((mathblocks_pop_count(row_mask)) != (order)))
                                 {
-#line 1007 "MatrixModule.cs"
-                                    goto csharp2cuda_for_continue_41;
+#line 1017 "MatrixModule.cs"
+                                    goto csharp2cuda_for_continue_42;
                                 }
-#line 1008 "MatrixModule.cs"
+#line 1018 "MatrixModule.cs"
                                 {
-#line 1008 "MatrixModule.cs"
+#line 1018 "MatrixModule.cs"
                                     int column_mask = 1;
                                     while (true)
                                     {
                                         if (!(((column_mask) < (column_limit))))
                                             break;
-#line 1009 "MatrixModule.cs"
+#line 1019 "MatrixModule.cs"
                                         {
-#line 1010 "MatrixModule.cs"
+#line 1020 "MatrixModule.cs"
                                             if (((mathblocks_pop_count(column_mask)) != (order)))
                                             {
-#line 1011 "MatrixModule.cs"
-                                                goto csharp2cuda_for_continue_40;
+#line 1021 "MatrixModule.cs"
+                                                goto csharp2cuda_for_continue_41;
                                             }
-#line 1012 "MatrixModule.cs"
-#line 1014 "MatrixModule.cs"
-                                            int csharp2cuda_temp_429 = (first)->columns;
-                                            mathblocks_matrix_submatrix_from_masks(a, csharp2cuda_temp_429, row_mask, column_mask, order, submatrix);
-#line 1019 "MatrixModule.cs"
-#line 1019 "MatrixModule.cs"
-                                            double csharp2cuda_temp_430 = mathblocks_matrix_determinant(submatrix, order, work);
-                                            if (((csharp2cuda_temp_430) < (0.0)))
-#line 1020 "MatrixModule.cs"
-                                            {
-#line 1021 "MatrixModule.cs"
-#line 1021 "MatrixModule.cs"
-                                                int* csharp2cuda_temp_431 = &((output)->boolean_value);
-                                                (*(csharp2cuda_temp_431) = 0);
 #line 1022 "MatrixModule.cs"
+#line 1024 "MatrixModule.cs"
+                                            int csharp2cuda_temp_435 = (first)->columns;
+                                            mathblocks_matrix_submatrix_from_masks(a, csharp2cuda_temp_435, row_mask, column_mask, order, submatrix);
+#line 1029 "MatrixModule.cs"
+#line 1029 "MatrixModule.cs"
+                                            double csharp2cuda_temp_436 = mathblocks_matrix_determinant(submatrix, order, work);
+                                            if (((csharp2cuda_temp_436) < (0.0)))
+#line 1030 "MatrixModule.cs"
+                                            {
+#line 1031 "MatrixModule.cs"
+#line 1031 "MatrixModule.cs"
+                                                int* csharp2cuda_temp_437 = &((output)->boolean_value);
+                                                (*(csharp2cuda_temp_437) = 0);
+#line 1032 "MatrixModule.cs"
                                                 break;
                                             }
                                         }
-                                        csharp2cuda_for_continue_40:
-#line 1008 "MatrixModule.cs"
-                                        int* csharp2cuda_temp_428 = &(column_mask);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_428));
+                                        csharp2cuda_for_continue_41:
+#line 1018 "MatrixModule.cs"
+                                        int* csharp2cuda_temp_434 = &(column_mask);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_434));
                                     }
                                 }
                             }
-                            csharp2cuda_for_continue_41:
-#line 1004 "MatrixModule.cs"
-                            int* csharp2cuda_temp_425 = &(row_mask);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_425));
+                            csharp2cuda_for_continue_42:
+#line 1014 "MatrixModule.cs"
+                            int* csharp2cuda_temp_431 = &(row_mask);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_431));
                         }
                     }
                 }
-#line 1000 "MatrixModule.cs"
-                int* csharp2cuda_temp_417 = &(order);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_417));
+#line 1010 "MatrixModule.cs"
+                int* csharp2cuda_temp_423 = &(order);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_423));
             }
         }
-#line 1027 "MatrixModule.cs"
+#line 1037 "MatrixModule.cs"
         return;
     }
-#line 1030 "MatrixModule.cs"
-#line 1030 "MatrixModule.cs"
-    bool csharp2cuda_temp_432;
-#line 1030 "MatrixModule.cs"
+#line 1040 "MatrixModule.cs"
+#line 1040 "MatrixModule.cs"
+    bool csharp2cuda_temp_438;
+#line 1040 "MatrixModule.cs"
     if (!(((opcode) == (33))))
     {
-#line 1030 "MatrixModule.cs"
-        csharp2cuda_temp_432 = ((opcode) == (40));
-    }
-    else
-    {
-#line 1030 "MatrixModule.cs"
-        csharp2cuda_temp_432 = true;
-    }
-#line 1030 "MatrixModule.cs"
-    bool csharp2cuda_temp_433;
-#line 1030 "MatrixModule.cs"
-    if (!(csharp2cuda_temp_432))
-    {
-#line 1030 "MatrixModule.cs"
-        csharp2cuda_temp_433 = ((opcode) == (43));
-    }
-    else
-    {
-#line 1030 "MatrixModule.cs"
-        csharp2cuda_temp_433 = true;
-    }
-    if (csharp2cuda_temp_433)
-#line 1031 "MatrixModule.cs"
-    {
-#line 1032 "MatrixModule.cs"
-        int size = (first)->rows;
-#line 1033 "MatrixModule.cs"
-#line 1033 "MatrixModule.cs"
-        int csharp2cuda_temp_434 = (first)->columns;
-#line 1033 "MatrixModule.cs"
-        bool csharp2cuda_temp_435;
-#line 1033 "MatrixModule.cs"
-        if (!(((size) != (csharp2cuda_temp_434))))
-        {
-#line 1033 "MatrixModule.cs"
-            csharp2cuda_temp_435 = ((((void*)(scratch))) == (((void*)(nullptr))));
-        }
-        else
-        {
-#line 1033 "MatrixModule.cs"
-            csharp2cuda_temp_435 = true;
-        }
-        if (csharp2cuda_temp_435)
-#line 1034 "MatrixModule.cs"
-        {
-#line 1035 "MatrixModule.cs"
-#line 1035 "MatrixModule.cs"
-            int* csharp2cuda_temp_436 = &((output)->valid);
-            (*(csharp2cuda_temp_436) = 0);
-#line 1036 "MatrixModule.cs"
-            return;
-        }
-#line 1038 "MatrixModule.cs"
-        double* csharp2cuda_temp_437;
-#line 1038 "MatrixModule.cs"
-        if (((opcode) == (43)))
-        {
-#line 1038 "MatrixModule.cs"
-            csharp2cuda_temp_437 = result;
-        }
-        else
-        {
-#line 1038 "MatrixModule.cs"
-            int csharp2cuda_temp_438 = (first)->count;
-#line 1038 "MatrixModule.cs"
-            csharp2cuda_temp_437 = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_438);
-        }
-#line 1038 "MatrixModule.cs"
-        double* eigenvalues = csharp2cuda_temp_437;
-#line 1039 "MatrixModule.cs"
-#line 1039 "MatrixModule.cs"
-        bool csharp2cuda_temp_439;
-#line 1039 "MatrixModule.cs"
-        if (((opcode) == (43)))
-        {
-#line 1039 "MatrixModule.cs"
-            bool csharp2cuda_temp_440 = mathblocks_matrix_is_symmetric(a, size, size);
-#line 1039 "MatrixModule.cs"
-            csharp2cuda_temp_439 = (!(csharp2cuda_temp_440));
-        }
-        else
-        {
-#line 1039 "MatrixModule.cs"
-            csharp2cuda_temp_439 = false;
-        }
-        if (csharp2cuda_temp_439)
 #line 1040 "MatrixModule.cs"
-        {
+        csharp2cuda_temp_438 = ((opcode) == (40));
+    }
+    else
+    {
+#line 1040 "MatrixModule.cs"
+        csharp2cuda_temp_438 = true;
+    }
+#line 1040 "MatrixModule.cs"
+    bool csharp2cuda_temp_439;
+#line 1040 "MatrixModule.cs"
+    if (!(csharp2cuda_temp_438))
+    {
+#line 1040 "MatrixModule.cs"
+        csharp2cuda_temp_439 = ((opcode) == (43));
+    }
+    else
+    {
+#line 1040 "MatrixModule.cs"
+        csharp2cuda_temp_439 = true;
+    }
+    if (csharp2cuda_temp_439)
 #line 1041 "MatrixModule.cs"
-#line 1041 "MatrixModule.cs"
-            int* csharp2cuda_temp_441 = &((output)->valid);
-            (*(csharp2cuda_temp_441) = 0);
+    {
 #line 1042 "MatrixModule.cs"
+        int size = (first)->rows;
+#line 1043 "MatrixModule.cs"
+#line 1043 "MatrixModule.cs"
+        int csharp2cuda_temp_440 = (first)->columns;
+#line 1043 "MatrixModule.cs"
+        bool csharp2cuda_temp_441;
+#line 1043 "MatrixModule.cs"
+        if (!(((size) != (csharp2cuda_temp_440))))
+        {
+#line 1043 "MatrixModule.cs"
+            csharp2cuda_temp_441 = ((((void*)(scratch))) == (((void*)(nullptr))));
+        }
+        else
+        {
+#line 1043 "MatrixModule.cs"
+            csharp2cuda_temp_441 = true;
+        }
+        if (csharp2cuda_temp_441)
+#line 1044 "MatrixModule.cs"
+        {
+#line 1045 "MatrixModule.cs"
+#line 1045 "MatrixModule.cs"
+            int* csharp2cuda_temp_442 = &((output)->valid);
+            (*(csharp2cuda_temp_442) = 0);
+#line 1046 "MatrixModule.cs"
             return;
         }
-#line 1044 "MatrixModule.cs"
+#line 1048 "MatrixModule.cs"
+        double* csharp2cuda_temp_443;
+#line 1048 "MatrixModule.cs"
         if (((opcode) == (43)))
         {
-#line 1044 "MatrixModule.cs"
+#line 1048 "MatrixModule.cs"
+            csharp2cuda_temp_443 = result;
+        }
+        else
+        {
+#line 1048 "MatrixModule.cs"
+            int csharp2cuda_temp_444 = (first)->count;
+#line 1048 "MatrixModule.cs"
+            csharp2cuda_temp_443 = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_444);
+        }
+#line 1048 "MatrixModule.cs"
+        double* eigenvalues = csharp2cuda_temp_443;
+#line 1049 "MatrixModule.cs"
+#line 1049 "MatrixModule.cs"
+        bool csharp2cuda_temp_445;
+#line 1049 "MatrixModule.cs"
+        if (((opcode) == (43)))
+        {
+#line 1049 "MatrixModule.cs"
+            bool csharp2cuda_temp_446 = mathblocks_matrix_is_symmetric(a, size, size);
+#line 1049 "MatrixModule.cs"
+            csharp2cuda_temp_445 = (!(csharp2cuda_temp_446));
+        }
+        else
+        {
+#line 1049 "MatrixModule.cs"
+            csharp2cuda_temp_445 = false;
+        }
+        if (csharp2cuda_temp_445)
+#line 1050 "MatrixModule.cs"
+        {
+#line 1051 "MatrixModule.cs"
+#line 1051 "MatrixModule.cs"
+            int* csharp2cuda_temp_447 = &((output)->valid);
+            (*(csharp2cuda_temp_447) = 0);
+#line 1052 "MatrixModule.cs"
+            return;
+        }
+#line 1054 "MatrixModule.cs"
+        if (((opcode) == (43)))
+        {
+#line 1054 "MatrixModule.cs"
             mathblocks_set_vector_shape(output, size);
         }
-#line 1045 "MatrixModule.cs"
-#line 1045 "MatrixModule.cs"
-        int csharp2cuda_temp_442 = (first)->count;
-#line 1045 "MatrixModule.cs"
-        int csharp2cuda_temp_443;
-#line 1045 "MatrixModule.cs"
+#line 1055 "MatrixModule.cs"
+#line 1055 "MatrixModule.cs"
+        int csharp2cuda_temp_448 = (first)->count;
+#line 1055 "MatrixModule.cs"
+        int csharp2cuda_temp_449;
+#line 1055 "MatrixModule.cs"
         if (((opcode) == (43)))
         {
-#line 1045 "MatrixModule.cs"
-            csharp2cuda_temp_443 = 0;
+#line 1055 "MatrixModule.cs"
+            csharp2cuda_temp_449 = 0;
         }
         else
         {
-#line 1045 "MatrixModule.cs"
-            csharp2cuda_temp_443 = size;
+#line 1055 "MatrixModule.cs"
+            csharp2cuda_temp_449 = size;
         }
-        mathblocks_matrix_symmetric_eigenvalues(a, size, scratch, eigenvalues, csharp2cuda_pointer_add(csharp2cuda_pointer_add(scratch, csharp2cuda_temp_442), csharp2cuda_temp_443));
-#line 1046 "MatrixModule.cs"
+        mathblocks_matrix_symmetric_eigenvalues(a, size, scratch, eigenvalues, csharp2cuda_pointer_add(csharp2cuda_pointer_add(scratch, csharp2cuda_temp_448), csharp2cuda_temp_449));
+#line 1056 "MatrixModule.cs"
         if (((opcode) == (33)))
         {
-#line 1046 "MatrixModule.cs"
-#line 1046 "MatrixModule.cs"
-            double* csharp2cuda_temp_444 = &((output)->scalar_value);
-#line 1046 "MatrixModule.cs"
-            double csharp2cuda_temp_445 = (eigenvalues)[csharp2cuda_i32_sub(size, 1)];
-            (*(csharp2cuda_temp_444) = csharp2cuda_temp_445);
+#line 1056 "MatrixModule.cs"
+#line 1056 "MatrixModule.cs"
+            double* csharp2cuda_temp_450 = &((output)->scalar_value);
+#line 1056 "MatrixModule.cs"
+            double csharp2cuda_temp_451 = (eigenvalues)[csharp2cuda_i32_sub(size, 1)];
+            (*(csharp2cuda_temp_450) = csharp2cuda_temp_451);
         }
         else
         {
-#line 1047 "MatrixModule.cs"
+#line 1057 "MatrixModule.cs"
             if (((opcode) == (40)))
             {
-#line 1047 "MatrixModule.cs"
-#line 1047 "MatrixModule.cs"
-                double* csharp2cuda_temp_446 = &((output)->scalar_value);
-#line 1047 "MatrixModule.cs"
-                double csharp2cuda_temp_447 = (eigenvalues)[0];
-                (*(csharp2cuda_temp_446) = csharp2cuda_temp_447);
+#line 1057 "MatrixModule.cs"
+#line 1057 "MatrixModule.cs"
+                double* csharp2cuda_temp_452 = &((output)->scalar_value);
+#line 1057 "MatrixModule.cs"
+                double csharp2cuda_temp_453 = (eigenvalues)[0];
+                (*(csharp2cuda_temp_452) = csharp2cuda_temp_453);
             }
         }
-#line 1048 "MatrixModule.cs"
+#line 1058 "MatrixModule.cs"
         {
-#line 1048 "MatrixModule.cs"
+#line 1058 "MatrixModule.cs"
             int index = 0;
             while (true)
             {
                 if (!(((index) < (size))))
                     break;
-#line 1049 "MatrixModule.cs"
-#line 1049 "MatrixModule.cs"
-                double csharp2cuda_temp_449 = (eigenvalues)[index];
-                if ((!(isfinite(csharp2cuda_temp_449))))
+#line 1059 "MatrixModule.cs"
+#line 1059 "MatrixModule.cs"
+                double csharp2cuda_temp_455 = (eigenvalues)[index];
+                if ((!(isfinite(csharp2cuda_temp_455))))
                 {
-#line 1049 "MatrixModule.cs"
-#line 1049 "MatrixModule.cs"
-                    int* csharp2cuda_temp_450 = &((output)->valid);
-                    (*(csharp2cuda_temp_450) = 0);
+#line 1059 "MatrixModule.cs"
+#line 1059 "MatrixModule.cs"
+                    int* csharp2cuda_temp_456 = &((output)->valid);
+                    (*(csharp2cuda_temp_456) = 0);
                 }
-#line 1048 "MatrixModule.cs"
-                int* csharp2cuda_temp_448 = &(index);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_448));
+#line 1058 "MatrixModule.cs"
+                int* csharp2cuda_temp_454 = &(index);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_454));
             }
         }
-#line 1050 "MatrixModule.cs"
+#line 1060 "MatrixModule.cs"
         return;
     }
-#line 1053 "MatrixModule.cs"
+#line 1063 "MatrixModule.cs"
     if (((opcode) == (34)))
-#line 1054 "MatrixModule.cs"
+#line 1064 "MatrixModule.cs"
     {
-#line 1055 "MatrixModule.cs"
-#line 1055 "MatrixModule.cs"
-        int csharp2cuda_temp_451 = (first)->rows;
-#line 1055 "MatrixModule.cs"
-        int csharp2cuda_temp_452 = (first)->columns;
-#line 1055 "MatrixModule.cs"
-        bool csharp2cuda_temp_453;
-#line 1055 "MatrixModule.cs"
-        if (!(((csharp2cuda_temp_451) > (csharp2cuda_temp_452))))
+#line 1065 "MatrixModule.cs"
+#line 1065 "MatrixModule.cs"
+        int csharp2cuda_temp_457 = (first)->rows;
+#line 1065 "MatrixModule.cs"
+        int csharp2cuda_temp_458 = (first)->columns;
+#line 1065 "MatrixModule.cs"
+        bool csharp2cuda_temp_459;
+#line 1065 "MatrixModule.cs"
+        if (!(((csharp2cuda_temp_457) > (csharp2cuda_temp_458))))
         {
-#line 1055 "MatrixModule.cs"
-            int csharp2cuda_temp_454 = (first)->columns;
-#line 1055 "MatrixModule.cs"
-            csharp2cuda_temp_453 = ((csharp2cuda_temp_454) > (20));
+#line 1065 "MatrixModule.cs"
+            int csharp2cuda_temp_460 = (first)->columns;
+#line 1065 "MatrixModule.cs"
+            csharp2cuda_temp_459 = ((csharp2cuda_temp_460) > (20));
         }
         else
         {
-#line 1055 "MatrixModule.cs"
-            csharp2cuda_temp_453 = true;
+#line 1065 "MatrixModule.cs"
+            csharp2cuda_temp_459 = true;
         }
-#line 1055 "MatrixModule.cs"
-        bool csharp2cuda_temp_455;
-#line 1055 "MatrixModule.cs"
-        if (!(csharp2cuda_temp_453))
+#line 1065 "MatrixModule.cs"
+        bool csharp2cuda_temp_461;
+#line 1065 "MatrixModule.cs"
+        if (!(csharp2cuda_temp_459))
         {
-#line 1055 "MatrixModule.cs"
-            csharp2cuda_temp_455 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 1065 "MatrixModule.cs"
+            csharp2cuda_temp_461 = ((((void*)(scratch))) == (((void*)(nullptr))));
         }
         else
         {
-#line 1055 "MatrixModule.cs"
-            csharp2cuda_temp_455 = true;
+#line 1065 "MatrixModule.cs"
+            csharp2cuda_temp_461 = true;
         }
-        if (csharp2cuda_temp_455)
-#line 1056 "MatrixModule.cs"
+        if (csharp2cuda_temp_461)
+#line 1066 "MatrixModule.cs"
         {
-#line 1057 "MatrixModule.cs"
-#line 1057 "MatrixModule.cs"
-            int* csharp2cuda_temp_456 = &((output)->valid);
-            (*(csharp2cuda_temp_456) = 0);
-#line 1058 "MatrixModule.cs"
+#line 1067 "MatrixModule.cs"
+#line 1067 "MatrixModule.cs"
+            int* csharp2cuda_temp_462 = &((output)->valid);
+            (*(csharp2cuda_temp_462) = 0);
+#line 1068 "MatrixModule.cs"
             return;
         }
-#line 1060 "MatrixModule.cs"
+#line 1070 "MatrixModule.cs"
         double* submatrix = scratch;
-#line 1061 "MatrixModule.cs"
-        int csharp2cuda_temp_457 = (first)->count;
-#line 1061 "MatrixModule.cs"
-        double* work = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_457);
-#line 1062 "MatrixModule.cs"
-        int csharp2cuda_temp_458 = (first)->rows;
-#line 1062 "MatrixModule.cs"
-        int row_mask = csharp2cuda_i32_sub(csharp2cuda_i32_shl(1, csharp2cuda_temp_458), 1);
-#line 1063 "MatrixModule.cs"
-        int csharp2cuda_temp_459 = (first)->columns;
-#line 1063 "MatrixModule.cs"
-        int limit = csharp2cuda_i32_shl(1, csharp2cuda_temp_459);
-#line 1064 "MatrixModule.cs"
+#line 1071 "MatrixModule.cs"
+        int csharp2cuda_temp_463 = (first)->count;
+#line 1071 "MatrixModule.cs"
+        double* work = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_463);
+#line 1072 "MatrixModule.cs"
+        int csharp2cuda_temp_464 = (first)->rows;
+#line 1072 "MatrixModule.cs"
+        int row_mask = csharp2cuda_i32_sub(csharp2cuda_i32_shl(1, csharp2cuda_temp_464), 1);
+#line 1073 "MatrixModule.cs"
+        int csharp2cuda_temp_465 = (first)->columns;
+#line 1073 "MatrixModule.cs"
+        int limit = csharp2cuda_i32_shl(1, csharp2cuda_temp_465);
+#line 1074 "MatrixModule.cs"
         int output_index = 0;
-#line 1065 "MatrixModule.cs"
+#line 1075 "MatrixModule.cs"
         {
-#line 1065 "MatrixModule.cs"
+#line 1075 "MatrixModule.cs"
             int column_mask = 1;
             while (true)
             {
                 if (!(((column_mask) < (limit))))
                     break;
-#line 1066 "MatrixModule.cs"
+#line 1076 "MatrixModule.cs"
                 {
-#line 1067 "MatrixModule.cs"
-#line 1067 "MatrixModule.cs"
-                    int csharp2cuda_temp_461 = (first)->rows;
-                    if (((mathblocks_pop_count(column_mask)) != (csharp2cuda_temp_461)))
-                    {
-#line 1068 "MatrixModule.cs"
-                        goto csharp2cuda_for_continue_44;
-                    }
-#line 1069 "MatrixModule.cs"
-#line 1071 "MatrixModule.cs"
-                    int csharp2cuda_temp_462 = (first)->columns;
-#line 1074 "MatrixModule.cs"
-                    int csharp2cuda_temp_463 = (first)->rows;
-                    mathblocks_matrix_submatrix_from_masks(a, csharp2cuda_temp_462, row_mask, column_mask, csharp2cuda_temp_463, submatrix);
-#line 1076 "MatrixModule.cs"
-#line 1076 "MatrixModule.cs"
-                    int* csharp2cuda_temp_464 = &(output_index);
-#line 1076 "MatrixModule.cs"
-                    int csharp2cuda_temp_465 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_464));
-#line 1076 "MatrixModule.cs"
-                    double* csharp2cuda_temp_466 = &((result)[csharp2cuda_temp_465]);
-#line 1078 "MatrixModule.cs"
+#line 1077 "MatrixModule.cs"
+#line 1077 "MatrixModule.cs"
                     int csharp2cuda_temp_467 = (first)->rows;
-#line 1076 "MatrixModule.cs"
-                    double csharp2cuda_temp_468 = mathblocks_matrix_determinant(submatrix, csharp2cuda_temp_467, work);
-                    (*(csharp2cuda_temp_466) = csharp2cuda_temp_468);
+                    if (((mathblocks_pop_count(column_mask)) != (csharp2cuda_temp_467)))
+                    {
+#line 1078 "MatrixModule.cs"
+                        goto csharp2cuda_for_continue_45;
+                    }
+#line 1079 "MatrixModule.cs"
+#line 1081 "MatrixModule.cs"
+                    int csharp2cuda_temp_468 = (first)->columns;
+#line 1084 "MatrixModule.cs"
+                    int csharp2cuda_temp_469 = (first)->rows;
+                    mathblocks_matrix_submatrix_from_masks(a, csharp2cuda_temp_468, row_mask, column_mask, csharp2cuda_temp_469, submatrix);
+#line 1086 "MatrixModule.cs"
+#line 1086 "MatrixModule.cs"
+                    int* csharp2cuda_temp_470 = &(output_index);
+#line 1086 "MatrixModule.cs"
+                    int csharp2cuda_temp_471 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_470));
+#line 1086 "MatrixModule.cs"
+                    double* csharp2cuda_temp_472 = &((result)[csharp2cuda_temp_471]);
+#line 1088 "MatrixModule.cs"
+                    int csharp2cuda_temp_473 = (first)->rows;
+#line 1086 "MatrixModule.cs"
+                    double csharp2cuda_temp_474 = mathblocks_matrix_determinant(submatrix, csharp2cuda_temp_473, work);
+                    (*(csharp2cuda_temp_472) = csharp2cuda_temp_474);
                 }
-                csharp2cuda_for_continue_44:
-#line 1065 "MatrixModule.cs"
-                int* csharp2cuda_temp_460 = &(column_mask);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_460));
+                csharp2cuda_for_continue_45:
+#line 1075 "MatrixModule.cs"
+                int* csharp2cuda_temp_466 = &(column_mask);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_466));
             }
         }
-#line 1081 "MatrixModule.cs"
+#line 1091 "MatrixModule.cs"
         mathblocks_set_vector_shape(output, output_index);
-#line 1082 "MatrixModule.cs"
+#line 1092 "MatrixModule.cs"
         {
-#line 1082 "MatrixModule.cs"
+#line 1092 "MatrixModule.cs"
             int index = 0;
             while (true)
             {
                 if (!(((index) < (output_index))))
                     break;
-#line 1083 "MatrixModule.cs"
-#line 1083 "MatrixModule.cs"
-                double csharp2cuda_temp_470 = (result)[index];
-                if ((!(isfinite(csharp2cuda_temp_470))))
+#line 1093 "MatrixModule.cs"
+#line 1093 "MatrixModule.cs"
+                double csharp2cuda_temp_476 = (result)[index];
+                if ((!(isfinite(csharp2cuda_temp_476))))
                 {
-#line 1083 "MatrixModule.cs"
-#line 1083 "MatrixModule.cs"
-                    int* csharp2cuda_temp_471 = &((output)->valid);
-                    (*(csharp2cuda_temp_471) = 0);
+#line 1093 "MatrixModule.cs"
+#line 1093 "MatrixModule.cs"
+                    int* csharp2cuda_temp_477 = &((output)->valid);
+                    (*(csharp2cuda_temp_477) = 0);
                 }
-#line 1082 "MatrixModule.cs"
-                int* csharp2cuda_temp_469 = &(index);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_469));
+#line 1092 "MatrixModule.cs"
+                int* csharp2cuda_temp_475 = &(index);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_475));
             }
         }
-#line 1084 "MatrixModule.cs"
+#line 1094 "MatrixModule.cs"
         return;
     }
-#line 1087 "MatrixModule.cs"
-#line 1087 "MatrixModule.cs"
-    bool csharp2cuda_temp_472;
-#line 1087 "MatrixModule.cs"
+#line 1097 "MatrixModule.cs"
+#line 1097 "MatrixModule.cs"
+    bool csharp2cuda_temp_478;
+#line 1097 "MatrixModule.cs"
     if (!(((opcode) == (35))))
     {
-#line 1087 "MatrixModule.cs"
-        csharp2cuda_temp_472 = ((opcode) == (36));
+#line 1097 "MatrixModule.cs"
+        csharp2cuda_temp_478 = ((opcode) == (36));
     }
     else
     {
-#line 1087 "MatrixModule.cs"
-        csharp2cuda_temp_472 = true;
+#line 1097 "MatrixModule.cs"
+        csharp2cuda_temp_478 = true;
     }
-    if (csharp2cuda_temp_472)
-#line 1088 "MatrixModule.cs"
+    if (csharp2cuda_temp_478)
+#line 1098 "MatrixModule.cs"
     {
-#line 1089 "MatrixModule.cs"
+#line 1099 "MatrixModule.cs"
         int iterations = 0;
-#line 1090 "MatrixModule.cs"
+#line 1100 "MatrixModule.cs"
         int size = (first)->rows;
-#line 1091 "MatrixModule.cs"
-#line 1091 "MatrixModule.cs"
-        int csharp2cuda_temp_473 = (first)->columns;
-#line 1091 "MatrixModule.cs"
-        bool csharp2cuda_temp_474;
-#line 1091 "MatrixModule.cs"
-        if (!(((size) != (csharp2cuda_temp_473))))
-        {
-#line 1092 "MatrixModule.cs"
-            double csharp2cuda_temp_475 = (second)->scalar_value;
-#line 1092 "MatrixModule.cs"
-            int* csharp2cuda_temp_476 = &(iterations);
-#line 1092 "MatrixModule.cs"
-            bool csharp2cuda_temp_477 = mathblocks_nonnegative_integer(csharp2cuda_temp_475, csharp2cuda_temp_476);
-#line 1091 "MatrixModule.cs"
-            csharp2cuda_temp_474 = (!(csharp2cuda_temp_477));
-        }
-        else
-        {
-#line 1091 "MatrixModule.cs"
-            csharp2cuda_temp_474 = true;
-        }
-#line 1091 "MatrixModule.cs"
-        bool csharp2cuda_temp_478;
-#line 1091 "MatrixModule.cs"
-        if (!(csharp2cuda_temp_474))
-        {
-#line 1091 "MatrixModule.cs"
-            csharp2cuda_temp_478 = ((iterations) <= (0));
-        }
-        else
-        {
-#line 1091 "MatrixModule.cs"
-            csharp2cuda_temp_478 = true;
-        }
-#line 1091 "MatrixModule.cs"
-        bool csharp2cuda_temp_479;
-#line 1091 "MatrixModule.cs"
-        if (!(csharp2cuda_temp_478))
-        {
-#line 1091 "MatrixModule.cs"
-            csharp2cuda_temp_479 = ((iterations) > (10000));
-        }
-        else
-        {
-#line 1091 "MatrixModule.cs"
-            csharp2cuda_temp_479 = true;
-        }
-#line 1091 "MatrixModule.cs"
+#line 1101 "MatrixModule.cs"
+#line 1101 "MatrixModule.cs"
+        int csharp2cuda_temp_479 = (first)->columns;
+#line 1101 "MatrixModule.cs"
         bool csharp2cuda_temp_480;
-#line 1091 "MatrixModule.cs"
-        if (!(csharp2cuda_temp_479))
+#line 1101 "MatrixModule.cs"
+        if (!(((size) != (csharp2cuda_temp_479))))
         {
-#line 1091 "MatrixModule.cs"
-            csharp2cuda_temp_480 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 1102 "MatrixModule.cs"
+            double csharp2cuda_temp_481 = (second)->scalar_value;
+#line 1102 "MatrixModule.cs"
+            int* csharp2cuda_temp_482 = &(iterations);
+#line 1102 "MatrixModule.cs"
+            bool csharp2cuda_temp_483 = mathblocks_nonnegative_integer(csharp2cuda_temp_481, csharp2cuda_temp_482);
+#line 1101 "MatrixModule.cs"
+            csharp2cuda_temp_480 = (!(csharp2cuda_temp_483));
         }
         else
         {
-#line 1091 "MatrixModule.cs"
+#line 1101 "MatrixModule.cs"
             csharp2cuda_temp_480 = true;
         }
-        if (csharp2cuda_temp_480)
-#line 1094 "MatrixModule.cs"
+#line 1101 "MatrixModule.cs"
+        bool csharp2cuda_temp_484;
+#line 1101 "MatrixModule.cs"
+        if (!(csharp2cuda_temp_480))
         {
-#line 1095 "MatrixModule.cs"
-#line 1095 "MatrixModule.cs"
-            int* csharp2cuda_temp_481 = &((output)->valid);
-            (*(csharp2cuda_temp_481) = 0);
-#line 1096 "MatrixModule.cs"
+#line 1101 "MatrixModule.cs"
+            csharp2cuda_temp_484 = ((iterations) <= (0));
+        }
+        else
+        {
+#line 1101 "MatrixModule.cs"
+            csharp2cuda_temp_484 = true;
+        }
+#line 1101 "MatrixModule.cs"
+        bool csharp2cuda_temp_485;
+#line 1101 "MatrixModule.cs"
+        if (!(csharp2cuda_temp_484))
+        {
+#line 1101 "MatrixModule.cs"
+            csharp2cuda_temp_485 = ((iterations) > (10000));
+        }
+        else
+        {
+#line 1101 "MatrixModule.cs"
+            csharp2cuda_temp_485 = true;
+        }
+#line 1101 "MatrixModule.cs"
+        bool csharp2cuda_temp_486;
+#line 1101 "MatrixModule.cs"
+        if (!(csharp2cuda_temp_485))
+        {
+#line 1101 "MatrixModule.cs"
+            csharp2cuda_temp_486 = ((((void*)(scratch))) == (((void*)(nullptr))));
+        }
+        else
+        {
+#line 1101 "MatrixModule.cs"
+            csharp2cuda_temp_486 = true;
+        }
+        if (csharp2cuda_temp_486)
+#line 1104 "MatrixModule.cs"
+        {
+#line 1105 "MatrixModule.cs"
+#line 1105 "MatrixModule.cs"
+            int* csharp2cuda_temp_487 = &((output)->valid);
+            (*(csharp2cuda_temp_487) = 0);
+#line 1106 "MatrixModule.cs"
             return;
         }
-#line 1098 "MatrixModule.cs"
+#line 1108 "MatrixModule.cs"
         {
-#line 1098 "MatrixModule.cs"
+#line 1108 "MatrixModule.cs"
             int index = 0;
             while (true)
             {
-#line 1098 "MatrixModule.cs"
-                int csharp2cuda_temp_483 = (first)->count;
-                if (!(((index) < (csharp2cuda_temp_483))))
+#line 1108 "MatrixModule.cs"
+                int csharp2cuda_temp_489 = (first)->count;
+                if (!(((index) < (csharp2cuda_temp_489))))
                     break;
-#line 1099 "MatrixModule.cs"
-#line 1099 "MatrixModule.cs"
-                double csharp2cuda_temp_484 = (a)[index];
-                if (((csharp2cuda_temp_484) < (0.0)))
+#line 1109 "MatrixModule.cs"
+#line 1109 "MatrixModule.cs"
+                double csharp2cuda_temp_490 = (a)[index];
+                if (((csharp2cuda_temp_490) < (0.0)))
                 {
-#line 1099 "MatrixModule.cs"
-#line 1099 "MatrixModule.cs"
-                    int* csharp2cuda_temp_485 = &((output)->valid);
-                    (*(csharp2cuda_temp_485) = 0);
+#line 1109 "MatrixModule.cs"
+#line 1109 "MatrixModule.cs"
+                    int* csharp2cuda_temp_491 = &((output)->valid);
+                    (*(csharp2cuda_temp_491) = 0);
                 }
-#line 1098 "MatrixModule.cs"
-                int* csharp2cuda_temp_482 = &(index);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_482));
+#line 1108 "MatrixModule.cs"
+                int* csharp2cuda_temp_488 = &(index);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_488));
             }
         }
-#line 1100 "MatrixModule.cs"
-#line 1100 "MatrixModule.cs"
-        bool csharp2cuda_temp_486 = (output)->valid;
-        if ((!(csharp2cuda_temp_486)))
+#line 1110 "MatrixModule.cs"
+#line 1110 "MatrixModule.cs"
+        bool csharp2cuda_temp_492 = (output)->valid;
+        if ((!(csharp2cuda_temp_492)))
         {
-#line 1101 "MatrixModule.cs"
+#line 1111 "MatrixModule.cs"
             return;
         }
-#line 1102 "MatrixModule.cs"
-        double* csharp2cuda_temp_487;
-#line 1102 "MatrixModule.cs"
+#line 1112 "MatrixModule.cs"
+        double* csharp2cuda_temp_493;
+#line 1112 "MatrixModule.cs"
         if (((opcode) == (36)))
         {
-#line 1102 "MatrixModule.cs"
-            csharp2cuda_temp_487 = result;
+#line 1112 "MatrixModule.cs"
+            csharp2cuda_temp_493 = result;
         }
         else
         {
-#line 1102 "MatrixModule.cs"
-            csharp2cuda_temp_487 = scratch;
+#line 1112 "MatrixModule.cs"
+            csharp2cuda_temp_493 = scratch;
         }
-#line 1102 "MatrixModule.cs"
-        double* vector = csharp2cuda_temp_487;
-#line 1103 "MatrixModule.cs"
-        double* csharp2cuda_temp_488;
-#line 1103 "MatrixModule.cs"
+#line 1112 "MatrixModule.cs"
+        double* vector = csharp2cuda_temp_493;
+#line 1113 "MatrixModule.cs"
+        double* csharp2cuda_temp_494;
+#line 1113 "MatrixModule.cs"
         if (((opcode) == (36)))
         {
-#line 1103 "MatrixModule.cs"
-            csharp2cuda_temp_488 = scratch;
+#line 1113 "MatrixModule.cs"
+            csharp2cuda_temp_494 = scratch;
         }
         else
         {
-#line 1103 "MatrixModule.cs"
-            csharp2cuda_temp_488 = csharp2cuda_pointer_add(scratch, size);
+#line 1113 "MatrixModule.cs"
+            csharp2cuda_temp_494 = csharp2cuda_pointer_add(scratch, size);
         }
-#line 1103 "MatrixModule.cs"
-        double* next = csharp2cuda_temp_488;
-#line 1104 "MatrixModule.cs"
-        double* csharp2cuda_temp_489;
-#line 1104 "MatrixModule.cs"
+#line 1113 "MatrixModule.cs"
+        double* next = csharp2cuda_temp_494;
+#line 1114 "MatrixModule.cs"
+        double* csharp2cuda_temp_495;
+#line 1114 "MatrixModule.cs"
         if (((opcode) == (36)))
         {
-#line 1104 "MatrixModule.cs"
-            csharp2cuda_temp_489 = csharp2cuda_pointer_add(scratch, size);
+#line 1114 "MatrixModule.cs"
+            csharp2cuda_temp_495 = csharp2cuda_pointer_add(scratch, size);
         }
         else
         {
-#line 1104 "MatrixModule.cs"
-            csharp2cuda_temp_489 = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_mul(size, 2));
+#line 1114 "MatrixModule.cs"
+            csharp2cuda_temp_495 = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_mul(size, 2));
         }
-#line 1104 "MatrixModule.cs"
-        double* products = csharp2cuda_temp_489;
-#line 1105 "MatrixModule.cs"
+#line 1114 "MatrixModule.cs"
+        double* products = csharp2cuda_temp_495;
+#line 1115 "MatrixModule.cs"
         {
-#line 1105 "MatrixModule.cs"
+#line 1115 "MatrixModule.cs"
             int index = 0;
             while (true)
             {
                 if (!(((index) < (size))))
                     break;
-#line 1106 "MatrixModule.cs"
-#line 1106 "MatrixModule.cs"
-                double* csharp2cuda_temp_491 = &((vector)[index]);
-#line 1106 "MatrixModule.cs"
-                double csharp2cuda_temp_492 = __ddiv_rn(1.0, ((double)(size)));
-                (*(csharp2cuda_temp_491) = csharp2cuda_temp_492);
-#line 1105 "MatrixModule.cs"
-                int* csharp2cuda_temp_490 = &(index);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_490));
+#line 1116 "MatrixModule.cs"
+#line 1116 "MatrixModule.cs"
+                double* csharp2cuda_temp_497 = &((vector)[index]);
+#line 1116 "MatrixModule.cs"
+                double csharp2cuda_temp_498 = __ddiv_rn(1.0, ((double)(size)));
+                (*(csharp2cuda_temp_497) = csharp2cuda_temp_498);
+#line 1115 "MatrixModule.cs"
+                int* csharp2cuda_temp_496 = &(index);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_496));
             }
         }
-#line 1107 "MatrixModule.cs"
+#line 1117 "MatrixModule.cs"
         {
-#line 1107 "MatrixModule.cs"
+#line 1117 "MatrixModule.cs"
             int iteration = 0;
             while (true)
             {
                 if (!(((iteration) < (iterations))))
                     break;
-#line 1108 "MatrixModule.cs"
+#line 1118 "MatrixModule.cs"
                 {
-#line 1109 "MatrixModule.cs"
+#line 1119 "MatrixModule.cs"
                     {
-#line 1109 "MatrixModule.cs"
+#line 1119 "MatrixModule.cs"
                         int row = 0;
                         while (true)
                         {
                             if (!(((row) < (size))))
                                 break;
-#line 1110 "MatrixModule.cs"
+#line 1120 "MatrixModule.cs"
                             {
-#line 1111 "MatrixModule.cs"
+#line 1121 "MatrixModule.cs"
                                 double sum = 0.0;
-#line 1112 "MatrixModule.cs"
+#line 1122 "MatrixModule.cs"
                                 {
-#line 1112 "MatrixModule.cs"
+#line 1122 "MatrixModule.cs"
                                     int column = 0;
                                     while (true)
                                     {
                                         if (!(((column) < (size))))
                                             break;
-#line 1113 "MatrixModule.cs"
-#line 1113 "MatrixModule.cs"
-                                        double* csharp2cuda_temp_496 = &(sum);
-#line 1113 "MatrixModule.cs"
-                                        double csharp2cuda_temp_497 = *(csharp2cuda_temp_496);
-#line 1113 "MatrixModule.cs"
-                                        double csharp2cuda_temp_498 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
-#line 1113 "MatrixModule.cs"
-                                        double csharp2cuda_temp_499 = (vector)[column];
-                                        (*(csharp2cuda_temp_496) = __dadd_rn(csharp2cuda_temp_497, __dmul_rn(csharp2cuda_temp_498, csharp2cuda_temp_499)));
-#line 1112 "MatrixModule.cs"
-                                        int* csharp2cuda_temp_495 = &(column);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_495));
+#line 1123 "MatrixModule.cs"
+#line 1123 "MatrixModule.cs"
+                                        double* csharp2cuda_temp_502 = &(sum);
+#line 1123 "MatrixModule.cs"
+                                        double csharp2cuda_temp_503 = *(csharp2cuda_temp_502);
+#line 1123 "MatrixModule.cs"
+                                        double csharp2cuda_temp_504 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
+#line 1123 "MatrixModule.cs"
+                                        double csharp2cuda_temp_505 = (vector)[column];
+                                        (*(csharp2cuda_temp_502) = __dadd_rn(csharp2cuda_temp_503, __dmul_rn(csharp2cuda_temp_504, csharp2cuda_temp_505)));
+#line 1122 "MatrixModule.cs"
+                                        int* csharp2cuda_temp_501 = &(column);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_501));
                                     }
                                 }
-#line 1114 "MatrixModule.cs"
-#line 1114 "MatrixModule.cs"
-                                double* csharp2cuda_temp_500 = &((next)[row]);
-#line 1114 "MatrixModule.cs"
-                                double csharp2cuda_temp_501 = (vector)[row];
-                                (*(csharp2cuda_temp_500) = __dadd_rn(sum, csharp2cuda_temp_501));
+#line 1124 "MatrixModule.cs"
+#line 1124 "MatrixModule.cs"
+                                double* csharp2cuda_temp_506 = &((next)[row]);
+#line 1124 "MatrixModule.cs"
+                                double csharp2cuda_temp_507 = (vector)[row];
+                                (*(csharp2cuda_temp_506) = __dadd_rn(sum, csharp2cuda_temp_507));
                             }
-#line 1109 "MatrixModule.cs"
-                            int* csharp2cuda_temp_494 = &(row);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_494));
+#line 1119 "MatrixModule.cs"
+                            int* csharp2cuda_temp_500 = &(row);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_500));
                         }
                     }
-#line 1116 "MatrixModule.cs"
+#line 1126 "MatrixModule.cs"
                     double norm = mathblocks_compensated_sum(next, size);
-#line 1117 "MatrixModule.cs"
+#line 1127 "MatrixModule.cs"
                     {
-#line 1117 "MatrixModule.cs"
+#line 1127 "MatrixModule.cs"
                         int index = 0;
                         while (true)
                         {
                             if (!(((index) < (size))))
                                 break;
-#line 1118 "MatrixModule.cs"
-#line 1118 "MatrixModule.cs"
-                            double* csharp2cuda_temp_503 = &((vector)[index]);
-#line 1118 "MatrixModule.cs"
-                            double csharp2cuda_temp_504 = (next)[index];
-#line 1118 "MatrixModule.cs"
-                            double csharp2cuda_temp_505 = __ddiv_rn(csharp2cuda_temp_504, norm);
-                            (*(csharp2cuda_temp_503) = csharp2cuda_temp_505);
-#line 1117 "MatrixModule.cs"
-                            int* csharp2cuda_temp_502 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_502));
+#line 1128 "MatrixModule.cs"
+#line 1128 "MatrixModule.cs"
+                            double* csharp2cuda_temp_509 = &((vector)[index]);
+#line 1128 "MatrixModule.cs"
+                            double csharp2cuda_temp_510 = (next)[index];
+#line 1128 "MatrixModule.cs"
+                            double csharp2cuda_temp_511 = __ddiv_rn(csharp2cuda_temp_510, norm);
+                            (*(csharp2cuda_temp_509) = csharp2cuda_temp_511);
+#line 1127 "MatrixModule.cs"
+                            int* csharp2cuda_temp_508 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_508));
                         }
                     }
                 }
-#line 1107 "MatrixModule.cs"
-                int* csharp2cuda_temp_493 = &(iteration);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_493));
+#line 1117 "MatrixModule.cs"
+                int* csharp2cuda_temp_499 = &(iteration);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_499));
             }
         }
-#line 1120 "MatrixModule.cs"
+#line 1130 "MatrixModule.cs"
         if (((opcode) == (36)))
-#line 1121 "MatrixModule.cs"
+#line 1131 "MatrixModule.cs"
         {
-#line 1122 "MatrixModule.cs"
+#line 1132 "MatrixModule.cs"
             mathblocks_set_vector_shape(output, size);
-#line 1123 "MatrixModule.cs"
+#line 1133 "MatrixModule.cs"
             {
-#line 1123 "MatrixModule.cs"
+#line 1133 "MatrixModule.cs"
                 int index = 0;
                 while (true)
                 {
                     if (!(((index) < (size))))
                         break;
-#line 1124 "MatrixModule.cs"
-#line 1124 "MatrixModule.cs"
-                    double csharp2cuda_temp_507 = (result)[index];
-                    if ((!(isfinite(csharp2cuda_temp_507))))
+#line 1134 "MatrixModule.cs"
+#line 1134 "MatrixModule.cs"
+                    double csharp2cuda_temp_513 = (result)[index];
+                    if ((!(isfinite(csharp2cuda_temp_513))))
                     {
-#line 1124 "MatrixModule.cs"
-#line 1124 "MatrixModule.cs"
-                        int* csharp2cuda_temp_508 = &((output)->valid);
-                        (*(csharp2cuda_temp_508) = 0);
+#line 1134 "MatrixModule.cs"
+#line 1134 "MatrixModule.cs"
+                        int* csharp2cuda_temp_514 = &((output)->valid);
+                        (*(csharp2cuda_temp_514) = 0);
                     }
-#line 1123 "MatrixModule.cs"
-                    int* csharp2cuda_temp_506 = &(index);
-                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_506));
+#line 1133 "MatrixModule.cs"
+                    int* csharp2cuda_temp_512 = &(index);
+                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_512));
                 }
             }
-#line 1125 "MatrixModule.cs"
+#line 1135 "MatrixModule.cs"
             return;
         }
-#line 1127 "MatrixModule.cs"
+#line 1137 "MatrixModule.cs"
         {
-#line 1127 "MatrixModule.cs"
+#line 1137 "MatrixModule.cs"
             int row = 0;
             while (true)
             {
                 if (!(((row) < (size))))
                     break;
-#line 1128 "MatrixModule.cs"
+#line 1138 "MatrixModule.cs"
                 {
-#line 1129 "MatrixModule.cs"
+#line 1139 "MatrixModule.cs"
                     double sum = 0.0;
-#line 1130 "MatrixModule.cs"
+#line 1140 "MatrixModule.cs"
                     {
-#line 1130 "MatrixModule.cs"
+#line 1140 "MatrixModule.cs"
                         int column = 0;
                         while (true)
                         {
                             if (!(((column) < (size))))
                                 break;
-#line 1131 "MatrixModule.cs"
-#line 1131 "MatrixModule.cs"
-                            double* csharp2cuda_temp_511 = &(sum);
-#line 1131 "MatrixModule.cs"
-                            double csharp2cuda_temp_512 = *(csharp2cuda_temp_511);
-#line 1131 "MatrixModule.cs"
-                            double csharp2cuda_temp_513 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
-#line 1131 "MatrixModule.cs"
-                            double csharp2cuda_temp_514 = (vector)[column];
-                            (*(csharp2cuda_temp_511) = __dadd_rn(csharp2cuda_temp_512, __dmul_rn(csharp2cuda_temp_513, csharp2cuda_temp_514)));
-#line 1130 "MatrixModule.cs"
-                            int* csharp2cuda_temp_510 = &(column);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_510));
+#line 1141 "MatrixModule.cs"
+#line 1141 "MatrixModule.cs"
+                            double* csharp2cuda_temp_517 = &(sum);
+#line 1141 "MatrixModule.cs"
+                            double csharp2cuda_temp_518 = *(csharp2cuda_temp_517);
+#line 1141 "MatrixModule.cs"
+                            double csharp2cuda_temp_519 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
+#line 1141 "MatrixModule.cs"
+                            double csharp2cuda_temp_520 = (vector)[column];
+                            (*(csharp2cuda_temp_517) = __dadd_rn(csharp2cuda_temp_518, __dmul_rn(csharp2cuda_temp_519, csharp2cuda_temp_520)));
+#line 1140 "MatrixModule.cs"
+                            int* csharp2cuda_temp_516 = &(column);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_516));
                         }
                     }
-#line 1132 "MatrixModule.cs"
-#line 1132 "MatrixModule.cs"
-                    double* csharp2cuda_temp_515 = &((next)[row]);
-                    (*(csharp2cuda_temp_515) = sum);
-                }
-#line 1127 "MatrixModule.cs"
-                int* csharp2cuda_temp_509 = &(row);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_509));
-            }
-        }
-#line 1134 "MatrixModule.cs"
-        {
-#line 1134 "MatrixModule.cs"
-            int index = 0;
-            while (true)
-            {
-                if (!(((index) < (size))))
-                    break;
-#line 1135 "MatrixModule.cs"
-#line 1135 "MatrixModule.cs"
-                double* csharp2cuda_temp_517 = &((products)[index]);
-#line 1135 "MatrixModule.cs"
-                double csharp2cuda_temp_518 = (vector)[index];
-#line 1135 "MatrixModule.cs"
-                double csharp2cuda_temp_519 = (next)[index];
-                (*(csharp2cuda_temp_517) = __dmul_rn(csharp2cuda_temp_518, csharp2cuda_temp_519));
-#line 1134 "MatrixModule.cs"
-                int* csharp2cuda_temp_516 = &(index);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_516));
-            }
-        }
-#line 1136 "MatrixModule.cs"
-        double numerator = mathblocks_compensated_sum(products, size);
-#line 1137 "MatrixModule.cs"
-        {
-#line 1137 "MatrixModule.cs"
-            int index = 0;
-            while (true)
-            {
-                if (!(((index) < (size))))
-                    break;
-#line 1138 "MatrixModule.cs"
-#line 1138 "MatrixModule.cs"
-                double* csharp2cuda_temp_521 = &((products)[index]);
-#line 1138 "MatrixModule.cs"
-                double csharp2cuda_temp_522 = (vector)[index];
-#line 1138 "MatrixModule.cs"
-                double csharp2cuda_temp_523 = (vector)[index];
-                (*(csharp2cuda_temp_521) = __dmul_rn(csharp2cuda_temp_522, csharp2cuda_temp_523));
-#line 1137 "MatrixModule.cs"
-                int* csharp2cuda_temp_520 = &(index);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_520));
-            }
-        }
-#line 1139 "MatrixModule.cs"
-        double denominator = mathblocks_compensated_sum(products, size);
-#line 1140 "MatrixModule.cs"
-#line 1140 "MatrixModule.cs"
-        double* csharp2cuda_temp_524 = &((output)->scalar_value);
-#line 1140 "MatrixModule.cs"
-        double csharp2cuda_temp_525 = __ddiv_rn(numerator, denominator);
-        (*(csharp2cuda_temp_524) = csharp2cuda_temp_525);
-#line 1141 "MatrixModule.cs"
-#line 1141 "MatrixModule.cs"
-        double csharp2cuda_temp_526 = (output)->scalar_value;
-        if ((!(isfinite(csharp2cuda_temp_526))))
-        {
-#line 1141 "MatrixModule.cs"
-#line 1141 "MatrixModule.cs"
-            int* csharp2cuda_temp_527 = &((output)->valid);
-            (*(csharp2cuda_temp_527) = 0);
-        }
 #line 1142 "MatrixModule.cs"
+#line 1142 "MatrixModule.cs"
+                    double* csharp2cuda_temp_521 = &((next)[row]);
+                    (*(csharp2cuda_temp_521) = sum);
+                }
+#line 1137 "MatrixModule.cs"
+                int* csharp2cuda_temp_515 = &(row);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_515));
+            }
+        }
+#line 1144 "MatrixModule.cs"
+        {
+#line 1144 "MatrixModule.cs"
+            int index = 0;
+            while (true)
+            {
+                if (!(((index) < (size))))
+                    break;
+#line 1145 "MatrixModule.cs"
+#line 1145 "MatrixModule.cs"
+                double* csharp2cuda_temp_523 = &((products)[index]);
+#line 1145 "MatrixModule.cs"
+                double csharp2cuda_temp_524 = (vector)[index];
+#line 1145 "MatrixModule.cs"
+                double csharp2cuda_temp_525 = (next)[index];
+                (*(csharp2cuda_temp_523) = __dmul_rn(csharp2cuda_temp_524, csharp2cuda_temp_525));
+#line 1144 "MatrixModule.cs"
+                int* csharp2cuda_temp_522 = &(index);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_522));
+            }
+        }
+#line 1146 "MatrixModule.cs"
+        double numerator = mathblocks_compensated_sum(products, size);
+#line 1147 "MatrixModule.cs"
+        {
+#line 1147 "MatrixModule.cs"
+            int index = 0;
+            while (true)
+            {
+                if (!(((index) < (size))))
+                    break;
+#line 1148 "MatrixModule.cs"
+#line 1148 "MatrixModule.cs"
+                double* csharp2cuda_temp_527 = &((products)[index]);
+#line 1148 "MatrixModule.cs"
+                double csharp2cuda_temp_528 = (vector)[index];
+#line 1148 "MatrixModule.cs"
+                double csharp2cuda_temp_529 = (vector)[index];
+                (*(csharp2cuda_temp_527) = __dmul_rn(csharp2cuda_temp_528, csharp2cuda_temp_529));
+#line 1147 "MatrixModule.cs"
+                int* csharp2cuda_temp_526 = &(index);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_526));
+            }
+        }
+#line 1149 "MatrixModule.cs"
+        double denominator = mathblocks_compensated_sum(products, size);
+#line 1150 "MatrixModule.cs"
+#line 1150 "MatrixModule.cs"
+        double* csharp2cuda_temp_530 = &((output)->scalar_value);
+#line 1150 "MatrixModule.cs"
+        double csharp2cuda_temp_531 = __ddiv_rn(numerator, denominator);
+        (*(csharp2cuda_temp_530) = csharp2cuda_temp_531);
+#line 1151 "MatrixModule.cs"
+#line 1151 "MatrixModule.cs"
+        double csharp2cuda_temp_532 = (output)->scalar_value;
+        if ((!(isfinite(csharp2cuda_temp_532))))
+        {
+#line 1151 "MatrixModule.cs"
+#line 1151 "MatrixModule.cs"
+            int* csharp2cuda_temp_533 = &((output)->valid);
+            (*(csharp2cuda_temp_533) = 0);
+        }
+#line 1152 "MatrixModule.cs"
         return;
     }
-#line 1145 "MatrixModule.cs"
+#line 1155 "MatrixModule.cs"
     if (((opcode) == (37)))
-#line 1146 "MatrixModule.cs"
+#line 1156 "MatrixModule.cs"
     {
-#line 1147 "MatrixModule.cs"
+#line 1157 "MatrixModule.cs"
         int size = (first)->rows;
-#line 1148 "MatrixModule.cs"
-#line 1148 "MatrixModule.cs"
-        int csharp2cuda_temp_528 = (first)->columns;
-#line 1148 "MatrixModule.cs"
-        bool csharp2cuda_temp_529;
-#line 1148 "MatrixModule.cs"
-        if (!(((size) != (csharp2cuda_temp_528))))
+#line 1158 "MatrixModule.cs"
+#line 1158 "MatrixModule.cs"
+        int csharp2cuda_temp_534 = (first)->columns;
+#line 1158 "MatrixModule.cs"
+        bool csharp2cuda_temp_535;
+#line 1158 "MatrixModule.cs"
+        if (!(((size) != (csharp2cuda_temp_534))))
         {
-#line 1148 "MatrixModule.cs"
-            csharp2cuda_temp_529 = ((size) > (20));
+#line 1158 "MatrixModule.cs"
+            csharp2cuda_temp_535 = ((size) > (20));
         }
         else
         {
-#line 1148 "MatrixModule.cs"
-            csharp2cuda_temp_529 = true;
+#line 1158 "MatrixModule.cs"
+            csharp2cuda_temp_535 = true;
         }
-#line 1148 "MatrixModule.cs"
-        bool csharp2cuda_temp_530;
-#line 1148 "MatrixModule.cs"
-        if (!(csharp2cuda_temp_529))
+#line 1158 "MatrixModule.cs"
+        bool csharp2cuda_temp_536;
+#line 1158 "MatrixModule.cs"
+        if (!(csharp2cuda_temp_535))
         {
-#line 1148 "MatrixModule.cs"
-            csharp2cuda_temp_530 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 1158 "MatrixModule.cs"
+            csharp2cuda_temp_536 = ((((void*)(scratch))) == (((void*)(nullptr))));
         }
         else
         {
-#line 1148 "MatrixModule.cs"
-            csharp2cuda_temp_530 = true;
+#line 1158 "MatrixModule.cs"
+            csharp2cuda_temp_536 = true;
         }
-        if (csharp2cuda_temp_530)
-#line 1149 "MatrixModule.cs"
+        if (csharp2cuda_temp_536)
+#line 1159 "MatrixModule.cs"
         {
-#line 1150 "MatrixModule.cs"
-#line 1150 "MatrixModule.cs"
-            int* csharp2cuda_temp_531 = &((output)->valid);
-            (*(csharp2cuda_temp_531) = 0);
-#line 1151 "MatrixModule.cs"
+#line 1160 "MatrixModule.cs"
+#line 1160 "MatrixModule.cs"
+            int* csharp2cuda_temp_537 = &((output)->valid);
+            (*(csharp2cuda_temp_537) = 0);
+#line 1161 "MatrixModule.cs"
             return;
         }
-#line 1153 "MatrixModule.cs"
+#line 1163 "MatrixModule.cs"
         int limit = csharp2cuda_i32_shl(1, size);
-#line 1154 "MatrixModule.cs"
+#line 1164 "MatrixModule.cs"
         mathblocks_set_vector_shape(output, csharp2cuda_i32_sub(limit, 1));
-#line 1155 "MatrixModule.cs"
+#line 1165 "MatrixModule.cs"
         double* submatrix = scratch;
-#line 1156 "MatrixModule.cs"
-        int csharp2cuda_temp_532 = (first)->count;
-#line 1156 "MatrixModule.cs"
-        double* work = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_532);
-#line 1157 "MatrixModule.cs"
+#line 1166 "MatrixModule.cs"
+        int csharp2cuda_temp_538 = (first)->count;
+#line 1166 "MatrixModule.cs"
+        double* work = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_538);
+#line 1167 "MatrixModule.cs"
         {
-#line 1157 "MatrixModule.cs"
+#line 1167 "MatrixModule.cs"
             int mask = 1;
             while (true)
             {
                 if (!(((mask) < (limit))))
                     break;
-#line 1158 "MatrixModule.cs"
+#line 1168 "MatrixModule.cs"
                 {
-#line 1159 "MatrixModule.cs"
+#line 1169 "MatrixModule.cs"
                     int order = mathblocks_pop_count(mask);
-#line 1160 "MatrixModule.cs"
+#line 1170 "MatrixModule.cs"
                     mathblocks_matrix_submatrix_from_masks(a, size, mask, mask, order, submatrix);
-#line 1167 "MatrixModule.cs"
-#line 1167 "MatrixModule.cs"
-                    double* csharp2cuda_temp_534 = &((result)[csharp2cuda_i32_sub(mask, 1)]);
-#line 1167 "MatrixModule.cs"
-                    double csharp2cuda_temp_535 = mathblocks_matrix_determinant(submatrix, order, work);
-                    (*(csharp2cuda_temp_534) = csharp2cuda_temp_535);
-#line 1168 "MatrixModule.cs"
-#line 1168 "MatrixModule.cs"
-                    double csharp2cuda_temp_536 = (result)[csharp2cuda_i32_sub(mask, 1)];
-                    if ((!(isfinite(csharp2cuda_temp_536))))
+#line 1177 "MatrixModule.cs"
+#line 1177 "MatrixModule.cs"
+                    double* csharp2cuda_temp_540 = &((result)[csharp2cuda_i32_sub(mask, 1)]);
+#line 1177 "MatrixModule.cs"
+                    double csharp2cuda_temp_541 = mathblocks_matrix_determinant(submatrix, order, work);
+                    (*(csharp2cuda_temp_540) = csharp2cuda_temp_541);
+#line 1178 "MatrixModule.cs"
+#line 1178 "MatrixModule.cs"
+                    double csharp2cuda_temp_542 = (result)[csharp2cuda_i32_sub(mask, 1)];
+                    if ((!(isfinite(csharp2cuda_temp_542))))
                     {
-#line 1168 "MatrixModule.cs"
-#line 1168 "MatrixModule.cs"
-                        int* csharp2cuda_temp_537 = &((output)->valid);
-                        (*(csharp2cuda_temp_537) = 0);
+#line 1178 "MatrixModule.cs"
+#line 1178 "MatrixModule.cs"
+                        int* csharp2cuda_temp_543 = &((output)->valid);
+                        (*(csharp2cuda_temp_543) = 0);
                     }
                 }
-#line 1157 "MatrixModule.cs"
-                int* csharp2cuda_temp_533 = &(mask);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_533));
+#line 1167 "MatrixModule.cs"
+                int* csharp2cuda_temp_539 = &(mask);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_539));
             }
         }
-#line 1170 "MatrixModule.cs"
+#line 1180 "MatrixModule.cs"
         return;
     }
-#line 1173 "MatrixModule.cs"
+#line 1183 "MatrixModule.cs"
     if (((opcode) == (38)))
-#line 1174 "MatrixModule.cs"
+#line 1184 "MatrixModule.cs"
     {
-#line 1175 "MatrixModule.cs"
+#line 1185 "MatrixModule.cs"
         if (((((void*)(scratch))) == (((void*)(nullptr)))))
-#line 1176 "MatrixModule.cs"
+#line 1186 "MatrixModule.cs"
         {
-#line 1177 "MatrixModule.cs"
-#line 1177 "MatrixModule.cs"
-            int* csharp2cuda_temp_538 = &((output)->valid);
-            (*(csharp2cuda_temp_538) = 0);
-#line 1178 "MatrixModule.cs"
+#line 1187 "MatrixModule.cs"
+#line 1187 "MatrixModule.cs"
+            int* csharp2cuda_temp_544 = &((output)->valid);
+            (*(csharp2cuda_temp_544) = 0);
+#line 1188 "MatrixModule.cs"
             return;
         }
-#line 1180 "MatrixModule.cs"
-#line 1180 "MatrixModule.cs"
-        double* csharp2cuda_temp_539 = &((output)->scalar_value);
-#line 1182 "MatrixModule.cs"
-        int csharp2cuda_temp_540 = (first)->rows;
-#line 1183 "MatrixModule.cs"
-        int csharp2cuda_temp_541 = (first)->columns;
-#line 1180 "MatrixModule.cs"
-        int csharp2cuda_temp_542 = mathblocks_matrix_rank(a, csharp2cuda_temp_540, csharp2cuda_temp_541, scratch);
-        (*(csharp2cuda_temp_539) = ((double)(csharp2cuda_temp_542)));
-#line 1185 "MatrixModule.cs"
+#line 1190 "MatrixModule.cs"
+#line 1190 "MatrixModule.cs"
+        double* csharp2cuda_temp_545 = &((output)->scalar_value);
+#line 1192 "MatrixModule.cs"
+        int csharp2cuda_temp_546 = (first)->rows;
+#line 1193 "MatrixModule.cs"
+        int csharp2cuda_temp_547 = (first)->columns;
+#line 1190 "MatrixModule.cs"
+        int csharp2cuda_temp_548 = mathblocks_matrix_rank(a, csharp2cuda_temp_546, csharp2cuda_temp_547, scratch);
+        (*(csharp2cuda_temp_545) = ((double)(csharp2cuda_temp_548)));
+#line 1195 "MatrixModule.cs"
         return;
     }
-#line 1188 "MatrixModule.cs"
+#line 1198 "MatrixModule.cs"
     if (((opcode) == (39)))
-#line 1189 "MatrixModule.cs"
+#line 1199 "MatrixModule.cs"
     {
-#line 1190 "MatrixModule.cs"
+#line 1200 "MatrixModule.cs"
         int retained = 0;
-#line 1191 "MatrixModule.cs"
+#line 1201 "MatrixModule.cs"
         int size = (first)->rows;
-#line 1192 "MatrixModule.cs"
-#line 1192 "MatrixModule.cs"
-        int csharp2cuda_temp_543 = (first)->columns;
-#line 1192 "MatrixModule.cs"
-        bool csharp2cuda_temp_544;
-#line 1192 "MatrixModule.cs"
-        if (!(((size) != (csharp2cuda_temp_543))))
-        {
-#line 1193 "MatrixModule.cs"
-            double csharp2cuda_temp_545 = (second)->scalar_value;
-#line 1193 "MatrixModule.cs"
-            int* csharp2cuda_temp_546 = &(retained);
-#line 1193 "MatrixModule.cs"
-            bool csharp2cuda_temp_547 = mathblocks_nonnegative_integer(csharp2cuda_temp_545, csharp2cuda_temp_546);
-#line 1192 "MatrixModule.cs"
-            csharp2cuda_temp_544 = (!(csharp2cuda_temp_547));
-        }
-        else
-        {
-#line 1192 "MatrixModule.cs"
-            csharp2cuda_temp_544 = true;
-        }
-#line 1192 "MatrixModule.cs"
-        bool csharp2cuda_temp_548;
-#line 1192 "MatrixModule.cs"
-        if (!(csharp2cuda_temp_544))
-        {
-#line 1192 "MatrixModule.cs"
-            csharp2cuda_temp_548 = ((retained) <= (0));
-        }
-        else
-        {
-#line 1192 "MatrixModule.cs"
-            csharp2cuda_temp_548 = true;
-        }
-#line 1192 "MatrixModule.cs"
-        bool csharp2cuda_temp_549;
-#line 1192 "MatrixModule.cs"
-        if (!(csharp2cuda_temp_548))
-        {
-#line 1192 "MatrixModule.cs"
-            csharp2cuda_temp_549 = ((retained) >= (size));
-        }
-        else
-        {
-#line 1192 "MatrixModule.cs"
-            csharp2cuda_temp_549 = true;
-        }
-#line 1192 "MatrixModule.cs"
+#line 1202 "MatrixModule.cs"
+#line 1202 "MatrixModule.cs"
+        int csharp2cuda_temp_549 = (first)->columns;
+#line 1202 "MatrixModule.cs"
         bool csharp2cuda_temp_550;
-#line 1192 "MatrixModule.cs"
-        if (!(csharp2cuda_temp_549))
+#line 1202 "MatrixModule.cs"
+        if (!(((size) != (csharp2cuda_temp_549))))
         {
-#line 1192 "MatrixModule.cs"
-            csharp2cuda_temp_550 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 1203 "MatrixModule.cs"
+            double csharp2cuda_temp_551 = (second)->scalar_value;
+#line 1203 "MatrixModule.cs"
+            int* csharp2cuda_temp_552 = &(retained);
+#line 1203 "MatrixModule.cs"
+            bool csharp2cuda_temp_553 = mathblocks_nonnegative_integer(csharp2cuda_temp_551, csharp2cuda_temp_552);
+#line 1202 "MatrixModule.cs"
+            csharp2cuda_temp_550 = (!(csharp2cuda_temp_553));
         }
         else
         {
-#line 1192 "MatrixModule.cs"
+#line 1202 "MatrixModule.cs"
             csharp2cuda_temp_550 = true;
         }
-        if (csharp2cuda_temp_550)
-#line 1195 "MatrixModule.cs"
+#line 1202 "MatrixModule.cs"
+        bool csharp2cuda_temp_554;
+#line 1202 "MatrixModule.cs"
+        if (!(csharp2cuda_temp_550))
         {
-#line 1196 "MatrixModule.cs"
-#line 1196 "MatrixModule.cs"
-            int* csharp2cuda_temp_551 = &((output)->valid);
-            (*(csharp2cuda_temp_551) = 0);
-#line 1197 "MatrixModule.cs"
+#line 1202 "MatrixModule.cs"
+            csharp2cuda_temp_554 = ((retained) <= (0));
+        }
+        else
+        {
+#line 1202 "MatrixModule.cs"
+            csharp2cuda_temp_554 = true;
+        }
+#line 1202 "MatrixModule.cs"
+        bool csharp2cuda_temp_555;
+#line 1202 "MatrixModule.cs"
+        if (!(csharp2cuda_temp_554))
+        {
+#line 1202 "MatrixModule.cs"
+            csharp2cuda_temp_555 = ((retained) >= (size));
+        }
+        else
+        {
+#line 1202 "MatrixModule.cs"
+            csharp2cuda_temp_555 = true;
+        }
+#line 1202 "MatrixModule.cs"
+        bool csharp2cuda_temp_556;
+#line 1202 "MatrixModule.cs"
+        if (!(csharp2cuda_temp_555))
+        {
+#line 1202 "MatrixModule.cs"
+            csharp2cuda_temp_556 = ((((void*)(scratch))) == (((void*)(nullptr))));
+        }
+        else
+        {
+#line 1202 "MatrixModule.cs"
+            csharp2cuda_temp_556 = true;
+        }
+        if (csharp2cuda_temp_556)
+#line 1205 "MatrixModule.cs"
+        {
+#line 1206 "MatrixModule.cs"
+#line 1206 "MatrixModule.cs"
+            int* csharp2cuda_temp_557 = &((output)->valid);
+            (*(csharp2cuda_temp_557) = 0);
+#line 1207 "MatrixModule.cs"
             return;
         }
-#line 1199 "MatrixModule.cs"
+#line 1209 "MatrixModule.cs"
         int eliminated = csharp2cuda_i32_sub(size, retained);
-#line 1200 "MatrixModule.cs"
+#line 1210 "MatrixModule.cs"
         double* leading = scratch;
-#line 1201 "MatrixModule.cs"
+#line 1211 "MatrixModule.cs"
         double* upper = csharp2cuda_pointer_add(leading, csharp2cuda_i32_mul(retained, retained));
-#line 1202 "MatrixModule.cs"
+#line 1212 "MatrixModule.cs"
         double* lower = csharp2cuda_pointer_add(upper, csharp2cuda_i32_mul(retained, eliminated));
-#line 1203 "MatrixModule.cs"
+#line 1213 "MatrixModule.cs"
         double* trailing = csharp2cuda_pointer_add(lower, csharp2cuda_i32_mul(eliminated, retained));
-#line 1204 "MatrixModule.cs"
+#line 1214 "MatrixModule.cs"
         double* inverse = csharp2cuda_pointer_add(trailing, csharp2cuda_i32_mul(eliminated, eliminated));
-#line 1205 "MatrixModule.cs"
+#line 1215 "MatrixModule.cs"
         double* augmented = csharp2cuda_pointer_add(inverse, csharp2cuda_i32_mul(eliminated, eliminated));
-#line 1206 "MatrixModule.cs"
+#line 1216 "MatrixModule.cs"
         double* solution = csharp2cuda_pointer_add(augmented, csharp2cuda_i32_mul(eliminated, csharp2cuda_i32_add(eliminated, 1)));
-#line 1207 "MatrixModule.cs"
+#line 1217 "MatrixModule.cs"
         double* upper_inverse = csharp2cuda_pointer_add(solution, eliminated);
-#line 1208 "MatrixModule.cs"
+#line 1218 "MatrixModule.cs"
         double* product = csharp2cuda_pointer_add(upper_inverse, csharp2cuda_i32_mul(retained, eliminated));
-#line 1209 "MatrixModule.cs"
+#line 1219 "MatrixModule.cs"
         {
-#line 1209 "MatrixModule.cs"
+#line 1219 "MatrixModule.cs"
             int row = 0;
             while (true)
             {
                 if (!(((row) < (size))))
                     break;
-#line 1210 "MatrixModule.cs"
+#line 1220 "MatrixModule.cs"
                 {
-#line 1211 "MatrixModule.cs"
+#line 1221 "MatrixModule.cs"
                     {
-#line 1211 "MatrixModule.cs"
+#line 1221 "MatrixModule.cs"
                         int column = 0;
                         while (true)
                         {
                             if (!(((column) < (size))))
                                 break;
-#line 1212 "MatrixModule.cs"
+#line 1222 "MatrixModule.cs"
                             {
-#line 1213 "MatrixModule.cs"
+#line 1223 "MatrixModule.cs"
                                 double value = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
-#line 1214 "MatrixModule.cs"
-#line 1214 "MatrixModule.cs"
-                                bool csharp2cuda_temp_554;
-#line 1214 "MatrixModule.cs"
+#line 1224 "MatrixModule.cs"
+#line 1224 "MatrixModule.cs"
+                                bool csharp2cuda_temp_560;
+#line 1224 "MatrixModule.cs"
                                 if (((row) < (retained)))
                                 {
-#line 1214 "MatrixModule.cs"
-                                    csharp2cuda_temp_554 = ((column) < (retained));
+#line 1224 "MatrixModule.cs"
+                                    csharp2cuda_temp_560 = ((column) < (retained));
                                 }
                                 else
                                 {
-#line 1214 "MatrixModule.cs"
-                                    csharp2cuda_temp_554 = false;
+#line 1224 "MatrixModule.cs"
+                                    csharp2cuda_temp_560 = false;
                                 }
-                                if (csharp2cuda_temp_554)
+                                if (csharp2cuda_temp_560)
                                 {
-#line 1215 "MatrixModule.cs"
-#line 1215 "MatrixModule.cs"
-                                    double* csharp2cuda_temp_555 = &((leading)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, retained), column)]);
-                                    (*(csharp2cuda_temp_555) = value);
+#line 1225 "MatrixModule.cs"
+#line 1225 "MatrixModule.cs"
+                                    double* csharp2cuda_temp_561 = &((leading)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, retained), column)]);
+                                    (*(csharp2cuda_temp_561) = value);
                                 }
                                 else
                                 {
-#line 1216 "MatrixModule.cs"
+#line 1226 "MatrixModule.cs"
                                     if (((row) < (retained)))
                                     {
-#line 1217 "MatrixModule.cs"
-#line 1217 "MatrixModule.cs"
-                                        double* csharp2cuda_temp_556 = &((upper)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), column), retained)]);
-                                        (*(csharp2cuda_temp_556) = value);
+#line 1227 "MatrixModule.cs"
+#line 1227 "MatrixModule.cs"
+                                        double* csharp2cuda_temp_562 = &((upper)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), column), retained)]);
+                                        (*(csharp2cuda_temp_562) = value);
                                     }
                                     else
                                     {
-#line 1218 "MatrixModule.cs"
+#line 1228 "MatrixModule.cs"
                                         if (((column) < (retained)))
                                         {
-#line 1219 "MatrixModule.cs"
-#line 1219 "MatrixModule.cs"
-                                            double* csharp2cuda_temp_557 = &((lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, retained), retained), column)]);
-                                            (*(csharp2cuda_temp_557) = value);
+#line 1229 "MatrixModule.cs"
+#line 1229 "MatrixModule.cs"
+                                            double* csharp2cuda_temp_563 = &((lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, retained), retained), column)]);
+                                            (*(csharp2cuda_temp_563) = value);
                                         }
                                         else
                                         {
-#line 1221 "MatrixModule.cs"
-#line 1221 "MatrixModule.cs"
-                                            double* csharp2cuda_temp_558 = &((trailing)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, retained), eliminated), column), retained)]);
-                                            (*(csharp2cuda_temp_558) = value);
+#line 1231 "MatrixModule.cs"
+#line 1231 "MatrixModule.cs"
+                                            double* csharp2cuda_temp_564 = &((trailing)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, retained), eliminated), column), retained)]);
+                                            (*(csharp2cuda_temp_564) = value);
                                         }
                                     }
                                 }
                             }
-#line 1211 "MatrixModule.cs"
-                            int* csharp2cuda_temp_553 = &(column);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_553));
+#line 1221 "MatrixModule.cs"
+                            int* csharp2cuda_temp_559 = &(column);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_559));
                         }
                     }
                 }
-#line 1209 "MatrixModule.cs"
-                int* csharp2cuda_temp_552 = &(row);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_552));
+#line 1219 "MatrixModule.cs"
+                int* csharp2cuda_temp_558 = &(row);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_558));
             }
         }
-#line 1224 "MatrixModule.cs"
+#line 1234 "MatrixModule.cs"
         {
-#line 1224 "MatrixModule.cs"
+#line 1234 "MatrixModule.cs"
             int column = 0;
             while (true)
             {
                 if (!(((column) < (eliminated))))
                     break;
-#line 1225 "MatrixModule.cs"
+#line 1235 "MatrixModule.cs"
                 {
-#line 1226 "MatrixModule.cs"
-#line 1226 "MatrixModule.cs"
-                    bool csharp2cuda_temp_560 = mathblocks_matrix_try_solve_basis(trailing, eliminated, column, augmented, solution);
-                    if ((!(csharp2cuda_temp_560)))
-#line 1232 "MatrixModule.cs"
+#line 1236 "MatrixModule.cs"
+#line 1236 "MatrixModule.cs"
+                    bool csharp2cuda_temp_566 = mathblocks_matrix_try_solve_basis(trailing, eliminated, column, augmented, solution);
+                    if ((!(csharp2cuda_temp_566)))
+#line 1242 "MatrixModule.cs"
                     {
-#line 1233 "MatrixModule.cs"
-#line 1233 "MatrixModule.cs"
-                        int* csharp2cuda_temp_561 = &((output)->valid);
-                        (*(csharp2cuda_temp_561) = 0);
-#line 1234 "MatrixModule.cs"
+#line 1243 "MatrixModule.cs"
+#line 1243 "MatrixModule.cs"
+                        int* csharp2cuda_temp_567 = &((output)->valid);
+                        (*(csharp2cuda_temp_567) = 0);
+#line 1244 "MatrixModule.cs"
                         return;
                     }
-#line 1236 "MatrixModule.cs"
+#line 1246 "MatrixModule.cs"
                     {
-#line 1236 "MatrixModule.cs"
+#line 1246 "MatrixModule.cs"
                         int row = 0;
                         while (true)
                         {
                             if (!(((row) < (eliminated))))
                                 break;
-#line 1237 "MatrixModule.cs"
-#line 1237 "MatrixModule.cs"
-                            double* csharp2cuda_temp_563 = &((inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), column)]);
-#line 1237 "MatrixModule.cs"
-                            double csharp2cuda_temp_564 = (solution)[row];
-                            (*(csharp2cuda_temp_563) = csharp2cuda_temp_564);
-#line 1236 "MatrixModule.cs"
-                            int* csharp2cuda_temp_562 = &(row);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_562));
+#line 1247 "MatrixModule.cs"
+#line 1247 "MatrixModule.cs"
+                            double* csharp2cuda_temp_569 = &((inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), column)]);
+#line 1247 "MatrixModule.cs"
+                            double csharp2cuda_temp_570 = (solution)[row];
+                            (*(csharp2cuda_temp_569) = csharp2cuda_temp_570);
+#line 1246 "MatrixModule.cs"
+                            int* csharp2cuda_temp_568 = &(row);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_568));
                         }
                     }
                 }
-#line 1224 "MatrixModule.cs"
-                int* csharp2cuda_temp_559 = &(column);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_559));
+#line 1234 "MatrixModule.cs"
+                int* csharp2cuda_temp_565 = &(column);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_565));
             }
         }
-#line 1239 "MatrixModule.cs"
+#line 1249 "MatrixModule.cs"
         {
-#line 1239 "MatrixModule.cs"
+#line 1249 "MatrixModule.cs"
             int row = 0;
             while (true)
             {
                 if (!(((row) < (retained))))
                     break;
-#line 1240 "MatrixModule.cs"
+#line 1250 "MatrixModule.cs"
                 {
-#line 1241 "MatrixModule.cs"
+#line 1251 "MatrixModule.cs"
                     {
-#line 1241 "MatrixModule.cs"
+#line 1251 "MatrixModule.cs"
                         int column = 0;
                         while (true)
                         {
                             if (!(((column) < (eliminated))))
                                 break;
-#line 1242 "MatrixModule.cs"
+#line 1252 "MatrixModule.cs"
                             {
-#line 1243 "MatrixModule.cs"
+#line 1253 "MatrixModule.cs"
                                 double sum = 0.0;
-#line 1244 "MatrixModule.cs"
+#line 1254 "MatrixModule.cs"
                                 {
-#line 1244 "MatrixModule.cs"
+#line 1254 "MatrixModule.cs"
                                     int inner = 0;
                                     while (true)
                                     {
                                         if (!(((inner) < (eliminated))))
                                             break;
-#line 1245 "MatrixModule.cs"
-#line 1245 "MatrixModule.cs"
-                                        double* csharp2cuda_temp_568 = &(sum);
-#line 1245 "MatrixModule.cs"
-                                        double csharp2cuda_temp_569 = *(csharp2cuda_temp_568);
-#line 1245 "MatrixModule.cs"
-                                        double csharp2cuda_temp_570 = (upper)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), inner)];
-#line 1246 "MatrixModule.cs"
-                                        double csharp2cuda_temp_571 = (inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, eliminated), column)];
-                                        (*(csharp2cuda_temp_568) = __dadd_rn(csharp2cuda_temp_569, __dmul_rn(csharp2cuda_temp_570, csharp2cuda_temp_571)));
-#line 1244 "MatrixModule.cs"
-                                        int* csharp2cuda_temp_567 = &(inner);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_567));
+#line 1255 "MatrixModule.cs"
+#line 1255 "MatrixModule.cs"
+                                        double* csharp2cuda_temp_574 = &(sum);
+#line 1255 "MatrixModule.cs"
+                                        double csharp2cuda_temp_575 = *(csharp2cuda_temp_574);
+#line 1255 "MatrixModule.cs"
+                                        double csharp2cuda_temp_576 = (upper)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), inner)];
+#line 1256 "MatrixModule.cs"
+                                        double csharp2cuda_temp_577 = (inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, eliminated), column)];
+                                        (*(csharp2cuda_temp_574) = __dadd_rn(csharp2cuda_temp_575, __dmul_rn(csharp2cuda_temp_576, csharp2cuda_temp_577)));
+#line 1254 "MatrixModule.cs"
+                                        int* csharp2cuda_temp_573 = &(inner);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_573));
                                     }
                                 }
-#line 1247 "MatrixModule.cs"
-#line 1247 "MatrixModule.cs"
-                                double* csharp2cuda_temp_572 = &((upper_inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), column)]);
-                                (*(csharp2cuda_temp_572) = sum);
+#line 1257 "MatrixModule.cs"
+#line 1257 "MatrixModule.cs"
+                                double* csharp2cuda_temp_578 = &((upper_inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), column)]);
+                                (*(csharp2cuda_temp_578) = sum);
                             }
-#line 1241 "MatrixModule.cs"
-                            int* csharp2cuda_temp_566 = &(column);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_566));
+#line 1251 "MatrixModule.cs"
+                            int* csharp2cuda_temp_572 = &(column);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_572));
                         }
                     }
                 }
-#line 1239 "MatrixModule.cs"
-                int* csharp2cuda_temp_565 = &(row);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_565));
+#line 1249 "MatrixModule.cs"
+                int* csharp2cuda_temp_571 = &(row);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_571));
             }
         }
-#line 1250 "MatrixModule.cs"
+#line 1260 "MatrixModule.cs"
         {
-#line 1250 "MatrixModule.cs"
+#line 1260 "MatrixModule.cs"
             int row = 0;
             while (true)
             {
                 if (!(((row) < (retained))))
                     break;
-#line 1251 "MatrixModule.cs"
+#line 1261 "MatrixModule.cs"
                 {
-#line 1252 "MatrixModule.cs"
+#line 1262 "MatrixModule.cs"
                     {
-#line 1252 "MatrixModule.cs"
+#line 1262 "MatrixModule.cs"
                         int column = 0;
                         while (true)
                         {
                             if (!(((column) < (retained))))
                                 break;
-#line 1253 "MatrixModule.cs"
+#line 1263 "MatrixModule.cs"
                             {
-#line 1254 "MatrixModule.cs"
+#line 1264 "MatrixModule.cs"
                                 double sum = 0.0;
-#line 1255 "MatrixModule.cs"
+#line 1265 "MatrixModule.cs"
                                 {
-#line 1255 "MatrixModule.cs"
+#line 1265 "MatrixModule.cs"
                                     int inner = 0;
                                     while (true)
                                     {
                                         if (!(((inner) < (eliminated))))
                                             break;
-#line 1256 "MatrixModule.cs"
-#line 1256 "MatrixModule.cs"
-                                        double* csharp2cuda_temp_576 = &(sum);
-#line 1256 "MatrixModule.cs"
-                                        double csharp2cuda_temp_577 = *(csharp2cuda_temp_576);
-#line 1256 "MatrixModule.cs"
-                                        double csharp2cuda_temp_578 = (upper_inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), inner)];
-#line 1257 "MatrixModule.cs"
-                                        double csharp2cuda_temp_579 = (lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, retained), column)];
-                                        (*(csharp2cuda_temp_576) = __dadd_rn(csharp2cuda_temp_577, __dmul_rn(csharp2cuda_temp_578, csharp2cuda_temp_579)));
-#line 1255 "MatrixModule.cs"
-                                        int* csharp2cuda_temp_575 = &(inner);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_575));
+#line 1266 "MatrixModule.cs"
+#line 1266 "MatrixModule.cs"
+                                        double* csharp2cuda_temp_582 = &(sum);
+#line 1266 "MatrixModule.cs"
+                                        double csharp2cuda_temp_583 = *(csharp2cuda_temp_582);
+#line 1266 "MatrixModule.cs"
+                                        double csharp2cuda_temp_584 = (upper_inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), inner)];
+#line 1267 "MatrixModule.cs"
+                                        double csharp2cuda_temp_585 = (lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, retained), column)];
+                                        (*(csharp2cuda_temp_582) = __dadd_rn(csharp2cuda_temp_583, __dmul_rn(csharp2cuda_temp_584, csharp2cuda_temp_585)));
+#line 1265 "MatrixModule.cs"
+                                        int* csharp2cuda_temp_581 = &(inner);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_581));
                                     }
                                 }
-#line 1258 "MatrixModule.cs"
-#line 1258 "MatrixModule.cs"
-                                double* csharp2cuda_temp_580 = &((product)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, retained), column)]);
-                                (*(csharp2cuda_temp_580) = sum);
+#line 1268 "MatrixModule.cs"
+#line 1268 "MatrixModule.cs"
+                                double* csharp2cuda_temp_586 = &((product)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, retained), column)]);
+                                (*(csharp2cuda_temp_586) = sum);
                             }
-#line 1252 "MatrixModule.cs"
-                            int* csharp2cuda_temp_574 = &(column);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_574));
+#line 1262 "MatrixModule.cs"
+                            int* csharp2cuda_temp_580 = &(column);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_580));
                         }
                     }
                 }
-#line 1250 "MatrixModule.cs"
-                int* csharp2cuda_temp_573 = &(row);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_573));
+#line 1260 "MatrixModule.cs"
+                int* csharp2cuda_temp_579 = &(row);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_579));
             }
         }
-#line 1261 "MatrixModule.cs"
+#line 1271 "MatrixModule.cs"
         mathblocks_matrix_shape(output, retained, retained);
-#line 1262 "MatrixModule.cs"
+#line 1272 "MatrixModule.cs"
         {
-#line 1262 "MatrixModule.cs"
+#line 1272 "MatrixModule.cs"
             int index = 0;
             while (true)
             {
                 if (!(((index) < (csharp2cuda_i32_mul(retained, retained)))))
                     break;
-#line 1263 "MatrixModule.cs"
+#line 1273 "MatrixModule.cs"
                 {
-#line 1264 "MatrixModule.cs"
-#line 1264 "MatrixModule.cs"
-                    double* csharp2cuda_temp_582 = &((result)[index]);
-#line 1264 "MatrixModule.cs"
-                    double csharp2cuda_temp_583 = (leading)[index];
-#line 1264 "MatrixModule.cs"
-                    double csharp2cuda_temp_584 = (product)[index];
-                    (*(csharp2cuda_temp_582) = __dsub_rn(csharp2cuda_temp_583, csharp2cuda_temp_584));
-#line 1265 "MatrixModule.cs"
-#line 1265 "MatrixModule.cs"
-                    double csharp2cuda_temp_585 = (result)[index];
-                    if ((!(isfinite(csharp2cuda_temp_585))))
+#line 1274 "MatrixModule.cs"
+#line 1274 "MatrixModule.cs"
+                    double* csharp2cuda_temp_588 = &((result)[index]);
+#line 1274 "MatrixModule.cs"
+                    double csharp2cuda_temp_589 = (leading)[index];
+#line 1274 "MatrixModule.cs"
+                    double csharp2cuda_temp_590 = (product)[index];
+                    (*(csharp2cuda_temp_588) = __dsub_rn(csharp2cuda_temp_589, csharp2cuda_temp_590));
+#line 1275 "MatrixModule.cs"
+#line 1275 "MatrixModule.cs"
+                    double csharp2cuda_temp_591 = (result)[index];
+                    if ((!(isfinite(csharp2cuda_temp_591))))
                     {
-#line 1265 "MatrixModule.cs"
-#line 1265 "MatrixModule.cs"
-                        int* csharp2cuda_temp_586 = &((output)->valid);
-                        (*(csharp2cuda_temp_586) = 0);
+#line 1275 "MatrixModule.cs"
+#line 1275 "MatrixModule.cs"
+                        int* csharp2cuda_temp_592 = &((output)->valid);
+                        (*(csharp2cuda_temp_592) = 0);
                     }
                 }
-#line 1262 "MatrixModule.cs"
-                int* csharp2cuda_temp_581 = &(index);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_581));
+#line 1272 "MatrixModule.cs"
+                int* csharp2cuda_temp_587 = &(index);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_587));
             }
         }
-#line 1267 "MatrixModule.cs"
+#line 1277 "MatrixModule.cs"
         return;
     }
-#line 1270 "MatrixModule.cs"
+#line 1280 "MatrixModule.cs"
     if (((opcode) == (41)))
-#line 1271 "MatrixModule.cs"
+#line 1281 "MatrixModule.cs"
     {
-#line 1272 "MatrixModule.cs"
+#line 1282 "MatrixModule.cs"
         int size = (first)->rows;
-#line 1273 "MatrixModule.cs"
-#line 1273 "MatrixModule.cs"
-        int csharp2cuda_temp_587 = (first)->columns;
-#line 1273 "MatrixModule.cs"
-        bool csharp2cuda_temp_588;
-#line 1273 "MatrixModule.cs"
-        if (!(((size) != (csharp2cuda_temp_587))))
+#line 1283 "MatrixModule.cs"
+#line 1283 "MatrixModule.cs"
+        int csharp2cuda_temp_593 = (first)->columns;
+#line 1283 "MatrixModule.cs"
+        bool csharp2cuda_temp_594;
+#line 1283 "MatrixModule.cs"
+        if (!(((size) != (csharp2cuda_temp_593))))
         {
-#line 1273 "MatrixModule.cs"
-            int csharp2cuda_temp_589 = (second)->count;
-#line 1273 "MatrixModule.cs"
-            csharp2cuda_temp_588 = ((csharp2cuda_temp_589) != (size));
+#line 1283 "MatrixModule.cs"
+            int csharp2cuda_temp_595 = (second)->count;
+#line 1283 "MatrixModule.cs"
+            csharp2cuda_temp_594 = ((csharp2cuda_temp_595) != (size));
         }
         else
         {
-#line 1273 "MatrixModule.cs"
-            csharp2cuda_temp_588 = true;
+#line 1283 "MatrixModule.cs"
+            csharp2cuda_temp_594 = true;
         }
-#line 1273 "MatrixModule.cs"
-        bool csharp2cuda_temp_590;
-#line 1273 "MatrixModule.cs"
-        if (!(csharp2cuda_temp_588))
+#line 1283 "MatrixModule.cs"
+        bool csharp2cuda_temp_596;
+#line 1283 "MatrixModule.cs"
+        if (!(csharp2cuda_temp_594))
         {
-#line 1273 "MatrixModule.cs"
-            csharp2cuda_temp_590 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 1283 "MatrixModule.cs"
+            csharp2cuda_temp_596 = ((((void*)(scratch))) == (((void*)(nullptr))));
         }
         else
         {
-#line 1273 "MatrixModule.cs"
-            csharp2cuda_temp_590 = true;
+#line 1283 "MatrixModule.cs"
+            csharp2cuda_temp_596 = true;
         }
-        if (csharp2cuda_temp_590)
-#line 1274 "MatrixModule.cs"
+        if (csharp2cuda_temp_596)
+#line 1284 "MatrixModule.cs"
         {
-#line 1275 "MatrixModule.cs"
-#line 1275 "MatrixModule.cs"
-            int* csharp2cuda_temp_591 = &((output)->valid);
-            (*(csharp2cuda_temp_591) = 0);
-#line 1276 "MatrixModule.cs"
+#line 1285 "MatrixModule.cs"
+#line 1285 "MatrixModule.cs"
+            int* csharp2cuda_temp_597 = &((output)->valid);
+            (*(csharp2cuda_temp_597) = 0);
+#line 1286 "MatrixModule.cs"
             return;
         }
-#line 1278 "MatrixModule.cs"
+#line 1288 "MatrixModule.cs"
         mathblocks_set_vector_shape(output, size);
-#line 1279 "MatrixModule.cs"
-#line 1279 "MatrixModule.cs"
-        bool csharp2cuda_temp_592 = mathblocks_matrix_try_solve(a, b, size, scratch, result);
-        if ((!(csharp2cuda_temp_592)))
+#line 1289 "MatrixModule.cs"
+#line 1289 "MatrixModule.cs"
+        bool csharp2cuda_temp_598 = mathblocks_matrix_try_solve(a, b, size, scratch, result);
+        if ((!(csharp2cuda_temp_598)))
         {
-#line 1280 "MatrixModule.cs"
-#line 1280 "MatrixModule.cs"
-            int* csharp2cuda_temp_593 = &((output)->valid);
-            (*(csharp2cuda_temp_593) = 0);
+#line 1290 "MatrixModule.cs"
+#line 1290 "MatrixModule.cs"
+            int* csharp2cuda_temp_599 = &((output)->valid);
+            (*(csharp2cuda_temp_599) = 0);
         }
-#line 1281 "MatrixModule.cs"
+#line 1291 "MatrixModule.cs"
         return;
     }
-#line 1284 "MatrixModule.cs"
+#line 1294 "MatrixModule.cs"
     if (((opcode) == (42)))
-#line 1285 "MatrixModule.cs"
+#line 1295 "MatrixModule.cs"
     {
-#line 1286 "MatrixModule.cs"
+#line 1296 "MatrixModule.cs"
         int iterations = 0;
-#line 1287 "MatrixModule.cs"
-#line 1287 "MatrixModule.cs"
-        double csharp2cuda_temp_594 = (second)->scalar_value;
-#line 1287 "MatrixModule.cs"
-        int* csharp2cuda_temp_595 = &(iterations);
-#line 1287 "MatrixModule.cs"
-        bool csharp2cuda_temp_596 = mathblocks_nonnegative_integer(csharp2cuda_temp_594, csharp2cuda_temp_595);
-#line 1287 "MatrixModule.cs"
-        bool csharp2cuda_temp_597;
-#line 1287 "MatrixModule.cs"
-        if (!((!(csharp2cuda_temp_596))))
+#line 1297 "MatrixModule.cs"
+#line 1297 "MatrixModule.cs"
+        double csharp2cuda_temp_600 = (second)->scalar_value;
+#line 1297 "MatrixModule.cs"
+        int* csharp2cuda_temp_601 = &(iterations);
+#line 1297 "MatrixModule.cs"
+        bool csharp2cuda_temp_602 = mathblocks_nonnegative_integer(csharp2cuda_temp_600, csharp2cuda_temp_601);
+#line 1297 "MatrixModule.cs"
+        bool csharp2cuda_temp_603;
+#line 1297 "MatrixModule.cs"
+        if (!((!(csharp2cuda_temp_602))))
         {
-#line 1287 "MatrixModule.cs"
-            csharp2cuda_temp_597 = ((iterations) <= (0));
+#line 1297 "MatrixModule.cs"
+            csharp2cuda_temp_603 = ((iterations) <= (0));
         }
         else
         {
-#line 1287 "MatrixModule.cs"
-            csharp2cuda_temp_597 = true;
+#line 1297 "MatrixModule.cs"
+            csharp2cuda_temp_603 = true;
         }
-#line 1287 "MatrixModule.cs"
-        bool csharp2cuda_temp_598;
-#line 1287 "MatrixModule.cs"
-        if (!(csharp2cuda_temp_597))
+#line 1297 "MatrixModule.cs"
+        bool csharp2cuda_temp_604;
+#line 1297 "MatrixModule.cs"
+        if (!(csharp2cuda_temp_603))
         {
-#line 1287 "MatrixModule.cs"
-            csharp2cuda_temp_598 = ((iterations) > (10000));
-        }
-        else
-        {
-#line 1287 "MatrixModule.cs"
-            csharp2cuda_temp_598 = true;
-        }
-#line 1287 "MatrixModule.cs"
-        bool csharp2cuda_temp_599;
-#line 1287 "MatrixModule.cs"
-        if (!(csharp2cuda_temp_598))
-        {
-#line 1287 "MatrixModule.cs"
-            csharp2cuda_temp_599 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 1297 "MatrixModule.cs"
+            csharp2cuda_temp_604 = ((iterations) > (10000));
         }
         else
         {
-#line 1287 "MatrixModule.cs"
-            csharp2cuda_temp_599 = true;
+#line 1297 "MatrixModule.cs"
+            csharp2cuda_temp_604 = true;
         }
-        if (csharp2cuda_temp_599)
-#line 1289 "MatrixModule.cs"
+#line 1297 "MatrixModule.cs"
+        bool csharp2cuda_temp_605;
+#line 1297 "MatrixModule.cs"
+        if (!(csharp2cuda_temp_604))
         {
-#line 1290 "MatrixModule.cs"
-#line 1290 "MatrixModule.cs"
-            int* csharp2cuda_temp_600 = &((output)->valid);
-            (*(csharp2cuda_temp_600) = 0);
-#line 1291 "MatrixModule.cs"
+#line 1297 "MatrixModule.cs"
+            csharp2cuda_temp_605 = ((((void*)(scratch))) == (((void*)(nullptr))));
+        }
+        else
+        {
+#line 1297 "MatrixModule.cs"
+            csharp2cuda_temp_605 = true;
+        }
+        if (csharp2cuda_temp_605)
+#line 1299 "MatrixModule.cs"
+        {
+#line 1300 "MatrixModule.cs"
+#line 1300 "MatrixModule.cs"
+            int* csharp2cuda_temp_606 = &((output)->valid);
+            (*(csharp2cuda_temp_606) = 0);
+#line 1301 "MatrixModule.cs"
             return;
         }
-#line 1293 "MatrixModule.cs"
+#line 1303 "MatrixModule.cs"
         int size = (first)->columns;
-#line 1294 "MatrixModule.cs"
+#line 1304 "MatrixModule.cs"
         double* gram = scratch;
-#line 1295 "MatrixModule.cs"
+#line 1305 "MatrixModule.cs"
         double* work = csharp2cuda_pointer_add(gram, csharp2cuda_i32_mul(size, size));
-#line 1296 "MatrixModule.cs"
+#line 1306 "MatrixModule.cs"
         double* eigenvalues = csharp2cuda_pointer_add(work, csharp2cuda_i32_mul(size, size));
-#line 1297 "MatrixModule.cs"
+#line 1307 "MatrixModule.cs"
         {
-#line 1297 "MatrixModule.cs"
+#line 1307 "MatrixModule.cs"
             int row = 0;
             while (true)
             {
                 if (!(((row) < (size))))
                     break;
-#line 1298 "MatrixModule.cs"
+#line 1308 "MatrixModule.cs"
                 {
-#line 1299 "MatrixModule.cs"
+#line 1309 "MatrixModule.cs"
                     {
-#line 1299 "MatrixModule.cs"
+#line 1309 "MatrixModule.cs"
                         int column = 0;
                         while (true)
                         {
                             if (!(((column) < (size))))
                                 break;
-#line 1300 "MatrixModule.cs"
+#line 1310 "MatrixModule.cs"
                             {
-#line 1301 "MatrixModule.cs"
+#line 1311 "MatrixModule.cs"
                                 double sum = 0.0;
-#line 1302 "MatrixModule.cs"
+#line 1312 "MatrixModule.cs"
                                 {
-#line 1302 "MatrixModule.cs"
+#line 1312 "MatrixModule.cs"
                                     int inner = 0;
                                     while (true)
                                     {
-#line 1302 "MatrixModule.cs"
-                                        int csharp2cuda_temp_604 = (first)->rows;
-                                        if (!(((inner) < (csharp2cuda_temp_604))))
+#line 1312 "MatrixModule.cs"
+                                        int csharp2cuda_temp_610 = (first)->rows;
+                                        if (!(((inner) < (csharp2cuda_temp_610))))
                                             break;
-#line 1303 "MatrixModule.cs"
-#line 1303 "MatrixModule.cs"
-                                        double* csharp2cuda_temp_605 = &(sum);
-#line 1303 "MatrixModule.cs"
-                                        double csharp2cuda_temp_606 = *(csharp2cuda_temp_605);
-#line 1303 "MatrixModule.cs"
-                                        int csharp2cuda_temp_607 = (first)->columns;
-#line 1303 "MatrixModule.cs"
-                                        double csharp2cuda_temp_608 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_607), row)];
-#line 1304 "MatrixModule.cs"
-                                        int csharp2cuda_temp_609 = (first)->columns;
-#line 1304 "MatrixModule.cs"
-                                        double csharp2cuda_temp_610 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_609), column)];
-                                        (*(csharp2cuda_temp_605) = __dadd_rn(csharp2cuda_temp_606, __dmul_rn(csharp2cuda_temp_608, csharp2cuda_temp_610)));
-#line 1302 "MatrixModule.cs"
-                                        int* csharp2cuda_temp_603 = &(inner);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_603));
+#line 1313 "MatrixModule.cs"
+#line 1313 "MatrixModule.cs"
+                                        double* csharp2cuda_temp_611 = &(sum);
+#line 1313 "MatrixModule.cs"
+                                        double csharp2cuda_temp_612 = *(csharp2cuda_temp_611);
+#line 1313 "MatrixModule.cs"
+                                        int csharp2cuda_temp_613 = (first)->columns;
+#line 1313 "MatrixModule.cs"
+                                        double csharp2cuda_temp_614 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_613), row)];
+#line 1314 "MatrixModule.cs"
+                                        int csharp2cuda_temp_615 = (first)->columns;
+#line 1314 "MatrixModule.cs"
+                                        double csharp2cuda_temp_616 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_615), column)];
+                                        (*(csharp2cuda_temp_611) = __dadd_rn(csharp2cuda_temp_612, __dmul_rn(csharp2cuda_temp_614, csharp2cuda_temp_616)));
+#line 1312 "MatrixModule.cs"
+                                        int* csharp2cuda_temp_609 = &(inner);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_609));
                                     }
                                 }
-#line 1306 "MatrixModule.cs"
+#line 1316 "MatrixModule.cs"
                                 if ((!(isfinite(sum))))
-#line 1307 "MatrixModule.cs"
+#line 1317 "MatrixModule.cs"
                                 {
-#line 1308 "MatrixModule.cs"
-#line 1308 "MatrixModule.cs"
-                                    int* csharp2cuda_temp_611 = &((output)->valid);
-                                    (*(csharp2cuda_temp_611) = 0);
-#line 1309 "MatrixModule.cs"
+#line 1318 "MatrixModule.cs"
+#line 1318 "MatrixModule.cs"
+                                    int* csharp2cuda_temp_617 = &((output)->valid);
+                                    (*(csharp2cuda_temp_617) = 0);
+#line 1319 "MatrixModule.cs"
                                     return;
                                 }
-#line 1311 "MatrixModule.cs"
-#line 1311 "MatrixModule.cs"
-                                double* csharp2cuda_temp_612 = &((gram)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
-                                (*(csharp2cuda_temp_612) = sum);
+#line 1321 "MatrixModule.cs"
+#line 1321 "MatrixModule.cs"
+                                double* csharp2cuda_temp_618 = &((gram)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
+                                (*(csharp2cuda_temp_618) = sum);
                             }
-#line 1299 "MatrixModule.cs"
-                            int* csharp2cuda_temp_602 = &(column);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_602));
+#line 1309 "MatrixModule.cs"
+                            int* csharp2cuda_temp_608 = &(column);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_608));
                         }
                     }
                 }
-#line 1297 "MatrixModule.cs"
-                int* csharp2cuda_temp_601 = &(row);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_601));
+#line 1307 "MatrixModule.cs"
+                int* csharp2cuda_temp_607 = &(row);
+                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_607));
             }
         }
-#line 1314 "MatrixModule.cs"
+#line 1324 "MatrixModule.cs"
         mathblocks_matrix_symmetric_eigenvalues(gram, size, work, eigenvalues, csharp2cuda_pointer_add(eigenvalues, size));
-#line 1315 "MatrixModule.cs"
+#line 1325 "MatrixModule.cs"
         double largest = (eigenvalues)[csharp2cuda_i32_sub(size, 1)];
-#line 1316 "MatrixModule.cs"
+#line 1326 "MatrixModule.cs"
         if (((largest) < (0.0)))
         {
-#line 1316 "MatrixModule.cs"
-#line 1316 "MatrixModule.cs"
-            double* csharp2cuda_temp_613 = &(largest);
-            (*(csharp2cuda_temp_613) = 0.0);
+#line 1326 "MatrixModule.cs"
+#line 1326 "MatrixModule.cs"
+            double* csharp2cuda_temp_619 = &(largest);
+            (*(csharp2cuda_temp_619) = 0.0);
         }
-#line 1317 "MatrixModule.cs"
-#line 1317 "MatrixModule.cs"
-        double* csharp2cuda_temp_614 = &((output)->scalar_value);
-        (*(csharp2cuda_temp_614) = mathblocks_square_root(largest));
-#line 1318 "MatrixModule.cs"
-#line 1318 "MatrixModule.cs"
-        double csharp2cuda_temp_615 = (output)->scalar_value;
-        if ((!(isfinite(csharp2cuda_temp_615))))
+#line 1327 "MatrixModule.cs"
+#line 1327 "MatrixModule.cs"
+        double* csharp2cuda_temp_620 = &((output)->scalar_value);
+        (*(csharp2cuda_temp_620) = mathblocks_square_root(largest));
+#line 1328 "MatrixModule.cs"
+#line 1328 "MatrixModule.cs"
+        double csharp2cuda_temp_621 = (output)->scalar_value;
+        if ((!(isfinite(csharp2cuda_temp_621))))
         {
-#line 1318 "MatrixModule.cs"
-#line 1318 "MatrixModule.cs"
-            int* csharp2cuda_temp_616 = &((output)->valid);
-            (*(csharp2cuda_temp_616) = 0);
+#line 1328 "MatrixModule.cs"
+#line 1328 "MatrixModule.cs"
+            int* csharp2cuda_temp_622 = &((output)->valid);
+            (*(csharp2cuda_temp_622) = 0);
         }
     }
 }

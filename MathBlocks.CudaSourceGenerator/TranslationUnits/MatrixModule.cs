@@ -873,6 +873,16 @@ internal static unsafe class MatrixModule
                 output->valid = 0;
                 return;
             }
+            // exp(A) overflows when trace(A) / n > ln(DBL_MAX) + ln(n) / 2 (Hadamard: det(exp A) = exp(trace A) and |det M| <= (sqrt(n) * max|m_ij|)^n), a
+            // result the scaling and squaring below can lose to zeros without a non-finite value.
+            double trace = 0.0;
+            for (int index = 0; index < size; index++)
+                trace += a[index * size + index];
+            if (trace / size > 709.782712893383973096 + 0.5 * (mathblocks_binary_logarithm((double)size) * 0.693147180559945309417))
+            {
+                output->valid = 0;
+                return;
+            }
             int scaling = norm > 1.0 ? (int)Math.Ceiling(mathblocks_binary_logarithm(norm)) : 0;
             if (scaling < 0) scaling = 0;
             double scale = mathblocks_power(2.0, (double)-scaling);
