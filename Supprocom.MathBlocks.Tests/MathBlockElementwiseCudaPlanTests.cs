@@ -34,7 +34,7 @@ public sealed class MathBlockElementwiseCudaPlanTests
         Assert.Equal(
             82,
             MathBlockCudaDeviceModule.Operations.Count(contract => contract.Family == MathBlockCudaOperationFamily.Elementwise));
-        Assert.Equal(525, MathBlocksCUDAWorker.SupportedBlockIdentities.Count);
+        Assert.Equal(537, MathBlocksCUDAWorker.SupportedBlockIdentities.Count);
         Assert.DoesNotContain(
             MathBlockCatalog.Standard.Operations,
             operation => operation.Identifier.StartsWith("elementwise", StringComparison.Ordinal));
