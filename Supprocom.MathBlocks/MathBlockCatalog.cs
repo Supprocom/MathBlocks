@@ -15,12 +15,11 @@ public static class MathBlockCatalog
     // they are registered there.
     internal static MathBlockRegistry Windowed => windowed.Value;
 
-    // CUDA plans, contracts and kernels resolve operations from Standard and the window forms that have a CUDA
-    // feature, so those forms have CUDA support without being part of Standard.
+    // CUDA plans, contracts and kernels resolve operations from Standard and the window and elementwise forms that
+    // have a CUDA feature, so those forms have CUDA support without being part of Standard.
     internal static MathBlockRegistry Cuda => cuda.Value;
 
-    // The elementwise.* and elementwise-valid.* forms have CoreCLR evaluators only. They stay outside Standard,
-    // which requires a CUDA implementation for every operation.
+    // The elementwise.* and elementwise-valid.* forms stay outside Standard until they are registered there.
     internal static MathBlockRegistry Elementwise => elementwise.Value;
 
     private static MathBlockRegistry CreateStandard()
@@ -35,6 +34,11 @@ public static class MathBlockCatalog
             Supprocom.MathBlocks.Cuda.MathBlockCudaFeatureIndex.SupportedIdentities, StringComparer.Ordinal);
         var operations = new List<MathBlockOperation>(Standard.Operations);
         foreach (var operation in Windowed.Operations)
+        {
+            if (supported.Contains(operation.Identity))
+                operations.Add(operation);
+        }
+        foreach (var operation in Elementwise.Operations)
         {
             if (supported.Contains(operation.Identity))
                 operations.Add(operation);

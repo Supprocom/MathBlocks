@@ -36,7 +36,10 @@ internal static class MathBlocksCudaKernelModule
             MathBlockCudaFamily.Transport => new KernelBinding(
                 state.Value.TransportFunction, feature.Opcode, TransportCudaBlockCatalog.BlockSize),
             MathBlockCudaFamily.Window => new KernelBinding(
-                state.Value.WindowFunction, feature.Opcode, WindowCudaBlockCatalog.BlockSize, RowStriped: true),
+                state.Value.WindowFunction, feature.Opcode, WindowCudaBlockCatalog.BlockSize, RowStriped: true,
+                ScratchCapacityArgument: true),
+            MathBlockCudaFamily.Elementwise => new KernelBinding(
+                state.Value.ElementwiseFunction, feature.Opcode, ElementwiseCudaBlockCatalog.BlockSize, RowStriped: true),
             _ => throw new InvalidOperationException($"CUDA family '{feature.Family}' is not supported.")
         };
     }
@@ -120,6 +123,12 @@ internal static class MathBlocksCudaKernelModule
                 module,
                 WindowCudaBlockCatalog.KernelEntryPoint),
             "cuModuleGetFunction(mathblocks_window)");
+        MathBlocksCudaNative.ThrowIfFailed(
+            MathBlocksCudaNative.cuModuleGetFunction(
+                out var elementwiseFunction,
+                module,
+                ElementwiseCudaBlockCatalog.KernelEntryPoint),
+            "cuModuleGetFunction(mathblocks_elementwise)");
         return new ModuleState(
             module,
             scalarFunction,
@@ -133,13 +142,20 @@ internal static class MathBlocksCudaKernelModule
             graphFunction,
             advancedFunction,
             transportFunction,
-            windowFunction);
+            windowFunction,
+            elementwiseFunction);
     }
 
-    // A row-striped kernel (the window family) takes its grid from the plan and a fifth argument, the scratch
-    // doubles per thread; every other kernel runs one block with four arguments.
+    // A row-striped kernel (the window and elementwise families) takes its grid from the plan; the window kernel
+    // also takes a fifth argument, the scratch doubles per thread. Every other kernel runs one block with four
+    // arguments.
     [StructLayout(LayoutKind.Sequential)]
-    public readonly record struct KernelBinding(IntPtr Function, int Opcode, uint BlockX, bool RowStriped = false);
+    public readonly record struct KernelBinding(
+        IntPtr Function,
+        int Opcode,
+        uint BlockX,
+        bool RowStriped = false,
+        bool ScratchCapacityArgument = false);
     private sealed record ModuleState(
         IntPtr Module,
         IntPtr ScalarFunction,
@@ -153,5 +169,6 @@ internal static class MathBlocksCudaKernelModule
         IntPtr GraphFunction,
         IntPtr AdvancedFunction,
         IntPtr TransportFunction,
-        IntPtr WindowFunction);
+        IntPtr WindowFunction,
+        IntPtr ElementwiseFunction);
 }

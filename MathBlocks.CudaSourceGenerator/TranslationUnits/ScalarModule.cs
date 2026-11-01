@@ -368,6 +368,116 @@ internal static unsafe class ScalarModule
         return Math.CopySign(1.0 - tau, value);
     }
 
+    // The scalar-valued opcodes 0..43 on their arguments: writes the result to value and returns whether it is a
+    // valid result (finite). The scalar dispatcher and the elementwise forms both evaluate their rows here.
+    [CudaDevice]
+    private static bool mathblocks_scalar_value(int opcode, double a, double b, double c, double* value)
+    {
+        double result = 0.0;
+        switch (opcode)
+        {
+            case 0: result = a + b; break;
+            case 1: result = a - b; break;
+            case 2: result = a * b; break;
+            case 3: result = a / b; break;
+            case 4: result = -a; break;
+            case 5: result = Math.Abs(a); break;
+            case 6: result = Cuda.Int(a > 0.0) - Cuda.Int(a < 0.0); break;
+            case 7: result = a > 0.0 ? a : 0.0; break;
+            case 8: result = Math.Min(a, b); break;
+            case 9: result = Math.Max(a, b); break;
+            case 10:
+                // Math.Clamp's rule: a lower limit above the upper limit is invalid; otherwise the value unless it
+                // compares below the lower or above the upper limit, so a zero value keeps its sign at zero limits.
+                if (b > c)
+                {
+                    *value = 0.0;
+                    return false;
+                }
+                result = a < b ? b : a > c ? c : a;
+                break;
+            case 11: result = 1.0 / a; break;
+            case 12: result = a * a; break;
+            case 13: result = a * a * a; break;
+            case 14: result = mathblocks_square_root(a); break;
+            case 15: result = mathblocks_cube_root(a); break;
+            case 16: result = mathblocks_power(a, b); break;
+            case 17: result = mathblocks_exponential(a); break;
+            case 18: result = mathblocks_natural_logarithm(a); break;
+            case 19: result = mathblocks_binary_logarithm(a); break;
+            case 20:
+                result = mathblocks_natural_logarithm(a) / 2.30258509299404568402;
+                break;
+            case 21: result = mathblocks_sine(a); break;
+            case 22: result = mathblocks_cosine(a); break;
+            case 23: result = mathblocks_sine(a) / mathblocks_cosine(a); break;
+            case 24: result = mathblocks_arc_sine(a); break;
+            case 25: result = mathblocks_arc_cosine(a); break;
+            case 26: result = mathblocks_arc_tangent(a); break;
+            case 27: result = mathblocks_arc_tangent_2(a, b); break;
+            case 28:
+            {
+                if (a == 0.0)
+                {
+                    result = a;
+                    break;
+                }
+                double positive = mathblocks_exponential(a);
+                double negative = mathblocks_exponential(-a);
+                result = (positive - negative) / 2.0;
+                break;
+            }
+            case 29:
+            {
+                double positive = mathblocks_exponential(a);
+                double negative = mathblocks_exponential(-a);
+                result = (positive + negative) / 2.0;
+                break;
+            }
+            case 30:
+            {
+                if (a == 0.0)
+                {
+                    result = a;
+                    break;
+                }
+                double positive = mathblocks_exponential(a);
+                double negative = mathblocks_exponential(-a);
+                result = (positive - negative) / (positive + negative);
+                break;
+            }
+            case 31: result = mathblocks_inverse_hyperbolic_sine(a); break;
+            case 32:
+                result = mathblocks_natural_logarithm(
+                    a + mathblocks_square_root(a * a - 1.0));
+                break;
+            case 33: result = 0.5 * mathblocks_log_one_plus(2.0 * a / (1.0 - a)); break;
+            case 34: result = Math.Floor(a); break;
+            case 35: result = Math.Ceiling(a); break;
+            case 36: result = Cuda.NearbyInteger(a); break;
+            case 37: result = Math.Truncate(a); break;
+            case 38: result = Cuda.FloatingRemainder(a, b); break;
+            case 39:
+                result = a >= 0.0
+                    ? 1.0 / (1.0 + mathblocks_exponential(-a))
+                    : mathblocks_exponential(a) / (1.0 + mathblocks_exponential(a));
+                break;
+            case 40:
+                result = mathblocks_natural_logarithm(a / (1.0 - a));
+                break;
+            case 41:
+                result = Math.Max(a, 0.0) +
+                    mathblocks_log_one_plus(mathblocks_exponential(-Math.Abs(a)));
+                break;
+            case 42: result = mathblocks_log_one_plus(a); break;
+            case 43: result = mathblocks_error_function(a); break;
+            default: *value = 0.0; return false;
+        }
+
+        *value = result;
+        return double.IsFinite(result);
+    }
+
     [CudaDevice(Name = "mathblocks_scalar_dispatch")]
     private static void mathblocks_scalar(
         int opcode,
@@ -395,96 +505,17 @@ internal static unsafe class ScalarModule
         double a = first == null ? 0.0 : first->scalar_value;
         double b = second == null ? 0.0 : second->scalar_value;
         double c = third == null ? 0.0 : third->scalar_value;
-        bool scalar_output = true;
+        if (opcode >= 0 && opcode <= 43)
+        {
+            double value = 0.0;
+            output->valid = mathblocks_scalar_value(opcode, a, b, c, &value);
+            output->scalar_value = value;
+            return;
+        }
 
+        bool scalar_output = true;
         switch (opcode)
         {
-            case 0: output->scalar_value = a + b; break;
-            case 1: output->scalar_value = a - b; break;
-            case 2: output->scalar_value = a * b; break;
-            case 3: output->scalar_value = a / b; break;
-            case 4: output->scalar_value = -a; break;
-            case 5: output->scalar_value = Math.Abs(a); break;
-            case 6: output->scalar_value = Cuda.Int(a > 0.0) - Cuda.Int(a < 0.0); break;
-            case 7: output->scalar_value = a > 0.0 ? a : 0.0; break;
-            case 8: output->scalar_value = Math.Min(a, b); break;
-            case 9: output->scalar_value = Math.Max(a, b); break;
-            case 10: output->scalar_value = Math.Min(Math.Max(a, b), c); break;
-            case 11: output->scalar_value = 1.0 / a; break;
-            case 12: output->scalar_value = a * a; break;
-            case 13: output->scalar_value = a * a * a; break;
-            case 14: output->scalar_value = mathblocks_square_root(a); break;
-            case 15: output->scalar_value = mathblocks_cube_root(a); break;
-            case 16: output->scalar_value = mathblocks_power(a, b); break;
-            case 17: output->scalar_value = mathblocks_exponential(a); break;
-            case 18: output->scalar_value = mathblocks_natural_logarithm(a); break;
-            case 19: output->scalar_value = mathblocks_binary_logarithm(a); break;
-            case 20:
-                output->scalar_value = mathblocks_natural_logarithm(a) / 2.30258509299404568402;
-                break;
-            case 21: output->scalar_value = mathblocks_sine(a); break;
-            case 22: output->scalar_value = mathblocks_cosine(a); break;
-            case 23: output->scalar_value = mathblocks_sine(a) / mathblocks_cosine(a); break;
-            case 24: output->scalar_value = mathblocks_arc_sine(a); break;
-            case 25: output->scalar_value = mathblocks_arc_cosine(a); break;
-            case 26: output->scalar_value = mathblocks_arc_tangent(a); break;
-            case 27: output->scalar_value = mathblocks_arc_tangent_2(a, b); break;
-            case 28:
-            {
-                if (a == 0.0)
-                {
-                    output->scalar_value = a;
-                    break;
-                }
-                double positive = mathblocks_exponential(a);
-                double negative = mathblocks_exponential(-a);
-                output->scalar_value = (positive - negative) / 2.0;
-                break;
-            }
-            case 29:
-            {
-                double positive = mathblocks_exponential(a);
-                double negative = mathblocks_exponential(-a);
-                output->scalar_value = (positive + negative) / 2.0;
-                break;
-            }
-            case 30:
-            {
-                if (a == 0.0)
-                {
-                    output->scalar_value = a;
-                    break;
-                }
-                double positive = mathblocks_exponential(a);
-                double negative = mathblocks_exponential(-a);
-                output->scalar_value = (positive - negative) / (positive + negative);
-                break;
-            }
-            case 31: output->scalar_value = mathblocks_inverse_hyperbolic_sine(a); break;
-            case 32:
-                output->scalar_value = mathblocks_natural_logarithm(
-                    a + mathblocks_square_root(a * a - 1.0));
-                break;
-            case 33: output->scalar_value = 0.5 * mathblocks_log_one_plus(2.0 * a / (1.0 - a)); break;
-            case 34: output->scalar_value = Math.Floor(a); break;
-            case 35: output->scalar_value = Math.Ceiling(a); break;
-            case 36: output->scalar_value = Cuda.NearbyInteger(a); break;
-            case 37: output->scalar_value = Math.Truncate(a); break;
-            case 38: output->scalar_value = Cuda.FloatingRemainder(a, b); break;
-            case 39:
-                output->scalar_value = a >= 0.0
-                    ? 1.0 / (1.0 + mathblocks_exponential(-a))
-                    : mathblocks_exponential(a) / (1.0 + mathblocks_exponential(a));
-                break;
-            case 40:
-                output->scalar_value = mathblocks_natural_logarithm(a / (1.0 - a));
-                break;
-            case 41:
-                output->scalar_value = Math.Max(a, 0.0) +
-                    mathblocks_log_one_plus(mathblocks_exponential(-Math.Abs(a)));
-                break;
-            case 42: output->scalar_value = mathblocks_log_one_plus(a); break;
-            case 43: output->scalar_value = mathblocks_error_function(a); break;
             case 44: output->boolean_value = a == b; scalar_output = false; break;
             case 45: output->boolean_value = a != b; scalar_output = false; break;
             case 46: output->boolean_value = a < b; scalar_output = false; break;

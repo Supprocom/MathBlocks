@@ -7,6 +7,12 @@ internal static partial class ScalarMathBlocks
         internal const string Identity = "scalar.clamp@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateClamp();
+        // A lower limit above the upper limit has no result, so the value is invalid on CoreCLR and CUDA alike.
+        private static MathBlockValue EvaluateClamp(IReadOnlyList<MathBlockValue> inputs) =>
+            inputs[1].AsScalar() > inputs[2].AsScalar()
+                ? MathBlockValue.Invalid(MathBlockType.Scalar(inputs[0].Type.Unit), "The lower limit exceeds the upper limit.")
+                : MathBlockValue.Scalar(MathBlockScalar.Clamp(inputs[0].AsScalar(), inputs[1].AsScalar(), inputs[2].AsScalar()), inputs[0].Type.Unit);
+
         private static MathBlockOperation CreateClamp() => MathBlockOperationFactory.Create("scalar.clamp", 3, types =>
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Scalar);
@@ -15,6 +21,6 @@ internal static partial class ScalarMathBlocks
             if (types[0].Unit != types[1].Unit || types[0].Unit != types[2].Unit)
                 throw new InvalidOperationException("The input units must be equal.");
             return types[0];
-        }, inputs => MathBlockValue.Scalar(MathBlockScalar.Clamp(inputs[0].AsScalar(), inputs[1].AsScalar(), inputs[2].AsScalar()), inputs[0].Type.Unit), [MathBlockValue.Scalar(5d), MathBlockValue.Scalar(0d), MathBlockValue.Scalar(3d)], MathBlockValue.Scalar(3d), performanceIterations: 512);
+        }, EvaluateClamp, [MathBlockValue.Scalar(5d), MathBlockValue.Scalar(0d), MathBlockValue.Scalar(3d)], MathBlockValue.Scalar(3d), performanceIterations: 512);
     }
 }

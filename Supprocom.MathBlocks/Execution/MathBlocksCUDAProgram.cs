@@ -263,16 +263,16 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                     continue;
                 var kernel = MathBlocksCudaKernelModule.Resolve(node.OperationIdentity!);
                 var launch = kernel.RowStriped
-                    ? ResolveWindowLaunch(node, payloadLayout)
+                    ? ResolveRowStripedLaunch(node, payloadLayout)
                     : new WindowLaunch(1, 0, 0);
                 var inputPointers = checked(allocatedDeviceArena + (ulong)plannedInputPointerOffsets[node.Index]);
                 var output = checked(allocatedDeviceArena + (ulong)plannedSlotOffsets[node.Index]);
                 var storage = new KernelArgumentStorage(
-                    kernel.Opcode,
+                    ResolveDispatchOpcode(node, kernel.Opcode, payloadLayout),
                     inputPointers,
                     node.Inputs.Count,
                     output,
-                    kernel.RowStriped ? launch.ScratchCapacity : null);
+                    kernel.ScratchCapacityArgument ? launch.ScratchCapacity : null);
                 arguments.Add(storage);
                 var dependencies = CreateKernelDependencies(node.Inputs, plannedGraphNodes, uploadNode);
                 var parameters = new MathBlocksCudaNative.KernelNodeParameters
@@ -628,8 +628,10 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 inputShapeOverrides,
                 inputExactValues);
             if (node.Kind == MathBlockProgramNodeKind.Operation &&
-                WindowCudaBlockCatalog.IsWindowIdentity(node.OperationIdentity) &&
-                WindowSeriesLengthsDiffer(inputTypes, inputShapeRows))
+                ((WindowCudaBlockCatalog.IsWindowIdentity(node.OperationIdentity) &&
+                    WindowSeriesLengthsDiffer(inputTypes, inputShapeRows)) ||
+                 (ElementwiseCudaBlockCatalog.IsElementwiseIdentity(node.OperationIdentity) &&
+                    ElementwiseCudaBlockCatalog.VectorLengthsDiffer(inputTypes, inputShapeRows))))
             {
                 shape = default;
             }
@@ -1814,6 +1816,30 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         if (size < 0 || size > 20)
             throw new InvalidOperationException("CUDA assignment shape is outside the operation domain.");
         return checked(2 * (1 << size));
+    }
+
+    // A row-striped kernel: the window launch below, or one thread per elementwise row in blocks of 128, with the
+    // rows striped over at most MaximumGridX blocks and no scratch.
+    private static WindowLaunch ResolveRowStripedLaunch(
+        MathBlockProgramNode node,
+        MathBlockCudaPayloadLayout payloadLayout) =>
+        ElementwiseCudaBlockCatalog.IsElementwiseIdentity(node.OperationIdentity)
+            ? new WindowLaunch(ElementwiseCudaBlockCatalog.GridX(payloadLayout.Capacities[node.Index]), 0, 0)
+            : ResolveWindowLaunch(node, payloadLayout);
+
+    // An elementwise kernel receives the kinds of its arguments in the opcode; every other kernel receives the
+    // contract opcode.
+    private static int ResolveDispatchOpcode(
+        MathBlockProgramNode node,
+        int opcode,
+        MathBlockCudaPayloadLayout payloadLayout)
+    {
+        if (!ElementwiseCudaBlockCatalog.IsElementwiseIdentity(node.OperationIdentity))
+            return opcode;
+        var inputTypes = new MathBlockType[node.Inputs.Count];
+        for (var index = 0; index < inputTypes.Length; index++)
+            inputTypes[index] = payloadLayout.ResolvedTypes[node.Inputs[index]];
+        return ElementwiseCudaBlockCatalog.DispatchOpcode(opcode, inputTypes);
     }
 
     // A window kernel runs GridX blocks of 128 threads over the rows, one row or one block of rows per thread

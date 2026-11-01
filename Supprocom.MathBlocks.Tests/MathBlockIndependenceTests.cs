@@ -72,7 +72,7 @@ public sealed partial class MathBlockIndependenceTests
                 SearchOption.TopDirectoryOnly)
             .Order(StringComparer.Ordinal)
             .ToArray();
-        Assert.Equal(13, translationSources.Length);
+        Assert.Equal(14, translationSources.Length);
         var runtimeCudaBlocks = Path.Combine(
             root,
             "Supprocom.MathBlocks",
@@ -103,7 +103,7 @@ public sealed partial class MathBlockIndependenceTests
         var operationSources = translationSources
             .Where(path => !path.EndsWith("DeviceDispatchModule.cs", StringComparison.Ordinal))
             .ToArray();
-        Assert.Equal(12, operationSources.Length);
+        Assert.Equal(13, operationSources.Length);
         Assert.All(operationSources, source =>
         {
             var text = File.ReadAllText(source);
@@ -121,7 +121,7 @@ public sealed partial class MathBlockIndependenceTests
         Assert.DoesNotContain("extern \"C\" __global__", generatorSource, StringComparison.Ordinal);
         Assert.DoesNotContain("blockIdx.x", generatorSource, StringComparison.Ordinal);
         Assert.Equal(
-            12,
+            13,
             operationSources.Count(path =>
                 File.ReadAllText(path).Contains("[CudaDevice(Name = \"mathblocks_", StringComparison.Ordinal)));
     }

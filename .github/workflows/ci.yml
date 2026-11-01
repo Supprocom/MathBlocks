@@ -43,8 +43,8 @@ jobs:
         shell: pwsh
         run: |
           $units = @(Get-ChildItem 'MathBlocks.CudaSourceGenerator/TranslationUnits' -Filter '*Module.cs')
-          if ($units.Count -ne 13) {
-              throw "The generator requires exactly 13 direct translation units."
+          if ($units.Count -ne 14) {
+              throw "The generator requires exactly 14 direct translation units."
           }
 
           $runtimeCudaBlocks = 'Supprocom.MathBlocks/Cuda/Blocks'
@@ -68,7 +68,7 @@ jobs:
           $deviceUnits = @($units | Where-Object {
               (Get-Content $_.FullName -Raw).IndexOf('[CudaDevice(Name = "mathblocks_', [StringComparison]::Ordinal) -ge 0
           })
-          if ($deviceUnits.Count -ne 12) {
+          if ($deviceUnits.Count -ne 13) {
               throw "Each operation family requires one direct CUDA device dispatcher."
           }
 

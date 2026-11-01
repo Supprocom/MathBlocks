@@ -160,6 +160,7 @@ public static class MathBlockCudaDeviceModule
         MathBlockCudaFamily.Advanced => 128,
         MathBlockCudaFamily.Transport => 128,
         MathBlockCudaFamily.Window => 128,
+        MathBlockCudaFamily.Elementwise => 128,
         _ => throw new InvalidOperationException($"CUDA family '{family}' is not supported.")
     };
 

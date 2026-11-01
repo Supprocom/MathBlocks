@@ -149,22 +149,50 @@ internal static class MathBlockPrimitives
         return result;
     }
 
+    // value * 2^exponent rounded once to nearest, ties to even (IEEE 754 scaleB, C ldexp), including subnormal
+    // results: the significand is shifted to the result's last bit and rounded there.
     public static double ScaleB(double value, int exponent)
     {
         if (value == 0d || !IsFinite(value))
             return value;
-        while (exponent > 1023)
+        var bits = ToBits(value);
+        var sign = bits & 0x8000_0000_0000_0000ul;
+        var biased = (long)((bits >> 52) & 0x7fful);
+        var significand = bits & 0x000f_ffff_ffff_fffful;
+        if (biased == 0L)
         {
-            value *= FromBits(0x7fe0_0000_0000_0000ul);
-            exponent -= 1023;
+            // Subnormal input: normalize so the leading bit is bit 52.
+            biased = 1L;
+            while ((significand & 0x0010_0000_0000_0000ul) == 0ul)
+            {
+                significand <<= 1;
+                biased--;
+            }
         }
-        while (exponent < -1022)
+        else
         {
-            value *= FromBits(0x0010_0000_0000_0000ul);
-            exponent += 1022;
+            significand |= 0x0010_0000_0000_0000ul;
         }
-        var power = FromBits((ulong)(exponent + 1023) << 52);
-        return value * power;
+
+        // value = significand * 2^(biased - 1075); the result's biased exponent is biased + exponent.
+        var target = biased + exponent;
+        if (target >= 0x7ffL)
+            return FromBits(sign | 0x7ff0_0000_0000_0000ul);
+        if (target >= 1L)
+            return FromBits(sign | ((ulong)target << 52) | (significand & 0x000f_ffff_ffff_fffful));
+
+        // Below 2^-1022 the last bit is 2^-1074: keep significand >> (1 - target) and round the bits shifted out.
+        // At a shift of 54 or more the value is below half of 2^-1074 and rounds to zero.
+        var shift = 1L - target;
+        if (shift >= 54L)
+            return FromBits(sign);
+        var quotient = significand >> (int)shift;
+        var remainder = significand & ((1ul << (int)shift) - 1ul);
+        var half = 1ul << (int)(shift - 1L);
+        if (remainder > half || (remainder == half && (quotient & 1ul) != 0ul))
+            quotient++;
+        // A carry into bit 52 gives 2^-1022, whose encoding is the same bits.
+        return FromBits(sign | quotient);
     }
 
     public static double Exp(double value) => MathBlockScalar.Exponential(value);
