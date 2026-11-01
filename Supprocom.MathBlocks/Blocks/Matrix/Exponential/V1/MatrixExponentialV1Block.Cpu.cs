@@ -20,6 +20,14 @@ public static partial class MathBlockAdvanced
         // overflow in the series or the squarings.
         if (!double.IsFinite(norm))
             return new MathBlockMatrix(matrix.Rows, matrix.Columns, MathBlockCollectionPrimitives.Repeat(double.NaN, matrix.Rows * matrix.Columns), true);
+        // exp(A) overflows when trace(A) / n > ln(DBL_MAX) + ln(n) / 2: det(exp A) = exp(trace A), and by Hadamard |det M| <= (sqrt(n) * max|m_ij|)^n,
+        // so some entry of exp(A) exceeds exp(trace(A) / n) / sqrt(n). (The bound with ln(n) instead of ln(n) / 2 is also valid and stricter.) The scaling
+        // and squaring below can lose such a result to zeros without ever producing a non-finite value.
+        var trace = 0d;
+        for (var index = 0; index < matrix.Rows; index++)
+            trace += matrix[index, index];
+        if (trace / matrix.Rows > 709.782712893383973096d + 0.5d * (Math.Log2(matrix.Rows) * 0.693147180559945309417d))
+            return new MathBlockMatrix(matrix.Rows, matrix.Columns, MathBlockCollectionPrimitives.Repeat(double.NaN, matrix.Rows * matrix.Columns), true);
         var scaling = norm > 1d ? Math.Max(0, (int)Math.Ceiling(Math.Log2(norm))) : 0;
         var scaled = MathBlockLinearAlgebra.Scale(matrix, Math.Pow(2d, -scaling));
         var result = MathBlockLinearAlgebra.Identity(matrix.Rows);

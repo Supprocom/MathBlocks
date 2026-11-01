@@ -92,6 +92,19 @@ public sealed class MathBlockInvalidStateTests
             ["extension.whitney/zero-lipschitz-overflowing-distance"] = ("extension.whitney@1", () =>
                 [Vector(-1.7e308d, 0d), Vector(5d, -3d), Vector(1.7e308d), Scalar(0d)]),
 
+            // The remaining overflow victims: a division by an infinity (a squared divisor, a slope's difference), a NaN cross product and a trace
+            // beyond ln(DBL_MAX) + ln(n) / 2 (the scaling and squaring of dense#596 collapsed to valid zeros without a non-finite value).
+            ["complex.divide/divisor-overflow"] = ("complex.divide@1", () =>
+                [MathBlockValue.Complex(new Complex(1d, 1d)), MathBlockValue.Complex(new Complex(1e200d, 1e200d))]),
+            ["geometry.contains-point/crossing-overflow"] = ("geometry.contains-point@1", () =>
+                [Points((-1e200d, -1e200d), (1e200d, -1e200d), (1e200d, 1e200d)), Points((2e199d, 1e199d))]),
+            ["geometry.convex-hull/nan-cross-product"] = ("geometry.convex-hull@1", () =>
+                [Points((0d, 0d), (1e200d, 1e200d), (2e200d, 2e200d))]),
+            ["statistics.theil-sen-slope/difference-overflow"] = ("statistics.theil-sen-slope@1", () =>
+                [Vector(-1.7e308d, 1.7e308d), Vector(1d, 2d)]),
+            ["matrix.exponential/trace-overflow"] = ("matrix.exponential@1", () =>
+                [Matrix(2, 2, 3.4292183174601395e201d, -2.799680927722256e101d, 8.572068857490139e301d, -1.0737128770591469d)]),
+
             // A row norm that overflows asked for int.MaxValue squarings.
             ["matrix.exponential/overflowing-norm"] = ("matrix.exponential@1", () => [Matrix(2, 2, 1.7e308d, 1.7e308d, 0d, 0d)]),
 
@@ -115,7 +128,8 @@ public sealed class MathBlockInvalidStateTests
     {
         // CUDA sizes this result by an upper bound, C(columns, min(rows, columns / 2)), not the exact count
         // C(columns, rows), so no declared length would equal its slot shape for every matrix shape.
-        ["matrix.maximal-minors@1"] = "the minor count is C(columns, rows), which the resolver does not compute"
+        ["matrix.maximal-minors@1"] = "the minor count is C(columns, rows), which the resolver does not compute",
+        ["geometry.convex-hull@1"] = "the number of hull vertices depends on the points, not on their count"
     };
 
     /// <summary>Gets the out-of-domain case names.</summary>
@@ -198,6 +212,21 @@ public sealed class MathBlockInvalidStateTests
         Assert.Equal([false, false, true, true, false, false], validity.AsBooleanVector());
         var form = MathBlockCatalog.Standard.Get("window.path.maximum-relative-decline").Evaluate(series, Scalar(3d), Scalar(-1d));
         Assert.Equal([-1d, -1d, 1d, 1d, -1d, -1d], form.AsVector());
+    }
+
+    /// <summary>
+    /// Verifies the trace bound of matrix.exponential: the result is invalid when trace / n exceeds ln(DBL_MAX) + ln(n) / 2 (the Hadamard form; the
+    /// bound with ln(n) is also valid and stricter) and a trace below it still gives a valid result.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "InvalidState")]
+    public void MatrixExponentialIsInvalidAboveTheTraceBoundAndValidBelowIt()
+    {
+        var operation = MathBlockCatalog.Standard.Get("matrix.exponential");
+        Assert.True(operation.Evaluate(Matrix(2, 2, 700d, 0d, 0d, 0d)).IsValid);
+        Assert.True(operation.Evaluate(Matrix(2, 2, 1.0d, 0d, 0d, 1d)).IsValid);
+        Assert.False(operation.Evaluate(Matrix(2, 2, 1500d, 0d, 0d, 0d)).IsValid);
+        Assert.False(operation.Evaluate(Matrix(2, 2, 3.4292183174601395e201d, -2.799680927722256e101d, 8.572068857490139e301d, -1.0737128770591469d)).IsValid);
     }
 
     /// <summary>Verifies the rolling variance is in the square of the input unit.</summary>

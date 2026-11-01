@@ -73,6 +73,23 @@ internal static unsafe class GeometryModule
             right[2 * right_index + 1]);
     }
 
+    // Whether the turn at the middle point is not a left turn. A NaN cross product (inf - inf from overflowing products) sets overflow.
+    [CudaDevice]
+    private static bool mathblocks_geometry_not_left_turn(
+        int* overflow,
+        double origin_x,
+        double origin_y,
+        double left_x,
+        double left_y,
+        double right_x,
+        double right_y)
+    {
+        double cross = mathblocks_geometry_cross(origin_x, origin_y, left_x, left_y, right_x, right_y);
+        if (double.IsNaN(cross))
+            *overflow = 1;
+        return cross <= 0.0;
+    }
+
     [CudaDevice]
     private static double mathblocks_geometry_cross(
         double origin_x,
@@ -474,11 +491,15 @@ internal static unsafe class GeometryModule
                             inside = true;
                             break;
                         }
-                        if ((left_y > point_y) != (right_y > point_y) &&
-                            point_x < (right_x - left_x) * (point_y - left_y) /
-                                      (right_y - left_y) + left_x)
+                        if ((left_y > point_y) != (right_y > point_y))
                         {
-                            inside = !inside;
+                            // The crossing lies between the edge's end points, so it is finite unless a product overflowed.
+                            double crossing = (right_x - left_x) * (point_y - left_y) /
+                                              (right_y - left_y) + left_x;
+                            if (!double.IsFinite(crossing))
+                                output->valid = 0;
+                            if (point_x < crossing)
+                                inside = !inside;
                         }
                     }
                     output->boolean_value = inside ? 1 : 0;
@@ -508,6 +529,7 @@ internal static unsafe class GeometryModule
                         unique_count++;
                     }
                     int count = 0;
+                    int hull_overflow = 0;
                     if (unique_count <= 1)
                     {
                         count = unique_count;
@@ -521,10 +543,11 @@ internal static unsafe class GeometryModule
                     {
                         for (int index = 0; index < unique_count; index++)
                         {
-                            while (count >= 2 && mathblocks_geometry_cross(
+                            while (count >= 2 && mathblocks_geometry_not_left_turn(
+                                &hull_overflow,
                                 hull[2 * (count - 2)], hull[2 * (count - 2) + 1],
                                 hull[2 * (count - 1)], hull[2 * (count - 1) + 1],
-                                sorted[2 * index], sorted[2 * index + 1]) <= 0.0)
+                                sorted[2 * index], sorted[2 * index + 1]))
                             {
                                 count--;
                             }
@@ -535,10 +558,11 @@ internal static unsafe class GeometryModule
                         int lower_count = count;
                         for (int index = unique_count - 2; index >= 0; index--)
                         {
-                            while (count > lower_count && mathblocks_geometry_cross(
+                            while (count > lower_count && mathblocks_geometry_not_left_turn(
+                                &hull_overflow,
                                 hull[2 * (count - 2)], hull[2 * (count - 2) + 1],
                                 hull[2 * (count - 1)], hull[2 * (count - 1) + 1],
-                                sorted[2 * index], sorted[2 * index + 1]) <= 0.0)
+                                sorted[2 * index], sorted[2 * index + 1]))
                             {
                                 count--;
                             }
@@ -548,6 +572,8 @@ internal static unsafe class GeometryModule
                         }
                         count--;
                     }
+                    if (hull_overflow != 0)
+                        output->valid = 0;
                     output->rows = count;
                     output->count = count;
                     if (count > output->capacity)

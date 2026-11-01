@@ -4094,7 +4094,7 @@ __device__ bool mathblocks_window_value(
 #line 467 "WindowModule.cs"
                 int slope_count = mathblocks_statistics_pair_slopes(a, b, count, scratch);
 #line 468 "WindowModule.cs"
-                if (((slope_count) == (0)))
+                if (((slope_count) <= (0)))
                 {
 #line 469 "WindowModule.cs"
                     return false;

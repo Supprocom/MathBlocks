@@ -322,6 +322,19 @@ public sealed partial class MathBlockCudaWorkerTests
                 "extension.mcshane", Values(-1.7e308d, 0d), Values(-5d, 3d), Values(1.7e308d), MathBlockValue.Scalar(0d)),
             ["extension.whitney/zero-lipschitz-overflowing-distance"] = () => Standalone(
                 "extension.whitney", Values(-1.7e308d, 0d), Values(5d, -3d), Values(1.7e308d), MathBlockValue.Scalar(0d)),
+            // The remaining overflow victims, invalid on both sides.
+            ["complex.divide/divisor-overflow"] = () => Standalone(
+                "complex.divide", MathBlockValue.Complex(new Complex(1d, 1d)), MathBlockValue.Complex(new Complex(1e200d, 1e200d))),
+            ["geometry.contains-point/crossing-overflow"] = () => Standalone(
+                "geometry.contains-point",
+                PointValues((-1e200d, -1e200d), (1e200d, -1e200d), (1e200d, 1e200d)), PointValues((2e199d, 1e199d))),
+            ["geometry.convex-hull/nan-cross-product"] = () => Standalone(
+                "geometry.convex-hull", PointValues((0d, 0d), (1e200d, 1e200d), (2e200d, 2e200d))),
+            ["statistics.theil-sen-slope/difference-overflow"] = () => Standalone(
+                "statistics.theil-sen-slope", Values(-1.7e308d, 1.7e308d), Values(1d, 2d)),
+            ["matrix.exponential/trace-overflow"] = () => Standalone(
+                "matrix.exponential",
+                MatrixValue(2, 2, 3.4292183174601395e201d, -2.799680927722256e101d, 8.572068857490139e301d, -1.0737128770591469d)),
             ["path.maximum-relative-decline/signed-zero"] = () => Standalone("path.maximum-relative-decline", Values(-1d, -1d, -2d)),
             // The windows whose running peak is 0 followed by 0 (rows 4 and 5) are invalid on both sides.
             ["window-valid.path.maximum-relative-decline/zero-maximum"] = () => WindowFormCase(

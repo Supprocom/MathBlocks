@@ -345,7 +345,7 @@ internal static unsafe class StatisticsModule
     }
 
     // Writes the pair slopes of the Theil-Sen estimator for left < right with distinct x in row order and
-    // returns their count.
+    // returns their count, or -1 when a difference, rise or slope overflows.
     [CudaDevice]
     private static int mathblocks_statistics_pair_slopes(
         [CudaReadOnly] double* x,
@@ -359,8 +359,17 @@ internal static unsafe class StatisticsModule
             for (int right = left + 1; right < count; right++)
             {
                 double difference = x[right] - x[left];
+                // An overflowing difference, rise or slope would divide by an infinity or put an infinity in the median: -1.
+                if (!double.IsFinite(difference))
+                    return -1;
                 if (difference != 0.0)
-                    slopes[slope_count++] = (y[right] - y[left]) / difference;
+                {
+                    double rise = y[right] - y[left];
+                    double slope = rise / difference;
+                    if (!double.IsFinite(rise) || !double.IsFinite(slope))
+                        return -1;
+                    slopes[slope_count++] = slope;
+                }
             }
         }
         return slope_count;
@@ -657,7 +666,7 @@ internal static unsafe class StatisticsModule
                         break;
                     }
                     int count = mathblocks_statistics_pair_slopes(a, b, first->count, scratch);
-                    if (count == 0)
+                    if (count <= 0)
                         output->valid = 0;
                     else
                         output->scalar_value = mathblocks_statistics_median(scratch, count);

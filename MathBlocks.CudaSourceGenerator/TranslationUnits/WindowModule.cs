@@ -465,7 +465,7 @@ internal static unsafe class WindowModule
             case 22:
             {
                 int slope_count = mathblocks_statistics_pair_slopes(a, b, count, scratch);
-                if (slope_count == 0)
+                if (slope_count <= 0)
                     return false;
                 *value = mathblocks_window_scratch_median(scratch, slope_count);
                 break;
