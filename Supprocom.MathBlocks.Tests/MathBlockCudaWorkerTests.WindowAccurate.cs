@@ -226,6 +226,7 @@ public sealed partial class MathBlockCudaWorkerTests
             ("inside", [1e-100d, 2e-100d, 1e149d, 1.1e149d], [2]),
             ("subnormal", [5e-324d, -5e-324d, 1e-310d, 2.5e-308d, -1e-320d, 0d, double.Epsilon, 3e-320d, -2.2e-308d, 7e-315d], [1, 2, 3, 10]),
             ("signed zeros", [-0d, 0d, -0d, -0d, 0d, 1d, -0d, 0d], [1, 2, 3, 8]),
+            ("square underflow", [5e-324d, -5e-324d, 1e-140d, -1e-140d, 1e-170d, 0d, 0d, -0d], [2, 3]),
             ("constant", [.. Enumerable.Repeat(-1.0101787042252373e+32d, 20), 1d, 2d], [2, 7, 20]),
             ("extremes", [double.MaxValue, double.Epsilon, -double.MaxValue, 1d, -double.Epsilon, 1e-300d, 1e300d], [1, 2, 3, 7])
         };

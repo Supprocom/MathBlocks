@@ -158,6 +158,46 @@ public sealed class MathBlockWindowAccurateTests(ITestOutputHelper output)
     }
 
     /// <summary>
+    /// Verifies a variance or deviation row whose exact S2 = sum x^2 is nonzero but rounds to 0, or whose S1 is
+    /// nonzero while S1^2 rounds to 0, holds the fill with the sibling false: [5e-324, -5e-324] (S2 = 2^-2147) and
+    /// [1e-140, -1e-140, 1e-170] (S1 = 1e-170, S1^2 about 1e-340, S2 in range). The sums and means of those windows,
+    /// and a window of exact zeros (variance +0), stay computed.
+    /// </summary>
+    [Fact]
+    public void WindowsWhoseExactSquareSumsRoundToZeroHoldTheFill()
+    {
+        var cases = new (double[] Values, int Width, bool[] VarianceComputed)[]
+        {
+            ([5e-324d, -5e-324d], 2, [false, false]),
+            ([1e-140d, -1e-140d, 1e-170d], 3, [false, false, false]),
+            ([0d, 0d, -0d], 2, [false, true, true])
+        };
+        var failures = new List<string>();
+        foreach (var (values, width, varianceComputed) in cases)
+        {
+            var x = MathBlockValue.Vector(values);
+            var w = MathBlockValue.Scalar(width);
+            foreach (var name in AccurateNames)
+            {
+                var valid = AccurateValidity(name).Evaluate(x, w).AsBooleanVector().ToArray();
+                var rows = AccurateForm(name).Evaluate(x, w, MathBlockValue.Scalar(Sentinel)).AsVector().ToArray();
+                for (var row = 0; row < values.Length; row++)
+                {
+                    var expected = string.Equals(name, "sum", StringComparison.Ordinal) || string.Equals(name, "mean", StringComparison.Ordinal)
+                        ? row >= width - 1
+                        : varianceComputed[row];
+                    if (expected != valid[row])
+                        failures.Add($"{name} {string.Join(", ", values)} w={width} row {row}: computed {valid[row]}, expected {expected}");
+                    if (!valid[row] && rows[row] != Sentinel)
+                        failures.Add($"{name} {string.Join(", ", values)} w={width} row {row}: {rows[row]:R}, expected the fill");
+                }
+            }
+        }
+
+        Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures));
+    }
+
+    /// <summary>
     /// Verifies squares of the smallest doubles fit the accumulator: subnormal and near-subnormal values, whose
     /// scaled square or Dekker error term has significand bits below 2^-2176, give a valid result. The sums and means
     /// are the exact values correctly rounded, which double addition and one division give here because every value

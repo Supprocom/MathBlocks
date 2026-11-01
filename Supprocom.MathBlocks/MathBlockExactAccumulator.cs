@@ -71,8 +71,12 @@ internal sealed class MathBlockExactAccumulator
 
     // The window value rounded to the nearest double, ties to even, and the rounded remainder:
     // high = RN(S) and low = RN(S - high). An overflow gives an infinite high and a zero low.
-    internal void ReadDoubleDouble(out double high, out double low)
+    internal void ReadDoubleDouble(out double high, out double low) => ReadDoubleDouble(out high, out low, out _);
+
+    // As above; zero tells whether the exact value is 0, which a high of 0 alone doesn't (S may round to 0).
+    internal void ReadDoubleDouble(out double high, out double low, out bool zero)
     {
+        zero = true;
         if (highest < 0)
         {
             high = 0d;
@@ -80,6 +84,8 @@ internal sealed class MathBlockExactAccumulator
             return;
         }
         var top = LoadMagnitude(out var negative);
+        for (var index = lowest; index <= top; index++)
+            zero &= scratch[index] == 0L;
         high = RoundMagnitude(scratch, lowest, top, false);
         low = 0d;
         if (!double.IsFinite(high))

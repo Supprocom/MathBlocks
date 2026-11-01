@@ -22,9 +22,9 @@ namespace Supprocom.MathBlocks;
 // Rows are computed when the result is finite, so a window whose sum overflows holds the fill. The sample forms need
 // w >= 2. The double-double steps keep their accuracy only while every value they round is 0 or at least 2^-968, so
 // that its low part and its Dekker error term are normal numbers, and every value Dekker's split takes is at most
-// 2^996, so that the split doesn't overflow. A variance or deviation row is not computed unless S2 and S1^2 are 0 or
-// within [2^-968, the largest double], S1^2 / w is 0 or within [2^-968, 2^996] and M is 0 or at least 2^-968:
-// roughly, unless the window's values lie between 1e-146 and 1e149 in magnitude. Outside the range an overflow
+// 2^996, so that the split doesn't overflow. A variance or deviation row is not computed unless S2 and S1^2 are 0
+// (exactly, not by rounding) or within [2^-968, the largest double], S1^2 / w is 0 or within [2^-968, 2^996] and M
+// is 0 or at least 2^-968: roughly, unless the window's values lie between 1e-146 and 1e149 in magnitude. Outside the range an overflow
 // already gives NaN, but an underflow would give a finite, inaccurate value. The check is a few comparisons per row.
 //
 // Guarantees (u = 2^-53; v the exact window variance, population or sample; m the exact window mean;
@@ -122,11 +122,14 @@ internal static class MathBlockWindowAccurate
             else
             {
                 first.ReadDoubleDouble(out var s1h, out var s1l);
-                second.ReadDoubleDouble(out var s2h, out var s2l);
+                second.ReadDoubleDouble(out var s2h, out var s2l, out var s2Zero);
                 Square(s1h, s1l, out var qh, out var ql);
                 DivideByInteger(qh, ql, width, out var rh, out var rl);
                 moment = SubtractRounded(s2h, s2l, rh, rl);
+                // A nonzero S2 or S1^2 that rounds to 0 is below the range like a tiny nonzero one. S1 is a sum of
+                // doubles, so it is 0 exactly when s1h is.
                 if (!InRange(s2h, double.MaxValue) || !InRange(qh, double.MaxValue) || !InRange(rh, LargestSplit) ||
+                    (s2h == 0d && !s2Zero) || (qh == 0d && s1h != 0d) ||
                     (moment > 0d && moment < SmallestAccurate))
                     moment = double.NaN;
                 else if (moment <= 0d)

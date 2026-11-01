@@ -838,18 +838,23 @@ internal static unsafe class WindowModule
         return BitConverter.Int64BitsToDouble(significand);
     }
 
-    // high = RN(S) and low = RN(S - high); an overflow gives an infinite high and a zero low.
+    // high = RN(S) and low = RN(S - high); an overflow gives an infinite high and a zero low. zero tells whether
+    // the exact value is 0, which a high of 0 alone doesn't (S may round to 0).
     [CudaDevice]
-    private static void mathblocks_window_exact_read_pair(long* accumulator, double* high, double* low)
+    private static void mathblocks_window_exact_read_pair(long* accumulator, double* high, double* low, bool* zero)
     {
         *high = 0.0;
         *low = 0.0;
+        *zero = true;
         if (accumulator[283] < 0L)
             return;
         long* scratch = accumulator + 141;
         int lowest = (int)accumulator[282];
         bool negative = false;
         int top = mathblocks_window_exact_load(accumulator, &negative);
+        for (int index = lowest; index <= top; index++)
+            if (scratch[index] != 0L)
+                *zero = false;
         *high = mathblocks_window_exact_round(scratch, lowest, top, false);
         if (!double.IsFinite(*high))
         {
@@ -1028,10 +1033,11 @@ internal static unsafe class WindowModule
                 if (!variance)
                 {
                     double low = 0.0;
+                    bool zero = true;
                     if (source == 54)
                         value = mathblocks_window_exact_read_quotient(first, width);
                     else
-                        mathblocks_window_exact_read_pair(first, &value, &low);
+                        mathblocks_window_exact_read_pair(first, &value, &low, &zero);
                     computed = double.IsFinite(value);
                 }
                 else
@@ -1048,8 +1054,10 @@ internal static unsafe class WindowModule
                         double ql = 0.0;
                         double rh = 0.0;
                         double rl = 0.0;
-                        mathblocks_window_exact_read_pair(first, &s1h, &s1l);
-                        mathblocks_window_exact_read_pair(second, &s2h, &s2l);
+                        bool s1_zero = true;
+                        bool s2_zero = true;
+                        mathblocks_window_exact_read_pair(first, &s1h, &s1l, &s1_zero);
+                        mathblocks_window_exact_read_pair(second, &s2h, &s2l, &s2_zero);
                         mathblocks_window_square(s1h, s1l, &qh, &ql);
                         mathblocks_window_divide_by_integer(qh, ql, width, &rh, &rl);
                         moment = mathblocks_window_subtract_rounded(s2h, s2l, rh, rl);
@@ -1057,6 +1065,7 @@ internal static unsafe class WindowModule
                         if (!mathblocks_window_in_range(s2h, largest) ||
                             !mathblocks_window_in_range(qh, largest) ||
                             !mathblocks_window_in_range(rh, mathblocks_window_power_of_two(996)) ||
+                            (s2h == 0.0 && !s2_zero) || (qh == 0.0 && s1h != 0.0) ||
                             (moment > 0.0 && moment < mathblocks_window_power_of_two(-968)))
                             in_range = false;
                         else if (moment <= 0.0)
