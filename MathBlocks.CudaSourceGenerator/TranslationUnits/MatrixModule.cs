@@ -1302,6 +1302,12 @@ internal static unsafe class MatrixModule
                     for (int inner = 0; inner < first->rows; inner++)
                         sum += a[inner * first->columns + row] *
                             a[inner * first->columns + column];
+                    // A square that overflowed gives an invalid result before the eigenvalue step, as on CoreCLR.
+                    if (!double.IsFinite(sum))
+                    {
+                        output->valid = 0;
+                        return;
+                    }
                     gram[row * size + column] = sum;
                 }
             }
