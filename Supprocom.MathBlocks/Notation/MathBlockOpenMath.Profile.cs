@@ -171,7 +171,7 @@ public static partial class MathBlockOpenMath
     {
         ProfileArtifactAuthority[] authority =
         [
-            new("mathblocks_operations2.ocd", 86876, "0BFBDCCDD95A3C4FBA4975AE3498DDC9CE3F2103E51402BDE0E43520AF2CA080", true),
+            new("mathblocks_operations2.ocd", 143352, "1160BFA7A08EAAEFC2FB475B1F88557AADB906938404DFE00184D36B3F045F1C", true),
             new("mathblocks_profile2.cdg", 1370, "5EC3D86461075E19A8EF0D9D88425C90B3F50A145D361421947818185C6630C8", true),
             new("mathblocks_profile2.rnc", 5395, "CB0F2C3759D8CAB0BA19776F7E81F30EEC1A2F84864267360ED79E95CE0A9439", true),
             new("mathblocks_program2.ocd", 1762, "B59D09667FC6F8C11E640B3215F9FF2F0620DB27D0AABEA19F44F23E15A69D7C", true),

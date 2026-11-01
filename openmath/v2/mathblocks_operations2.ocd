@@ -205,6 +205,416 @@
     <Description>This application identifies MathBlocks operation cooperative.shapley-values@1. It requires 1 ordered operand references.</Description>
   </CDDefinition>
   <CDDefinition>
+    <Name>op.elementwise-valid.combinatorics.ballot-count.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.combinatorics.ballot-count@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.combinatorics.binomial-coefficient.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.combinatorics.binomial-coefficient@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.combinatorics.factorial.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.combinatorics.factorial@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.probability.normal-cdf.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.probability.normal-cdf@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.probability.poisson-cdf.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.probability.poisson-cdf@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.probability.poisson-pmf.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.probability.poisson-pmf@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.arc-cosine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.arc-cosine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.arc-sine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.arc-sine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.arc-tangent-2.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.arc-tangent-2@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.arc-tangent.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.arc-tangent@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.binary-logarithm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.binary-logarithm@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.ceiling.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.ceiling@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.clamp.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.clamp@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.common-logarithm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.common-logarithm@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.cosine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.cosine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.cube-root.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.cube-root@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.cube.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.cube@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.floor.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.floor@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.hyperbolic-cosine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.hyperbolic-cosine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.hyperbolic-sine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.hyperbolic-sine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.hyperbolic-tangent.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.hyperbolic-tangent@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.inverse-hyperbolic-cosine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.inverse-hyperbolic-cosine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.inverse-hyperbolic-sine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.inverse-hyperbolic-sine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.inverse-hyperbolic-tangent.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.inverse-hyperbolic-tangent@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.log-one-plus.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.log-one-plus@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.logistic.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.logistic@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.logit.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.logit@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.maximum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.maximum@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.minimum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.minimum@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.modulo.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.modulo@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.negate.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.negate@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.reciprocal.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.reciprocal@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.round.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.round@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.sine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.sine@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.softplus.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.softplus@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.tangent.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.tangent@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.truncate.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.truncate@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.special.beta.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.special.beta@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.special.error-function.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.special.error-function@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.special.log-gamma.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.special.log-gamma@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.special.regularized-incomplete-beta.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.special.regularized-incomplete-beta@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.combinatorics.ballot-count.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.combinatorics.ballot-count@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.combinatorics.binomial-coefficient.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.combinatorics.binomial-coefficient@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.combinatorics.factorial.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.combinatorics.factorial@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.probability.normal-cdf.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.probability.normal-cdf@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.probability.poisson-cdf.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.probability.poisson-cdf@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.probability.poisson-pmf.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.probability.poisson-pmf@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.arc-cosine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.arc-cosine@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.arc-sine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.arc-sine@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.arc-tangent-2.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.arc-tangent-2@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.arc-tangent.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.arc-tangent@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.binary-logarithm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.binary-logarithm@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.ceiling.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.ceiling@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.clamp.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.clamp@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.common-logarithm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.common-logarithm@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.cosine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.cosine@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.cube-root.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.cube-root@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.cube.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.cube@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.floor.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.floor@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.hyperbolic-cosine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.hyperbolic-cosine@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.hyperbolic-sine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.hyperbolic-sine@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.hyperbolic-tangent.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.hyperbolic-tangent@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.inverse-hyperbolic-cosine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.inverse-hyperbolic-cosine@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.inverse-hyperbolic-sine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.inverse-hyperbolic-sine@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.inverse-hyperbolic-tangent.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.inverse-hyperbolic-tangent@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.log-one-plus.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.log-one-plus@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.logistic.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.logistic@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.logit.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.logit@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.maximum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.maximum@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.minimum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.minimum@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.modulo.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.modulo@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.negate.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.negate@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.reciprocal.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.reciprocal@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.round.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.round@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.sine.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.sine@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.softplus.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.softplus@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.tangent.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.tangent@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.truncate.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.truncate@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.special.beta.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.special.beta@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.special.error-function.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.special.error-function@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.special.log-gamma.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.special.log-gamma@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.special.regularized-incomplete-beta.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.special.regularized-incomplete-beta@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
     <Name>op.extension.mcshane.v1</Name>
     <Role>application</Role>
     <Description>This application identifies MathBlocks operation extension.mcshane@1. It requires 4 ordered operand references.</Description>
@@ -1693,5 +2103,595 @@
     <Name>op.vector.unique.v1</Name>
     <Role>application</Role>
     <Description>This application identifies MathBlocks operation vector.unique@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-accurate-valid.mean.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-accurate-valid.mean@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-accurate-valid.population-standard-deviation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-accurate-valid.population-standard-deviation@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-accurate-valid.population-variance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-accurate-valid.population-variance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-accurate-valid.sample-standard-deviation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-accurate-valid.sample-standard-deviation@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-accurate-valid.sample-variance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-accurate-valid.sample-variance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-accurate-valid.sum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-accurate-valid.sum@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-accurate.mean.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-accurate.mean@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-accurate.population-standard-deviation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-accurate.population-standard-deviation@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-accurate.population-variance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-accurate.population-variance@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-accurate.sample-standard-deviation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-accurate.sample-standard-deviation@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-accurate.sample-variance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-accurate.sample-variance@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-accurate.sum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-accurate.sum@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.information.binary-shannon-entropy.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.information.binary-shannon-entropy@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.information.gini-impurity.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.information.gini-impurity@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.information.renyi-entropy.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.information.renyi-entropy@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.information.shannon-entropy.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.information.shannon-entropy@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.information.tsallis-entropy.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.information.tsallis-entropy@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.path.first-passage-index.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.path.first-passage-index@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.path.longest-true-run.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.path.longest-true-run@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.path.maximum-decline.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.path.maximum-decline@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.path.maximum-relative-decline.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.path.maximum-relative-decline@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.path.power-variation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.path.power-variation@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.path.quadratic-variation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.path.quadratic-variation@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.path.recurrence-rate.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.path.recurrence-rate@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.path.total-variation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.path.total-variation@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.path.turning-point-count.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.path.turning-point-count@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.path.zero-crossing-count.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.path.zero-crossing-count@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.autocorrelation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.autocorrelation@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.central-moment.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.central-moment@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.distance-correlation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.distance-correlation@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.interquartile-range.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.interquartile-range@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.kendall-tau-b.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.kendall-tau-b@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.linear-intercept.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.linear-intercept@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.linear-r-squared.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.linear-r-squared@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.linear-slope.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.linear-slope@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.median-absolute-deviation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.median-absolute-deviation@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.pearson-correlation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.pearson-correlation@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.population-covariance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.population-covariance@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.population-excess-kurtosis.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.population-excess-kurtosis@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.population-skewness.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.population-skewness@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.population-standard-deviation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.population-standard-deviation@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.population-variance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.population-variance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.pseudomedian.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.pseudomedian@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.raw-moment.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.raw-moment@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.root-mean-square.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.root-mean-square@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.sample-covariance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.sample-covariance@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.sample-standard-deviation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.sample-standard-deviation@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.sample-variance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.sample-variance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.spearman-correlation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.spearman-correlation@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.theil-sen-slope.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.theil-sen-slope@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.weighted-mean.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.weighted-mean@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.statistics.weighted-population-variance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.statistics.weighted-population-variance@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.vector.arg-maximum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.vector.arg-maximum@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.vector.arg-minimum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.vector.arg-minimum@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.vector.geometric-mean.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.vector.geometric-mean@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.vector.l1-norm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.vector.l1-norm@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.vector.l2-norm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.vector.l2-norm@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.vector.maximum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.vector.maximum@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.vector.mean.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.vector.mean@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.vector.median.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.vector.median@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.vector.minimum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.vector.minimum@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.vector.quantile.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.vector.quantile@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.vector.rank.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.vector.rank@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.vector.standardize.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.vector.standardize@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window-valid.vector.sum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window-valid.vector.sum@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.information.binary-shannon-entropy.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.information.binary-shannon-entropy@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.information.gini-impurity.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.information.gini-impurity@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.information.renyi-entropy.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.information.renyi-entropy@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.information.shannon-entropy.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.information.shannon-entropy@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.information.tsallis-entropy.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.information.tsallis-entropy@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.path.first-passage-index.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.path.first-passage-index@1. It requires 5 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.path.longest-true-run.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.path.longest-true-run@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.path.maximum-decline.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.path.maximum-decline@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.path.maximum-relative-decline.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.path.maximum-relative-decline@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.path.power-variation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.path.power-variation@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.path.quadratic-variation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.path.quadratic-variation@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.path.recurrence-rate.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.path.recurrence-rate@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.path.total-variation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.path.total-variation@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.path.turning-point-count.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.path.turning-point-count@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.path.zero-crossing-count.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.path.zero-crossing-count@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.autocorrelation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.autocorrelation@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.central-moment.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.central-moment@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.distance-correlation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.distance-correlation@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.interquartile-range.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.interquartile-range@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.kendall-tau-b.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.kendall-tau-b@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.linear-intercept.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.linear-intercept@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.linear-r-squared.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.linear-r-squared@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.linear-slope.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.linear-slope@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.median-absolute-deviation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.median-absolute-deviation@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.pearson-correlation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.pearson-correlation@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.population-covariance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.population-covariance@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.population-excess-kurtosis.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.population-excess-kurtosis@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.population-skewness.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.population-skewness@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.population-standard-deviation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.population-standard-deviation@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.population-variance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.population-variance@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.pseudomedian.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.pseudomedian@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.raw-moment.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.raw-moment@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.root-mean-square.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.root-mean-square@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.sample-covariance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.sample-covariance@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.sample-standard-deviation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.sample-standard-deviation@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.sample-variance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.sample-variance@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.spearman-correlation.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.spearman-correlation@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.theil-sen-slope.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.theil-sen-slope@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.weighted-mean.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.weighted-mean@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.statistics.weighted-population-variance.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.statistics.weighted-population-variance@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.vector.arg-maximum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.vector.arg-maximum@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.vector.arg-minimum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.vector.arg-minimum@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.vector.geometric-mean.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.vector.geometric-mean@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.vector.l1-norm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.vector.l1-norm@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.vector.l2-norm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.vector.l2-norm@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.vector.maximum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.vector.maximum@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.vector.mean.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.vector.mean@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.vector.median.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.vector.median@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.vector.minimum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.vector.minimum@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.vector.quantile.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.vector.quantile@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.vector.rank.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.vector.rank@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.vector.standardize.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.vector.standardize@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.window.vector.sum.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation window.vector.sum@1. It requires 3 ordered operand references.</Description>
   </CDDefinition>
 </CD>

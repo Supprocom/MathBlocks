@@ -5,7 +5,7 @@ start = element operation-mappings {
   attribute profile { "2" },
   attribute openmath { "2.0" },
   attribute content-mathml { "3.0" },
-  attribute count { "337" },
+  attribute count { "537" },
   attribute fingerprint { xsd:string { pattern = "[0-9A-F]{64}" } },
   element operation {
     attribute identity { xsd:string { pattern = "[^@]+@[1-9][0-9]*" } },
