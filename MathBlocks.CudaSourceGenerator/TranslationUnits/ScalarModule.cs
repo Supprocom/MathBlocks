@@ -38,21 +38,8 @@ internal static unsafe class ScalarModule
             return value;
         if (value < 0.0 || double.IsNaN(value))
             return mathblocks_quiet_nan();
-
-        double scaled = value;
-        double correction = 1.0;
-        ulong bits = (ulong)BitConverter.DoubleToInt64Bits(scaled);
-        if ((bits & 0x7ff0000000000000UL) == 0UL)
-        {
-            scaled *= BitConverter.Int64BitsToDouble((long)0x4350000000000000UL);
-            correction = BitConverter.Int64BitsToDouble((long)0x3e40000000000000UL);
-            bits = (ulong)BitConverter.DoubleToInt64Bits(scaled);
-        }
-
-        double estimate = BitConverter.Int64BitsToDouble((long)((bits >> 1) + 0x1ff8000000000000UL));
-        for (int iteration = 0; iteration < 7; iteration++)
-            estimate = 0.5 * (estimate + scaled / estimate);
-        return estimate * correction;
+        // CUDA's double sqrt is correctly rounded, as IEEE 754 requires, so it gives CoreCLR's System.Math.Sqrt bits.
+        return Math.Sqrt(value);
     }
 
     [CudaDevice]

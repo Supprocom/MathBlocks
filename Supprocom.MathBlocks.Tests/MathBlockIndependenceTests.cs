@@ -472,8 +472,13 @@ string.Equals(match.Value, "Task", StringComparison.Ordinal))
             if (IsBuildOutput(sourceRoot, file))
                 continue;
             var source = File.ReadAllText(file);
+            var relative = Path.GetRelativePath(sourceRoot, file);
+            // The one exception is the correctly rounded square root, which IEEE 754 requires and the hardware
+            // instruction behind System.Math.Sqrt gives.
+            if (string.Equals(relative, Path.Combine("Primitives", "MathBlockPrimitives.cs"), StringComparison.Ordinal))
+                source = source.Replace("System.Math.Sqrt(value)", string.Empty, StringComparison.Ordinal);
             if (SystemMathReference().IsMatch(source))
-                systemMathReferences.Add(Path.GetRelativePath(sourceRoot, file));
+                systemMathReferences.Add(relative);
         }
 
         Assert.Contains(
@@ -483,7 +488,7 @@ string.Equals(match.Value, "Task", StringComparison.Ordinal))
         Assert.Empty(systemMathReferences);
     }
 
-    /// <summary>Verifies production binary has no system math member reference.</summary>
+    /// <summary>Verifies production binary references no system math member except Sqrt.</summary>
     [Fact]
     public void ProductionBinaryHasNoSystemMathMemberReference()
     {
@@ -501,7 +506,8 @@ string.Equals(match.Value, "Task", StringComparison.Ordinal))
                 references.Add(metadata.GetString(member.Name));
         }
 
-        Assert.Empty(references);
+        // Only the correctly rounded square root (IEEE 754), used by MathBlockPrimitives.Sqrt.
+        Assert.Equal(["Sqrt"], references);
     }
 
     /// <summary>Verifies production binary has no system linq enumerable member reference.</summary>
