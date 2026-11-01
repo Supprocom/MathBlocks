@@ -7,7 +7,7 @@ namespace Supprocom.MathBlocks.Tests;
 /// <summary>
 /// Verifies without a device that every operation identity named in the CUDA test data exists. A CUDA test resolves its identity
 /// (<c>MathBlockCudaDeviceModule.GetOperation</c>, <c>MathBlockCatalog.Standard.Get</c>) before it reaches the device, so a misspelt or invented
-/// identity fails the test in the GPU run after the lock is taken. The check reads every string literal of the CUDA test sources that has the shape
+/// identity fails the test in the device run after the lock is taken. The check reads every string literal of the CUDA test sources that has the shape
 /// of an operation identity (a known family prefix, dotted words, optional <c>@version</c>, optional <c>/case</c> suffix) and requires it to be a
 /// CUDA operation of the device module and an operation of the Standard catalog.
 /// </summary>
