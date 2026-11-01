@@ -73,6 +73,8 @@ public sealed class MathBlockInvalidStateTests
     // Operations whose result shape is not a function of the input types, so their declared type leaves it out.
     private static readonly Dictionary<string, string> UndeclaredShapes = new(StringComparer.Ordinal)
     {
+        // CUDA sizes this result by an upper bound, C(columns, min(rows, columns / 2)), not the exact count
+        // C(columns, rows), so no declared length would equal its slot shape for every matrix shape.
         ["matrix.maximal-minors@1"] = "the minor count is C(columns, rows), which the resolver does not compute"
     };
 
@@ -145,7 +147,8 @@ public sealed class MathBlockInvalidStateTests
     /// <summary>
     /// Evaluates every operation of the standard, window and elementwise registries on its samples with inputs
     /// replaced by out-of-domain values, and requires a value of a type its declared type accepts whenever the type
-    /// resolves: an exception from Evaluate past type resolution is a failure.
+    /// resolves, and an invalid value of exactly the declared type: an exception from Evaluate past type resolution
+    /// is a failure.
     /// </summary>
     [Fact]
     [Trait("Category", "InvalidState")]
@@ -175,6 +178,8 @@ public sealed class MathBlockInvalidStateTests
                     var result = operation.Evaluate(inputs);
                     if (!declared.Accepts(result.Type))
                         failures.TryAdd(operation.Identity, $"returned {result.Type} for the declared {declared}");
+                    else if (!result.IsValid && result.Type != declared)
+                        failures.TryAdd(operation.Identity, $"returned an invalid {result.Type}, not the declared {declared} ({Describe(inputs)})");
                 }
                 catch (Exception exception) when (exception is not OutOfMemoryException)
                 {

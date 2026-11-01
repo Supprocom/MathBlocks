@@ -156,6 +156,106 @@ public sealed partial class MathBlockCudaWorkerTests
             $"{identifier}: CoreCLR={DescribeBits(coreclr)} ({coreclr.Type}), CUDA={DescribeBits(cuda)} ({cuda.Type})");
     }
 
+    /// <summary>
+    /// Gets the operations whose declared type has less shape than their valid results (the shape depends on input
+    /// values), where the CUDA slot shape is a capacity.
+    /// </summary>
+    public static TheoryData<string> ValueDependentShapeOperations =>
+    [
+        "boolean-vector.true-indices", "combinatorics.nonempty-subset-sums", "cooperative.shapley-values",
+        "geometry.centroid", "geometry.convex-hull", "matrix.identity", "matrix.maximal-minors",
+        "matrix.principal-minors", "matrix.reshape", "matrix.schur-complement", "path.lead-lag-transform",
+        "path.run-length-encode", "sequence.convolution", "sequence.difference", "sequence.exponential-moving-average",
+        "sequence.rolling-maximum", "sequence.rolling-mean", "sequence.rolling-median", "sequence.rolling-minimum",
+        "sequence.rolling-quantile", "sequence.rolling-standard-deviation", "sequence.rolling-sum",
+        "sequence.rolling-variance", "state.transition-counts", "statistics.histogram",
+        "topology.zero-dimensional-persistence", "vector.linspace", "vector.repeat", "vector.slice", "vector.unique"
+    ];
+
+    /// <summary>
+    /// Verifies an invalid result has the CoreCLR type on CUDA, the type the operation resolves for its inputs: the
+    /// program is compiled from the operation's valid sample and then given the first input of the same types
+    /// (one input replaced) that CoreCLR rejects. An operation with no such input is reported in the output.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(ValueDependentShapeOperations))]
+    public void CUDAInvalidResultHasTheCoreCLRType(string identifier)
+    {
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        var operation = MathBlockCatalog.Standard.Get(identifier);
+        var sample = operation.RegressionCases[0].Inputs.ToArray();
+        Assert.True(operation.Evaluate(sample).IsValid, $"{identifier}: the sample is not valid.");
+        var invalid = SameTypeVariants(sample).FirstOrDefault(inputs => !operation.Evaluate(inputs).IsValid);
+        if (invalid is null)
+        {
+            testOutput.WriteLine($"{identifier}: no input of the sample's types is invalid on CoreCLR.");
+            return;
+        }
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var nodes = sample.Select((input, index) => builder.Input($"input-{index}", input.Type)).ToArray();
+        var program = builder.Output("result", builder.Apply(operation.Identifier, operation.Version, nodes)).Build();
+        using var compiled = new MathBlocksCUDAWorker().Compile(program, Named(sample));
+        var coreclr = program.Evaluate(Named(invalid))["result"];
+        compiled.UploadInputs(Named(invalid));
+        compiled.ExecuteResident();
+        var cuda = compiled.ReadOutputs()["result"];
+        testOutput.WriteLine($"{identifier}: CoreCLR {DescribeBits(coreclr)} {coreclr.Type}, CUDA {DescribeBits(cuda)} {cuda.Type}");
+
+        Assert.True(
+            IsExact(coreclr, cuda),
+            $"{identifier}: CoreCLR={DescribeBits(coreclr)} ({coreclr.Type}), CUDA={DescribeBits(cuda)} ({cuda.Type})");
+
+        static Dictionary<string, MathBlockValue> Named(MathBlockValue[] inputs) =>
+            inputs.Select((input, index) => (Name: $"input-{index}", Input: input))
+                .ToDictionary(item => item.Name, item => item.Input, StringComparer.Ordinal);
+    }
+
+    // The sample with one input replaced by a value of exactly the same type: other scalars, and vectors, matrices,
+    // Boolean vectors and point sets of the same shape with other entries.
+    private static IEnumerable<MathBlockValue[]> SameTypeVariants(MathBlockValue[] sample)
+    {
+        double[] scalars = [21d, 0d, -1d, 0.5d, 1_000_001d, 4097d, 1e308d, -0.5d, 3d];
+        for (var input = 0; input < sample.Length; input++)
+        {
+            var value = sample[input];
+            var unit = value.Type.Unit;
+            var alternatives = new List<MathBlockValue>();
+            switch (value.Type.Kind)
+            {
+                case MathBlockValueKind.Scalar:
+                    alternatives.AddRange(scalars.Select(item => MathBlockValue.Scalar(item, unit)));
+                    break;
+                case MathBlockValueKind.Vector:
+                    var count = value.AsVector().Count;
+                    alternatives.Add(MathBlockValue.Vector(Enumerable.Range(0, count).Select(index => index % 2 == 0 ? 1.7e308d : -1.7e308d), unit));
+                    alternatives.Add(MathBlockValue.Vector(Enumerable.Repeat(1e200d, count), unit));
+                    alternatives.Add(MathBlockValue.Vector(Enumerable.Range(0, count).Select(index => -1d - index), unit));
+                    alternatives.Add(MathBlockValue.Vector(Enumerable.Range(0, count).Select(index => 0.5d + index), unit));
+                    alternatives.Add(MathBlockValue.Vector(new double[count], unit));
+                    break;
+                case MathBlockValueKind.Matrix:
+                    var matrix = value.AsMatrix();
+                    alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Repeat(1e200d, matrix.Rows * matrix.Columns)), unit));
+                    alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Range(0, matrix.Rows * matrix.Columns).Select(index => -1d - index)), unit));
+                    alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Range(0, matrix.Rows * matrix.Columns).Select(index => 0.5d + index)), unit));
+                    break;
+                case MathBlockValueKind.PointSet:
+                    var points = value.AsPointSet().Count;
+                    alternatives.Add(MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Range(0, points).Select(index => new MathBlockPoint(index % 2 == 0 ? 1.7e308d : -1.7e308d, index * 1e200d))), unit));
+                    break;
+            }
+            for (var variant = 0; variant < alternatives.Count; variant++)
+            {
+                var alternative = alternatives[variant];
+                if (alternative.Type != value.Type)
+                    continue;
+                var inputs = (MathBlockValue[])sample.Clone();
+                inputs[input] = alternative;
+                yield return inputs;
+            }
+        }
+    }
+
     private static void VerifyOverflowCase(string name, OverflowCase overflow)
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);

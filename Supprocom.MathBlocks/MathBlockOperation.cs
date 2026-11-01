@@ -153,7 +153,9 @@ public sealed class MathBlockOperation
             throw new InvalidOperationException(
                 $"Operation '{Identity}' returned '{result.Type}', but its declared type is '{outputType}'.");
         }
-        return result;
+        // An invalid result has exactly the declared type for these inputs, as on CUDA, so a value factory that
+        // keeps a computed length (a nonfinite vector, for example) does not add shape the declared type lacks.
+        return result.IsValid || result.Type == outputType ? result : MathBlockValue.Invalid(outputType, result.InvalidReason!);
     }
 
     private void RequireArity(int actual)
