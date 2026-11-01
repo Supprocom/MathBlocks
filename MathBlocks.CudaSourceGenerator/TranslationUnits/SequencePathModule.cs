@@ -476,7 +476,7 @@ internal static unsafe class SequencePathModule
         double decline = 0.0;
         for (int index = 1; index < count; index++)
         {
-            // The owned maximum, which mirrors CoreCLR's MathBlockPrimitives.Max for signed zeros and NaN.
+            // The owned maximum, as CoreCLR: a NaN candidate (0 / 0 at a zero peak) makes the result NaN (invalid), and -0 is less than +0.
             maximum = mathblocks_maximum(maximum, values[index]);
             double candidate = !relative
                 ? maximum - values[index]

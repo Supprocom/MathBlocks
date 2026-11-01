@@ -34,8 +34,11 @@ internal static class MathBlockPrimitives
 
     public static int Sign(double value) => value > 0d ? 1 : value < 0d ? -1 : 0;
 
+    // IEEE 754-2019 minimum and maximum: a NaN operand gives NaN, and -0 is less than +0.
     public static double Min(double left, double right)
     {
+        if (IsNaN(left) || IsNaN(right))
+            return NaN;
         if (left < right)
             return left;
         if (right < left)
@@ -49,6 +52,8 @@ internal static class MathBlockPrimitives
 
     public static double Max(double left, double right)
     {
+        if (IsNaN(left) || IsNaN(right))
+            return NaN;
         if (left > right)
             return left;
         if (right > left)

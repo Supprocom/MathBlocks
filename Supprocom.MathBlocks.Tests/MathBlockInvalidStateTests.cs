@@ -82,6 +82,16 @@ public sealed class MathBlockInvalidStateTests
             ["geometry.halfspace-depth/nan-cross-product"] = ("geometry.halfspace-depth@1", () =>
                 [Points((1e200d, 1e200d), (2e200d, 2e200d)), Points((0d, 0d))]),
 
+            // A NaN operand gives NaN from the owned Max and Min (IEEE 754-2019), so an intermediate that is NaN makes the result invalid.
+            // A zero peak followed by a zero is 0 / 0 (as a zero peak followed by a negative value is already invalid).
+            ["path.maximum-relative-decline/zero-peak-then-zero"] = ("path.maximum-relative-decline@1", () => [Vector(0d, -0d, 0.5d)]),
+            ["path.maximum-relative-decline/zero-peak-then-later-decline"] = ("path.maximum-relative-decline@1", () => [Vector(0d, 0d, 3d, 1d)]),
+            // A zero Lipschitz constant times an overflowing distance is 0 * infinity.
+            ["extension.mcshane/zero-lipschitz-overflowing-distance"] = ("extension.mcshane@1", () =>
+                [Vector(-1.7e308d, 0d), Vector(-5d, 3d), Vector(1.7e308d), Scalar(0d)]),
+            ["extension.whitney/zero-lipschitz-overflowing-distance"] = ("extension.whitney@1", () =>
+                [Vector(-1.7e308d, 0d), Vector(5d, -3d), Vector(1.7e308d), Scalar(0d)]),
+
             // A row norm that overflows asked for int.MaxValue squarings.
             ["matrix.exponential/overflowing-norm"] = ("matrix.exponential@1", () => [Matrix(2, 2, 1.7e308d, 1.7e308d, 0d, 0d)]),
 
@@ -173,6 +183,21 @@ public sealed class MathBlockInvalidStateTests
             }
         }
         Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures));
+    }
+
+    /// <summary>
+    /// Verifies a window whose running peak is 0 followed by 0 (0 / 0) is invalid in both window forms, as a zero peak followed by a
+    /// negative value is; the windows with a positive peak are valid.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "InvalidState")]
+    public void RelativeDeclineWindowsWithAZeroPeakFollowedByZeroAreInvalid()
+    {
+        var series = Vector(-0d, 2d, 0d, -0d, 0d, 1.25d);
+        var validity = MathBlockCatalog.Standard.Get("window-valid.path.maximum-relative-decline").Evaluate(series, Scalar(3d));
+        Assert.Equal([false, false, true, true, false, false], validity.AsBooleanVector());
+        var form = MathBlockCatalog.Standard.Get("window.path.maximum-relative-decline").Evaluate(series, Scalar(3d), Scalar(-1d));
+        Assert.Equal([-1d, -1d, 1d, 1d, -1d, -1d], form.AsVector());
     }
 
     /// <summary>Verifies the rolling variance is in the square of the input unit.</summary>

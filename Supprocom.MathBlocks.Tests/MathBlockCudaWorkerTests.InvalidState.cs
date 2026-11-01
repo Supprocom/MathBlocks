@@ -314,7 +314,16 @@ public sealed partial class MathBlockCudaWorkerTests
                 "transport.assignment-cost", MatrixValue(2, 2, 3d, 1d, 1d, 3d), Values(0.5d, 1d)),
             ["geometry.fisher-rao-distance/not-distributions"] = () => Standalone(
                 "geometry.fisher-rao-distance", Values(-0.5d, -0.5d), Values(-0d, -1d)),
+            // A running peak of 0 followed by 0 is 0 / 0, which the owned maximum now propagates: invalid on both sides.
+            ["path.maximum-relative-decline/zero-peak-then-zero"] = () => Standalone("path.maximum-relative-decline", Values(0d, -0d, 0.5d)),
+            ["path.maximum-relative-decline/zero-peak-then-later-decline"] = () => Standalone("path.maximum-relative-decline", Values(0d, 0d, 3d, 1d)),
+            // A zero Lipschitz constant times an overflowing distance is 0 * infinity, a NaN term: invalid on both sides.
+            ["extension.mcshane/zero-lipschitz-overflowing-distance"] = () => Standalone(
+                "extension.mcshane", Values(-1.7e308d, 0d), Values(-5d, 3d), Values(1.7e308d), MathBlockValue.Scalar(0d)),
+            ["extension.whitney/zero-lipschitz-overflowing-distance"] = () => Standalone(
+                "extension.whitney", Values(-1.7e308d, 0d), Values(5d, -3d), Values(1.7e308d), MathBlockValue.Scalar(0d)),
             ["path.maximum-relative-decline/signed-zero"] = () => Standalone("path.maximum-relative-decline", Values(-1d, -1d, -2d)),
+            // The windows whose running peak is 0 followed by 0 (rows 4 and 5) are invalid on both sides.
             ["window-valid.path.maximum-relative-decline/zero-maximum"] = () => WindowFormCase(
                 "window-valid.path.maximum-relative-decline", Values(-0d, 2d, 0d, -0d, 0d, 1.25d)),
             ["window.path.maximum-relative-decline/zero-maximum"] = () => WindowFormCase(
