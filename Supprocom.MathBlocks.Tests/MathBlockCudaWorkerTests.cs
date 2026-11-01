@@ -75,6 +75,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         Assert.All(expected, identity => Assert.Contains(identity, supported));
         var registered = MathBlockCatalog.Standard.Operations
             .Concat(MathBlockWindowTestSupport.Windowed.Operations)
+            .Concat(MathBlockElementwiseTestSupport.Elementwise.Operations)
             .Select(operation => operation.Identity)
             .ToHashSet(StringComparer.Ordinal);
         Assert.All(supported, identity => Assert.Contains(identity, registered));
