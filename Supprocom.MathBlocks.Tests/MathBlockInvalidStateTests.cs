@@ -70,6 +70,12 @@ public sealed class MathBlockInvalidStateTests
     private static readonly double[] ScalarVariants =
         [0d, -0d, -1d, 1d, 2d, 0.5d, -0.5d, 3d, 21d, 65537d, 1e308d, -1e308d, 1e-310d, 4097d, 1_000_001d];
 
+    // Operations whose result shape is not a function of the input types, so their declared type leaves it out.
+    private static readonly Dictionary<string, string> UndeclaredShapes = new(StringComparer.Ordinal)
+    {
+        ["matrix.maximal-minors@1"] = "the minor count is C(columns, rows), which the resolver does not compute"
+    };
+
     /// <summary>Gets the out-of-domain case names.</summary>
     public static TheoryData<string> CaseNames => [.. Cases.Keys.Order(StringComparer.Ordinal)];
 
@@ -89,7 +95,32 @@ public sealed class MathBlockInvalidStateTests
         var result = await Task.Run(() => operation.Evaluate(inputs)).WaitAsync(TimeSpan.FromSeconds(60));
 
         Assert.False(result.IsValid, $"{name} returned a valid {result.Type}.");
-        Assert.True(declared.Accepts(result.Type), $"{name} returned {result.Type}; the declared type is {declared}.");
+        Assert.Equal(declared, result.Type);
+    }
+
+    /// <summary>
+    /// Verifies each operation with an out-of-domain case declares the shape of its valid results, so an invalid
+    /// value built from the declared type carries the shape a valid result would have (as the CUDA result type does).
+    /// </summary>
+    [Fact]
+    [Trait("Category", "InvalidState")]
+    public void OperationsWithOutOfDomainCasesDeclareTheShapeOfTheirValidResults()
+    {
+        var failures = new List<string>();
+        foreach (var identity in Cases.Values.Select(item => item.Identity).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal))
+        {
+            if (UndeclaredShapes.ContainsKey(identity))
+                continue;
+            var operation = Find(identity);
+            foreach (var regression in operation.RegressionCases)
+            {
+                var declared = operation.ResolveOutputType(regression.Inputs.Select(input => input.Type).ToArray());
+                var result = operation.Evaluate(regression.Inputs);
+                if (!result.IsValid || declared != result.Type)
+                    failures.Add($"{identity}/{regression.Name}: declared {declared}, result {result.Type} ({(result.IsValid ? "valid" : result.InvalidReason)})");
+            }
+        }
+        Assert.True(failures.Count == 0, string.Join(Environment.NewLine, failures));
     }
 
     /// <summary>Verifies the rolling variance is in the square of the input unit.</summary>

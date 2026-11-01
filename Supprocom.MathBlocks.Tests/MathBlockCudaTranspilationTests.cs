@@ -33,7 +33,7 @@ public sealed class MathBlockCudaTranspilationTests
             "F3096223C62C011850688E74365A214A4CB0AA7308E9FC4B7463304D055E48D2",
             MathBlockCudaDeviceModule.SourceFingerprint);
         Assert.Equal(
-            "B63DAC5AA53CBC14E6541A803EDC0AE4858DA8EFBCB2288D3C9E725859FD129C",
+            "21515543AF90A7B78661202CFA44E073E4F7705D5F48E0E41BA427002CDE54A1",
             MathBlockCudaDeviceModule.Abi.OperationTableFingerprint);
     }
 

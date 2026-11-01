@@ -118,6 +118,44 @@ public sealed partial class MathBlockCudaWorkerTests
                 [MatrixValue(2, 2, 1.7e308d, 1.7e308d, 0d, 0d)]));
     }
 
+    /// <summary>Gets the point-set operations with a non-scalar result, whose invalid result carries a shape.</summary>
+    public static TheoryData<string> EmptyPointSetOperations =>
+    [
+        "geometry.centroid", "geometry.convex-hull", "geometry.delaunay-graph", "geometry.gabriel-graph",
+        "geometry.barycentric-coordinates", "topology.zero-dimensional-persistence", "point-set.to-matrix"
+    ];
+
+    /// <summary>
+    /// Verifies an empty point set gives the CoreCLR result on CUDA, invalid value and type included. The program is
+    /// compiled from the empty inputs themselves, so the CUDA result type comes from their shapes.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(EmptyPointSetOperations))]
+    public void CUDAEmptyPointSetGivesTheCoreCLRResult(string identifier)
+    {
+        Assert.True(MathBlocksCUDAWorker.IsAvailable, "A CUDA device is required.");
+        var operation = MathBlockCatalog.Standard.Get(identifier);
+        var inputs = operation.RegressionCases[0].Inputs
+            .Select(input => input.Type.Kind == MathBlockValueKind.PointSet
+                ? MathBlockValue.PointSet(new MathBlockPointSet([]), input.Type.Unit)
+                : input)
+            .ToArray();
+        var named = inputs.Select((input, index) => (Name: $"input-{index}", Input: input))
+            .ToDictionary(item => item.Name, item => item.Input, StringComparer.Ordinal);
+        var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+        var nodes = inputs.Select((input, index) => builder.Input($"input-{index}", input.Type)).ToArray();
+        var program = builder.Output("result", builder.Apply(operation.Identifier, operation.Version, nodes)).Build();
+        var coreclr = program.Evaluate(named)["result"];
+        using var compiled = new MathBlocksCUDAWorker().Compile(program, named);
+        compiled.UploadInputs(named);
+        compiled.ExecuteResident();
+        var cuda = compiled.ReadOutputs()["result"];
+
+        Assert.True(
+            IsExact(coreclr, cuda),
+            $"{identifier}: CoreCLR={DescribeBits(coreclr)} ({coreclr.Type}), CUDA={DescribeBits(cuda)} ({cuda.Type})");
+    }
+
     private static void VerifyOverflowCase(string name, OverflowCase overflow)
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
