@@ -306,7 +306,7 @@ public sealed partial class MathBlockCudaWorkerTests
     // Programs compiled from their own inputs (so the CUDA plan has those exact shapes and values), where CoreCLR and
     // CUDA disagreed: domain checks that one side lacked, the sign of a zero from the maximum, and inputs that CUDA
     // rejected at compile time while CoreCLR returns an invalid value at run time.
-    private static readonly Dictionary<string, Func<(MathBlockProgram Program, MathBlockValue[] Inputs)>> SelfCompiledCases =
+    internal static readonly Dictionary<string, Func<(MathBlockProgram Program, MathBlockValue[] Inputs)>> SelfCompiledCases =
         new(StringComparer.Ordinal)
         {
             ["transform.haar/length-3"] = () => Standalone("transform.haar", Values(1d, 2d, 3d)),
