@@ -304,7 +304,8 @@ public sealed partial class MathBlockCudaWorkerTests
     }
 
     // Programs compiled from their own inputs (so the CUDA plan has those exact shapes and values), where CoreCLR and
-    // CUDA disagreed: domain checks that one side lacked, and the sign of a zero from the maximum.
+    // CUDA disagreed: domain checks that one side lacked, the sign of a zero from the maximum, and inputs that CUDA
+    // rejected at compile time while CoreCLR returns an invalid value at run time.
     private static readonly Dictionary<string, Func<(MathBlockProgram Program, MathBlockValue[] Inputs)>> SelfCompiledCases =
         new(StringComparer.Ordinal)
         {
@@ -317,7 +318,23 @@ public sealed partial class MathBlockCudaWorkerTests
             ["window-valid.path.maximum-relative-decline/zero-maximum"] = () => WindowFormCase(
                 "window-valid.path.maximum-relative-decline", Values(-0d, 2d, 0d, -0d, 0d, 1.25d)),
             ["window.path.maximum-relative-decline/zero-maximum"] = () => WindowFormCase(
-                "window.path.maximum-relative-decline", Values(-0d, 2d, 0d, -0d, 0d, 1.25d))
+                "window.path.maximum-relative-decline", Values(-0d, 2d, 0d, -0d, 0d, 1.25d)),
+            ["combinatorics.nonempty-subset-sums/21-values"] = () => Standalone(
+                "combinatorics.nonempty-subset-sums", Values([.. Enumerable.Range(1, 21).Select(value => (double)value)])),
+            ["cooperative.shapley-values/length-3"] = () => Standalone("cooperative.shapley-values", Values(1d, 2d, 3d)),
+            ["information.conditional-mutual-information/state-counts"] = () => SampleWithScalarIncremented("information.conditional-mutual-information", 1),
+            ["matrix.reshape/shape"] = () => SampleWithScalarIncremented("matrix.reshape", 1),
+            ["matrix.principal-minors/21-rows"] = () => Standalone("matrix.principal-minors", Diagonal(21)),
+            ["transport.minimum-assignment/21-rows"] = () => Standalone("transport.minimum-assignment", Diagonal(21)),
+            // An operation that consumes an always-invalid node is invalid too.
+            ["combinatorics.nonempty-subset-sums/consumed"] = () =>
+            {
+                var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
+                var values = builder.Input("input-0", MathBlockType.Vector(length: 21));
+                var sums = builder.Apply("combinatorics.nonempty-subset-sums", 1, values);
+                var program = builder.Output("result", builder.Apply("vector.sum", 1, sums)).Build();
+                return (program, [Values([.. Enumerable.Range(1, 21).Select(value => (double)value)])]);
+            }
         };
 
     /// <summary>Gets the self-compiled case names.</summary>
@@ -358,6 +375,14 @@ public sealed partial class MathBlockCudaWorkerTests
         return Single(MathBlockWindowTestSupport.Windowed, identifier, inputs);
     }
 
+    // The operation's sample with one scalar input one larger, which no longer matches the vector's shape.
+    private static (MathBlockProgram Program, MathBlockValue[] Inputs) SampleWithScalarIncremented(string identifier, int input)
+    {
+        var inputs = MathBlockCatalog.Standard.Get(identifier).RegressionCases[0].Inputs.ToArray();
+        inputs[input] = MathBlockValue.Scalar(inputs[input].AsScalar() + 1d, inputs[input].Type.Unit);
+        return Standalone(identifier, inputs);
+    }
+
     private static (MathBlockProgram Program, MathBlockValue[] Inputs) Single(MathBlockRegistry registry, string identifier, MathBlockValue[] inputs)
     {
         var builder = new MathBlockProgramBuilder(registry);
@@ -366,6 +391,9 @@ public sealed partial class MathBlockCudaWorkerTests
     }
 
     private static MathBlockValue Values(params double[] values) => MathBlockValue.Vector(values);
+
+    private static MathBlockValue Diagonal(int size) =>
+        MathBlockValue.Matrix(new MathBlockMatrix(size, size, Enumerable.Range(0, size * size).Select(index => index % (size + 1) == 0 ? 2d : 1d / size)));
 
     private static void VerifyOverflowCase(string name, OverflowCase overflow)
     {

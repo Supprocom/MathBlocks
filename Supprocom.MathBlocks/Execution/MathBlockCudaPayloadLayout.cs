@@ -5,4 +5,5 @@ internal readonly record struct MathBlockCudaPayloadLayout(
     int[] ShapeRows,
     int[] ShapeColumns,
     MathBlockValue?[] ExactValues,
-    MathBlockType[] ResolvedTypes);
+    MathBlockType[] ResolvedTypes,
+    bool[] AlwaysInvalid);

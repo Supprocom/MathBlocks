@@ -124,19 +124,27 @@ public sealed class MathBlockWindowCudaPlanTests
         Assert.Equal(MathBlockValueKind.BooleanVector, siblingPlan.OutputType.Kind);
     }
 
-    /// <summary>Verifies an exact width outside 1 .. n is rejected by the static window authority.</summary>
+    /// <summary>
+    /// Verifies an exact width outside 1 .. n plans an always-invalid output (no payload, no scratch, the planned
+    /// type), as CoreCLR returns an invalid value of that type.
+    /// </summary>
     [Theory]
     [InlineData(0)]
     [InlineData(-3)]
     [InlineData(301)]
-    public void WindowCUDAPlanRejectsAnExactWidthOutsideTheSeries(int width)
+    public void WindowCUDAPlanMakesAnExactWidthOutsideTheSeriesAlwaysInvalid(int width)
     {
         var series = CreateSourceInputs("statistics.pearson-correlation", 300, 2, 12);
         var contract = MathBlockCudaDeviceModule.GetOperation("window.statistics.pearson-correlation@1");
+        var inputs = FormInputs(series, width, FillFor("statistics.pearson-correlation", series));
 
-        var exception = Assert.Throws<InvalidOperationException>(() =>
-            contract.PlanCUDA(FormInputs(series, width, FillFor("statistics.pearson-correlation", series))));
-        Assert.Contains("window authority", exception.Message, StringComparison.Ordinal);
+        var plan = contract.PlanCUDA(inputs);
+        var coreclr = Form("statistics.pearson-correlation").Evaluate(inputs);
+
+        Assert.Equal(0, plan.OutputCapacity);
+        Assert.Equal(0, plan.ScratchBytes);
+        Assert.False(coreclr.IsValid);
+        Assert.Equal(coreclr.Type, plan.OutputType);
     }
 
     /// <summary>Verifies unequal series lengths give the shapeless type that the CoreCLR lift's invalid result has.</summary>
