@@ -59,8 +59,19 @@ public sealed class MathBlockInvalidStateTests
             ["topology.zero-dimensional-persistence/overflow"] = ("topology.zero-dimensional-persistence@1", () => [Points((0d, 0d), (1e200d, 0d), (0d, 1e200d))]),
 
             // A row norm that overflows asked for int.MaxValue squarings.
-            ["matrix.exponential/overflowing-norm"] = ("matrix.exponential@1", () => [Matrix(2, 2, 1.7e308d, 1.7e308d, 0d, 0d)])
+            ["matrix.exponential/overflowing-norm"] = ("matrix.exponential@1", () => [Matrix(2, 2, 1.7e308d, 1.7e308d, 0d, 0d)]),
+
+            // An iteration count above 10,000, which graph.page-rank and transport.sinkhorn-coupling already reject;
+            // 1e9 iterations ran for minutes.
+            ["markov.stationary-distribution/iterations-over-cap"] = ("markov.stationary-distribution@1", () => IterativeInputs("markov.stationary-distribution@1", 10_001d)),
+            ["matrix.perron-value/iterations-over-cap"] = ("matrix.perron-value@1", () => IterativeInputs("matrix.perron-value@1", 10_001d)),
+            ["matrix.perron-vector/iterations-over-cap"] = ("matrix.perron-vector@1", () => IterativeInputs("matrix.perron-vector@1", 10_001d)),
+            ["matrix.spectral-norm/iterations-over-cap"] = ("matrix.spectral-norm@1", () => IterativeInputs("matrix.spectral-norm@1", 10_001d))
         };
+
+    /// <summary>Gets the operations whose second input is an iteration count capped at 10,000.</summary>
+    public static TheoryData<string> CappedIterationIdentities =>
+        ["markov.stationary-distribution@1", "matrix.perron-value@1", "matrix.perron-vector@1", "matrix.spectral-norm@1"];
 
     private static readonly double[] ScalarVariants =
         [0d, -0d, -1d, 1d, 2d, 0.5d, -0.5d, 3d, 21d, 65537d, 1e308d, -1e308d, 1e-310d, 4097d, 1_000_001d];
@@ -93,6 +104,26 @@ public sealed class MathBlockInvalidStateTests
 
         Assert.False(result.IsValid, $"{name} returned a valid {result.Type}.");
         Assert.Equal(declared, result.Type);
+    }
+
+    /// <summary>Verifies an iteration count of exactly 10,000 still gives a valid result.</summary>
+    [Theory]
+    [MemberData(nameof(CappedIterationIdentities))]
+    [Trait("Category", "InvalidState")]
+    public void IterationCountsUpToTheCapGiveAValidResult(string identity)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(identity);
+        var result = Find(identity).Evaluate(IterativeInputs(identity, 10_000d));
+
+        Assert.True(result.IsValid, $"{identity} returned {result.InvalidReason}");
+    }
+
+    // The operation's first regression case with its iteration count (the second input) replaced.
+    private static MathBlockValue[] IterativeInputs(string identity, double iterations)
+    {
+        var inputs = Find(identity).RegressionCases[0].Inputs.ToArray();
+        inputs[1] = MathBlockValue.Scalar(iterations, inputs[1].Type.Unit);
+        return inputs;
     }
 
     /// <summary>

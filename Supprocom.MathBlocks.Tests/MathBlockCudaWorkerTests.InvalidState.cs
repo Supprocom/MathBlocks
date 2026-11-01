@@ -326,6 +326,15 @@ public sealed partial class MathBlockCudaWorkerTests
             ["matrix.reshape/shape"] = () => SampleWithScalarIncremented("matrix.reshape", 1),
             ["matrix.principal-minors/21-rows"] = () => Standalone("matrix.principal-minors", Diagonal(21)),
             ["transport.minimum-assignment/21-rows"] = () => Standalone("transport.minimum-assignment", Diagonal(21)),
+            // An iteration count is capped at 10,000, as for graph.page-rank and transport.sinkhorn-coupling.
+            ["markov.stationary-distribution/10000-iterations"] = () => SampleWithIterations("markov.stationary-distribution", 10_000d),
+            ["markov.stationary-distribution/10001-iterations"] = () => SampleWithIterations("markov.stationary-distribution", 10_001d),
+            ["matrix.perron-value/10000-iterations"] = () => SampleWithIterations("matrix.perron-value", 10_000d),
+            ["matrix.perron-value/10001-iterations"] = () => SampleWithIterations("matrix.perron-value", 10_001d),
+            ["matrix.perron-vector/10000-iterations"] = () => SampleWithIterations("matrix.perron-vector", 10_000d),
+            ["matrix.perron-vector/10001-iterations"] = () => SampleWithIterations("matrix.perron-vector", 10_001d),
+            ["matrix.spectral-norm/10000-iterations"] = () => SampleWithIterations("matrix.spectral-norm", 10_000d),
+            ["matrix.spectral-norm/10001-iterations"] = () => SampleWithIterations("matrix.spectral-norm", 10_001d),
             // An operation that consumes an always-invalid node is invalid too.
             ["combinatorics.nonempty-subset-sums/consumed"] = () =>
             {
@@ -380,6 +389,14 @@ public sealed partial class MathBlockCudaWorkerTests
     {
         var inputs = MathBlockCatalog.Standard.Get(identifier).RegressionCases[0].Inputs.ToArray();
         inputs[input] = MathBlockValue.Scalar(inputs[input].AsScalar() + 1d, inputs[input].Type.Unit);
+        return Standalone(identifier, inputs);
+    }
+
+    // The operation's sample with its iteration count (the second input) replaced.
+    private static (MathBlockProgram Program, MathBlockValue[] Inputs) SampleWithIterations(string identifier, double iterations)
+    {
+        var inputs = MathBlockCatalog.Standard.Get(identifier).RegressionCases[0].Inputs.ToArray();
+        inputs[1] = MathBlockValue.Scalar(iterations, inputs[1].Type.Unit);
         return Standalone(identifier, inputs);
     }
 
