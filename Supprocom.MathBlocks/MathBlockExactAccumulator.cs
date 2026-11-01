@@ -6,19 +6,22 @@ namespace Supprocom.MathBlocks;
 // most three) chunks under its bits, in pieces below 2^33, so no addition rounds and no carry is propagated until
 // a value is read. The 31 spare bits per chunk absorb 2^27 additions before an in-place carry pass is needed.
 //
-// The range covers every double and every exact square of one (2^-2148 .. 2^2048) with room for 2^31 terms, so
-// sums of x and of x^2 use the same layout. The accumulated value is exact and does not depend on the order or
-// history of the additions; only its chunk representation does, and every read first carries the chunks into the
-// canonical form, so a read depends only on the value.
+// The range covers every double and every exact square of one (2^-2148 .. 2^2048), the significand bits of the
+// smallest terms down to 2^-2200, and room for 2^31 terms, so sums of x and of x^2 use the same layout. The
+// accumulated value is exact and does not depend on the order or history of the additions; only its chunk
+// representation does, and every read first carries the chunks into the canonical form, so a read depends only on
+// the value.
 //
 // The code is plain loops over a fixed array with no allocation after construction, so a per-thread CUDA struct can
 // mirror it.
 internal sealed class MathBlockExactAccumulator
 {
-    internal const int ChunkCount = 140;
+    internal const int ChunkCount = 141;
 
-    // Bit 0 of chunk 0 has the weight 2^BaseExponent; it is below 2^-2148, the lowest bit of a square.
-    internal const int BaseExponent = -2176;
+    // Bit 0 of chunk 0 has the weight 2^BaseExponent. Every nonzero term is at least 2^-2148 in magnitude (a square
+    // of a multiple of 2^-1074, or its error term), so the lowest bit of its 53-bit significand weighs at least
+    // 2^-2200, and 2^-2208 is the chunk boundary below that.
+    internal const int BaseExponent = -2208;
 
     private const long ChunkMask = 0xFFFF_FFFFL;
     private const int CarryInterval = 1 << 27;
@@ -68,8 +71,12 @@ internal sealed class MathBlockExactAccumulator
 
     // The window value rounded to the nearest double, ties to even, and the rounded remainder:
     // high = RN(S) and low = RN(S - high). An overflow gives an infinite high and a zero low.
-    internal void ReadDoubleDouble(out double high, out double low)
+    internal void ReadDoubleDouble(out double high, out double low) => ReadDoubleDouble(out high, out low, out _);
+
+    // As above; zero tells whether the exact value is 0, which a high of 0 alone doesn't (S may round to 0).
+    internal void ReadDoubleDouble(out double high, out double low, out bool zero)
     {
+        zero = true;
         if (highest < 0)
         {
             high = 0d;
@@ -77,6 +84,8 @@ internal sealed class MathBlockExactAccumulator
             return;
         }
         var top = LoadMagnitude(out var negative);
+        for (var index = lowest; index <= top; index++)
+            zero &= scratch[index] == 0L;
         high = RoundMagnitude(scratch, lowest, top, false);
         low = 0d;
         if (!double.IsFinite(high))

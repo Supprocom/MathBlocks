@@ -1816,11 +1816,11 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         return checked(2 * (1 << size));
     }
 
-    // A window kernel runs GridX blocks of 128 threads striped over the rows. Each thread owns ScratchCapacity
-    // doubles for the planned width, so ScratchBytes = ScratchCapacity * 8 * threads. The width is the exact
-    // width input (a constant or prototype); without one, the series length bounds the width of the O(w)
-    // sources. The grid is the smaller of the blocks the rows need and the blocks whose slices fit the scratch
-    // budget, and at least one block.
+    // A window kernel runs GridX blocks of 128 threads over the rows, one row or one block of rows per thread
+    // (WindowCudaBlockCatalog.RowsPerThread). Each thread owns ScratchCapacity doubles for the planned width, so
+    // ScratchBytes = ScratchCapacity * 8 * threads. The width is the exact width input (a constant or prototype);
+    // without one, the series length bounds the width of the O(w) sources. The grid is the smaller of the blocks
+    // the rows need and the blocks whose slices fit the scratch budget, and at least one block.
     internal static WindowLaunch ResolveWindowLaunch(
         MathBlockProgramNode node,
         MathBlockCudaPayloadLayout payloadLayout)
@@ -1829,11 +1829,13 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         var source = WindowCudaBlockCatalog.Resolve(identity).Opcode / 2;
         var rows = (long)payloadLayout.Capacities[node.Index];
         long width;
+        long? plannedWidth = null;
         if (payloadLayout.ExactValues[node.Inputs[ResolveWindowWidthInput(node)]] is { } widthValue &&
             widthValue.Type.Kind == MathBlockValueKind.Scalar)
         {
             var exact = widthValue.AsScalar();
             width = exact >= 1d && exact <= int.MaxValue && exact == Math.Truncate(exact) ? (long)exact : 0L;
+            plannedWidth = width;
         }
         else if (WindowCudaBlockCatalog.RequiresPlanTimeWidth(source))
         {
@@ -1844,7 +1846,9 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             width = rows;
         }
         var blockSize = (long)WindowCudaBlockCatalog.BlockSize;
-        var rowBlocks = rows <= blockSize ? 1L : (rows + blockSize - 1L) / blockSize;
+        var rowsPerThread = WindowCudaBlockCatalog.RowsPerThread(source, plannedWidth);
+        var threads = (rows + rowsPerThread - 1L) / rowsPerThread;
+        var rowBlocks = threads <= blockSize ? 1L : (threads + blockSize - 1L) / blockSize;
         if (rowBlocks > WindowCudaBlockCatalog.MaximumGridX)
             rowBlocks = WindowCudaBlockCatalog.MaximumGridX;
         var perThread = WindowCudaBlockCatalog.ScratchDoubles(source, width);

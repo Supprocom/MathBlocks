@@ -3,11 +3,13 @@
 using System;
 using Supprocom.CSharp2CUDA;
 
-// Trailing-window forms. Opcode 2 * source + sibling, with source the index in the window source list. Every
-// thread checks the inputs itself and then evaluates the rows end = thread, thread + threads, ...: the window
-// kernel passes the grid-wide thread index and count, the device dispatch path the thread index in the block.
-// Row end >= width - 1 calls the source's per-thread function on rows end - width + 1 .. end of each series;
-// warm-up rows and rows whose source result is invalid hold the fill (form) or false (sibling).
+// Trailing-window forms. Opcode 2 * source + sibling, with source the index in the window source list (0 .. 52)
+// or a window-accurate source (53 .. 58). Every thread checks the inputs itself and then evaluates its rows: the
+// window kernel passes the grid-wide thread index and count, the device dispatch path the thread index in the
+// block. Most sources take the rows end = thread, thread + threads, ..., and row end >= width - 1 calls the
+// source's per-thread function on rows end - width + 1 .. end of each series. The median, the quantile and the
+// window-accurate sources give each thread one block of consecutive rows and slide their state through it.
+// Warm-up rows and rows whose result is invalid hold the fill (form) or false (sibling).
 [TranspileToCUDA]
 internal static unsafe class WindowModule
 {
@@ -208,6 +210,14 @@ internal static unsafe class WindowModule
                 return count * (count - 1);
             case 15:
                 return count * (count + 1);
+            case 53:
+            case 54:
+                return 285;
+            case 55:
+            case 56:
+            case 57:
+            case 58:
+                return 570;
             default:
                 return 0;
         }
@@ -588,6 +598,558 @@ internal static unsafe class WindowModule
         return double.IsFinite(*value);
     }
 
+    // The window-accurate.* sources (53 sum, 54 mean, 55 population variance, 56 sample variance, 57 population
+    // standard deviation, 58 sample standard deviation) mirror MathBlockExactAccumulator and MathBlockWindowAccurate
+    // step for step. An accumulator is 285 longs of the thread's scratch: the chunks 0 .. 140 (chunk i counts units
+    // of 2^(-2208 + 32 i)), the read scratch 141 .. 281, then lowest, highest and the count of additions since the
+    // last in-place carry. The sum is exact, so its value, and every read, does not depend on the order or history
+    // of the additions; a thread can start from any earlier row.
+    [CudaDevice]
+    private static double mathblocks_window_power_of_two(int exponent)
+    {
+        return BitConverter.Int64BitsToDouble((long)(exponent + 1023) << 52);
+    }
+
+    [CudaDevice]
+    private static void mathblocks_window_exact_clear(long* accumulator)
+    {
+        for (int index = 0; index < 282; index++)
+            accumulator[index] = 0L;
+        accumulator[282] = 141L;
+        accumulator[283] = -1L;
+        accumulator[284] = 0L;
+    }
+
+    // Adds value * 2^shift to the chunks of target in pieces below 2^33 and returns the lowest chunk index touched.
+    [CudaDevice]
+    private static int mathblocks_window_exact_add_to(long* target, double value, int shift, bool subtract)
+    {
+        long bits = BitConverter.DoubleToInt64Bits(value);
+        bool negative = (bits < 0L) != subtract;
+        int biased = (int)((bits >> 52) & 2047L);
+        long significand = bits & 4503599627370495L;
+        int exponent;
+        if (biased == 0)
+        {
+            exponent = -1074;
+        }
+        else
+        {
+            significand |= 1L << 52;
+            exponent = biased - 1075;
+        }
+        int position = exponent + shift + 2208;
+        int index = position >> 5;
+        int offset = position & 31;
+        long low_part = (significand & 4294967295L) << offset;
+        long high_part = (significand >> 32) << offset;
+        long first = low_part & 4294967295L;
+        long second = (low_part >> 32) + (high_part & 4294967295L);
+        long third = high_part >> 32;
+        if (negative)
+        {
+            target[index] -= first;
+            target[index + 1] -= second;
+            target[index + 2] -= third;
+        }
+        else
+        {
+            target[index] += first;
+            target[index + 1] += second;
+            target[index + 2] += third;
+        }
+        return index;
+    }
+
+    // Carries chunks first .. last into [0, 2^32) and adds the final carry to chunk last + 1, which then holds the
+    // sign of the value.
+    [CudaDevice]
+    private static long mathblocks_window_exact_carry(long* target, int first, int last)
+    {
+        long carry = 0L;
+        for (int index = first; index <= last; index++)
+        {
+            long current = target[index] + carry;
+            carry = current >> 32;
+            target[index] = current & 4294967295L;
+        }
+        target[last + 1] += carry;
+        return target[last + 1];
+    }
+
+    [CudaDevice]
+    private static void mathblocks_window_exact_negate(long* target, int first, int last)
+    {
+        for (int index = first; index <= last; index++)
+            target[index] = -target[index];
+    }
+
+    [CudaDevice]
+    private static void mathblocks_window_exact_add(long* accumulator, double value, int shift, bool subtract)
+    {
+        if (value == 0.0)
+            return;
+        int index = mathblocks_window_exact_add_to(accumulator, value, shift, subtract);
+        if (index < accumulator[282])
+            accumulator[282] = index;
+        if (index + 2 > accumulator[283])
+            accumulator[283] = index + 2;
+        accumulator[284] += 1L;
+        if (accumulator[284] == 134217728L)
+        {
+            mathblocks_window_exact_carry(accumulator, (int)accumulator[282], (int)accumulator[283]);
+            accumulator[283] += 1L;
+            accumulator[284] = 0L;
+        }
+    }
+
+    [CudaDevice]
+    private static void mathblocks_window_split(double a, double* high, double* low)
+    {
+        double c = 134217729.0 * a;
+        *high = c - (c - a);
+        *low = a - *high;
+    }
+
+    // Dekker's product without FMA: p = fl(a b) and p + e = a b exactly, barring overflow and underflow.
+    [CudaDevice]
+    private static void mathblocks_window_two_product(double a, double b, double* p, double* e)
+    {
+        *p = a * b;
+        double ah = 0.0;
+        double al = 0.0;
+        double bh = 0.0;
+        double bl = 0.0;
+        mathblocks_window_split(a, &ah, &al);
+        mathblocks_window_split(b, &bh, &bl);
+        *e = ((ah * bh - *p) + ah * bl + al * bh) + al * bl;
+    }
+
+    // Adds (or subtracts) value^2 exactly as the product pair of value scaled by 2^600 or 2^-600 outside
+    // 2^-400 .. 2^400, added back at that scale.
+    [CudaDevice]
+    private static void mathblocks_window_exact_add_square(long* accumulator, double value, bool subtract)
+    {
+        if (value == 0.0)
+            return;
+        double magnitude = Math.Abs(value);
+        double scaled = value;
+        int shift = 0;
+        if (magnitude < mathblocks_window_power_of_two(-400))
+        {
+            scaled = value * mathblocks_window_power_of_two(600);
+            shift = -1200;
+        }
+        else if (magnitude > mathblocks_window_power_of_two(400))
+        {
+            scaled = value * mathblocks_window_power_of_two(-600);
+            shift = 1200;
+        }
+        double product = 0.0;
+        double error = 0.0;
+        mathblocks_window_two_product(scaled, scaled, &product, &error);
+        mathblocks_window_exact_add(accumulator, product, shift, subtract);
+        mathblocks_window_exact_add(accumulator, error, shift, subtract);
+    }
+
+    // Copies the chunks into the read scratch in canonical form with the magnitude of the value and returns top:
+    // chunks lowest .. top are in [0, 2^32).
+    [CudaDevice]
+    private static int mathblocks_window_exact_load(long* accumulator, bool* negative)
+    {
+        long* scratch = accumulator + 141;
+        int lowest = (int)accumulator[282];
+        int highest = (int)accumulator[283];
+        for (int index = lowest; index <= highest; index++)
+            scratch[index] = accumulator[index];
+        for (int index = highest + 1; index <= highest + 4; index++)
+            scratch[index] = 0L;
+        *negative = mathblocks_window_exact_carry(scratch, lowest, highest) < 0L;
+        if (*negative)
+        {
+            mathblocks_window_exact_negate(scratch, lowest, highest + 1);
+            mathblocks_window_exact_carry(scratch, lowest, highest + 1);
+        }
+        return highest + 1;
+    }
+
+    // count (1 .. 53) bits of the canonical value starting at the bit with weight 2^position.
+    [CudaDevice]
+    private static long mathblocks_window_exact_bits([CudaReadOnly] long* value, int position, int count)
+    {
+        int relative = position + 2208;
+        int index = relative >> 5;
+        int offset = relative & 31;
+        ulong word = (ulong)value[index] | ((ulong)value[index + 1] << 32);
+        ulong result = word >> offset;
+        if (offset != 0)
+            result |= (ulong)value[index + 2] << (64 - offset);
+        return (long)(result & ((1UL << count) - 1UL));
+    }
+
+    // Whether any bit with weight below 2^position is set.
+    [CudaDevice]
+    private static bool mathblocks_window_exact_any_below([CudaReadOnly] long* value, int lowest, int position)
+    {
+        int relative = position + 2208;
+        int index = relative >> 5;
+        int offset = relative & 31;
+        if ((value[index] & ((1L << offset) - 1L)) != 0L)
+            return true;
+        for (int chunk = lowest; chunk < index; chunk++)
+            if (value[chunk] != 0L)
+                return true;
+        return false;
+    }
+
+    // Rounds a nonnegative canonical value (zero above top) to the nearest double, ties to even, with sticky an
+    // extra nonzero part below every chunk bit. The result's bits are built directly.
+    [CudaDevice]
+    private static double mathblocks_window_exact_round([CudaReadOnly] long* value, int lowest, int top, bool sticky)
+    {
+        int chunk = top;
+        while (chunk >= lowest && value[chunk] == 0L)
+            chunk--;
+        if (chunk < lowest)
+            return 0.0;
+        int bit = 31;
+        while (((value[chunk] >> bit) & 1L) == 0L)
+            bit--;
+        int most = -2208 + 32 * chunk + bit;
+        int least = most - 52 < -1074 ? -1074 : most - 52;
+        int count = most - least + 1;
+        long significand = count > 0 ? mathblocks_window_exact_bits(value, least, count) : 0L;
+        bool round = mathblocks_window_exact_bits(value, least - 1, 1) != 0L;
+        bool below = sticky || mathblocks_window_exact_any_below(value, lowest, least - 1);
+        if (round && (below || (significand & 1L) != 0L))
+            significand++;
+        if (significand == 1L << 53)
+        {
+            significand = 1L << 52;
+            least++;
+        }
+        if (significand >= 1L << 52)
+        {
+            int biased = least + 1075;
+            if (biased >= 2047)
+                return BitConverter.Int64BitsToDouble(9218868437227405312L);
+            return BitConverter.Int64BitsToDouble(((long)biased << 52) | (significand - (1L << 52)));
+        }
+        return BitConverter.Int64BitsToDouble(significand);
+    }
+
+    // high = RN(S) and low = RN(S - high); an overflow gives an infinite high and a zero low. zero tells whether
+    // the exact value is 0, which a high of 0 alone doesn't (S may round to 0).
+    [CudaDevice]
+    private static void mathblocks_window_exact_read_pair(long* accumulator, double* high, double* low, bool* zero)
+    {
+        *high = 0.0;
+        *low = 0.0;
+        *zero = true;
+        if (accumulator[283] < 0L)
+            return;
+        long* scratch = accumulator + 141;
+        int lowest = (int)accumulator[282];
+        bool negative = false;
+        int top = mathblocks_window_exact_load(accumulator, &negative);
+        for (int index = lowest; index <= top; index++)
+            if (scratch[index] != 0L)
+                *zero = false;
+        *high = mathblocks_window_exact_round(scratch, lowest, top, false);
+        if (!double.IsFinite(*high))
+        {
+            *high = negative ? -*high : *high;
+            return;
+        }
+        mathblocks_window_exact_add_to(scratch, *high, 0, true);
+        bool rest_negative = mathblocks_window_exact_carry(scratch, lowest, top) < 0L;
+        if (rest_negative)
+        {
+            mathblocks_window_exact_negate(scratch, lowest, top + 1);
+            mathblocks_window_exact_carry(scratch, lowest, top + 1);
+        }
+        *low = mathblocks_window_exact_round(scratch, lowest, top + 1, false);
+        if (rest_negative)
+            *low = -*low;
+        if (negative)
+        {
+            *high = -*high;
+            *low = -*low;
+        }
+    }
+
+    // RN(S / divisor) for an integer divisor >= 1 by long division over the canonical chunks, down to four chunks
+    // below the leading one, with a nonzero remainder as the sticky bit; the chunks below lowest that it writes are
+    // cleared again.
+    [CudaDevice]
+    private static double mathblocks_window_exact_read_quotient(long* accumulator, int divisor)
+    {
+        if (accumulator[283] < 0L)
+            return 0.0;
+        long* scratch = accumulator + 141;
+        int lowest = (int)accumulator[282];
+        bool negative = false;
+        int top = mathblocks_window_exact_load(accumulator, &negative);
+        int leading = top;
+        while (leading > lowest && scratch[leading] == 0L)
+            leading--;
+        int start = leading - 4 < lowest ? leading - 4 : lowest;
+        if (start < 0)
+            start = 0;
+        long remainder = 0L;
+        for (int index = top + 1; index >= start; index--)
+        {
+            long current = (remainder << 32) | scratch[index];
+            scratch[index] = current / divisor;
+            remainder = current % divisor;
+        }
+        double result = mathblocks_window_exact_round(scratch, start, top + 1, remainder != 0L);
+        for (int index = start; index < lowest; index++)
+            scratch[index] = 0L;
+        return negative ? -result : result;
+    }
+
+    [CudaDevice]
+    private static void mathblocks_window_two_sum(double a, double b, double* s, double* e)
+    {
+        *s = a + b;
+        double b_virtual = *s - a;
+        double a_virtual = *s - b_virtual;
+        *e = (a - a_virtual) + (b - b_virtual);
+    }
+
+    [CudaDevice]
+    private static void mathblocks_window_fast_two_sum(double a, double b, double* s, double* e)
+    {
+        *s = a + b;
+        *e = b - (*s - a);
+    }
+
+    // (h + l)^2: h^2 exactly plus the rounded cross term 2 h l.
+    [CudaDevice]
+    private static void mathblocks_window_square(double h, double l, double* sh, double* sl)
+    {
+        double p = 0.0;
+        double e = 0.0;
+        mathblocks_window_two_product(h, h, &p, &e);
+        double low = e + (h + h) * l;
+        mathblocks_window_fast_two_sum(p, low, sh, sl);
+    }
+
+    // (h + l) / width: the quotient's high part, then the exact remainder h - q width plus l, over width.
+    [CudaDevice]
+    private static void mathblocks_window_divide_by_integer(double h, double l, int width, double* qh, double* ql)
+    {
+        double divisor = width;
+        double high = h / divisor;
+        double p = 0.0;
+        double e = 0.0;
+        mathblocks_window_two_product(high, divisor, &p, &e);
+        double low = ((h - p) - e + l) / divisor;
+        mathblocks_window_fast_two_sum(high, low, qh, ql);
+    }
+
+    // (ah + al) - (bh + bl) by the accurate double-double addition, rounded once to double.
+    [CudaDevice]
+    private static double mathblocks_window_subtract_rounded(double ah, double al, double bh, double bl)
+    {
+        double sh = 0.0;
+        double sl = 0.0;
+        double th = 0.0;
+        double tl = 0.0;
+        mathblocks_window_two_sum(ah, -bh, &sh, &sl);
+        mathblocks_window_two_sum(al, -bl, &th, &tl);
+        double c = sl + th;
+        double vh = 0.0;
+        double vl = 0.0;
+        mathblocks_window_fast_two_sum(sh, c, &vh, &vl);
+        double w = tl + vl;
+        double zh = 0.0;
+        double zl = 0.0;
+        mathblocks_window_fast_two_sum(vh, w, &zh, &zl);
+        return zh;
+    }
+
+    // Whether value is 0 or within [2^-968, largest]; false for an infinity or NaN.
+    [CudaDevice]
+    private static bool mathblocks_window_in_range(double value, double largest)
+    {
+        return value == 0.0 ||
+            (Math.Abs(value) >= mathblocks_window_power_of_two(-968) && Math.Abs(value) <= largest);
+    }
+
+    // The rows first_row .. last_row - 1 of a window-accurate source. The thread first adds the up to width - 1 rows
+    // before first_row, then adds x[row] and subtracts x[row - width] per row as the sequential CoreCLR pass does;
+    // the change count covers the pairs of adjacent rows inside the window in the same way.
+    [CudaDevice]
+    private static void mathblocks_window_accurate_rows(
+        int source,
+        [CudaReadOnly] double* x,
+        int width,
+        int first_row,
+        int last_row,
+        double fill,
+        bool sibling,
+        double* result,
+        CudaInt32* boolean_result,
+        long* scratch)
+    {
+        bool variance = source >= 55;
+        bool sample = source == 56 || source == 58;
+        bool deviation = source >= 57;
+        long* first = scratch;
+        long* second = scratch + 285;
+        mathblocks_window_exact_clear(first);
+        if (variance)
+            mathblocks_window_exact_clear(second);
+        double divisor = sample ? width - 1.0 : width;
+        int begin = first_row - width + 1 < 0 ? 0 : first_row - width + 1;
+        int changes = 0;
+        for (int row = begin; row < last_row; row++)
+        {
+            mathblocks_window_exact_add(first, x[row], 0, false);
+            if (variance)
+            {
+                mathblocks_window_exact_add_square(second, x[row], false);
+                if (row > begin && x[row] != x[row - 1])
+                    changes++;
+            }
+            if (row - width >= begin)
+            {
+                mathblocks_window_exact_add(first, x[row - width], 0, true);
+                if (variance)
+                {
+                    mathblocks_window_exact_add_square(second, x[row - width], true);
+                    if (x[row - width + 1] != x[row - width])
+                        changes--;
+                }
+            }
+            if (row < first_row)
+                continue;
+            bool computed = false;
+            double value = 0.0;
+            if (row >= width - 1)
+            {
+                if (!variance)
+                {
+                    double low = 0.0;
+                    bool zero = true;
+                    if (source == 54)
+                        value = mathblocks_window_exact_read_quotient(first, width);
+                    else
+                        mathblocks_window_exact_read_pair(first, &value, &low, &zero);
+                    computed = double.IsFinite(value);
+                }
+                else
+                {
+                    double moment = 0.0;
+                    bool in_range = true;
+                    if (changes != 0)
+                    {
+                        double s1h = 0.0;
+                        double s1l = 0.0;
+                        double s2h = 0.0;
+                        double s2l = 0.0;
+                        double qh = 0.0;
+                        double ql = 0.0;
+                        double rh = 0.0;
+                        double rl = 0.0;
+                        bool s1_zero = true;
+                        bool s2_zero = true;
+                        mathblocks_window_exact_read_pair(first, &s1h, &s1l, &s1_zero);
+                        mathblocks_window_exact_read_pair(second, &s2h, &s2l, &s2_zero);
+                        mathblocks_window_square(s1h, s1l, &qh, &ql);
+                        mathblocks_window_divide_by_integer(qh, ql, width, &rh, &rl);
+                        moment = mathblocks_window_subtract_rounded(s2h, s2l, rh, rl);
+                        double largest = BitConverter.Int64BitsToDouble(9218868437227405311L);
+                        if (!mathblocks_window_in_range(s2h, largest) ||
+                            !mathblocks_window_in_range(qh, largest) ||
+                            !mathblocks_window_in_range(rh, mathblocks_window_power_of_two(996)) ||
+                            (s2h == 0.0 && !s2_zero) || (qh == 0.0 && s1h != 0.0) ||
+                            (moment > 0.0 && moment < mathblocks_window_power_of_two(-968)))
+                            in_range = false;
+                        else if (moment <= 0.0)
+                            moment = 0.0;
+                    }
+                    value = moment / divisor;
+                    if (deviation)
+                        value = mathblocks_square_root(value);
+                    computed = in_range && double.IsFinite(value);
+                }
+            }
+            if (sibling)
+                boolean_result[row] = computed;
+            else
+                result[row] = computed ? value : fill;
+        }
+    }
+
+    // The rows first_row .. last_row - 1 of window.vector.median (source 47) and window.vector.quantile (48) from a
+    // sorted copy of the window that slides with the rows. The source's stable insertion sort orders the window by
+    // (value, index) with -0 equal to +0; a new row has the largest index, so it goes after every value that does
+    // not compare greater, and the leaving row has the smallest, so it is the first value that does not compare
+    // lower than it. The sorted copy therefore equals the source's sorted window on every row, and the quantile is
+    // the source's expression on it.
+    [CudaDevice]
+    private static void mathblocks_window_sorted_rows(
+        [CudaReadOnly] double* x,
+        int width,
+        double probability,
+        int first_row,
+        int last_row,
+        double fill,
+        bool sibling,
+        double* result,
+        CudaInt32* boolean_result,
+        double* sorted)
+    {
+        bool probability_valid = !(probability < 0.0 || probability > 1.0);
+        int begin = first_row - width + 1 < 0 ? 0 : first_row - width + 1;
+        int size = 0;
+        for (int row = begin; row < last_row; row++)
+        {
+            if (row - width >= begin)
+            {
+                double leaving = x[row - width];
+                int low = 0;
+                int high = size;
+                while (low < high)
+                {
+                    int middle = (low + high) / 2;
+                    if (sorted[middle] < leaving)
+                        low = middle + 1;
+                    else
+                        high = middle;
+                }
+                for (int index = low; index < size - 1; index++)
+                    sorted[index] = sorted[index + 1];
+                size--;
+            }
+            double entering = x[row];
+            int position = size;
+            while (position > 0 && sorted[position - 1] > entering)
+            {
+                sorted[position] = sorted[position - 1];
+                position--;
+            }
+            sorted[position] = entering;
+            size++;
+            if (row < first_row)
+                continue;
+            bool computed = false;
+            double value = 0.0;
+            if (row >= width - 1 && probability_valid)
+            {
+                value = mathblocks_statistics_sorted_quantile(sorted, width, probability);
+                computed = double.IsFinite(value);
+            }
+            if (sibling)
+                boolean_result[row] = computed;
+            else
+                result[row] = computed ? value : fill;
+        }
+    }
+
     // Thread 0 writes the output header; the other threads only write rows.
     [CudaDevice]
     private static void mathblocks_window_publish(MathBlockSlot* output, bool valid, int count, int thread)
@@ -619,7 +1181,7 @@ internal static unsafe class WindowModule
         bool sibling = opcode % 2 != 0;
         int arity = mathblocks_window_source_arity(source);
         int series = mathblocks_window_series_count(source);
-        bool valid = opcode >= 0 && source < 53 && input_count == arity + (sibling ? 1 : 2);
+        bool valid = opcode >= 0 && source < 59 && input_count == arity + (sibling ? 1 : 2);
         for (int index = 0; valid && index < input_count; index++)
             if (inputs[index] == null || !inputs[index]->valid)
                 valid = false;
@@ -658,6 +1220,44 @@ internal static unsafe class WindowModule
         double* result = (double*)output->data_pointer;
         CudaInt32* boolean_result = (CudaInt32*)output->data_pointer;
         double* scratch = (double*)output->scratch_pointer + thread * (int)capacity;
+        if (source == 47 || source == 48 || source >= 53)
+        {
+            // These sources slide a state over consecutive rows, so each thread owns one block of rows.
+            long rows_per_thread = ((long)count + threads - 1) / threads;
+            long first_row = thread * rows_per_thread;
+            if (first_row >= count)
+                return;
+            long last_row = count - first_row < rows_per_thread ? count : first_row + rows_per_thread;
+            if (source >= 53)
+            {
+                mathblocks_window_accurate_rows(
+                    source,
+                    a,
+                    width,
+                    (int)first_row,
+                    (int)last_row,
+                    fill,
+                    sibling,
+                    result,
+                    boolean_result,
+                    (long*)scratch);
+            }
+            else
+            {
+                mathblocks_window_sorted_rows(
+                    a,
+                    width,
+                    source == 47 ? 0.5 : first_parameter->scalar_value,
+                    (int)first_row,
+                    (int)last_row,
+                    fill,
+                    sibling,
+                    result,
+                    boolean_result,
+                    scratch);
+            }
+            return;
+        }
         for (int end = thread; end < count; end += threads)
         {
             bool row_valid = false;

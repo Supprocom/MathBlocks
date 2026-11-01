@@ -119,6 +119,33 @@ public sealed class MathBlocksWindowBatchTests
             () => MathBlocksWindowBatch.Evaluate(series, "window-accurate.mean@1", [MathBlockValue.Scalar(0.5d)], [2], 0d));
     }
 
+    /// <summary>
+    /// Verifies the CUDA entry points reject unsupported forms, wrong parameter and input counts and a null worker
+    /// before they compile anything, and return no results for no widths. Nothing here reaches the CUDA driver.
+    /// </summary>
+    [Fact]
+    public void CUDAEntryPointsRejectInvalidRequestsBeforeCompiling()
+    {
+        var worker = new Supprocom.MathBlocks.Cuda.MathBlocksCUDAWorker();
+        var series = MathBlockValue.Vector([1d, 2d, 3d]);
+        foreach (var identity in new[] { "window.vector.sum@1", "window-accurate-valid.sum@1", "vector.minimum@1", "window-accurate.sum" })
+        {
+            var exception = Assert.Throws<ArgumentException>(() => MathBlocksWindowBatch.EvaluateCUDA(worker, series, identity, [2], 0d));
+            Assert.Contains($"'{identity}'", exception.Message, StringComparison.Ordinal);
+            var paired = Assert.Throws<ArgumentException>(
+                () => MathBlocksWindowBatch.EvaluateWithValidityCUDA(worker, identity, [series, MathBlockValue.Scalar(2d), MathBlockValue.Scalar(0d)]));
+            Assert.Contains($"'{identity}'", paired.Message, StringComparison.Ordinal);
+        }
+
+        Assert.Throws<ArgumentException>(() => MathBlocksWindowBatch.EvaluateCUDA(worker, series, "window.vector.quantile@1", [2], 0d));
+        Assert.Throws<ArgumentException>(
+            () => MathBlocksWindowBatch.EvaluateCUDA(worker, series, "window-accurate.mean@1", [MathBlockValue.Scalar(0.5d)], [2], 0d));
+        Assert.Throws<ArgumentException>(
+            () => MathBlocksWindowBatch.EvaluateWithValidityCUDA(worker, "window-accurate.mean@1", [series, MathBlockValue.Scalar(2d)]));
+        Assert.Throws<ArgumentNullException>(() => MathBlocksWindowBatch.EvaluateCUDA(null!, series, "window-accurate.mean@1", [2], 0d));
+        Assert.Empty(MathBlocksWindowBatch.EvaluateCUDA(worker, series, "window-accurate.mean@1", [], 0d));
+    }
+
     internal static MathBlockOperation Resolve(string identity) =>
         MathBlockWindowTestSupport.Windowed.Get(identity[..identity.LastIndexOf('@')]);
 
