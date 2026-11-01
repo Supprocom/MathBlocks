@@ -1063,8 +1063,13 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         var result = ResolveOperation(node.OperationIdentity!).Evaluate(inputs);
         if (!result.IsValid)
         {
-            throw new InvalidOperationException(
-                $"CUDA constant folding rejected node {node.Index}: {result.InvalidReason}");
+            // CoreCLR returns an invalid value for these inputs, so the plan does too, never a throw. A scalar result can
+            // size a consumer (a width, count or index), which then has no exact value to resolve from: the node becomes
+            // an always-invalid node with the planned type, and so does everything that consumes it. A complex or Boolean
+            // result sizes nothing, so it is not folded and the device computes (and reports) the invalid value.
+            if (node.Type.Kind == MathBlockValueKind.Scalar)
+                throw new StaticDomainException($"CUDA constant folding made node {node.Index} invalid: {result.InvalidReason}");
+            return null;
         }
         return IsCompileTimeValue(result) ? result : null;
     }
