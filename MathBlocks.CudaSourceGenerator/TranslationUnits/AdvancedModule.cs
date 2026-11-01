@@ -356,7 +356,7 @@ internal static unsafe class AdvancedModule
                     }
                 {
                     int iterations = 0;
-                    if (!mathblocks_sequence_positive_integer(second->scalar_value, &iterations))
+                    if (!mathblocks_sequence_positive_integer(second->scalar_value, &iterations) || iterations > 10000)
                     {
                         output->valid = 0;
                         break;
