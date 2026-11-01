@@ -92,7 +92,7 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
             ran++;
             output.WriteLine($"{context}: {caseValid} of {reference.Outputs.Count} outputs valid");
 
-            using var generic = worker.Compile(expression.Program, inputs);
+            using var generic = worker.Compile(expression.Program, CreatePrototype(inputs));
             IReadOnlyDictionary<string, MathBlockValue> dispatched;
             try
             {
@@ -121,6 +121,27 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
             }
         }
         return (ran, valid, filled);
+    }
+
+    // The generic dispatcher sizes its buffers from valid prototype inputs, so each invalid input is replaced by a
+    // valid value of its kind and the case's row count; the case then runs with its own inputs.
+    private static Dictionary<string, MathBlockValue> CreatePrototype(Dictionary<string, MathBlockValue> inputs)
+    {
+        var rows = inputs.Values.Where(value => value.IsValid && value.Type.Kind is MathBlockValueKind.Vector or
+                MathBlockValueKind.BooleanVector)
+            .Select(value => value.Type.Kind == MathBlockValueKind.Vector
+                ? value.AsVector().Count
+                : value.AsBooleanVector().Count)
+            .FirstOrDefault();
+        var prototype = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal);
+        foreach (var (name, value) in inputs)
+            prototype[name] = value.IsValid ? value : value.Type.Kind switch
+            {
+                MathBlockValueKind.Vector => MathBlockValue.Vector(new double[rows], value.Type.Unit),
+                MathBlockValueKind.BooleanVector => MathBlockValue.BooleanVector(new bool[rows]),
+                _ => MathBlockValue.Scalar(0d, value.Type.Unit)
+            };
+        return prototype;
     }
 
     /// <summary>Times the fused kernel against the generic dispatcher at the full row count.</summary>
