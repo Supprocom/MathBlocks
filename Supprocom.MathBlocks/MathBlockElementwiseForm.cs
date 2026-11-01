@@ -160,11 +160,21 @@ internal sealed class MathBlockElementwiseForm
                 if (vectors[index] is { } vector)
                     rowInputs[index] = MathBlockValue.Scalar(vector[row], units[index]);
             }
-            var result = source.Evaluate(rowInputs);
+            var computed = EvaluateRow(rowInputs, out var value);
             if (valid is not null)
-                valid[row] = result.IsValid;
+                valid[row] = computed;
             if (values is not null)
-                values[row] = result.IsValid ? result.AsScalar() : fill;
+                values[row] = computed ? value : fill;
         }
+    }
+
+    // One row: the source operation's own CoreCLR evaluation on the row's scalar arguments. Returns whether the
+    // source result is valid (the row is computed) and its value, or 0 when it is not. The form, the sibling and the
+    // fused expression's elementwise rows all evaluate their rows here.
+    internal bool EvaluateRow(MathBlockValue[] rowInputs, out double value)
+    {
+        var result = source.Evaluate(rowInputs);
+        value = result.IsValid ? result.AsScalar() : 0d;
+        return result.IsValid;
     }
 }
