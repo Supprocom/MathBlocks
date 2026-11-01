@@ -66,7 +66,12 @@ public sealed class MathBlockInvalidStateTests
             ["markov.stationary-distribution/iterations-over-cap"] = ("markov.stationary-distribution@1", () => IterativeInputs("markov.stationary-distribution@1", 10_001d)),
             ["matrix.perron-value/iterations-over-cap"] = ("matrix.perron-value@1", () => IterativeInputs("matrix.perron-value@1", 10_001d)),
             ["matrix.perron-vector/iterations-over-cap"] = ("matrix.perron-vector@1", () => IterativeInputs("matrix.perron-vector@1", 10_001d)),
-            ["matrix.spectral-norm/iterations-over-cap"] = ("matrix.spectral-norm@1", () => IterativeInputs("matrix.spectral-norm@1", 10_001d))
+            ["matrix.spectral-norm/iterations-over-cap"] = ("matrix.spectral-norm@1", () => IterativeInputs("matrix.spectral-norm@1", 10_001d)),
+
+            // A square in the Gram matrix overflows: the owned Max dropped the NaN from the eigenvalue step and returned a valid 0,
+            // where vector.l2-norm and matrix.frobenius-norm give an invalid value when their sum of squares overflows.
+            ["matrix.spectral-norm/gram-overflow-2x2"] = ("matrix.spectral-norm@1", () => [Matrix(2, 2, 21.808109993025802d, -1E-16d, 2.0261677264706863d, 1.7920054269081442E+308d), Scalar(32d)]),
+            ["matrix.spectral-norm/gram-overflow-5x5"] = ("matrix.spectral-norm@1", () => [Matrix(5, 5, -1.4934540366773823d, -724.1384810885675d, -110d, -2.863890391847497E+250d, -736.1104387680798d, -4.29484363142549d, 2.313432234973772E+223d, 4.722841828411625d, 0.09556606759165165d, -39d, 0.04059996335593041d, -0.5318688056945957d, 3.7223115856823336E+175d, -740.769435392698d, -20.097659664810053d, -739.8147664805746d, 0.9999956274522844d, 2.7099982004438914d, 4.192299232855897d, -1.3907820097623635E+181d, 3.6241968239171687d, 4.518422333933148E+220d, -750.0798031522245d, 59.5d, -5.7572465458520234d), Scalar(32d)])
         };
 
     /// <summary>Gets the operations whose second input is an iteration count capped at 10,000.</summary>

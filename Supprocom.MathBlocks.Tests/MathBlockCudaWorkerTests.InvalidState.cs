@@ -335,6 +335,11 @@ public sealed partial class MathBlockCudaWorkerTests
             ["matrix.perron-vector/10001-iterations"] = () => SampleWithIterations("matrix.perron-vector", 10_001d),
             ["matrix.spectral-norm/10000-iterations"] = () => SampleWithIterations("matrix.spectral-norm", 10_000d),
             ["matrix.spectral-norm/10001-iterations"] = () => SampleWithIterations("matrix.spectral-norm", 10_001d),
+            // A square in the Gram matrix overflows, so both sides give an invalid scalar (CoreCLR gave a valid 0).
+            ["matrix.spectral-norm/gram-overflow-2x2"] = () => Standalone(
+                "matrix.spectral-norm", MatrixValue(2, 2, 21.808109993025802d, -1E-16d, 2.0261677264706863d, 1.7920054269081442E+308d), MathBlockValue.Scalar(32d)),
+            ["matrix.spectral-norm/gram-overflow-5x5"] = () => Standalone(
+                "matrix.spectral-norm", MatrixValue(5, 5, -1.4934540366773823d, -724.1384810885675d, -110d, -2.863890391847497E+250d, -736.1104387680798d, -4.29484363142549d, 2.313432234973772E+223d, 4.722841828411625d, 0.09556606759165165d, -39d, 0.04059996335593041d, -0.5318688056945957d, 3.7223115856823336E+175d, -740.769435392698d, -20.097659664810053d, -739.8147664805746d, 0.9999956274522844d, 2.7099982004438914d, 4.192299232855897d, -1.3907820097623635E+181d, 3.6241968239171687d, 4.518422333933148E+220d, -750.0798031522245d, 59.5d, -5.7572465458520234d), MathBlockValue.Scalar(32d)),
             // An operation that consumes an always-invalid node is invalid too.
             ["combinatorics.nonempty-subset-sums/consumed"] = () =>
             {
