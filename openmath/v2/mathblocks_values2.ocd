@@ -3,9 +3,9 @@
   <CDName>mathblocks_values2</CDName>
   <CDBase>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v2</CDBase>
   <CDURL>https://raw.githubusercontent.com/Supprocom/MathBlocks/main/openmath/v2/mathblocks_values2.ocd</CDURL>
-  <CDReviewDate>2031-10-31</CDReviewDate>
+  <CDReviewDate>2031-11-02</CDReviewDate>
   <CDStatus>private</CDStatus>
-  <CDDate>2026-10-31</CDDate>
+  <CDDate>2026-11-02</CDDate>
   <CDVersion>2</CDVersion>
   <CDRevision>0</CDRevision>
   <Description>This content dictionary defines exact MathBlocks structured constant values.</Description>

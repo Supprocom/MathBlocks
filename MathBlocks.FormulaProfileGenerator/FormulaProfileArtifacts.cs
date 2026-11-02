@@ -367,8 +367,8 @@ internal static class FormulaProfileArtifacts
                 "2031-09-20",
                 "This content dictionary provides exact extension symbols for every operation in the MathBlocks 0.5.0 standard catalog."),
             2 => new(
-                "2026-10-31",
-                "2031-10-31",
+                "2026-11-02",
+                "2031-11-02",
                 "This content dictionary provides exact extension symbols for every operation in the MathBlocks 0.6.0 standard catalog."),
             _ => throw new ArgumentOutOfRangeException(nameof(version))
         };

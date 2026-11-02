@@ -242,8 +242,8 @@ internal static class OpenMathProfileArtifacts
                 "2031-09-03",
                 "This content dictionary defines the exact operations in the MathBlocks 0.4.0 standard catalog."),
             2 => new(
-                "2026-10-31",
-                "2031-10-31",
+                "2026-11-02",
+                "2031-11-02",
                 "This content dictionary defines the exact operations in the MathBlocks 0.6.0 standard catalog."),
             _ => throw new ArgumentOutOfRangeException(nameof(version))
         };
