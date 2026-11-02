@@ -176,7 +176,8 @@ public static partial class MathBlockOpenMath
             new("mathblocks_profile2.rnc", 5395, "CB0F2C3759D8CAB0BA19776F7E81F30EEC1A2F84864267360ED79E95CE0A9439", true),
             new("mathblocks_program2.ocd", 1762, "B59D09667FC6F8C11E640B3215F9FF2F0620DB27D0AABEA19F44F23E15A69D7C", true),
             new("mathblocks_types2.ocd", 3071, "5B4EAC67F2FC62575D202E6FD918F362E765012FF70959FA555D76E5C441BF55", true),
-            new("mathblocks_values2.ocd", 3154, "1A6786C2F809CD4F9476FA4605A7C72937746870F782EF2D49CB2D76E44AB36C", true)
+            new("mathblocks_values2.ocd", 3154, "1A6786C2F809CD4F9476FA4605A7C72937746870F782EF2D49CB2D76E44AB36C", true),
+            new("README.md", 3169, "B27896B2FB6B142A931C7127E0795B0A64EDBB4A9EA2BBAFD4CA62159D0DDEA9", false)
         ];
         return new MathBlockOpenMathProfileDescriptor(
             2,

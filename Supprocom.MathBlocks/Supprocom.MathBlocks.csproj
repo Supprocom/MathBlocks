@@ -85,6 +85,8 @@
                       LogicalName="Supprocom.MathBlocks.OpenMath.v2.mathblocks_types2.ocd" />
     <EmbeddedResource Include="..\openmath\v2\mathblocks_values2.ocd"
                       LogicalName="Supprocom.MathBlocks.OpenMath.v2.mathblocks_values2.ocd" />
+    <EmbeddedResource Include="..\openmath\v2\README.md"
+                      LogicalName="Supprocom.MathBlocks.OpenMath.v2.README.md" />
     <EmbeddedResource Include="..\formula\v2\*.*"
                       LogicalName="Supprocom.MathBlocks.Formula.v2.%(Filename)%(Extension)" />
     <AssemblyMetadata Include="RepositoryCommit" Value="$(RepositoryCommit)" Condition="'$(RepositoryCommit)' != ''" />

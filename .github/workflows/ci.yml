@@ -570,12 +570,14 @@ jobs:
           done
           test "$(grep -c '^formula/v1/' "$PACKAGE_EVIDENCE/nupkg-contents.txt")" -eq 9
           for required in \
+            openmath/v2/README.md \
             openmath/v2/mathblocks_operations2.ocd \
             openmath/v2/mathblocks_profile2.cdg \
             openmath/v2/mathblocks_profile2.rnc \
             openmath/v2/mathblocks_program2.ocd \
             openmath/v2/mathblocks_types2.ocd \
             openmath/v2/mathblocks_values2.ocd \
+            formula/v2/README.md \
             formula/v2/mathblocks_formula2.ocd \
             formula/v2/mathblocks_formula_mappings2.rnc \
             formula/v2/mathblocks_formula_mappings2.xml \
@@ -586,8 +588,8 @@ jobs:
             formula/v2/mathblocks_formula_values2.ocd; do
             grep -Fx "$required" "$PACKAGE_EVIDENCE/nupkg-contents.txt"
           done
-          test "$(grep -c '^openmath/v2/' "$PACKAGE_EVIDENCE/nupkg-contents.txt")" -eq 6
-          test "$(grep -c '^formula/v2/' "$PACKAGE_EVIDENCE/nupkg-contents.txt")" -eq 8
+          test "$(grep -c '^openmath/v2/' "$PACKAGE_EVIDENCE/nupkg-contents.txt")" -eq 7
+          test "$(grep -c '^formula/v2/' "$PACKAGE_EVIDENCE/nupkg-contents.txt")" -eq 9
           unzip -p "$nupkg" README.md > "$PACKAGE_EVIDENCE/README.md"
           cmp README.md "$PACKAGE_EVIDENCE/README.md"
 
@@ -702,7 +704,7 @@ jobs:
               throw 'The embedded formula Profile 2 authority is missing.'
           }
           foreach ($profile in @(@{ Root = 'formula/v1'; Count = 9; Source = $authoritySource.Substring(0, $profile2Start) },
-                                 @{ Root = 'formula/v2'; Count = 8; Source = $authoritySource.Substring($profile2Start) })) {
+                                 @{ Root = 'formula/v2'; Count = 9; Source = $authoritySource.Substring($profile2Start) })) {
           $matches = [regex]::Matches(
             $profile.Source,
             'new\("(?<name>[^\"]+)", (?<length>[0-9]+), "(?<sha>[0-9A-F]{64})", (?:true|false)\)')

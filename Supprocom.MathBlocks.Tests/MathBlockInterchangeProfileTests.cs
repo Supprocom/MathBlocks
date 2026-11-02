@@ -169,13 +169,14 @@ public sealed class MathBlockInterchangeProfileTests
                 "mathblocks_profile2.rnc",
                 "mathblocks_program2.ocd",
                 "mathblocks_types2.ocd",
-                "mathblocks_values2.ocd"
+                "mathblocks_values2.ocd",
+                "README.md"
             ],
             MathBlockOpenMath.Profile2.Artifacts.Select(artifact => artifact.Name),
             StringComparer.Ordinal);
         Assert.All(MathBlockOpenMath.Profile2.Artifacts, artifact =>
         {
-            Assert.True(artifact.IsNormative);
+            Assert.Equal(!string.Equals(artifact.Name, "README.md", StringComparison.Ordinal), artifact.IsNormative);
             Assert.Equal(string.Concat("openmath/v2/", artifact.Name), artifact.PackagePath);
             Assert.Equal(File.ReadAllBytes(TrackedPath("openmath", 2, artifact.Name)), ReadAll(artifact.OpenRead()));
         });
@@ -193,13 +194,14 @@ public sealed class MathBlockInterchangeProfileTests
                 "mathblocks_formula_openmath2.rnc",
                 "mathblocks_formula_operations2.ocd",
                 "mathblocks_formula_profile2.cdg",
-                "mathblocks_formula_values2.ocd"
+                "mathblocks_formula_values2.ocd",
+                "README.md"
             ],
             MathBlockFormulaInterchange.Profile2.Artifacts.Select(artifact => artifact.Name),
             StringComparer.Ordinal);
         Assert.All(MathBlockFormulaInterchange.Profile2.Artifacts, artifact =>
         {
-            Assert.True(artifact.IsNormative);
+            Assert.Equal(!string.Equals(artifact.Name, "README.md", StringComparison.Ordinal), artifact.IsNormative);
             Assert.Equal(string.Concat("formula/v2/", artifact.Name), artifact.PackagePath);
             Assert.Equal(File.ReadAllBytes(TrackedPath("formula", 2, artifact.Name)), ReadAll(artifact.OpenRead()));
         });
