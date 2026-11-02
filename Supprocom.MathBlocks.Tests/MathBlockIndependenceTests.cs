@@ -197,7 +197,7 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Contains("## Documentation", readme, StringComparison.Ordinal);
         Assert.Contains("## Build from source", readme, StringComparison.Ordinal);
         Assert.Contains(
-            "dotnet add package Supprocom.MathBlocks --version 0.5.2",
+            "dotnet add package Supprocom.MathBlocks --version 0.6.0",
             readme,
             StringComparison.Ordinal);
         AssertReadmeUsesOneParagraphAndOneSupplementPerSection(readme);
