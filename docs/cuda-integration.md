@@ -2,7 +2,7 @@
 
 This guide describes the public device module, consumer-owned kernel
 composition, managed resident programs, fingerprints, parity rules, and
-performance contracts in MathBlocks 0.5.2.
+performance contracts in MathBlocks 0.6.0.
 
 ## Device module
 
@@ -10,11 +10,11 @@ performance contracts in MathBlocks 0.5.2.
 dispatch table, source fingerprint, and ABI fingerprint.
 
 `MathBlockCudaDeviceModule.Operations` contains one immutable public contract
-for each of the 337 standard operations. Each entry exposes its operation
+for each of the 537 standard operations. Each entry exposes its operation
 identity, family, opcode, arity, rules, execution behavior, regression cases,
 and fingerprint.
 
-`ResolveOutputType` applies the CPU type contract. `PlanCUDA` applies the
+`ResolveOutputType` applies the CoreCLR type contract. `PlanCUDA` applies the
 same checked shape, capacity, and scratch authority used by CUDA execution.
 
 ## Slot and value ABI
@@ -76,7 +76,7 @@ values in production code.
 ## Consumer transaction ownership
 
 The external package gate compiles a consumer-owned CUDA kernel and executes
-all 337 operation identities plus one nested directed acyclic graph in one
+all 537 operation identities plus one nested directed acyclic graph in one
 launch.
 
 That gate performs one immutable arena upload, one kernel launch, one
@@ -93,8 +93,12 @@ graph launch, one synchronization, and one output download. Callers may queue
 resident executions before synchronization, and the compiled program
 serializes state changes for safe concurrent calls.
 
-The parity policy requires CUDA results to match CPU results, including data
+The parity policy requires CUDA results to match CoreCLR results, including data
 bits, shape, type, unit, and invalid state.
+
+A compiled CUDA program sizes its outputs from its prototype inputs; an execution whose result needs more than that planned capacity returns an invalid value, where CoreCLR computes it. Compile with a prototype that covers the largest shapes you'll execute.
+
+On CUDA, a consumer kernel that calls mathblocks_operation_dispatch for an elementwise form with the public Opcode gets an invalid result when a vector argument is empty; MathBlocksCUDAWorker is not affected.
 
 ## Fingerprints
 
@@ -107,15 +111,14 @@ The source fingerprint binds the exact CUDA definitions and dispatch
 implementation. A package version check does not replace source or ABI
 fingerprint validation.
 
-MathBlocks 0.5.2 retains the source generated with CSharp2CUDA 0.3.1 in 0.5.1.
-Its source, operation-table, and ABI fingerprints differ from 0.5.0, so consumers
-with cached PTX or device state from 0.5.0 must rebuild them against the loaded
-package.
+MathBlocks 0.6.0 changes the generated CUDA source and the dispatch table. Their source, operation-table, and ABI
+fingerprints differ from 0.5.2, so consumers with cached PTX or device state from 0.5.2 must rebuild them against the
+loaded package.
 
 ## Performance contract
 
 Every standard operation has a sub-millisecond target on its contract shape.
-The CPU gate measures warm p95 latency, while the CUDA gate measures warm
+The CoreCLR gate measures warm p95 latency, while the CUDA gate measures warm
 median latency.
 
 These are test contracts rather than universal hardware claims. Results depend
@@ -132,6 +135,4 @@ an unrepresentable resource requirement before launch.
 
 ## Runtime prerequisites
 
-CUDA execution requires the platform driver, toolkit, architecture, and native
-packages described in the [development guide](development.md). The source
-repository itself does not redistribute CUDA or LibTorch binaries.
+MathBlocks composes and fingerprints the CUDA device module without any CUDA installation. Compiling and running it needs an NVIDIA device, its driver, and the NVRTC of an installed CUDA Toolkit 12.0 or later; the [development guide](development.md) lists the file names and the search order. MathBlocks does not ship NVIDIA binaries. `MathBlockCudaNvrtcLibrary.Current` reports the NVRTC version and file that compile the module, so a parity run can record them.

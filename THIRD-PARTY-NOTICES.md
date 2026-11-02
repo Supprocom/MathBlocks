@@ -1,7 +1,7 @@
 # Third-party dependency notices
 
 This document records the dependency identities reviewed for MathBlocks through
-September 28, 2026. It does not replace the applicable license text.
+November 1, 2026. It does not replace the applicable license text.
 
 The `AGPL-3.0-only` license applies to MathBlocks source. It does not change any
 third-party license.
@@ -34,44 +34,6 @@ and test-only [xunit.analyzers 2.1.0](https://www.nuget.org/packages/xunit.analy
 use Apache-2.0 terms. All seven are build/test-only analyzer references with
 `PrivateAssets=all`; none is a MathBlocks runtime package dependency.
 
-## Production project on Windows
-
-[`libtorch-cuda-12.8-win-x64-part1` 2.10.0](https://www.nuget.org/packages/libtorch-cuda-12.8-win-x64-part1/2.10.0)
-and
-[`libtorch-cuda-12.8-win-x64-part8` 2.10.0](https://www.nuget.org/packages/libtorch-cuda-12.8-win-x64-part8/2.10.0)
-are direct Windows dependencies. Their NuGet metadata uses the MIT expression.
-
-These package archives include LibTorch and native CUDA, cuBLAS, cuDNN, NVRTC,
-and support libraries. The embedded `LICENSE-LIBTORCH.txt` notice includes MIT,
-BSD-3-Clause, Apache-2.0, and zlib-family terms.
-
-NVIDIA components remain subject to the NVIDIA SDK, CUDA Toolkit, and cuDNN
-agreements. Review the
-[CUDA 12.8 agreement](https://docs.nvidia.com/cuda/archive/12.8.1/eula/index.html)
-and the
-[cuDNN agreement](https://docs.nvidia.com/deeplearning/cudnn/backend/latest/)
-before binary distribution.
-
-## Production project on Linux
-
-[`TorchSharp-cuda-linux` 0.107.0](https://www.nuget.org/packages/TorchSharp-cuda-linux/0.107.0)
-is the direct Linux dependency. Its NuGet metadata uses the MIT expression.
-
-This package depends on
-[`TorchSharp` 0.107.0](https://www.nuget.org/packages/TorchSharp/0.107.0)
-and
-[`libtorch-cuda-12.8-linux-x64` 2.10.0](https://www.nuget.org/packages/libtorch-cuda-12.8-linux-x64/2.10.0).
-Both parent packages use the MIT expression.
-
-The Linux LibTorch parent package expands into 24 version 2.10.0 fragment
-packages. Those packages contain LibTorch, CUDA, and related native components.
-
-TorchSharp declares Google.Protobuf 3.21.9, SharpZipLib 1.4.0, SkiaSharp 2.88.6,
-and System.Memory 4.5.5. Google.Protobuf uses BSD-3-Clause.
-
-SharpZipLib, SkiaSharp, and System.Memory use MIT terms. SkiaSharp and its native
-components retain their package notices.
-
 ## Test project
 
 [`Markdig` 1.4.0](https://www.nuget.org/packages/Markdig/1.4.0) is a direct
@@ -92,20 +54,11 @@ packages. These packages use Apache-2.0 terms.
 xunit.runner.visualstudio 3.1.1 is a direct test dependency and uses the
 Apache-2.0 expression.
 
-## Native system dependencies and acquisition
+## Native system dependencies
 
 MathBlocks calls the NVIDIA CUDA Driver API and NVRTC through native imports.
-Windows loads `nvcuda.dll` and `nvrtc64_120_0.dll`.
+Both come from the user's system: the NVIDIA driver and an installed CUDA Toolkit 12.0 or later. Windows loads `nvcuda.dll` and `nvrtc64_130_0.dll` or `nvrtc64_120_0.dll`.
 
-Linux loads `libcuda.so.1` and an available `libnvrtc` version. The NVIDIA
-driver is a system dependency and is not part of MathBlocks.
+Linux loads `libcuda.so.1` and `libnvrtc.so.13`, `libnvrtc.so.12` or `libnvrtc.so`. Neither the driver nor NVRTC is part of MathBlocks, and the package contains no NVIDIA file.
 
-The Windows loader also calls `kernel32.dll`, which is an operating-system
-component.
-
-NuGet downloads the declared packages into the user's package cache. The
-MathBlocks Git repository does not contain or redistribute these package
-archives or their binary files.
-
-A user who distributes compiled output must review each applicable third-party
-license. NuGet metadata does not replace the notices inside native archives.
+A user who distributes an application that includes NVIDIA components must follow NVIDIA's license terms for them.

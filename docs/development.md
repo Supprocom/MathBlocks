@@ -1,12 +1,12 @@
 # MathBlocks Development Guide
 
-This guide covers prerequisites, native dependencies, source builds, tests,
-package boundaries, and repository hygiene for MathBlocks 0.5.2.
+This guide covers prerequisites, the CUDA requirement, source builds, tests,
+package boundaries, and repository hygiene for MathBlocks 0.6.0.
 
 ## Source-only repository
 
-The Git repository contains source text and project metadata only. It does not
-contain or redistribute NVIDIA, CUDA, TorchSharp, or LibTorch binaries.
+The Git repository contains source text and project metadata only. Neither the repository nor the package
+contains or redistributes NVIDIA or CUDA binaries.
 
 NuGet downloads declared dependencies into the user package cache outside the
 repository. Build and restore outputs must remain ignored and must not be
@@ -14,24 +14,19 @@ committed or redistributed as repository content.
 
 ## Prerequisites
 
-MathBlocks targets .NET 10. CPU development needs the .NET 10 SDK; CUDA
-development and CUDA tests additionally need compatible NVIDIA hardware,
-drivers, and toolkit support.
+MathBlocks targets .NET 10. CoreCLR development needs only the .NET 10 SDK. CUDA development and CUDA tests also need an NVIDIA device, its driver, and an installed CUDA Toolkit 12.0 or later. MathBlocks loads the driver and the toolkit's NVRTC at run time; it does not install or ship either.
 
-| Environment | Required runtime packages |
+| Environment | Requirement |
 | --- | --- |
-| Windows CUDA | x64 Windows, `libtorch-cuda-12.8-win-x64-part1` 2.10.0, and `libtorch-cuda-12.8-win-x64-part8` 2.10.0 |
-| Linux CUDA | x64 Linux and `TorchSharp-cuda-linux` 0.107.0 with its declared dependencies |
-| CPU-only build and portable tests | .NET 10 SDK |
+| Windows CUDA | x64 Windows, the NVIDIA driver (`nvcuda.dll`), and CUDA Toolkit 12.0 or later. MathBlocks looks for `nvrtc64_130_0.dll`, then `nvrtc64_120_0.dll`, in `%CUDA_PATH%\bin`, `%CUDA_PATH%\bin\x64`, and then each absolute `PATH` directory. |
+| Linux CUDA | x64 Linux, the NVIDIA driver (`libcuda.so.1`), and CUDA Toolkit 12.0 or later. MathBlocks asks the system library loader for `libnvrtc.so.13`, then `libnvrtc.so.12`, then `libnvrtc.so`; the toolkit's library directory must be on the loader path (for example through `ldconfig` or `LD_LIBRARY_PATH`). |
+| CoreCLR build and portable tests | .NET 10 SDK |
 
-The package declares the same native-acquisition dependency graph on every
-pack host. Review each third-party license before use; recorded identities and
-terms are in [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md).
+The package declares no dependencies. Use an NVRTC version new enough for your device's compute capability, and a driver that supports that CUDA version: a newer NVRTC can generate PTX that an older driver rejects. `MathBlockCudaNvrtcLibrary.Current` reports the NVRTC version and file in use. If no supported NVRTC is found, CUDA compilation fails with a message that lists every name and path searched. Recorded third-party identities and terms are in [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md).
 
 ## Restore
 
-Restore the root solution to acquire the production, test, generator, analyzer,
-and native package graph.
+Restore the root solution to acquire the production, test, generator, and analyzer packages.
 
 ```text
 dotnet restore MathBlocks.slnx --force-evaluate -p:NuGetAuditMode=all
@@ -50,8 +45,7 @@ dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj --confi
 ```
 
 Portable tests do not require a CUDA device. CUDA execution and performance
-tests require a compatible NVIDIA driver, CUDA toolkit, and supported x64
-platform.
+tests require an NVIDIA device and driver, CUDA Toolkit 12.0 or later, and x64 Windows or Linux.
 
 ## Analyzer policy
 
@@ -93,8 +87,7 @@ evidence. It then restores
 `Supprocom.MathBlocks.ExternalConsumer` from the packed package rather than a
 project reference.
 
-CI also compiles the generated CUDA source and a consumer kernel with NVRTC,
-without requiring a GPU. This catches CUDA compiler errors that a byte-for-byte
+CI installs the CUDA Toolkit 12.8 NVRTC from NVIDIA's package repository and compiles the generated CUDA source and a consumer kernel with it, without a CUDA device. This catches CUDA compiler errors that a byte-for-byte
 golden comparison cannot detect.
 
 The external consumer validates public package use, formula mappings, embedded
@@ -116,5 +109,4 @@ cross-platform checkout, and package gates.
 MathBlocks uses the GNU Affero General Public License version 3 only. The SPDX
 expression is `AGPL-3.0-only`.
 
-The project license does not replace or modify the licenses of CUDA,
-TorchSharp, LibTorch, source-generation, test, or other third-party packages.
+The project license does not replace or modify the licenses of the NVIDIA driver, the CUDA Toolkit, source-generation, test, or other third-party packages.

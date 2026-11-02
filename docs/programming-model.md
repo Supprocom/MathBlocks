@@ -1,7 +1,7 @@
 # MathBlocks Programming Model
 
-This guide describes the standard operation catalog, typed program model, CPU
-execution path, and ownership boundary of MathBlocks 0.5.2.
+This guide describes the standard operation catalog, typed program model, CoreCLR
+execution path, and ownership boundary of MathBlocks 0.6.0.
 
 ## Operation contracts
 
@@ -9,8 +9,8 @@ Each operation has a stable identifier and a positive version. The version
 binds operand rules, output rules, units, shapes, capacity, scratch
 requirements, validity behavior, and execution semantics.
 
-The standard catalog contains 337 operations. Every standard operation carries
-CPU regression evidence, CUDA regression evidence, and a contract-shape
+The standard catalog contains 537 operations. Every standard operation carries
+CoreCLR regression evidence, CUDA regression evidence, and a contract-shape
 performance target.
 
 Unknown versions, unknown operation identifiers, incompatible input types, and
@@ -23,7 +23,7 @@ operations into any directed acyclic graph.
 | Arity and input rules | Validate operands before execution |
 | Output rule | Resolve the exact output type |
 | Capacity and scratch rules | Bound storage and temporary resources |
-| CPU and CUDA behavior | Define equivalent execution semantics |
+| CoreCLR and CUDA behavior | Define equivalent execution semantics |
 | Regression and performance cases | Bind correctness and latency evidence |
 
 ## Program construction
@@ -46,10 +46,10 @@ The builder validates each application against the selected catalog operation.
 Nodes may be shared by multiple later operations, and a program may expose more
 than one named output.
 
-## CPU execution
+## CoreCLR execution
 
 `MathBlockProgram.Evaluate` evaluates a program from named
-`MathBlockValue` inputs. `MathBlocksCPUWorker` executes independent nodes in
+`MathBlockValue` inputs. `MathBlocksCoreCLRWorker` executes independent nodes in
 parallel by graph level while preserving the program's dependency order.
 
 ```csharp
@@ -66,9 +66,9 @@ The program remains a deterministic operation graph: execution does not
 rewrite, simplify, or reorder it. Input and output values are explicit, and
 type incompatibilities are rejected rather than coerced.
 
-## CPU and CUDA parity
+## CoreCLR and CUDA parity
 
-The same operation contract drives CPU type resolution, CPU execution, CUDA
+The same operation contract drives CoreCLR type resolution, CoreCLR execution, CUDA
 planning, and CUDA dispatch. CUDA parity includes value bits, type, shape,
 unit, and invalid state.
 
@@ -77,7 +77,7 @@ The managed and device-level CUDA paths are documented in
 
 ## Assembly boundary
 
-CPU and CUDA APIs live in the single `Supprocom.MathBlocks` production
+CoreCLR and CUDA APIs live in the single `Supprocom.MathBlocks` production
 assembly. `Supprocom.MathBlocks.Cuda` is a namespace in that assembly, not a
 second package or production binary.
 

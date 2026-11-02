@@ -11,8 +11,8 @@
     <Authors>Supprocom</Authors>
     <Company>Supprocom</Company>
     <Copyright>Copyright (C) 2026 mkn8rn</Copyright>
-    <Description>Typed mathematical-operation contracts with exhaustive OpenMath and Content MathML formula interchange, deterministic CPU execution, and CUDA composition.</Description>
-    <PackageDescription>Typed mathematical-operation contracts with exhaustive OpenMath and Content MathML formula interchange, deterministic CPU execution, and CUDA composition.</PackageDescription>
+    <Description>Typed mathematical-operation contracts with exhaustive OpenMath and Content MathML formula interchange, deterministic CoreCLR execution, and CUDA composition. CUDA execution uses the installed NVIDIA driver and CUDA Toolkit 12.0 or later; the package ships no native binaries.</Description>
+    <PackageDescription>Typed mathematical-operation contracts with exhaustive OpenMath and Content MathML formula interchange, deterministic CoreCLR execution, and CUDA composition. CUDA execution uses the installed NVIDIA driver and CUDA Toolkit 12.0 or later; the package ships no native binaries.</PackageDescription>
     <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Supprocom/MathBlocks</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Supprocom/MathBlocks</RepositoryUrl>
