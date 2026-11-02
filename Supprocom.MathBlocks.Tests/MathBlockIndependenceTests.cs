@@ -187,7 +187,7 @@ public sealed partial class MathBlockIndependenceTests
             File.ReadAllText(projectPath),
             StringComparison.Ordinal);
         Assert.Contains(
-            "337-operation OpenMath and Content MathML interchange",
+            "Adds 200 operations, for 537 in all",
             document.Descendants("PackageReleaseNotes").Single().Value,
             StringComparison.Ordinal);
         Assert.Equal(new Version(0, 6, 0, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);

@@ -19,7 +19,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>mathematics;openmath;mathml;content-mathml;operation-contract;computation-graph;coreclr;cuda;deterministic;numerics</PackageTags>
-    <PackageReleaseNotes>Clears enabled SDK and specialist analyzer warnings with a tracked public API baseline, strengthens native loading, and fixes .NET 10 NVRTC UTF-8 option marshaling. The 337-operation OpenMath and Content MathML interchange and CUDA source fingerprint remain unchanged.</PackageReleaseNotes>
+    <PackageReleaseNotes>Adds 200 operations, for 537 in all, each implemented on CoreCLR and CUDA with bit-identical results within the documented CUDA limits: window forms (`window.*`, `window-accurate.*`) and elementwise forms (`elementwise.*`), each with a validity sibling that marks which rows are valid. Adds batched window evaluation (`MathBlocksWindowBatch`), fused expressions (`MathBlockFusedExpression`), and causality metadata for every standard operation (`MathBlockOperation.Causality`). OpenMath and Formula Interchange Profile 2 maps all 537 operations; Profile 1 is unchanged. Breaking: the CPU execution API is renamed to CoreCLR (`MathBlocksCoreCLRWorker`, `EvaluateCoreCLR`), with no aliases. CUDA execution uses the installed NVIDIA driver and CUDA Toolkit 12.0 or later; the package ships no native binaries.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType>portable</DebugType>
