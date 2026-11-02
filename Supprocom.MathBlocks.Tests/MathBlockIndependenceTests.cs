@@ -221,7 +221,7 @@ string.Equals(item.Attribute("PackagePath")?.Value, "README.md", StringCompariso
         Assert.Contains("## Total operation mapping", formulaGuide, StringComparison.Ordinal);
         Assert.Contains("## Canonical and security boundary", formulaGuide, StringComparison.Ordinal);
         Assert.Contains("## Operation contracts", programmingGuide, StringComparison.Ordinal);
-        Assert.Contains("## CPU execution", programmingGuide, StringComparison.Ordinal);
+        Assert.Contains("## CoreCLR execution", programmingGuide, StringComparison.Ordinal);
         Assert.Contains("## Consumer-owned kernels", cudaGuide, StringComparison.Ordinal);
         Assert.Contains("## Performance contract", cudaGuide, StringComparison.Ordinal);
         Assert.Contains("## Build and test", developmentGuide, StringComparison.Ordinal);
