@@ -151,6 +151,32 @@ internal static unsafe class AdvancedModule
         double* result = (double*)output->data_pointer;
         double* scratch = (double*)output->scratch_pointer;
 
+        // Lipschitz extensions (Whitney): every query is an independent output, each one computed by one thread with
+        // the serial inner loop in index order (the order of CoreCLR); thread t takes the queries t, t + block size, ...
+        // The domain test reads only inputs, so every thread evaluates it for itself and no thread writes the output slot
+        // before the barrier; thread 0 sets the shape and the validity in the switch below, as before, after the barrier
+        // that makes the results visible to it for the finite check.
+        if (opcode == 5)
+        {
+            bool lipschitz_invalid = first->count <= 0 || first->count != second->count || fourth->scalar_value < 0.0;
+            if (!lipschitz_invalid)
+            {
+                for (int query = thread; query < third->count; query += (int)Cuda.BlockDim.X)
+                {
+                    double selected = -mathblocks_positive_infinity();
+                    for (int index = 0; index < first->count; index++)
+                    {
+                        double candidate = b[index] - fourth->scalar_value * Math.Abs(c[query] - a[index]);
+                        // The owned maximum, as CoreCLR: a NaN candidate (0 * infinity from a zero Lipschitz constant and an
+                        // overflowing distance) makes the result NaN (invalid), and the sign of a zero is the same.
+                        selected = mathblocks_maximum(selected, candidate);
+                    }
+                    result[query] = selected;
+                }
+            }
+            Cuda.SyncThreads();
+        }
+
         if (thread == 0)
         {
             switch (opcode)
@@ -257,6 +283,8 @@ internal static unsafe class AdvancedModule
                         output->valid = 0;
                         break;
                     }
+                    if (opcode == 5)
+                        break; // Whitney: filled by the block-parallel section above.
                     for (int query = 0; query < third->count; query++)
                     {
                         double selected = opcode == 4
