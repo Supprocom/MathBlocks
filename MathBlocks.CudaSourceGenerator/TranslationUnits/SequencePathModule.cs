@@ -586,6 +586,29 @@ internal static unsafe class SequencePathModule
         double* result = (double*)output->data_pointer;
         double* scratch = (double*)output->scratch_pointer;
 
+        // Convolution: every output is an independent sum, formed by one thread over the left index in ascending order, which
+        // is the order in which CoreCLR (and the serial loop below) adds to that output; thread t takes the outputs t, t + block
+        // size, ... The domain test reads only inputs and no thread writes the output slot before the barrier; thread 0 sets the
+        // shape and the validity in the switch below, after the barrier that makes the results visible to it.
+        if (opcode == 0)
+        {
+            int convolution_count = first->count + second->count - 1;
+            if (first->count > 0 && second->count > 0 && convolution_count <= output->capacity)
+            {
+                for (int output_index = thread; output_index < convolution_count; output_index += (int)Cuda.BlockDim.X)
+                {
+                    int low = output_index - (second->count - 1);
+                    int left_start = low > 0 ? low : 0;
+                    int left_end = output_index < first->count - 1 ? output_index : first->count - 1;
+                    double sum = 0.0;
+                    for (int left = left_start; left <= left_end; left++)
+                        sum += a[left] * b[output_index - left];
+                    result[output_index] = sum;
+                }
+            }
+            Cuda.SyncThreads();
+        }
+
         switch (opcode)
         {
             case 0:
@@ -595,6 +618,15 @@ internal static unsafe class SequencePathModule
                     mathblocks_sequence_set_vector_shape(output, count);
                     if (first->count <= 0 || second->count <= 0)
                         output->valid = 0;
+                    // The block-parallel section above filled every output; a non-finite output is absorbing (an infinity or a NaN
+                    // stays one under every later addition), so it is non-finite exactly when CoreCLR's running check fired. Only then
+                    // is the serial loop below run again, which leaves the partially filled data exactly as it did.
+                    bool finite = true;
+                    for (int index = 0; output->valid && index < count; index++)
+                        if (!double.IsFinite(result[index]))
+                            finite = false;
+                    if (finite)
+                        break;
                     for (int index = 0; output->valid && index < count; index++)
                         result[index] = 0.0;
                     for (int left = 0; output->valid && left < first->count; left++)
