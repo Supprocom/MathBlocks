@@ -165,7 +165,7 @@ public sealed class MathBlockStableSortTests
             index = source.IndexOf(InsertionShift, index + 1, StringComparison.Ordinal);
         }
 
-        Assert.Equal(["mathblocks_advanced_dispatch", "mathblocks_sort_copy_values", "mathblocks_window_sorted_rows"], owners);
+        Assert.Equal(["mathblocks_advanced_dispatch", "mathblocks_sort_copy_values", "mathblocks_window_mad_rows", "mathblocks_window_sorted_rows"], owners);
     }
 
     /// <summary>Verifies the window scratch of the interquartile range holds the merge array and the pair forms keep theirs.</summary>
