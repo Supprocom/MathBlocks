@@ -18,7 +18,7 @@ public sealed class SequenceConvolutionV1BlockTests
     [InlineData(0, 0)]
     public void EmptyOperandIsInvalid(int leftCount, int rightCount)
     {
-        var operation = MathBlockCatalog.Standard.Get("sequence.convolution@1");
+        var operation = MathBlockCatalog.Standard.Get("sequence.convolution");
         var result = operation.Evaluate([
             MathBlockValue.Vector(new double[leftCount]),
             MathBlockValue.Vector(new double[rightCount])]);
@@ -31,7 +31,7 @@ public sealed class SequenceConvolutionV1BlockTests
     [Trait("Category", "BlockContract")]
     public void NonEmptyOperandsGiveTheFullConvolution()
     {
-        var result = MathBlockCatalog.Standard.Get("sequence.convolution@1")
+        var result = MathBlockCatalog.Standard.Get("sequence.convolution")
             .Evaluate([MathBlockValue.Vector([1d, 2d]), MathBlockValue.Vector([1d, 1d, -0d])]);
         Assert.True(result.IsValid);
         Assert.Equal([1d, 3d, 2d, -0d], result.AsVector().ToArray());
