@@ -1,4 +1,4 @@
-using System.Numerics;
+using System.Runtime.Intrinsics;
 
 namespace Supprocom.MathBlocks;
 
@@ -244,15 +244,15 @@ internal sealed class MathBlockElementwiseForm
         // and every row of the block is computed with exactly Min or Max's value. Any other block, and the tail, take
         // the per-row loop below.
         var blockKind = 0;
-        if (arity == 2 && Vector.IsHardwareAccelerated && count >= Vector<double>.Count)
+        if (arity == 2 && MathBlockSimd.UseBlocks && count >= MathBlockSimd.BlockWidth)
         {
             if (binary!.Equals((Func<double, double, double>)MathBlockScalar.Minimum))
                 blockKind = 1;
             else if (binary.Equals((Func<double, double, double>)MathBlockScalar.Maximum))
                 blockKind = 2;
         }
-        var firstConstant = new Vector<double>(constants[0]);
-        var secondConstant = new Vector<double>(constants[1 % arity]);
+        var firstConstant = Vector256.Create(constants[0]);
+        var secondConstant = Vector256.Create(constants[1 % arity]);
 
         var row = 0;
         while (row < count)
@@ -261,10 +261,10 @@ internal sealed class MathBlockElementwiseForm
             {
                 while (row < count)
                 {
-                    if (blockKind != 0 && row <= count - Vector<double>.Count)
+                    if (blockKind != 0 && row <= count - MathBlockSimd.BlockWidth)
                     {
-                        var left = vectors[0] is not null ? new Vector<double>(first[row..]) : firstConstant;
-                        var right = vectors[1] is not null ? new Vector<double>(second[row..]) : secondConstant;
+                        var left = vectors[0] is not null ? Vector256.Create<double>(first[row..]) : firstConstant;
+                        var right = vectors[1] is not null ? Vector256.Create<double>(second[row..]) : secondConstant;
                         if (MathBlockSimd.BlockIsFinite(left) && MathBlockSimd.BlockIsFinite(right))
                         {
                             var block = blockKind == 1
@@ -273,8 +273,8 @@ internal sealed class MathBlockElementwiseForm
                             if (values is not null)
                                 block.CopyTo(values.AsSpan(row));
                             if (valid is not null)
-                                valid.AsSpan(row, Vector<double>.Count).Fill(true);
-                            row += Vector<double>.Count;
+                                valid.AsSpan(row, MathBlockSimd.BlockWidth).Fill(true);
+                            row += MathBlockSimd.BlockWidth;
                             continue;
                         }
                     }

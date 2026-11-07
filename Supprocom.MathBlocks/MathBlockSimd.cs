@@ -1,4 +1,4 @@
-using System.Numerics;
+using System.Runtime.Intrinsics;
 
 namespace Supprocom.MathBlocks;
 
@@ -10,20 +10,25 @@ namespace Supprocom.MathBlocks;
 // operands that are not NaN, see the callers' precondition.
 internal static class MathBlockSimd
 {
+    // Four doubles per 256-bit block. Callers use blocks only where Vector256 is hardware accelerated.
+    internal const int BlockWidth = 4;
+
     private const ulong ExponentMask = 0x7ff0_0000_0000_0000ul;
 
     // True when every element is finite. An element is finite exactly when its exponent bits are not all ones,
     // which is MathBlockPrimitives.IsFinite. The vector loop tests whole blocks and the tail is tested one by one.
+    internal static bool UseBlocks => Vector256.IsHardwareAccelerated;
+
     internal static bool AllFinite(ReadOnlySpan<double> values)
     {
         var index = 0;
-        if (values.Length >= Vector<double>.Count)
+        if (UseBlocks && values.Length >= BlockWidth)
         {
-            var mask = new Vector<ulong>(ExponentMask);
-            for (; index <= values.Length - Vector<double>.Count; index += Vector<double>.Count)
+            var mask = Vector256.Create(ExponentMask);
+            for (; UseBlocks && index <= values.Length - BlockWidth; index += BlockWidth)
             {
-                var bits = Vector.AsVectorUInt64(new Vector<double>(values[index..]));
-                if (Vector.EqualsAny(bits & mask, mask))
+                var bits = Vector256.AsUInt64(Vector256.Create<double>(values[index..]));
+                if (Vector256.EqualsAny(bits & mask, mask))
                     return false;
             }
         }
@@ -34,38 +39,38 @@ internal static class MathBlockSimd
     }
 
     // True when no element of the block starting at the offset is infinite or NaN. The block holds a full vector.
-    internal static bool BlockIsFinite(Vector<double> block)
+    internal static bool BlockIsFinite(Vector256<double> block)
     {
-        var mask = new Vector<ulong>(ExponentMask);
-        return !Vector.EqualsAny(Vector.AsVectorUInt64(block) & mask, mask);
+        var mask = Vector256.Create(ExponentMask);
+        return !Vector256.EqualsAny(Vector256.AsUInt64(block) & mask, mask);
     }
 
     // Minimum for operands that are not NaN. Unequal operands give the smaller. Equal operands give the same bits
     // unless both are zero, where the result is -0 if either is -0: the bitwise OR of the two, as Min returns.
-    internal static Vector<double> MinimumWithoutNaN(Vector<double> left, Vector<double> right)
+    internal static Vector256<double> MinimumWithoutNaN(Vector256<double> left, Vector256<double> right)
     {
-        var tie = Vector.AsVectorDouble(Vector.AsVectorUInt64(left) | Vector.AsVectorUInt64(right));
-        return Vector.ConditionalSelect(
-            Vector.LessThan(left, right),
+        var tie = Vector256.AsDouble(Vector256.AsUInt64(left) | Vector256.AsUInt64(right));
+        return Vector256.ConditionalSelect(
+            Vector256.LessThan(left, right),
             left,
-            Vector.ConditionalSelect(Vector.GreaterThan(left, right), right, tie));
+            Vector256.ConditionalSelect(Vector256.GreaterThan(left, right), right, tie));
     }
 
     // Maximum for operands that are not NaN: the bitwise AND of equal operands is +0 unless both are -0, as Max returns.
-    internal static Vector<double> MaximumWithoutNaN(Vector<double> left, Vector<double> right)
+    internal static Vector256<double> MaximumWithoutNaN(Vector256<double> left, Vector256<double> right)
     {
-        var tie = Vector.AsVectorDouble(Vector.AsVectorUInt64(left) & Vector.AsVectorUInt64(right));
-        return Vector.ConditionalSelect(
-            Vector.GreaterThan(left, right),
+        var tie = Vector256.AsDouble(Vector256.AsUInt64(left) & Vector256.AsUInt64(right));
+        return Vector256.ConditionalSelect(
+            Vector256.GreaterThan(left, right),
             left,
-            Vector.ConditionalSelect(Vector.LessThan(left, right), right, tie));
+            Vector256.ConditionalSelect(Vector256.LessThan(left, right), right, tie));
     }
 
     internal static void Add(ReadOnlySpan<double> left, ReadOnlySpan<double> right, Span<double> result)
     {
         var index = 0;
-        for (; index <= result.Length - Vector<double>.Count; index += Vector<double>.Count)
-            (new Vector<double>(left[index..]) + new Vector<double>(right[index..])).CopyTo(result[index..]);
+        for (; UseBlocks && index <= result.Length - BlockWidth; index += BlockWidth)
+            (Vector256.Create<double>(left[index..]) + Vector256.Create<double>(right[index..])).CopyTo(result[index..]);
         for (; index < result.Length; index++)
             result[index] = left[index] + right[index];
     }
@@ -73,8 +78,8 @@ internal static class MathBlockSimd
     internal static void Subtract(ReadOnlySpan<double> left, ReadOnlySpan<double> right, Span<double> result)
     {
         var index = 0;
-        for (; index <= result.Length - Vector<double>.Count; index += Vector<double>.Count)
-            (new Vector<double>(left[index..]) - new Vector<double>(right[index..])).CopyTo(result[index..]);
+        for (; UseBlocks && index <= result.Length - BlockWidth; index += BlockWidth)
+            (Vector256.Create<double>(left[index..]) - Vector256.Create<double>(right[index..])).CopyTo(result[index..]);
         for (; index < result.Length; index++)
             result[index] = left[index] - right[index];
     }
@@ -82,8 +87,8 @@ internal static class MathBlockSimd
     internal static void Multiply(ReadOnlySpan<double> left, ReadOnlySpan<double> right, Span<double> result)
     {
         var index = 0;
-        for (; index <= result.Length - Vector<double>.Count; index += Vector<double>.Count)
-            (new Vector<double>(left[index..]) * new Vector<double>(right[index..])).CopyTo(result[index..]);
+        for (; UseBlocks && index <= result.Length - BlockWidth; index += BlockWidth)
+            (Vector256.Create<double>(left[index..]) * Vector256.Create<double>(right[index..])).CopyTo(result[index..]);
         for (; index < result.Length; index++)
             result[index] = left[index] * right[index];
     }
@@ -91,8 +96,8 @@ internal static class MathBlockSimd
     internal static void Divide(ReadOnlySpan<double> left, ReadOnlySpan<double> right, Span<double> result)
     {
         var index = 0;
-        for (; index <= result.Length - Vector<double>.Count; index += Vector<double>.Count)
-            (new Vector<double>(left[index..]) / new Vector<double>(right[index..])).CopyTo(result[index..]);
+        for (; UseBlocks && index <= result.Length - BlockWidth; index += BlockWidth)
+            (Vector256.Create<double>(left[index..]) / Vector256.Create<double>(right[index..])).CopyTo(result[index..]);
         for (; index < result.Length; index++)
             result[index] = left[index] / right[index];
     }
@@ -101,9 +106,9 @@ internal static class MathBlockSimd
     internal static void Scale(ReadOnlySpan<double> values, double scalar, Span<double> result)
     {
         var index = 0;
-        var factor = new Vector<double>(scalar);
-        for (; index <= result.Length - Vector<double>.Count; index += Vector<double>.Count)
-            (new Vector<double>(values[index..]) * factor).CopyTo(result[index..]);
+        var multiplier = Vector256.Create(scalar);
+        for (; UseBlocks && index <= result.Length - BlockWidth; index += BlockWidth)
+            (Vector256.Create<double>(values[index..]) * multiplier).CopyTo(result[index..]);
         for (; index < result.Length; index++)
             result[index] = values[index] * scalar;
     }
