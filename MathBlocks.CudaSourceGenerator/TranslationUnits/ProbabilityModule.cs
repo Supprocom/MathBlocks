@@ -343,16 +343,51 @@ internal static unsafe class ProbabilityModule
             if (!mathblocks_probability_integer(b, &count) || count < 0 || rate < 0.0)
                 return false;
             double sum = 0.0;
-            int start = opcode == 25 ? 0 : count;
-            int end = count;
-            for (int index = start; index <= end; index++)
+            if (opcode == 25 && rate == 0.0)
             {
-                double probability = rate == 0.0
-                    ? (index == 0 ? 1.0 : 0.0)
-                    : mathblocks_exponential(
-                        -rate + index * mathblocks_natural_logarithm(rate) -
-                        mathblocks_probability_log_gamma(index + 1.0));
-                sum += probability;
+                // Index 0 contributes 1.0 and every later term is +0.0, so the sum is exactly 1.0.
+                sum = 1.0;
+            }
+            else if (opcode == 25)
+            {
+                // The sum of terms 0..count in index order. A term whose exponent is below -800 is exactly +0.0
+                // (the exponential returns 0.0 below -745.13), and adding +0.0 leaves the sum unchanged, so those
+                // terms are skipped: the exponent rises with the index up to the rate and falls after it.
+                double log_rate = mathblocks_natural_logarithm(rate);
+                int peak = rate < count ? (int)rate : count;
+                int first = 0;
+                bool reached = -rate + peak * log_rate - mathblocks_probability_log_gamma(peak + 1.0) >= -800.0;
+                if (reached)
+                {
+                    int high = peak;
+                    while (first < high)
+                    {
+                        int middle = first + (high - first) / 2;
+                        if (-rate + middle * log_rate - mathblocks_probability_log_gamma(middle + 1.0) >= -800.0)
+                            high = middle;
+                        else
+                            first = middle + 1;
+                    }
+                    for (int index = first; index <= count; index++)
+                    {
+                        double exponent = -rate + index * log_rate - mathblocks_probability_log_gamma(index + 1.0);
+                        if (index > rate && exponent < -800.0)
+                            break;
+                        sum += mathblocks_exponential(exponent);
+                    }
+                }
+            }
+            else
+            {
+                for (int index = count; index <= count; index++)
+                {
+                    double probability = rate == 0.0
+                        ? (index == 0 ? 1.0 : 0.0)
+                        : mathblocks_exponential(
+                            -rate + index * mathblocks_natural_logarithm(rate) -
+                            mathblocks_probability_log_gamma(index + 1.0));
+                    sum += probability;
+                }
             }
             *value = sum;
             return double.IsFinite(sum);

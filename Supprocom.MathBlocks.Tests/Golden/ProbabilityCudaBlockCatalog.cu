@@ -882,7 +882,7 @@ __device__ double mathblocks_probability_binomial(int n, int k);
 __device__ MathBlockComplexValue mathblocks_probability_complex_cube_root(
     MathBlockComplexValue value);
 
-#line 385 "ProbabilityModule.cs"
+#line 420 "ProbabilityModule.cs"
 __device__ void mathblocks_probability_dispatch(
     int opcode,
     MathBlockSlot** inputs,
@@ -1169,965 +1169,965 @@ __device__ MathBlockComplexValue mathblocks_probability_complex_cube_root(
     return mathblocks_complex_from_polar(mathblocks_cube_root(mathblocks_complex_magnitude(value)), csharp2cuda_temp_3);
 }
 
-#line 385 "ProbabilityModule.cs"
+#line 420 "ProbabilityModule.cs"
 __device__ void mathblocks_probability_dispatch(
     int opcode,
     MathBlockSlot** inputs,
     int input_count,
     MathBlockSlot* output)
-#line 391 "ProbabilityModule.cs"
+#line 426 "ProbabilityModule.cs"
 {
-#line 392 "ProbabilityModule.cs"
+#line 427 "ProbabilityModule.cs"
     int thread = threadIdx.x;
-#line 393 "ProbabilityModule.cs"
+#line 428 "ProbabilityModule.cs"
     MathBlockSlot* csharp2cuda_temp_0;
-#line 393 "ProbabilityModule.cs"
+#line 428 "ProbabilityModule.cs"
     if (((input_count) > (0)))
     {
-#line 393 "ProbabilityModule.cs"
+#line 428 "ProbabilityModule.cs"
         csharp2cuda_temp_0 = (inputs)[0];
     }
     else
     {
-#line 393 "ProbabilityModule.cs"
+#line 428 "ProbabilityModule.cs"
         csharp2cuda_temp_0 = ((MathBlockSlot*)(nullptr));
     }
-#line 393 "ProbabilityModule.cs"
+#line 428 "ProbabilityModule.cs"
     const MathBlockSlot* first = csharp2cuda_temp_0;
-#line 394 "ProbabilityModule.cs"
+#line 429 "ProbabilityModule.cs"
     MathBlockSlot* csharp2cuda_temp_1;
-#line 394 "ProbabilityModule.cs"
+#line 429 "ProbabilityModule.cs"
     if (((input_count) > (1)))
     {
-#line 394 "ProbabilityModule.cs"
+#line 429 "ProbabilityModule.cs"
         csharp2cuda_temp_1 = (inputs)[1];
     }
     else
     {
-#line 394 "ProbabilityModule.cs"
+#line 429 "ProbabilityModule.cs"
         csharp2cuda_temp_1 = ((MathBlockSlot*)(nullptr));
     }
-#line 394 "ProbabilityModule.cs"
+#line 429 "ProbabilityModule.cs"
     const MathBlockSlot* second = csharp2cuda_temp_1;
-#line 395 "ProbabilityModule.cs"
+#line 430 "ProbabilityModule.cs"
     MathBlockSlot* csharp2cuda_temp_2;
-#line 395 "ProbabilityModule.cs"
+#line 430 "ProbabilityModule.cs"
     if (((input_count) > (2)))
     {
-#line 395 "ProbabilityModule.cs"
+#line 430 "ProbabilityModule.cs"
         csharp2cuda_temp_2 = (inputs)[2];
     }
     else
     {
-#line 395 "ProbabilityModule.cs"
+#line 430 "ProbabilityModule.cs"
         csharp2cuda_temp_2 = ((MathBlockSlot*)(nullptr));
     }
-#line 395 "ProbabilityModule.cs"
+#line 430 "ProbabilityModule.cs"
     const MathBlockSlot* third = csharp2cuda_temp_2;
-#line 396 "ProbabilityModule.cs"
+#line 431 "ProbabilityModule.cs"
     MathBlockSlot* csharp2cuda_temp_3;
-#line 396 "ProbabilityModule.cs"
+#line 431 "ProbabilityModule.cs"
     if (((input_count) > (3)))
     {
-#line 396 "ProbabilityModule.cs"
+#line 431 "ProbabilityModule.cs"
         csharp2cuda_temp_3 = (inputs)[3];
     }
     else
     {
-#line 396 "ProbabilityModule.cs"
+#line 431 "ProbabilityModule.cs"
         csharp2cuda_temp_3 = ((MathBlockSlot*)(nullptr));
     }
-#line 396 "ProbabilityModule.cs"
+#line 431 "ProbabilityModule.cs"
     const MathBlockSlot* fourth = csharp2cuda_temp_3;
-#line 397 "ProbabilityModule.cs"
+#line 432 "ProbabilityModule.cs"
     if (((thread) == (0)))
-#line 398 "ProbabilityModule.cs"
+#line 433 "ProbabilityModule.cs"
     {
-#line 399 "ProbabilityModule.cs"
-#line 399 "ProbabilityModule.cs"
+#line 434 "ProbabilityModule.cs"
+#line 434 "ProbabilityModule.cs"
         double* csharp2cuda_temp_4 = &((output)->scalar_value);
         (*(csharp2cuda_temp_4) = 0.0);
-#line 400 "ProbabilityModule.cs"
-#line 400 "ProbabilityModule.cs"
+#line 435 "ProbabilityModule.cs"
+#line 435 "ProbabilityModule.cs"
         int* csharp2cuda_temp_5 = &((output)->boolean_value);
         (*(csharp2cuda_temp_5) = 0);
-#line 401 "ProbabilityModule.cs"
-#line 401 "ProbabilityModule.cs"
+#line 436 "ProbabilityModule.cs"
+#line 436 "ProbabilityModule.cs"
         int* csharp2cuda_temp_6 = &((output)->rows);
         (*(csharp2cuda_temp_6) = 0);
-#line 402 "ProbabilityModule.cs"
-#line 402 "ProbabilityModule.cs"
+#line 437 "ProbabilityModule.cs"
+#line 437 "ProbabilityModule.cs"
         int* csharp2cuda_temp_7 = &((output)->columns);
         (*(csharp2cuda_temp_7) = 0);
-#line 403 "ProbabilityModule.cs"
-#line 403 "ProbabilityModule.cs"
+#line 438 "ProbabilityModule.cs"
+#line 438 "ProbabilityModule.cs"
         int* csharp2cuda_temp_8 = &((output)->count);
         (*(csharp2cuda_temp_8) = 0);
-#line 404 "ProbabilityModule.cs"
-#line 404 "ProbabilityModule.cs"
+#line 439 "ProbabilityModule.cs"
+#line 439 "ProbabilityModule.cs"
         int* csharp2cuda_temp_9 = &((output)->valid);
         (*(csharp2cuda_temp_9) = 1);
-#line 405 "ProbabilityModule.cs"
+#line 440 "ProbabilityModule.cs"
         {
-#line 405 "ProbabilityModule.cs"
+#line 440 "ProbabilityModule.cs"
             int index = 0;
             while (true)
             {
                 if (!(((index) < (input_count))))
                     break;
-#line 406 "ProbabilityModule.cs"
-#line 406 "ProbabilityModule.cs"
+#line 441 "ProbabilityModule.cs"
+#line 441 "ProbabilityModule.cs"
                 MathBlockSlot* csharp2cuda_temp_11 = (inputs)[index];
-#line 406 "ProbabilityModule.cs"
+#line 441 "ProbabilityModule.cs"
                 bool csharp2cuda_temp_12;
-#line 406 "ProbabilityModule.cs"
+#line 441 "ProbabilityModule.cs"
                 if (!(((((void*)(csharp2cuda_temp_11))) == (((void*)(nullptr))))))
                 {
-#line 406 "ProbabilityModule.cs"
+#line 441 "ProbabilityModule.cs"
                     MathBlockSlot* csharp2cuda_temp_13 = (inputs)[index];
-#line 406 "ProbabilityModule.cs"
+#line 441 "ProbabilityModule.cs"
                     bool csharp2cuda_temp_14 = (csharp2cuda_temp_13)->valid;
-#line 406 "ProbabilityModule.cs"
+#line 441 "ProbabilityModule.cs"
                     csharp2cuda_temp_12 = (!(csharp2cuda_temp_14));
                 }
                 else
                 {
-#line 406 "ProbabilityModule.cs"
+#line 441 "ProbabilityModule.cs"
                     csharp2cuda_temp_12 = true;
                 }
                 if (csharp2cuda_temp_12)
                 {
-#line 406 "ProbabilityModule.cs"
-#line 406 "ProbabilityModule.cs"
+#line 441 "ProbabilityModule.cs"
+#line 441 "ProbabilityModule.cs"
                     int* csharp2cuda_temp_15 = &((output)->valid);
                     (*(csharp2cuda_temp_15) = 0);
                 }
-#line 405 "ProbabilityModule.cs"
+#line 440 "ProbabilityModule.cs"
                 int* csharp2cuda_temp_10 = &(index);
                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_10));
             }
         }
     }
-#line 408 "ProbabilityModule.cs"
+#line 443 "ProbabilityModule.cs"
     __syncthreads();
-#line 409 "ProbabilityModule.cs"
-#line 409 "ProbabilityModule.cs"
+#line 444 "ProbabilityModule.cs"
+#line 444 "ProbabilityModule.cs"
     bool csharp2cuda_temp_16 = (output)->valid;
     if ((!(csharp2cuda_temp_16)))
     {
-#line 410 "ProbabilityModule.cs"
+#line 445 "ProbabilityModule.cs"
         return;
     }
-#line 412 "ProbabilityModule.cs"
+#line 447 "ProbabilityModule.cs"
     double* csharp2cuda_temp_17;
-#line 412 "ProbabilityModule.cs"
+#line 447 "ProbabilityModule.cs"
     if (((((void*)(first))) == (((void*)(nullptr)))))
     {
-#line 412 "ProbabilityModule.cs"
+#line 447 "ProbabilityModule.cs"
         csharp2cuda_temp_17 = ((double*)(nullptr));
     }
     else
     {
-#line 412 "ProbabilityModule.cs"
+#line 447 "ProbabilityModule.cs"
         unsigned long long csharp2cuda_temp_18 = (first)->data_pointer;
-#line 412 "ProbabilityModule.cs"
+#line 447 "ProbabilityModule.cs"
         csharp2cuda_temp_17 = ((double*)(csharp2cuda_temp_18));
     }
-#line 412 "ProbabilityModule.cs"
+#line 447 "ProbabilityModule.cs"
     const double* a = csharp2cuda_temp_17;
-#line 413 "ProbabilityModule.cs"
+#line 448 "ProbabilityModule.cs"
     double* csharp2cuda_temp_19;
-#line 413 "ProbabilityModule.cs"
+#line 448 "ProbabilityModule.cs"
     if (((((void*)(second))) == (((void*)(nullptr)))))
     {
-#line 413 "ProbabilityModule.cs"
+#line 448 "ProbabilityModule.cs"
         csharp2cuda_temp_19 = ((double*)(nullptr));
     }
     else
     {
-#line 413 "ProbabilityModule.cs"
+#line 448 "ProbabilityModule.cs"
         unsigned long long csharp2cuda_temp_20 = (second)->data_pointer;
-#line 413 "ProbabilityModule.cs"
+#line 448 "ProbabilityModule.cs"
         csharp2cuda_temp_19 = ((double*)(csharp2cuda_temp_20));
     }
-#line 413 "ProbabilityModule.cs"
+#line 448 "ProbabilityModule.cs"
     const double* b = csharp2cuda_temp_19;
-#line 414 "ProbabilityModule.cs"
+#line 449 "ProbabilityModule.cs"
     unsigned long long csharp2cuda_temp_21 = (output)->data_pointer;
-#line 414 "ProbabilityModule.cs"
+#line 449 "ProbabilityModule.cs"
     double* result = ((double*)(csharp2cuda_temp_21));
-#line 415 "ProbabilityModule.cs"
+#line 450 "ProbabilityModule.cs"
     unsigned long long csharp2cuda_temp_22 = (output)->scratch_pointer;
-#line 415 "ProbabilityModule.cs"
+#line 450 "ProbabilityModule.cs"
     double* scratch = ((double*)(csharp2cuda_temp_22));
-#line 417 "ProbabilityModule.cs"
+#line 452 "ProbabilityModule.cs"
     if (((opcode) == (3)))
-#line 418 "ProbabilityModule.cs"
+#line 453 "ProbabilityModule.cs"
     {
-#line 419 "ProbabilityModule.cs"
+#line 454 "ProbabilityModule.cs"
         if (((thread) == (0)))
-#line 420 "ProbabilityModule.cs"
+#line 455 "ProbabilityModule.cs"
         {
-#line 421 "ProbabilityModule.cs"
-#line 421 "ProbabilityModule.cs"
+#line 456 "ProbabilityModule.cs"
+#line 456 "ProbabilityModule.cs"
             int csharp2cuda_temp_23 = (first)->count;
             if (((csharp2cuda_temp_23) > (20)))
-#line 422 "ProbabilityModule.cs"
+#line 457 "ProbabilityModule.cs"
             {
-#line 423 "ProbabilityModule.cs"
-#line 423 "ProbabilityModule.cs"
+#line 458 "ProbabilityModule.cs"
+#line 458 "ProbabilityModule.cs"
                 int* csharp2cuda_temp_24 = &((output)->valid);
                 (*(csharp2cuda_temp_24) = 0);
-#line 424 "ProbabilityModule.cs"
+#line 459 "ProbabilityModule.cs"
                 return;
             }
-#line 426 "ProbabilityModule.cs"
-#line 426 "ProbabilityModule.cs"
+#line 461 "ProbabilityModule.cs"
+#line 461 "ProbabilityModule.cs"
             int csharp2cuda_temp_25 = (first)->count;
             mathblocks_set_vector_shape(output, csharp2cuda_i32_sub(csharp2cuda_i32_shl(1, csharp2cuda_temp_25), 1));
         }
-#line 428 "ProbabilityModule.cs"
+#line 463 "ProbabilityModule.cs"
         __syncthreads();
-#line 429 "ProbabilityModule.cs"
+#line 464 "ProbabilityModule.cs"
         {
-#line 429 "ProbabilityModule.cs"
+#line 464 "ProbabilityModule.cs"
             int mask = csharp2cuda_i32_add(thread, 1);
             while (true)
             {
-#line 429 "ProbabilityModule.cs"
+#line 464 "ProbabilityModule.cs"
                 bool csharp2cuda_temp_28 = (output)->valid;
-#line 429 "ProbabilityModule.cs"
+#line 464 "ProbabilityModule.cs"
                 bool csharp2cuda_temp_29;
-#line 429 "ProbabilityModule.cs"
+#line 464 "ProbabilityModule.cs"
                 if (csharp2cuda_temp_28)
                 {
-#line 429 "ProbabilityModule.cs"
+#line 464 "ProbabilityModule.cs"
                     int csharp2cuda_temp_30 = (output)->count;
-#line 429 "ProbabilityModule.cs"
+#line 464 "ProbabilityModule.cs"
                     csharp2cuda_temp_29 = ((mask) <= (csharp2cuda_temp_30));
                 }
                 else
                 {
-#line 429 "ProbabilityModule.cs"
+#line 464 "ProbabilityModule.cs"
                     csharp2cuda_temp_29 = false;
                 }
                 if (!(csharp2cuda_temp_29))
                     break;
-#line 430 "ProbabilityModule.cs"
+#line 465 "ProbabilityModule.cs"
                 {
-#line 431 "ProbabilityModule.cs"
+#line 466 "ProbabilityModule.cs"
                     double sum = 0.0;
-#line 432 "ProbabilityModule.cs"
+#line 467 "ProbabilityModule.cs"
                     {
-#line 432 "ProbabilityModule.cs"
+#line 467 "ProbabilityModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 432 "ProbabilityModule.cs"
+#line 467 "ProbabilityModule.cs"
                             int csharp2cuda_temp_32 = (first)->count;
                             if (!(((index) < (csharp2cuda_temp_32))))
                                 break;
-#line 433 "ProbabilityModule.cs"
+#line 468 "ProbabilityModule.cs"
                             if (((csharp2cuda_i32_and(mask, csharp2cuda_i32_shl(1, index))) != (0)))
                             {
-#line 433 "ProbabilityModule.cs"
-#line 433 "ProbabilityModule.cs"
+#line 468 "ProbabilityModule.cs"
+#line 468 "ProbabilityModule.cs"
                                 double* csharp2cuda_temp_33 = &(sum);
-#line 433 "ProbabilityModule.cs"
+#line 468 "ProbabilityModule.cs"
                                 double csharp2cuda_temp_34 = *(csharp2cuda_temp_33);
-#line 433 "ProbabilityModule.cs"
+#line 468 "ProbabilityModule.cs"
                                 double csharp2cuda_temp_35 = (a)[index];
                                 (*(csharp2cuda_temp_33) = __dadd_rn(csharp2cuda_temp_34, csharp2cuda_temp_35));
                             }
-#line 432 "ProbabilityModule.cs"
+#line 467 "ProbabilityModule.cs"
                             int* csharp2cuda_temp_31 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_31));
                         }
                     }
-#line 434 "ProbabilityModule.cs"
-#line 434 "ProbabilityModule.cs"
+#line 469 "ProbabilityModule.cs"
+#line 469 "ProbabilityModule.cs"
                     double* csharp2cuda_temp_36 = &((result)[csharp2cuda_i32_sub(mask, 1)]);
                     (*(csharp2cuda_temp_36) = sum);
-#line 435 "ProbabilityModule.cs"
+#line 470 "ProbabilityModule.cs"
                     if ((!(isfinite(sum))))
                     {
-#line 435 "ProbabilityModule.cs"
+#line 470 "ProbabilityModule.cs"
                         atomicExch(&((output)->valid), 0);
                     }
                 }
-#line 429 "ProbabilityModule.cs"
+#line 464 "ProbabilityModule.cs"
                 int* csharp2cuda_temp_26 = &(mask);
-#line 429 "ProbabilityModule.cs"
+#line 464 "ProbabilityModule.cs"
                 int csharp2cuda_temp_27 = *(csharp2cuda_temp_26);
                 (*(csharp2cuda_temp_26) = csharp2cuda_i32_add(csharp2cuda_temp_27, blockDim.x));
             }
         }
-#line 437 "ProbabilityModule.cs"
+#line 472 "ProbabilityModule.cs"
         return;
     }
-#line 440 "ProbabilityModule.cs"
+#line 475 "ProbabilityModule.cs"
     if (((opcode) == (19)))
-#line 441 "ProbabilityModule.cs"
+#line 476 "ProbabilityModule.cs"
     {
-#line 442 "ProbabilityModule.cs"
+#line 477 "ProbabilityModule.cs"
         int csharp2cuda_temp_37 = (first)->count;
-#line 442 "ProbabilityModule.cs"
+#line 477 "ProbabilityModule.cs"
         int csharp2cuda_temp_38;
-#line 442 "ProbabilityModule.cs"
+#line 477 "ProbabilityModule.cs"
         if (((csharp2cuda_temp_37) <= (1)))
         {
-#line 442 "ProbabilityModule.cs"
+#line 477 "ProbabilityModule.cs"
             csharp2cuda_temp_38 = 1;
         }
         else
         {
-#line 442 "ProbabilityModule.cs"
+#line 477 "ProbabilityModule.cs"
             int csharp2cuda_temp_39 = (first)->count;
-#line 442 "ProbabilityModule.cs"
+#line 477 "ProbabilityModule.cs"
             csharp2cuda_temp_38 = csharp2cuda_i32_sub(csharp2cuda_temp_39, 1);
         }
-#line 442 "ProbabilityModule.cs"
+#line 477 "ProbabilityModule.cs"
         int count = csharp2cuda_temp_38;
-#line 443 "ProbabilityModule.cs"
+#line 478 "ProbabilityModule.cs"
         if (((thread) == (0)))
         {
-#line 443 "ProbabilityModule.cs"
+#line 478 "ProbabilityModule.cs"
             mathblocks_set_vector_shape(output, count);
         }
-#line 444 "ProbabilityModule.cs"
+#line 479 "ProbabilityModule.cs"
         __syncthreads();
-#line 445 "ProbabilityModule.cs"
-#line 445 "ProbabilityModule.cs"
+#line 480 "ProbabilityModule.cs"
+#line 480 "ProbabilityModule.cs"
         int csharp2cuda_temp_40 = (first)->count;
         if (((csharp2cuda_temp_40) <= (1)))
-#line 446 "ProbabilityModule.cs"
+#line 481 "ProbabilityModule.cs"
         {
-#line 447 "ProbabilityModule.cs"
+#line 482 "ProbabilityModule.cs"
             if (((thread) == (0)))
             {
-#line 447 "ProbabilityModule.cs"
-#line 447 "ProbabilityModule.cs"
+#line 482 "ProbabilityModule.cs"
+#line 482 "ProbabilityModule.cs"
                 double* csharp2cuda_temp_41 = &((result)[0]);
                 (*(csharp2cuda_temp_41) = 0.0);
             }
         }
         else
-#line 450 "ProbabilityModule.cs"
+#line 485 "ProbabilityModule.cs"
         {
-#line 451 "ProbabilityModule.cs"
+#line 486 "ProbabilityModule.cs"
             {
-#line 451 "ProbabilityModule.cs"
+#line 486 "ProbabilityModule.cs"
                 int index = csharp2cuda_i32_add(thread, 1);
                 while (true)
                 {
-#line 451 "ProbabilityModule.cs"
+#line 486 "ProbabilityModule.cs"
                     int csharp2cuda_temp_44 = (first)->count;
                     if (!(((index) < (csharp2cuda_temp_44))))
                         break;
-#line 452 "ProbabilityModule.cs"
+#line 487 "ProbabilityModule.cs"
                     {
-#line 453 "ProbabilityModule.cs"
-#line 453 "ProbabilityModule.cs"
+#line 488 "ProbabilityModule.cs"
+#line 488 "ProbabilityModule.cs"
                         double* csharp2cuda_temp_45 = &((result)[csharp2cuda_i32_sub(index, 1)]);
-#line 453 "ProbabilityModule.cs"
+#line 488 "ProbabilityModule.cs"
                         double csharp2cuda_temp_46 = (a)[index];
                         (*(csharp2cuda_temp_45) = __dmul_rn(((double)(index)), csharp2cuda_temp_46));
-#line 454 "ProbabilityModule.cs"
-#line 454 "ProbabilityModule.cs"
+#line 489 "ProbabilityModule.cs"
+#line 489 "ProbabilityModule.cs"
                         double csharp2cuda_temp_47 = (result)[csharp2cuda_i32_sub(index, 1)];
                         if ((!(isfinite(csharp2cuda_temp_47))))
                         {
-#line 454 "ProbabilityModule.cs"
+#line 489 "ProbabilityModule.cs"
                             atomicExch(&((output)->valid), 0);
                         }
                     }
-#line 451 "ProbabilityModule.cs"
+#line 486 "ProbabilityModule.cs"
                     int* csharp2cuda_temp_42 = &(index);
-#line 451 "ProbabilityModule.cs"
+#line 486 "ProbabilityModule.cs"
                     int csharp2cuda_temp_43 = *(csharp2cuda_temp_42);
                     (*(csharp2cuda_temp_42) = csharp2cuda_i32_add(csharp2cuda_temp_43, blockDim.x));
                 }
             }
         }
-#line 457 "ProbabilityModule.cs"
+#line 492 "ProbabilityModule.cs"
         return;
     }
-#line 460 "ProbabilityModule.cs"
-#line 460 "ProbabilityModule.cs"
+#line 495 "ProbabilityModule.cs"
+#line 495 "ProbabilityModule.cs"
     bool csharp2cuda_temp_48;
-#line 460 "ProbabilityModule.cs"
+#line 495 "ProbabilityModule.cs"
     if (!(((opcode) == (24))))
     {
-#line 460 "ProbabilityModule.cs"
+#line 495 "ProbabilityModule.cs"
         csharp2cuda_temp_48 = ((opcode) == (27));
     }
     else
     {
-#line 460 "ProbabilityModule.cs"
+#line 495 "ProbabilityModule.cs"
         csharp2cuda_temp_48 = true;
     }
     if (csharp2cuda_temp_48)
-#line 461 "ProbabilityModule.cs"
+#line 496 "ProbabilityModule.cs"
     {
-#line 462 "ProbabilityModule.cs"
+#line 497 "ProbabilityModule.cs"
         if (((thread) == (0)))
-#line 463 "ProbabilityModule.cs"
+#line 498 "ProbabilityModule.cs"
         {
-#line 464 "ProbabilityModule.cs"
-#line 464 "ProbabilityModule.cs"
+#line 499 "ProbabilityModule.cs"
+#line 499 "ProbabilityModule.cs"
             int csharp2cuda_temp_49 = (first)->count;
             if (((csharp2cuda_temp_49) <= (0)))
-#line 465 "ProbabilityModule.cs"
+#line 500 "ProbabilityModule.cs"
             {
-#line 466 "ProbabilityModule.cs"
-#line 466 "ProbabilityModule.cs"
+#line 501 "ProbabilityModule.cs"
+#line 501 "ProbabilityModule.cs"
                 int* csharp2cuda_temp_50 = &((output)->valid);
                 (*(csharp2cuda_temp_50) = 0);
-#line 467 "ProbabilityModule.cs"
+#line 502 "ProbabilityModule.cs"
                 return;
             }
-#line 469 "ProbabilityModule.cs"
+#line 504 "ProbabilityModule.cs"
             {
-#line 469 "ProbabilityModule.cs"
+#line 504 "ProbabilityModule.cs"
                 int index = 0;
                 while (true)
                 {
-#line 469 "ProbabilityModule.cs"
+#line 504 "ProbabilityModule.cs"
                     int csharp2cuda_temp_52 = (first)->count;
                     if (!(((index) < (csharp2cuda_temp_52))))
                         break;
-#line 470 "ProbabilityModule.cs"
-#line 470 "ProbabilityModule.cs"
+#line 505 "ProbabilityModule.cs"
+#line 505 "ProbabilityModule.cs"
                     double csharp2cuda_temp_53 = (a)[index];
                     if (((csharp2cuda_temp_53) < (0.0)))
                     {
-#line 470 "ProbabilityModule.cs"
-#line 470 "ProbabilityModule.cs"
+#line 505 "ProbabilityModule.cs"
+#line 505 "ProbabilityModule.cs"
                         int* csharp2cuda_temp_54 = &((output)->valid);
                         (*(csharp2cuda_temp_54) = 0);
                     }
-#line 469 "ProbabilityModule.cs"
+#line 504 "ProbabilityModule.cs"
                     int* csharp2cuda_temp_51 = &(index);
                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_51));
                 }
             }
-#line 471 "ProbabilityModule.cs"
-#line 471 "ProbabilityModule.cs"
+#line 506 "ProbabilityModule.cs"
+#line 506 "ProbabilityModule.cs"
             int csharp2cuda_temp_55 = (first)->count;
             mathblocks_set_vector_shape(output, csharp2cuda_temp_55);
-#line 472 "ProbabilityModule.cs"
+#line 507 "ProbabilityModule.cs"
             if (((opcode) == (24)))
-#line 473 "ProbabilityModule.cs"
+#line 508 "ProbabilityModule.cs"
             {
-#line 474 "ProbabilityModule.cs"
+#line 509 "ProbabilityModule.cs"
                 int csharp2cuda_temp_56 = (first)->count;
-#line 474 "ProbabilityModule.cs"
+#line 509 "ProbabilityModule.cs"
                 double total = mathblocks_compensated_sum(a, csharp2cuda_temp_56);
-#line 475 "ProbabilityModule.cs"
+#line 510 "ProbabilityModule.cs"
                 {
-#line 475 "ProbabilityModule.cs"
+#line 510 "ProbabilityModule.cs"
                     int index = 0;
                     while (true)
                     {
-#line 475 "ProbabilityModule.cs"
+#line 510 "ProbabilityModule.cs"
                         bool csharp2cuda_temp_58 = (output)->valid;
-#line 475 "ProbabilityModule.cs"
+#line 510 "ProbabilityModule.cs"
                         bool csharp2cuda_temp_59;
-#line 475 "ProbabilityModule.cs"
+#line 510 "ProbabilityModule.cs"
                         if (csharp2cuda_temp_58)
                         {
-#line 475 "ProbabilityModule.cs"
+#line 510 "ProbabilityModule.cs"
                             int csharp2cuda_temp_60 = (first)->count;
-#line 475 "ProbabilityModule.cs"
+#line 510 "ProbabilityModule.cs"
                             csharp2cuda_temp_59 = ((index) < (csharp2cuda_temp_60));
                         }
                         else
                         {
-#line 475 "ProbabilityModule.cs"
+#line 510 "ProbabilityModule.cs"
                             csharp2cuda_temp_59 = false;
                         }
                         if (!(csharp2cuda_temp_59))
                             break;
-#line 476 "ProbabilityModule.cs"
-#line 476 "ProbabilityModule.cs"
+#line 511 "ProbabilityModule.cs"
+#line 511 "ProbabilityModule.cs"
                         double* csharp2cuda_temp_61 = &((result)[index]);
-#line 476 "ProbabilityModule.cs"
+#line 511 "ProbabilityModule.cs"
                         double csharp2cuda_temp_62 = (a)[index];
-#line 476 "ProbabilityModule.cs"
+#line 511 "ProbabilityModule.cs"
                         double csharp2cuda_temp_63 = __ddiv_rn(1.0, total);
                         (*(csharp2cuda_temp_61) = __dmul_rn(csharp2cuda_temp_62, csharp2cuda_temp_63));
-#line 475 "ProbabilityModule.cs"
+#line 510 "ProbabilityModule.cs"
                         int* csharp2cuda_temp_57 = &(index);
                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_57));
                     }
                 }
             }
             else
-#line 479 "ProbabilityModule.cs"
+#line 514 "ProbabilityModule.cs"
             {
-#line 480 "ProbabilityModule.cs"
+#line 515 "ProbabilityModule.cs"
                 double maximum = (a)[0];
-#line 481 "ProbabilityModule.cs"
+#line 516 "ProbabilityModule.cs"
                 {
-#line 481 "ProbabilityModule.cs"
+#line 516 "ProbabilityModule.cs"
                     int index = 1;
                     while (true)
                     {
-#line 481 "ProbabilityModule.cs"
+#line 516 "ProbabilityModule.cs"
                         int csharp2cuda_temp_65 = (first)->count;
                         if (!(((index) < (csharp2cuda_temp_65))))
                             break;
-#line 482 "ProbabilityModule.cs"
-#line 482 "ProbabilityModule.cs"
+#line 517 "ProbabilityModule.cs"
+#line 517 "ProbabilityModule.cs"
                         double* csharp2cuda_temp_66 = &(maximum);
-#line 482 "ProbabilityModule.cs"
+#line 517 "ProbabilityModule.cs"
                         double csharp2cuda_temp_67 = (a)[index];
                         (*(csharp2cuda_temp_66) = mathblocks_maximum(maximum, csharp2cuda_temp_67));
-#line 481 "ProbabilityModule.cs"
+#line 516 "ProbabilityModule.cs"
                         int* csharp2cuda_temp_64 = &(index);
                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_64));
                     }
                 }
-#line 483 "ProbabilityModule.cs"
+#line 518 "ProbabilityModule.cs"
                 {
-#line 483 "ProbabilityModule.cs"
+#line 518 "ProbabilityModule.cs"
                     int index = 0;
                     while (true)
                     {
-#line 483 "ProbabilityModule.cs"
+#line 518 "ProbabilityModule.cs"
                         int csharp2cuda_temp_69 = (first)->count;
                         if (!(((index) < (csharp2cuda_temp_69))))
                             break;
-#line 484 "ProbabilityModule.cs"
-#line 484 "ProbabilityModule.cs"
+#line 519 "ProbabilityModule.cs"
+#line 519 "ProbabilityModule.cs"
                         double* csharp2cuda_temp_70 = &((result)[index]);
-#line 484 "ProbabilityModule.cs"
+#line 519 "ProbabilityModule.cs"
                         double csharp2cuda_temp_71 = (a)[index];
                         (*(csharp2cuda_temp_70) = mathblocks_exponential(__dsub_rn(csharp2cuda_temp_71, maximum)));
-#line 483 "ProbabilityModule.cs"
+#line 518 "ProbabilityModule.cs"
                         int* csharp2cuda_temp_68 = &(index);
                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_68));
                     }
                 }
-#line 485 "ProbabilityModule.cs"
+#line 520 "ProbabilityModule.cs"
                 int csharp2cuda_temp_72 = (first)->count;
-#line 485 "ProbabilityModule.cs"
+#line 520 "ProbabilityModule.cs"
                 double total = mathblocks_compensated_sum(result, csharp2cuda_temp_72);
-#line 486 "ProbabilityModule.cs"
+#line 521 "ProbabilityModule.cs"
                 double scale = __ddiv_rn(1.0, total);
-#line 487 "ProbabilityModule.cs"
+#line 522 "ProbabilityModule.cs"
                 {
-#line 487 "ProbabilityModule.cs"
+#line 522 "ProbabilityModule.cs"
                     int index = 0;
                     while (true)
                     {
-#line 487 "ProbabilityModule.cs"
+#line 522 "ProbabilityModule.cs"
                         int csharp2cuda_temp_74 = (first)->count;
                         if (!(((index) < (csharp2cuda_temp_74))))
                             break;
-#line 488 "ProbabilityModule.cs"
-#line 488 "ProbabilityModule.cs"
+#line 523 "ProbabilityModule.cs"
+#line 523 "ProbabilityModule.cs"
                         double* csharp2cuda_temp_75 = &((result)[index]);
-#line 488 "ProbabilityModule.cs"
+#line 523 "ProbabilityModule.cs"
                         double csharp2cuda_temp_76 = *(csharp2cuda_temp_75);
                         (*(csharp2cuda_temp_75) = __dmul_rn(csharp2cuda_temp_76, scale));
-#line 487 "ProbabilityModule.cs"
+#line 522 "ProbabilityModule.cs"
                         int* csharp2cuda_temp_73 = &(index);
                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_73));
                     }
                 }
             }
-#line 490 "ProbabilityModule.cs"
+#line 525 "ProbabilityModule.cs"
             {
-#line 490 "ProbabilityModule.cs"
+#line 525 "ProbabilityModule.cs"
                 int index = 0;
                 while (true)
                 {
-#line 490 "ProbabilityModule.cs"
+#line 525 "ProbabilityModule.cs"
                     int csharp2cuda_temp_78 = (first)->count;
                     if (!(((index) < (csharp2cuda_temp_78))))
                         break;
-#line 491 "ProbabilityModule.cs"
-#line 491 "ProbabilityModule.cs"
+#line 526 "ProbabilityModule.cs"
+#line 526 "ProbabilityModule.cs"
                     double csharp2cuda_temp_79 = (result)[index];
                     if ((!(isfinite(csharp2cuda_temp_79))))
                     {
-#line 491 "ProbabilityModule.cs"
-#line 491 "ProbabilityModule.cs"
+#line 526 "ProbabilityModule.cs"
+#line 526 "ProbabilityModule.cs"
                         int* csharp2cuda_temp_80 = &((output)->valid);
                         (*(csharp2cuda_temp_80) = 0);
                     }
-#line 490 "ProbabilityModule.cs"
+#line 525 "ProbabilityModule.cs"
                     int* csharp2cuda_temp_77 = &(index);
                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_77));
                 }
             }
         }
-#line 493 "ProbabilityModule.cs"
+#line 528 "ProbabilityModule.cs"
         return;
     }
-#line 496 "ProbabilityModule.cs"
+#line 531 "ProbabilityModule.cs"
     if (((thread) != (0)))
     {
-#line 497 "ProbabilityModule.cs"
+#line 532 "ProbabilityModule.cs"
         return;
     }
-#line 499 "ProbabilityModule.cs"
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     bool csharp2cuda_temp_81;
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     if (!(((opcode) == (0))))
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_81 = ((opcode) == (1));
     }
     else
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_81 = true;
     }
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     bool csharp2cuda_temp_82;
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     if (!(csharp2cuda_temp_81))
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_82 = ((opcode) == (2));
     }
     else
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_82 = true;
     }
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     bool csharp2cuda_temp_83;
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     if (!(csharp2cuda_temp_82))
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_83 = ((opcode) == (23));
     }
     else
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_83 = true;
     }
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     bool csharp2cuda_temp_84;
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     if (!(csharp2cuda_temp_83))
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_84 = ((opcode) == (25));
     }
     else
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_84 = true;
     }
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     bool csharp2cuda_temp_85;
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     if (!(csharp2cuda_temp_84))
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_85 = ((opcode) == (26));
     }
     else
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_85 = true;
     }
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     bool csharp2cuda_temp_86;
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     if (!(csharp2cuda_temp_85))
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_86 = ((opcode) == (28));
     }
     else
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_86 = true;
     }
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     bool csharp2cuda_temp_87;
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     if (!(csharp2cuda_temp_86))
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_87 = ((opcode) == (29));
     }
     else
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_87 = true;
     }
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     bool csharp2cuda_temp_88;
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
     if (!(csharp2cuda_temp_87))
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_88 = ((opcode) == (30));
     }
     else
     {
-#line 499 "ProbabilityModule.cs"
+#line 534 "ProbabilityModule.cs"
         csharp2cuda_temp_88 = true;
     }
     if (csharp2cuda_temp_88)
-#line 501 "ProbabilityModule.cs"
+#line 536 "ProbabilityModule.cs"
     {
-#line 502 "ProbabilityModule.cs"
+#line 537 "ProbabilityModule.cs"
         double value = 0.0;
-#line 505 "ProbabilityModule.cs"
+#line 540 "ProbabilityModule.cs"
         double csharp2cuda_temp_89;
-#line 505 "ProbabilityModule.cs"
+#line 540 "ProbabilityModule.cs"
         if (((((void*)(first))) == (((void*)(nullptr)))))
         {
-#line 505 "ProbabilityModule.cs"
+#line 540 "ProbabilityModule.cs"
             csharp2cuda_temp_89 = 0.0;
         }
         else
         {
-#line 505 "ProbabilityModule.cs"
+#line 540 "ProbabilityModule.cs"
             csharp2cuda_temp_89 = (first)->scalar_value;
         }
-#line 506 "ProbabilityModule.cs"
+#line 541 "ProbabilityModule.cs"
         double csharp2cuda_temp_90;
-#line 506 "ProbabilityModule.cs"
+#line 541 "ProbabilityModule.cs"
         if (((((void*)(second))) == (((void*)(nullptr)))))
         {
-#line 506 "ProbabilityModule.cs"
+#line 541 "ProbabilityModule.cs"
             csharp2cuda_temp_90 = 0.0;
         }
         else
         {
-#line 506 "ProbabilityModule.cs"
+#line 541 "ProbabilityModule.cs"
             csharp2cuda_temp_90 = (second)->scalar_value;
         }
-#line 507 "ProbabilityModule.cs"
+#line 542 "ProbabilityModule.cs"
         double csharp2cuda_temp_91;
-#line 507 "ProbabilityModule.cs"
+#line 542 "ProbabilityModule.cs"
         if (((((void*)(third))) == (((void*)(nullptr)))))
         {
-#line 507 "ProbabilityModule.cs"
+#line 542 "ProbabilityModule.cs"
             csharp2cuda_temp_91 = 0.0;
         }
         else
         {
-#line 507 "ProbabilityModule.cs"
+#line 542 "ProbabilityModule.cs"
             csharp2cuda_temp_91 = (third)->scalar_value;
         }
-#line 508 "ProbabilityModule.cs"
+#line 543 "ProbabilityModule.cs"
         double* csharp2cuda_temp_92 = &(value);
-#line 503 "ProbabilityModule.cs"
+#line 538 "ProbabilityModule.cs"
         bool valid = mathblocks_probability_scalar_value(opcode, csharp2cuda_temp_89, csharp2cuda_temp_90, csharp2cuda_temp_91, csharp2cuda_temp_92);
-#line 509 "ProbabilityModule.cs"
-#line 509 "ProbabilityModule.cs"
+#line 544 "ProbabilityModule.cs"
+#line 544 "ProbabilityModule.cs"
         double* csharp2cuda_temp_93 = &((output)->scalar_value);
         (*(csharp2cuda_temp_93) = value);
-#line 510 "ProbabilityModule.cs"
+#line 545 "ProbabilityModule.cs"
         if ((!(valid)))
         {
-#line 510 "ProbabilityModule.cs"
-#line 510 "ProbabilityModule.cs"
+#line 545 "ProbabilityModule.cs"
+#line 545 "ProbabilityModule.cs"
             int* csharp2cuda_temp_94 = &((output)->valid);
             (*(csharp2cuda_temp_94) = 0);
         }
-#line 511 "ProbabilityModule.cs"
+#line 546 "ProbabilityModule.cs"
         return;
     }
-#line 514 "ProbabilityModule.cs"
-#line 514 "ProbabilityModule.cs"
+#line 549 "ProbabilityModule.cs"
+#line 549 "ProbabilityModule.cs"
     bool csharp2cuda_temp_95;
-#line 514 "ProbabilityModule.cs"
+#line 549 "ProbabilityModule.cs"
     if (((opcode) >= (4)))
     {
-#line 514 "ProbabilityModule.cs"
+#line 549 "ProbabilityModule.cs"
         csharp2cuda_temp_95 = ((opcode) <= (16));
     }
     else
     {
-#line 514 "ProbabilityModule.cs"
+#line 549 "ProbabilityModule.cs"
         csharp2cuda_temp_95 = false;
     }
     if (csharp2cuda_temp_95)
-#line 515 "ProbabilityModule.cs"
+#line 550 "ProbabilityModule.cs"
     {
-#line 516 "ProbabilityModule.cs"
+#line 551 "ProbabilityModule.cs"
         bool csharp2cuda_temp_96;
-#line 516 "ProbabilityModule.cs"
+#line 551 "ProbabilityModule.cs"
         if (((opcode) == (12)))
         {
-#line 517 "ProbabilityModule.cs"
+#line 552 "ProbabilityModule.cs"
             int csharp2cuda_temp_97 = (first)->count;
-#line 516 "ProbabilityModule.cs"
+#line 551 "ProbabilityModule.cs"
             csharp2cuda_temp_96 = mathblocks_probability_distribution(a, csharp2cuda_temp_97);
         }
         else
         {
-#line 518 "ProbabilityModule.cs"
+#line 553 "ProbabilityModule.cs"
             int csharp2cuda_temp_98 = (first)->count;
-#line 516 "ProbabilityModule.cs"
+#line 551 "ProbabilityModule.cs"
             csharp2cuda_temp_96 = mathblocks_probability_distribution(a, csharp2cuda_temp_98);
         }
-#line 516 "ProbabilityModule.cs"
+#line 551 "ProbabilityModule.cs"
         bool first_distribution = csharp2cuda_temp_96;
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
         bool csharp2cuda_temp_99;
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
         if (!(((opcode) == (4))))
         {
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
             csharp2cuda_temp_99 = ((opcode) == (7));
         }
         else
         {
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
             csharp2cuda_temp_99 = true;
         }
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
         bool csharp2cuda_temp_100;
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
         if (!(csharp2cuda_temp_99))
         {
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
             csharp2cuda_temp_100 = ((opcode) == (9));
         }
         else
         {
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
             csharp2cuda_temp_100 = true;
         }
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
         bool csharp2cuda_temp_101;
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
         if (!(csharp2cuda_temp_100))
         {
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
             csharp2cuda_temp_101 = ((opcode) == (10));
         }
         else
         {
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
             csharp2cuda_temp_101 = true;
         }
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
         bool csharp2cuda_temp_102;
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
         if (!(csharp2cuda_temp_101))
         {
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
             csharp2cuda_temp_102 = ((opcode) == (11));
         }
         else
         {
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
             csharp2cuda_temp_102 = true;
         }
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
         bool csharp2cuda_temp_103;
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
         if (!(csharp2cuda_temp_102))
         {
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
             csharp2cuda_temp_103 = ((opcode) == (15));
         }
         else
         {
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
             csharp2cuda_temp_103 = true;
         }
-#line 519 "ProbabilityModule.cs"
+#line 554 "ProbabilityModule.cs"
         bool pair = csharp2cuda_temp_103;
-#line 521 "ProbabilityModule.cs"
-#line 521 "ProbabilityModule.cs"
+#line 556 "ProbabilityModule.cs"
+#line 556 "ProbabilityModule.cs"
         bool csharp2cuda_temp_104;
-#line 521 "ProbabilityModule.cs"
+#line 556 "ProbabilityModule.cs"
         if (!((!(first_distribution))))
         {
-#line 521 "ProbabilityModule.cs"
+#line 556 "ProbabilityModule.cs"
             bool csharp2cuda_temp_105;
-#line 521 "ProbabilityModule.cs"
+#line 556 "ProbabilityModule.cs"
             if (pair)
             {
-#line 522 "ProbabilityModule.cs"
+#line 557 "ProbabilityModule.cs"
                 int csharp2cuda_temp_106 = (first)->count;
-#line 522 "ProbabilityModule.cs"
+#line 557 "ProbabilityModule.cs"
                 int csharp2cuda_temp_107 = (second)->count;
-#line 522 "ProbabilityModule.cs"
+#line 557 "ProbabilityModule.cs"
                 bool csharp2cuda_temp_108;
-#line 522 "ProbabilityModule.cs"
+#line 557 "ProbabilityModule.cs"
                 if (!(((csharp2cuda_temp_106) != (csharp2cuda_temp_107))))
                 {
-#line 522 "ProbabilityModule.cs"
+#line 557 "ProbabilityModule.cs"
                     int csharp2cuda_temp_109 = (second)->count;
-#line 522 "ProbabilityModule.cs"
+#line 557 "ProbabilityModule.cs"
                     bool csharp2cuda_temp_110 = mathblocks_probability_distribution(b, csharp2cuda_temp_109);
-#line 522 "ProbabilityModule.cs"
+#line 557 "ProbabilityModule.cs"
                     csharp2cuda_temp_108 = (!(csharp2cuda_temp_110));
                 }
                 else
                 {
-#line 522 "ProbabilityModule.cs"
+#line 557 "ProbabilityModule.cs"
                     csharp2cuda_temp_108 = true;
                 }
-#line 521 "ProbabilityModule.cs"
+#line 556 "ProbabilityModule.cs"
                 csharp2cuda_temp_105 = csharp2cuda_temp_108;
             }
             else
             {
-#line 521 "ProbabilityModule.cs"
+#line 556 "ProbabilityModule.cs"
                 csharp2cuda_temp_105 = false;
             }
-#line 521 "ProbabilityModule.cs"
+#line 556 "ProbabilityModule.cs"
             csharp2cuda_temp_104 = csharp2cuda_temp_105;
         }
         else
         {
-#line 521 "ProbabilityModule.cs"
+#line 556 "ProbabilityModule.cs"
             csharp2cuda_temp_104 = true;
         }
         if (csharp2cuda_temp_104)
-#line 523 "ProbabilityModule.cs"
+#line 558 "ProbabilityModule.cs"
         {
-#line 524 "ProbabilityModule.cs"
-#line 524 "ProbabilityModule.cs"
+#line 559 "ProbabilityModule.cs"
+#line 559 "ProbabilityModule.cs"
             int* csharp2cuda_temp_111 = &((output)->valid);
             (*(csharp2cuda_temp_111) = 0);
-#line 525 "ProbabilityModule.cs"
+#line 560 "ProbabilityModule.cs"
             return;
         }
-#line 527 "ProbabilityModule.cs"
+#line 562 "ProbabilityModule.cs"
         double value = 0.0;
-#line 528 "ProbabilityModule.cs"
+#line 563 "ProbabilityModule.cs"
         if (((opcode) == (4)))
-#line 529 "ProbabilityModule.cs"
+#line 564 "ProbabilityModule.cs"
         {
-#line 530 "ProbabilityModule.cs"
+#line 565 "ProbabilityModule.cs"
             {
-#line 530 "ProbabilityModule.cs"
+#line 565 "ProbabilityModule.cs"
                 int index = 0;
                 while (true)
                 {
-#line 530 "ProbabilityModule.cs"
+#line 565 "ProbabilityModule.cs"
                     int csharp2cuda_temp_113 = (first)->count;
                     if (!(((index) < (csharp2cuda_temp_113))))
                         break;
-#line 531 "ProbabilityModule.cs"
-#line 531 "ProbabilityModule.cs"
+#line 566 "ProbabilityModule.cs"
+#line 566 "ProbabilityModule.cs"
                     double* csharp2cuda_temp_114 = &(value);
-#line 531 "ProbabilityModule.cs"
+#line 566 "ProbabilityModule.cs"
                     double csharp2cuda_temp_115 = *(csharp2cuda_temp_114);
-#line 531 "ProbabilityModule.cs"
+#line 566 "ProbabilityModule.cs"
                     double csharp2cuda_temp_116 = (a)[index];
-#line 531 "ProbabilityModule.cs"
+#line 566 "ProbabilityModule.cs"
                     double csharp2cuda_temp_117 = (b)[index];
                     (*(csharp2cuda_temp_114) = __dadd_rn(csharp2cuda_temp_115, mathblocks_square_root(__dmul_rn(csharp2cuda_temp_116, csharp2cuda_temp_117))));
-#line 530 "ProbabilityModule.cs"
+#line 565 "ProbabilityModule.cs"
                     int* csharp2cuda_temp_112 = &(index);
                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_112));
                 }
@@ -2135,305 +2135,305 @@ __device__ void mathblocks_probability_dispatch(
         }
         else
         {
-#line 533 "ProbabilityModule.cs"
+#line 568 "ProbabilityModule.cs"
             if (((opcode) == (5)))
-#line 534 "ProbabilityModule.cs"
+#line 569 "ProbabilityModule.cs"
             {
-#line 535 "ProbabilityModule.cs"
-#line 535 "ProbabilityModule.cs"
+#line 570 "ProbabilityModule.cs"
+#line 570 "ProbabilityModule.cs"
                 double* csharp2cuda_temp_118 = &(value);
-#line 535 "ProbabilityModule.cs"
+#line 570 "ProbabilityModule.cs"
                 int csharp2cuda_temp_119 = (first)->count;
-#line 535 "ProbabilityModule.cs"
+#line 570 "ProbabilityModule.cs"
                 double csharp2cuda_temp_120 = mathblocks_probability_entropy(a, csharp2cuda_temp_119);
-#line 535 "ProbabilityModule.cs"
+#line 570 "ProbabilityModule.cs"
                 double csharp2cuda_temp_121 = __ddiv_rn(csharp2cuda_temp_120, mathblocks_natural_logarithm(2.0));
                 (*(csharp2cuda_temp_118) = csharp2cuda_temp_121);
             }
             else
             {
-#line 538 "ProbabilityModule.cs"
+#line 573 "ProbabilityModule.cs"
                 if (((opcode) == (6)))
-#line 539 "ProbabilityModule.cs"
+#line 574 "ProbabilityModule.cs"
                 {
-#line 540 "ProbabilityModule.cs"
+#line 575 "ProbabilityModule.cs"
                     int first_count = 0;
-#line 541 "ProbabilityModule.cs"
+#line 576 "ProbabilityModule.cs"
                     int second_count = 0;
-#line 542 "ProbabilityModule.cs"
+#line 577 "ProbabilityModule.cs"
                     int condition_count = 0;
-#line 543 "ProbabilityModule.cs"
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     double csharp2cuda_temp_122 = (second)->scalar_value;
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     int* csharp2cuda_temp_123 = &(first_count);
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     bool csharp2cuda_temp_124 = mathblocks_probability_integer(csharp2cuda_temp_122, csharp2cuda_temp_123);
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     bool csharp2cuda_temp_125;
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     if (!((!(csharp2cuda_temp_124))))
                     {
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                         csharp2cuda_temp_125 = ((first_count) <= (0));
                     }
                     else
                     {
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                         csharp2cuda_temp_125 = true;
                     }
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     bool csharp2cuda_temp_126;
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     if (!(csharp2cuda_temp_125))
                     {
-#line 544 "ProbabilityModule.cs"
+#line 579 "ProbabilityModule.cs"
                         double csharp2cuda_temp_127 = (third)->scalar_value;
-#line 544 "ProbabilityModule.cs"
+#line 579 "ProbabilityModule.cs"
                         int* csharp2cuda_temp_128 = &(second_count);
-#line 544 "ProbabilityModule.cs"
+#line 579 "ProbabilityModule.cs"
                         bool csharp2cuda_temp_129 = mathblocks_probability_integer(csharp2cuda_temp_127, csharp2cuda_temp_128);
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                         csharp2cuda_temp_126 = (!(csharp2cuda_temp_129));
                     }
                     else
                     {
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                         csharp2cuda_temp_126 = true;
                     }
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     bool csharp2cuda_temp_130;
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     if (!(csharp2cuda_temp_126))
                     {
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                         csharp2cuda_temp_130 = ((second_count) <= (0));
                     }
                     else
                     {
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                         csharp2cuda_temp_130 = true;
                     }
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     bool csharp2cuda_temp_131;
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     if (!(csharp2cuda_temp_130))
                     {
-#line 545 "ProbabilityModule.cs"
+#line 580 "ProbabilityModule.cs"
                         double csharp2cuda_temp_132 = (fourth)->scalar_value;
-#line 545 "ProbabilityModule.cs"
+#line 580 "ProbabilityModule.cs"
                         int* csharp2cuda_temp_133 = &(condition_count);
-#line 545 "ProbabilityModule.cs"
+#line 580 "ProbabilityModule.cs"
                         bool csharp2cuda_temp_134 = mathblocks_probability_integer(csharp2cuda_temp_132, csharp2cuda_temp_133);
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                         csharp2cuda_temp_131 = (!(csharp2cuda_temp_134));
                     }
                     else
                     {
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                         csharp2cuda_temp_131 = true;
                     }
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     bool csharp2cuda_temp_135;
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     if (!(csharp2cuda_temp_131))
                     {
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                         csharp2cuda_temp_135 = ((condition_count) <= (0));
                     }
                     else
                     {
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                         csharp2cuda_temp_135 = true;
                     }
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     bool csharp2cuda_temp_136;
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     if (!(csharp2cuda_temp_135))
                     {
-#line 546 "ProbabilityModule.cs"
+#line 581 "ProbabilityModule.cs"
                         int csharp2cuda_temp_137 = (first)->count;
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                         csharp2cuda_temp_136 = ((csharp2cuda_i64_mul(csharp2cuda_i64_mul(((long long)(first_count)), ((long long)(second_count))), ((long long)(condition_count)))) != (((long long)(csharp2cuda_temp_137))));
                     }
                     else
                     {
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                         csharp2cuda_temp_136 = true;
                     }
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     bool csharp2cuda_temp_138;
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                     if (!(csharp2cuda_temp_136))
                     {
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                         csharp2cuda_temp_138 = ((((void*)(scratch))) == (((void*)(nullptr))));
                     }
                     else
                     {
-#line 543 "ProbabilityModule.cs"
+#line 578 "ProbabilityModule.cs"
                         csharp2cuda_temp_138 = true;
                     }
                     if (csharp2cuda_temp_138)
-#line 547 "ProbabilityModule.cs"
+#line 582 "ProbabilityModule.cs"
                     {
-#line 548 "ProbabilityModule.cs"
-#line 548 "ProbabilityModule.cs"
+#line 583 "ProbabilityModule.cs"
+#line 583 "ProbabilityModule.cs"
                         int* csharp2cuda_temp_139 = &((output)->valid);
                         (*(csharp2cuda_temp_139) = 0);
-#line 549 "ProbabilityModule.cs"
+#line 584 "ProbabilityModule.cs"
                         return;
                     }
-#line 551 "ProbabilityModule.cs"
+#line 586 "ProbabilityModule.cs"
                     int first_condition_count = csharp2cuda_i32_mul(first_count, condition_count);
-#line 552 "ProbabilityModule.cs"
+#line 587 "ProbabilityModule.cs"
                     int second_condition_count = csharp2cuda_i32_mul(second_count, condition_count);
-#line 553 "ProbabilityModule.cs"
+#line 588 "ProbabilityModule.cs"
                     double* first_condition = scratch;
-#line 554 "ProbabilityModule.cs"
+#line 589 "ProbabilityModule.cs"
                     double* second_condition = csharp2cuda_pointer_add(first_condition, first_condition_count);
-#line 555 "ProbabilityModule.cs"
+#line 590 "ProbabilityModule.cs"
                     double* condition = csharp2cuda_pointer_add(second_condition, second_condition_count);
-#line 556 "ProbabilityModule.cs"
+#line 591 "ProbabilityModule.cs"
                     {
-#line 556 "ProbabilityModule.cs"
+#line 591 "ProbabilityModule.cs"
                         int index = 0;
                         while (true)
                         {
                             if (!(((index) < (csharp2cuda_i32_add(csharp2cuda_i32_add(first_condition_count, second_condition_count), condition_count)))))
                                 break;
-#line 557 "ProbabilityModule.cs"
-#line 557 "ProbabilityModule.cs"
+#line 592 "ProbabilityModule.cs"
+#line 592 "ProbabilityModule.cs"
                             double* csharp2cuda_temp_141 = &((scratch)[index]);
                             (*(csharp2cuda_temp_141) = 0.0);
-#line 556 "ProbabilityModule.cs"
+#line 591 "ProbabilityModule.cs"
                             int* csharp2cuda_temp_140 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_140));
                         }
                     }
-#line 558 "ProbabilityModule.cs"
+#line 593 "ProbabilityModule.cs"
                     {
-#line 558 "ProbabilityModule.cs"
+#line 593 "ProbabilityModule.cs"
                         int first_index = 0;
                         while (true)
                         {
                             if (!(((first_index) < (first_count))))
                                 break;
-#line 559 "ProbabilityModule.cs"
+#line 594 "ProbabilityModule.cs"
                             {
-#line 559 "ProbabilityModule.cs"
+#line 594 "ProbabilityModule.cs"
                                 int second_index = 0;
                                 while (true)
                                 {
                                     if (!(((second_index) < (second_count))))
                                         break;
-#line 560 "ProbabilityModule.cs"
+#line 595 "ProbabilityModule.cs"
                                     {
-#line 560 "ProbabilityModule.cs"
+#line 595 "ProbabilityModule.cs"
                                         int state = 0;
                                         while (true)
                                         {
                                             if (!(((state) < (condition_count))))
                                                 break;
-#line 561 "ProbabilityModule.cs"
+#line 596 "ProbabilityModule.cs"
                                             {
-#line 562 "ProbabilityModule.cs"
+#line 597 "ProbabilityModule.cs"
                                                 double probability = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_add(csharp2cuda_i32_mul(first_index, second_count), second_index), condition_count), state)];
-#line 564 "ProbabilityModule.cs"
-#line 564 "ProbabilityModule.cs"
+#line 599 "ProbabilityModule.cs"
+#line 599 "ProbabilityModule.cs"
                                                 double* csharp2cuda_temp_145 = &((first_condition)[csharp2cuda_i32_add(csharp2cuda_i32_mul(first_index, condition_count), state)]);
-#line 564 "ProbabilityModule.cs"
+#line 599 "ProbabilityModule.cs"
                                                 double csharp2cuda_temp_146 = *(csharp2cuda_temp_145);
                                                 (*(csharp2cuda_temp_145) = __dadd_rn(csharp2cuda_temp_146, probability));
-#line 565 "ProbabilityModule.cs"
-#line 565 "ProbabilityModule.cs"
+#line 600 "ProbabilityModule.cs"
+#line 600 "ProbabilityModule.cs"
                                                 double* csharp2cuda_temp_147 = &((second_condition)[csharp2cuda_i32_add(csharp2cuda_i32_mul(second_index, condition_count), state)]);
-#line 565 "ProbabilityModule.cs"
+#line 600 "ProbabilityModule.cs"
                                                 double csharp2cuda_temp_148 = *(csharp2cuda_temp_147);
                                                 (*(csharp2cuda_temp_147) = __dadd_rn(csharp2cuda_temp_148, probability));
-#line 566 "ProbabilityModule.cs"
-#line 566 "ProbabilityModule.cs"
+#line 601 "ProbabilityModule.cs"
+#line 601 "ProbabilityModule.cs"
                                                 double* csharp2cuda_temp_149 = &((condition)[state]);
-#line 566 "ProbabilityModule.cs"
+#line 601 "ProbabilityModule.cs"
                                                 double csharp2cuda_temp_150 = *(csharp2cuda_temp_149);
                                                 (*(csharp2cuda_temp_149) = __dadd_rn(csharp2cuda_temp_150, probability));
                                             }
-#line 560 "ProbabilityModule.cs"
+#line 595 "ProbabilityModule.cs"
                                             int* csharp2cuda_temp_144 = &(state);
                                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_144));
                                         }
                                     }
-#line 559 "ProbabilityModule.cs"
+#line 594 "ProbabilityModule.cs"
                                     int* csharp2cuda_temp_143 = &(second_index);
                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_143));
                                 }
                             }
-#line 558 "ProbabilityModule.cs"
+#line 593 "ProbabilityModule.cs"
                             int* csharp2cuda_temp_142 = &(first_index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_142));
                         }
                     }
-#line 568 "ProbabilityModule.cs"
+#line 603 "ProbabilityModule.cs"
                     {
-#line 568 "ProbabilityModule.cs"
+#line 603 "ProbabilityModule.cs"
                         int first_index = 0;
                         while (true)
                         {
                             if (!(((first_index) < (first_count))))
                                 break;
-#line 569 "ProbabilityModule.cs"
+#line 604 "ProbabilityModule.cs"
                             {
-#line 569 "ProbabilityModule.cs"
+#line 604 "ProbabilityModule.cs"
                                 int second_index = 0;
                                 while (true)
                                 {
                                     if (!(((second_index) < (second_count))))
                                         break;
-#line 570 "ProbabilityModule.cs"
+#line 605 "ProbabilityModule.cs"
                                     {
-#line 570 "ProbabilityModule.cs"
+#line 605 "ProbabilityModule.cs"
                                         int state = 0;
                                         while (true)
                                         {
                                             if (!(((state) < (condition_count))))
                                                 break;
-#line 571 "ProbabilityModule.cs"
+#line 606 "ProbabilityModule.cs"
                                             {
-#line 572 "ProbabilityModule.cs"
+#line 607 "ProbabilityModule.cs"
                                                 double probability = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_add(csharp2cuda_i32_mul(first_index, second_count), second_index), condition_count), state)];
-#line 574 "ProbabilityModule.cs"
+#line 609 "ProbabilityModule.cs"
                                                 if (((probability) == (0.0)))
                                                 {
-#line 574 "ProbabilityModule.cs"
+#line 609 "ProbabilityModule.cs"
                                                     goto csharp2cuda_for_continue_15;
                                                 }
-#line 575 "ProbabilityModule.cs"
-#line 575 "ProbabilityModule.cs"
+#line 610 "ProbabilityModule.cs"
+#line 610 "ProbabilityModule.cs"
                                                 double* csharp2cuda_temp_154 = &(value);
-#line 575 "ProbabilityModule.cs"
+#line 610 "ProbabilityModule.cs"
                                                 double csharp2cuda_temp_155 = *(csharp2cuda_temp_154);
-#line 576 "ProbabilityModule.cs"
+#line 611 "ProbabilityModule.cs"
                                                 double csharp2cuda_temp_156 = (condition)[state];
-#line 577 "ProbabilityModule.cs"
+#line 612 "ProbabilityModule.cs"
                                                 double csharp2cuda_temp_157 = (first_condition)[csharp2cuda_i32_add(csharp2cuda_i32_mul(first_index, condition_count), state)];
-#line 578 "ProbabilityModule.cs"
+#line 613 "ProbabilityModule.cs"
                                                 double csharp2cuda_temp_158 = (second_condition)[csharp2cuda_i32_add(csharp2cuda_i32_mul(second_index, condition_count), state)];
-#line 576 "ProbabilityModule.cs"
+#line 611 "ProbabilityModule.cs"
                                                 double csharp2cuda_temp_159 = __ddiv_rn(__dmul_rn(probability, csharp2cuda_temp_156), __dmul_rn(csharp2cuda_temp_157, csharp2cuda_temp_158));
                                                 (*(csharp2cuda_temp_154) = __dadd_rn(csharp2cuda_temp_155, __dmul_rn(probability, mathblocks_natural_logarithm(csharp2cuda_temp_159))));
                                             }
                                             csharp2cuda_for_continue_15:
-#line 570 "ProbabilityModule.cs"
+#line 605 "ProbabilityModule.cs"
                                             int* csharp2cuda_temp_153 = &(state);
                                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_153));
                                         }
                                     }
-#line 569 "ProbabilityModule.cs"
+#line 604 "ProbabilityModule.cs"
                                     int* csharp2cuda_temp_152 = &(second_index);
                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_152));
                                 }
                             }
-#line 568 "ProbabilityModule.cs"
+#line 603 "ProbabilityModule.cs"
                             int* csharp2cuda_temp_151 = &(first_index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_151));
                         }
@@ -2441,68 +2441,68 @@ __device__ void mathblocks_probability_dispatch(
                 }
                 else
                 {
-#line 581 "ProbabilityModule.cs"
+#line 616 "ProbabilityModule.cs"
                     if (((opcode) == (7)))
-#line 582 "ProbabilityModule.cs"
+#line 617 "ProbabilityModule.cs"
                     {
-#line 583 "ProbabilityModule.cs"
+#line 618 "ProbabilityModule.cs"
                         {
-#line 583 "ProbabilityModule.cs"
+#line 618 "ProbabilityModule.cs"
                             int index = 0;
                             while (true)
                             {
-#line 583 "ProbabilityModule.cs"
+#line 618 "ProbabilityModule.cs"
                                 int csharp2cuda_temp_161 = (first)->count;
                                 if (!(((index) < (csharp2cuda_temp_161))))
                                     break;
-#line 584 "ProbabilityModule.cs"
+#line 619 "ProbabilityModule.cs"
                                 {
-#line 585 "ProbabilityModule.cs"
-#line 585 "ProbabilityModule.cs"
+#line 620 "ProbabilityModule.cs"
+#line 620 "ProbabilityModule.cs"
                                     double csharp2cuda_temp_162 = (a)[index];
-#line 585 "ProbabilityModule.cs"
+#line 620 "ProbabilityModule.cs"
                                     bool csharp2cuda_temp_163;
-#line 585 "ProbabilityModule.cs"
+#line 620 "ProbabilityModule.cs"
                                     if (((csharp2cuda_temp_162) > (0.0)))
                                     {
-#line 585 "ProbabilityModule.cs"
+#line 620 "ProbabilityModule.cs"
                                         double csharp2cuda_temp_164 = (b)[index];
-#line 585 "ProbabilityModule.cs"
+#line 620 "ProbabilityModule.cs"
                                         csharp2cuda_temp_163 = ((csharp2cuda_temp_164) == (0.0));
                                     }
                                     else
                                     {
-#line 585 "ProbabilityModule.cs"
+#line 620 "ProbabilityModule.cs"
                                         csharp2cuda_temp_163 = false;
                                     }
                                     if (csharp2cuda_temp_163)
-#line 586 "ProbabilityModule.cs"
+#line 621 "ProbabilityModule.cs"
                                     {
-#line 587 "ProbabilityModule.cs"
-#line 587 "ProbabilityModule.cs"
+#line 622 "ProbabilityModule.cs"
+#line 622 "ProbabilityModule.cs"
                                         int* csharp2cuda_temp_165 = &((output)->valid);
                                         (*(csharp2cuda_temp_165) = 0);
-#line 588 "ProbabilityModule.cs"
+#line 623 "ProbabilityModule.cs"
                                         return;
                                     }
-#line 590 "ProbabilityModule.cs"
-#line 590 "ProbabilityModule.cs"
+#line 625 "ProbabilityModule.cs"
+#line 625 "ProbabilityModule.cs"
                                     double csharp2cuda_temp_166 = (a)[index];
                                     if (((csharp2cuda_temp_166) > (0.0)))
                                     {
-#line 591 "ProbabilityModule.cs"
-#line 591 "ProbabilityModule.cs"
+#line 626 "ProbabilityModule.cs"
+#line 626 "ProbabilityModule.cs"
                                         double* csharp2cuda_temp_167 = &(value);
-#line 591 "ProbabilityModule.cs"
+#line 626 "ProbabilityModule.cs"
                                         double csharp2cuda_temp_168 = *(csharp2cuda_temp_167);
-#line 591 "ProbabilityModule.cs"
+#line 626 "ProbabilityModule.cs"
                                         double csharp2cuda_temp_169 = (a)[index];
-#line 591 "ProbabilityModule.cs"
+#line 626 "ProbabilityModule.cs"
                                         double csharp2cuda_temp_170 = (b)[index];
                                         (*(csharp2cuda_temp_167) = __dsub_rn(csharp2cuda_temp_168, __dmul_rn(csharp2cuda_temp_169, mathblocks_natural_logarithm(csharp2cuda_temp_170))));
                                     }
                                 }
-#line 583 "ProbabilityModule.cs"
+#line 618 "ProbabilityModule.cs"
                                 int* csharp2cuda_temp_160 = &(index);
                                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_160));
                             }
@@ -2510,301 +2510,301 @@ __device__ void mathblocks_probability_dispatch(
                     }
                     else
                     {
-#line 594 "ProbabilityModule.cs"
+#line 629 "ProbabilityModule.cs"
                         if (((opcode) == (8)))
-#line 595 "ProbabilityModule.cs"
+#line 630 "ProbabilityModule.cs"
                         {
-#line 596 "ProbabilityModule.cs"
-#line 596 "ProbabilityModule.cs"
+#line 631 "ProbabilityModule.cs"
+#line 631 "ProbabilityModule.cs"
                             double* csharp2cuda_temp_171 = &(value);
-#line 596 "ProbabilityModule.cs"
+#line 631 "ProbabilityModule.cs"
                             int csharp2cuda_temp_172 = (first)->count;
                             (*(csharp2cuda_temp_171) = __dsub_rn(1.0, mathblocks_compensated_product_sum(a, a, csharp2cuda_temp_172)));
                         }
                         else
                         {
-#line 598 "ProbabilityModule.cs"
+#line 633 "ProbabilityModule.cs"
                             if (((opcode) == (9)))
-#line 599 "ProbabilityModule.cs"
+#line 634 "ProbabilityModule.cs"
                             {
-#line 600 "ProbabilityModule.cs"
+#line 635 "ProbabilityModule.cs"
                                 {
-#line 600 "ProbabilityModule.cs"
+#line 635 "ProbabilityModule.cs"
                                     int index = 0;
                                     while (true)
                                     {
-#line 600 "ProbabilityModule.cs"
+#line 635 "ProbabilityModule.cs"
                                         int csharp2cuda_temp_174 = (first)->count;
                                         if (!(((index) < (csharp2cuda_temp_174))))
                                             break;
-#line 601 "ProbabilityModule.cs"
+#line 636 "ProbabilityModule.cs"
                                         {
-#line 602 "ProbabilityModule.cs"
+#line 637 "ProbabilityModule.cs"
                                             double csharp2cuda_temp_175 = (a)[index];
-#line 602 "ProbabilityModule.cs"
+#line 637 "ProbabilityModule.cs"
                                             double csharp2cuda_temp_176 = (b)[index];
-#line 602 "ProbabilityModule.cs"
+#line 637 "ProbabilityModule.cs"
                                             double difference = __dsub_rn(mathblocks_square_root(csharp2cuda_temp_175), mathblocks_square_root(csharp2cuda_temp_176));
-#line 603 "ProbabilityModule.cs"
-#line 603 "ProbabilityModule.cs"
+#line 638 "ProbabilityModule.cs"
+#line 638 "ProbabilityModule.cs"
                                             double* csharp2cuda_temp_177 = &(value);
-#line 603 "ProbabilityModule.cs"
+#line 638 "ProbabilityModule.cs"
                                             double csharp2cuda_temp_178 = *(csharp2cuda_temp_177);
                                             (*(csharp2cuda_temp_177) = __dadd_rn(csharp2cuda_temp_178, __dmul_rn(difference, difference)));
                                         }
-#line 600 "ProbabilityModule.cs"
+#line 635 "ProbabilityModule.cs"
                                         int* csharp2cuda_temp_173 = &(index);
                                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_173));
                                     }
                                 }
-#line 605 "ProbabilityModule.cs"
-#line 605 "ProbabilityModule.cs"
+#line 640 "ProbabilityModule.cs"
+#line 640 "ProbabilityModule.cs"
                                 double* csharp2cuda_temp_179 = &(value);
-#line 605 "ProbabilityModule.cs"
+#line 640 "ProbabilityModule.cs"
                                 double csharp2cuda_temp_180 = __ddiv_rn(value, 2.0);
                                 (*(csharp2cuda_temp_179) = mathblocks_square_root(csharp2cuda_temp_180));
                             }
                             else
                             {
-#line 607 "ProbabilityModule.cs"
+#line 642 "ProbabilityModule.cs"
                                 if (((opcode) == (10)))
-#line 608 "ProbabilityModule.cs"
+#line 643 "ProbabilityModule.cs"
                                 {
-#line 609 "ProbabilityModule.cs"
+#line 644 "ProbabilityModule.cs"
                                     if (((((void*)(scratch))) == (((void*)(nullptr)))))
-#line 610 "ProbabilityModule.cs"
+#line 645 "ProbabilityModule.cs"
                                     {
-#line 611 "ProbabilityModule.cs"
-#line 611 "ProbabilityModule.cs"
+#line 646 "ProbabilityModule.cs"
+#line 646 "ProbabilityModule.cs"
                                         int* csharp2cuda_temp_181 = &((output)->valid);
                                         (*(csharp2cuda_temp_181) = 0);
-#line 612 "ProbabilityModule.cs"
+#line 647 "ProbabilityModule.cs"
                                         return;
                                     }
-#line 614 "ProbabilityModule.cs"
+#line 649 "ProbabilityModule.cs"
                                     {
-#line 614 "ProbabilityModule.cs"
+#line 649 "ProbabilityModule.cs"
                                         int index = 0;
                                         while (true)
                                         {
-#line 614 "ProbabilityModule.cs"
+#line 649 "ProbabilityModule.cs"
                                             int csharp2cuda_temp_183 = (first)->count;
                                             if (!(((index) < (csharp2cuda_temp_183))))
                                                 break;
-#line 615 "ProbabilityModule.cs"
-#line 615 "ProbabilityModule.cs"
+#line 650 "ProbabilityModule.cs"
+#line 650 "ProbabilityModule.cs"
                                             double* csharp2cuda_temp_184 = &((scratch)[index]);
-#line 615 "ProbabilityModule.cs"
+#line 650 "ProbabilityModule.cs"
                                             double csharp2cuda_temp_185 = (a)[index];
-#line 615 "ProbabilityModule.cs"
+#line 650 "ProbabilityModule.cs"
                                             double csharp2cuda_temp_186 = (b)[index];
-#line 615 "ProbabilityModule.cs"
+#line 650 "ProbabilityModule.cs"
                                             double csharp2cuda_temp_187 = __ddiv_rn(__dadd_rn(csharp2cuda_temp_185, csharp2cuda_temp_186), 2.0);
                                             (*(csharp2cuda_temp_184) = csharp2cuda_temp_187);
-#line 614 "ProbabilityModule.cs"
+#line 649 "ProbabilityModule.cs"
                                             int* csharp2cuda_temp_182 = &(index);
                                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_182));
                                         }
                                     }
-#line 616 "ProbabilityModule.cs"
-#line 616 "ProbabilityModule.cs"
+#line 651 "ProbabilityModule.cs"
+#line 651 "ProbabilityModule.cs"
                                     double* csharp2cuda_temp_188 = &(value);
-#line 616 "ProbabilityModule.cs"
+#line 651 "ProbabilityModule.cs"
                                     int csharp2cuda_temp_189 = (first)->count;
-#line 616 "ProbabilityModule.cs"
+#line 651 "ProbabilityModule.cs"
                                     double csharp2cuda_temp_190 = mathblocks_probability_kl(a, scratch, csharp2cuda_temp_189);
-#line 617 "ProbabilityModule.cs"
+#line 652 "ProbabilityModule.cs"
                                     int csharp2cuda_temp_191 = (first)->count;
-#line 617 "ProbabilityModule.cs"
+#line 652 "ProbabilityModule.cs"
                                     double csharp2cuda_temp_192 = mathblocks_probability_kl(b, scratch, csharp2cuda_temp_191);
                                     (*(csharp2cuda_temp_188) = __dmul_rn(0.5, __dadd_rn(csharp2cuda_temp_190, csharp2cuda_temp_192)));
                                 }
                                 else
                                 {
-#line 619 "ProbabilityModule.cs"
+#line 654 "ProbabilityModule.cs"
                                     if (((opcode) == (11)))
-#line 620 "ProbabilityModule.cs"
+#line 655 "ProbabilityModule.cs"
                                     {
-#line 621 "ProbabilityModule.cs"
+#line 656 "ProbabilityModule.cs"
                                         {
-#line 621 "ProbabilityModule.cs"
+#line 656 "ProbabilityModule.cs"
                                             int index = 0;
                                             while (true)
                                             {
-#line 621 "ProbabilityModule.cs"
+#line 656 "ProbabilityModule.cs"
                                                 int csharp2cuda_temp_194 = (first)->count;
                                                 if (!(((index) < (csharp2cuda_temp_194))))
                                                     break;
-#line 622 "ProbabilityModule.cs"
-#line 622 "ProbabilityModule.cs"
+#line 657 "ProbabilityModule.cs"
+#line 657 "ProbabilityModule.cs"
                                                 double csharp2cuda_temp_195 = (a)[index];
-#line 622 "ProbabilityModule.cs"
+#line 657 "ProbabilityModule.cs"
                                                 bool csharp2cuda_temp_196;
-#line 622 "ProbabilityModule.cs"
+#line 657 "ProbabilityModule.cs"
                                                 if (((csharp2cuda_temp_195) > (0.0)))
                                                 {
-#line 622 "ProbabilityModule.cs"
+#line 657 "ProbabilityModule.cs"
                                                     double csharp2cuda_temp_197 = (b)[index];
-#line 622 "ProbabilityModule.cs"
+#line 657 "ProbabilityModule.cs"
                                                     csharp2cuda_temp_196 = ((csharp2cuda_temp_197) == (0.0));
                                                 }
                                                 else
                                                 {
-#line 622 "ProbabilityModule.cs"
+#line 657 "ProbabilityModule.cs"
                                                     csharp2cuda_temp_196 = false;
                                                 }
                                                 if (csharp2cuda_temp_196)
-#line 623 "ProbabilityModule.cs"
+#line 658 "ProbabilityModule.cs"
                                                 {
-#line 624 "ProbabilityModule.cs"
-#line 624 "ProbabilityModule.cs"
+#line 659 "ProbabilityModule.cs"
+#line 659 "ProbabilityModule.cs"
                                                     int* csharp2cuda_temp_198 = &((output)->valid);
                                                     (*(csharp2cuda_temp_198) = 0);
-#line 625 "ProbabilityModule.cs"
+#line 660 "ProbabilityModule.cs"
                                                     return;
                                                 }
-#line 621 "ProbabilityModule.cs"
+#line 656 "ProbabilityModule.cs"
                                                 int* csharp2cuda_temp_193 = &(index);
                                                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_193));
                                             }
                                         }
-#line 627 "ProbabilityModule.cs"
-#line 627 "ProbabilityModule.cs"
+#line 662 "ProbabilityModule.cs"
+#line 662 "ProbabilityModule.cs"
                                         double* csharp2cuda_temp_199 = &(value);
-#line 627 "ProbabilityModule.cs"
+#line 662 "ProbabilityModule.cs"
                                         int csharp2cuda_temp_200 = (first)->count;
-#line 627 "ProbabilityModule.cs"
+#line 662 "ProbabilityModule.cs"
                                         double csharp2cuda_temp_201 = mathblocks_probability_kl(a, b, csharp2cuda_temp_200);
                                         (*(csharp2cuda_temp_199) = csharp2cuda_temp_201);
                                     }
                                     else
                                     {
-#line 629 "ProbabilityModule.cs"
+#line 664 "ProbabilityModule.cs"
                                         if (((opcode) == (12)))
-#line 630 "ProbabilityModule.cs"
+#line 665 "ProbabilityModule.cs"
                                         {
-#line 631 "ProbabilityModule.cs"
+#line 666 "ProbabilityModule.cs"
                                             int rows = (first)->rows;
-#line 632 "ProbabilityModule.cs"
+#line 667 "ProbabilityModule.cs"
                                             int columns = (first)->columns;
-#line 633 "ProbabilityModule.cs"
+#line 668 "ProbabilityModule.cs"
                                             if (((((void*)(scratch))) == (((void*)(nullptr)))))
-#line 634 "ProbabilityModule.cs"
+#line 669 "ProbabilityModule.cs"
                                             {
-#line 635 "ProbabilityModule.cs"
-#line 635 "ProbabilityModule.cs"
+#line 670 "ProbabilityModule.cs"
+#line 670 "ProbabilityModule.cs"
                                                 int* csharp2cuda_temp_202 = &((output)->valid);
                                                 (*(csharp2cuda_temp_202) = 0);
-#line 636 "ProbabilityModule.cs"
+#line 671 "ProbabilityModule.cs"
                                                 return;
                                             }
-#line 638 "ProbabilityModule.cs"
+#line 673 "ProbabilityModule.cs"
                                             double* row_totals = scratch;
-#line 639 "ProbabilityModule.cs"
+#line 674 "ProbabilityModule.cs"
                                             double* column_totals = csharp2cuda_pointer_add(scratch, rows);
-#line 640 "ProbabilityModule.cs"
+#line 675 "ProbabilityModule.cs"
                                             {
-#line 640 "ProbabilityModule.cs"
+#line 675 "ProbabilityModule.cs"
                                                 int index = 0;
                                                 while (true)
                                                 {
                                                     if (!(((index) < (csharp2cuda_i32_add(rows, columns)))))
                                                         break;
-#line 640 "ProbabilityModule.cs"
-#line 640 "ProbabilityModule.cs"
+#line 675 "ProbabilityModule.cs"
+#line 675 "ProbabilityModule.cs"
                                                     double* csharp2cuda_temp_204 = &((scratch)[index]);
                                                     (*(csharp2cuda_temp_204) = 0.0);
-#line 640 "ProbabilityModule.cs"
+#line 675 "ProbabilityModule.cs"
                                                     int* csharp2cuda_temp_203 = &(index);
                                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_203));
                                                 }
                                             }
-#line 641 "ProbabilityModule.cs"
+#line 676 "ProbabilityModule.cs"
                                             {
-#line 641 "ProbabilityModule.cs"
+#line 676 "ProbabilityModule.cs"
                                                 int row = 0;
                                                 while (true)
                                                 {
                                                     if (!(((row) < (rows))))
                                                         break;
-#line 642 "ProbabilityModule.cs"
+#line 677 "ProbabilityModule.cs"
                                                     {
-#line 642 "ProbabilityModule.cs"
+#line 677 "ProbabilityModule.cs"
                                                         int column = 0;
                                                         while (true)
                                                         {
                                                             if (!(((column) < (columns))))
                                                                 break;
-#line 643 "ProbabilityModule.cs"
+#line 678 "ProbabilityModule.cs"
                                                             {
-#line 644 "ProbabilityModule.cs"
+#line 679 "ProbabilityModule.cs"
                                                                 double probability = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)];
-#line 645 "ProbabilityModule.cs"
-#line 645 "ProbabilityModule.cs"
+#line 680 "ProbabilityModule.cs"
+#line 680 "ProbabilityModule.cs"
                                                                 double* csharp2cuda_temp_207 = &((row_totals)[row]);
-#line 645 "ProbabilityModule.cs"
+#line 680 "ProbabilityModule.cs"
                                                                 double csharp2cuda_temp_208 = *(csharp2cuda_temp_207);
                                                                 (*(csharp2cuda_temp_207) = __dadd_rn(csharp2cuda_temp_208, probability));
-#line 646 "ProbabilityModule.cs"
-#line 646 "ProbabilityModule.cs"
+#line 681 "ProbabilityModule.cs"
+#line 681 "ProbabilityModule.cs"
                                                                 double* csharp2cuda_temp_209 = &((column_totals)[column]);
-#line 646 "ProbabilityModule.cs"
+#line 681 "ProbabilityModule.cs"
                                                                 double csharp2cuda_temp_210 = *(csharp2cuda_temp_209);
                                                                 (*(csharp2cuda_temp_209) = __dadd_rn(csharp2cuda_temp_210, probability));
                                                             }
-#line 642 "ProbabilityModule.cs"
+#line 677 "ProbabilityModule.cs"
                                                             int* csharp2cuda_temp_206 = &(column);
                                                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_206));
                                                         }
                                                     }
-#line 641 "ProbabilityModule.cs"
+#line 676 "ProbabilityModule.cs"
                                                     int* csharp2cuda_temp_205 = &(row);
                                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_205));
                                                 }
                                             }
-#line 648 "ProbabilityModule.cs"
+#line 683 "ProbabilityModule.cs"
                                             {
-#line 648 "ProbabilityModule.cs"
+#line 683 "ProbabilityModule.cs"
                                                 int row = 0;
                                                 while (true)
                                                 {
                                                     if (!(((row) < (rows))))
                                                         break;
-#line 649 "ProbabilityModule.cs"
+#line 684 "ProbabilityModule.cs"
                                                     {
-#line 649 "ProbabilityModule.cs"
+#line 684 "ProbabilityModule.cs"
                                                         int column = 0;
                                                         while (true)
                                                         {
                                                             if (!(((column) < (columns))))
                                                                 break;
-#line 650 "ProbabilityModule.cs"
+#line 685 "ProbabilityModule.cs"
                                                             {
-#line 651 "ProbabilityModule.cs"
+#line 686 "ProbabilityModule.cs"
                                                                 double probability = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)];
-#line 652 "ProbabilityModule.cs"
+#line 687 "ProbabilityModule.cs"
                                                                 if (((probability) > (0.0)))
                                                                 {
-#line 653 "ProbabilityModule.cs"
-#line 653 "ProbabilityModule.cs"
+#line 688 "ProbabilityModule.cs"
+#line 688 "ProbabilityModule.cs"
                                                                     double* csharp2cuda_temp_213 = &(value);
-#line 653 "ProbabilityModule.cs"
+#line 688 "ProbabilityModule.cs"
                                                                     double csharp2cuda_temp_214 = *(csharp2cuda_temp_213);
-#line 654 "ProbabilityModule.cs"
+#line 689 "ProbabilityModule.cs"
                                                                     double csharp2cuda_temp_215 = (row_totals)[row];
-#line 654 "ProbabilityModule.cs"
+#line 689 "ProbabilityModule.cs"
                                                                     double csharp2cuda_temp_216 = (column_totals)[column];
-#line 654 "ProbabilityModule.cs"
+#line 689 "ProbabilityModule.cs"
                                                                     double csharp2cuda_temp_217 = __ddiv_rn(probability, __dmul_rn(csharp2cuda_temp_215, csharp2cuda_temp_216));
                                                                     (*(csharp2cuda_temp_213) = __dadd_rn(csharp2cuda_temp_214, __dmul_rn(probability, mathblocks_natural_logarithm(csharp2cuda_temp_217))));
                                                                 }
                                                             }
-#line 649 "ProbabilityModule.cs"
+#line 684 "ProbabilityModule.cs"
                                                             int* csharp2cuda_temp_212 = &(column);
                                                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_212));
                                                         }
                                                     }
-#line 648 "ProbabilityModule.cs"
+#line 683 "ProbabilityModule.cs"
                                                     int* csharp2cuda_temp_211 = &(row);
                                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_211));
                                                 }
@@ -2812,93 +2812,93 @@ __device__ void mathblocks_probability_dispatch(
                                         }
                                         else
                                         {
-#line 657 "ProbabilityModule.cs"
-#line 657 "ProbabilityModule.cs"
+#line 692 "ProbabilityModule.cs"
+#line 692 "ProbabilityModule.cs"
                                             bool csharp2cuda_temp_218;
-#line 657 "ProbabilityModule.cs"
+#line 692 "ProbabilityModule.cs"
                                             if (!(((opcode) == (13))))
                                             {
-#line 657 "ProbabilityModule.cs"
+#line 692 "ProbabilityModule.cs"
                                                 csharp2cuda_temp_218 = ((opcode) == (16));
                                             }
                                             else
                                             {
-#line 657 "ProbabilityModule.cs"
+#line 692 "ProbabilityModule.cs"
                                                 csharp2cuda_temp_218 = true;
                                             }
                                             if (csharp2cuda_temp_218)
-#line 658 "ProbabilityModule.cs"
+#line 693 "ProbabilityModule.cs"
                                             {
-#line 659 "ProbabilityModule.cs"
-#line 661 "ProbabilityModule.cs"
+#line 694 "ProbabilityModule.cs"
+#line 696 "ProbabilityModule.cs"
                                                 int csharp2cuda_temp_219 = (first)->count;
-#line 662 "ProbabilityModule.cs"
+#line 697 "ProbabilityModule.cs"
                                                 double csharp2cuda_temp_220 = (second)->scalar_value;
-#line 664 "ProbabilityModule.cs"
+#line 699 "ProbabilityModule.cs"
                                                 double* csharp2cuda_temp_221 = &(value);
-#line 659 "ProbabilityModule.cs"
+#line 694 "ProbabilityModule.cs"
                                                 bool csharp2cuda_temp_222 = mathblocks_probability_ordered_entropy_value(a, csharp2cuda_temp_219, csharp2cuda_temp_220, ((opcode) == (13)), csharp2cuda_temp_221);
                                                 if ((!(csharp2cuda_temp_222)))
-#line 665 "ProbabilityModule.cs"
+#line 700 "ProbabilityModule.cs"
                                                 {
-#line 666 "ProbabilityModule.cs"
-#line 666 "ProbabilityModule.cs"
+#line 701 "ProbabilityModule.cs"
+#line 701 "ProbabilityModule.cs"
                                                     int* csharp2cuda_temp_223 = &((output)->valid);
                                                     (*(csharp2cuda_temp_223) = 0);
-#line 667 "ProbabilityModule.cs"
+#line 702 "ProbabilityModule.cs"
                                                     return;
                                                 }
                                             }
                                             else
                                             {
-#line 670 "ProbabilityModule.cs"
+#line 705 "ProbabilityModule.cs"
                                                 if (((opcode) == (14)))
-#line 671 "ProbabilityModule.cs"
+#line 706 "ProbabilityModule.cs"
                                                 {
-#line 672 "ProbabilityModule.cs"
-#line 672 "ProbabilityModule.cs"
+#line 707 "ProbabilityModule.cs"
+#line 707 "ProbabilityModule.cs"
                                                     double* csharp2cuda_temp_224 = &(value);
-#line 672 "ProbabilityModule.cs"
+#line 707 "ProbabilityModule.cs"
                                                     int csharp2cuda_temp_225 = (first)->count;
-#line 672 "ProbabilityModule.cs"
+#line 707 "ProbabilityModule.cs"
                                                     double csharp2cuda_temp_226 = mathblocks_probability_entropy(a, csharp2cuda_temp_225);
                                                     (*(csharp2cuda_temp_224) = csharp2cuda_temp_226);
                                                 }
                                                 else
                                                 {
-#line 674 "ProbabilityModule.cs"
+#line 709 "ProbabilityModule.cs"
                                                     if (((opcode) == (15)))
-#line 675 "ProbabilityModule.cs"
+#line 710 "ProbabilityModule.cs"
                                                     {
-#line 676 "ProbabilityModule.cs"
+#line 711 "ProbabilityModule.cs"
                                                         {
-#line 676 "ProbabilityModule.cs"
+#line 711 "ProbabilityModule.cs"
                                                             int index = 0;
                                                             while (true)
                                                             {
-#line 676 "ProbabilityModule.cs"
+#line 711 "ProbabilityModule.cs"
                                                                 int csharp2cuda_temp_228 = (first)->count;
                                                                 if (!(((index) < (csharp2cuda_temp_228))))
                                                                     break;
-#line 677 "ProbabilityModule.cs"
-#line 677 "ProbabilityModule.cs"
+#line 712 "ProbabilityModule.cs"
+#line 712 "ProbabilityModule.cs"
                                                                 double* csharp2cuda_temp_229 = &(value);
-#line 677 "ProbabilityModule.cs"
+#line 712 "ProbabilityModule.cs"
                                                                 double csharp2cuda_temp_230 = *(csharp2cuda_temp_229);
-#line 677 "ProbabilityModule.cs"
+#line 712 "ProbabilityModule.cs"
                                                                 double csharp2cuda_temp_231 = (a)[index];
-#line 677 "ProbabilityModule.cs"
+#line 712 "ProbabilityModule.cs"
                                                                 double csharp2cuda_temp_232 = (b)[index];
                                                                 (*(csharp2cuda_temp_229) = __dadd_rn(csharp2cuda_temp_230, fabs(__dsub_rn(csharp2cuda_temp_231, csharp2cuda_temp_232))));
-#line 676 "ProbabilityModule.cs"
+#line 711 "ProbabilityModule.cs"
                                                                 int* csharp2cuda_temp_227 = &(index);
                                                                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_227));
                                                             }
                                                         }
-#line 678 "ProbabilityModule.cs"
-#line 678 "ProbabilityModule.cs"
+#line 713 "ProbabilityModule.cs"
+#line 713 "ProbabilityModule.cs"
                                                         double* csharp2cuda_temp_233 = &(value);
-#line 678 "ProbabilityModule.cs"
+#line 713 "ProbabilityModule.cs"
                                                         double csharp2cuda_temp_234 = *(csharp2cuda_temp_233);
                                                         (*(csharp2cuda_temp_233) = __ddiv_rn(csharp2cuda_temp_234, 2.0));
                                                     }
@@ -2913,546 +2913,546 @@ __device__ void mathblocks_probability_dispatch(
                 }
             }
         }
-#line 680 "ProbabilityModule.cs"
-#line 680 "ProbabilityModule.cs"
+#line 715 "ProbabilityModule.cs"
+#line 715 "ProbabilityModule.cs"
         double* csharp2cuda_temp_235 = &((output)->scalar_value);
         (*(csharp2cuda_temp_235) = value);
-#line 681 "ProbabilityModule.cs"
+#line 716 "ProbabilityModule.cs"
         if ((!(isfinite(value))))
         {
-#line 681 "ProbabilityModule.cs"
-#line 681 "ProbabilityModule.cs"
+#line 716 "ProbabilityModule.cs"
+#line 716 "ProbabilityModule.cs"
             int* csharp2cuda_temp_236 = &((output)->valid);
             (*(csharp2cuda_temp_236) = 0);
         }
-#line 682 "ProbabilityModule.cs"
+#line 717 "ProbabilityModule.cs"
         return;
     }
-#line 685 "ProbabilityModule.cs"
+#line 720 "ProbabilityModule.cs"
     if (((opcode) == (17)))
-#line 686 "ProbabilityModule.cs"
+#line 721 "ProbabilityModule.cs"
     {
-#line 687 "ProbabilityModule.cs"
+#line 722 "ProbabilityModule.cs"
         double parameter = (second)->scalar_value;
-#line 688 "ProbabilityModule.cs"
-#line 688 "ProbabilityModule.cs"
+#line 723 "ProbabilityModule.cs"
+#line 723 "ProbabilityModule.cs"
         int csharp2cuda_temp_237 = (first)->count;
-#line 688 "ProbabilityModule.cs"
+#line 723 "ProbabilityModule.cs"
         bool csharp2cuda_temp_238;
-#line 688 "ProbabilityModule.cs"
+#line 723 "ProbabilityModule.cs"
         if (!(((csharp2cuda_temp_237) <= (0))))
         {
-#line 688 "ProbabilityModule.cs"
+#line 723 "ProbabilityModule.cs"
             csharp2cuda_temp_238 = ((parameter) < (0.0));
         }
         else
         {
-#line 688 "ProbabilityModule.cs"
+#line 723 "ProbabilityModule.cs"
             csharp2cuda_temp_238 = true;
         }
-#line 688 "ProbabilityModule.cs"
+#line 723 "ProbabilityModule.cs"
         bool csharp2cuda_temp_239;
-#line 688 "ProbabilityModule.cs"
+#line 723 "ProbabilityModule.cs"
         if (!(csharp2cuda_temp_238))
         {
-#line 688 "ProbabilityModule.cs"
+#line 723 "ProbabilityModule.cs"
             csharp2cuda_temp_239 = ((parameter) > (1.0));
         }
         else
         {
-#line 688 "ProbabilityModule.cs"
+#line 723 "ProbabilityModule.cs"
             csharp2cuda_temp_239 = true;
         }
         if (csharp2cuda_temp_239)
-#line 689 "ProbabilityModule.cs"
+#line 724 "ProbabilityModule.cs"
         {
-#line 690 "ProbabilityModule.cs"
-#line 690 "ProbabilityModule.cs"
+#line 725 "ProbabilityModule.cs"
+#line 725 "ProbabilityModule.cs"
             int* csharp2cuda_temp_240 = &((output)->valid);
             (*(csharp2cuda_temp_240) = 0);
-#line 691 "ProbabilityModule.cs"
+#line 726 "ProbabilityModule.cs"
             return;
         }
-#line 693 "ProbabilityModule.cs"
+#line 728 "ProbabilityModule.cs"
         int csharp2cuda_temp_241 = (first)->count;
-#line 693 "ProbabilityModule.cs"
+#line 728 "ProbabilityModule.cs"
         int degree = csharp2cuda_i32_sub(csharp2cuda_temp_241, 1);
-#line 694 "ProbabilityModule.cs"
+#line 729 "ProbabilityModule.cs"
         double value = 0.0;
-#line 695 "ProbabilityModule.cs"
+#line 730 "ProbabilityModule.cs"
         {
-#line 695 "ProbabilityModule.cs"
+#line 730 "ProbabilityModule.cs"
             int index = 0;
             while (true)
             {
                 if (!(((index) <= (degree))))
                     break;
-#line 696 "ProbabilityModule.cs"
-#line 696 "ProbabilityModule.cs"
+#line 731 "ProbabilityModule.cs"
+#line 731 "ProbabilityModule.cs"
                 double* csharp2cuda_temp_243 = &(value);
-#line 696 "ProbabilityModule.cs"
+#line 731 "ProbabilityModule.cs"
                 double csharp2cuda_temp_244 = *(csharp2cuda_temp_243);
-#line 696 "ProbabilityModule.cs"
+#line 731 "ProbabilityModule.cs"
                 double csharp2cuda_temp_245 = (a)[index];
                 (*(csharp2cuda_temp_243) = __dadd_rn(csharp2cuda_temp_244, __dmul_rn(__dmul_rn(__dmul_rn(csharp2cuda_temp_245, mathblocks_probability_binomial(degree, index)), mathblocks_power(parameter, ((double)(index)))), mathblocks_power(__dsub_rn(1.0, parameter), ((double)(csharp2cuda_i32_sub(degree, index)))))));
-#line 695 "ProbabilityModule.cs"
+#line 730 "ProbabilityModule.cs"
                 int* csharp2cuda_temp_242 = &(index);
                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_242));
             }
         }
-#line 699 "ProbabilityModule.cs"
-#line 699 "ProbabilityModule.cs"
+#line 734 "ProbabilityModule.cs"
+#line 734 "ProbabilityModule.cs"
         double* csharp2cuda_temp_246 = &((output)->scalar_value);
         (*(csharp2cuda_temp_246) = value);
-#line 700 "ProbabilityModule.cs"
+#line 735 "ProbabilityModule.cs"
         if ((!(isfinite(value))))
         {
-#line 700 "ProbabilityModule.cs"
-#line 700 "ProbabilityModule.cs"
+#line 735 "ProbabilityModule.cs"
+#line 735 "ProbabilityModule.cs"
             int* csharp2cuda_temp_247 = &((output)->valid);
             (*(csharp2cuda_temp_247) = 0);
         }
-#line 701 "ProbabilityModule.cs"
+#line 736 "ProbabilityModule.cs"
         return;
     }
-#line 704 "ProbabilityModule.cs"
+#line 739 "ProbabilityModule.cs"
     if (((opcode) == (18)))
-#line 705 "ProbabilityModule.cs"
+#line 740 "ProbabilityModule.cs"
     {
-#line 706 "ProbabilityModule.cs"
-#line 706 "ProbabilityModule.cs"
+#line 741 "ProbabilityModule.cs"
+#line 741 "ProbabilityModule.cs"
         int csharp2cuda_temp_248 = (first)->count;
         if (((csharp2cuda_temp_248) != (4)))
-#line 707 "ProbabilityModule.cs"
+#line 742 "ProbabilityModule.cs"
         {
-#line 708 "ProbabilityModule.cs"
-#line 708 "ProbabilityModule.cs"
+#line 743 "ProbabilityModule.cs"
+#line 743 "ProbabilityModule.cs"
             int* csharp2cuda_temp_249 = &((output)->valid);
             (*(csharp2cuda_temp_249) = 0);
-#line 709 "ProbabilityModule.cs"
+#line 744 "ProbabilityModule.cs"
             return;
         }
-#line 711 "ProbabilityModule.cs"
+#line 746 "ProbabilityModule.cs"
         unsigned long long csharp2cuda_temp_250 = (output)->data_pointer;
-#line 711 "ProbabilityModule.cs"
+#line 746 "ProbabilityModule.cs"
         MathBlockComplexValue* roots = ((MathBlockComplexValue*)(csharp2cuda_temp_250));
-#line 712 "ProbabilityModule.cs"
+#line 747 "ProbabilityModule.cs"
         mathblocks_complex_shape(output, 3);
-#line 713 "ProbabilityModule.cs"
+#line 748 "ProbabilityModule.cs"
         double constant = (a)[0];
-#line 714 "ProbabilityModule.cs"
+#line 749 "ProbabilityModule.cs"
         double linear = (a)[1];
-#line 715 "ProbabilityModule.cs"
+#line 750 "ProbabilityModule.cs"
         double quadratic = (a)[2];
-#line 716 "ProbabilityModule.cs"
+#line 751 "ProbabilityModule.cs"
         double leading = (a)[3];
-#line 717 "ProbabilityModule.cs"
+#line 752 "ProbabilityModule.cs"
         if (((leading) == (0.0)))
-#line 718 "ProbabilityModule.cs"
+#line 753 "ProbabilityModule.cs"
         {
-#line 719 "ProbabilityModule.cs"
-#line 719 "ProbabilityModule.cs"
+#line 754 "ProbabilityModule.cs"
+#line 754 "ProbabilityModule.cs"
             int* csharp2cuda_temp_251 = &((output)->valid);
             (*(csharp2cuda_temp_251) = 0);
-#line 720 "ProbabilityModule.cs"
+#line 755 "ProbabilityModule.cs"
             return;
         }
-#line 722 "ProbabilityModule.cs"
+#line 757 "ProbabilityModule.cs"
         double normalized_a = __ddiv_rn(quadratic, leading);
-#line 723 "ProbabilityModule.cs"
+#line 758 "ProbabilityModule.cs"
         double normalized_b = __ddiv_rn(linear, leading);
-#line 724 "ProbabilityModule.cs"
+#line 759 "ProbabilityModule.cs"
         double normalized_c = __ddiv_rn(constant, leading);
-#line 725 "ProbabilityModule.cs"
+#line 760 "ProbabilityModule.cs"
         double csharp2cuda_temp_252 = __ddiv_rn(__dmul_rn(normalized_a, normalized_a), 3.0);
-#line 725 "ProbabilityModule.cs"
+#line 760 "ProbabilityModule.cs"
         double p = __dsub_rn(normalized_b, csharp2cuda_temp_252);
-#line 726 "ProbabilityModule.cs"
+#line 761 "ProbabilityModule.cs"
         double csharp2cuda_temp_253 = __ddiv_rn(__dmul_rn(__dmul_rn(__dmul_rn(2.0, normalized_a), normalized_a), normalized_a), 27.0);
-#line 727 "ProbabilityModule.cs"
+#line 762 "ProbabilityModule.cs"
         double csharp2cuda_temp_254 = __ddiv_rn(__dmul_rn(normalized_a, normalized_b), 3.0);
-#line 726 "ProbabilityModule.cs"
+#line 761 "ProbabilityModule.cs"
         double q = __dadd_rn(__dsub_rn(csharp2cuda_temp_253, csharp2cuda_temp_254), normalized_c);
-#line 729 "ProbabilityModule.cs"
+#line 764 "ProbabilityModule.cs"
         double csharp2cuda_temp_255 = __ddiv_rn(__dmul_rn(q, q), 4.0);
-#line 729 "ProbabilityModule.cs"
+#line 764 "ProbabilityModule.cs"
         double csharp2cuda_temp_256 = __ddiv_rn(__dmul_rn(__dmul_rn(p, p), p), 27.0);
-#line 728 "ProbabilityModule.cs"
+#line 763 "ProbabilityModule.cs"
         MathBlockComplexValue square_root = mathblocks_complex_square_root(mathblocks_complex_make(__dadd_rn(csharp2cuda_temp_255, csharp2cuda_temp_256), 0.0));
-#line 731 "ProbabilityModule.cs"
+#line 766 "ProbabilityModule.cs"
         double csharp2cuda_temp_257 = __ddiv_rn((-(q)), 2.0);
-#line 730 "ProbabilityModule.cs"
+#line 765 "ProbabilityModule.cs"
         MathBlockComplexValue u = mathblocks_probability_complex_cube_root(mathblocks_complex_add(mathblocks_complex_make(csharp2cuda_temp_257, 0.0), square_root));
-#line 732 "ProbabilityModule.cs"
+#line 767 "ProbabilityModule.cs"
         double csharp2cuda_temp_258 = (u).real;
-#line 732 "ProbabilityModule.cs"
+#line 767 "ProbabilityModule.cs"
         bool csharp2cuda_temp_259;
-#line 732 "ProbabilityModule.cs"
+#line 767 "ProbabilityModule.cs"
         if (((csharp2cuda_temp_258) == (0.0)))
         {
-#line 732 "ProbabilityModule.cs"
+#line 767 "ProbabilityModule.cs"
             double csharp2cuda_temp_260 = (u).imaginary;
-#line 732 "ProbabilityModule.cs"
+#line 767 "ProbabilityModule.cs"
             csharp2cuda_temp_259 = ((csharp2cuda_temp_260) == (0.0));
         }
         else
         {
-#line 732 "ProbabilityModule.cs"
+#line 767 "ProbabilityModule.cs"
             csharp2cuda_temp_259 = false;
         }
-#line 732 "ProbabilityModule.cs"
+#line 767 "ProbabilityModule.cs"
         MathBlockComplexValue csharp2cuda_temp_261;
-#line 732 "ProbabilityModule.cs"
+#line 767 "ProbabilityModule.cs"
         if (csharp2cuda_temp_259)
         {
-#line 734 "ProbabilityModule.cs"
+#line 769 "ProbabilityModule.cs"
             double csharp2cuda_temp_262 = __ddiv_rn((-(q)), 2.0);
-#line 732 "ProbabilityModule.cs"
+#line 767 "ProbabilityModule.cs"
             csharp2cuda_temp_261 = mathblocks_probability_complex_cube_root(mathblocks_complex_subtract(mathblocks_complex_make(csharp2cuda_temp_262, 0.0), square_root));
         }
         else
         {
-#line 732 "ProbabilityModule.cs"
+#line 767 "ProbabilityModule.cs"
             csharp2cuda_temp_261 = mathblocks_complex_divide(mathblocks_complex_make((-(p)), 0.0), mathblocks_complex_multiply(mathblocks_complex_make(3.0, 0.0), u));
         }
-#line 732 "ProbabilityModule.cs"
+#line 767 "ProbabilityModule.cs"
         MathBlockComplexValue v = csharp2cuda_temp_261;
-#line 740 "ProbabilityModule.cs"
+#line 775 "ProbabilityModule.cs"
         double csharp2cuda_temp_263 = __ddiv_rn(mathblocks_square_root(3.0), 2.0);
-#line 738 "ProbabilityModule.cs"
+#line 773 "ProbabilityModule.cs"
         MathBlockComplexValue omega = mathblocks_complex_make((-(0.5)), csharp2cuda_temp_263);
-#line 741 "ProbabilityModule.cs"
-#line 741 "ProbabilityModule.cs"
+#line 776 "ProbabilityModule.cs"
+#line 776 "ProbabilityModule.cs"
         MathBlockComplexValue* csharp2cuda_temp_264 = &((roots)[0]);
-#line 743 "ProbabilityModule.cs"
+#line 778 "ProbabilityModule.cs"
         double csharp2cuda_temp_265 = __ddiv_rn(normalized_a, 3.0);
         (*(csharp2cuda_temp_264) = mathblocks_complex_subtract(mathblocks_complex_add(u, v), mathblocks_complex_make(csharp2cuda_temp_265, 0.0)));
-#line 744 "ProbabilityModule.cs"
-#line 744 "ProbabilityModule.cs"
+#line 779 "ProbabilityModule.cs"
+#line 779 "ProbabilityModule.cs"
         MathBlockComplexValue* csharp2cuda_temp_266 = &((roots)[1]);
-#line 748 "ProbabilityModule.cs"
+#line 783 "ProbabilityModule.cs"
         double csharp2cuda_temp_267 = __ddiv_rn(normalized_a, 3.0);
         (*(csharp2cuda_temp_266) = mathblocks_complex_subtract(mathblocks_complex_add(mathblocks_complex_multiply(omega, u), mathblocks_complex_multiply(mathblocks_complex_conjugate(omega), v)), mathblocks_complex_make(csharp2cuda_temp_267, 0.0)));
-#line 749 "ProbabilityModule.cs"
-#line 749 "ProbabilityModule.cs"
+#line 784 "ProbabilityModule.cs"
+#line 784 "ProbabilityModule.cs"
         MathBlockComplexValue* csharp2cuda_temp_268 = &((roots)[2]);
-#line 753 "ProbabilityModule.cs"
+#line 788 "ProbabilityModule.cs"
         double csharp2cuda_temp_269 = __ddiv_rn(normalized_a, 3.0);
         (*(csharp2cuda_temp_268) = mathblocks_complex_subtract(mathblocks_complex_add(mathblocks_complex_multiply(mathblocks_complex_conjugate(omega), u), mathblocks_complex_multiply(omega, v)), mathblocks_complex_make(csharp2cuda_temp_269, 0.0)));
-#line 754 "ProbabilityModule.cs"
+#line 789 "ProbabilityModule.cs"
         {
-#line 754 "ProbabilityModule.cs"
+#line 789 "ProbabilityModule.cs"
             int index = 0;
             while (true)
             {
                 if (!(((index) < (3))))
                     break;
-#line 755 "ProbabilityModule.cs"
-#line 755 "ProbabilityModule.cs"
+#line 790 "ProbabilityModule.cs"
+#line 790 "ProbabilityModule.cs"
                 MathBlockComplexValue csharp2cuda_temp_271 = (roots)[index];
                 if ((!(mathblocks_complex_finite(csharp2cuda_temp_271))))
                 {
-#line 755 "ProbabilityModule.cs"
-#line 755 "ProbabilityModule.cs"
+#line 790 "ProbabilityModule.cs"
+#line 790 "ProbabilityModule.cs"
                     int* csharp2cuda_temp_272 = &((output)->valid);
                     (*(csharp2cuda_temp_272) = 0);
                 }
-#line 754 "ProbabilityModule.cs"
+#line 789 "ProbabilityModule.cs"
                 int* csharp2cuda_temp_270 = &(index);
                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_270));
             }
         }
-#line 756 "ProbabilityModule.cs"
+#line 791 "ProbabilityModule.cs"
         return;
     }
-#line 759 "ProbabilityModule.cs"
+#line 794 "ProbabilityModule.cs"
     if (((opcode) == (20)))
-#line 760 "ProbabilityModule.cs"
+#line 795 "ProbabilityModule.cs"
     {
-#line 761 "ProbabilityModule.cs"
+#line 796 "ProbabilityModule.cs"
         int order = 0;
-#line 762 "ProbabilityModule.cs"
-#line 762 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
         double csharp2cuda_temp_273 = (second)->scalar_value;
-#line 762 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
         int* csharp2cuda_temp_274 = &(order);
-#line 762 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
         bool csharp2cuda_temp_275 = mathblocks_probability_integer(csharp2cuda_temp_273, csharp2cuda_temp_274);
-#line 762 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
         bool csharp2cuda_temp_276;
-#line 762 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
         if (!((!(csharp2cuda_temp_275))))
         {
-#line 762 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
             csharp2cuda_temp_276 = ((order) < (0));
         }
         else
         {
-#line 762 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
             csharp2cuda_temp_276 = true;
         }
-#line 762 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
         bool csharp2cuda_temp_277;
-#line 762 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
         if (!(csharp2cuda_temp_276))
         {
-#line 763 "ProbabilityModule.cs"
+#line 798 "ProbabilityModule.cs"
             int csharp2cuda_temp_278 = (first)->count;
-#line 762 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
             csharp2cuda_temp_277 = ((order) > (csharp2cuda_temp_278));
         }
         else
         {
-#line 762 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
             csharp2cuda_temp_277 = true;
         }
-#line 762 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
         bool csharp2cuda_temp_279;
-#line 762 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
         if (!(csharp2cuda_temp_277))
         {
-#line 762 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
             csharp2cuda_temp_279 = ((((void*)(scratch))) == (((void*)(nullptr))));
         }
         else
         {
-#line 762 "ProbabilityModule.cs"
+#line 797 "ProbabilityModule.cs"
             csharp2cuda_temp_279 = true;
         }
         if (csharp2cuda_temp_279)
-#line 764 "ProbabilityModule.cs"
+#line 799 "ProbabilityModule.cs"
         {
-#line 765 "ProbabilityModule.cs"
-#line 765 "ProbabilityModule.cs"
+#line 800 "ProbabilityModule.cs"
+#line 800 "ProbabilityModule.cs"
             int* csharp2cuda_temp_280 = &((output)->valid);
             (*(csharp2cuda_temp_280) = 0);
-#line 766 "ProbabilityModule.cs"
+#line 801 "ProbabilityModule.cs"
             return;
         }
-#line 768 "ProbabilityModule.cs"
+#line 803 "ProbabilityModule.cs"
         {
-#line 768 "ProbabilityModule.cs"
+#line 803 "ProbabilityModule.cs"
             int index = 0;
             while (true)
             {
                 if (!(((index) <= (order))))
                     break;
-#line 768 "ProbabilityModule.cs"
-#line 768 "ProbabilityModule.cs"
+#line 803 "ProbabilityModule.cs"
+#line 803 "ProbabilityModule.cs"
                 double* csharp2cuda_temp_282 = &((scratch)[index]);
                 (*(csharp2cuda_temp_282) = 0.0);
-#line 768 "ProbabilityModule.cs"
+#line 803 "ProbabilityModule.cs"
                 int* csharp2cuda_temp_281 = &(index);
                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_281));
             }
         }
-#line 769 "ProbabilityModule.cs"
-#line 769 "ProbabilityModule.cs"
+#line 804 "ProbabilityModule.cs"
+#line 804 "ProbabilityModule.cs"
         double* csharp2cuda_temp_283 = &((scratch)[0]);
         (*(csharp2cuda_temp_283) = 1.0);
-#line 770 "ProbabilityModule.cs"
+#line 805 "ProbabilityModule.cs"
         {
-#line 770 "ProbabilityModule.cs"
+#line 805 "ProbabilityModule.cs"
             int value_index = 0;
             while (true)
             {
-#line 770 "ProbabilityModule.cs"
+#line 805 "ProbabilityModule.cs"
                 int csharp2cuda_temp_285 = (first)->count;
                 if (!(((value_index) < (csharp2cuda_temp_285))))
                     break;
-#line 771 "ProbabilityModule.cs"
+#line 806 "ProbabilityModule.cs"
                 {
-#line 772 "ProbabilityModule.cs"
+#line 807 "ProbabilityModule.cs"
                     int csharp2cuda_temp_286;
-#line 772 "ProbabilityModule.cs"
+#line 807 "ProbabilityModule.cs"
                     if (((order) < (csharp2cuda_i32_add(value_index, 1))))
                     {
-#line 772 "ProbabilityModule.cs"
+#line 807 "ProbabilityModule.cs"
                         csharp2cuda_temp_286 = order;
                     }
                     else
                     {
-#line 772 "ProbabilityModule.cs"
+#line 807 "ProbabilityModule.cs"
                         csharp2cuda_temp_286 = csharp2cuda_i32_add(value_index, 1);
                     }
-#line 772 "ProbabilityModule.cs"
+#line 807 "ProbabilityModule.cs"
                     int maximum = csharp2cuda_temp_286;
-#line 773 "ProbabilityModule.cs"
+#line 808 "ProbabilityModule.cs"
                     {
-#line 773 "ProbabilityModule.cs"
+#line 808 "ProbabilityModule.cs"
                         int degree = maximum;
                         while (true)
                         {
                             if (!(((degree) >= (1))))
                                 break;
-#line 774 "ProbabilityModule.cs"
-#line 774 "ProbabilityModule.cs"
+#line 809 "ProbabilityModule.cs"
+#line 809 "ProbabilityModule.cs"
                             double* csharp2cuda_temp_288 = &((scratch)[degree]);
-#line 774 "ProbabilityModule.cs"
+#line 809 "ProbabilityModule.cs"
                             double csharp2cuda_temp_289 = *(csharp2cuda_temp_288);
-#line 774 "ProbabilityModule.cs"
+#line 809 "ProbabilityModule.cs"
                             double csharp2cuda_temp_290 = (a)[value_index];
-#line 774 "ProbabilityModule.cs"
+#line 809 "ProbabilityModule.cs"
                             double csharp2cuda_temp_291 = (scratch)[csharp2cuda_i32_sub(degree, 1)];
                             (*(csharp2cuda_temp_288) = __dadd_rn(csharp2cuda_temp_289, __dmul_rn(csharp2cuda_temp_290, csharp2cuda_temp_291)));
-#line 773 "ProbabilityModule.cs"
+#line 808 "ProbabilityModule.cs"
                             int* csharp2cuda_temp_287 = &(degree);
                             csharp2cuda_i32_post_decrement(*(csharp2cuda_temp_287));
                         }
                     }
                 }
-#line 770 "ProbabilityModule.cs"
+#line 805 "ProbabilityModule.cs"
                 int* csharp2cuda_temp_284 = &(value_index);
                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_284));
             }
         }
-#line 776 "ProbabilityModule.cs"
-#line 776 "ProbabilityModule.cs"
+#line 811 "ProbabilityModule.cs"
+#line 811 "ProbabilityModule.cs"
         double* csharp2cuda_temp_292 = &((output)->scalar_value);
-#line 776 "ProbabilityModule.cs"
+#line 811 "ProbabilityModule.cs"
         double csharp2cuda_temp_293 = (scratch)[order];
         (*(csharp2cuda_temp_292) = csharp2cuda_temp_293);
-#line 777 "ProbabilityModule.cs"
-#line 777 "ProbabilityModule.cs"
+#line 812 "ProbabilityModule.cs"
+#line 812 "ProbabilityModule.cs"
         double csharp2cuda_temp_294 = (output)->scalar_value;
         if ((!(isfinite(csharp2cuda_temp_294))))
         {
-#line 777 "ProbabilityModule.cs"
-#line 777 "ProbabilityModule.cs"
+#line 812 "ProbabilityModule.cs"
+#line 812 "ProbabilityModule.cs"
             int* csharp2cuda_temp_295 = &((output)->valid);
             (*(csharp2cuda_temp_295) = 0);
         }
-#line 778 "ProbabilityModule.cs"
+#line 813 "ProbabilityModule.cs"
         return;
     }
-#line 781 "ProbabilityModule.cs"
+#line 816 "ProbabilityModule.cs"
     if (((opcode) == (21)))
-#line 782 "ProbabilityModule.cs"
+#line 817 "ProbabilityModule.cs"
     {
-#line 783 "ProbabilityModule.cs"
+#line 818 "ProbabilityModule.cs"
         double value = 0.0;
-#line 784 "ProbabilityModule.cs"
+#line 819 "ProbabilityModule.cs"
         {
-#line 784 "ProbabilityModule.cs"
+#line 819 "ProbabilityModule.cs"
             int csharp2cuda_temp_296 = (first)->count;
-#line 784 "ProbabilityModule.cs"
+#line 819 "ProbabilityModule.cs"
             int index = csharp2cuda_i32_sub(csharp2cuda_temp_296, 1);
             while (true)
             {
                 if (!(((index) >= (0))))
                     break;
-#line 785 "ProbabilityModule.cs"
-#line 785 "ProbabilityModule.cs"
+#line 820 "ProbabilityModule.cs"
+#line 820 "ProbabilityModule.cs"
                 double* csharp2cuda_temp_298 = &(value);
-#line 785 "ProbabilityModule.cs"
+#line 820 "ProbabilityModule.cs"
                 double csharp2cuda_temp_299 = (second)->scalar_value;
-#line 785 "ProbabilityModule.cs"
+#line 820 "ProbabilityModule.cs"
                 double csharp2cuda_temp_300 = (a)[index];
                 (*(csharp2cuda_temp_298) = __dadd_rn(__dmul_rn(value, csharp2cuda_temp_299), csharp2cuda_temp_300));
-#line 784 "ProbabilityModule.cs"
+#line 819 "ProbabilityModule.cs"
                 int* csharp2cuda_temp_297 = &(index);
                 csharp2cuda_i32_post_decrement(*(csharp2cuda_temp_297));
             }
         }
-#line 786 "ProbabilityModule.cs"
-#line 786 "ProbabilityModule.cs"
+#line 821 "ProbabilityModule.cs"
+#line 821 "ProbabilityModule.cs"
         double* csharp2cuda_temp_301 = &((output)->scalar_value);
         (*(csharp2cuda_temp_301) = value);
-#line 787 "ProbabilityModule.cs"
+#line 822 "ProbabilityModule.cs"
         if ((!(isfinite(value))))
         {
-#line 787 "ProbabilityModule.cs"
-#line 787 "ProbabilityModule.cs"
+#line 822 "ProbabilityModule.cs"
+#line 822 "ProbabilityModule.cs"
             int* csharp2cuda_temp_302 = &((output)->valid);
             (*(csharp2cuda_temp_302) = 0);
         }
-#line 788 "ProbabilityModule.cs"
+#line 823 "ProbabilityModule.cs"
         return;
     }
-#line 791 "ProbabilityModule.cs"
+#line 826 "ProbabilityModule.cs"
     if (((opcode) == (22)))
-#line 792 "ProbabilityModule.cs"
+#line 827 "ProbabilityModule.cs"
     {
-#line 793 "ProbabilityModule.cs"
-#line 793 "ProbabilityModule.cs"
+#line 828 "ProbabilityModule.cs"
+#line 828 "ProbabilityModule.cs"
         int csharp2cuda_temp_303 = (first)->count;
         if (((csharp2cuda_temp_303) <= (0)))
-#line 794 "ProbabilityModule.cs"
+#line 829 "ProbabilityModule.cs"
         {
-#line 795 "ProbabilityModule.cs"
-#line 795 "ProbabilityModule.cs"
+#line 830 "ProbabilityModule.cs"
+#line 830 "ProbabilityModule.cs"
             int* csharp2cuda_temp_304 = &((output)->valid);
             (*(csharp2cuda_temp_304) = 0);
-#line 796 "ProbabilityModule.cs"
+#line 831 "ProbabilityModule.cs"
             return;
         }
-#line 798 "ProbabilityModule.cs"
+#line 833 "ProbabilityModule.cs"
         double maximum = (a)[0];
-#line 799 "ProbabilityModule.cs"
+#line 834 "ProbabilityModule.cs"
         {
-#line 799 "ProbabilityModule.cs"
+#line 834 "ProbabilityModule.cs"
             int index = 1;
             while (true)
             {
-#line 799 "ProbabilityModule.cs"
+#line 834 "ProbabilityModule.cs"
                 int csharp2cuda_temp_306 = (first)->count;
                 if (!(((index) < (csharp2cuda_temp_306))))
                     break;
-#line 800 "ProbabilityModule.cs"
-#line 800 "ProbabilityModule.cs"
+#line 835 "ProbabilityModule.cs"
+#line 835 "ProbabilityModule.cs"
                 double* csharp2cuda_temp_307 = &(maximum);
-#line 800 "ProbabilityModule.cs"
+#line 835 "ProbabilityModule.cs"
                 double csharp2cuda_temp_308 = (a)[index];
                 (*(csharp2cuda_temp_307) = mathblocks_maximum(maximum, csharp2cuda_temp_308));
-#line 799 "ProbabilityModule.cs"
+#line 834 "ProbabilityModule.cs"
                 int* csharp2cuda_temp_305 = &(index);
                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_305));
             }
         }
-#line 801 "ProbabilityModule.cs"
+#line 836 "ProbabilityModule.cs"
         double sum = 0.0;
-#line 802 "ProbabilityModule.cs"
+#line 837 "ProbabilityModule.cs"
         {
-#line 802 "ProbabilityModule.cs"
+#line 837 "ProbabilityModule.cs"
             int index = 0;
             while (true)
             {
-#line 802 "ProbabilityModule.cs"
+#line 837 "ProbabilityModule.cs"
                 int csharp2cuda_temp_310 = (first)->count;
                 if (!(((index) < (csharp2cuda_temp_310))))
                     break;
-#line 803 "ProbabilityModule.cs"
-#line 803 "ProbabilityModule.cs"
+#line 838 "ProbabilityModule.cs"
+#line 838 "ProbabilityModule.cs"
                 double* csharp2cuda_temp_311 = &(sum);
-#line 803 "ProbabilityModule.cs"
+#line 838 "ProbabilityModule.cs"
                 double csharp2cuda_temp_312 = *(csharp2cuda_temp_311);
-#line 803 "ProbabilityModule.cs"
+#line 838 "ProbabilityModule.cs"
                 double csharp2cuda_temp_313 = (a)[index];
                 (*(csharp2cuda_temp_311) = __dadd_rn(csharp2cuda_temp_312, mathblocks_exponential(__dsub_rn(csharp2cuda_temp_313, maximum))));
-#line 802 "ProbabilityModule.cs"
+#line 837 "ProbabilityModule.cs"
                 int* csharp2cuda_temp_309 = &(index);
                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_309));
             }
         }
-#line 804 "ProbabilityModule.cs"
-#line 804 "ProbabilityModule.cs"
+#line 839 "ProbabilityModule.cs"
+#line 839 "ProbabilityModule.cs"
         double* csharp2cuda_temp_314 = &((output)->scalar_value);
         (*(csharp2cuda_temp_314) = __dadd_rn(maximum, mathblocks_natural_logarithm(sum)));
-#line 805 "ProbabilityModule.cs"
-#line 805 "ProbabilityModule.cs"
+#line 840 "ProbabilityModule.cs"
+#line 840 "ProbabilityModule.cs"
         double csharp2cuda_temp_315 = (output)->scalar_value;
         if ((!(isfinite(csharp2cuda_temp_315))))
         {
-#line 805 "ProbabilityModule.cs"
-#line 805 "ProbabilityModule.cs"
+#line 840 "ProbabilityModule.cs"
+#line 840 "ProbabilityModule.cs"
             int* csharp2cuda_temp_316 = &((output)->valid);
             (*(csharp2cuda_temp_316) = 0);
         }
-#line 806 "ProbabilityModule.cs"
+#line 841 "ProbabilityModule.cs"
         return;
     }
-#line 809 "ProbabilityModule.cs"
-#line 809 "ProbabilityModule.cs"
+#line 844 "ProbabilityModule.cs"
+#line 844 "ProbabilityModule.cs"
     int* csharp2cuda_temp_317 = &((output)->valid);
     (*(csharp2cuda_temp_317) = 0);
 }
@@ -4091,165 +4091,281 @@ __device__ bool mathblocks_probability_scalar_value(int opcode, double a, double
 #line 345 "ProbabilityModule.cs"
         double sum = 0.0;
 #line 346 "ProbabilityModule.cs"
-        int csharp2cuda_temp_31;
+#line 346 "ProbabilityModule.cs"
+        bool csharp2cuda_temp_31;
 #line 346 "ProbabilityModule.cs"
         if (((opcode) == (25)))
         {
 #line 346 "ProbabilityModule.cs"
-            csharp2cuda_temp_31 = 0;
+            csharp2cuda_temp_31 = ((rate) == (0.0));
         }
         else
         {
 #line 346 "ProbabilityModule.cs"
-            csharp2cuda_temp_31 = count;
+            csharp2cuda_temp_31 = false;
         }
-#line 346 "ProbabilityModule.cs"
-        int start = csharp2cuda_temp_31;
+        if (csharp2cuda_temp_31)
 #line 347 "ProbabilityModule.cs"
-        int end = count;
-#line 348 "ProbabilityModule.cs"
         {
-#line 348 "ProbabilityModule.cs"
-            int index = start;
-            while (true)
-            {
-                if (!(((index) <= (end))))
-                    break;
 #line 349 "ProbabilityModule.cs"
+#line 349 "ProbabilityModule.cs"
+            double* csharp2cuda_temp_32 = &(sum);
+            (*(csharp2cuda_temp_32) = 1.0);
+        }
+        else
+        {
+#line 351 "ProbabilityModule.cs"
+            if (((opcode) == (25)))
+#line 352 "ProbabilityModule.cs"
+            {
+#line 356 "ProbabilityModule.cs"
+                double log_rate = mathblocks_natural_logarithm(rate);
+#line 357 "ProbabilityModule.cs"
+                int csharp2cuda_temp_33;
+#line 357 "ProbabilityModule.cs"
+                if (((rate) < (((double)(count)))))
                 {
-#line 350 "ProbabilityModule.cs"
-                    double csharp2cuda_temp_33;
-#line 350 "ProbabilityModule.cs"
-                    if (((rate) == (0.0)))
-                    {
-#line 351 "ProbabilityModule.cs"
-                        double csharp2cuda_temp_34;
-#line 351 "ProbabilityModule.cs"
-                        if (((index) == (0)))
-                        {
-#line 351 "ProbabilityModule.cs"
-                            csharp2cuda_temp_34 = 1.0;
-                        }
-                        else
-                        {
-#line 351 "ProbabilityModule.cs"
-                            csharp2cuda_temp_34 = 0.0;
-                        }
-#line 350 "ProbabilityModule.cs"
-                        csharp2cuda_temp_33 = csharp2cuda_temp_34;
-                    }
-                    else
-                    {
-#line 350 "ProbabilityModule.cs"
-                        csharp2cuda_temp_33 = mathblocks_exponential(__dsub_rn(__dadd_rn((-(rate)), __dmul_rn(((double)(index)), mathblocks_natural_logarithm(rate))), mathblocks_probability_log_gamma(__dadd_rn(((double)(index)), 1.0))));
-                    }
-#line 350 "ProbabilityModule.cs"
-                    double probability = csharp2cuda_temp_33;
-#line 355 "ProbabilityModule.cs"
-#line 355 "ProbabilityModule.cs"
-                    double* csharp2cuda_temp_35 = &(sum);
-#line 355 "ProbabilityModule.cs"
-                    double csharp2cuda_temp_36 = *(csharp2cuda_temp_35);
-                    (*(csharp2cuda_temp_35) = __dadd_rn(csharp2cuda_temp_36, probability));
+#line 357 "ProbabilityModule.cs"
+                    csharp2cuda_temp_33 = csharp2cuda_f64_to_i32(rate);
                 }
-#line 348 "ProbabilityModule.cs"
-                int* csharp2cuda_temp_32 = &(index);
-                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_32));
+                else
+                {
+#line 357 "ProbabilityModule.cs"
+                    csharp2cuda_temp_33 = count;
+                }
+#line 357 "ProbabilityModule.cs"
+                int peak = csharp2cuda_temp_33;
+#line 358 "ProbabilityModule.cs"
+                int first = 0;
+#line 359 "ProbabilityModule.cs"
+                bool reached = ((__dsub_rn(__dadd_rn((-(rate)), __dmul_rn(((double)(peak)), log_rate)), mathblocks_probability_log_gamma(__dadd_rn(((double)(peak)), 1.0)))) >= ((-(800.0))));
+#line 360 "ProbabilityModule.cs"
+                if (reached)
+#line 361 "ProbabilityModule.cs"
+                {
+#line 362 "ProbabilityModule.cs"
+                    int high = peak;
+#line 363 "ProbabilityModule.cs"
+                    while (true)
+                    {
+                        if (!(((first) < (high))))
+                            break;
+#line 364 "ProbabilityModule.cs"
+                        {
+#line 365 "ProbabilityModule.cs"
+                            int csharp2cuda_temp_34 = csharp2cuda_i32_div(csharp2cuda_i32_sub(high, first), 2);
+#line 365 "ProbabilityModule.cs"
+                            int middle = csharp2cuda_i32_add(first, csharp2cuda_temp_34);
+#line 366 "ProbabilityModule.cs"
+                            if (((__dsub_rn(__dadd_rn((-(rate)), __dmul_rn(((double)(middle)), log_rate)), mathblocks_probability_log_gamma(__dadd_rn(((double)(middle)), 1.0)))) >= ((-(800.0)))))
+                            {
+#line 367 "ProbabilityModule.cs"
+#line 367 "ProbabilityModule.cs"
+                                int* csharp2cuda_temp_35 = &(high);
+                                (*(csharp2cuda_temp_35) = middle);
+                            }
+                            else
+                            {
+#line 369 "ProbabilityModule.cs"
+#line 369 "ProbabilityModule.cs"
+                                int* csharp2cuda_temp_36 = &(first);
+                                (*(csharp2cuda_temp_36) = csharp2cuda_i32_add(middle, 1));
+                            }
+                        }
+                    }
+#line 371 "ProbabilityModule.cs"
+                    {
+#line 371 "ProbabilityModule.cs"
+                        int index = first;
+                        while (true)
+                        {
+                            if (!(((index) <= (count))))
+                                break;
+#line 372 "ProbabilityModule.cs"
+                            {
+#line 373 "ProbabilityModule.cs"
+                                double exponent = __dsub_rn(__dadd_rn((-(rate)), __dmul_rn(((double)(index)), log_rate)), mathblocks_probability_log_gamma(__dadd_rn(((double)(index)), 1.0)));
+#line 374 "ProbabilityModule.cs"
+#line 374 "ProbabilityModule.cs"
+                                bool csharp2cuda_temp_38;
+#line 374 "ProbabilityModule.cs"
+                                if (((((double)(index))) > (rate)))
+                                {
+#line 374 "ProbabilityModule.cs"
+                                    csharp2cuda_temp_38 = ((exponent) < ((-(800.0))));
+                                }
+                                else
+                                {
+#line 374 "ProbabilityModule.cs"
+                                    csharp2cuda_temp_38 = false;
+                                }
+                                if (csharp2cuda_temp_38)
+                                {
+#line 375 "ProbabilityModule.cs"
+                                    break;
+                                }
+#line 376 "ProbabilityModule.cs"
+#line 376 "ProbabilityModule.cs"
+                                double* csharp2cuda_temp_39 = &(sum);
+#line 376 "ProbabilityModule.cs"
+                                double csharp2cuda_temp_40 = *(csharp2cuda_temp_39);
+                                (*(csharp2cuda_temp_39) = __dadd_rn(csharp2cuda_temp_40, mathblocks_exponential(exponent)));
+                            }
+#line 371 "ProbabilityModule.cs"
+                            int* csharp2cuda_temp_37 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_37));
+                        }
+                    }
+                }
+            }
+            else
+#line 381 "ProbabilityModule.cs"
+            {
+#line 382 "ProbabilityModule.cs"
+                {
+#line 382 "ProbabilityModule.cs"
+                    int index = count;
+                    while (true)
+                    {
+                        if (!(((index) <= (count))))
+                            break;
+#line 383 "ProbabilityModule.cs"
+                        {
+#line 384 "ProbabilityModule.cs"
+                            double csharp2cuda_temp_42;
+#line 384 "ProbabilityModule.cs"
+                            if (((rate) == (0.0)))
+                            {
+#line 385 "ProbabilityModule.cs"
+                                double csharp2cuda_temp_43;
+#line 385 "ProbabilityModule.cs"
+                                if (((index) == (0)))
+                                {
+#line 385 "ProbabilityModule.cs"
+                                    csharp2cuda_temp_43 = 1.0;
+                                }
+                                else
+                                {
+#line 385 "ProbabilityModule.cs"
+                                    csharp2cuda_temp_43 = 0.0;
+                                }
+#line 384 "ProbabilityModule.cs"
+                                csharp2cuda_temp_42 = csharp2cuda_temp_43;
+                            }
+                            else
+                            {
+#line 384 "ProbabilityModule.cs"
+                                csharp2cuda_temp_42 = mathblocks_exponential(__dsub_rn(__dadd_rn((-(rate)), __dmul_rn(((double)(index)), mathblocks_natural_logarithm(rate))), mathblocks_probability_log_gamma(__dadd_rn(((double)(index)), 1.0))));
+                            }
+#line 384 "ProbabilityModule.cs"
+                            double probability = csharp2cuda_temp_42;
+#line 389 "ProbabilityModule.cs"
+#line 389 "ProbabilityModule.cs"
+                            double* csharp2cuda_temp_44 = &(sum);
+#line 389 "ProbabilityModule.cs"
+                            double csharp2cuda_temp_45 = *(csharp2cuda_temp_44);
+                            (*(csharp2cuda_temp_44) = __dadd_rn(csharp2cuda_temp_45, probability));
+                        }
+#line 382 "ProbabilityModule.cs"
+                        int* csharp2cuda_temp_41 = &(index);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_41));
+                    }
+                }
             }
         }
-#line 357 "ProbabilityModule.cs"
-#line 357 "ProbabilityModule.cs"
-        double* csharp2cuda_temp_37 = value;
-        (*(csharp2cuda_temp_37) = sum);
-#line 358 "ProbabilityModule.cs"
+#line 392 "ProbabilityModule.cs"
+#line 392 "ProbabilityModule.cs"
+        double* csharp2cuda_temp_46 = value;
+        (*(csharp2cuda_temp_46) = sum);
+#line 393 "ProbabilityModule.cs"
         return isfinite(sum);
     }
-#line 361 "ProbabilityModule.cs"
+#line 396 "ProbabilityModule.cs"
     if (((opcode) == (28)))
-#line 362 "ProbabilityModule.cs"
+#line 397 "ProbabilityModule.cs"
     {
-#line 363 "ProbabilityModule.cs"
-#line 363 "ProbabilityModule.cs"
-        double* csharp2cuda_temp_38 = value;
-        (*(csharp2cuda_temp_38) = mathblocks_exponential(__dsub_rn(__dadd_rn(mathblocks_probability_log_gamma(a), mathblocks_probability_log_gamma(b)), mathblocks_probability_log_gamma(__dadd_rn(a, b)))));
+#line 398 "ProbabilityModule.cs"
+#line 398 "ProbabilityModule.cs"
+        double* csharp2cuda_temp_47 = value;
+        (*(csharp2cuda_temp_47) = mathblocks_exponential(__dsub_rn(__dadd_rn(mathblocks_probability_log_gamma(a), mathblocks_probability_log_gamma(b)), mathblocks_probability_log_gamma(__dadd_rn(a, b)))));
     }
     else
     {
-#line 368 "ProbabilityModule.cs"
+#line 403 "ProbabilityModule.cs"
         if (((opcode) == (29)))
-#line 369 "ProbabilityModule.cs"
+#line 404 "ProbabilityModule.cs"
         {
-#line 370 "ProbabilityModule.cs"
-#line 370 "ProbabilityModule.cs"
-            double* csharp2cuda_temp_39 = value;
-            (*(csharp2cuda_temp_39) = mathblocks_probability_log_gamma(a));
+#line 405 "ProbabilityModule.cs"
+#line 405 "ProbabilityModule.cs"
+            double* csharp2cuda_temp_48 = value;
+            (*(csharp2cuda_temp_48) = mathblocks_probability_log_gamma(a));
         }
         else
         {
-#line 372 "ProbabilityModule.cs"
+#line 407 "ProbabilityModule.cs"
             if (((opcode) == (30)))
-#line 373 "ProbabilityModule.cs"
+#line 408 "ProbabilityModule.cs"
             {
-#line 374 "ProbabilityModule.cs"
-#line 374 "ProbabilityModule.cs"
-                bool csharp2cuda_temp_40;
-#line 374 "ProbabilityModule.cs"
+#line 409 "ProbabilityModule.cs"
+#line 409 "ProbabilityModule.cs"
+                bool csharp2cuda_temp_49;
+#line 409 "ProbabilityModule.cs"
                 if (!(((a) < (0.0))))
                 {
-#line 374 "ProbabilityModule.cs"
-                    csharp2cuda_temp_40 = ((a) > (1.0));
+#line 409 "ProbabilityModule.cs"
+                    csharp2cuda_temp_49 = ((a) > (1.0));
                 }
                 else
                 {
-#line 374 "ProbabilityModule.cs"
-                    csharp2cuda_temp_40 = true;
+#line 409 "ProbabilityModule.cs"
+                    csharp2cuda_temp_49 = true;
                 }
-#line 374 "ProbabilityModule.cs"
-                bool csharp2cuda_temp_41;
-#line 374 "ProbabilityModule.cs"
-                if (!(csharp2cuda_temp_40))
+#line 409 "ProbabilityModule.cs"
+                bool csharp2cuda_temp_50;
+#line 409 "ProbabilityModule.cs"
+                if (!(csharp2cuda_temp_49))
                 {
-#line 374 "ProbabilityModule.cs"
-                    csharp2cuda_temp_41 = ((b) <= (0.0));
-                }
-                else
-                {
-#line 374 "ProbabilityModule.cs"
-                    csharp2cuda_temp_41 = true;
-                }
-#line 374 "ProbabilityModule.cs"
-                bool csharp2cuda_temp_42;
-#line 374 "ProbabilityModule.cs"
-                if (!(csharp2cuda_temp_41))
-                {
-#line 374 "ProbabilityModule.cs"
-                    csharp2cuda_temp_42 = ((c) <= (0.0));
+#line 409 "ProbabilityModule.cs"
+                    csharp2cuda_temp_50 = ((b) <= (0.0));
                 }
                 else
                 {
-#line 374 "ProbabilityModule.cs"
-                    csharp2cuda_temp_42 = true;
+#line 409 "ProbabilityModule.cs"
+                    csharp2cuda_temp_50 = true;
                 }
-                if (csharp2cuda_temp_42)
+#line 409 "ProbabilityModule.cs"
+                bool csharp2cuda_temp_51;
+#line 409 "ProbabilityModule.cs"
+                if (!(csharp2cuda_temp_50))
                 {
-#line 375 "ProbabilityModule.cs"
+#line 409 "ProbabilityModule.cs"
+                    csharp2cuda_temp_51 = ((c) <= (0.0));
+                }
+                else
+                {
+#line 409 "ProbabilityModule.cs"
+                    csharp2cuda_temp_51 = true;
+                }
+                if (csharp2cuda_temp_51)
+                {
+#line 410 "ProbabilityModule.cs"
                     return false;
                 }
-#line 376 "ProbabilityModule.cs"
-#line 376 "ProbabilityModule.cs"
-                double* csharp2cuda_temp_43 = value;
-                (*(csharp2cuda_temp_43) = mathblocks_probability_incomplete_beta(a, b, c));
+#line 411 "ProbabilityModule.cs"
+#line 411 "ProbabilityModule.cs"
+                double* csharp2cuda_temp_52 = value;
+                (*(csharp2cuda_temp_52) = mathblocks_probability_incomplete_beta(a, b, c));
             }
             else
-#line 379 "ProbabilityModule.cs"
+#line 414 "ProbabilityModule.cs"
             {
-#line 380 "ProbabilityModule.cs"
+#line 415 "ProbabilityModule.cs"
                 return false;
             }
         }
     }
-#line 382 "ProbabilityModule.cs"
-#line 382 "ProbabilityModule.cs"
-    double csharp2cuda_temp_44 = *(value);
-    return isfinite(csharp2cuda_temp_44);
+#line 417 "ProbabilityModule.cs"
+#line 417 "ProbabilityModule.cs"
+    double csharp2cuda_temp_53 = *(value);
+    return isfinite(csharp2cuda_temp_53);
 }
