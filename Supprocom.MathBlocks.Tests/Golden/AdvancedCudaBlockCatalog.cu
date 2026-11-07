@@ -875,45 +875,58 @@ __device__ void mathblocks_advanced_dispatch(
 #line 152 "AdvancedModule.cs"
     double* scratch = ((double*)(csharp2cuda_temp_24));
 #line 159 "AdvancedModule.cs"
-    if (((opcode) == (5)))
+#line 159 "AdvancedModule.cs"
+    bool csharp2cuda_temp_25;
+#line 159 "AdvancedModule.cs"
+    if (!(((opcode) == (4))))
+    {
+#line 159 "AdvancedModule.cs"
+        csharp2cuda_temp_25 = ((opcode) == (5));
+    }
+    else
+    {
+#line 159 "AdvancedModule.cs"
+        csharp2cuda_temp_25 = true;
+    }
+    if (csharp2cuda_temp_25)
 #line 160 "AdvancedModule.cs"
     {
 #line 161 "AdvancedModule.cs"
-        int csharp2cuda_temp_25 = (first)->count;
+        int csharp2cuda_temp_26 = (first)->count;
 #line 161 "AdvancedModule.cs"
-        bool csharp2cuda_temp_26;
+        bool csharp2cuda_temp_27;
 #line 161 "AdvancedModule.cs"
-        if (!(((csharp2cuda_temp_25) <= (0))))
+        if (!(((csharp2cuda_temp_26) <= (0))))
         {
 #line 161 "AdvancedModule.cs"
-            int csharp2cuda_temp_27 = (first)->count;
+            int csharp2cuda_temp_28 = (first)->count;
 #line 161 "AdvancedModule.cs"
-            int csharp2cuda_temp_28 = (second)->count;
+            int csharp2cuda_temp_29 = (second)->count;
 #line 161 "AdvancedModule.cs"
-            csharp2cuda_temp_26 = ((csharp2cuda_temp_27) != (csharp2cuda_temp_28));
+            csharp2cuda_temp_27 = ((csharp2cuda_temp_28) != (csharp2cuda_temp_29));
         }
         else
         {
 #line 161 "AdvancedModule.cs"
-            csharp2cuda_temp_26 = true;
+            csharp2cuda_temp_27 = true;
         }
 #line 161 "AdvancedModule.cs"
-        bool csharp2cuda_temp_29;
+        bool csharp2cuda_temp_30;
 #line 161 "AdvancedModule.cs"
-        if (!(csharp2cuda_temp_26))
+        if (!(csharp2cuda_temp_27))
         {
 #line 161 "AdvancedModule.cs"
-            double csharp2cuda_temp_30 = (fourth)->scalar_value;
+            double csharp2cuda_temp_31 = (fourth)->scalar_value;
 #line 161 "AdvancedModule.cs"
-            csharp2cuda_temp_29 = ((csharp2cuda_temp_30) < (0.0));
+            csharp2cuda_temp_30 = ((csharp2cuda_temp_31) < (0.0));
         }
         else
         {
 #line 161 "AdvancedModule.cs"
-            csharp2cuda_temp_29 = true;
+            csharp2cuda_temp_30 = true;
         }
 #line 161 "AdvancedModule.cs"
-        bool lipschitz_invalid = csharp2cuda_temp_29;
+        bool lipschitz_invalid = csharp2cuda_temp_30;
 #line 162 "AdvancedModule.cs"
         if ((!(lipschitz_invalid)))
 #line 163 "AdvancedModule.cs"
@@ -925,2727 +938,2665 @@ __device__ void mathblocks_advanced_dispatch(
                 while (true)
                 {
 #line 164 "AdvancedModule.cs"
-                    int csharp2cuda_temp_33 = (third)->count;
-                    if (!(((query) < (csharp2cuda_temp_33))))
+                    int csharp2cuda_temp_34 = (third)->count;
+                    if (!(((query) < (csharp2cuda_temp_34))))
                         break;
 #line 165 "AdvancedModule.cs"
                     {
 #line 166 "AdvancedModule.cs"
-                        double selected = (-(mathblocks_positive_infinity()));
-#line 167 "AdvancedModule.cs"
+                        double csharp2cuda_temp_35;
+#line 166 "AdvancedModule.cs"
+                        if (((opcode) == (4)))
                         {
-#line 167 "AdvancedModule.cs"
-                            int index = 0;
-                            while (true)
-                            {
-#line 167 "AdvancedModule.cs"
-                                int csharp2cuda_temp_35 = (first)->count;
-                                if (!(((index) < (csharp2cuda_temp_35))))
-                                    break;
-#line 168 "AdvancedModule.cs"
-                                {
-#line 169 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_36 = (b)[index];
-#line 169 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_37 = (fourth)->scalar_value;
-#line 169 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_38 = (c)[query];
-#line 169 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_39 = (a)[index];
-#line 169 "AdvancedModule.cs"
-                                    double candidate = __dsub_rn(csharp2cuda_temp_36, __dmul_rn(csharp2cuda_temp_37, fabs(__dsub_rn(csharp2cuda_temp_38, csharp2cuda_temp_39))));
-#line 172 "AdvancedModule.cs"
-#line 172 "AdvancedModule.cs"
-                                    double* csharp2cuda_temp_40 = &(selected);
-                                    (*(csharp2cuda_temp_40) = mathblocks_maximum(selected, candidate));
-                                }
-#line 167 "AdvancedModule.cs"
-                                int* csharp2cuda_temp_34 = &(index);
-                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_34));
-                            }
-                        }
-#line 174 "AdvancedModule.cs"
-#line 174 "AdvancedModule.cs"
-                        double* csharp2cuda_temp_41 = &((result)[query]);
-                        (*(csharp2cuda_temp_41) = selected);
-                    }
-#line 164 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_31 = &(query);
-#line 164 "AdvancedModule.cs"
-                    int csharp2cuda_temp_32 = *(csharp2cuda_temp_31);
-                    (*(csharp2cuda_temp_31) = csharp2cuda_i32_add(csharp2cuda_temp_32, blockDim.x));
-                }
-            }
-        }
-#line 177 "AdvancedModule.cs"
-        __syncthreads();
-    }
-#line 180 "AdvancedModule.cs"
-    if (((thread) == (0)))
-#line 181 "AdvancedModule.cs"
-    {
-#line 182 "AdvancedModule.cs"
-        switch (opcode)
-        {
-#line 184 "AdvancedModule.cs"
-            case 0:
-#line 185 "AdvancedModule.cs"
-#line 185 "AdvancedModule.cs"
-                int csharp2cuda_temp_42 = (first)->count;
-#line 185 "AdvancedModule.cs"
-                bool csharp2cuda_temp_43;
-#line 185 "AdvancedModule.cs"
-                if (!(((csharp2cuda_temp_42) <= (0))))
-                {
-#line 185 "AdvancedModule.cs"
-                    int csharp2cuda_temp_44 = (first)->count;
-#line 185 "AdvancedModule.cs"
-                    csharp2cuda_temp_43 = ((csharp2cuda_temp_44) >= (31));
-                }
-                else
-                {
-#line 185 "AdvancedModule.cs"
-                    csharp2cuda_temp_43 = true;
-                }
-#line 185 "AdvancedModule.cs"
-                bool csharp2cuda_temp_45;
-#line 185 "AdvancedModule.cs"
-                if (!(csharp2cuda_temp_43))
-                {
-#line 186 "AdvancedModule.cs"
-                    int csharp2cuda_temp_46 = (second)->count;
-#line 186 "AdvancedModule.cs"
-                    int csharp2cuda_temp_47 = (first)->count;
-#line 185 "AdvancedModule.cs"
-                    csharp2cuda_temp_45 = ((csharp2cuda_temp_46) != (csharp2cuda_i32_shl(1, csharp2cuda_temp_47)));
-                }
-                else
-                {
-#line 185 "AdvancedModule.cs"
-                    csharp2cuda_temp_45 = true;
-                }
-#line 185 "AdvancedModule.cs"
-                bool csharp2cuda_temp_48;
-#line 185 "AdvancedModule.cs"
-                if (!(csharp2cuda_temp_45))
-                {
-#line 185 "AdvancedModule.cs"
-                    csharp2cuda_temp_48 = ((((void*)(scratch))) == (((void*)(nullptr))));
-                }
-                else
-                {
-#line 185 "AdvancedModule.cs"
-                    csharp2cuda_temp_48 = true;
-                }
-                if (csharp2cuda_temp_48)
-#line 187 "AdvancedModule.cs"
-                {
-#line 188 "AdvancedModule.cs"
-#line 188 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_49 = &((output)->valid);
-                    (*(csharp2cuda_temp_49) = 0);
-#line 189 "AdvancedModule.cs"
-                    break;
-                }
-#line 191 "AdvancedModule.cs"
-                {
-#line 191 "AdvancedModule.cs"
-                    int index = 0;
-                    while (true)
-                    {
-#line 191 "AdvancedModule.cs"
-                        int csharp2cuda_temp_51 = (first)->count;
-                        if (!(((index) < (csharp2cuda_temp_51))))
-                            break;
-#line 192 "AdvancedModule.cs"
-                        {
-#line 193 "AdvancedModule.cs"
-#line 193 "AdvancedModule.cs"
-                            double csharp2cuda_temp_52 = (a)[index];
-                            if (((csharp2cuda_temp_52) < (0.0)))
-#line 194 "AdvancedModule.cs"
-                            {
-#line 195 "AdvancedModule.cs"
-#line 195 "AdvancedModule.cs"
-                                int* csharp2cuda_temp_53 = &((output)->valid);
-                                (*(csharp2cuda_temp_53) = 0);
-#line 196 "AdvancedModule.cs"
-                                break;
-                            }
-#line 198 "AdvancedModule.cs"
-                            int position = index;
-#line 199 "AdvancedModule.cs"
-                            while (true)
-                            {
-#line 199 "AdvancedModule.cs"
-                                bool csharp2cuda_temp_54;
-#line 199 "AdvancedModule.cs"
-                                if (((position) > (0)))
-                                {
-#line 199 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_55 = (scratch)[csharp2cuda_i32_sub(position, 1)];
-#line 199 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_56 = (a)[csharp2cuda_f64_to_i32(csharp2cuda_temp_55)];
-#line 199 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_57 = (a)[index];
-#line 199 "AdvancedModule.cs"
-                                    csharp2cuda_temp_54 = ((csharp2cuda_temp_56) > (csharp2cuda_temp_57));
-                                }
-                                else
-                                {
-#line 199 "AdvancedModule.cs"
-                                    csharp2cuda_temp_54 = false;
-                                }
-                                if (!(csharp2cuda_temp_54))
-                                    break;
-#line 200 "AdvancedModule.cs"
-                                {
-#line 201 "AdvancedModule.cs"
-#line 201 "AdvancedModule.cs"
-                                    double* csharp2cuda_temp_58 = &((scratch)[position]);
-#line 201 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_59 = (scratch)[csharp2cuda_i32_sub(position, 1)];
-                                    (*(csharp2cuda_temp_58) = csharp2cuda_temp_59);
-#line 202 "AdvancedModule.cs"
-#line 202 "AdvancedModule.cs"
-                                    int* csharp2cuda_temp_60 = &(position);
-                                    csharp2cuda_i32_post_decrement(*(csharp2cuda_temp_60));
-                                }
-                            }
-#line 204 "AdvancedModule.cs"
-#line 204 "AdvancedModule.cs"
-                            double* csharp2cuda_temp_61 = &((scratch)[position]);
-                            (*(csharp2cuda_temp_61) = ((double)(index)));
-                        }
-#line 191 "AdvancedModule.cs"
-                        int* csharp2cuda_temp_50 = &(index);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_50));
-                    }
-                }
-#line 206 "AdvancedModule.cs"
-                if ((output)->valid)
-#line 207 "AdvancedModule.cs"
-                {
-#line 208 "AdvancedModule.cs"
-                    double total = 0.0;
-#line 209 "AdvancedModule.cs"
-                    double previous = 0.0;
-#line 210 "AdvancedModule.cs"
-                    {
-#line 210 "AdvancedModule.cs"
-                        int position = 0;
-                        while (true)
-                        {
-#line 210 "AdvancedModule.cs"
-                            int csharp2cuda_temp_63 = (first)->count;
-                            if (!(((position) < (csharp2cuda_temp_63))))
-                                break;
-#line 211 "AdvancedModule.cs"
-                            {
-#line 212 "AdvancedModule.cs"
-                                int coalition = 0;
-#line 213 "AdvancedModule.cs"
-                                {
-#line 213 "AdvancedModule.cs"
-                                    int index = position;
-                                    while (true)
-                                    {
-#line 213 "AdvancedModule.cs"
-                                        int csharp2cuda_temp_65 = (first)->count;
-                                        if (!(((index) < (csharp2cuda_temp_65))))
-                                            break;
-#line 214 "AdvancedModule.cs"
-#line 214 "AdvancedModule.cs"
-                                        int* csharp2cuda_temp_66 = &(coalition);
-#line 214 "AdvancedModule.cs"
-                                        int csharp2cuda_temp_67 = *(csharp2cuda_temp_66);
-#line 214 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_68 = (scratch)[index];
-                                        (*(csharp2cuda_temp_66) = csharp2cuda_i32_or(csharp2cuda_temp_67, csharp2cuda_i32_shl(1, csharp2cuda_f64_to_i32(csharp2cuda_temp_68))));
-#line 213 "AdvancedModule.cs"
-                                        int* csharp2cuda_temp_64 = &(index);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_64));
-                                    }
-                                }
-#line 215 "AdvancedModule.cs"
-                                double csharp2cuda_temp_69 = (scratch)[position];
-#line 215 "AdvancedModule.cs"
-                                int ordered = csharp2cuda_f64_to_i32(csharp2cuda_temp_69);
-#line 216 "AdvancedModule.cs"
-#line 216 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_70 = &(total);
-#line 216 "AdvancedModule.cs"
-                                double csharp2cuda_temp_71 = *(csharp2cuda_temp_70);
-#line 216 "AdvancedModule.cs"
-                                double csharp2cuda_temp_72 = (a)[ordered];
-#line 216 "AdvancedModule.cs"
-                                double csharp2cuda_temp_73 = (b)[coalition];
-                                (*(csharp2cuda_temp_70) = __dadd_rn(csharp2cuda_temp_71, __dmul_rn(__dsub_rn(csharp2cuda_temp_72, previous), csharp2cuda_temp_73)));
-#line 217 "AdvancedModule.cs"
-#line 217 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_74 = &(previous);
-#line 217 "AdvancedModule.cs"
-                                double csharp2cuda_temp_75 = (a)[ordered];
-                                (*(csharp2cuda_temp_74) = csharp2cuda_temp_75);
-                            }
-#line 210 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_62 = &(position);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_62));
-                        }
-                    }
-#line 219 "AdvancedModule.cs"
-#line 219 "AdvancedModule.cs"
-                    double* csharp2cuda_temp_76 = &((output)->scalar_value);
-                    (*(csharp2cuda_temp_76) = total);
-                }
-#line 221 "AdvancedModule.cs"
-                break;
-#line 222 "AdvancedModule.cs"
-            case 1:
-#line 223 "AdvancedModule.cs"
-#line 223 "AdvancedModule.cs"
-                int csharp2cuda_temp_77 = (first)->count;
-#line 223 "AdvancedModule.cs"
-                bool csharp2cuda_temp_78;
-#line 223 "AdvancedModule.cs"
-                if (!((!(mathblocks_advanced_power_of_two(csharp2cuda_temp_77)))))
-                {
-#line 223 "AdvancedModule.cs"
-                    int csharp2cuda_temp_79 = (first)->count;
-#line 223 "AdvancedModule.cs"
-                    csharp2cuda_temp_78 = ((csharp2cuda_temp_79) > (csharp2cuda_i32_shl(1, 12)));
-                }
-                else
-                {
-#line 223 "AdvancedModule.cs"
-                    csharp2cuda_temp_78 = true;
-                }
-                if (csharp2cuda_temp_78)
-#line 224 "AdvancedModule.cs"
-                {
-#line 225 "AdvancedModule.cs"
-#line 225 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_80 = &((output)->valid);
-                    (*(csharp2cuda_temp_80) = 0);
-#line 226 "AdvancedModule.cs"
-                    break;
-                }
-#line 228 "AdvancedModule.cs"
-#line 228 "AdvancedModule.cs"
-                int* csharp2cuda_temp_81 = &((output)->boolean_value);
-                (*(csharp2cuda_temp_81) = 1);
-#line 229 "AdvancedModule.cs"
-                {
-#line 229 "AdvancedModule.cs"
-                    int left = 0;
-                    while (true)
-                    {
-#line 229 "AdvancedModule.cs"
-                        int csharp2cuda_temp_83 = (first)->count;
-#line 229 "AdvancedModule.cs"
-                        bool csharp2cuda_temp_84;
-#line 229 "AdvancedModule.cs"
-                        if (((left) < (csharp2cuda_temp_83)))
-                        {
-#line 229 "AdvancedModule.cs"
-                            csharp2cuda_temp_84 = (output)->boolean_value;
+#line 166 "AdvancedModule.cs"
+                            csharp2cuda_temp_35 = mathblocks_positive_infinity();
                         }
                         else
                         {
-#line 229 "AdvancedModule.cs"
-                            csharp2cuda_temp_84 = false;
+#line 166 "AdvancedModule.cs"
+                            csharp2cuda_temp_35 = (-(mathblocks_positive_infinity()));
                         }
-                        if (!(csharp2cuda_temp_84))
-                            break;
-#line 230 "AdvancedModule.cs"
+#line 166 "AdvancedModule.cs"
+                        double selected = csharp2cuda_temp_35;
+#line 169 "AdvancedModule.cs"
                         {
-#line 230 "AdvancedModule.cs"
-                            int right = 0;
+#line 169 "AdvancedModule.cs"
+                            int index = 0;
                             while (true)
                             {
-#line 230 "AdvancedModule.cs"
-                                int csharp2cuda_temp_86 = (first)->count;
-                                if (!(((right) < (csharp2cuda_temp_86))))
+#line 169 "AdvancedModule.cs"
+                                int csharp2cuda_temp_37 = (first)->count;
+                                if (!(((index) < (csharp2cuda_temp_37))))
                                     break;
-#line 231 "AdvancedModule.cs"
-#line 231 "AdvancedModule.cs"
-                                double csharp2cuda_temp_87 = (a)[left];
-#line 231 "AdvancedModule.cs"
-                                double csharp2cuda_temp_88 = (a)[right];
-#line 231 "AdvancedModule.cs"
-                                double csharp2cuda_temp_89 = (a)[csharp2cuda_i32_or(left, right)];
-#line 231 "AdvancedModule.cs"
-                                double csharp2cuda_temp_90 = (a)[csharp2cuda_i32_and(left, right)];
-                                if (((__dadd_rn(csharp2cuda_temp_87, csharp2cuda_temp_88)) < (__dadd_rn(csharp2cuda_temp_89, csharp2cuda_temp_90))))
-#line 232 "AdvancedModule.cs"
+#line 170 "AdvancedModule.cs"
                                 {
-#line 233 "AdvancedModule.cs"
-#line 233 "AdvancedModule.cs"
-                                    int* csharp2cuda_temp_91 = &((output)->boolean_value);
-                                    (*(csharp2cuda_temp_91) = 0);
-#line 234 "AdvancedModule.cs"
-                                    break;
+#line 171 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_38;
+#line 171 "AdvancedModule.cs"
+                                    if (((opcode) == (4)))
+                                    {
+#line 172 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_39 = (b)[index];
+#line 172 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_40 = (fourth)->scalar_value;
+#line 172 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_41 = (c)[query];
+#line 172 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_42 = (a)[index];
+#line 171 "AdvancedModule.cs"
+                                        csharp2cuda_temp_38 = __dadd_rn(csharp2cuda_temp_39, __dmul_rn(csharp2cuda_temp_40, fabs(__dsub_rn(csharp2cuda_temp_41, csharp2cuda_temp_42))));
+                                    }
+                                    else
+                                    {
+#line 173 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_43 = (b)[index];
+#line 173 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_44 = (fourth)->scalar_value;
+#line 173 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_45 = (c)[query];
+#line 173 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_46 = (a)[index];
+#line 171 "AdvancedModule.cs"
+                                        csharp2cuda_temp_38 = __dsub_rn(csharp2cuda_temp_43, __dmul_rn(csharp2cuda_temp_44, fabs(__dsub_rn(csharp2cuda_temp_45, csharp2cuda_temp_46))));
+                                    }
+#line 171 "AdvancedModule.cs"
+                                    double candidate = csharp2cuda_temp_38;
+#line 176 "AdvancedModule.cs"
+#line 176 "AdvancedModule.cs"
+                                    double* csharp2cuda_temp_47 = &(selected);
+#line 176 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_48;
+#line 176 "AdvancedModule.cs"
+                                    if (((opcode) == (4)))
+                                    {
+#line 176 "AdvancedModule.cs"
+                                        csharp2cuda_temp_48 = mathblocks_minimum(selected, candidate);
+                                    }
+                                    else
+                                    {
+#line 176 "AdvancedModule.cs"
+                                        csharp2cuda_temp_48 = mathblocks_maximum(selected, candidate);
+                                    }
+                                    (*(csharp2cuda_temp_47) = csharp2cuda_temp_48);
                                 }
-#line 230 "AdvancedModule.cs"
-                                int* csharp2cuda_temp_85 = &(right);
-                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_85));
+#line 169 "AdvancedModule.cs"
+                                int* csharp2cuda_temp_36 = &(index);
+                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_36));
                             }
                         }
-#line 229 "AdvancedModule.cs"
-                        int* csharp2cuda_temp_82 = &(left);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_82));
+#line 180 "AdvancedModule.cs"
+#line 180 "AdvancedModule.cs"
+                        double* csharp2cuda_temp_49 = &((result)[query]);
+                        (*(csharp2cuda_temp_49) = selected);
                     }
+#line 164 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_32 = &(query);
+#line 164 "AdvancedModule.cs"
+                    int csharp2cuda_temp_33 = *(csharp2cuda_temp_32);
+                    (*(csharp2cuda_temp_32) = csharp2cuda_i32_add(csharp2cuda_temp_33, blockDim.x));
                 }
-#line 236 "AdvancedModule.cs"
-                break;
-#line 237 "AdvancedModule.cs"
-            case 2:
-#line 238 "AdvancedModule.cs"
-#line 238 "AdvancedModule.cs"
-                int csharp2cuda_temp_92 = (first)->count;
-                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_92);
-#line 239 "AdvancedModule.cs"
-#line 239 "AdvancedModule.cs"
-                int csharp2cuda_temp_93 = (first)->count;
-                if ((!(mathblocks_advanced_power_of_two(csharp2cuda_temp_93))))
-#line 240 "AdvancedModule.cs"
+            }
+        }
+#line 183 "AdvancedModule.cs"
+        __syncthreads();
+    }
+#line 186 "AdvancedModule.cs"
+    if (((thread) == (0)))
+#line 187 "AdvancedModule.cs"
+    {
+#line 188 "AdvancedModule.cs"
+        switch (opcode)
+        {
+#line 190 "AdvancedModule.cs"
+            case 0:
+#line 191 "AdvancedModule.cs"
+#line 191 "AdvancedModule.cs"
+                int csharp2cuda_temp_50 = (first)->count;
+#line 191 "AdvancedModule.cs"
+                bool csharp2cuda_temp_51;
+#line 191 "AdvancedModule.cs"
+                if (!(((csharp2cuda_temp_50) <= (0))))
                 {
-#line 241 "AdvancedModule.cs"
-#line 241 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_94 = &((output)->valid);
-                    (*(csharp2cuda_temp_94) = 0);
-#line 242 "AdvancedModule.cs"
-                    break;
-                }
-#line 244 "AdvancedModule.cs"
-                {
-#line 244 "AdvancedModule.cs"
-                    int index = 0;
-                    while (true)
-                    {
-#line 244 "AdvancedModule.cs"
-                        int csharp2cuda_temp_96 = (first)->count;
-                        if (!(((index) < (csharp2cuda_temp_96))))
-                            break;
-#line 245 "AdvancedModule.cs"
-#line 245 "AdvancedModule.cs"
-                        double* csharp2cuda_temp_97 = &((result)[index]);
-#line 245 "AdvancedModule.cs"
-                        double csharp2cuda_temp_98 = (a)[index];
-                        (*(csharp2cuda_temp_97) = csharp2cuda_temp_98);
-#line 244 "AdvancedModule.cs"
-                        int* csharp2cuda_temp_95 = &(index);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_95));
-                    }
-                }
-#line 246 "AdvancedModule.cs"
-                {
-#line 246 "AdvancedModule.cs"
-                    int bit = 0;
-                    while (true)
-                    {
-#line 246 "AdvancedModule.cs"
-                        int csharp2cuda_temp_100 = (first)->count;
-                        if (!(((bit) < (mathblocks_advanced_log_two(csharp2cuda_temp_100)))))
-                            break;
-#line 247 "AdvancedModule.cs"
-                        {
-#line 247 "AdvancedModule.cs"
-                            int mask = 0;
-                            while (true)
-                            {
-#line 247 "AdvancedModule.cs"
-                                int csharp2cuda_temp_102 = (first)->count;
-                                if (!(((mask) < (csharp2cuda_temp_102))))
-                                    break;
-#line 248 "AdvancedModule.cs"
-                                if (((csharp2cuda_i32_and(mask, csharp2cuda_i32_shl(1, bit))) != (0)))
-                                {
-#line 249 "AdvancedModule.cs"
-#line 249 "AdvancedModule.cs"
-                                    double* csharp2cuda_temp_103 = &((result)[mask]);
-#line 249 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_104 = *(csharp2cuda_temp_103);
-#line 249 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_105 = (result)[csharp2cuda_i32_xor(mask, csharp2cuda_i32_shl(1, bit))];
-                                    (*(csharp2cuda_temp_103) = __dsub_rn(csharp2cuda_temp_104, csharp2cuda_temp_105));
-                                }
-#line 247 "AdvancedModule.cs"
-                                int* csharp2cuda_temp_101 = &(mask);
-                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_101));
-                            }
-                        }
-#line 246 "AdvancedModule.cs"
-                        int* csharp2cuda_temp_99 = &(bit);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_99));
-                    }
-                }
-#line 250 "AdvancedModule.cs"
-                break;
-#line 251 "AdvancedModule.cs"
-            case 3:
-#line 252 "AdvancedModule.cs"
-#line 252 "AdvancedModule.cs"
-                int csharp2cuda_temp_106 = (first)->count;
-#line 252 "AdvancedModule.cs"
-                bool csharp2cuda_temp_107;
-#line 252 "AdvancedModule.cs"
-                if (!((!(mathblocks_advanced_power_of_two(csharp2cuda_temp_106)))))
-                {
-#line 252 "AdvancedModule.cs"
-                    int csharp2cuda_temp_108 = (first)->count;
-#line 252 "AdvancedModule.cs"
-                    csharp2cuda_temp_107 = ((csharp2cuda_temp_108) > (csharp2cuda_i32_shl(1, 20)));
+#line 191 "AdvancedModule.cs"
+                    int csharp2cuda_temp_52 = (first)->count;
+#line 191 "AdvancedModule.cs"
+                    csharp2cuda_temp_51 = ((csharp2cuda_temp_52) >= (31));
                 }
                 else
                 {
-#line 252 "AdvancedModule.cs"
-                    csharp2cuda_temp_107 = true;
+#line 191 "AdvancedModule.cs"
+                    csharp2cuda_temp_51 = true;
                 }
-                if (csharp2cuda_temp_107)
-#line 253 "AdvancedModule.cs"
+#line 191 "AdvancedModule.cs"
+                bool csharp2cuda_temp_53;
+#line 191 "AdvancedModule.cs"
+                if (!(csharp2cuda_temp_51))
                 {
-#line 254 "AdvancedModule.cs"
-#line 254 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_109 = &((output)->valid);
-                    (*(csharp2cuda_temp_109) = 0);
-#line 255 "AdvancedModule.cs"
+#line 192 "AdvancedModule.cs"
+                    int csharp2cuda_temp_54 = (second)->count;
+#line 192 "AdvancedModule.cs"
+                    int csharp2cuda_temp_55 = (first)->count;
+#line 191 "AdvancedModule.cs"
+                    csharp2cuda_temp_53 = ((csharp2cuda_temp_54) != (csharp2cuda_i32_shl(1, csharp2cuda_temp_55)));
+                }
+                else
+                {
+#line 191 "AdvancedModule.cs"
+                    csharp2cuda_temp_53 = true;
+                }
+#line 191 "AdvancedModule.cs"
+                bool csharp2cuda_temp_56;
+#line 191 "AdvancedModule.cs"
+                if (!(csharp2cuda_temp_53))
+                {
+#line 191 "AdvancedModule.cs"
+                    csharp2cuda_temp_56 = ((((void*)(scratch))) == (((void*)(nullptr))));
+                }
+                else
+                {
+#line 191 "AdvancedModule.cs"
+                    csharp2cuda_temp_56 = true;
+                }
+                if (csharp2cuda_temp_56)
+#line 193 "AdvancedModule.cs"
+                {
+#line 194 "AdvancedModule.cs"
+#line 194 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_57 = &((output)->valid);
+                    (*(csharp2cuda_temp_57) = 0);
+#line 195 "AdvancedModule.cs"
                     break;
                 }
+#line 197 "AdvancedModule.cs"
+                {
+#line 197 "AdvancedModule.cs"
+                    int index = 0;
+                    while (true)
+                    {
+#line 197 "AdvancedModule.cs"
+                        int csharp2cuda_temp_59 = (first)->count;
+                        if (!(((index) < (csharp2cuda_temp_59))))
+                            break;
+#line 198 "AdvancedModule.cs"
+                        {
+#line 199 "AdvancedModule.cs"
+#line 199 "AdvancedModule.cs"
+                            double csharp2cuda_temp_60 = (a)[index];
+                            if (((csharp2cuda_temp_60) < (0.0)))
+#line 200 "AdvancedModule.cs"
+                            {
+#line 201 "AdvancedModule.cs"
+#line 201 "AdvancedModule.cs"
+                                int* csharp2cuda_temp_61 = &((output)->valid);
+                                (*(csharp2cuda_temp_61) = 0);
+#line 202 "AdvancedModule.cs"
+                                break;
+                            }
+#line 204 "AdvancedModule.cs"
+                            int position = index;
+#line 205 "AdvancedModule.cs"
+                            while (true)
+                            {
+#line 205 "AdvancedModule.cs"
+                                bool csharp2cuda_temp_62;
+#line 205 "AdvancedModule.cs"
+                                if (((position) > (0)))
+                                {
+#line 205 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_63 = (scratch)[csharp2cuda_i32_sub(position, 1)];
+#line 205 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_64 = (a)[csharp2cuda_f64_to_i32(csharp2cuda_temp_63)];
+#line 205 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_65 = (a)[index];
+#line 205 "AdvancedModule.cs"
+                                    csharp2cuda_temp_62 = ((csharp2cuda_temp_64) > (csharp2cuda_temp_65));
+                                }
+                                else
+                                {
+#line 205 "AdvancedModule.cs"
+                                    csharp2cuda_temp_62 = false;
+                                }
+                                if (!(csharp2cuda_temp_62))
+                                    break;
+#line 206 "AdvancedModule.cs"
+                                {
+#line 207 "AdvancedModule.cs"
+#line 207 "AdvancedModule.cs"
+                                    double* csharp2cuda_temp_66 = &((scratch)[position]);
+#line 207 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_67 = (scratch)[csharp2cuda_i32_sub(position, 1)];
+                                    (*(csharp2cuda_temp_66) = csharp2cuda_temp_67);
+#line 208 "AdvancedModule.cs"
+#line 208 "AdvancedModule.cs"
+                                    int* csharp2cuda_temp_68 = &(position);
+                                    csharp2cuda_i32_post_decrement(*(csharp2cuda_temp_68));
+                                }
+                            }
+#line 210 "AdvancedModule.cs"
+#line 210 "AdvancedModule.cs"
+                            double* csharp2cuda_temp_69 = &((scratch)[position]);
+                            (*(csharp2cuda_temp_69) = ((double)(index)));
+                        }
+#line 197 "AdvancedModule.cs"
+                        int* csharp2cuda_temp_58 = &(index);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_58));
+                    }
+                }
+#line 212 "AdvancedModule.cs"
+                if ((output)->valid)
+#line 213 "AdvancedModule.cs"
+                {
+#line 214 "AdvancedModule.cs"
+                    double total = 0.0;
+#line 215 "AdvancedModule.cs"
+                    double previous = 0.0;
+#line 216 "AdvancedModule.cs"
+                    {
+#line 216 "AdvancedModule.cs"
+                        int position = 0;
+                        while (true)
+                        {
+#line 216 "AdvancedModule.cs"
+                            int csharp2cuda_temp_71 = (first)->count;
+                            if (!(((position) < (csharp2cuda_temp_71))))
+                                break;
+#line 217 "AdvancedModule.cs"
+                            {
+#line 218 "AdvancedModule.cs"
+                                int coalition = 0;
+#line 219 "AdvancedModule.cs"
+                                {
+#line 219 "AdvancedModule.cs"
+                                    int index = position;
+                                    while (true)
+                                    {
+#line 219 "AdvancedModule.cs"
+                                        int csharp2cuda_temp_73 = (first)->count;
+                                        if (!(((index) < (csharp2cuda_temp_73))))
+                                            break;
+#line 220 "AdvancedModule.cs"
+#line 220 "AdvancedModule.cs"
+                                        int* csharp2cuda_temp_74 = &(coalition);
+#line 220 "AdvancedModule.cs"
+                                        int csharp2cuda_temp_75 = *(csharp2cuda_temp_74);
+#line 220 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_76 = (scratch)[index];
+                                        (*(csharp2cuda_temp_74) = csharp2cuda_i32_or(csharp2cuda_temp_75, csharp2cuda_i32_shl(1, csharp2cuda_f64_to_i32(csharp2cuda_temp_76))));
+#line 219 "AdvancedModule.cs"
+                                        int* csharp2cuda_temp_72 = &(index);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_72));
+                                    }
+                                }
+#line 221 "AdvancedModule.cs"
+                                double csharp2cuda_temp_77 = (scratch)[position];
+#line 221 "AdvancedModule.cs"
+                                int ordered = csharp2cuda_f64_to_i32(csharp2cuda_temp_77);
+#line 222 "AdvancedModule.cs"
+#line 222 "AdvancedModule.cs"
+                                double* csharp2cuda_temp_78 = &(total);
+#line 222 "AdvancedModule.cs"
+                                double csharp2cuda_temp_79 = *(csharp2cuda_temp_78);
+#line 222 "AdvancedModule.cs"
+                                double csharp2cuda_temp_80 = (a)[ordered];
+#line 222 "AdvancedModule.cs"
+                                double csharp2cuda_temp_81 = (b)[coalition];
+                                (*(csharp2cuda_temp_78) = __dadd_rn(csharp2cuda_temp_79, __dmul_rn(__dsub_rn(csharp2cuda_temp_80, previous), csharp2cuda_temp_81)));
+#line 223 "AdvancedModule.cs"
+#line 223 "AdvancedModule.cs"
+                                double* csharp2cuda_temp_82 = &(previous);
+#line 223 "AdvancedModule.cs"
+                                double csharp2cuda_temp_83 = (a)[ordered];
+                                (*(csharp2cuda_temp_82) = csharp2cuda_temp_83);
+                            }
+#line 216 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_70 = &(position);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_70));
+                        }
+                    }
+#line 225 "AdvancedModule.cs"
+#line 225 "AdvancedModule.cs"
+                    double* csharp2cuda_temp_84 = &((output)->scalar_value);
+                    (*(csharp2cuda_temp_84) = total);
+                }
+#line 227 "AdvancedModule.cs"
+                break;
+#line 228 "AdvancedModule.cs"
+            case 1:
+#line 229 "AdvancedModule.cs"
+#line 229 "AdvancedModule.cs"
+                int csharp2cuda_temp_85 = (first)->count;
+#line 229 "AdvancedModule.cs"
+                bool csharp2cuda_temp_86;
+#line 229 "AdvancedModule.cs"
+                if (!((!(mathblocks_advanced_power_of_two(csharp2cuda_temp_85)))))
+                {
+#line 229 "AdvancedModule.cs"
+                    int csharp2cuda_temp_87 = (first)->count;
+#line 229 "AdvancedModule.cs"
+                    csharp2cuda_temp_86 = ((csharp2cuda_temp_87) > (csharp2cuda_i32_shl(1, 12)));
+                }
+                else
+                {
+#line 229 "AdvancedModule.cs"
+                    csharp2cuda_temp_86 = true;
+                }
+                if (csharp2cuda_temp_86)
+#line 230 "AdvancedModule.cs"
+                {
+#line 231 "AdvancedModule.cs"
+#line 231 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_88 = &((output)->valid);
+                    (*(csharp2cuda_temp_88) = 0);
+#line 232 "AdvancedModule.cs"
+                    break;
+                }
+#line 234 "AdvancedModule.cs"
+#line 234 "AdvancedModule.cs"
+                int* csharp2cuda_temp_89 = &((output)->boolean_value);
+                (*(csharp2cuda_temp_89) = 1);
+#line 235 "AdvancedModule.cs"
+                {
+#line 235 "AdvancedModule.cs"
+                    int left = 0;
+                    while (true)
+                    {
+#line 235 "AdvancedModule.cs"
+                        int csharp2cuda_temp_91 = (first)->count;
+#line 235 "AdvancedModule.cs"
+                        bool csharp2cuda_temp_92;
+#line 235 "AdvancedModule.cs"
+                        if (((left) < (csharp2cuda_temp_91)))
+                        {
+#line 235 "AdvancedModule.cs"
+                            csharp2cuda_temp_92 = (output)->boolean_value;
+                        }
+                        else
+                        {
+#line 235 "AdvancedModule.cs"
+                            csharp2cuda_temp_92 = false;
+                        }
+                        if (!(csharp2cuda_temp_92))
+                            break;
+#line 236 "AdvancedModule.cs"
+                        {
+#line 236 "AdvancedModule.cs"
+                            int right = 0;
+                            while (true)
+                            {
+#line 236 "AdvancedModule.cs"
+                                int csharp2cuda_temp_94 = (first)->count;
+                                if (!(((right) < (csharp2cuda_temp_94))))
+                                    break;
+#line 237 "AdvancedModule.cs"
+#line 237 "AdvancedModule.cs"
+                                double csharp2cuda_temp_95 = (a)[left];
+#line 237 "AdvancedModule.cs"
+                                double csharp2cuda_temp_96 = (a)[right];
+#line 237 "AdvancedModule.cs"
+                                double csharp2cuda_temp_97 = (a)[csharp2cuda_i32_or(left, right)];
+#line 237 "AdvancedModule.cs"
+                                double csharp2cuda_temp_98 = (a)[csharp2cuda_i32_and(left, right)];
+                                if (((__dadd_rn(csharp2cuda_temp_95, csharp2cuda_temp_96)) < (__dadd_rn(csharp2cuda_temp_97, csharp2cuda_temp_98))))
+#line 238 "AdvancedModule.cs"
+                                {
+#line 239 "AdvancedModule.cs"
+#line 239 "AdvancedModule.cs"
+                                    int* csharp2cuda_temp_99 = &((output)->boolean_value);
+                                    (*(csharp2cuda_temp_99) = 0);
+#line 240 "AdvancedModule.cs"
+                                    break;
+                                }
+#line 236 "AdvancedModule.cs"
+                                int* csharp2cuda_temp_93 = &(right);
+                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_93));
+                            }
+                        }
+#line 235 "AdvancedModule.cs"
+                        int* csharp2cuda_temp_90 = &(left);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_90));
+                    }
+                }
+#line 242 "AdvancedModule.cs"
+                break;
+#line 243 "AdvancedModule.cs"
+            case 2:
+#line 244 "AdvancedModule.cs"
+#line 244 "AdvancedModule.cs"
+                int csharp2cuda_temp_100 = (first)->count;
+                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_100);
+#line 245 "AdvancedModule.cs"
+#line 245 "AdvancedModule.cs"
+                int csharp2cuda_temp_101 = (first)->count;
+                if ((!(mathblocks_advanced_power_of_two(csharp2cuda_temp_101))))
+#line 246 "AdvancedModule.cs"
+                {
+#line 247 "AdvancedModule.cs"
+#line 247 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_102 = &((output)->valid);
+                    (*(csharp2cuda_temp_102) = 0);
+#line 248 "AdvancedModule.cs"
+                    break;
+                }
+#line 250 "AdvancedModule.cs"
+                {
+#line 250 "AdvancedModule.cs"
+                    int index = 0;
+                    while (true)
+                    {
+#line 250 "AdvancedModule.cs"
+                        int csharp2cuda_temp_104 = (first)->count;
+                        if (!(((index) < (csharp2cuda_temp_104))))
+                            break;
+#line 251 "AdvancedModule.cs"
+#line 251 "AdvancedModule.cs"
+                        double* csharp2cuda_temp_105 = &((result)[index]);
+#line 251 "AdvancedModule.cs"
+                        double csharp2cuda_temp_106 = (a)[index];
+                        (*(csharp2cuda_temp_105) = csharp2cuda_temp_106);
+#line 250 "AdvancedModule.cs"
+                        int* csharp2cuda_temp_103 = &(index);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_103));
+                    }
+                }
+#line 252 "AdvancedModule.cs"
+                {
+#line 252 "AdvancedModule.cs"
+                    int bit = 0;
+                    while (true)
+                    {
+#line 252 "AdvancedModule.cs"
+                        int csharp2cuda_temp_108 = (first)->count;
+                        if (!(((bit) < (mathblocks_advanced_log_two(csharp2cuda_temp_108)))))
+                            break;
+#line 253 "AdvancedModule.cs"
+                        {
+#line 253 "AdvancedModule.cs"
+                            int mask = 0;
+                            while (true)
+                            {
+#line 253 "AdvancedModule.cs"
+                                int csharp2cuda_temp_110 = (first)->count;
+                                if (!(((mask) < (csharp2cuda_temp_110))))
+                                    break;
+#line 254 "AdvancedModule.cs"
+                                if (((csharp2cuda_i32_and(mask, csharp2cuda_i32_shl(1, bit))) != (0)))
+                                {
+#line 255 "AdvancedModule.cs"
+#line 255 "AdvancedModule.cs"
+                                    double* csharp2cuda_temp_111 = &((result)[mask]);
+#line 255 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_112 = *(csharp2cuda_temp_111);
+#line 255 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_113 = (result)[csharp2cuda_i32_xor(mask, csharp2cuda_i32_shl(1, bit))];
+                                    (*(csharp2cuda_temp_111) = __dsub_rn(csharp2cuda_temp_112, csharp2cuda_temp_113));
+                                }
+#line 253 "AdvancedModule.cs"
+                                int* csharp2cuda_temp_109 = &(mask);
+                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_109));
+                            }
+                        }
+#line 252 "AdvancedModule.cs"
+                        int* csharp2cuda_temp_107 = &(bit);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_107));
+                    }
+                }
+#line 256 "AdvancedModule.cs"
+                break;
 #line 257 "AdvancedModule.cs"
+            case 3:
+#line 258 "AdvancedModule.cs"
+#line 258 "AdvancedModule.cs"
+                int csharp2cuda_temp_114 = (first)->count;
+#line 258 "AdvancedModule.cs"
+                bool csharp2cuda_temp_115;
+#line 258 "AdvancedModule.cs"
+                if (!((!(mathblocks_advanced_power_of_two(csharp2cuda_temp_114)))))
                 {
 #line 258 "AdvancedModule.cs"
-                    int csharp2cuda_temp_110 = (first)->count;
+                    int csharp2cuda_temp_116 = (first)->count;
 #line 258 "AdvancedModule.cs"
-                    int player_count = mathblocks_advanced_log_two(csharp2cuda_temp_110);
+                    csharp2cuda_temp_115 = ((csharp2cuda_temp_116) > (csharp2cuda_i32_shl(1, 20)));
+                }
+                else
+                {
+#line 258 "AdvancedModule.cs"
+                    csharp2cuda_temp_115 = true;
+                }
+                if (csharp2cuda_temp_115)
 #line 259 "AdvancedModule.cs"
-                    mathblocks_sequence_set_vector_shape(output, player_count);
+                {
 #line 260 "AdvancedModule.cs"
+#line 260 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_117 = &((output)->valid);
+                    (*(csharp2cuda_temp_117) = 0);
+#line 261 "AdvancedModule.cs"
+                    break;
+                }
+#line 263 "AdvancedModule.cs"
+                {
+#line 264 "AdvancedModule.cs"
+                    int csharp2cuda_temp_118 = (first)->count;
+#line 264 "AdvancedModule.cs"
+                    int player_count = mathblocks_advanced_log_two(csharp2cuda_temp_118);
+#line 265 "AdvancedModule.cs"
+                    mathblocks_sequence_set_vector_shape(output, player_count);
+#line 266 "AdvancedModule.cs"
                     double denominator = mathblocks_advanced_factorial(player_count);
-#line 261 "AdvancedModule.cs"
+#line 267 "AdvancedModule.cs"
                     {
-#line 261 "AdvancedModule.cs"
+#line 267 "AdvancedModule.cs"
                         int player = 0;
                         while (true)
                         {
                             if (!(((player) < (player_count))))
                                 break;
-#line 262 "AdvancedModule.cs"
+#line 268 "AdvancedModule.cs"
                             {
-#line 263 "AdvancedModule.cs"
-#line 263 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_112 = &((result)[player]);
-                                (*(csharp2cuda_temp_112) = 0.0);
-#line 264 "AdvancedModule.cs"
+#line 269 "AdvancedModule.cs"
+#line 269 "AdvancedModule.cs"
+                                double* csharp2cuda_temp_120 = &((result)[player]);
+                                (*(csharp2cuda_temp_120) = 0.0);
+#line 270 "AdvancedModule.cs"
                                 {
-#line 264 "AdvancedModule.cs"
+#line 270 "AdvancedModule.cs"
                                     int coalition = 0;
                                     while (true)
                                     {
-#line 264 "AdvancedModule.cs"
-                                        int csharp2cuda_temp_114 = (first)->count;
-                                        if (!(((coalition) < (csharp2cuda_temp_114))))
+#line 270 "AdvancedModule.cs"
+                                        int csharp2cuda_temp_122 = (first)->count;
+                                        if (!(((coalition) < (csharp2cuda_temp_122))))
                                             break;
-#line 265 "AdvancedModule.cs"
+#line 271 "AdvancedModule.cs"
                                         {
-#line 266 "AdvancedModule.cs"
+#line 272 "AdvancedModule.cs"
                                             if (((csharp2cuda_i32_and(coalition, csharp2cuda_i32_shl(1, player))) != (0)))
                                             {
-#line 267 "AdvancedModule.cs"
+#line 273 "AdvancedModule.cs"
                                                 goto csharp2cuda_for_continue_11;
                                             }
-#line 268 "AdvancedModule.cs"
+#line 274 "AdvancedModule.cs"
                                             int size = mathblocks_advanced_popcount(coalition);
-#line 269 "AdvancedModule.cs"
+#line 275 "AdvancedModule.cs"
                                             double weight = __ddiv_rn(__dmul_rn(mathblocks_advanced_factorial(size), mathblocks_advanced_factorial(csharp2cuda_i32_sub(csharp2cuda_i32_sub(player_count, size), 1))), denominator);
-#line 272 "AdvancedModule.cs"
-#line 272 "AdvancedModule.cs"
-                                            double* csharp2cuda_temp_115 = &((result)[player]);
-#line 272 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_116 = *(csharp2cuda_temp_115);
-#line 273 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_117 = (a)[csharp2cuda_i32_or(coalition, csharp2cuda_i32_shl(1, player))];
-#line 273 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_118 = (a)[coalition];
-                                            (*(csharp2cuda_temp_115) = __dadd_rn(csharp2cuda_temp_116, __dmul_rn(weight, __dsub_rn(csharp2cuda_temp_117, csharp2cuda_temp_118))));
+#line 278 "AdvancedModule.cs"
+#line 278 "AdvancedModule.cs"
+                                            double* csharp2cuda_temp_123 = &((result)[player]);
+#line 278 "AdvancedModule.cs"
+                                            double csharp2cuda_temp_124 = *(csharp2cuda_temp_123);
+#line 279 "AdvancedModule.cs"
+                                            double csharp2cuda_temp_125 = (a)[csharp2cuda_i32_or(coalition, csharp2cuda_i32_shl(1, player))];
+#line 279 "AdvancedModule.cs"
+                                            double csharp2cuda_temp_126 = (a)[coalition];
+                                            (*(csharp2cuda_temp_123) = __dadd_rn(csharp2cuda_temp_124, __dmul_rn(weight, __dsub_rn(csharp2cuda_temp_125, csharp2cuda_temp_126))));
                                         }
                                         csharp2cuda_for_continue_11:
-#line 264 "AdvancedModule.cs"
-                                        int* csharp2cuda_temp_113 = &(coalition);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_113));
+#line 270 "AdvancedModule.cs"
+                                        int* csharp2cuda_temp_121 = &(coalition);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_121));
                                     }
                                 }
                             }
-#line 261 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_111 = &(player);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_111));
+#line 267 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_119 = &(player);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_119));
                         }
                     }
-#line 276 "AdvancedModule.cs"
+#line 282 "AdvancedModule.cs"
                     break;
                 }
-#line 278 "AdvancedModule.cs"
+#line 284 "AdvancedModule.cs"
             case 4:
             case 5:
-#line 280 "AdvancedModule.cs"
-#line 280 "AdvancedModule.cs"
-                int csharp2cuda_temp_119 = (third)->count;
-                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_119);
-#line 281 "AdvancedModule.cs"
-#line 281 "AdvancedModule.cs"
-                int csharp2cuda_temp_120 = (first)->count;
-#line 281 "AdvancedModule.cs"
-                bool csharp2cuda_temp_121;
-#line 281 "AdvancedModule.cs"
-                if (!(((csharp2cuda_temp_120) <= (0))))
-                {
-#line 281 "AdvancedModule.cs"
-                    int csharp2cuda_temp_122 = (first)->count;
-#line 281 "AdvancedModule.cs"
-                    int csharp2cuda_temp_123 = (second)->count;
-#line 281 "AdvancedModule.cs"
-                    csharp2cuda_temp_121 = ((csharp2cuda_temp_122) != (csharp2cuda_temp_123));
-                }
-                else
-                {
-#line 281 "AdvancedModule.cs"
-                    csharp2cuda_temp_121 = true;
-                }
-#line 281 "AdvancedModule.cs"
-                bool csharp2cuda_temp_124;
-#line 281 "AdvancedModule.cs"
-                if (!(csharp2cuda_temp_121))
-                {
-#line 281 "AdvancedModule.cs"
-                    double csharp2cuda_temp_125 = (fourth)->scalar_value;
-#line 281 "AdvancedModule.cs"
-                    csharp2cuda_temp_124 = ((csharp2cuda_temp_125) < (0.0));
-                }
-                else
-                {
-#line 281 "AdvancedModule.cs"
-                    csharp2cuda_temp_124 = true;
-                }
-                if (csharp2cuda_temp_124)
-#line 282 "AdvancedModule.cs"
-                {
-#line 283 "AdvancedModule.cs"
-#line 283 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_126 = &((output)->valid);
-                    (*(csharp2cuda_temp_126) = 0);
-#line 284 "AdvancedModule.cs"
-                    break;
-                }
 #line 286 "AdvancedModule.cs"
-                if (((opcode) == (5)))
+#line 286 "AdvancedModule.cs"
+                int csharp2cuda_temp_127 = (third)->count;
+                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_127);
+#line 287 "AdvancedModule.cs"
+#line 287 "AdvancedModule.cs"
+                int csharp2cuda_temp_128 = (first)->count;
+#line 287 "AdvancedModule.cs"
+                bool csharp2cuda_temp_129;
+#line 287 "AdvancedModule.cs"
+                if (!(((csharp2cuda_temp_128) <= (0))))
                 {
 #line 287 "AdvancedModule.cs"
-                    break;
+                    int csharp2cuda_temp_130 = (first)->count;
+#line 287 "AdvancedModule.cs"
+                    int csharp2cuda_temp_131 = (second)->count;
+#line 287 "AdvancedModule.cs"
+                    csharp2cuda_temp_129 = ((csharp2cuda_temp_130) != (csharp2cuda_temp_131));
                 }
+                else
+                {
+#line 287 "AdvancedModule.cs"
+                    csharp2cuda_temp_129 = true;
+                }
+#line 287 "AdvancedModule.cs"
+                bool csharp2cuda_temp_132;
+#line 287 "AdvancedModule.cs"
+                if (!(csharp2cuda_temp_129))
+                {
+#line 287 "AdvancedModule.cs"
+                    double csharp2cuda_temp_133 = (fourth)->scalar_value;
+#line 287 "AdvancedModule.cs"
+                    csharp2cuda_temp_132 = ((csharp2cuda_temp_133) < (0.0));
+                }
+                else
+                {
+#line 287 "AdvancedModule.cs"
+                    csharp2cuda_temp_132 = true;
+                }
+                if (csharp2cuda_temp_132)
 #line 288 "AdvancedModule.cs"
                 {
-#line 288 "AdvancedModule.cs"
-                    int query = 0;
-                    while (true)
-                    {
-#line 288 "AdvancedModule.cs"
-                        int csharp2cuda_temp_128 = (third)->count;
-                        if (!(((query) < (csharp2cuda_temp_128))))
-                            break;
 #line 289 "AdvancedModule.cs"
-                        {
+#line 289 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_134 = &((output)->valid);
+                    (*(csharp2cuda_temp_134) = 0);
 #line 290 "AdvancedModule.cs"
-                            double csharp2cuda_temp_129;
-#line 290 "AdvancedModule.cs"
-                            if (((opcode) == (4)))
-                            {
-#line 290 "AdvancedModule.cs"
-                                csharp2cuda_temp_129 = mathblocks_positive_infinity();
-                            }
-                            else
-                            {
-#line 290 "AdvancedModule.cs"
-                                csharp2cuda_temp_129 = (-(mathblocks_positive_infinity()));
-                            }
-#line 290 "AdvancedModule.cs"
-                            double selected = csharp2cuda_temp_129;
-#line 293 "AdvancedModule.cs"
-                            {
-#line 293 "AdvancedModule.cs"
-                                int index = 0;
-                                while (true)
-                                {
-#line 293 "AdvancedModule.cs"
-                                    int csharp2cuda_temp_131 = (first)->count;
-                                    if (!(((index) < (csharp2cuda_temp_131))))
-                                        break;
-#line 294 "AdvancedModule.cs"
-                                    {
-#line 295 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_132;
-#line 295 "AdvancedModule.cs"
-                                        if (((opcode) == (4)))
-                                        {
-#line 296 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_133 = (b)[index];
-#line 296 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_134 = (fourth)->scalar_value;
-#line 296 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_135 = (c)[query];
-#line 296 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_136 = (a)[index];
-#line 295 "AdvancedModule.cs"
-                                            csharp2cuda_temp_132 = __dadd_rn(csharp2cuda_temp_133, __dmul_rn(csharp2cuda_temp_134, fabs(__dsub_rn(csharp2cuda_temp_135, csharp2cuda_temp_136))));
-                                        }
-                                        else
-                                        {
-#line 297 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_137 = (b)[index];
-#line 297 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_138 = (fourth)->scalar_value;
-#line 297 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_139 = (c)[query];
-#line 297 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_140 = (a)[index];
-#line 295 "AdvancedModule.cs"
-                                            csharp2cuda_temp_132 = __dsub_rn(csharp2cuda_temp_137, __dmul_rn(csharp2cuda_temp_138, fabs(__dsub_rn(csharp2cuda_temp_139, csharp2cuda_temp_140))));
-                                        }
-#line 295 "AdvancedModule.cs"
-                                        double candidate = csharp2cuda_temp_132;
-#line 300 "AdvancedModule.cs"
-#line 300 "AdvancedModule.cs"
-                                        double* csharp2cuda_temp_141 = &(selected);
-#line 300 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_142;
-#line 300 "AdvancedModule.cs"
-                                        if (((opcode) == (4)))
-                                        {
-#line 300 "AdvancedModule.cs"
-                                            csharp2cuda_temp_142 = mathblocks_minimum(selected, candidate);
-                                        }
-                                        else
-                                        {
-#line 300 "AdvancedModule.cs"
-                                            csharp2cuda_temp_142 = mathblocks_maximum(selected, candidate);
-                                        }
-                                        (*(csharp2cuda_temp_141) = csharp2cuda_temp_142);
-                                    }
-#line 293 "AdvancedModule.cs"
-                                    int* csharp2cuda_temp_130 = &(index);
-                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_130));
-                                }
-                            }
-#line 304 "AdvancedModule.cs"
-#line 304 "AdvancedModule.cs"
-                            double* csharp2cuda_temp_143 = &((result)[query]);
-                            (*(csharp2cuda_temp_143) = selected);
-                        }
-#line 288 "AdvancedModule.cs"
-                        int* csharp2cuda_temp_127 = &(query);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_127));
-                    }
-                }
-#line 306 "AdvancedModule.cs"
-                break;
-#line 307 "AdvancedModule.cs"
-            case 6:
-#line 308 "AdvancedModule.cs"
-#line 308 "AdvancedModule.cs"
-                int csharp2cuda_temp_144 = (first)->count;
-                if (((csharp2cuda_temp_144) <= (0)))
-#line 309 "AdvancedModule.cs"
-                {
-#line 310 "AdvancedModule.cs"
-#line 310 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_145 = &((output)->valid);
-                    (*(csharp2cuda_temp_145) = 0);
-#line 311 "AdvancedModule.cs"
                     break;
                 }
-#line 313 "AdvancedModule.cs"
+#line 292 "AdvancedModule.cs"
+                break;
+#line 293 "AdvancedModule.cs"
+            case 6:
+#line 294 "AdvancedModule.cs"
+#line 294 "AdvancedModule.cs"
+                int csharp2cuda_temp_135 = (first)->count;
+                if (((csharp2cuda_temp_135) <= (0)))
+#line 295 "AdvancedModule.cs"
                 {
-#line 314 "AdvancedModule.cs"
+#line 296 "AdvancedModule.cs"
+#line 296 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_136 = &((output)->valid);
+                    (*(csharp2cuda_temp_136) = 0);
+#line 297 "AdvancedModule.cs"
+                    break;
+                }
+#line 299 "AdvancedModule.cs"
+                {
+#line 300 "AdvancedModule.cs"
                     double sum = 0.0;
-#line 315 "AdvancedModule.cs"
+#line 301 "AdvancedModule.cs"
                     {
-#line 315 "AdvancedModule.cs"
+#line 301 "AdvancedModule.cs"
                         int left = 0;
                         while (true)
                         {
-#line 315 "AdvancedModule.cs"
-                            int csharp2cuda_temp_147 = (first)->count;
-                            if (!(((left) < (csharp2cuda_temp_147))))
+#line 301 "AdvancedModule.cs"
+                            int csharp2cuda_temp_138 = (first)->count;
+                            if (!(((left) < (csharp2cuda_temp_138))))
                                 break;
-#line 316 "AdvancedModule.cs"
+#line 302 "AdvancedModule.cs"
                             {
-#line 316 "AdvancedModule.cs"
+#line 302 "AdvancedModule.cs"
                                 int right = 0;
                                 while (true)
                                 {
-#line 316 "AdvancedModule.cs"
-                                    int csharp2cuda_temp_149 = (first)->count;
-                                    if (!(((right) < (csharp2cuda_temp_149))))
+#line 302 "AdvancedModule.cs"
+                                    int csharp2cuda_temp_140 = (first)->count;
+                                    if (!(((right) < (csharp2cuda_temp_140))))
                                         break;
-#line 317 "AdvancedModule.cs"
-#line 317 "AdvancedModule.cs"
-                                    double* csharp2cuda_temp_150 = &(sum);
-#line 317 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_151 = *(csharp2cuda_temp_150);
-#line 317 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_152 = (a)[left];
-#line 317 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_153 = (a)[right];
-                                    (*(csharp2cuda_temp_150) = __dadd_rn(csharp2cuda_temp_151, fabs(__dsub_rn(csharp2cuda_temp_152, csharp2cuda_temp_153))));
-#line 316 "AdvancedModule.cs"
-                                    int* csharp2cuda_temp_148 = &(right);
-                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_148));
+#line 303 "AdvancedModule.cs"
+#line 303 "AdvancedModule.cs"
+                                    double* csharp2cuda_temp_141 = &(sum);
+#line 303 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_142 = *(csharp2cuda_temp_141);
+#line 303 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_143 = (a)[left];
+#line 303 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_144 = (a)[right];
+                                    (*(csharp2cuda_temp_141) = __dadd_rn(csharp2cuda_temp_142, fabs(__dsub_rn(csharp2cuda_temp_143, csharp2cuda_temp_144))));
+#line 302 "AdvancedModule.cs"
+                                    int* csharp2cuda_temp_139 = &(right);
+                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_139));
                                 }
                             }
-#line 315 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_146 = &(left);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_146));
+#line 301 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_137 = &(left);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_137));
                         }
                     }
-#line 318 "AdvancedModule.cs"
-#line 318 "AdvancedModule.cs"
-                    double* csharp2cuda_temp_154 = &((output)->scalar_value);
-#line 319 "AdvancedModule.cs"
-                    int csharp2cuda_temp_155 = (first)->count;
-#line 319 "AdvancedModule.cs"
-                    int csharp2cuda_temp_156 = (first)->count;
-#line 318 "AdvancedModule.cs"
-                    double csharp2cuda_temp_157 = __ddiv_rn(sum, __dmul_rn(__dmul_rn(2.0, ((double)(csharp2cuda_temp_155))), mathblocks_compensated_sum(a, csharp2cuda_temp_156)));
-                    (*(csharp2cuda_temp_154) = csharp2cuda_temp_157);
-#line 320 "AdvancedModule.cs"
+#line 304 "AdvancedModule.cs"
+#line 304 "AdvancedModule.cs"
+                    double* csharp2cuda_temp_145 = &((output)->scalar_value);
+#line 305 "AdvancedModule.cs"
+                    int csharp2cuda_temp_146 = (first)->count;
+#line 305 "AdvancedModule.cs"
+                    int csharp2cuda_temp_147 = (first)->count;
+#line 304 "AdvancedModule.cs"
+                    double csharp2cuda_temp_148 = __ddiv_rn(sum, __dmul_rn(__dmul_rn(2.0, ((double)(csharp2cuda_temp_146))), mathblocks_compensated_sum(a, csharp2cuda_temp_147)));
+                    (*(csharp2cuda_temp_145) = csharp2cuda_temp_148);
+#line 306 "AdvancedModule.cs"
                     break;
                 }
-#line 322 "AdvancedModule.cs"
+#line 308 "AdvancedModule.cs"
             case 7:
-#line 323 "AdvancedModule.cs"
-#line 323 "AdvancedModule.cs"
-                int csharp2cuda_temp_158 = (first)->count;
-                mathblocks_sequence_set_vector_shape(output, csharp2cuda_i32_add(csharp2cuda_temp_158, 1));
-#line 324 "AdvancedModule.cs"
-#line 324 "AdvancedModule.cs"
-                int csharp2cuda_temp_159 = (first)->count;
-#line 324 "AdvancedModule.cs"
-                bool csharp2cuda_temp_160;
-#line 324 "AdvancedModule.cs"
-                if (!(((csharp2cuda_temp_159) <= (0))))
+#line 309 "AdvancedModule.cs"
+#line 309 "AdvancedModule.cs"
+                int csharp2cuda_temp_149 = (first)->count;
+                mathblocks_sequence_set_vector_shape(output, csharp2cuda_i32_add(csharp2cuda_temp_149, 1));
+#line 310 "AdvancedModule.cs"
+#line 310 "AdvancedModule.cs"
+                int csharp2cuda_temp_150 = (first)->count;
+#line 310 "AdvancedModule.cs"
+                bool csharp2cuda_temp_151;
+#line 310 "AdvancedModule.cs"
+                if (!(((csharp2cuda_temp_150) <= (0))))
                 {
-#line 324 "AdvancedModule.cs"
-                    csharp2cuda_temp_160 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 310 "AdvancedModule.cs"
+                    csharp2cuda_temp_151 = ((((void*)(scratch))) == (((void*)(nullptr))));
                 }
                 else
                 {
-#line 324 "AdvancedModule.cs"
-                    csharp2cuda_temp_160 = true;
+#line 310 "AdvancedModule.cs"
+                    csharp2cuda_temp_151 = true;
                 }
-                if (csharp2cuda_temp_160)
-#line 325 "AdvancedModule.cs"
+                if (csharp2cuda_temp_151)
+#line 311 "AdvancedModule.cs"
                 {
-#line 326 "AdvancedModule.cs"
-#line 326 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_161 = &((output)->valid);
-                    (*(csharp2cuda_temp_161) = 0);
-#line 327 "AdvancedModule.cs"
+#line 312 "AdvancedModule.cs"
+#line 312 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_152 = &((output)->valid);
+                    (*(csharp2cuda_temp_152) = 0);
+#line 313 "AdvancedModule.cs"
                     break;
                 }
-#line 329 "AdvancedModule.cs"
-#line 329 "AdvancedModule.cs"
-                double* csharp2cuda_temp_162 = &((result)[0]);
-                (*(csharp2cuda_temp_162) = 0.0);
-#line 330 "AdvancedModule.cs"
+#line 315 "AdvancedModule.cs"
+#line 315 "AdvancedModule.cs"
+                double* csharp2cuda_temp_153 = &((result)[0]);
+                (*(csharp2cuda_temp_153) = 0.0);
+#line 316 "AdvancedModule.cs"
                 {
-#line 330 "AdvancedModule.cs"
+#line 316 "AdvancedModule.cs"
                     int index = 0;
                     while (true)
                     {
-#line 330 "AdvancedModule.cs"
-                        int csharp2cuda_temp_164 = (first)->count;
-                        if (!(((index) < (csharp2cuda_temp_164))))
+#line 316 "AdvancedModule.cs"
+                        int csharp2cuda_temp_155 = (first)->count;
+                        if (!(((index) < (csharp2cuda_temp_155))))
                             break;
-#line 331 "AdvancedModule.cs"
-#line 331 "AdvancedModule.cs"
-                        double* csharp2cuda_temp_165 = &((result)[csharp2cuda_i32_add(index, 1)]);
-#line 331 "AdvancedModule.cs"
-                        double csharp2cuda_temp_166 = (a)[index];
-                        (*(csharp2cuda_temp_165) = csharp2cuda_temp_166);
-#line 330 "AdvancedModule.cs"
-                        int* csharp2cuda_temp_163 = &(index);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_163));
+#line 317 "AdvancedModule.cs"
+#line 317 "AdvancedModule.cs"
+                        double* csharp2cuda_temp_156 = &((result)[csharp2cuda_i32_add(index, 1)]);
+#line 317 "AdvancedModule.cs"
+                        double csharp2cuda_temp_157 = (a)[index];
+                        (*(csharp2cuda_temp_156) = csharp2cuda_temp_157);
+#line 316 "AdvancedModule.cs"
+                        int* csharp2cuda_temp_154 = &(index);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_154));
                     }
                 }
-#line 332 "AdvancedModule.cs"
+#line 318 "AdvancedModule.cs"
                 {
-#line 333 "AdvancedModule.cs"
-                    int csharp2cuda_temp_167 = (first)->count;
-#line 333 "AdvancedModule.cs"
-                    double* sorted = mathblocks_stable_merge_sort(csharp2cuda_pointer_add(result, 1), scratch, csharp2cuda_temp_167, false);
-#line 334 "AdvancedModule.cs"
+#line 319 "AdvancedModule.cs"
+                    int csharp2cuda_temp_158 = (first)->count;
+#line 319 "AdvancedModule.cs"
+                    double* sorted = mathblocks_stable_merge_sort(csharp2cuda_pointer_add(result, 1), scratch, csharp2cuda_temp_158, false);
+#line 320 "AdvancedModule.cs"
                     if (((((void*)(sorted))) != (((void*)(csharp2cuda_pointer_add(result, 1))))))
                     {
-#line 335 "AdvancedModule.cs"
+#line 321 "AdvancedModule.cs"
                         {
-#line 335 "AdvancedModule.cs"
+#line 321 "AdvancedModule.cs"
                             int index = 0;
                             while (true)
                             {
-#line 335 "AdvancedModule.cs"
-                                int csharp2cuda_temp_169 = (first)->count;
-                                if (!(((index) < (csharp2cuda_temp_169))))
+#line 321 "AdvancedModule.cs"
+                                int csharp2cuda_temp_160 = (first)->count;
+                                if (!(((index) < (csharp2cuda_temp_160))))
                                     break;
-#line 336 "AdvancedModule.cs"
-#line 336 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_170 = &((result)[csharp2cuda_i32_add(index, 1)]);
-#line 336 "AdvancedModule.cs"
-                                double csharp2cuda_temp_171 = (sorted)[index];
-                                (*(csharp2cuda_temp_170) = csharp2cuda_temp_171);
-#line 335 "AdvancedModule.cs"
-                                int* csharp2cuda_temp_168 = &(index);
-                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_168));
+#line 322 "AdvancedModule.cs"
+#line 322 "AdvancedModule.cs"
+                                double* csharp2cuda_temp_161 = &((result)[csharp2cuda_i32_add(index, 1)]);
+#line 322 "AdvancedModule.cs"
+                                double csharp2cuda_temp_162 = (sorted)[index];
+                                (*(csharp2cuda_temp_161) = csharp2cuda_temp_162);
+#line 321 "AdvancedModule.cs"
+                                int* csharp2cuda_temp_159 = &(index);
+                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_159));
                             }
                         }
                     }
+                }
+#line 324 "AdvancedModule.cs"
+                {
+#line 325 "AdvancedModule.cs"
+                    int csharp2cuda_temp_163 = (first)->count;
+#line 325 "AdvancedModule.cs"
+                    double total = mathblocks_compensated_sum(csharp2cuda_pointer_add(result, 1), csharp2cuda_temp_163);
+#line 326 "AdvancedModule.cs"
+                    {
+#line 326 "AdvancedModule.cs"
+                        int index = 0;
+                        while (true)
+                        {
+#line 326 "AdvancedModule.cs"
+                            int csharp2cuda_temp_165 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_165))))
+                                break;
+#line 327 "AdvancedModule.cs"
+#line 327 "AdvancedModule.cs"
+                            double* csharp2cuda_temp_166 = &((result)[csharp2cuda_i32_add(index, 1)]);
+#line 327 "AdvancedModule.cs"
+                            double csharp2cuda_temp_167 = (result)[index];
+#line 327 "AdvancedModule.cs"
+                            double csharp2cuda_temp_168 = (result)[csharp2cuda_i32_add(index, 1)];
+#line 327 "AdvancedModule.cs"
+                            double csharp2cuda_temp_169 = __ddiv_rn(csharp2cuda_temp_168, total);
+                            (*(csharp2cuda_temp_166) = __dadd_rn(csharp2cuda_temp_167, csharp2cuda_temp_169));
+#line 326 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_164 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_164));
+                        }
+                    }
+#line 328 "AdvancedModule.cs"
+                    break;
+                }
+#line 330 "AdvancedModule.cs"
+            case 8:
+#line 331 "AdvancedModule.cs"
+#line 331 "AdvancedModule.cs"
+                int csharp2cuda_temp_170 = (first)->rows;
+#line 331 "AdvancedModule.cs"
+                int csharp2cuda_temp_171 = (first)->columns;
+#line 331 "AdvancedModule.cs"
+                bool csharp2cuda_temp_172;
+#line 331 "AdvancedModule.cs"
+                if (!(((csharp2cuda_temp_170) != (csharp2cuda_temp_171))))
+                {
+#line 331 "AdvancedModule.cs"
+                    int csharp2cuda_temp_173 = (first)->rows;
+#line 331 "AdvancedModule.cs"
+                    int csharp2cuda_temp_174 = (second)->count;
+#line 331 "AdvancedModule.cs"
+                    csharp2cuda_temp_172 = ((csharp2cuda_temp_173) != (csharp2cuda_temp_174));
+                }
+                else
+                {
+#line 331 "AdvancedModule.cs"
+                    csharp2cuda_temp_172 = true;
+                }
+#line 331 "AdvancedModule.cs"
+                bool csharp2cuda_temp_175;
+#line 331 "AdvancedModule.cs"
+                if (!(csharp2cuda_temp_172))
+                {
+#line 332 "AdvancedModule.cs"
+                    int csharp2cuda_temp_176 = (first)->rows;
+#line 332 "AdvancedModule.cs"
+                    int csharp2cuda_temp_177 = (first)->columns;
+#line 332 "AdvancedModule.cs"
+                    bool csharp2cuda_temp_178 = mathblocks_advanced_transition(a, csharp2cuda_temp_176, csharp2cuda_temp_177);
+#line 331 "AdvancedModule.cs"
+                    csharp2cuda_temp_175 = (!(csharp2cuda_temp_178));
+                }
+                else
+                {
+#line 331 "AdvancedModule.cs"
+                    csharp2cuda_temp_175 = true;
+                }
+#line 331 "AdvancedModule.cs"
+                bool csharp2cuda_temp_179;
+#line 331 "AdvancedModule.cs"
+                if (!(csharp2cuda_temp_175))
+                {
+#line 333 "AdvancedModule.cs"
+                    int csharp2cuda_temp_180 = (second)->count;
+#line 333 "AdvancedModule.cs"
+                    bool csharp2cuda_temp_181 = mathblocks_advanced_distribution(b, csharp2cuda_temp_180);
+#line 331 "AdvancedModule.cs"
+                    csharp2cuda_temp_179 = (!(csharp2cuda_temp_181));
+                }
+                else
+                {
+#line 331 "AdvancedModule.cs"
+                    csharp2cuda_temp_179 = true;
+                }
+                if (csharp2cuda_temp_179)
+#line 334 "AdvancedModule.cs"
+                {
+#line 335 "AdvancedModule.cs"
+#line 335 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_182 = &((output)->valid);
+                    (*(csharp2cuda_temp_182) = 0);
+#line 336 "AdvancedModule.cs"
+                    break;
                 }
 #line 338 "AdvancedModule.cs"
                 {
 #line 339 "AdvancedModule.cs"
-                    int csharp2cuda_temp_172 = (first)->count;
-#line 339 "AdvancedModule.cs"
-                    double total = mathblocks_compensated_sum(csharp2cuda_pointer_add(result, 1), csharp2cuda_temp_172);
-#line 340 "AdvancedModule.cs"
-                    {
-#line 340 "AdvancedModule.cs"
-                        int index = 0;
-                        while (true)
-                        {
-#line 340 "AdvancedModule.cs"
-                            int csharp2cuda_temp_174 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_174))))
-                                break;
-#line 341 "AdvancedModule.cs"
-#line 341 "AdvancedModule.cs"
-                            double* csharp2cuda_temp_175 = &((result)[csharp2cuda_i32_add(index, 1)]);
-#line 341 "AdvancedModule.cs"
-                            double csharp2cuda_temp_176 = (result)[index];
-#line 341 "AdvancedModule.cs"
-                            double csharp2cuda_temp_177 = (result)[csharp2cuda_i32_add(index, 1)];
-#line 341 "AdvancedModule.cs"
-                            double csharp2cuda_temp_178 = __ddiv_rn(csharp2cuda_temp_177, total);
-                            (*(csharp2cuda_temp_175) = __dadd_rn(csharp2cuda_temp_176, csharp2cuda_temp_178));
-#line 340 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_173 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_173));
-                        }
-                    }
-#line 342 "AdvancedModule.cs"
-                    break;
-                }
-#line 344 "AdvancedModule.cs"
-            case 8:
-#line 345 "AdvancedModule.cs"
-#line 345 "AdvancedModule.cs"
-                int csharp2cuda_temp_179 = (first)->rows;
-#line 345 "AdvancedModule.cs"
-                int csharp2cuda_temp_180 = (first)->columns;
-#line 345 "AdvancedModule.cs"
-                bool csharp2cuda_temp_181;
-#line 345 "AdvancedModule.cs"
-                if (!(((csharp2cuda_temp_179) != (csharp2cuda_temp_180))))
-                {
-#line 345 "AdvancedModule.cs"
-                    int csharp2cuda_temp_182 = (first)->rows;
-#line 345 "AdvancedModule.cs"
-                    int csharp2cuda_temp_183 = (second)->count;
-#line 345 "AdvancedModule.cs"
-                    csharp2cuda_temp_181 = ((csharp2cuda_temp_182) != (csharp2cuda_temp_183));
-                }
-                else
-                {
-#line 345 "AdvancedModule.cs"
-                    csharp2cuda_temp_181 = true;
-                }
-#line 345 "AdvancedModule.cs"
-                bool csharp2cuda_temp_184;
-#line 345 "AdvancedModule.cs"
-                if (!(csharp2cuda_temp_181))
-                {
-#line 346 "AdvancedModule.cs"
-                    int csharp2cuda_temp_185 = (first)->rows;
-#line 346 "AdvancedModule.cs"
-                    int csharp2cuda_temp_186 = (first)->columns;
-#line 346 "AdvancedModule.cs"
-                    bool csharp2cuda_temp_187 = mathblocks_advanced_transition(a, csharp2cuda_temp_185, csharp2cuda_temp_186);
-#line 345 "AdvancedModule.cs"
-                    csharp2cuda_temp_184 = (!(csharp2cuda_temp_187));
-                }
-                else
-                {
-#line 345 "AdvancedModule.cs"
-                    csharp2cuda_temp_184 = true;
-                }
-#line 345 "AdvancedModule.cs"
-                bool csharp2cuda_temp_188;
-#line 345 "AdvancedModule.cs"
-                if (!(csharp2cuda_temp_184))
-                {
-#line 347 "AdvancedModule.cs"
-                    int csharp2cuda_temp_189 = (second)->count;
-#line 347 "AdvancedModule.cs"
-                    bool csharp2cuda_temp_190 = mathblocks_advanced_distribution(b, csharp2cuda_temp_189);
-#line 345 "AdvancedModule.cs"
-                    csharp2cuda_temp_188 = (!(csharp2cuda_temp_190));
-                }
-                else
-                {
-#line 345 "AdvancedModule.cs"
-                    csharp2cuda_temp_188 = true;
-                }
-                if (csharp2cuda_temp_188)
-#line 348 "AdvancedModule.cs"
-                {
-#line 349 "AdvancedModule.cs"
-#line 349 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_191 = &((output)->valid);
-                    (*(csharp2cuda_temp_191) = 0);
-#line 350 "AdvancedModule.cs"
-                    break;
-                }
-#line 352 "AdvancedModule.cs"
-                {
-#line 353 "AdvancedModule.cs"
                     double total = 0.0;
-#line 354 "AdvancedModule.cs"
+#line 340 "AdvancedModule.cs"
                     {
-#line 354 "AdvancedModule.cs"
+#line 340 "AdvancedModule.cs"
                         int row = 0;
                         while (true)
                         {
-#line 354 "AdvancedModule.cs"
-                            int csharp2cuda_temp_193 = (first)->rows;
-                            if (!(((row) < (csharp2cuda_temp_193))))
+#line 340 "AdvancedModule.cs"
+                            int csharp2cuda_temp_184 = (first)->rows;
+                            if (!(((row) < (csharp2cuda_temp_184))))
                                 break;
-#line 355 "AdvancedModule.cs"
+#line 341 "AdvancedModule.cs"
                             {
-#line 355 "AdvancedModule.cs"
+#line 341 "AdvancedModule.cs"
                                 int column = 0;
                                 while (true)
                                 {
-#line 355 "AdvancedModule.cs"
-                                    int csharp2cuda_temp_195 = (first)->columns;
-                                    if (!(((column) < (csharp2cuda_temp_195))))
+#line 341 "AdvancedModule.cs"
+                                    int csharp2cuda_temp_186 = (first)->columns;
+                                    if (!(((column) < (csharp2cuda_temp_186))))
                                         break;
-#line 356 "AdvancedModule.cs"
+#line 342 "AdvancedModule.cs"
                                     {
-#line 357 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_196 = (b)[row];
-#line 357 "AdvancedModule.cs"
-                                        int csharp2cuda_temp_197 = (first)->columns;
-#line 357 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_198 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_197), column)];
-#line 357 "AdvancedModule.cs"
-                                        double forward = __dmul_rn(csharp2cuda_temp_196, csharp2cuda_temp_198);
-#line 358 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_199 = (b)[column];
-#line 358 "AdvancedModule.cs"
-                                        int csharp2cuda_temp_200 = (first)->columns;
-#line 358 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_201 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(column, csharp2cuda_temp_200), row)];
-#line 358 "AdvancedModule.cs"
-                                        double reverse = __dmul_rn(csharp2cuda_temp_199, csharp2cuda_temp_201);
-#line 359 "AdvancedModule.cs"
-#line 359 "AdvancedModule.cs"
-                                        bool csharp2cuda_temp_202;
-#line 359 "AdvancedModule.cs"
+#line 343 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_187 = (b)[row];
+#line 343 "AdvancedModule.cs"
+                                        int csharp2cuda_temp_188 = (first)->columns;
+#line 343 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_189 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_188), column)];
+#line 343 "AdvancedModule.cs"
+                                        double forward = __dmul_rn(csharp2cuda_temp_187, csharp2cuda_temp_189);
+#line 344 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_190 = (b)[column];
+#line 344 "AdvancedModule.cs"
+                                        int csharp2cuda_temp_191 = (first)->columns;
+#line 344 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_192 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(column, csharp2cuda_temp_191), row)];
+#line 344 "AdvancedModule.cs"
+                                        double reverse = __dmul_rn(csharp2cuda_temp_190, csharp2cuda_temp_192);
+#line 345 "AdvancedModule.cs"
+#line 345 "AdvancedModule.cs"
+                                        bool csharp2cuda_temp_193;
+#line 345 "AdvancedModule.cs"
                                         if (((forward) > (0.0)))
                                         {
-#line 359 "AdvancedModule.cs"
-                                            csharp2cuda_temp_202 = ((reverse) == (0.0));
+#line 345 "AdvancedModule.cs"
+                                            csharp2cuda_temp_193 = ((reverse) == (0.0));
                                         }
                                         else
                                         {
-#line 359 "AdvancedModule.cs"
-                                            csharp2cuda_temp_202 = false;
+#line 345 "AdvancedModule.cs"
+                                            csharp2cuda_temp_193 = false;
                                         }
-                                        if (csharp2cuda_temp_202)
-#line 360 "AdvancedModule.cs"
+                                        if (csharp2cuda_temp_193)
+#line 346 "AdvancedModule.cs"
                                         {
-#line 361 "AdvancedModule.cs"
-#line 361 "AdvancedModule.cs"
-                                            int* csharp2cuda_temp_203 = &((output)->valid);
-                                            (*(csharp2cuda_temp_203) = 0);
-#line 362 "AdvancedModule.cs"
+#line 347 "AdvancedModule.cs"
+#line 347 "AdvancedModule.cs"
+                                            int* csharp2cuda_temp_194 = &((output)->valid);
+                                            (*(csharp2cuda_temp_194) = 0);
+#line 348 "AdvancedModule.cs"
                                             break;
                                         }
-#line 364 "AdvancedModule.cs"
-#line 364 "AdvancedModule.cs"
-                                        bool csharp2cuda_temp_204;
-#line 364 "AdvancedModule.cs"
+#line 350 "AdvancedModule.cs"
+#line 350 "AdvancedModule.cs"
+                                        bool csharp2cuda_temp_195;
+#line 350 "AdvancedModule.cs"
                                         if (((forward) > (0.0)))
                                         {
-#line 364 "AdvancedModule.cs"
-                                            csharp2cuda_temp_204 = ((reverse) > (0.0));
+#line 350 "AdvancedModule.cs"
+                                            csharp2cuda_temp_195 = ((reverse) > (0.0));
                                         }
                                         else
                                         {
-#line 364 "AdvancedModule.cs"
-                                            csharp2cuda_temp_204 = false;
+#line 350 "AdvancedModule.cs"
+                                            csharp2cuda_temp_195 = false;
                                         }
-                                        if (csharp2cuda_temp_204)
+                                        if (csharp2cuda_temp_195)
                                         {
-#line 365 "AdvancedModule.cs"
-#line 365 "AdvancedModule.cs"
-                                            double* csharp2cuda_temp_205 = &(total);
-#line 365 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_206 = *(csharp2cuda_temp_205);
-#line 365 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_207 = __ddiv_rn(forward, reverse);
-                                            (*(csharp2cuda_temp_205) = __dadd_rn(csharp2cuda_temp_206, __dmul_rn(forward, mathblocks_natural_logarithm(csharp2cuda_temp_207))));
+#line 351 "AdvancedModule.cs"
+#line 351 "AdvancedModule.cs"
+                                            double* csharp2cuda_temp_196 = &(total);
+#line 351 "AdvancedModule.cs"
+                                            double csharp2cuda_temp_197 = *(csharp2cuda_temp_196);
+#line 351 "AdvancedModule.cs"
+                                            double csharp2cuda_temp_198 = __ddiv_rn(forward, reverse);
+                                            (*(csharp2cuda_temp_196) = __dadd_rn(csharp2cuda_temp_197, __dmul_rn(forward, mathblocks_natural_logarithm(csharp2cuda_temp_198))));
                                         }
                                     }
-#line 355 "AdvancedModule.cs"
-                                    int* csharp2cuda_temp_194 = &(column);
-                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_194));
+#line 341 "AdvancedModule.cs"
+                                    int* csharp2cuda_temp_185 = &(column);
+                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_185));
                                 }
                             }
-#line 354 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_192 = &(row);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_192));
+#line 340 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_183 = &(row);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_183));
                         }
                     }
-#line 367 "AdvancedModule.cs"
-#line 367 "AdvancedModule.cs"
-                    double* csharp2cuda_temp_208 = &((output)->scalar_value);
-                    (*(csharp2cuda_temp_208) = total);
-#line 368 "AdvancedModule.cs"
+#line 353 "AdvancedModule.cs"
+#line 353 "AdvancedModule.cs"
+                    double* csharp2cuda_temp_199 = &((output)->scalar_value);
+                    (*(csharp2cuda_temp_199) = total);
+#line 354 "AdvancedModule.cs"
                     break;
                 }
-#line 370 "AdvancedModule.cs"
+#line 356 "AdvancedModule.cs"
             case 9:
-#line 371 "AdvancedModule.cs"
-#line 371 "AdvancedModule.cs"
-                int csharp2cuda_temp_209 = (first)->rows;
-                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_209);
-#line 372 "AdvancedModule.cs"
-#line 372 "AdvancedModule.cs"
-                int csharp2cuda_temp_210 = (first)->rows;
-#line 372 "AdvancedModule.cs"
-                int csharp2cuda_temp_211 = (first)->columns;
-#line 372 "AdvancedModule.cs"
-                bool csharp2cuda_temp_212 = mathblocks_advanced_transition(a, csharp2cuda_temp_210, csharp2cuda_temp_211);
-#line 372 "AdvancedModule.cs"
-                bool csharp2cuda_temp_213;
-#line 372 "AdvancedModule.cs"
-                if (!((!(csharp2cuda_temp_212))))
+#line 357 "AdvancedModule.cs"
+#line 357 "AdvancedModule.cs"
+                int csharp2cuda_temp_200 = (first)->rows;
+                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_200);
+#line 358 "AdvancedModule.cs"
+#line 358 "AdvancedModule.cs"
+                int csharp2cuda_temp_201 = (first)->rows;
+#line 358 "AdvancedModule.cs"
+                int csharp2cuda_temp_202 = (first)->columns;
+#line 358 "AdvancedModule.cs"
+                bool csharp2cuda_temp_203 = mathblocks_advanced_transition(a, csharp2cuda_temp_201, csharp2cuda_temp_202);
+#line 358 "AdvancedModule.cs"
+                bool csharp2cuda_temp_204;
+#line 358 "AdvancedModule.cs"
+                if (!((!(csharp2cuda_temp_203))))
                 {
-#line 372 "AdvancedModule.cs"
-                    csharp2cuda_temp_213 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 358 "AdvancedModule.cs"
+                    csharp2cuda_temp_204 = ((((void*)(scratch))) == (((void*)(nullptr))));
                 }
                 else
                 {
-#line 372 "AdvancedModule.cs"
-                    csharp2cuda_temp_213 = true;
+#line 358 "AdvancedModule.cs"
+                    csharp2cuda_temp_204 = true;
                 }
-                if (csharp2cuda_temp_213)
-#line 373 "AdvancedModule.cs"
+                if (csharp2cuda_temp_204)
+#line 359 "AdvancedModule.cs"
                 {
-#line 374 "AdvancedModule.cs"
-#line 374 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_214 = &((output)->valid);
-                    (*(csharp2cuda_temp_214) = 0);
-#line 375 "AdvancedModule.cs"
+#line 360 "AdvancedModule.cs"
+#line 360 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_205 = &((output)->valid);
+                    (*(csharp2cuda_temp_205) = 0);
+#line 361 "AdvancedModule.cs"
                     break;
                 }
-#line 377 "AdvancedModule.cs"
+#line 363 "AdvancedModule.cs"
                 {
-#line 378 "AdvancedModule.cs"
+#line 364 "AdvancedModule.cs"
                     int iterations = 0;
-#line 379 "AdvancedModule.cs"
-#line 379 "AdvancedModule.cs"
-                    double csharp2cuda_temp_215 = (second)->scalar_value;
-#line 379 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_216 = &(iterations);
-#line 379 "AdvancedModule.cs"
-                    bool csharp2cuda_temp_217 = mathblocks_sequence_positive_integer(csharp2cuda_temp_215, csharp2cuda_temp_216);
-#line 379 "AdvancedModule.cs"
-                    bool csharp2cuda_temp_218;
-#line 379 "AdvancedModule.cs"
-                    if (!((!(csharp2cuda_temp_217))))
+#line 365 "AdvancedModule.cs"
+#line 365 "AdvancedModule.cs"
+                    double csharp2cuda_temp_206 = (second)->scalar_value;
+#line 365 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_207 = &(iterations);
+#line 365 "AdvancedModule.cs"
+                    bool csharp2cuda_temp_208 = mathblocks_sequence_positive_integer(csharp2cuda_temp_206, csharp2cuda_temp_207);
+#line 365 "AdvancedModule.cs"
+                    bool csharp2cuda_temp_209;
+#line 365 "AdvancedModule.cs"
+                    if (!((!(csharp2cuda_temp_208))))
                     {
-#line 379 "AdvancedModule.cs"
-                        csharp2cuda_temp_218 = ((iterations) > (10000));
+#line 365 "AdvancedModule.cs"
+                        csharp2cuda_temp_209 = ((iterations) > (10000));
                     }
                     else
                     {
-#line 379 "AdvancedModule.cs"
-                        csharp2cuda_temp_218 = true;
+#line 365 "AdvancedModule.cs"
+                        csharp2cuda_temp_209 = true;
                     }
-                    if (csharp2cuda_temp_218)
-#line 380 "AdvancedModule.cs"
+                    if (csharp2cuda_temp_209)
+#line 366 "AdvancedModule.cs"
                     {
-#line 381 "AdvancedModule.cs"
-#line 381 "AdvancedModule.cs"
-                        int* csharp2cuda_temp_219 = &((output)->valid);
-                        (*(csharp2cuda_temp_219) = 0);
-#line 382 "AdvancedModule.cs"
+#line 367 "AdvancedModule.cs"
+#line 367 "AdvancedModule.cs"
+                        int* csharp2cuda_temp_210 = &((output)->valid);
+                        (*(csharp2cuda_temp_210) = 0);
+#line 368 "AdvancedModule.cs"
                         break;
                     }
-#line 384 "AdvancedModule.cs"
+#line 370 "AdvancedModule.cs"
                     {
-#line 384 "AdvancedModule.cs"
+#line 370 "AdvancedModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 384 "AdvancedModule.cs"
-                            int csharp2cuda_temp_221 = (first)->rows;
-                            if (!(((index) < (csharp2cuda_temp_221))))
+#line 370 "AdvancedModule.cs"
+                            int csharp2cuda_temp_212 = (first)->rows;
+                            if (!(((index) < (csharp2cuda_temp_212))))
                                 break;
-#line 385 "AdvancedModule.cs"
-#line 385 "AdvancedModule.cs"
-                            double* csharp2cuda_temp_222 = &((result)[index]);
-#line 385 "AdvancedModule.cs"
-                            int csharp2cuda_temp_223 = (first)->rows;
-#line 385 "AdvancedModule.cs"
-                            double csharp2cuda_temp_224 = __ddiv_rn(1.0, ((double)(csharp2cuda_temp_223)));
-                            (*(csharp2cuda_temp_222) = csharp2cuda_temp_224);
-#line 384 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_220 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_220));
+#line 371 "AdvancedModule.cs"
+#line 371 "AdvancedModule.cs"
+                            double* csharp2cuda_temp_213 = &((result)[index]);
+#line 371 "AdvancedModule.cs"
+                            int csharp2cuda_temp_214 = (first)->rows;
+#line 371 "AdvancedModule.cs"
+                            double csharp2cuda_temp_215 = __ddiv_rn(1.0, ((double)(csharp2cuda_temp_214)));
+                            (*(csharp2cuda_temp_213) = csharp2cuda_temp_215);
+#line 370 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_211 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_211));
                         }
                     }
-#line 386 "AdvancedModule.cs"
+#line 372 "AdvancedModule.cs"
                     {
-#line 386 "AdvancedModule.cs"
+#line 372 "AdvancedModule.cs"
                         int iteration = 0;
                         while (true)
                         {
                             if (!(((iteration) < (iterations))))
                                 break;
-#line 387 "AdvancedModule.cs"
+#line 373 "AdvancedModule.cs"
                             {
-#line 388 "AdvancedModule.cs"
+#line 374 "AdvancedModule.cs"
                                 {
-#line 388 "AdvancedModule.cs"
+#line 374 "AdvancedModule.cs"
                                     int index = 0;
                                     while (true)
                                     {
-#line 388 "AdvancedModule.cs"
-                                        int csharp2cuda_temp_227 = (first)->rows;
-                                        if (!(((index) < (csharp2cuda_temp_227))))
+#line 374 "AdvancedModule.cs"
+                                        int csharp2cuda_temp_218 = (first)->rows;
+                                        if (!(((index) < (csharp2cuda_temp_218))))
                                             break;
-#line 389 "AdvancedModule.cs"
-#line 389 "AdvancedModule.cs"
-                                        double* csharp2cuda_temp_228 = &((scratch)[index]);
-                                        (*(csharp2cuda_temp_228) = 0.0);
-#line 388 "AdvancedModule.cs"
-                                        int* csharp2cuda_temp_226 = &(index);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_226));
+#line 375 "AdvancedModule.cs"
+#line 375 "AdvancedModule.cs"
+                                        double* csharp2cuda_temp_219 = &((scratch)[index]);
+                                        (*(csharp2cuda_temp_219) = 0.0);
+#line 374 "AdvancedModule.cs"
+                                        int* csharp2cuda_temp_217 = &(index);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_217));
                                     }
                                 }
-#line 390 "AdvancedModule.cs"
+#line 376 "AdvancedModule.cs"
                                 {
-#line 390 "AdvancedModule.cs"
+#line 376 "AdvancedModule.cs"
                                     int row = 0;
                                     while (true)
                                     {
-#line 390 "AdvancedModule.cs"
-                                        int csharp2cuda_temp_230 = (first)->rows;
-                                        if (!(((row) < (csharp2cuda_temp_230))))
+#line 376 "AdvancedModule.cs"
+                                        int csharp2cuda_temp_221 = (first)->rows;
+                                        if (!(((row) < (csharp2cuda_temp_221))))
                                             break;
-#line 391 "AdvancedModule.cs"
+#line 377 "AdvancedModule.cs"
                                         {
-#line 391 "AdvancedModule.cs"
+#line 377 "AdvancedModule.cs"
                                             int column = 0;
                                             while (true)
                                             {
-#line 391 "AdvancedModule.cs"
-                                                int csharp2cuda_temp_232 = (first)->columns;
-                                                if (!(((column) < (csharp2cuda_temp_232))))
+#line 377 "AdvancedModule.cs"
+                                                int csharp2cuda_temp_223 = (first)->columns;
+                                                if (!(((column) < (csharp2cuda_temp_223))))
                                                     break;
-#line 392 "AdvancedModule.cs"
-#line 392 "AdvancedModule.cs"
-                                                double* csharp2cuda_temp_233 = &((scratch)[column]);
-#line 392 "AdvancedModule.cs"
-                                                double csharp2cuda_temp_234 = *(csharp2cuda_temp_233);
-#line 392 "AdvancedModule.cs"
-                                                double csharp2cuda_temp_235 = (result)[row];
-#line 392 "AdvancedModule.cs"
-                                                int csharp2cuda_temp_236 = (first)->columns;
-#line 392 "AdvancedModule.cs"
-                                                double csharp2cuda_temp_237 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_236), column)];
-                                                (*(csharp2cuda_temp_233) = __dadd_rn(csharp2cuda_temp_234, __dmul_rn(csharp2cuda_temp_235, csharp2cuda_temp_237)));
-#line 391 "AdvancedModule.cs"
-                                                int* csharp2cuda_temp_231 = &(column);
-                                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_231));
+#line 378 "AdvancedModule.cs"
+#line 378 "AdvancedModule.cs"
+                                                double* csharp2cuda_temp_224 = &((scratch)[column]);
+#line 378 "AdvancedModule.cs"
+                                                double csharp2cuda_temp_225 = *(csharp2cuda_temp_224);
+#line 378 "AdvancedModule.cs"
+                                                double csharp2cuda_temp_226 = (result)[row];
+#line 378 "AdvancedModule.cs"
+                                                int csharp2cuda_temp_227 = (first)->columns;
+#line 378 "AdvancedModule.cs"
+                                                double csharp2cuda_temp_228 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_227), column)];
+                                                (*(csharp2cuda_temp_224) = __dadd_rn(csharp2cuda_temp_225, __dmul_rn(csharp2cuda_temp_226, csharp2cuda_temp_228)));
+#line 377 "AdvancedModule.cs"
+                                                int* csharp2cuda_temp_222 = &(column);
+                                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_222));
                                             }
                                         }
-#line 390 "AdvancedModule.cs"
-                                        int* csharp2cuda_temp_229 = &(row);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_229));
+#line 376 "AdvancedModule.cs"
+                                        int* csharp2cuda_temp_220 = &(row);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_220));
                                     }
                                 }
-#line 393 "AdvancedModule.cs"
+#line 379 "AdvancedModule.cs"
                                 {
-#line 393 "AdvancedModule.cs"
+#line 379 "AdvancedModule.cs"
                                     int index = 0;
                                     while (true)
                                     {
-#line 393 "AdvancedModule.cs"
-                                        int csharp2cuda_temp_239 = (first)->rows;
-                                        if (!(((index) < (csharp2cuda_temp_239))))
+#line 379 "AdvancedModule.cs"
+                                        int csharp2cuda_temp_230 = (first)->rows;
+                                        if (!(((index) < (csharp2cuda_temp_230))))
                                             break;
-#line 394 "AdvancedModule.cs"
-#line 394 "AdvancedModule.cs"
-                                        double* csharp2cuda_temp_240 = &((result)[index]);
-#line 394 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_241 = (scratch)[index];
-                                        (*(csharp2cuda_temp_240) = csharp2cuda_temp_241);
-#line 393 "AdvancedModule.cs"
-                                        int* csharp2cuda_temp_238 = &(index);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_238));
+#line 380 "AdvancedModule.cs"
+#line 380 "AdvancedModule.cs"
+                                        double* csharp2cuda_temp_231 = &((result)[index]);
+#line 380 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_232 = (scratch)[index];
+                                        (*(csharp2cuda_temp_231) = csharp2cuda_temp_232);
+#line 379 "AdvancedModule.cs"
+                                        int* csharp2cuda_temp_229 = &(index);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_229));
                                     }
                                 }
                             }
-#line 386 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_225 = &(iteration);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_225));
+#line 372 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_216 = &(iteration);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_216));
                         }
                     }
-#line 396 "AdvancedModule.cs"
+#line 382 "AdvancedModule.cs"
                     break;
                 }
-#line 398 "AdvancedModule.cs"
+#line 384 "AdvancedModule.cs"
             case 10:
-#line 399 "AdvancedModule.cs"
-#line 399 "AdvancedModule.cs"
-                int csharp2cuda_temp_242 = (first)->count;
-                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_242);
-#line 400 "AdvancedModule.cs"
-#line 400 "AdvancedModule.cs"
-                int csharp2cuda_temp_243 = (first)->count;
-#line 400 "AdvancedModule.cs"
-                bool csharp2cuda_temp_244;
-#line 400 "AdvancedModule.cs"
-                if (!(((csharp2cuda_temp_243) <= (0))))
+#line 385 "AdvancedModule.cs"
+#line 385 "AdvancedModule.cs"
+                int csharp2cuda_temp_233 = (first)->count;
+                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_233);
+#line 386 "AdvancedModule.cs"
+#line 386 "AdvancedModule.cs"
+                int csharp2cuda_temp_234 = (first)->count;
+#line 386 "AdvancedModule.cs"
+                bool csharp2cuda_temp_235;
+#line 386 "AdvancedModule.cs"
+                if (!(((csharp2cuda_temp_234) <= (0))))
                 {
-#line 400 "AdvancedModule.cs"
-                    csharp2cuda_temp_244 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 386 "AdvancedModule.cs"
+                    csharp2cuda_temp_235 = ((((void*)(scratch))) == (((void*)(nullptr))));
                 }
                 else
                 {
-#line 400 "AdvancedModule.cs"
-                    csharp2cuda_temp_244 = true;
+#line 386 "AdvancedModule.cs"
+                    csharp2cuda_temp_235 = true;
                 }
-                if (csharp2cuda_temp_244)
-#line 401 "AdvancedModule.cs"
+                if (csharp2cuda_temp_235)
+#line 387 "AdvancedModule.cs"
                 {
-#line 402 "AdvancedModule.cs"
-#line 402 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_245 = &((output)->valid);
-                    (*(csharp2cuda_temp_245) = 0);
-#line 403 "AdvancedModule.cs"
+#line 388 "AdvancedModule.cs"
+#line 388 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_236 = &((output)->valid);
+                    (*(csharp2cuda_temp_236) = 0);
+#line 389 "AdvancedModule.cs"
                     break;
                 }
-#line 405 "AdvancedModule.cs"
+#line 391 "AdvancedModule.cs"
                 {
-#line 406 "AdvancedModule.cs"
+#line 392 "AdvancedModule.cs"
                     double* means = scratch;
-#line 407 "AdvancedModule.cs"
-                    int csharp2cuda_temp_246 = (first)->count;
-#line 407 "AdvancedModule.cs"
-                    int* weights = ((int*)(csharp2cuda_pointer_add(means, csharp2cuda_temp_246)));
-#line 408 "AdvancedModule.cs"
-                    int csharp2cuda_temp_247 = (first)->count;
-#line 408 "AdvancedModule.cs"
-                    int* starts = csharp2cuda_pointer_add(weights, csharp2cuda_temp_247);
-#line 409 "AdvancedModule.cs"
+#line 393 "AdvancedModule.cs"
+                    int csharp2cuda_temp_237 = (first)->count;
+#line 393 "AdvancedModule.cs"
+                    int* weights = ((int*)(csharp2cuda_pointer_add(means, csharp2cuda_temp_237)));
+#line 394 "AdvancedModule.cs"
+                    int csharp2cuda_temp_238 = (first)->count;
+#line 394 "AdvancedModule.cs"
+                    int* starts = csharp2cuda_pointer_add(weights, csharp2cuda_temp_238);
+#line 395 "AdvancedModule.cs"
                     int block_count = 0;
-#line 410 "AdvancedModule.cs"
+#line 396 "AdvancedModule.cs"
                     {
-#line 410 "AdvancedModule.cs"
+#line 396 "AdvancedModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 410 "AdvancedModule.cs"
-                            int csharp2cuda_temp_249 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_249))))
+#line 396 "AdvancedModule.cs"
+                            int csharp2cuda_temp_240 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_240))))
                                 break;
-#line 411 "AdvancedModule.cs"
+#line 397 "AdvancedModule.cs"
                             {
-#line 412 "AdvancedModule.cs"
-#line 412 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_250 = &((means)[block_count]);
-#line 412 "AdvancedModule.cs"
-                                double csharp2cuda_temp_251 = (a)[index];
-                                (*(csharp2cuda_temp_250) = csharp2cuda_temp_251);
-#line 413 "AdvancedModule.cs"
-#line 413 "AdvancedModule.cs"
-                                int* csharp2cuda_temp_252 = &((weights)[block_count]);
-                                (*(csharp2cuda_temp_252) = 1);
-#line 414 "AdvancedModule.cs"
-#line 414 "AdvancedModule.cs"
-                                int* csharp2cuda_temp_253 = &((starts)[block_count]);
-                                (*(csharp2cuda_temp_253) = index);
-#line 415 "AdvancedModule.cs"
-#line 415 "AdvancedModule.cs"
-                                int* csharp2cuda_temp_254 = &(block_count);
-                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_254));
-#line 416 "AdvancedModule.cs"
+#line 398 "AdvancedModule.cs"
+#line 398 "AdvancedModule.cs"
+                                double* csharp2cuda_temp_241 = &((means)[block_count]);
+#line 398 "AdvancedModule.cs"
+                                double csharp2cuda_temp_242 = (a)[index];
+                                (*(csharp2cuda_temp_241) = csharp2cuda_temp_242);
+#line 399 "AdvancedModule.cs"
+#line 399 "AdvancedModule.cs"
+                                int* csharp2cuda_temp_243 = &((weights)[block_count]);
+                                (*(csharp2cuda_temp_243) = 1);
+#line 400 "AdvancedModule.cs"
+#line 400 "AdvancedModule.cs"
+                                int* csharp2cuda_temp_244 = &((starts)[block_count]);
+                                (*(csharp2cuda_temp_244) = index);
+#line 401 "AdvancedModule.cs"
+#line 401 "AdvancedModule.cs"
+                                int* csharp2cuda_temp_245 = &(block_count);
+                                csharp2cuda_i32_post_increment(*(csharp2cuda_temp_245));
+#line 402 "AdvancedModule.cs"
                                 while (true)
                                 {
-#line 416 "AdvancedModule.cs"
-                                    bool csharp2cuda_temp_255;
-#line 416 "AdvancedModule.cs"
+#line 402 "AdvancedModule.cs"
+                                    bool csharp2cuda_temp_246;
+#line 402 "AdvancedModule.cs"
                                     if (((block_count) >= (2)))
                                     {
-#line 416 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_256 = (means)[csharp2cuda_i32_sub(block_count, 2)];
-#line 416 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_257 = (means)[csharp2cuda_i32_sub(block_count, 1)];
-#line 416 "AdvancedModule.cs"
-                                        csharp2cuda_temp_255 = ((csharp2cuda_temp_256) > (csharp2cuda_temp_257));
+#line 402 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_247 = (means)[csharp2cuda_i32_sub(block_count, 2)];
+#line 402 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_248 = (means)[csharp2cuda_i32_sub(block_count, 1)];
+#line 402 "AdvancedModule.cs"
+                                        csharp2cuda_temp_246 = ((csharp2cuda_temp_247) > (csharp2cuda_temp_248));
                                     }
                                     else
                                     {
-#line 416 "AdvancedModule.cs"
-                                        csharp2cuda_temp_255 = false;
+#line 402 "AdvancedModule.cs"
+                                        csharp2cuda_temp_246 = false;
                                     }
-                                    if (!(csharp2cuda_temp_255))
+                                    if (!(csharp2cuda_temp_246))
                                         break;
-#line 417 "AdvancedModule.cs"
+#line 403 "AdvancedModule.cs"
                                     {
-#line 418 "AdvancedModule.cs"
-                                        int csharp2cuda_temp_258 = (weights)[csharp2cuda_i32_sub(block_count, 2)];
-#line 418 "AdvancedModule.cs"
-                                        int csharp2cuda_temp_259 = (weights)[csharp2cuda_i32_sub(block_count, 1)];
-#line 418 "AdvancedModule.cs"
-                                        int combined_weight = csharp2cuda_i32_add(csharp2cuda_temp_258, csharp2cuda_temp_259);
-#line 419 "AdvancedModule.cs"
-#line 419 "AdvancedModule.cs"
-                                        double* csharp2cuda_temp_260 = &((means)[csharp2cuda_i32_sub(block_count, 2)]);
-#line 420 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_261 = (means)[csharp2cuda_i32_sub(block_count, 2)];
-#line 420 "AdvancedModule.cs"
-                                        int csharp2cuda_temp_262 = (weights)[csharp2cuda_i32_sub(block_count, 2)];
-#line 421 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_263 = (means)[csharp2cuda_i32_sub(block_count, 1)];
-#line 421 "AdvancedModule.cs"
-                                        int csharp2cuda_temp_264 = (weights)[csharp2cuda_i32_sub(block_count, 1)];
-#line 420 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_265 = __ddiv_rn(__dadd_rn(__dmul_rn(csharp2cuda_temp_261, ((double)(csharp2cuda_temp_262))), __dmul_rn(csharp2cuda_temp_263, ((double)(csharp2cuda_temp_264)))), ((double)(combined_weight)));
-                                        (*(csharp2cuda_temp_260) = csharp2cuda_temp_265);
-#line 423 "AdvancedModule.cs"
-#line 423 "AdvancedModule.cs"
-                                        int* csharp2cuda_temp_266 = &((weights)[csharp2cuda_i32_sub(block_count, 2)]);
-                                        (*(csharp2cuda_temp_266) = combined_weight);
-#line 424 "AdvancedModule.cs"
-#line 424 "AdvancedModule.cs"
-                                        int* csharp2cuda_temp_267 = &(block_count);
-                                        csharp2cuda_i32_post_decrement(*(csharp2cuda_temp_267));
+#line 404 "AdvancedModule.cs"
+                                        int csharp2cuda_temp_249 = (weights)[csharp2cuda_i32_sub(block_count, 2)];
+#line 404 "AdvancedModule.cs"
+                                        int csharp2cuda_temp_250 = (weights)[csharp2cuda_i32_sub(block_count, 1)];
+#line 404 "AdvancedModule.cs"
+                                        int combined_weight = csharp2cuda_i32_add(csharp2cuda_temp_249, csharp2cuda_temp_250);
+#line 405 "AdvancedModule.cs"
+#line 405 "AdvancedModule.cs"
+                                        double* csharp2cuda_temp_251 = &((means)[csharp2cuda_i32_sub(block_count, 2)]);
+#line 406 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_252 = (means)[csharp2cuda_i32_sub(block_count, 2)];
+#line 406 "AdvancedModule.cs"
+                                        int csharp2cuda_temp_253 = (weights)[csharp2cuda_i32_sub(block_count, 2)];
+#line 407 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_254 = (means)[csharp2cuda_i32_sub(block_count, 1)];
+#line 407 "AdvancedModule.cs"
+                                        int csharp2cuda_temp_255 = (weights)[csharp2cuda_i32_sub(block_count, 1)];
+#line 406 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_256 = __ddiv_rn(__dadd_rn(__dmul_rn(csharp2cuda_temp_252, ((double)(csharp2cuda_temp_253))), __dmul_rn(csharp2cuda_temp_254, ((double)(csharp2cuda_temp_255)))), ((double)(combined_weight)));
+                                        (*(csharp2cuda_temp_251) = csharp2cuda_temp_256);
+#line 409 "AdvancedModule.cs"
+#line 409 "AdvancedModule.cs"
+                                        int* csharp2cuda_temp_257 = &((weights)[csharp2cuda_i32_sub(block_count, 2)]);
+                                        (*(csharp2cuda_temp_257) = combined_weight);
+#line 410 "AdvancedModule.cs"
+#line 410 "AdvancedModule.cs"
+                                        int* csharp2cuda_temp_258 = &(block_count);
+                                        csharp2cuda_i32_post_decrement(*(csharp2cuda_temp_258));
                                     }
                                 }
                             }
-#line 410 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_248 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_248));
+#line 396 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_239 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_239));
                         }
                     }
-#line 427 "AdvancedModule.cs"
+#line 413 "AdvancedModule.cs"
                     {
-#line 427 "AdvancedModule.cs"
+#line 413 "AdvancedModule.cs"
                         int block = 0;
                         while (true)
                         {
                             if (!(((block) < (block_count))))
                                 break;
-#line 428 "AdvancedModule.cs"
+#line 414 "AdvancedModule.cs"
                             {
-#line 429 "AdvancedModule.cs"
-                                int csharp2cuda_temp_269;
-#line 429 "AdvancedModule.cs"
+#line 415 "AdvancedModule.cs"
+                                int csharp2cuda_temp_260;
+#line 415 "AdvancedModule.cs"
                                 if (((csharp2cuda_i32_add(block, 1)) < (block_count)))
                                 {
-#line 429 "AdvancedModule.cs"
-                                    csharp2cuda_temp_269 = (starts)[csharp2cuda_i32_add(block, 1)];
+#line 415 "AdvancedModule.cs"
+                                    csharp2cuda_temp_260 = (starts)[csharp2cuda_i32_add(block, 1)];
                                 }
                                 else
                                 {
-#line 429 "AdvancedModule.cs"
-                                    csharp2cuda_temp_269 = (first)->count;
+#line 415 "AdvancedModule.cs"
+                                    csharp2cuda_temp_260 = (first)->count;
                                 }
-#line 429 "AdvancedModule.cs"
-                                int end = csharp2cuda_temp_269;
-#line 430 "AdvancedModule.cs"
+#line 415 "AdvancedModule.cs"
+                                int end = csharp2cuda_temp_260;
+#line 416 "AdvancedModule.cs"
                                 {
-#line 430 "AdvancedModule.cs"
+#line 416 "AdvancedModule.cs"
                                     int index = (starts)[block];
                                     while (true)
                                     {
                                         if (!(((index) < (end))))
                                             break;
-#line 431 "AdvancedModule.cs"
-#line 431 "AdvancedModule.cs"
-                                        double* csharp2cuda_temp_271 = &((result)[index]);
-#line 431 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_272 = (means)[block];
-                                        (*(csharp2cuda_temp_271) = csharp2cuda_temp_272);
-#line 430 "AdvancedModule.cs"
-                                        int* csharp2cuda_temp_270 = &(index);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_270));
+#line 417 "AdvancedModule.cs"
+#line 417 "AdvancedModule.cs"
+                                        double* csharp2cuda_temp_262 = &((result)[index]);
+#line 417 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_263 = (means)[block];
+                                        (*(csharp2cuda_temp_262) = csharp2cuda_temp_263);
+#line 416 "AdvancedModule.cs"
+                                        int* csharp2cuda_temp_261 = &(index);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_261));
                                     }
                                 }
                             }
-#line 427 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_268 = &(block);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_268));
+#line 413 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_259 = &(block);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_259));
                         }
                     }
-#line 433 "AdvancedModule.cs"
+#line 419 "AdvancedModule.cs"
                     break;
                 }
-#line 435 "AdvancedModule.cs"
+#line 421 "AdvancedModule.cs"
             case 11:
-#line 436 "AdvancedModule.cs"
-#line 436 "AdvancedModule.cs"
-                int csharp2cuda_temp_273 = (first)->count;
-#line 436 "AdvancedModule.cs"
-                int csharp2cuda_temp_274 = (second)->count;
-#line 436 "AdvancedModule.cs"
-                bool csharp2cuda_temp_275;
-#line 436 "AdvancedModule.cs"
-                if (!(((csharp2cuda_temp_273) != (csharp2cuda_temp_274))))
+#line 422 "AdvancedModule.cs"
+#line 422 "AdvancedModule.cs"
+                int csharp2cuda_temp_264 = (first)->count;
+#line 422 "AdvancedModule.cs"
+                int csharp2cuda_temp_265 = (second)->count;
+#line 422 "AdvancedModule.cs"
+                bool csharp2cuda_temp_266;
+#line 422 "AdvancedModule.cs"
+                if (!(((csharp2cuda_temp_264) != (csharp2cuda_temp_265))))
                 {
-#line 436 "AdvancedModule.cs"
-                    csharp2cuda_temp_275 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 422 "AdvancedModule.cs"
+                    csharp2cuda_temp_266 = ((((void*)(scratch))) == (((void*)(nullptr))));
                 }
                 else
                 {
-#line 436 "AdvancedModule.cs"
-                    csharp2cuda_temp_275 = true;
+#line 422 "AdvancedModule.cs"
+                    csharp2cuda_temp_266 = true;
                 }
-                if (csharp2cuda_temp_275)
-#line 437 "AdvancedModule.cs"
+                if (csharp2cuda_temp_266)
+#line 423 "AdvancedModule.cs"
                 {
-#line 438 "AdvancedModule.cs"
-#line 438 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_276 = &((output)->valid);
-                    (*(csharp2cuda_temp_276) = 0);
-#line 439 "AdvancedModule.cs"
+#line 424 "AdvancedModule.cs"
+#line 424 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_267 = &((output)->valid);
+                    (*(csharp2cuda_temp_267) = 0);
+#line 425 "AdvancedModule.cs"
                     break;
                 }
-#line 441 "AdvancedModule.cs"
+#line 427 "AdvancedModule.cs"
                 {
-#line 442 "AdvancedModule.cs"
+#line 428 "AdvancedModule.cs"
                     double* left_sorted = scratch;
-#line 443 "AdvancedModule.cs"
-                    int csharp2cuda_temp_277 = (first)->count;
-#line 443 "AdvancedModule.cs"
-                    double* right_sorted = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_277);
-#line 444 "AdvancedModule.cs"
-#line 444 "AdvancedModule.cs"
-                    int csharp2cuda_temp_278 = (first)->count;
-                    mathblocks_statistics_sort_copy(a, csharp2cuda_temp_278, left_sorted, true);
-#line 445 "AdvancedModule.cs"
-#line 445 "AdvancedModule.cs"
-                    int csharp2cuda_temp_279 = (first)->count;
-                    mathblocks_statistics_sort_copy(b, csharp2cuda_temp_279, right_sorted, true);
-#line 446 "AdvancedModule.cs"
+#line 429 "AdvancedModule.cs"
+                    int csharp2cuda_temp_268 = (first)->count;
+#line 429 "AdvancedModule.cs"
+                    double* right_sorted = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_268);
+#line 430 "AdvancedModule.cs"
+#line 430 "AdvancedModule.cs"
+                    int csharp2cuda_temp_269 = (first)->count;
+                    mathblocks_statistics_sort_copy(a, csharp2cuda_temp_269, left_sorted, true);
+#line 431 "AdvancedModule.cs"
+#line 431 "AdvancedModule.cs"
+                    int csharp2cuda_temp_270 = (first)->count;
+                    mathblocks_statistics_sort_copy(b, csharp2cuda_temp_270, right_sorted, true);
+#line 432 "AdvancedModule.cs"
                     double left_sum = 0.0;
-#line 447 "AdvancedModule.cs"
+#line 433 "AdvancedModule.cs"
                     double right_sum = 0.0;
-#line 448 "AdvancedModule.cs"
+#line 434 "AdvancedModule.cs"
                     bool majorizes = true;
-#line 449 "AdvancedModule.cs"
+#line 435 "AdvancedModule.cs"
                     {
-#line 449 "AdvancedModule.cs"
+#line 435 "AdvancedModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 449 "AdvancedModule.cs"
-                            int csharp2cuda_temp_281 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_281))))
+#line 435 "AdvancedModule.cs"
+                            int csharp2cuda_temp_272 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_272))))
                                 break;
-#line 450 "AdvancedModule.cs"
+#line 436 "AdvancedModule.cs"
                             {
-#line 451 "AdvancedModule.cs"
-#line 451 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_282 = &(left_sum);
-#line 451 "AdvancedModule.cs"
-                                double csharp2cuda_temp_283 = *(csharp2cuda_temp_282);
-#line 451 "AdvancedModule.cs"
-                                double csharp2cuda_temp_284 = (left_sorted)[index];
-                                (*(csharp2cuda_temp_282) = __dadd_rn(csharp2cuda_temp_283, csharp2cuda_temp_284));
-#line 452 "AdvancedModule.cs"
-#line 452 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_285 = &(right_sum);
-#line 452 "AdvancedModule.cs"
-                                double csharp2cuda_temp_286 = *(csharp2cuda_temp_285);
-#line 452 "AdvancedModule.cs"
-                                double csharp2cuda_temp_287 = (right_sorted)[index];
-                                (*(csharp2cuda_temp_285) = __dadd_rn(csharp2cuda_temp_286, csharp2cuda_temp_287));
-#line 453 "AdvancedModule.cs"
-#line 453 "AdvancedModule.cs"
-                                int csharp2cuda_temp_288 = (first)->count;
-#line 453 "AdvancedModule.cs"
-                                bool csharp2cuda_temp_289;
-#line 453 "AdvancedModule.cs"
-                                if (((index) < (csharp2cuda_i32_sub(csharp2cuda_temp_288, 1))))
+#line 437 "AdvancedModule.cs"
+#line 437 "AdvancedModule.cs"
+                                double* csharp2cuda_temp_273 = &(left_sum);
+#line 437 "AdvancedModule.cs"
+                                double csharp2cuda_temp_274 = *(csharp2cuda_temp_273);
+#line 437 "AdvancedModule.cs"
+                                double csharp2cuda_temp_275 = (left_sorted)[index];
+                                (*(csharp2cuda_temp_273) = __dadd_rn(csharp2cuda_temp_274, csharp2cuda_temp_275));
+#line 438 "AdvancedModule.cs"
+#line 438 "AdvancedModule.cs"
+                                double* csharp2cuda_temp_276 = &(right_sum);
+#line 438 "AdvancedModule.cs"
+                                double csharp2cuda_temp_277 = *(csharp2cuda_temp_276);
+#line 438 "AdvancedModule.cs"
+                                double csharp2cuda_temp_278 = (right_sorted)[index];
+                                (*(csharp2cuda_temp_276) = __dadd_rn(csharp2cuda_temp_277, csharp2cuda_temp_278));
+#line 439 "AdvancedModule.cs"
+#line 439 "AdvancedModule.cs"
+                                int csharp2cuda_temp_279 = (first)->count;
+#line 439 "AdvancedModule.cs"
+                                bool csharp2cuda_temp_280;
+#line 439 "AdvancedModule.cs"
+                                if (((index) < (csharp2cuda_i32_sub(csharp2cuda_temp_279, 1))))
                                 {
-#line 453 "AdvancedModule.cs"
-                                    csharp2cuda_temp_289 = ((left_sum) < (right_sum));
+#line 439 "AdvancedModule.cs"
+                                    csharp2cuda_temp_280 = ((left_sum) < (right_sum));
                                 }
                                 else
                                 {
-#line 453 "AdvancedModule.cs"
-                                    csharp2cuda_temp_289 = false;
+#line 439 "AdvancedModule.cs"
+                                    csharp2cuda_temp_280 = false;
                                 }
-                                if (csharp2cuda_temp_289)
+                                if (csharp2cuda_temp_280)
                                 {
-#line 454 "AdvancedModule.cs"
-#line 454 "AdvancedModule.cs"
-                                    bool* csharp2cuda_temp_290 = &(majorizes);
-                                    (*(csharp2cuda_temp_290) = false);
+#line 440 "AdvancedModule.cs"
+#line 440 "AdvancedModule.cs"
+                                    bool* csharp2cuda_temp_281 = &(majorizes);
+                                    (*(csharp2cuda_temp_281) = false);
                                 }
                             }
-#line 449 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_280 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_280));
+#line 435 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_271 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_271));
                         }
                     }
-#line 456 "AdvancedModule.cs"
-#line 456 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_291 = &((output)->boolean_value);
-#line 456 "AdvancedModule.cs"
-                    bool csharp2cuda_temp_292;
-#line 456 "AdvancedModule.cs"
+#line 442 "AdvancedModule.cs"
+#line 442 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_282 = &((output)->boolean_value);
+#line 442 "AdvancedModule.cs"
+                    bool csharp2cuda_temp_283;
+#line 442 "AdvancedModule.cs"
                     if (majorizes)
                     {
-#line 456 "AdvancedModule.cs"
-                        csharp2cuda_temp_292 = ((left_sum) == (right_sum));
+#line 442 "AdvancedModule.cs"
+                        csharp2cuda_temp_283 = ((left_sum) == (right_sum));
                     }
                     else
                     {
-#line 456 "AdvancedModule.cs"
-                        csharp2cuda_temp_292 = false;
+#line 442 "AdvancedModule.cs"
+                        csharp2cuda_temp_283 = false;
                     }
-#line 456 "AdvancedModule.cs"
-                    int csharp2cuda_temp_293;
-#line 456 "AdvancedModule.cs"
-                    if (csharp2cuda_temp_292)
+#line 442 "AdvancedModule.cs"
+                    int csharp2cuda_temp_284;
+#line 442 "AdvancedModule.cs"
+                    if (csharp2cuda_temp_283)
                     {
-#line 456 "AdvancedModule.cs"
-                        csharp2cuda_temp_293 = 1;
+#line 442 "AdvancedModule.cs"
+                        csharp2cuda_temp_284 = 1;
                     }
                     else
                     {
-#line 456 "AdvancedModule.cs"
-                        csharp2cuda_temp_293 = 0;
+#line 442 "AdvancedModule.cs"
+                        csharp2cuda_temp_284 = 0;
                     }
-                    (*(csharp2cuda_temp_291) = csharp2cuda_temp_293);
-#line 457 "AdvancedModule.cs"
+                    (*(csharp2cuda_temp_282) = csharp2cuda_temp_284);
+#line 443 "AdvancedModule.cs"
                     break;
                 }
-#line 459 "AdvancedModule.cs"
+#line 445 "AdvancedModule.cs"
             case 12:
-#line 460 "AdvancedModule.cs"
-#line 460 "AdvancedModule.cs"
-                int csharp2cuda_temp_294 = (first)->count;
-#line 460 "AdvancedModule.cs"
-                bool csharp2cuda_temp_295;
-#line 460 "AdvancedModule.cs"
-                if (!(((csharp2cuda_temp_294) <= (0))))
+#line 446 "AdvancedModule.cs"
+#line 446 "AdvancedModule.cs"
+                int csharp2cuda_temp_285 = (first)->count;
+#line 446 "AdvancedModule.cs"
+                bool csharp2cuda_temp_286;
+#line 446 "AdvancedModule.cs"
+                if (!(((csharp2cuda_temp_285) <= (0))))
                 {
-#line 460 "AdvancedModule.cs"
-                    int csharp2cuda_temp_296 = (first)->count;
-#line 460 "AdvancedModule.cs"
-                    int csharp2cuda_temp_297 = (second)->count;
-#line 460 "AdvancedModule.cs"
-                    csharp2cuda_temp_295 = ((csharp2cuda_temp_296) != (csharp2cuda_temp_297));
+#line 446 "AdvancedModule.cs"
+                    int csharp2cuda_temp_287 = (first)->count;
+#line 446 "AdvancedModule.cs"
+                    int csharp2cuda_temp_288 = (second)->count;
+#line 446 "AdvancedModule.cs"
+                    csharp2cuda_temp_286 = ((csharp2cuda_temp_287) != (csharp2cuda_temp_288));
                 }
                 else
                 {
-#line 460 "AdvancedModule.cs"
-                    csharp2cuda_temp_295 = true;
+#line 446 "AdvancedModule.cs"
+                    csharp2cuda_temp_286 = true;
                 }
-                if (csharp2cuda_temp_295)
-#line 461 "AdvancedModule.cs"
+                if (csharp2cuda_temp_286)
+#line 447 "AdvancedModule.cs"
                 {
-#line 462 "AdvancedModule.cs"
-#line 462 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_298 = &((output)->valid);
-                    (*(csharp2cuda_temp_298) = 0);
-#line 463 "AdvancedModule.cs"
+#line 448 "AdvancedModule.cs"
+#line 448 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_289 = &((output)->valid);
+                    (*(csharp2cuda_temp_289) = 0);
+#line 449 "AdvancedModule.cs"
                     break;
                 }
-#line 465 "AdvancedModule.cs"
+#line 451 "AdvancedModule.cs"
                 {
-#line 466 "AdvancedModule.cs"
+#line 452 "AdvancedModule.cs"
                     double minimum = mathblocks_positive_infinity();
-#line 467 "AdvancedModule.cs"
+#line 453 "AdvancedModule.cs"
                     double maximum = (-(mathblocks_positive_infinity()));
-#line 468 "AdvancedModule.cs"
+#line 454 "AdvancedModule.cs"
                     {
-#line 468 "AdvancedModule.cs"
+#line 454 "AdvancedModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 468 "AdvancedModule.cs"
-                            int csharp2cuda_temp_300 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_300))))
+#line 454 "AdvancedModule.cs"
+                            int csharp2cuda_temp_291 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_291))))
                                 break;
-#line 469 "AdvancedModule.cs"
+#line 455 "AdvancedModule.cs"
                             {
-#line 470 "AdvancedModule.cs"
-#line 470 "AdvancedModule.cs"
-                                double csharp2cuda_temp_301 = (a)[index];
-#line 470 "AdvancedModule.cs"
-                                bool csharp2cuda_temp_302;
-#line 470 "AdvancedModule.cs"
-                                if (!(((csharp2cuda_temp_301) <= (0.0))))
+#line 456 "AdvancedModule.cs"
+#line 456 "AdvancedModule.cs"
+                                double csharp2cuda_temp_292 = (a)[index];
+#line 456 "AdvancedModule.cs"
+                                bool csharp2cuda_temp_293;
+#line 456 "AdvancedModule.cs"
+                                if (!(((csharp2cuda_temp_292) <= (0.0))))
                                 {
-#line 470 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_303 = (b)[index];
-#line 470 "AdvancedModule.cs"
-                                    csharp2cuda_temp_302 = ((csharp2cuda_temp_303) <= (0.0));
+#line 456 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_294 = (b)[index];
+#line 456 "AdvancedModule.cs"
+                                    csharp2cuda_temp_293 = ((csharp2cuda_temp_294) <= (0.0));
                                 }
                                 else
                                 {
-#line 470 "AdvancedModule.cs"
-                                    csharp2cuda_temp_302 = true;
+#line 456 "AdvancedModule.cs"
+                                    csharp2cuda_temp_293 = true;
                                 }
-                                if (csharp2cuda_temp_302)
-#line 471 "AdvancedModule.cs"
+                                if (csharp2cuda_temp_293)
+#line 457 "AdvancedModule.cs"
                                 {
-#line 472 "AdvancedModule.cs"
-#line 472 "AdvancedModule.cs"
-                                    int* csharp2cuda_temp_304 = &((output)->valid);
-                                    (*(csharp2cuda_temp_304) = 0);
-#line 473 "AdvancedModule.cs"
+#line 458 "AdvancedModule.cs"
+#line 458 "AdvancedModule.cs"
+                                    int* csharp2cuda_temp_295 = &((output)->valid);
+                                    (*(csharp2cuda_temp_295) = 0);
+#line 459 "AdvancedModule.cs"
                                     break;
                                 }
-#line 475 "AdvancedModule.cs"
-                                double csharp2cuda_temp_305 = (a)[index];
-#line 475 "AdvancedModule.cs"
-                                double csharp2cuda_temp_306 = (b)[index];
-#line 475 "AdvancedModule.cs"
-                                double ratio = __ddiv_rn(csharp2cuda_temp_305, csharp2cuda_temp_306);
-#line 476 "AdvancedModule.cs"
-#line 476 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_307 = &(minimum);
-#line 476 "AdvancedModule.cs"
-                                double csharp2cuda_temp_308;
-#line 476 "AdvancedModule.cs"
+#line 461 "AdvancedModule.cs"
+                                double csharp2cuda_temp_296 = (a)[index];
+#line 461 "AdvancedModule.cs"
+                                double csharp2cuda_temp_297 = (b)[index];
+#line 461 "AdvancedModule.cs"
+                                double ratio = __ddiv_rn(csharp2cuda_temp_296, csharp2cuda_temp_297);
+#line 462 "AdvancedModule.cs"
+#line 462 "AdvancedModule.cs"
+                                double* csharp2cuda_temp_298 = &(minimum);
+#line 462 "AdvancedModule.cs"
+                                double csharp2cuda_temp_299;
+#line 462 "AdvancedModule.cs"
                                 if (((minimum) < (ratio)))
                                 {
-#line 476 "AdvancedModule.cs"
-                                    csharp2cuda_temp_308 = minimum;
+#line 462 "AdvancedModule.cs"
+                                    csharp2cuda_temp_299 = minimum;
                                 }
                                 else
                                 {
-#line 476 "AdvancedModule.cs"
-                                    csharp2cuda_temp_308 = ratio;
+#line 462 "AdvancedModule.cs"
+                                    csharp2cuda_temp_299 = ratio;
                                 }
-                                (*(csharp2cuda_temp_307) = csharp2cuda_temp_308);
-#line 477 "AdvancedModule.cs"
-#line 477 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_309 = &(maximum);
-#line 477 "AdvancedModule.cs"
-                                double csharp2cuda_temp_310;
-#line 477 "AdvancedModule.cs"
+                                (*(csharp2cuda_temp_298) = csharp2cuda_temp_299);
+#line 463 "AdvancedModule.cs"
+#line 463 "AdvancedModule.cs"
+                                double* csharp2cuda_temp_300 = &(maximum);
+#line 463 "AdvancedModule.cs"
+                                double csharp2cuda_temp_301;
+#line 463 "AdvancedModule.cs"
                                 if (((maximum) > (ratio)))
                                 {
-#line 477 "AdvancedModule.cs"
-                                    csharp2cuda_temp_310 = maximum;
+#line 463 "AdvancedModule.cs"
+                                    csharp2cuda_temp_301 = maximum;
                                 }
                                 else
                                 {
-#line 477 "AdvancedModule.cs"
-                                    csharp2cuda_temp_310 = ratio;
+#line 463 "AdvancedModule.cs"
+                                    csharp2cuda_temp_301 = ratio;
                                 }
-                                (*(csharp2cuda_temp_309) = csharp2cuda_temp_310);
+                                (*(csharp2cuda_temp_300) = csharp2cuda_temp_301);
                             }
-#line 468 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_299 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_299));
+#line 454 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_290 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_290));
                         }
                     }
-#line 479 "AdvancedModule.cs"
-#line 479 "AdvancedModule.cs"
-                    double* csharp2cuda_temp_311 = &((output)->scalar_value);
-#line 479 "AdvancedModule.cs"
-                    double csharp2cuda_temp_312 = __ddiv_rn(maximum, minimum);
-                    (*(csharp2cuda_temp_311) = mathblocks_natural_logarithm(csharp2cuda_temp_312));
-#line 480 "AdvancedModule.cs"
+#line 465 "AdvancedModule.cs"
+#line 465 "AdvancedModule.cs"
+                    double* csharp2cuda_temp_302 = &((output)->scalar_value);
+#line 465 "AdvancedModule.cs"
+                    double csharp2cuda_temp_303 = __ddiv_rn(maximum, minimum);
+                    (*(csharp2cuda_temp_302) = mathblocks_natural_logarithm(csharp2cuda_temp_303));
+#line 466 "AdvancedModule.cs"
                     break;
                 }
-#line 482 "AdvancedModule.cs"
+#line 468 "AdvancedModule.cs"
             case 13:
             case 16:
-#line 484 "AdvancedModule.cs"
-#line 484 "AdvancedModule.cs"
-                int csharp2cuda_temp_313 = (first)->count;
-                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_313);
-#line 485 "AdvancedModule.cs"
-#line 485 "AdvancedModule.cs"
-                int csharp2cuda_temp_314 = (first)->count;
-#line 485 "AdvancedModule.cs"
-                bool csharp2cuda_temp_315;
-#line 485 "AdvancedModule.cs"
-                if (!(((csharp2cuda_temp_314) <= (0))))
+#line 470 "AdvancedModule.cs"
+#line 470 "AdvancedModule.cs"
+                int csharp2cuda_temp_304 = (first)->count;
+                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_304);
+#line 471 "AdvancedModule.cs"
+#line 471 "AdvancedModule.cs"
+                int csharp2cuda_temp_305 = (first)->count;
+#line 471 "AdvancedModule.cs"
+                bool csharp2cuda_temp_306;
+#line 471 "AdvancedModule.cs"
+                if (!(((csharp2cuda_temp_305) <= (0))))
                 {
-#line 485 "AdvancedModule.cs"
-                    csharp2cuda_temp_315 = ((((void*)(scratch))) == (((void*)(nullptr))));
+#line 471 "AdvancedModule.cs"
+                    csharp2cuda_temp_306 = ((((void*)(scratch))) == (((void*)(nullptr))));
                 }
                 else
                 {
-#line 485 "AdvancedModule.cs"
-                    csharp2cuda_temp_315 = true;
+#line 471 "AdvancedModule.cs"
+                    csharp2cuda_temp_306 = true;
                 }
-                if (csharp2cuda_temp_315)
-#line 486 "AdvancedModule.cs"
+                if (csharp2cuda_temp_306)
+#line 472 "AdvancedModule.cs"
                 {
-#line 487 "AdvancedModule.cs"
-#line 487 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_316 = &((output)->valid);
-                    (*(csharp2cuda_temp_316) = 0);
-#line 488 "AdvancedModule.cs"
+#line 473 "AdvancedModule.cs"
+#line 473 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_307 = &((output)->valid);
+                    (*(csharp2cuda_temp_307) = 0);
+#line 474 "AdvancedModule.cs"
                     break;
                 }
-#line 490 "AdvancedModule.cs"
+#line 476 "AdvancedModule.cs"
                 {
-#line 491 "AdvancedModule.cs"
+#line 477 "AdvancedModule.cs"
                     int* hull = ((int*)(scratch));
-#line 492 "AdvancedModule.cs"
+#line 478 "AdvancedModule.cs"
                     int hull_count = 0;
-#line 493 "AdvancedModule.cs"
+#line 479 "AdvancedModule.cs"
                     bool concave = ((opcode) == (16));
-#line 494 "AdvancedModule.cs"
+#line 480 "AdvancedModule.cs"
                     {
-#line 494 "AdvancedModule.cs"
+#line 480 "AdvancedModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 494 "AdvancedModule.cs"
-                            int csharp2cuda_temp_318 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_318))))
+#line 480 "AdvancedModule.cs"
+                            int csharp2cuda_temp_309 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_309))))
                                 break;
-#line 495 "AdvancedModule.cs"
+#line 481 "AdvancedModule.cs"
                             {
-#line 496 "AdvancedModule.cs"
-#line 496 "AdvancedModule.cs"
-                                int* csharp2cuda_temp_319 = &(hull_count);
-#line 496 "AdvancedModule.cs"
-                                int csharp2cuda_temp_320 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_319));
-#line 496 "AdvancedModule.cs"
-                                int* csharp2cuda_temp_321 = &((hull)[csharp2cuda_temp_320]);
-                                (*(csharp2cuda_temp_321) = index);
-#line 497 "AdvancedModule.cs"
+#line 482 "AdvancedModule.cs"
+#line 482 "AdvancedModule.cs"
+                                int* csharp2cuda_temp_310 = &(hull_count);
+#line 482 "AdvancedModule.cs"
+                                int csharp2cuda_temp_311 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_310));
+#line 482 "AdvancedModule.cs"
+                                int* csharp2cuda_temp_312 = &((hull)[csharp2cuda_temp_311]);
+                                (*(csharp2cuda_temp_312) = index);
+#line 483 "AdvancedModule.cs"
                                 while (true)
                                 {
                                     if (!(((hull_count) >= (3))))
                                         break;
-#line 498 "AdvancedModule.cs"
+#line 484 "AdvancedModule.cs"
                                     {
-#line 499 "AdvancedModule.cs"
+#line 485 "AdvancedModule.cs"
                                         int one = (hull)[csharp2cuda_i32_sub(hull_count, 3)];
-#line 500 "AdvancedModule.cs"
+#line 486 "AdvancedModule.cs"
                                         int middle = (hull)[csharp2cuda_i32_sub(hull_count, 2)];
-#line 501 "AdvancedModule.cs"
+#line 487 "AdvancedModule.cs"
                                         int last = (hull)[csharp2cuda_i32_sub(hull_count, 1)];
-#line 502 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_322 = (a)[middle];
-#line 502 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_323 = (a)[one];
-#line 502 "AdvancedModule.cs"
-                                        double first_slope = __ddiv_rn(__dsub_rn(csharp2cuda_temp_322, csharp2cuda_temp_323), ((double)(csharp2cuda_i32_sub(middle, one))));
-#line 503 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_324 = (a)[last];
-#line 503 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_325 = (a)[middle];
-#line 503 "AdvancedModule.cs"
-                                        double second_slope = __ddiv_rn(__dsub_rn(csharp2cuda_temp_324, csharp2cuda_temp_325), ((double)(csharp2cuda_i32_sub(last, middle))));
-#line 504 "AdvancedModule.cs"
-#line 504 "AdvancedModule.cs"
-                                        bool csharp2cuda_temp_326;
-#line 504 "AdvancedModule.cs"
+#line 488 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_313 = (a)[middle];
+#line 488 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_314 = (a)[one];
+#line 488 "AdvancedModule.cs"
+                                        double first_slope = __ddiv_rn(__dsub_rn(csharp2cuda_temp_313, csharp2cuda_temp_314), ((double)(csharp2cuda_i32_sub(middle, one))));
+#line 489 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_315 = (a)[last];
+#line 489 "AdvancedModule.cs"
+                                        double csharp2cuda_temp_316 = (a)[middle];
+#line 489 "AdvancedModule.cs"
+                                        double second_slope = __ddiv_rn(__dsub_rn(csharp2cuda_temp_315, csharp2cuda_temp_316), ((double)(csharp2cuda_i32_sub(last, middle))));
+#line 490 "AdvancedModule.cs"
+#line 490 "AdvancedModule.cs"
+                                        bool csharp2cuda_temp_317;
+#line 490 "AdvancedModule.cs"
                                         if (concave)
                                         {
-#line 504 "AdvancedModule.cs"
-                                            csharp2cuda_temp_326 = ((first_slope) >= (second_slope));
+#line 490 "AdvancedModule.cs"
+                                            csharp2cuda_temp_317 = ((first_slope) >= (second_slope));
                                         }
                                         else
                                         {
-#line 504 "AdvancedModule.cs"
-                                            csharp2cuda_temp_326 = ((first_slope) <= (second_slope));
+#line 490 "AdvancedModule.cs"
+                                            csharp2cuda_temp_317 = ((first_slope) <= (second_slope));
                                         }
-                                        if (csharp2cuda_temp_326)
+                                        if (csharp2cuda_temp_317)
                                         {
-#line 505 "AdvancedModule.cs"
+#line 491 "AdvancedModule.cs"
                                             break;
                                         }
-#line 506 "AdvancedModule.cs"
-#line 506 "AdvancedModule.cs"
-                                        int* csharp2cuda_temp_327 = &((hull)[csharp2cuda_i32_sub(hull_count, 2)]);
-#line 506 "AdvancedModule.cs"
-                                        int csharp2cuda_temp_328 = (hull)[csharp2cuda_i32_sub(hull_count, 1)];
-                                        (*(csharp2cuda_temp_327) = csharp2cuda_temp_328);
-#line 507 "AdvancedModule.cs"
-#line 507 "AdvancedModule.cs"
-                                        int* csharp2cuda_temp_329 = &(hull_count);
-                                        csharp2cuda_i32_post_decrement(*(csharp2cuda_temp_329));
+#line 492 "AdvancedModule.cs"
+#line 492 "AdvancedModule.cs"
+                                        int* csharp2cuda_temp_318 = &((hull)[csharp2cuda_i32_sub(hull_count, 2)]);
+#line 492 "AdvancedModule.cs"
+                                        int csharp2cuda_temp_319 = (hull)[csharp2cuda_i32_sub(hull_count, 1)];
+                                        (*(csharp2cuda_temp_318) = csharp2cuda_temp_319);
+#line 493 "AdvancedModule.cs"
+#line 493 "AdvancedModule.cs"
+                                        int* csharp2cuda_temp_320 = &(hull_count);
+                                        csharp2cuda_i32_post_decrement(*(csharp2cuda_temp_320));
                                     }
                                 }
                             }
-#line 494 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_317 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_317));
+#line 480 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_308 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_308));
                         }
                     }
-#line 510 "AdvancedModule.cs"
+#line 496 "AdvancedModule.cs"
                     {
-#line 510 "AdvancedModule.cs"
+#line 496 "AdvancedModule.cs"
                         int segment = 1;
                         while (true)
                         {
                             if (!(((segment) < (hull_count))))
                                 break;
-#line 511 "AdvancedModule.cs"
+#line 497 "AdvancedModule.cs"
                             {
-#line 512 "AdvancedModule.cs"
+#line 498 "AdvancedModule.cs"
                                 int start = (hull)[csharp2cuda_i32_sub(segment, 1)];
-#line 513 "AdvancedModule.cs"
+#line 499 "AdvancedModule.cs"
                                 int end = (hull)[segment];
-#line 514 "AdvancedModule.cs"
+#line 500 "AdvancedModule.cs"
                                 {
-#line 514 "AdvancedModule.cs"
+#line 500 "AdvancedModule.cs"
                                     int index = start;
                                     while (true)
                                     {
                                         if (!(((index) <= (end))))
                                             break;
-#line 515 "AdvancedModule.cs"
+#line 501 "AdvancedModule.cs"
                                         {
-#line 516 "AdvancedModule.cs"
+#line 502 "AdvancedModule.cs"
                                             double weight = __ddiv_rn(((double)(csharp2cuda_i32_sub(index, start))), ((double)(csharp2cuda_i32_sub(end, start))));
-#line 517 "AdvancedModule.cs"
-#line 517 "AdvancedModule.cs"
-                                            double* csharp2cuda_temp_332 = &((result)[index]);
-#line 517 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_333 = (a)[start];
-#line 517 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_334 = (a)[end];
-                                            (*(csharp2cuda_temp_332) = __dadd_rn(__dmul_rn(csharp2cuda_temp_333, __dsub_rn(1.0, weight)), __dmul_rn(csharp2cuda_temp_334, weight)));
+#line 503 "AdvancedModule.cs"
+#line 503 "AdvancedModule.cs"
+                                            double* csharp2cuda_temp_323 = &((result)[index]);
+#line 503 "AdvancedModule.cs"
+                                            double csharp2cuda_temp_324 = (a)[start];
+#line 503 "AdvancedModule.cs"
+                                            double csharp2cuda_temp_325 = (a)[end];
+                                            (*(csharp2cuda_temp_323) = __dadd_rn(__dmul_rn(csharp2cuda_temp_324, __dsub_rn(1.0, weight)), __dmul_rn(csharp2cuda_temp_325, weight)));
                                         }
-#line 514 "AdvancedModule.cs"
-                                        int* csharp2cuda_temp_331 = &(index);
-                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_331));
+#line 500 "AdvancedModule.cs"
+                                        int* csharp2cuda_temp_322 = &(index);
+                                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_322));
                                     }
                                 }
                             }
-#line 510 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_330 = &(segment);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_330));
+#line 496 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_321 = &(segment);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_321));
                         }
                     }
-#line 520 "AdvancedModule.cs"
+#line 506 "AdvancedModule.cs"
                     break;
                 }
-#line 522 "AdvancedModule.cs"
+#line 508 "AdvancedModule.cs"
             case 14:
-#line 523 "AdvancedModule.cs"
+#line 509 "AdvancedModule.cs"
                 if (((((void*)(scratch))) == (((void*)(nullptr)))))
-#line 524 "AdvancedModule.cs"
+#line 510 "AdvancedModule.cs"
                 {
-#line 525 "AdvancedModule.cs"
-#line 525 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_335 = &((output)->valid);
-                    (*(csharp2cuda_temp_335) = 0);
-#line 526 "AdvancedModule.cs"
+#line 511 "AdvancedModule.cs"
+#line 511 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_326 = &((output)->valid);
+                    (*(csharp2cuda_temp_326) = 0);
+#line 512 "AdvancedModule.cs"
                     break;
                 }
-#line 528 "AdvancedModule.cs"
+#line 514 "AdvancedModule.cs"
                 {
-#line 528 "AdvancedModule.cs"
+#line 514 "AdvancedModule.cs"
                     int index = 0;
                     while (true)
                     {
-#line 528 "AdvancedModule.cs"
-                        int csharp2cuda_temp_337 = (first)->count;
-                        if (!(((index) < (csharp2cuda_temp_337))))
+#line 514 "AdvancedModule.cs"
+                        int csharp2cuda_temp_328 = (first)->count;
+                        if (!(((index) < (csharp2cuda_temp_328))))
                             break;
-#line 529 "AdvancedModule.cs"
-#line 529 "AdvancedModule.cs"
-                        double* csharp2cuda_temp_338 = &((scratch)[index]);
-#line 529 "AdvancedModule.cs"
-                        double csharp2cuda_temp_339 = (a)[index];
-                        (*(csharp2cuda_temp_338) = csharp2cuda_temp_339);
-#line 528 "AdvancedModule.cs"
-                        int* csharp2cuda_temp_336 = &(index);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_336));
+#line 515 "AdvancedModule.cs"
+#line 515 "AdvancedModule.cs"
+                        double* csharp2cuda_temp_329 = &((scratch)[index]);
+#line 515 "AdvancedModule.cs"
+                        double csharp2cuda_temp_330 = (a)[index];
+                        (*(csharp2cuda_temp_329) = csharp2cuda_temp_330);
+#line 514 "AdvancedModule.cs"
+                        int* csharp2cuda_temp_327 = &(index);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_327));
                     }
                 }
-#line 530 "AdvancedModule.cs"
-#line 530 "AdvancedModule.cs"
-                int* csharp2cuda_temp_340 = &((output)->boolean_value);
-                (*(csharp2cuda_temp_340) = 1);
-#line 531 "AdvancedModule.cs"
+#line 516 "AdvancedModule.cs"
+#line 516 "AdvancedModule.cs"
+                int* csharp2cuda_temp_331 = &((output)->boolean_value);
+                (*(csharp2cuda_temp_331) = 1);
+#line 517 "AdvancedModule.cs"
                 {
-#line 531 "AdvancedModule.cs"
+#line 517 "AdvancedModule.cs"
                     int order = 0;
-#line 531 "AdvancedModule.cs"
+#line 517 "AdvancedModule.cs"
                     int length = (first)->count;
                     while (true)
                     {
-#line 532 "AdvancedModule.cs"
-                        int csharp2cuda_temp_343 = (first)->count;
-#line 532 "AdvancedModule.cs"
-                        bool csharp2cuda_temp_344;
-#line 532 "AdvancedModule.cs"
-                        if (((order) < (csharp2cuda_temp_343)))
+#line 518 "AdvancedModule.cs"
+                        int csharp2cuda_temp_334 = (first)->count;
+#line 518 "AdvancedModule.cs"
+                        bool csharp2cuda_temp_335;
+#line 518 "AdvancedModule.cs"
+                        if (((order) < (csharp2cuda_temp_334)))
                         {
-#line 532 "AdvancedModule.cs"
-                            csharp2cuda_temp_344 = (output)->boolean_value;
+#line 518 "AdvancedModule.cs"
+                            csharp2cuda_temp_335 = (output)->boolean_value;
                         }
                         else
                         {
-#line 532 "AdvancedModule.cs"
-                            csharp2cuda_temp_344 = false;
+#line 518 "AdvancedModule.cs"
+                            csharp2cuda_temp_335 = false;
                         }
-                        if (!(csharp2cuda_temp_344))
+                        if (!(csharp2cuda_temp_335))
                             break;
-#line 534 "AdvancedModule.cs"
+#line 520 "AdvancedModule.cs"
                         {
-#line 535 "AdvancedModule.cs"
-                            double csharp2cuda_temp_345;
-#line 535 "AdvancedModule.cs"
+#line 521 "AdvancedModule.cs"
+                            double csharp2cuda_temp_336;
+#line 521 "AdvancedModule.cs"
                             if (((csharp2cuda_i32_and(order, 1)) == (0)))
                             {
-#line 535 "AdvancedModule.cs"
-                                csharp2cuda_temp_345 = 1.0;
+#line 521 "AdvancedModule.cs"
+                                csharp2cuda_temp_336 = 1.0;
                             }
                             else
                             {
-#line 535 "AdvancedModule.cs"
-                                csharp2cuda_temp_345 = (-(1.0));
+#line 521 "AdvancedModule.cs"
+                                csharp2cuda_temp_336 = (-(1.0));
                             }
-#line 535 "AdvancedModule.cs"
-                            double sign = csharp2cuda_temp_345;
-#line 536 "AdvancedModule.cs"
+#line 521 "AdvancedModule.cs"
+                            double sign = csharp2cuda_temp_336;
+#line 522 "AdvancedModule.cs"
                             {
-#line 536 "AdvancedModule.cs"
+#line 522 "AdvancedModule.cs"
                                 int index = 0;
                                 while (true)
                                 {
                                     if (!(((index) < (length))))
                                         break;
-#line 537 "AdvancedModule.cs"
-#line 537 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_347 = (scratch)[index];
-                                    if (((__dmul_rn(sign, csharp2cuda_temp_347)) < (0.0)))
-#line 538 "AdvancedModule.cs"
+#line 523 "AdvancedModule.cs"
+#line 523 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_338 = (scratch)[index];
+                                    if (((__dmul_rn(sign, csharp2cuda_temp_338)) < (0.0)))
+#line 524 "AdvancedModule.cs"
                                     {
-#line 539 "AdvancedModule.cs"
-#line 539 "AdvancedModule.cs"
-                                        int* csharp2cuda_temp_348 = &((output)->boolean_value);
-                                        (*(csharp2cuda_temp_348) = 0);
-#line 540 "AdvancedModule.cs"
+#line 525 "AdvancedModule.cs"
+#line 525 "AdvancedModule.cs"
+                                        int* csharp2cuda_temp_339 = &((output)->boolean_value);
+                                        (*(csharp2cuda_temp_339) = 0);
+#line 526 "AdvancedModule.cs"
                                         break;
                                     }
-#line 536 "AdvancedModule.cs"
-                                    int* csharp2cuda_temp_346 = &(index);
-                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_346));
+#line 522 "AdvancedModule.cs"
+                                    int* csharp2cuda_temp_337 = &(index);
+                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_337));
                                 }
                             }
-#line 542 "AdvancedModule.cs"
+#line 528 "AdvancedModule.cs"
                             {
-#line 542 "AdvancedModule.cs"
+#line 528 "AdvancedModule.cs"
                                 int index = 1;
                                 while (true)
                                 {
-#line 542 "AdvancedModule.cs"
-                                    bool csharp2cuda_temp_350 = (output)->boolean_value;
-#line 542 "AdvancedModule.cs"
-                                    bool csharp2cuda_temp_351;
-#line 542 "AdvancedModule.cs"
-                                    if (csharp2cuda_temp_350)
+#line 528 "AdvancedModule.cs"
+                                    bool csharp2cuda_temp_341 = (output)->boolean_value;
+#line 528 "AdvancedModule.cs"
+                                    bool csharp2cuda_temp_342;
+#line 528 "AdvancedModule.cs"
+                                    if (csharp2cuda_temp_341)
                                     {
-#line 542 "AdvancedModule.cs"
-                                        csharp2cuda_temp_351 = ((index) < (length));
+#line 528 "AdvancedModule.cs"
+                                        csharp2cuda_temp_342 = ((index) < (length));
                                     }
                                     else
                                     {
-#line 542 "AdvancedModule.cs"
-                                        csharp2cuda_temp_351 = false;
+#line 528 "AdvancedModule.cs"
+                                        csharp2cuda_temp_342 = false;
                                     }
-                                    if (!(csharp2cuda_temp_351))
+                                    if (!(csharp2cuda_temp_342))
                                         break;
-#line 543 "AdvancedModule.cs"
-#line 543 "AdvancedModule.cs"
-                                    double* csharp2cuda_temp_352 = &((scratch)[csharp2cuda_i32_sub(index, 1)]);
-#line 543 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_353 = (scratch)[index];
-#line 543 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_354 = (scratch)[csharp2cuda_i32_sub(index, 1)];
-                                    (*(csharp2cuda_temp_352) = __dsub_rn(csharp2cuda_temp_353, csharp2cuda_temp_354));
-#line 542 "AdvancedModule.cs"
-                                    int* csharp2cuda_temp_349 = &(index);
-                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_349));
+#line 529 "AdvancedModule.cs"
+#line 529 "AdvancedModule.cs"
+                                    double* csharp2cuda_temp_343 = &((scratch)[csharp2cuda_i32_sub(index, 1)]);
+#line 529 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_344 = (scratch)[index];
+#line 529 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_345 = (scratch)[csharp2cuda_i32_sub(index, 1)];
+                                    (*(csharp2cuda_temp_343) = __dsub_rn(csharp2cuda_temp_344, csharp2cuda_temp_345));
+#line 528 "AdvancedModule.cs"
+                                    int* csharp2cuda_temp_340 = &(index);
+                                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_340));
                                 }
                             }
                         }
-#line 533 "AdvancedModule.cs"
-                        int* csharp2cuda_temp_341 = &(order);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_341));
-#line 533 "AdvancedModule.cs"
-                        int* csharp2cuda_temp_342 = &(length);
-                        csharp2cuda_i32_post_decrement(*(csharp2cuda_temp_342));
+#line 519 "AdvancedModule.cs"
+                        int* csharp2cuda_temp_332 = &(order);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_332));
+#line 519 "AdvancedModule.cs"
+                        int* csharp2cuda_temp_333 = &(length);
+                        csharp2cuda_i32_post_decrement(*(csharp2cuda_temp_333));
                     }
                 }
-#line 545 "AdvancedModule.cs"
+#line 531 "AdvancedModule.cs"
                 break;
-#line 546 "AdvancedModule.cs"
+#line 532 "AdvancedModule.cs"
             case 15:
-#line 547 "AdvancedModule.cs"
-#line 547 "AdvancedModule.cs"
-                int* csharp2cuda_temp_355 = &((output)->boolean_value);
-                (*(csharp2cuda_temp_355) = 1);
-#line 548 "AdvancedModule.cs"
+#line 533 "AdvancedModule.cs"
+#line 533 "AdvancedModule.cs"
+                int* csharp2cuda_temp_346 = &((output)->boolean_value);
+                (*(csharp2cuda_temp_346) = 1);
+#line 534 "AdvancedModule.cs"
                 {
-#line 548 "AdvancedModule.cs"
+#line 534 "AdvancedModule.cs"
                     int index = 0;
                     while (true)
                     {
-#line 548 "AdvancedModule.cs"
-                        int csharp2cuda_temp_357 = (first)->count;
-                        if (!(((index) < (csharp2cuda_temp_357))))
+#line 534 "AdvancedModule.cs"
+                        int csharp2cuda_temp_348 = (first)->count;
+                        if (!(((index) < (csharp2cuda_temp_348))))
                             break;
-#line 549 "AdvancedModule.cs"
-#line 549 "AdvancedModule.cs"
-                        double csharp2cuda_temp_358 = (a)[index];
-                        if (((csharp2cuda_temp_358) < (0.0)))
+#line 535 "AdvancedModule.cs"
+#line 535 "AdvancedModule.cs"
+                        double csharp2cuda_temp_349 = (a)[index];
+                        if (((csharp2cuda_temp_349) < (0.0)))
                         {
-#line 549 "AdvancedModule.cs"
-#line 549 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_359 = &((output)->boolean_value);
-                            (*(csharp2cuda_temp_359) = 0);
+#line 535 "AdvancedModule.cs"
+#line 535 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_350 = &((output)->boolean_value);
+                            (*(csharp2cuda_temp_350) = 0);
                         }
-#line 548 "AdvancedModule.cs"
-                        int* csharp2cuda_temp_356 = &(index);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_356));
+#line 534 "AdvancedModule.cs"
+                        int* csharp2cuda_temp_347 = &(index);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_347));
                     }
                 }
-#line 550 "AdvancedModule.cs"
+#line 536 "AdvancedModule.cs"
                 {
-#line 550 "AdvancedModule.cs"
+#line 536 "AdvancedModule.cs"
                     int index = 1;
                     while (true)
                     {
-#line 550 "AdvancedModule.cs"
-                        bool csharp2cuda_temp_361 = (output)->boolean_value;
-#line 550 "AdvancedModule.cs"
-                        bool csharp2cuda_temp_362;
-#line 550 "AdvancedModule.cs"
-                        if (csharp2cuda_temp_361)
+#line 536 "AdvancedModule.cs"
+                        bool csharp2cuda_temp_352 = (output)->boolean_value;
+#line 536 "AdvancedModule.cs"
+                        bool csharp2cuda_temp_353;
+#line 536 "AdvancedModule.cs"
+                        if (csharp2cuda_temp_352)
                         {
-#line 550 "AdvancedModule.cs"
-                            int csharp2cuda_temp_363 = (first)->count;
-#line 550 "AdvancedModule.cs"
-                            csharp2cuda_temp_362 = ((index) < (csharp2cuda_i32_sub(csharp2cuda_temp_363, 1)));
+#line 536 "AdvancedModule.cs"
+                            int csharp2cuda_temp_354 = (first)->count;
+#line 536 "AdvancedModule.cs"
+                            csharp2cuda_temp_353 = ((index) < (csharp2cuda_i32_sub(csharp2cuda_temp_354, 1)));
                         }
                         else
                         {
-#line 550 "AdvancedModule.cs"
-                            csharp2cuda_temp_362 = false;
+#line 536 "AdvancedModule.cs"
+                            csharp2cuda_temp_353 = false;
                         }
-                        if (!(csharp2cuda_temp_362))
+                        if (!(csharp2cuda_temp_353))
                             break;
-#line 551 "AdvancedModule.cs"
-#line 551 "AdvancedModule.cs"
-                        double csharp2cuda_temp_364 = (a)[index];
-#line 551 "AdvancedModule.cs"
-                        double csharp2cuda_temp_365 = (a)[index];
-#line 551 "AdvancedModule.cs"
-                        double csharp2cuda_temp_366 = (a)[csharp2cuda_i32_sub(index, 1)];
-#line 551 "AdvancedModule.cs"
-                        double csharp2cuda_temp_367 = (a)[csharp2cuda_i32_add(index, 1)];
-                        if (((__dmul_rn(csharp2cuda_temp_364, csharp2cuda_temp_365)) < (__dmul_rn(csharp2cuda_temp_366, csharp2cuda_temp_367))))
+#line 537 "AdvancedModule.cs"
+#line 537 "AdvancedModule.cs"
+                        double csharp2cuda_temp_355 = (a)[index];
+#line 537 "AdvancedModule.cs"
+                        double csharp2cuda_temp_356 = (a)[index];
+#line 537 "AdvancedModule.cs"
+                        double csharp2cuda_temp_357 = (a)[csharp2cuda_i32_sub(index, 1)];
+#line 537 "AdvancedModule.cs"
+                        double csharp2cuda_temp_358 = (a)[csharp2cuda_i32_add(index, 1)];
+                        if (((__dmul_rn(csharp2cuda_temp_355, csharp2cuda_temp_356)) < (__dmul_rn(csharp2cuda_temp_357, csharp2cuda_temp_358))))
                         {
-#line 552 "AdvancedModule.cs"
-#line 552 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_368 = &((output)->boolean_value);
-                            (*(csharp2cuda_temp_368) = 0);
+#line 538 "AdvancedModule.cs"
+#line 538 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_359 = &((output)->boolean_value);
+                            (*(csharp2cuda_temp_359) = 0);
                         }
-#line 550 "AdvancedModule.cs"
-                        int* csharp2cuda_temp_360 = &(index);
-                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_360));
+#line 536 "AdvancedModule.cs"
+                        int* csharp2cuda_temp_351 = &(index);
+                        csharp2cuda_i32_post_increment(*(csharp2cuda_temp_351));
                     }
                 }
-#line 553 "AdvancedModule.cs"
+#line 539 "AdvancedModule.cs"
                 break;
-#line 554 "AdvancedModule.cs"
+#line 540 "AdvancedModule.cs"
             case 17:
-#line 555 "AdvancedModule.cs"
-#line 555 "AdvancedModule.cs"
-                int csharp2cuda_temp_369 = (first)->count;
-                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_369);
-#line 556 "AdvancedModule.cs"
-#line 556 "AdvancedModule.cs"
-                int csharp2cuda_temp_370 = (first)->count;
-#line 556 "AdvancedModule.cs"
-                bool csharp2cuda_temp_371 = mathblocks_advanced_distribution(a, csharp2cuda_temp_370);
-                if ((!(csharp2cuda_temp_371)))
-#line 557 "AdvancedModule.cs"
+#line 541 "AdvancedModule.cs"
+#line 541 "AdvancedModule.cs"
+                int csharp2cuda_temp_360 = (first)->count;
+                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_360);
+#line 542 "AdvancedModule.cs"
+#line 542 "AdvancedModule.cs"
+                int csharp2cuda_temp_361 = (first)->count;
+#line 542 "AdvancedModule.cs"
+                bool csharp2cuda_temp_362 = mathblocks_advanced_distribution(a, csharp2cuda_temp_361);
+                if ((!(csharp2cuda_temp_362)))
+#line 543 "AdvancedModule.cs"
                 {
-#line 558 "AdvancedModule.cs"
-#line 558 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_372 = &((output)->valid);
-                    (*(csharp2cuda_temp_372) = 0);
-#line 559 "AdvancedModule.cs"
+#line 544 "AdvancedModule.cs"
+#line 544 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_363 = &((output)->valid);
+                    (*(csharp2cuda_temp_363) = 0);
+#line 545 "AdvancedModule.cs"
                     break;
                 }
-#line 561 "AdvancedModule.cs"
+#line 547 "AdvancedModule.cs"
                 {
-#line 562 "AdvancedModule.cs"
+#line 548 "AdvancedModule.cs"
                     double survival = 1.0;
-#line 563 "AdvancedModule.cs"
+#line 549 "AdvancedModule.cs"
                     {
-#line 563 "AdvancedModule.cs"
+#line 549 "AdvancedModule.cs"
                         int index = 0;
                         while (true)
                         {
-#line 563 "AdvancedModule.cs"
-                            int csharp2cuda_temp_374 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_374))))
+#line 549 "AdvancedModule.cs"
+                            int csharp2cuda_temp_365 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_365))))
                                 break;
-#line 564 "AdvancedModule.cs"
+#line 550 "AdvancedModule.cs"
                             {
-#line 565 "AdvancedModule.cs"
-#line 565 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_375 = &((result)[index]);
-#line 565 "AdvancedModule.cs"
-                                double csharp2cuda_temp_376 = (a)[index];
-#line 565 "AdvancedModule.cs"
-                                double csharp2cuda_temp_377 = __ddiv_rn(csharp2cuda_temp_376, survival);
-                                (*(csharp2cuda_temp_375) = csharp2cuda_temp_377);
-#line 566 "AdvancedModule.cs"
-#line 566 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_378 = &(survival);
-#line 566 "AdvancedModule.cs"
-                                double csharp2cuda_temp_379 = *(csharp2cuda_temp_378);
-#line 566 "AdvancedModule.cs"
-                                double csharp2cuda_temp_380 = (a)[index];
-                                (*(csharp2cuda_temp_378) = __dsub_rn(csharp2cuda_temp_379, csharp2cuda_temp_380));
+#line 551 "AdvancedModule.cs"
+#line 551 "AdvancedModule.cs"
+                                double* csharp2cuda_temp_366 = &((result)[index]);
+#line 551 "AdvancedModule.cs"
+                                double csharp2cuda_temp_367 = (a)[index];
+#line 551 "AdvancedModule.cs"
+                                double csharp2cuda_temp_368 = __ddiv_rn(csharp2cuda_temp_367, survival);
+                                (*(csharp2cuda_temp_366) = csharp2cuda_temp_368);
+#line 552 "AdvancedModule.cs"
+#line 552 "AdvancedModule.cs"
+                                double* csharp2cuda_temp_369 = &(survival);
+#line 552 "AdvancedModule.cs"
+                                double csharp2cuda_temp_370 = *(csharp2cuda_temp_369);
+#line 552 "AdvancedModule.cs"
+                                double csharp2cuda_temp_371 = (a)[index];
+                                (*(csharp2cuda_temp_369) = __dsub_rn(csharp2cuda_temp_370, csharp2cuda_temp_371));
                             }
-#line 563 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_373 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_373));
+#line 549 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_364 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_364));
                         }
                     }
-#line 568 "AdvancedModule.cs"
+#line 554 "AdvancedModule.cs"
                     break;
                 }
-#line 570 "AdvancedModule.cs"
+#line 556 "AdvancedModule.cs"
             case 18:
-#line 571 "AdvancedModule.cs"
-#line 571 "AdvancedModule.cs"
-                int csharp2cuda_temp_381 = (first)->count;
-                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_381);
-#line 572 "AdvancedModule.cs"
-#line 572 "AdvancedModule.cs"
-                int csharp2cuda_temp_382 = (first)->count;
-#line 572 "AdvancedModule.cs"
-                int csharp2cuda_temp_383 = (second)->count;
-                if (((csharp2cuda_temp_382) != (csharp2cuda_temp_383)))
-#line 573 "AdvancedModule.cs"
+#line 557 "AdvancedModule.cs"
+#line 557 "AdvancedModule.cs"
+                int csharp2cuda_temp_372 = (first)->count;
+                mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_372);
+#line 558 "AdvancedModule.cs"
+#line 558 "AdvancedModule.cs"
+                int csharp2cuda_temp_373 = (first)->count;
+#line 558 "AdvancedModule.cs"
+                int csharp2cuda_temp_374 = (second)->count;
+                if (((csharp2cuda_temp_373) != (csharp2cuda_temp_374)))
+#line 559 "AdvancedModule.cs"
                 {
-#line 574 "AdvancedModule.cs"
-#line 574 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_384 = &((output)->valid);
-                    (*(csharp2cuda_temp_384) = 0);
+#line 560 "AdvancedModule.cs"
+#line 560 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_375 = &((output)->valid);
+                    (*(csharp2cuda_temp_375) = 0);
+#line 561 "AdvancedModule.cs"
+                    break;
+                }
+#line 563 "AdvancedModule.cs"
+                {
+#line 564 "AdvancedModule.cs"
+                    double survival = 1.0;
+#line 565 "AdvancedModule.cs"
+                    {
+#line 565 "AdvancedModule.cs"
+                        int index = 0;
+                        while (true)
+                        {
+#line 565 "AdvancedModule.cs"
+                            int csharp2cuda_temp_377 = (first)->count;
+                            if (!(((index) < (csharp2cuda_temp_377))))
+                                break;
+#line 566 "AdvancedModule.cs"
+                            {
+#line 567 "AdvancedModule.cs"
+#line 567 "AdvancedModule.cs"
+                                double csharp2cuda_temp_378 = (a)[index];
+#line 567 "AdvancedModule.cs"
+                                bool csharp2cuda_temp_379;
+#line 567 "AdvancedModule.cs"
+                                if (!(((csharp2cuda_temp_378) < (0.0))))
+                                {
+#line 567 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_380 = (b)[index];
+#line 567 "AdvancedModule.cs"
+                                    csharp2cuda_temp_379 = ((csharp2cuda_temp_380) <= (0.0));
+                                }
+                                else
+                                {
+#line 567 "AdvancedModule.cs"
+                                    csharp2cuda_temp_379 = true;
+                                }
+#line 567 "AdvancedModule.cs"
+                                bool csharp2cuda_temp_381;
+#line 567 "AdvancedModule.cs"
+                                if (!(csharp2cuda_temp_379))
+                                {
+#line 567 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_382 = (a)[index];
+#line 567 "AdvancedModule.cs"
+                                    double csharp2cuda_temp_383 = (b)[index];
+#line 567 "AdvancedModule.cs"
+                                    csharp2cuda_temp_381 = ((csharp2cuda_temp_382) > (csharp2cuda_temp_383));
+                                }
+                                else
+                                {
+#line 567 "AdvancedModule.cs"
+                                    csharp2cuda_temp_381 = true;
+                                }
+                                if (csharp2cuda_temp_381)
+#line 568 "AdvancedModule.cs"
+                                {
+#line 569 "AdvancedModule.cs"
+#line 569 "AdvancedModule.cs"
+                                    int* csharp2cuda_temp_384 = &((output)->valid);
+                                    (*(csharp2cuda_temp_384) = 0);
+#line 570 "AdvancedModule.cs"
+                                    break;
+                                }
+#line 572 "AdvancedModule.cs"
+#line 572 "AdvancedModule.cs"
+                                double* csharp2cuda_temp_385 = &(survival);
+#line 572 "AdvancedModule.cs"
+                                double csharp2cuda_temp_386 = *(csharp2cuda_temp_385);
+#line 572 "AdvancedModule.cs"
+                                double csharp2cuda_temp_387 = (a)[index];
+#line 572 "AdvancedModule.cs"
+                                double csharp2cuda_temp_388 = (b)[index];
+#line 572 "AdvancedModule.cs"
+                                double csharp2cuda_temp_389 = __ddiv_rn(csharp2cuda_temp_387, csharp2cuda_temp_388);
+                                (*(csharp2cuda_temp_385) = __dmul_rn(csharp2cuda_temp_386, __dsub_rn(1.0, csharp2cuda_temp_389)));
+#line 573 "AdvancedModule.cs"
+#line 573 "AdvancedModule.cs"
+                                double* csharp2cuda_temp_390 = &((result)[index]);
+                                (*(csharp2cuda_temp_390) = survival);
+                            }
+#line 565 "AdvancedModule.cs"
+                            int* csharp2cuda_temp_376 = &(index);
+                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_376));
+                        }
+                    }
 #line 575 "AdvancedModule.cs"
                     break;
                 }
-#line 577 "AdvancedModule.cs"
-                {
-#line 578 "AdvancedModule.cs"
-                    double survival = 1.0;
-#line 579 "AdvancedModule.cs"
-                    {
-#line 579 "AdvancedModule.cs"
-                        int index = 0;
-                        while (true)
-                        {
-#line 579 "AdvancedModule.cs"
-                            int csharp2cuda_temp_386 = (first)->count;
-                            if (!(((index) < (csharp2cuda_temp_386))))
-                                break;
-#line 580 "AdvancedModule.cs"
-                            {
-#line 581 "AdvancedModule.cs"
-#line 581 "AdvancedModule.cs"
-                                double csharp2cuda_temp_387 = (a)[index];
-#line 581 "AdvancedModule.cs"
-                                bool csharp2cuda_temp_388;
-#line 581 "AdvancedModule.cs"
-                                if (!(((csharp2cuda_temp_387) < (0.0))))
-                                {
-#line 581 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_389 = (b)[index];
-#line 581 "AdvancedModule.cs"
-                                    csharp2cuda_temp_388 = ((csharp2cuda_temp_389) <= (0.0));
-                                }
-                                else
-                                {
-#line 581 "AdvancedModule.cs"
-                                    csharp2cuda_temp_388 = true;
-                                }
-#line 581 "AdvancedModule.cs"
-                                bool csharp2cuda_temp_390;
-#line 581 "AdvancedModule.cs"
-                                if (!(csharp2cuda_temp_388))
-                                {
-#line 581 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_391 = (a)[index];
-#line 581 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_392 = (b)[index];
-#line 581 "AdvancedModule.cs"
-                                    csharp2cuda_temp_390 = ((csharp2cuda_temp_391) > (csharp2cuda_temp_392));
-                                }
-                                else
-                                {
-#line 581 "AdvancedModule.cs"
-                                    csharp2cuda_temp_390 = true;
-                                }
-                                if (csharp2cuda_temp_390)
-#line 582 "AdvancedModule.cs"
-                                {
-#line 583 "AdvancedModule.cs"
-#line 583 "AdvancedModule.cs"
-                                    int* csharp2cuda_temp_393 = &((output)->valid);
-                                    (*(csharp2cuda_temp_393) = 0);
-#line 584 "AdvancedModule.cs"
-                                    break;
-                                }
-#line 586 "AdvancedModule.cs"
-#line 586 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_394 = &(survival);
-#line 586 "AdvancedModule.cs"
-                                double csharp2cuda_temp_395 = *(csharp2cuda_temp_394);
-#line 586 "AdvancedModule.cs"
-                                double csharp2cuda_temp_396 = (a)[index];
-#line 586 "AdvancedModule.cs"
-                                double csharp2cuda_temp_397 = (b)[index];
-#line 586 "AdvancedModule.cs"
-                                double csharp2cuda_temp_398 = __ddiv_rn(csharp2cuda_temp_396, csharp2cuda_temp_397);
-                                (*(csharp2cuda_temp_394) = __dmul_rn(csharp2cuda_temp_395, __dsub_rn(1.0, csharp2cuda_temp_398)));
-#line 587 "AdvancedModule.cs"
-#line 587 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_399 = &((result)[index]);
-                                (*(csharp2cuda_temp_399) = survival);
-                            }
-#line 579 "AdvancedModule.cs"
-                            int* csharp2cuda_temp_385 = &(index);
-                            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_385));
-                        }
-                    }
-#line 589 "AdvancedModule.cs"
-                    break;
-                }
         }
-#line 593 "AdvancedModule.cs"
-#line 593 "AdvancedModule.cs"
-        bool csharp2cuda_temp_400 = (output)->valid;
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
+        bool csharp2cuda_temp_391 = (output)->valid;
+#line 579 "AdvancedModule.cs"
+        bool csharp2cuda_temp_392;
+#line 579 "AdvancedModule.cs"
+        if (csharp2cuda_temp_391)
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_392 = ((opcode) != (1));
+        }
+        else
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_392 = false;
+        }
+#line 579 "AdvancedModule.cs"
+        bool csharp2cuda_temp_393;
+#line 579 "AdvancedModule.cs"
+        if (csharp2cuda_temp_392)
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_393 = ((opcode) != (2));
+        }
+        else
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_393 = false;
+        }
+#line 579 "AdvancedModule.cs"
+        bool csharp2cuda_temp_394;
+#line 579 "AdvancedModule.cs"
+        if (csharp2cuda_temp_393)
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_394 = ((opcode) != (3));
+        }
+        else
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_394 = false;
+        }
+#line 579 "AdvancedModule.cs"
+        bool csharp2cuda_temp_395;
+#line 579 "AdvancedModule.cs"
+        if (csharp2cuda_temp_394)
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_395 = ((opcode) != (4));
+        }
+        else
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_395 = false;
+        }
+#line 579 "AdvancedModule.cs"
+        bool csharp2cuda_temp_396;
+#line 579 "AdvancedModule.cs"
+        if (csharp2cuda_temp_395)
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_396 = ((opcode) != (5));
+        }
+        else
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_396 = false;
+        }
+#line 579 "AdvancedModule.cs"
+        bool csharp2cuda_temp_397;
+#line 579 "AdvancedModule.cs"
+        if (csharp2cuda_temp_396)
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_397 = ((opcode) != (7));
+        }
+        else
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_397 = false;
+        }
+#line 579 "AdvancedModule.cs"
+        bool csharp2cuda_temp_398;
+#line 579 "AdvancedModule.cs"
+        if (csharp2cuda_temp_397)
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_398 = ((opcode) != (9));
+        }
+        else
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_398 = false;
+        }
+#line 579 "AdvancedModule.cs"
+        bool csharp2cuda_temp_399;
+#line 579 "AdvancedModule.cs"
+        if (csharp2cuda_temp_398)
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_399 = ((opcode) != (10));
+        }
+        else
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_399 = false;
+        }
+#line 579 "AdvancedModule.cs"
+        bool csharp2cuda_temp_400;
+#line 579 "AdvancedModule.cs"
+        if (csharp2cuda_temp_399)
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_400 = ((opcode) != (11));
+        }
+        else
+        {
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_400 = false;
+        }
+#line 579 "AdvancedModule.cs"
         bool csharp2cuda_temp_401;
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
         if (csharp2cuda_temp_400)
         {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_401 = ((opcode) != (1));
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_401 = ((opcode) != (13));
         }
         else
         {
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
             csharp2cuda_temp_401 = false;
         }
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
         bool csharp2cuda_temp_402;
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
         if (csharp2cuda_temp_401)
         {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_402 = ((opcode) != (2));
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_402 = ((opcode) != (14));
         }
         else
         {
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
             csharp2cuda_temp_402 = false;
         }
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
         bool csharp2cuda_temp_403;
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
         if (csharp2cuda_temp_402)
         {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_403 = ((opcode) != (3));
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_403 = ((opcode) != (15));
         }
         else
         {
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
             csharp2cuda_temp_403 = false;
         }
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
         bool csharp2cuda_temp_404;
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
         if (csharp2cuda_temp_403)
         {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_404 = ((opcode) != (4));
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_404 = ((opcode) != (16));
         }
         else
         {
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
             csharp2cuda_temp_404 = false;
         }
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
         bool csharp2cuda_temp_405;
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
         if (csharp2cuda_temp_404)
         {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_405 = ((opcode) != (5));
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_405 = ((opcode) != (17));
         }
         else
         {
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
             csharp2cuda_temp_405 = false;
         }
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
         bool csharp2cuda_temp_406;
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
         if (csharp2cuda_temp_405)
         {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_406 = ((opcode) != (7));
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_406 = ((opcode) != (18));
         }
         else
         {
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
             csharp2cuda_temp_406 = false;
         }
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
         bool csharp2cuda_temp_407;
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
         if (csharp2cuda_temp_406)
         {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_407 = ((opcode) != (9));
+#line 583 "AdvancedModule.cs"
+            double csharp2cuda_temp_408 = (output)->scalar_value;
+#line 579 "AdvancedModule.cs"
+            csharp2cuda_temp_407 = (!(isfinite(csharp2cuda_temp_408)));
         }
         else
         {
-#line 593 "AdvancedModule.cs"
+#line 579 "AdvancedModule.cs"
             csharp2cuda_temp_407 = false;
         }
-#line 593 "AdvancedModule.cs"
-        bool csharp2cuda_temp_408;
-#line 593 "AdvancedModule.cs"
         if (csharp2cuda_temp_407)
+#line 584 "AdvancedModule.cs"
         {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_408 = ((opcode) != (10));
+#line 585 "AdvancedModule.cs"
+#line 585 "AdvancedModule.cs"
+            int* csharp2cuda_temp_409 = &((output)->valid);
+            (*(csharp2cuda_temp_409) = 0);
         }
-        else
-        {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_408 = false;
-        }
-#line 593 "AdvancedModule.cs"
-        bool csharp2cuda_temp_409;
-#line 593 "AdvancedModule.cs"
-        if (csharp2cuda_temp_408)
-        {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_409 = ((opcode) != (11));
-        }
-        else
-        {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_409 = false;
-        }
-#line 593 "AdvancedModule.cs"
-        bool csharp2cuda_temp_410;
-#line 593 "AdvancedModule.cs"
-        if (csharp2cuda_temp_409)
-        {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_410 = ((opcode) != (13));
-        }
-        else
-        {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_410 = false;
-        }
-#line 593 "AdvancedModule.cs"
+#line 587 "AdvancedModule.cs"
+#line 587 "AdvancedModule.cs"
+        bool csharp2cuda_temp_410 = (output)->valid;
+#line 587 "AdvancedModule.cs"
         bool csharp2cuda_temp_411;
-#line 593 "AdvancedModule.cs"
+#line 587 "AdvancedModule.cs"
         if (csharp2cuda_temp_410)
         {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_411 = ((opcode) != (14));
-        }
-        else
-        {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_411 = false;
-        }
-#line 593 "AdvancedModule.cs"
-        bool csharp2cuda_temp_412;
-#line 593 "AdvancedModule.cs"
-        if (csharp2cuda_temp_411)
-        {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_412 = ((opcode) != (15));
-        }
-        else
-        {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_412 = false;
-        }
-#line 593 "AdvancedModule.cs"
-        bool csharp2cuda_temp_413;
-#line 593 "AdvancedModule.cs"
-        if (csharp2cuda_temp_412)
-        {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_413 = ((opcode) != (16));
-        }
-        else
-        {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_413 = false;
-        }
-#line 593 "AdvancedModule.cs"
-        bool csharp2cuda_temp_414;
-#line 593 "AdvancedModule.cs"
-        if (csharp2cuda_temp_413)
-        {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_414 = ((opcode) != (17));
-        }
-        else
-        {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_414 = false;
-        }
-#line 593 "AdvancedModule.cs"
-        bool csharp2cuda_temp_415;
-#line 593 "AdvancedModule.cs"
-        if (csharp2cuda_temp_414)
-        {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_415 = ((opcode) != (18));
-        }
-        else
-        {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_415 = false;
-        }
-#line 593 "AdvancedModule.cs"
-        bool csharp2cuda_temp_416;
-#line 593 "AdvancedModule.cs"
-        if (csharp2cuda_temp_415)
-        {
-#line 597 "AdvancedModule.cs"
-            double csharp2cuda_temp_417 = (output)->scalar_value;
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_416 = (!(isfinite(csharp2cuda_temp_417)));
-        }
-        else
-        {
-#line 593 "AdvancedModule.cs"
-            csharp2cuda_temp_416 = false;
-        }
-        if (csharp2cuda_temp_416)
-#line 598 "AdvancedModule.cs"
-        {
-#line 599 "AdvancedModule.cs"
-#line 599 "AdvancedModule.cs"
-            int* csharp2cuda_temp_418 = &((output)->valid);
-            (*(csharp2cuda_temp_418) = 0);
-        }
-#line 601 "AdvancedModule.cs"
-#line 601 "AdvancedModule.cs"
-        bool csharp2cuda_temp_419 = (output)->valid;
-#line 601 "AdvancedModule.cs"
-        bool csharp2cuda_temp_420;
-#line 601 "AdvancedModule.cs"
-        if (csharp2cuda_temp_419)
-        {
-#line 602 "AdvancedModule.cs"
-            bool csharp2cuda_temp_421;
-#line 602 "AdvancedModule.cs"
+#line 588 "AdvancedModule.cs"
+            bool csharp2cuda_temp_412;
+#line 588 "AdvancedModule.cs"
             if (!(((opcode) == (2))))
             {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_421 = ((opcode) == (3));
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_412 = ((opcode) == (3));
             }
             else
             {
-#line 602 "AdvancedModule.cs"
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_412 = true;
+            }
+#line 588 "AdvancedModule.cs"
+            bool csharp2cuda_temp_413;
+#line 588 "AdvancedModule.cs"
+            if (!(csharp2cuda_temp_412))
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_413 = ((opcode) == (4));
+            }
+            else
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_413 = true;
+            }
+#line 588 "AdvancedModule.cs"
+            bool csharp2cuda_temp_414;
+#line 588 "AdvancedModule.cs"
+            if (!(csharp2cuda_temp_413))
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_414 = ((opcode) == (5));
+            }
+            else
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_414 = true;
+            }
+#line 588 "AdvancedModule.cs"
+            bool csharp2cuda_temp_415;
+#line 588 "AdvancedModule.cs"
+            if (!(csharp2cuda_temp_414))
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_415 = ((opcode) == (7));
+            }
+            else
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_415 = true;
+            }
+#line 588 "AdvancedModule.cs"
+            bool csharp2cuda_temp_416;
+#line 588 "AdvancedModule.cs"
+            if (!(csharp2cuda_temp_415))
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_416 = ((opcode) == (9));
+            }
+            else
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_416 = true;
+            }
+#line 588 "AdvancedModule.cs"
+            bool csharp2cuda_temp_417;
+#line 588 "AdvancedModule.cs"
+            if (!(csharp2cuda_temp_416))
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_417 = ((opcode) == (10));
+            }
+            else
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_417 = true;
+            }
+#line 588 "AdvancedModule.cs"
+            bool csharp2cuda_temp_418;
+#line 588 "AdvancedModule.cs"
+            if (!(csharp2cuda_temp_417))
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_418 = ((opcode) == (13));
+            }
+            else
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_418 = true;
+            }
+#line 588 "AdvancedModule.cs"
+            bool csharp2cuda_temp_419;
+#line 588 "AdvancedModule.cs"
+            if (!(csharp2cuda_temp_418))
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_419 = ((opcode) == (16));
+            }
+            else
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_419 = true;
+            }
+#line 588 "AdvancedModule.cs"
+            bool csharp2cuda_temp_420;
+#line 588 "AdvancedModule.cs"
+            if (!(csharp2cuda_temp_419))
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_420 = ((opcode) == (17));
+            }
+            else
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_420 = true;
+            }
+#line 588 "AdvancedModule.cs"
+            bool csharp2cuda_temp_421;
+#line 588 "AdvancedModule.cs"
+            if (!(csharp2cuda_temp_420))
+            {
+#line 588 "AdvancedModule.cs"
+                csharp2cuda_temp_421 = ((opcode) == (18));
+            }
+            else
+            {
+#line 588 "AdvancedModule.cs"
                 csharp2cuda_temp_421 = true;
             }
-#line 602 "AdvancedModule.cs"
-            bool csharp2cuda_temp_422;
-#line 602 "AdvancedModule.cs"
-            if (!(csharp2cuda_temp_421))
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_422 = ((opcode) == (4));
-            }
-            else
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_422 = true;
-            }
-#line 602 "AdvancedModule.cs"
-            bool csharp2cuda_temp_423;
-#line 602 "AdvancedModule.cs"
-            if (!(csharp2cuda_temp_422))
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_423 = ((opcode) == (5));
-            }
-            else
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_423 = true;
-            }
-#line 602 "AdvancedModule.cs"
-            bool csharp2cuda_temp_424;
-#line 602 "AdvancedModule.cs"
-            if (!(csharp2cuda_temp_423))
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_424 = ((opcode) == (7));
-            }
-            else
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_424 = true;
-            }
-#line 602 "AdvancedModule.cs"
-            bool csharp2cuda_temp_425;
-#line 602 "AdvancedModule.cs"
-            if (!(csharp2cuda_temp_424))
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_425 = ((opcode) == (9));
-            }
-            else
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_425 = true;
-            }
-#line 602 "AdvancedModule.cs"
-            bool csharp2cuda_temp_426;
-#line 602 "AdvancedModule.cs"
-            if (!(csharp2cuda_temp_425))
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_426 = ((opcode) == (10));
-            }
-            else
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_426 = true;
-            }
-#line 602 "AdvancedModule.cs"
-            bool csharp2cuda_temp_427;
-#line 602 "AdvancedModule.cs"
-            if (!(csharp2cuda_temp_426))
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_427 = ((opcode) == (13));
-            }
-            else
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_427 = true;
-            }
-#line 602 "AdvancedModule.cs"
-            bool csharp2cuda_temp_428;
-#line 602 "AdvancedModule.cs"
-            if (!(csharp2cuda_temp_427))
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_428 = ((opcode) == (16));
-            }
-            else
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_428 = true;
-            }
-#line 602 "AdvancedModule.cs"
-            bool csharp2cuda_temp_429;
-#line 602 "AdvancedModule.cs"
-            if (!(csharp2cuda_temp_428))
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_429 = ((opcode) == (17));
-            }
-            else
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_429 = true;
-            }
-#line 602 "AdvancedModule.cs"
-            bool csharp2cuda_temp_430;
-#line 602 "AdvancedModule.cs"
-            if (!(csharp2cuda_temp_429))
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_430 = ((opcode) == (18));
-            }
-            else
-            {
-#line 602 "AdvancedModule.cs"
-                csharp2cuda_temp_430 = true;
-            }
-#line 601 "AdvancedModule.cs"
-            csharp2cuda_temp_420 = csharp2cuda_temp_430;
+#line 587 "AdvancedModule.cs"
+            csharp2cuda_temp_411 = csharp2cuda_temp_421;
         }
         else
         {
-#line 601 "AdvancedModule.cs"
-            csharp2cuda_temp_420 = false;
+#line 587 "AdvancedModule.cs"
+            csharp2cuda_temp_411 = false;
         }
-        if (csharp2cuda_temp_420)
-#line 605 "AdvancedModule.cs"
+        if (csharp2cuda_temp_411)
+#line 591 "AdvancedModule.cs"
         {
-#line 606 "AdvancedModule.cs"
+#line 592 "AdvancedModule.cs"
             {
-#line 606 "AdvancedModule.cs"
+#line 592 "AdvancedModule.cs"
                 int index = 0;
                 while (true)
                 {
-#line 606 "AdvancedModule.cs"
-                    int csharp2cuda_temp_432 = (output)->count;
-                    if (!(((index) < (csharp2cuda_temp_432))))
+#line 592 "AdvancedModule.cs"
+                    int csharp2cuda_temp_423 = (output)->count;
+                    if (!(((index) < (csharp2cuda_temp_423))))
                         break;
-#line 607 "AdvancedModule.cs"
-#line 607 "AdvancedModule.cs"
-                    double csharp2cuda_temp_433 = (result)[index];
-                    if ((!(isfinite(csharp2cuda_temp_433))))
+#line 593 "AdvancedModule.cs"
+#line 593 "AdvancedModule.cs"
+                    double csharp2cuda_temp_424 = (result)[index];
+                    if ((!(isfinite(csharp2cuda_temp_424))))
                     {
-#line 607 "AdvancedModule.cs"
-#line 607 "AdvancedModule.cs"
-                        int* csharp2cuda_temp_434 = &((output)->valid);
-                        (*(csharp2cuda_temp_434) = 0);
+#line 593 "AdvancedModule.cs"
+#line 593 "AdvancedModule.cs"
+                        int* csharp2cuda_temp_425 = &((output)->valid);
+                        (*(csharp2cuda_temp_425) = 0);
                     }
-#line 606 "AdvancedModule.cs"
-                    int* csharp2cuda_temp_431 = &(index);
-                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_431));
+#line 592 "AdvancedModule.cs"
+                    int* csharp2cuda_temp_422 = &(index);
+                    csharp2cuda_i32_post_increment(*(csharp2cuda_temp_422));
                 }
             }
         }
