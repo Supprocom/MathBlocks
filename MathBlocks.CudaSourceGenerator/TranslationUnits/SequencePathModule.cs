@@ -1081,36 +1081,53 @@ internal static unsafe class SequencePathModule
                 }
                 break;
             case 14:
-                if (thread == 0)
                 {
-                    if (first->count <= 0 || second->count <= 0 || scratch == null)
+                    int rows_count = first->count;
+                    int columns_count = second->count;
+                    if (rows_count <= 0 || columns_count <= 0 || scratch == null)
                     {
-                        output->valid = 0;
+                        Cuda.SyncThreads();
+                        if (thread == 0)
+                            output->valid = 0;
+                        break;
                     }
-                    else
+
+                    double* diagonal_even = scratch;
+                    double* diagonal_odd = scratch + (columns_count + 1);
+                    for (int diagonal = 2; diagonal <= rows_count + columns_count; diagonal++)
                     {
-                        int width = second->count + 1;
-                        double* previous = scratch;
-                        double* current = scratch + width;
-                        for (int index = 0; index < width; index++)
-                            previous[index] = mathblocks_positive_infinity();
-                        previous[0] = 0.0;
-                        for (int left = 0; left < first->count; left++)
+                        double* older = (diagonal & 1) == 0 ? diagonal_even : diagonal_odd;
+                        double* newer = (diagonal & 1) == 0 ? diagonal_odd : diagonal_even;
+                        int low = diagonal - rows_count > 1 ? diagonal - rows_count : 1;
+                        int high = columns_count < diagonal - 1 ? columns_count : diagonal - 1;
+                        for (int top = high; top >= low; top -= Cuda.BlockDim.X)
                         {
-                            current[0] = mathblocks_positive_infinity();
-                            for (int right = 0; right < second->count; right++)
+                            int right = top - thread;
+                            bool active = right >= low;
+                            double value = 0.0;
+                            if (active)
                             {
-                                double minimum = previous[right + 1] < current[right]
-                                    ? previous[right + 1]
-                                    : current[right];
-                                minimum = minimum < previous[right] ? minimum : previous[right];
-                                current[right + 1] = Math.Abs(a[left] - b[right]) + minimum;
+                                int left = diagonal - right;
+                                double above = left == 1 ? mathblocks_positive_infinity() : newer[right];
+                                double before = right == 1 ? mathblocks_positive_infinity() : newer[right - 1];
+                                double corner = left == 1 || right == 1
+                                    ? (left == 1 && right == 1 ? 0.0 : mathblocks_positive_infinity())
+                                    : older[right - 1];
+                                double minimum = above < before ? above : before;
+                                minimum = minimum < corner ? minimum : corner;
+                                value = Math.Abs(a[left - 1] - b[right - 1]) + minimum;
                             }
-                            double* swap = previous;
-                            previous = current;
-                            current = swap;
+                            Cuda.SyncThreads();
+                            if (active)
+                                older[right] = value;
+                            Cuda.SyncThreads();
                         }
-                        output->scalar_value = previous[second->count];
+                    }
+
+                    if (thread == 0)
+                    {
+                        double* last = ((rows_count + columns_count) & 1) == 0 ? diagonal_even : diagonal_odd;
+                        output->scalar_value = last[columns_count];
                         if (!double.IsFinite(output->scalar_value))
                             output->valid = 0;
                     }
