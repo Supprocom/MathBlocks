@@ -213,6 +213,16 @@ jobs:
           grep -oE 'NVRTC 12\.8 \([^)]+\)' "$NVRTC_EVIDENCE/interop.log" | tee "$NVRTC_EVIDENCE/nvrtc-version.txt" \
             || { echo "::error::The NVRTC gate did not report NVRTC 12.8."; exit 1; }
 
+      - name: Run the PTX allow-list gate without a device
+        run: >-
+          LD_LIBRARY_PATH="$NVRTC_ROOT"
+          dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj
+          -c Release --no-build --no-restore
+          --artifacts-path "$ARTIFACT_ROOT/tests"
+          --filter "Category=PtxAllowList"
+          --logger "trx;LogFileName=mathblocks-ptx-allow-list.trx"
+          --results-directory "$TEST_RESULTS"
+
       - name: Run the portable codec fingerprint gate
         run: >-
           dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj

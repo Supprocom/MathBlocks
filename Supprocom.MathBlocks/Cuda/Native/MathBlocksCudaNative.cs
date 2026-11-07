@@ -73,6 +73,11 @@ internal static class MathBlocksCudaNative
         return CompileForArchitecture(source, name, ResolvePtxArchitecture(), fusedMultiplyAdd);
     }
 
+    // Compiles for a fixed architecture, as production does (--fmad=false), without a context or a device. For the PTX
+    // allow-list test, which runs where NVRTC is installed and no GPU is.
+    internal static byte[] CompilePtxWithoutDevice(string source, string name, string architecture) =>
+        CompileForArchitecture(source, name, architecture, fusedMultiplyAdd: false);
+
     private static byte[] CompilePtxForArchitecture(string source, string name, string architecture) =>
         CompileForArchitecture(source, name, architecture, fusedMultiplyAdd: false);
 
