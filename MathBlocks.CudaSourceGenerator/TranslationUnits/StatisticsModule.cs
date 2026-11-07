@@ -167,6 +167,26 @@ internal static unsafe class StatisticsModule
         return mathblocks_statistics_sorted_quantile(sorted, count, 0.5);
     }
 
+    // The average rank of values[index]: the values below it plus half of the equal ones (itself included) plus a half.
+    // Both counts are exact integers; a NaN value counts nothing, so its rank is 0.5.
+    [CudaDevice]
+    private static double mathblocks_statistics_rank_at(
+        [CudaReadOnly] double* values,
+        int count,
+        int index)
+    {
+        int lower = 0;
+        int equal = 0;
+        for (int candidate = 0; candidate < count; candidate++)
+        {
+            if (values[candidate] < values[index])
+                lower++;
+            else if (values[candidate] == values[index])
+                equal++;
+        }
+        return lower + (equal + 1.0) / 2.0;
+    }
+
     [CudaDevice]
     private static void mathblocks_statistics_rank(
         [CudaReadOnly] double* values,
@@ -174,18 +194,7 @@ internal static unsafe class StatisticsModule
         double* result)
     {
         for (int index = 0; index < count; index++)
-        {
-            int lower = 0;
-            int equal = 0;
-            for (int candidate = 0; candidate < count; candidate++)
-            {
-                if (values[candidate] < values[index])
-                    lower++;
-                else if (values[candidate] == values[index])
-                    equal++;
-            }
-            result[index] = lower + (equal + 1.0) / 2.0;
-        }
+            result[index] = mathblocks_statistics_rank_at(values, count, index);
     }
 
     [CudaDevice]
@@ -404,6 +413,18 @@ internal static unsafe class StatisticsModule
         double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
         double* result = (double*)output->data_pointer;
         double* scratch = (double*)output->scratch_pointer;
+
+        // Spearman: the threads of the block count the ranks by index; each rank is an exact integer count, so the
+        // values are those of one thread counting them all. The condition is the one of the case below.
+        if (opcode == 23 && first->count > 0 && first->count == second->count && scratch != null)
+        {
+            for (int index = thread; index < first->count; index += Cuda.BlockDim.X)
+            {
+                scratch[index] = mathblocks_statistics_rank_at(a, first->count, index);
+                scratch[first->count + index] = mathblocks_statistics_rank_at(b, first->count, index);
+            }
+            Cuda.SyncThreads();
+        }
 
         if (thread == 0)
         {
@@ -648,10 +669,9 @@ internal static unsafe class StatisticsModule
                         output->valid = 0;
                         break;
                     }
+                    // The ranks were counted by the whole block before this switch.
                     double* left_ranks = scratch;
                     double* right_ranks = scratch + first->count;
-                    mathblocks_statistics_rank(a, first->count, left_ranks);
-                    mathblocks_statistics_rank(b, first->count, right_ranks);
                     output->scalar_value = mathblocks_statistics_pearson(
                         left_ranks,
                         right_ranks,

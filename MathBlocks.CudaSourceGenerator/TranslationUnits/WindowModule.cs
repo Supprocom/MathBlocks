@@ -300,6 +300,123 @@ internal static unsafe class WindowModule
         return double.IsFinite(*value);
     }
 
+    // Sifts values[root] down in the max-heap of the first end values.
+    [CudaDevice]
+    private static void mathblocks_window_heap_sift(double* values, int root, int end)
+    {
+        int child = 2 * root + 1;
+        while (child < end)
+        {
+            if (child + 1 < end && values[child + 1] > values[child])
+                child++;
+            if (!(values[child] > values[root]))
+                break;
+            double moved = values[root];
+            values[root] = values[child];
+            values[child] = moved;
+            root = child;
+            child = 2 * root + 1;
+        }
+    }
+
+    // Sorts count values ascending in place. The order of equal values (-0.0 and +0.0 among them) is not defined, which
+    // the rank counts below do not need: they only compare. Not used with a NaN.
+    [CudaDevice]
+    private static void mathblocks_window_heap_sort(double* values, int count)
+    {
+        for (int start = count / 2 - 1; start >= 0; start--)
+            mathblocks_window_heap_sift(values, start, count);
+        for (int end = count - 1; end > 0; end--)
+        {
+            double top = values[0];
+            values[0] = values[end];
+            values[end] = top;
+            mathblocks_window_heap_sift(values, 0, end);
+        }
+    }
+
+    // The average rank of value among the count sorted values: the same exact counts as mathblocks_statistics_rank_at,
+    // found by binary search (the values below it, the values not above it), and the same expression.
+    [CudaDevice]
+    private static double mathblocks_window_sorted_rank([CudaReadOnly] double* sorted, int count, double value)
+    {
+        int low = 0;
+        int high = count;
+        while (low < high)
+        {
+            int middle = low + (high - low) / 2;
+            if (sorted[middle] < value)
+                low = middle + 1;
+            else
+                high = middle;
+        }
+        int lower = low;
+        high = count;
+        while (low < high)
+        {
+            int middle = low + (high - low) / 2;
+            if (sorted[middle] > value)
+                high = middle;
+            else
+                low = middle + 1;
+        }
+        int equal = low - lower;
+        return lower + (equal + 1.0) / 2.0;
+    }
+
+    // The average ranks of a into scratch[0, count) and of b into scratch[count, 2 * count), the values of
+    // mathblocks_statistics_rank. With no NaN a sorted copy and a binary search give the same counts; the
+    // two ranks of a row are kept as twice their value (an integer below 2^31, exact) in the two halves of one
+    // 64-bit word while the second sorted copy is in the second half of the scratch. A NaN, or a count above 2^28,
+    // takes the counting loop.
+    [CudaDevice]
+    private static void mathblocks_window_ranks(
+        [CudaReadOnly] double* a,
+        [CudaReadOnly] double* b,
+        int count,
+        double* scratch)
+    {
+        double* left = scratch;
+        double* right = scratch + count;
+        bool fast = count <= 268435456;
+        for (int index = 0; fast && index < count; index++)
+            if (double.IsNaN(a[index]) || double.IsNaN(b[index]))
+                fast = false;
+        if (!fast)
+        {
+            mathblocks_statistics_rank(a, count, left);
+            mathblocks_statistics_rank(b, count, right);
+            return;
+        }
+        for (int index = 0; index < count; index++)
+            right[index] = a[index];
+        mathblocks_window_heap_sort(right, count);
+        // Why the packing is exact: a rank is lower + (equal + 1.0) / 2.0 with both counts at most count, so it is a
+        // multiple of 0.5 below 2^53 and every operation of the expression is exact. Twice the rank is an integer
+        // of at most 2 * count, below 2^29 for the count bound of 2^28 (above it the counting loop runs), so it fits
+        // 32 bits, and (double)twice * 0.5 gives back the same double. The top three bits of a word stay zero, so the
+        // word is never a NaN or infinity, and it is only copied, never computed on, until unpacked.
+        for (int index = 0; index < count; index++)
+        {
+            long twice = (long)(mathblocks_window_sorted_rank(right, count, a[index]) * 2.0);
+            left[index] = BitConverter.Int64BitsToDouble(twice << 32);
+        }
+        for (int index = 0; index < count; index++)
+            right[index] = b[index];
+        mathblocks_window_heap_sort(right, count);
+        for (int index = 0; index < count; index++)
+        {
+            long twice = (long)(mathblocks_window_sorted_rank(right, count, b[index]) * 2.0);
+            left[index] = BitConverter.Int64BitsToDouble(BitConverter.DoubleToInt64Bits(left[index]) | twice);
+        }
+        for (int index = 0; index < count; index++)
+        {
+            long packed = BitConverter.DoubleToInt64Bits(left[index]);
+            right[index] = (double)(packed & 0xffffffffL) * 0.5;
+            left[index] = (double)((packed >> 32) & 0xffffffffL) * 0.5;
+        }
+    }
+
     // The source's median of the first count scratch values, sorted with the merge sort into the buffer after them.
     [CudaDevice]
     private static double mathblocks_window_scratch_median(double* scratch, int count)
@@ -457,8 +574,7 @@ internal static unsafe class WindowModule
                     return false;
                 double* left_ranks = scratch;
                 double* right_ranks = scratch + count;
-                mathblocks_statistics_rank(a, count, left_ranks);
-                mathblocks_statistics_rank(b, count, right_ranks);
+                mathblocks_window_ranks(a, b, count, scratch);
                 *value = mathblocks_statistics_pearson(left_ranks, right_ranks, count);
                 break;
             }
