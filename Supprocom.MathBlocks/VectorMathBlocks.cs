@@ -20,6 +20,26 @@ public static partial class MathBlockVectorMath
         return result;
     }
 
+    private delegate void BlockZip(ReadOnlySpan<double> left, ReadOnlySpan<double> right, Span<double> result);
+
+    // The block form of Zip for an arithmetic operation whose packed result equals its scalar result (see
+    // MathBlockSimd). It applies when both lists are vectors and the right one has at least as many elements; any
+    // other call, including a shorter right list that must throw at its first missing element, takes Zip.
+    private static double[] Zip(
+        IReadOnlyList<double> left,
+        IReadOnlyList<double> right,
+        Func<double, double, double> function,
+        BlockZip block)
+    {
+        if (left is MathBlockVector leftVector && right is MathBlockVector rightVector && rightVector.Count >= leftVector.Count)
+        {
+            var result = new double[leftVector.Count];
+            block(leftVector.Span, rightVector.Span, result);
+            return result;
+        }
+        return Zip(left, right, function);
+    }
+
     private static double[] Zip(
         IReadOnlyList<double> left,
         IReadOnlyList<double> right,

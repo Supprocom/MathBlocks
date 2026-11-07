@@ -6,6 +6,12 @@ public static partial class MathBlockVectorMath
     public static double[] Scale(IReadOnlyList<double> values, double scalar)
     {
         ArgumentNullException.ThrowIfNull(values);
+        if (values is MathBlockVector vector)
+        {
+            var result = new double[vector.Count];
+            MathBlockSimd.Scale(vector.Span, scalar, result);
+            return result;
+        }
         return Map(values, value => value * scalar);
     }
 }

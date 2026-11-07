@@ -7,6 +7,6 @@ public static partial class MathBlockVectorMath
     {
         ArgumentNullException.ThrowIfNull(left);
         ArgumentNullException.ThrowIfNull(right);
-        return Zip(left, right, MathBlockScalar.Multiply);
+        return Zip(left, right, MathBlockScalar.Multiply, MathBlockSimd.Multiply);
     }
 }

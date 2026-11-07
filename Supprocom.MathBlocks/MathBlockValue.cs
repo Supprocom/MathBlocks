@@ -62,7 +62,7 @@ public readonly struct MathBlockValue
     }
 
     internal static MathBlockValue Vector(double[] values, MathBlockUnit unit, bool takeOwnership) =>
-        MathBlockDataValidation.AllFinite(values)
+        MathBlockSimd.AllFinite(values)
             ? new(MathBlockType.Vector(unit, values.Length), true, null,
                 reference: new MathBlockVector(values, takeOwnership))
             : Invalid(MathBlockType.Vector(unit, values.Length), "The vector result contains a nonfinite value.");
