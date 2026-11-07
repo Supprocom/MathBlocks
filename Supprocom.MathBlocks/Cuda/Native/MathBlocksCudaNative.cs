@@ -74,7 +74,7 @@ internal static class MathBlocksCudaNative
     }
 
     // Compiles for a fixed architecture, as production does (--fmad=false), without a context or a device. For the PTX
-    // allow-list test, which runs where NVRTC is installed and no GPU is.
+    // allow-list test, which runs where NVRTC is installed and no CUDA device is.
     internal static byte[] CompilePtxWithoutDevice(string source, string name, string architecture) =>
         CompileForArchitecture(source, name, architecture, fusedMultiplyAdd: false);
 
