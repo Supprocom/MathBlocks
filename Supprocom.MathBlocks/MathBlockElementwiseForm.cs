@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace Supprocom.MathBlocks;
 
 // One generic lift turns a scalar operation into its elementwise vector form. Each argument is a vector or a
@@ -236,13 +238,46 @@ internal sealed class MathBlockElementwiseForm
         var second = arity == 2 && vectors[1] is { } secondVector ? secondVector.Span : default;
         var firstIsVector = vectors[0] is not null;
         var secondIsVector = arity == 2 && vectors[1] is not null;
+        // Block path for scalar.minimum and scalar.maximum, recognised by the kernel being that very function. A block
+        // takes it only when all its inputs are finite (so none is NaN, which MinimumWithoutNaN and MaximumWithoutNaN
+        // require, and each row's input check passes). Their results are one of the two operands, so they are finite
+        // and every row of the block is computed with exactly Min or Max's value. Any other block, and the tail, take
+        // the per-row loop below.
+        var blockKind = 0;
+        if (arity == 2 && Vector.IsHardwareAccelerated && count >= Vector<double>.Count)
+        {
+            if (binary!.Equals((Func<double, double, double>)MathBlockScalar.Minimum))
+                blockKind = 1;
+            else if (binary.Equals((Func<double, double, double>)MathBlockScalar.Maximum))
+                blockKind = 2;
+        }
+        var firstConstant = new Vector<double>(constants[0]);
+        var secondConstant = new Vector<double>(constants[1 % arity]);
+
         var row = 0;
         while (row < count)
         {
             try
             {
-                for (; row < count; row++)
+                while (row < count)
                 {
+                    if (blockKind != 0 && row <= count - Vector<double>.Count)
+                    {
+                        var left = vectors[0] is not null ? new Vector<double>(first[row..]) : firstConstant;
+                        var right = vectors[1] is not null ? new Vector<double>(second[row..]) : secondConstant;
+                        if (MathBlockSimd.BlockIsFinite(left) && MathBlockSimd.BlockIsFinite(right))
+                        {
+                            var block = blockKind == 1
+                                ? MathBlockSimd.MinimumWithoutNaN(left, right)
+                                : MathBlockSimd.MaximumWithoutNaN(left, right);
+                            if (values is not null)
+                                block.CopyTo(values.AsSpan(row));
+                            if (valid is not null)
+                                valid.AsSpan(row, Vector<double>.Count).Fill(true);
+                            row += Vector<double>.Count;
+                            continue;
+                        }
+                    }
                     var x = firstIsVector ? first[row] : constants[0];
                     var y = secondIsVector ? second[row] : arity == 2 ? constants[1] : 0d;
                     var computed = Math.IsFinite(x) && (arity == 1 || Math.IsFinite(y));
@@ -253,6 +288,7 @@ internal sealed class MathBlockElementwiseForm
                         computed = Math.IsFinite(result);
                     }
                     Store(row, computed, result, fill, values, valid);
+                    row++;
                 }
             }
             catch (Exception exception) when (exception is ArithmeticException or ArgumentOutOfRangeException or IndexOutOfRangeException)
