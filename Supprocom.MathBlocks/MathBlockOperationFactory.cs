@@ -28,8 +28,9 @@ internal static class MathBlockOperationFactory
         double sample,
         double expected,
         MathBlockTypeResolver? resolver = null,
-        double tolerance = 1e-10) =>
-        Create(
+        double tolerance = 1e-10)
+    {
+        var operation = Create(
             identifier,
             1,
             resolver ?? (types => MathBlockTypeRules.Unary(types, MathBlockValueKind.Scalar)),
@@ -43,6 +44,9 @@ internal static class MathBlockOperationFactory
             MathBlockValue.Scalar(expected),
             tolerance,
             512);
+        operation.UnaryKernel = function;
+        return operation;
+    }
 
     public static MathBlockOperation ScalarBinary(
         string identifier,
@@ -51,8 +55,9 @@ internal static class MathBlockOperationFactory
         double right,
         double expected,
         MathBlockTypeResolver resolver,
-        double tolerance = 1e-10) =>
-        Create(
+        double tolerance = 1e-10)
+    {
+        var operation = Create(
             identifier,
             2,
             resolver,
@@ -65,6 +70,9 @@ internal static class MathBlockOperationFactory
             MathBlockValue.Scalar(expected),
             tolerance,
             512);
+        operation.BinaryKernel = function;
+        return operation;
+    }
 
     public static MathBlockOperation ScalarComparison(
         string identifier,

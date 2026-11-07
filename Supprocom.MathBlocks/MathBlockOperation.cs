@@ -94,6 +94,12 @@ public sealed class MathBlockOperation
     // builder applies it, so a length that follows from constants is part of the node type at build time.
     internal Func<MathBlockType, IReadOnlyList<MathBlockType>, IReadOnlyList<MathBlockValue?>, MathBlockType>? ConstantRefinement { get; set; }
 
+    // The raw scalar function of an operation built by MathBlockOperationFactory.ScalarUnary or ScalarBinary, which is
+    // exactly the function that factory's evaluator applies to the scalar inputs. Every other operation has none.
+    // The elementwise form reads it to run its rows without the per-row Evaluate overhead.
+    internal Func<double, double>? UnaryKernel { get; set; }
+    internal Func<double, double, double>? BinaryKernel { get; set; }
+
     /// <summary>Validates input types and resolves the operation output type.</summary>
     public MathBlockType ResolveOutputType(IReadOnlyList<MathBlockType> inputTypes)
     {

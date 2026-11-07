@@ -137,6 +137,9 @@ internal sealed class MathBlockElementwiseForm
         double[]? values,
         bool[]? valid)
     {
+        if (count > 0 && TryRunKernel(inputs, count, fill, values, valid))
+            return;
+
         var rowInputs = new MathBlockValue[source.Arity];
         var vectors = new MathBlockVector?[source.Arity];
         var units = new MathBlockUnit[source.Arity];
@@ -166,6 +169,107 @@ internal sealed class MathBlockElementwiseForm
             if (values is not null)
                 values[row] = computed ? value : fill;
         }
+    }
+
+    // Fast path for a source built by MathBlockOperationFactory.ScalarUnary or ScalarBinary. It returns false, having
+    // written nothing, whenever it cannot show that it gives exactly the outcome of the per-row path below.
+    //
+    // Equivalence argument. For such a source, Evaluate(row) is, in order:
+    //   1. RequireArity: the arity is the source arity on every row.
+    //   2. outputType = resolver(row input types). A vector argument contributes Scalar(unit) on every row and a
+    //      scalar argument its own type, so the types, and therefore outputType, are the same on every row. They are
+    //      resolved once here, from the same types, so a resolver exception is the same exception.
+    //   3. Any invalid input gives an invalid row. A row input is MathBlockValue.Scalar(vector[row], unit), which is
+    //      invalid exactly when vector[row] is not finite: the loop below tests that per row. An invalid scalar
+    //      argument makes every row invalid, so that case is left to the per-row path.
+    //   4. The evaluator computes MathBlockValue.Scalar(kernel(inputs), outputType.Unit), where kernel is the very
+    //      function the factory stored in UnaryKernel or BinaryKernel. That value is valid exactly when the kernel
+    //      result is finite, and then holds the result. The loop applies the same kernel to the same doubles and
+    //      tests Math.IsFinite on the result. The three exceptions Evaluate converts to an invalid row
+    //      (ArithmeticException, ArgumentOutOfRangeException, IndexOutOfRangeException) are caught here the same way;
+    //      any other exception propagates as before.
+    //   5. outputType.Accepts(result.Type) is checked on a result whose type is Scalar(outputType.Unit) whether the
+    //      result is valid or not, so it has one outcome for the whole run. It is evaluated once; if it would throw,
+    //      this method returns false and the per-row path throws on row 0 as before.
+    //   6. The final type normalisation keeps IsValid, the only thing EvaluateRow reads.
+    // Arguments of any kind other than Scalar (after the vector-to-row mapping) are left to the per-row path.
+    private bool TryRunKernel(
+        IReadOnlyList<MathBlockValue> inputs,
+        int count,
+        double fill,
+        double[]? values,
+        bool[]? valid)
+    {
+        var arity = source.Arity;
+        var unary = source.UnaryKernel;
+        var binary = source.BinaryKernel;
+        if ((arity == 1 && unary is null) || (arity == 2 && binary is null) || arity is not (1 or 2))
+            return false;
+
+        var types = new MathBlockType[arity];
+        var vectors = new MathBlockVector?[arity];
+        var constants = new double[arity];
+        for (var index = 0; index < arity; index++)
+        {
+            var input = inputs[index];
+            if (input.Type.Kind == MathBlockValueKind.Vector)
+            {
+                vectors[index] = input.AsVector();
+                types[index] = MathBlockType.Scalar(input.Type.Unit);
+            }
+            else if (input.Type.Kind == MathBlockValueKind.Scalar && input.IsValid)
+            {
+                constants[index] = input.AsScalar();
+                types[index] = input.Type;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        var outputType = source.ResolveOutputType(types);
+        if (!outputType.Accepts(MathBlockType.Scalar(outputType.Unit)))
+            return false;
+
+        var first = vectors[0] is { } firstVector ? firstVector.Span : default;
+        var second = arity == 2 && vectors[1] is { } secondVector ? secondVector.Span : default;
+        var firstIsVector = vectors[0] is not null;
+        var secondIsVector = arity == 2 && vectors[1] is not null;
+        var row = 0;
+        while (row < count)
+        {
+            try
+            {
+                for (; row < count; row++)
+                {
+                    var x = firstIsVector ? first[row] : constants[0];
+                    var y = secondIsVector ? second[row] : arity == 2 ? constants[1] : 0d;
+                    var computed = Math.IsFinite(x) && (arity == 1 || Math.IsFinite(y));
+                    var result = 0d;
+                    if (computed)
+                    {
+                        result = arity == 1 ? unary!(x) : binary!(x, y);
+                        computed = Math.IsFinite(result);
+                    }
+                    Store(row, computed, result, fill, values, valid);
+                }
+            }
+            catch (Exception exception) when (exception is ArithmeticException or ArgumentOutOfRangeException or IndexOutOfRangeException)
+            {
+                Store(row, false, 0d, fill, values, valid);
+                row++;
+            }
+        }
+        return true;
+    }
+
+    private static void Store(int row, bool computed, double result, double fill, double[]? values, bool[]? valid)
+    {
+        if (valid is not null)
+            valid[row] = computed;
+        if (values is not null)
+            values[row] = computed ? result : fill;
     }
 
     // One row: the source operation's own CoreCLR evaluation on the row's scalar arguments. Returns whether the
