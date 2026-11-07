@@ -27,6 +27,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// of the points: at the 11,585 points the scratch allows, the merge sort of 67 million edges alone takes about 15 s.
     /// </summary>
     [Theory]
+    [Trait("Category", "CudaDevice")]
     [MemberData(nameof(WholeInputSortSources))]
     [Trait("Category", "CudaStableSort")]
     public async Task CUDAWholeInputSortsFinishInTimeAndMatchCoreCLRAsync(string source)

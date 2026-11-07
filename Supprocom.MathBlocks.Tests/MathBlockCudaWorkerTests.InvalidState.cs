@@ -113,6 +113,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// program matches bit for bit.
     /// </summary>
     [Theory]
+    [Trait("Category", "CudaDevice")]
     [MemberData(nameof(OverflowCaseNames))]
     public void CUDAOverflowGivesTheCoreCLRInvalidValue(string name)
     {
@@ -126,6 +127,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// Before the fix the kernel squared int.MaxValue times, so this case is kept out of the overflow theory.
     /// </summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     public void CUDAMatrixExponentialOfAnOverflowingNormIsInvalid()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
@@ -149,6 +151,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// compiled from the empty inputs themselves, so the CUDA result type comes from their shapes.
     /// </summary>
     [Theory]
+    [Trait("Category", "CudaDevice")]
     [MemberData(nameof(EmptyPointSetOperations))]
     public void CUDAEmptyPointSetGivesTheCoreCLRResult(string identifier)
     {
@@ -197,6 +200,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// (one input replaced) that CoreCLR rejects. An operation with no such input is reported in the output.
     /// </summary>
     [Theory]
+    [Trait("Category", "CudaDevice")]
     [MemberData(nameof(ValueDependentShapeOperations))]
     public void CUDAInvalidResultHasTheCoreCLRType(string identifier)
     {
@@ -284,6 +288,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// intermediate rolling sum has a run-time length the plan does not know.
     /// </summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     public void CUDAInvalidProgramOutputHasItsPlannedType()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
@@ -446,6 +451,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// validity and type.
     /// </summary>
     [Theory]
+    [Trait("Category", "CudaDevice")]
     [MemberData(nameof(SelfCompiledCaseNames))]
     public void CUDAProgramCompiledFromItsInputsGivesTheCoreCLRResult(string name)
     {

@@ -171,7 +171,7 @@ jobs:
           dotnet test Supprocom.MathBlocks.Tests/Supprocom.MathBlocks.Tests.csproj
           -c Release --no-build --no-restore
           --artifacts-path "$ARTIFACT_ROOT/tests"
-          --filter "FullyQualifiedName!~Cuda&Category!=Performance&Category!=PtxAllowList"
+          --filter "Category!=CudaDevice&Category!=Performance&Category!=PtxAllowList&Category!=NvrtcInteropContract"
           --logger "trx;LogFileName=mathblocks-portable.trx"
           --results-directory "$TEST_RESULTS"
 

@@ -13,6 +13,7 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
     /// the invalid mask, and equals the generic dispatcher's values and validity, under --fmad=false and --fmad=true.
     /// </summary>
     [Theory]
+    [Trait("Category", "CudaDevice")]
     [Trait("Category", "CudaExecution")]
     [InlineData(false)]
     [InlineData(true)]
@@ -31,6 +32,7 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
     /// mask on edge rows, every source at the full row count, random programs and invalid inputs.
     /// </summary>
     [Theory]
+    [Trait("Category", "CudaDevice")]
     [Trait("Category", "CudaExecution")]
     [InlineData(false)]
     [InlineData(true)]

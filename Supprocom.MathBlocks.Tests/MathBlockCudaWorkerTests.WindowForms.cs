@@ -18,6 +18,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// 300, a fill equal to a computed value, run-time widths above n and non-integer, and unequal series lengths.
     /// </summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     [Trait("Category", "WindowCuda")]
     public void CUDAWindowFormsMatchTheCoreCLRLiftOnSamplesAndEdgeCases()
     {
@@ -51,6 +52,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// and pseudomedian averages of signed zeros, and medians and quantiles of windows mixing -0.0 and +0.0.
     /// </summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     [Trait("Category", "WindowCuda")]
     public void CUDAWindowOrderStatisticsPreserveSignedZeroBits()
     {
@@ -91,6 +93,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// against the CoreCLR lift, row for row.
     /// </summary>
     [Theory]
+    [Trait("Category", "CudaDevice")]
     [MemberData(nameof(WindowSources))]
     [Trait("Category", "WindowCudaFullScale")]
     public void CUDAWindowFormsMatchTheCoreCLRLiftAtFullLength(string source)

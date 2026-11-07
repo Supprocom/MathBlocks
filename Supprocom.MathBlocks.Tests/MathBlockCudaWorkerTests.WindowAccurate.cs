@@ -20,6 +20,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// non-integer and different from the planned width.
     /// </summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     [Trait("Category", "WindowCuda")]
     public void CUDAWindowAccurateFormsMatchCoreCLROnSamplesAndEdgeCases()
     {
@@ -54,6 +55,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// PatternResearcher length of 302,893 rows and widths 2, 17 and 96 on one input family, row for row.
     /// </summary>
     [Theory]
+    [Trait("Category", "CudaDevice")]
     [MemberData(nameof(WindowAccurateFamilies))]
     [Trait("Category", "WindowCudaFullScale")]
     public void CUDAWindowAccurateFormsMatchCoreCLRAtFullLength(string family)
@@ -88,6 +90,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// evaluated alone, for every form the batch supports.
     /// </summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     [Trait("Category", "WindowCuda")]
     public void CUDAWindowBatchEqualsEachFormEvaluatedAlone()
     {
