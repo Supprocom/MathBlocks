@@ -23,6 +23,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// which zero a median picks. Execution is the part with the deadline; the compile is not.
     /// </summary>
     [Theory]
+    [Trait("Category", "CudaDevice")]
     [MemberData(nameof(PairOrderStatisticsSources))]
     [Trait("Category", "CudaStableSort")]
     public async Task CUDAPairOrderStatisticsFinishInTimeAndMatchCoreCLRAsync(string source, int rows)

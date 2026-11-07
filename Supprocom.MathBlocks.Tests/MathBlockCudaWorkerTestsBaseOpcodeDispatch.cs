@@ -10,7 +10,7 @@ namespace Supprocom.MathBlocks.Tests;
 /// (<see cref="MathBlockCudaOperationContract.Opcode"/>, the elementwise mask bits 0), as the package-only consumer does, and compares the
 /// result bit for bit with CoreCLR. The elementwise dispatcher derives the argument kinds from the input slots.
 /// </summary>
-// The class name contains MathBlockCudaWorkerTests so that the standard CoreCLR filter, which excludes the CUDA execution classes by that name, leaves it out.
+[Trait("Category", "CudaDevice")]
 public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
 {
     private const double Fill = -98_765.25d;

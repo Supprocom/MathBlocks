@@ -81,6 +81,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
     /// <summary>Verifies cudaformula replays one resident graph with parallel branches.</summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     public void CUDAFormulaReplaysOneResidentGraphWithParallelBranches()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
@@ -121,6 +122,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
     /// <summary>Verifies cudaprogram queues resident replays before one synchronization.</summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     public void CUDAProgramQueuesResidentReplaysBeforeOneSynchronization()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
@@ -220,6 +222,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
     /// <summary>Verifies cudaarena round trips every value kind with one upload and one download.</summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     public void CUDAArenaRoundTripsEveryValueKindWithOneUploadAndOneDownload()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
@@ -294,6 +297,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
     /// <summary>Verifies cudascalar reduction scratch remains outside the download region.</summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     public void CUDAScalarReductionScratchRemainsOutsideTheDownloadRegion()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
@@ -319,6 +323,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
     /// <summary>Verifies cudaconditional mutual information scratch preserves the following output slot.</summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     public void CUDAConditionalMutualInformationScratchPreservesTheFollowingOutputSlot()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
@@ -358,6 +363,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
     /// <summary>Verifies cudadynamic repeat capacity propagates through boolean nodes.</summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     public void CUDADynamicRepeatCapacityPropagatesThroughBooleanNodes()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
@@ -399,6 +405,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
     /// <summary>Verifies cudadynamic slice capacity propagates through concatenate and reduction.</summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     public void CUDADynamicSliceCapacityPropagatesThroughConcatenateAndReduction()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
@@ -462,6 +469,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
     /// <summary>Verifies cudarolling order statistics preserve signed zero bits.</summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     public void CUDARollingOrderStatisticsPreserveSignedZeroBits()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
@@ -773,6 +781,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
     /// <summary>Verifies cudaprogram is safe for concurrent atomic executions.</summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     public void CUDAProgramIsSafeForConcurrentAtomicExecutions()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
@@ -804,6 +813,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
     /// <summary>Verifies every supported cudablock matches its cpuregression output exactly.</summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     public void EverySupportedCUDABlockMatchesItsCPURegressionOutputExactly()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
@@ -852,6 +862,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     /// smallest subnormal, and both zeros.
     /// </summary>
     [Theory]
+    [Trait("Category", "CudaDevice")]
     [InlineData("scalar.arc-sine")]
     [InlineData("scalar.arc-cosine")]
     public void CUDAInverseSineAndCosineMatchCoreCLRBitForBitAcrossTheDomain(string identifier)
@@ -934,6 +945,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     /// vector inputs that hold every pairing of signed zeros.
     /// </summary>
     [Theory]
+    [Trait("Category", "CudaDevice")]
     [MemberData(nameof(SignedZeroParityOperations))]
     public void CUDASignedZeroMatchesCoreCLRBitForBit(string identifier)
     {

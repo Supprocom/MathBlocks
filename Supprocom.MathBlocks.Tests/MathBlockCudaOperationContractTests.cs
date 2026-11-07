@@ -114,6 +114,7 @@ public sealed class MathBlockCudaOperationContractTests
 
     /// <summary>Verifies cudadevice module compiles aconsumer owned nested kernel.</summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     public void CUDADeviceModuleCompilesAConsumerOwnedNestedKernel()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");

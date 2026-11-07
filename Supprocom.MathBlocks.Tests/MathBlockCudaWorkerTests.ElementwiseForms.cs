@@ -26,6 +26,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// subnormals, empty vectors, an empty vector next to a non-empty one, unequal lengths and invalid inputs.
     /// </summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     [Trait("Category", "ElementwiseCuda")]
     public void CUDAElementwiseFormsMatchTheCoreCLRLiftOnSamplesAndEdgeCases()
     {
@@ -67,6 +68,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// against the CoreCLR lift, row for row.
     /// </summary>
     [Theory]
+    [Trait("Category", "CudaDevice")]
     [MemberData(nameof(ElementwiseSources))]
     [Trait("Category", "ElementwiseCudaFullScale")]
     public void CUDAElementwiseFormsMatchTheCoreCLRLiftAtFullLength(string source)
@@ -105,6 +107,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// limit, which is invalid on both sides.
     /// </summary>
     [Fact]
+    [Trait("Category", "CudaDevice")]
     [Trait("Category", "ElementwiseCuda")]
     public void CUDAClampFollowsTheMathClampRuleAtSignedZerosAndInvalidLimits()
     {
@@ -148,6 +151,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// (0, 10], plus parameters that are subnormal, where the exponential of the front factor is subnormal.
     /// </summary>
     [Theory]
+    [Trait("Category", "CudaDevice")]
     [InlineData("special.log-gamma")]
     [InlineData("special.beta")]
     [InlineData("special.regularized-incomplete-beta")]
@@ -214,6 +218,7 @@ public sealed partial class MathBlockCudaWorkerTests
     /// (1022, 1075), and the Poisson probability at rates in (708, 745).
     /// </summary>
     [Theory]
+    [Trait("Category", "CudaDevice")]
     [InlineData("scalar.exponential")]
     [InlineData("scalar.logistic")]
     [InlineData("scalar.power")]
