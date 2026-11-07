@@ -13,12 +13,23 @@ internal sealed class MathBlockWindowForm
     private readonly MathBlockWindowLift lift;
     private readonly bool[] series;
     private readonly MathBlockWindowKernel? kernel;
+    private readonly bool totalVariation;
 
     internal MathBlockWindowForm(
         MathBlockOperation source,
         MathBlockWindowLift lift,
         bool[] series,
         MathBlockWindowKernel? kernel = null)
+        : this(source, lift, series, kernel, allowDirectRows: true)
+    {
+    }
+
+    private MathBlockWindowForm(
+        MathBlockOperation source,
+        MathBlockWindowLift lift,
+        bool[] series,
+        MathBlockWindowKernel? kernel,
+        bool allowDirectRows)
     {
         if (series.Length != source.Arity)
             throw new ArgumentException("The window series map must cover every source input.", nameof(series));
@@ -26,6 +37,8 @@ internal sealed class MathBlockWindowForm
         this.lift = lift;
         this.series = series;
         this.kernel = kernel;
+        totalVariation = allowDirectRows && lift == MathBlockWindowLift.Scalar && series.Length == 1 && series[0] &&
+            string.Equals(source.Identity, PathMathBlocks.PathTotalVariationV1Block.Identity, StringComparison.Ordinal);
         FormTypeResolver = ResolveFormType;
         ValidityTypeResolver = ResolveValidityType;
     }
@@ -35,7 +48,7 @@ internal sealed class MathBlockWindowForm
     internal MathBlockWindowKernel? Kernel => kernel;
 
     // The same form evaluated by the direct lift, kept as the reference for the kernels.
-    internal MathBlockWindowForm WithoutKernel() => new(source, lift, series);
+    internal MathBlockWindowForm WithoutKernel() => new(source, lift, series, null, allowDirectRows: false);
 
     internal int SourceArity => source.Arity;
 
@@ -198,6 +211,9 @@ internal sealed class MathBlockWindowForm
             return;
         }
 
+        if (totalVariation && TryRunTotalVariation(inputs, count, width, fill, values, valid))
+            return;
+
         var windowInputs = new MathBlockValue[source.Arity];
         var vectors = new MathBlockVector?[source.Arity];
         var booleanVectors = new MathBlockBooleanVector?[source.Arity];
@@ -250,5 +266,58 @@ internal sealed class MathBlockWindowForm
                         : result.AsVector()[width - 1];
             }
         }
+    }
+
+    // Rows of window.path.total-variation without evaluating the source on each window.
+    //
+    // Equivalence argument. For window end t, the direct lift evaluates path.total-variation@1 on a vector value
+    // holding series[t - width + 1 .. t]. That evaluation is, in order:
+    //   1. outputType = SameUnitScalar(Vector(unit, width)): the same for every window, since the unit and the width
+    //      are fixed. It is resolved once here from the same type, so a resolver exception is the same exception.
+    //   2. The input is valid, so there is no invalid-input result.
+    //   3. width >= 1, so the path is not empty and the evaluator returns
+    //      MathBlockValue.Scalar(MathBlockPath.TotalVariation(window), outputType.Unit). TotalVariation is
+    //      result = 0; result += Math.Abs(window[i] - window[i - 1]) for i = 1 .. width - 1, in that order. No
+    //      exception can come out of it (it is double arithmetic). The loop below runs those very operations on the
+    //      same doubles in the same order for each window, with no running sum or reuse between windows, so every
+    //      sum has the same rounding. The scalar value is valid exactly when the sum is finite, and then holds the sum.
+    //   4. outputType.Accepts(result.Type) is checked on a result of type Scalar(outputType.Unit), valid or not,
+    //      so it has one outcome for the run. It is evaluated once; if it would throw, this method returns false and
+    //      the direct lift throws on its first window, as before.
+    //   5. The final type normalisation keeps IsValid, and the lift reads only IsValid and the scalar.
+    // Rows before the first full window keep fill and an unset validity flag, as in the direct lift. The valid
+    // array is zero-initialised by its callers, as for the direct lift.
+    private bool TryRunTotalVariation(
+        IReadOnlyList<MathBlockValue> inputs,
+        int count,
+        int width,
+        double fill,
+        double[]? values,
+        bool[]? valid)
+    {
+        var input = inputs[0];
+        if (input.Type.Kind != MathBlockValueKind.Vector)
+            return false;
+        var outputType = source.ResolveOutputType([MathBlockType.Vector(input.Type.Unit, width)]);
+        if (!outputType.Accepts(MathBlockType.Scalar(outputType.Unit)))
+            return false;
+
+        var path = input.AsVector().Span;
+        if (values is not null)
+            for (var row = 0; row < width - 1; row++)
+                values[row] = fill;
+        for (var end = width - 1; end < count; end++)
+        {
+            var start = end - width + 1;
+            var sum = 0d;
+            for (var index = start + 1; index <= end; index++)
+                sum += Math.Abs(path[index] - path[index - 1]);
+            var computed = Math.IsFinite(sum);
+            if (valid is not null)
+                valid[end] = computed;
+            if (values is not null)
+                values[end] = computed ? sum : fill;
+        }
+        return true;
     }
 }
