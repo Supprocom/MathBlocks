@@ -426,6 +426,94 @@ internal static unsafe class StatisticsModule
             Cuda.SyncThreads();
         }
 
+        // Distance correlation: the block builds both distance matrices by rows, then centres them. Every sum keeps the
+        // order of the one thread: a row sum runs over its row's columns, each of the two matrix totals and each of
+        // the three moments is one serial sum over the matrix in index order by a single thread. The totals and the
+        // moments are handed between threads through output->scalar_value and the scratch, between barriers.
+        // The condition is the one of the case below.
+        bool distance_parallel = opcode == 3 && first->count > 0 && first->count == second->count && scratch != null;
+        if (distance_parallel)
+        {
+            int distance_count = first->count;
+            int distance_cells = distance_count * distance_count;
+            double* left_distances = scratch;
+            double* right_distances = scratch + distance_cells;
+            double* row_means = right_distances + distance_cells;
+            int second_owner = 1 % Cuda.BlockDim.X;
+            int third_owner = 2 % Cuda.BlockDim.X;
+            for (int row = thread; row < distance_count; row += Cuda.BlockDim.X)
+            {
+                row_means[row] = 0.0;
+                for (int column = 0; column < distance_count; column++)
+                {
+                    double distance = Math.Abs(a[row] - a[column]);
+                    left_distances[row * distance_count + column] = distance;
+                    row_means[row] += distance;
+                    right_distances[row * distance_count + column] = Math.Abs(b[row] - b[column]);
+                }
+                row_means[row] /= distance_count;
+            }
+            Cuda.SyncThreads();
+            double left_total = 0.0;
+            double right_total = 0.0;
+            if (thread == 0)
+            {
+                for (int index = 0; index < distance_cells; index++)
+                    left_total += left_distances[index];
+                left_total /= distance_count * distance_count;
+                output->scalar_value = left_total;
+            }
+            if (thread == second_owner)
+            {
+                for (int index = 0; index < distance_cells; index++)
+                    right_total += right_distances[index];
+                right_total /= distance_count * distance_count;
+            }
+            Cuda.SyncThreads();
+            double left_mean = output->scalar_value;
+            for (int row = thread; row < distance_count; row += Cuda.BlockDim.X)
+                for (int column = 0; column < distance_count; column++)
+                    left_distances[row * distance_count + column] -=
+                        row_means[row] + row_means[column] - left_mean;
+            Cuda.SyncThreads();
+            if (thread == second_owner)
+                output->scalar_value = right_total;
+            for (int row = thread; row < distance_count; row += Cuda.BlockDim.X)
+            {
+                row_means[row] = 0.0;
+                for (int column = 0; column < distance_count; column++)
+                    row_means[row] += right_distances[row * distance_count + column];
+                row_means[row] /= distance_count;
+            }
+            Cuda.SyncThreads();
+            double right_mean = output->scalar_value;
+            for (int row = thread; row < distance_count; row += Cuda.BlockDim.X)
+                for (int column = 0; column < distance_count; column++)
+                    right_distances[row * distance_count + column] -=
+                        row_means[row] + row_means[column] - right_mean;
+            Cuda.SyncThreads();
+            double covariance_moment = 0.0;
+            double left_moment = 0.0;
+            double right_moment = 0.0;
+            if (thread == 0)
+                for (int index = 0; index < distance_cells; index++)
+                    covariance_moment += left_distances[index] * right_distances[index];
+            if (thread == second_owner)
+                for (int index = 0; index < distance_cells; index++)
+                    left_moment += left_distances[index] * left_distances[index];
+            if (thread == third_owner)
+                for (int index = 0; index < distance_cells; index++)
+                    right_moment += right_distances[index] * right_distances[index];
+            Cuda.SyncThreads();
+            if (thread == 0)
+                scratch[0] = covariance_moment;
+            if (thread == second_owner)
+                scratch[1] = left_moment;
+            if (thread == third_owner)
+                scratch[2] = right_moment;
+            Cuda.SyncThreads();
+        }
+
         if (thread == 0)
         {
             switch (opcode)
@@ -494,20 +582,9 @@ internal static unsafe class StatisticsModule
                         output->valid = 0;
                         break;
                     }
-                    double* left_distances = scratch;
-                    double* right_distances = scratch + count * count;
-                    double* row_means = right_distances + count * count;
-                    mathblocks_statistics_center_distance(a, count, left_distances, row_means);
-                    mathblocks_statistics_center_distance(b, count, right_distances, row_means);
-                    double covariance_square = 0.0;
-                    double left_variance_square = 0.0;
-                    double right_variance_square = 0.0;
-                    for (int index = 0; index < count * count; index++)
-                    {
-                        covariance_square += left_distances[index] * right_distances[index];
-                        left_variance_square += left_distances[index] * left_distances[index];
-                        right_variance_square += right_distances[index] * right_distances[index];
-                    }
+                    double covariance_square = scratch[0];
+                    double left_variance_square = scratch[1];
+                    double right_variance_square = scratch[2];
                     covariance_square /= count * count;
                     left_variance_square /= count * count;
                     right_variance_square /= count * count;
