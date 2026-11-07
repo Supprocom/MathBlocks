@@ -3,9 +3,18 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockVectorMath
 {
 
+    // A MathBlockVector argument is read through its backing span, with the same function on the same elements in
+    // the same order, so every element is the same IEEE result. Any other list keeps the indexer loop.
     private static double[] Map(IReadOnlyList<double> values, Func<double, double> function)
     {
         var result = new double[values.Count];
+        if (values is MathBlockVector vector)
+        {
+            var span = vector.Span;
+            for (var index = 0; index < result.Length; index++)
+                result[index] = function(span[index]);
+            return result;
+        }
         for (var index = 0; index < result.Length; index++)
             result[index] = function(values[index]);
         return result;
@@ -17,6 +26,15 @@ public static partial class MathBlockVectorMath
         Func<double, double, double> function)
     {
         var result = new double[left.Count];
+        if (left is MathBlockVector leftVector && right is MathBlockVector rightVector)
+        {
+            // A shorter right span throws IndexOutOfRangeException at the same element, as its indexer does.
+            var leftSpan = leftVector.Span;
+            var rightSpan = rightVector.Span;
+            for (var index = 0; index < result.Length; index++)
+                result[index] = function(leftSpan[index], rightSpan[index]);
+            return result;
+        }
         for (var index = 0; index < result.Length; index++)
             result[index] = function(left[index], right[index]);
         return result;
