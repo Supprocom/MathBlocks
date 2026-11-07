@@ -238,46 +238,46 @@ internal sealed class MathBlockElementwiseForm
         var second = arity == 2 && vectors[1] is { } secondVector ? secondVector.Span : default;
         var firstIsVector = vectors[0] is not null;
         var secondIsVector = arity == 2 && vectors[1] is not null;
-        // Block path for scalar.minimum and scalar.maximum, recognised by the kernel being that very function. A block
-        // takes it only when all its inputs are finite (so none is NaN, which MinimumWithoutNaN and MaximumWithoutNaN
-        // require, and each row's input check passes). Their results are one of the two operands, so they are finite
-        // and every row of the block is computed with exactly Min or Max's value. Any other block, and the tail, take
-        // the per-row loop below.
-        var blockKind = 0;
+        // Block path for scalar.minimum and scalar.maximum, recognised by the kernel being that very function. It is a
+        // separate method so that the loop below, which every other kernel runs, stays small.
         if (arity == 2 && MathBlockSimd.UseBlocks && count >= MathBlockSimd.BlockWidth)
         {
-            if (binary!.Equals((Func<double, double, double>)MathBlockScalar.Minimum))
-                blockKind = 1;
-            else if (binary.Equals((Func<double, double, double>)MathBlockScalar.Maximum))
-                blockKind = 2;
+            var kind = binary!.Equals((Func<double, double, double>)MathBlockScalar.Minimum) ? 1
+                : binary.Equals((Func<double, double, double>)MathBlockScalar.Maximum) ? 2
+                : 0;
+            if (kind != 0)
+            {
+                RunBlocks(kind, first, second, firstIsVector, secondIsVector, constants, count, fill, values, valid);
+                return true;
+            }
         }
-        var firstConstant = Vector256.Create(constants[0]);
-        var secondConstant = Vector256.Create(constants[1 % arity]);
 
+        RunRows(unary, binary, first, second, firstIsVector, secondIsVector, constants, count, fill, values, valid);
+        return true;
+    }
+
+    // The per-row loop for every kernel that has no block path, one row per iteration.
+    private static void RunRows(
+        Func<double, double>? unary,
+        Func<double, double, double>? binary,
+        ReadOnlySpan<double> first,
+        ReadOnlySpan<double> second,
+        bool firstIsVector,
+        bool secondIsVector,
+        double[] constants,
+        int count,
+        double fill,
+        double[]? values,
+        bool[]? valid)
+    {
+        var arity = binary is null ? 1 : 2;
         var row = 0;
         while (row < count)
         {
             try
             {
-                while (row < count)
+                for (; row < count; row++)
                 {
-                    if (blockKind != 0 && row <= count - MathBlockSimd.BlockWidth)
-                    {
-                        var left = vectors[0] is not null ? Vector256.Create<double>(first[row..]) : firstConstant;
-                        var right = vectors[1] is not null ? Vector256.Create<double>(second[row..]) : secondConstant;
-                        if (MathBlockSimd.BlockIsFinite(left) && MathBlockSimd.BlockIsFinite(right))
-                        {
-                            var block = blockKind == 1
-                                ? MathBlockSimd.MinimumWithoutNaN(left, right)
-                                : MathBlockSimd.MaximumWithoutNaN(left, right);
-                            if (values is not null)
-                                block.CopyTo(values.AsSpan(row));
-                            if (valid is not null)
-                                valid.AsSpan(row, MathBlockSimd.BlockWidth).Fill(true);
-                            row += MathBlockSimd.BlockWidth;
-                            continue;
-                        }
-                    }
                     var x = firstIsVector ? first[row] : constants[0];
                     var y = secondIsVector ? second[row] : arity == 2 ? constants[1] : 0d;
                     var computed = Math.IsFinite(x) && (arity == 1 || Math.IsFinite(y));
@@ -288,7 +288,6 @@ internal sealed class MathBlockElementwiseForm
                         computed = Math.IsFinite(result);
                     }
                     Store(row, computed, result, fill, values, valid);
-                    row++;
                 }
             }
             catch (Exception exception) when (exception is ArithmeticException or ArgumentOutOfRangeException or IndexOutOfRangeException)
@@ -297,7 +296,69 @@ internal sealed class MathBlockElementwiseForm
                 row++;
             }
         }
-        return true;
+    }
+
+    // Minimum (kind 1) or maximum (kind 2) over blocks. A block takes the vector path only when all its inputs are
+    // finite (so none is NaN, which MinimumWithoutNaN and MaximumWithoutNaN require, and each row's input check
+    // passes). Their results are one of the two operands, so they are finite and every row of the block holds exactly
+    // Min or Max's value. Any other block, and the tail, run the per-row logic of TryRunKernel; neither Min nor Max
+    // throws, so there is no exception handling here.
+    private static void RunBlocks(
+        int kind,
+        ReadOnlySpan<double> first,
+        ReadOnlySpan<double> second,
+        bool firstIsVector,
+        bool secondIsVector,
+        double[] constants,
+        int count,
+        double fill,
+        double[]? values,
+        bool[]? valid)
+    {
+        var firstConstant = Vector256.Create(constants[0]);
+        var secondConstant = Vector256.Create(constants[1]);
+        var row = 0;
+        for (; row <= count - MathBlockSimd.BlockWidth; row += MathBlockSimd.BlockWidth)
+        {
+            var left = firstIsVector ? Vector256.Create<double>(first[row..]) : firstConstant;
+            var right = secondIsVector ? Vector256.Create<double>(second[row..]) : secondConstant;
+            if (MathBlockSimd.BlockIsFinite(left) && MathBlockSimd.BlockIsFinite(right))
+            {
+                var block = kind == 1
+                    ? MathBlockSimd.MinimumWithoutNaN(left, right)
+                    : MathBlockSimd.MaximumWithoutNaN(left, right);
+                if (values is not null)
+                    block.CopyTo(values.AsSpan(row));
+                if (valid is not null)
+                    valid.AsSpan(row, MathBlockSimd.BlockWidth).Fill(true);
+            }
+            else
+            {
+                for (var offset = 0; offset < MathBlockSimd.BlockWidth; offset++)
+                    RunRow(kind, first, second, firstIsVector, secondIsVector, constants, row + offset, fill, values, valid);
+            }
+        }
+        for (; row < count; row++)
+            RunRow(kind, first, second, firstIsVector, secondIsVector, constants, row, fill, values, valid);
+    }
+
+    private static void RunRow(
+        int kind,
+        ReadOnlySpan<double> first,
+        ReadOnlySpan<double> second,
+        bool firstIsVector,
+        bool secondIsVector,
+        double[] constants,
+        int row,
+        double fill,
+        double[]? values,
+        bool[]? valid)
+    {
+        var x = firstIsVector ? first[row] : constants[0];
+        var y = secondIsVector ? second[row] : constants[1];
+        var computed = Math.IsFinite(x) && Math.IsFinite(y);
+        var result = computed ? (kind == 1 ? Math.Min(x, y) : Math.Max(x, y)) : 0d;
+        Store(row, computed, result, fill, values, valid);
     }
 
     private static void Store(int row, bool computed, double result, double fill, double[]? values, bool[]? valid)
