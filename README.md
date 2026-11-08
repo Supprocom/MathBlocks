@@ -10,7 +10,7 @@ through both OpenMath 2.0 and Strict Content MathML 3.0.
 Install the `Supprocom.MathBlocks` package from NuGet.org. You do not need CUDA to build programs, evaluate them on CoreCLR, or exchange formulas. You need an NVIDIA driver and an installed CUDA Toolkit 12.0 or later when you run CUDA: MathBlocks compiles its device module with the toolkit's NVRTC and does not ship NVIDIA binaries. See the [development guide](https://github.com/Supprocom/MathBlocks/blob/eb69fe91abf1a223e576c507e52436bce7fe85bf/docs/development.md).
 
 ```text
-dotnet add package Supprocom.MathBlocks --version 0.6.0
+dotnet add package Supprocom.MathBlocks --version 0.6.1
 ```
 
 ## Build a program
