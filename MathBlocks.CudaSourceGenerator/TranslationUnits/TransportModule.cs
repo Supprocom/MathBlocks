@@ -110,42 +110,6 @@ internal static unsafe class TransportModule
         double* result = (double*)output->data_pointer;
         double* scratch = (double*)output->scratch_pointer;
 
-        // Energy distance: the cross sum and the two within sums are independent serial sums, each in its own order
-        // of the one thread; the sums of the second and the third are handed to thread 0 through output->scalar_value,
-        // between barriers. The condition is the one of the case below.
-        double energy_cross = 0.0;
-        double energy_left_within = 0.0;
-        double energy_right_within = 0.0;
-        if (opcode == 2 && first->count > 0 && second->count > 0)
-        {
-            int left_owner = 1 % Cuda.BlockDim.X;
-            int right_owner = 2 % Cuda.BlockDim.X;
-            if (thread == 0)
-                energy_cross = mathblocks_transport_mean_pairwise(a, first->count, b, second->count);
-            if (thread == left_owner)
-                energy_left_within = mathblocks_transport_mean_pairwise(a, first->count, a, first->count);
-            if (thread == right_owner)
-                energy_right_within = mathblocks_transport_mean_pairwise(b, second->count, b, second->count);
-            if (left_owner != 0)
-            {
-                if (thread == left_owner)
-                    output->scalar_value = energy_left_within;
-                Cuda.SyncThreads();
-                if (thread == 0)
-                    energy_left_within = output->scalar_value;
-                Cuda.SyncThreads();
-            }
-            if (right_owner != 0)
-            {
-                if (thread == right_owner)
-                    output->scalar_value = energy_right_within;
-                Cuda.SyncThreads();
-                if (thread == 0)
-                    energy_right_within = output->scalar_value;
-                Cuda.SyncThreads();
-            }
-        }
-
         if (thread == 0)
         {
             switch (opcode)
@@ -193,7 +157,13 @@ internal static unsafe class TransportModule
                         break;
                     }
                 {
-                    double squared = 2.0 * energy_cross - energy_left_within - energy_right_within;
+                    double cross = mathblocks_transport_mean_pairwise(
+                        a, first->count, b, second->count);
+                    double left_within = mathblocks_transport_mean_pairwise(
+                        a, first->count, a, first->count);
+                    double right_within = mathblocks_transport_mean_pairwise(
+                        b, second->count, b, second->count);
+                    double squared = 2.0 * cross - left_within - right_within;
                     // The owned maximum, as CoreCLR: a NaN (inf - inf from overflowing pairwise means) stays NaN and the result is invalid.
                     output->scalar_value = mathblocks_square_root(mathblocks_maximum(squared, 0.0));
                     break;
