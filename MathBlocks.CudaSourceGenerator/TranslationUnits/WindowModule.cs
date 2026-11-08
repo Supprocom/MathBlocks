@@ -7,8 +7,8 @@ using Supprocom.CSharp2CUDA;
 // or a window-accurate source (53 .. 58). Every thread checks the inputs itself and then evaluates its rows: the
 // window kernel passes the grid-wide thread index and count, the device dispatch path the thread index in the
 // block. Most sources take the rows end = thread, thread + threads, ..., and row end >= width - 1 calls the
-// source's per-thread function on rows end - width + 1 .. end of each series. The median, the quantile, the median absolute
-// deviation and the window-accurate sources give each thread one block of consecutive rows and slide their state through it.
+// source's per-thread function on rows end - width + 1 .. end of each series. The median, the quantile and the
+// window-accurate sources give each thread one block of consecutive rows and slide their state through it.
 // Warm-up rows and rows whose result is invalid hold the fill (form) or false (sibling).
 [TranspileToCUDA]
 internal static unsafe class WindowModule
@@ -417,22 +417,6 @@ internal static unsafe class WindowModule
         }
     }
 
-    // The median absolute deviation of count values from two sorts, as the source: the sorted copy in scratch
-    // [0, count), the deviations from its median in scratch [count, 2 * count), the second sort over the deviations.
-    // The second sort overwrites the sorted copy.
-    [CudaDevice]
-    private static double mathblocks_window_mad_full([CudaReadOnly] double* a, int count, double* scratch)
-    {
-        double* sorted = scratch;
-        double* deviations = scratch + count;
-        mathblocks_statistics_sort_copy(a, count, sorted, false);
-        double median = mathblocks_statistics_sorted_quantile(sorted, count, 0.5);
-        for (int index = 0; index < count; index++)
-            deviations[index] = Math.Abs(a[index] - median);
-        mathblocks_statistics_sort_copy(deviations, count, sorted, false);
-        return mathblocks_statistics_sorted_quantile(sorted, count, 0.5);
-    }
-
     // The source's median of the first count scratch values, sorted with the merge sort into the buffer after them.
     [CudaDevice]
     private static double mathblocks_window_scratch_median(double* scratch, int count)
@@ -544,7 +528,14 @@ internal static unsafe class WindowModule
             {
                 if (count <= 0 || scratch == null)
                     return false;
-                *value = mathblocks_window_mad_full(a, count, scratch);
+                double* sorted = scratch;
+                double* deviations = scratch + count;
+                mathblocks_statistics_sort_copy(a, count, sorted, false);
+                double median = mathblocks_statistics_sorted_quantile(sorted, count, 0.5);
+                for (int index = 0; index < count; index++)
+                    deviations[index] = Math.Abs(a[index] - median);
+                mathblocks_statistics_sort_copy(deviations, count, sorted, false);
+                *value = mathblocks_statistics_sorted_quantile(sorted, count, 0.5);
                 break;
             }
             case 11:
@@ -1256,138 +1247,6 @@ internal static unsafe class WindowModule
         }
     }
 
-    // The rows first_row .. last_row - 1 of window.statistics.median-absolute-deviation (source 8) with the sorted
-    // copy of the values kept in scratch [0, width) and slid with the rows. With no NaN in the window the stable
-    // sort of the values is unique: ordered by value, ties in arrival order (-0 and +0 compare equal and keep
-    // their order). A row leaving removes the first value that does not compare lower than it, the first of its
-    // equals, and a row entering goes after every value that does not compare greater, so the slid copy is the
-    // stable sort bit for bit. The second sort of the source is over the deviations from the median. Its sorted
-    // multiset has unique bits (equal deviations are the same double, Math.Abs gives +0 for both zeros), and the
-    // deviations of the sorted values form two monotone runs, the values not above the median going down and the
-    // values above it going up (rounding is monotone), so the smallest width / 2 + 1 deviations come from a merge
-    // of the two runs and are written to scratch [width, 2 * width), where the source's quantile expression reads
-    // the two it needs. A window with a NaN, or a median that is not finite, takes the source's two sorts, which
-    // overwrite the copy; the next row then sorts its window again.
-    [CudaDevice]
-    private static void mathblocks_window_mad_rows(
-        [CudaReadOnly] double* x,
-        int width,
-        int first_row,
-        int last_row,
-        double fill,
-        bool sibling,
-        double* result,
-        CudaInt32* boolean_result,
-        double* scratch)
-    {
-        double* sorted = scratch;
-        double* deviations = scratch + width;
-        bool started = false;
-        bool ready = false;
-        int nan_count = 0;
-        for (int row = first_row; row < last_row; row++)
-        {
-            bool computed = false;
-            double value = 0.0;
-            if (row >= width - 1)
-            {
-                int start = row - width + 1;
-                if (!started)
-                {
-                    started = true;
-                    for (int index = start; index <= row; index++)
-                        if (double.IsNaN(x[index]))
-                            nan_count++;
-                }
-                else
-                {
-                    double leaving = x[row - width];
-                    double entering = x[row];
-                    if (double.IsNaN(leaving))
-                        nan_count--;
-                    if (double.IsNaN(entering))
-                        nan_count++;
-                    if (ready && nan_count == 0)
-                    {
-                        int low = 0;
-                        int high = width;
-                        while (low < high)
-                        {
-                            int middle = (low + high) / 2;
-                            if (sorted[middle] < leaving)
-                                low = middle + 1;
-                            else
-                                high = middle;
-                        }
-                        for (int index = low; index < width - 1; index++)
-                            sorted[index] = sorted[index + 1];
-                        int position = width - 1;
-                        while (position > 0 && sorted[position - 1] > entering)
-                        {
-                            sorted[position] = sorted[position - 1];
-                            position--;
-                        }
-                        sorted[position] = entering;
-                    }
-                    else
-                    {
-                        ready = false;
-                    }
-                }
-                bool full = nan_count > 0;
-                double median = 0.0;
-                if (!full)
-                {
-                    if (!ready)
-                    {
-                        mathblocks_statistics_sort_copy(x + start, width, sorted, false);
-                        ready = true;
-                    }
-                    median = mathblocks_statistics_sorted_quantile(sorted, width, 0.5);
-                    full = !double.IsFinite(median);
-                }
-                if (full)
-                {
-                    value = mathblocks_window_mad_full(x + start, width, scratch);
-                    ready = false;
-                }
-                else
-                {
-                    int low = 0;
-                    int high = width;
-                    while (low < high)
-                    {
-                        int middle = (low + high) / 2;
-                        if (sorted[middle] > median)
-                            high = middle;
-                        else
-                            low = middle + 1;
-                    }
-                    int left = low - 1;
-                    int right = low;
-                    int needed = width / 2 + 1;
-                    for (int index = 0; index < needed; index++)
-                    {
-                        double down = left >= 0 ? Math.Abs(sorted[left] - median) : 0.0;
-                        double up = right < width ? Math.Abs(sorted[right] - median) : 0.0;
-                        bool take_left = right >= width || (left >= 0 && down <= up);
-                        deviations[index] = take_left ? down : up;
-                        if (take_left)
-                            left--;
-                        else
-                            right++;
-                    }
-                    value = mathblocks_statistics_sorted_quantile(deviations, width, 0.5);
-                }
-                computed = double.IsFinite(value);
-            }
-            if (sibling)
-                boolean_result[row] = computed;
-            else
-                result[row] = computed ? value : fill;
-        }
-    }
-
     // Thread 0 writes the output header; the other threads only write rows.
     [CudaDevice]
     private static void mathblocks_window_publish(MathBlockSlot* output, bool valid, int count, int thread)
@@ -1458,29 +1317,6 @@ internal static unsafe class WindowModule
         double* result = (double*)output->data_pointer;
         CudaInt32* boolean_result = (CudaInt32*)output->data_pointer;
         double* scratch = (double*)output->scratch_pointer + thread * (int)capacity;
-        if (source == 8)
-        {
-            // The sorted copy of the values slides over consecutive rows, so the active threads each own a block of
-            // at least 64 rows; the other threads of the grid, and so the scratch of the plan, stay unused.
-            long rows_per_thread = ((long)count + threads - 1) / threads;
-            if (rows_per_thread < 64)
-                rows_per_thread = 64;
-            long first_row = thread * rows_per_thread;
-            if (first_row >= count)
-                return;
-            long last_row = count - first_row < rows_per_thread ? count : first_row + rows_per_thread;
-            mathblocks_window_mad_rows(
-                a,
-                width,
-                (int)first_row,
-                (int)last_row,
-                fill,
-                sibling,
-                result,
-                boolean_result,
-                scratch);
-            return;
-        }
         if (source == 47 || source == 48 || source >= 53)
         {
             // These sources slide a state over consecutive rows, so each thread owns one block of rows.
