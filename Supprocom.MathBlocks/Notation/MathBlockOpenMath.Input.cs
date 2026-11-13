@@ -682,23 +682,33 @@ public static partial class MathBlockOpenMath
         value[2] == third &&
         value[3] == fourth;
 
+    // Validates import options without importing, for callers that carry them.
+    internal static void RequireOptions(MathBlockOpenMathImportOptions? options) =>
+        _ = CreateOptionsSnapshot(options);
+
     private static OpenMathImportOptionsSnapshot CreateOptionsSnapshot(
         MathBlockOpenMathImportOptions? options)
     {
         var value = options ?? MathBlockOpenMathImportOptions.Default;
         if (value.MaximumDocumentCharacters <= 0 ||
-            value.MaximumDocumentCharacters > MaximumDocumentCharacters)
+            value.MaximumDocumentCharacters > MathBlockOpenMathImportOptions.MaximumStringLength)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(options),
-                "The maximum document character count is outside the supported range.");
+                value.MaximumDocumentCharacters,
+                "The maximum document character count must be from 1 to " +
+                MathBlockOpenMathImportOptions.MaximumStringLength.ToString("N0", CultureInfo.InvariantCulture) +
+                ", the longest .NET string.");
         }
         if (value.MaximumDocumentBytes <= 0 ||
-            value.MaximumDocumentBytes > MaximumDocumentUtf8Bytes)
+            value.MaximumDocumentBytes > Array.MaxLength)
         {
             throw new ArgumentOutOfRangeException(
                 nameof(options),
-                "The maximum document byte count is outside the supported range.");
+                value.MaximumDocumentBytes,
+                "The maximum document byte count must be from 1 to " +
+                Array.MaxLength.ToString("N0", CultureInfo.InvariantCulture) +
+                ", the longest .NET byte array.");
         }
         if (value.MaximumNodes <= 0)
         {

@@ -240,3 +240,34 @@ Supprocom.MathBlocks.MathBlockDomainOptions.MaximumTotallyNonnegativeSize.init -
 Supprocom.MathBlocks.MathBlockNonConvergencePolicy
 Supprocom.MathBlocks.MathBlockNonConvergencePolicy.Estimate = 0 -> Supprocom.MathBlocks.MathBlockNonConvergencePolicy
 Supprocom.MathBlocks.MathBlockNonConvergencePolicy.Invalid = 1 -> Supprocom.MathBlocks.MathBlockNonConvergencePolicy
+Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions
+Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions.MathBlockFormulaInterchangeOptions() -> void
+Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions.MaximumDocumentCharacters.get -> int
+Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions.MaximumDocumentCharacters.init -> void
+Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions.MaximumDocumentUtf8Bytes.get -> int
+Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions.MaximumDocumentUtf8Bytes.init -> void
+Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions.MaximumExpressionDepth.get -> int
+Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions.MaximumExpressionDepth.init -> void
+Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions.MaximumExpressionElements.get -> int
+Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions.MaximumExpressionElements.init -> void
+Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions.OpenMath.get -> Supprocom.MathBlocks.MathBlockOpenMathImportOptions?
+Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions.OpenMath.init -> void
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.Import(string! source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaImportResult!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.Import(string! source, Supprocom.MathBlocks.MathBlockFormulaFormat format, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockType>! inputTypes, string! outputName, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaImportResult!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.ImportUtf8(System.Buffers.ReadOnlySequence<byte> source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaImportResult!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.ImportUtf8(System.ReadOnlySpan<byte> source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaImportResult!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.ImportUtf8(System.ReadOnlySpan<byte> source, Supprocom.MathBlocks.MathBlockFormulaFormat format, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockType>! inputTypes, string! outputName, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaImportResult!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.Normalize(string! source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> string!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.NormalizeUtf8(System.ReadOnlySpan<byte> source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> byte[]!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.Read(System.IO.TextReader! source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaImportResult!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.ReadAsync(System.IO.TextReader! source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Supprocom.MathBlocks.MathBlockFormulaImportResult!>!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.ReadUtf8(System.IO.Stream! source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaImportResult!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.ReadUtf8Async(System.IO.Stream! source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Supprocom.MathBlocks.MathBlockFormulaImportResult!>!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.TryImport(string? source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaImportAttempt!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.TryImportUtf8(System.Buffers.ReadOnlySequence<byte> source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaImportAttempt!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.TryImportUtf8(System.ReadOnlySpan<byte> source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaImportAttempt!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.TryRead(System.IO.TextReader? source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaImportAttempt!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.TryReadUtf8(System.IO.Stream? source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaImportAttempt!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.Validate(string? source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaValidationResult!
+static Supprocom.MathBlocks.MathBlockFormulaInterchange.ValidateUtf8(System.ReadOnlySpan<byte> source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaValidationResult!
+static Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions.Default.get -> Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions!
