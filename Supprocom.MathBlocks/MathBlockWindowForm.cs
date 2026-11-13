@@ -58,6 +58,36 @@ internal sealed class MathBlockWindowForm
 
     internal int FormArity => source.Arity + 2;
 
+    // The signature of the form or of its validity sibling: the lifted operation's signature row embedded in a lift row.
+    internal MathBlockTypeSignature? CreateSignature(string identity, bool validity)
+    {
+        if (source.TypeSignature is not { RuleKind: MathBlockTypeRuleKind.Composed } inner)
+            return null;
+        var seriesKinds = MathBlockTypeOperand.KindBit(MathBlockValueKind.Vector) |
+            MathBlockTypeOperand.KindBit(MathBlockValueKind.BooleanVector);
+        var operands = new List<MathBlockTypeOperand>(inner.Operands.Count + 2);
+        var seriesMask = 0;
+        for (var index = 0; index < inner.Operands.Count; index++)
+        {
+            var operand = inner.Operands[index];
+            if (series[index])
+            {
+                seriesMask |= 1 << index;
+                operand = operand with { AcceptedKindMask = operand.AcceptedKindMask & seriesKinds };
+            }
+            operands.Add(operand with { IsConstant = false });
+        }
+        operands.Add(new MathBlockTypeOperand(
+            MathBlockTypeOperand.KindBit(MathBlockValueKind.Scalar), MathBlockTypeOperand.DimensionlessUnit, true));
+        if (!validity)
+            operands.Add(new MathBlockTypeOperand(MathBlockTypeOperand.KindBit(MathBlockValueKind.Scalar), MathBlockTypeOperand.AnyUnit, false));
+        return new MathBlockTypeSignature(
+            identity,
+            MathBlockTypeRuleKind.WindowForm,
+            [validity ? 1 : 0, lift == MathBlockWindowLift.LastRow ? 1 : 0, seriesMask, .. inner.ToRow()],
+            operands);
+    }
+
     internal int ValidityArity => source.Arity + 1;
 
     private MathBlockType ResolveFormType(IReadOnlyList<MathBlockType> types)

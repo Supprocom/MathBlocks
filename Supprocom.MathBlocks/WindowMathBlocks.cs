@@ -234,7 +234,7 @@ internal static class WindowMathBlocks
             .ResolveOutputType(MathBlockCollectionPrimitives.Map(definition.Sample, value => value.Type))
             .Unit;
         sample[^1] = MathBlockValue.Scalar(SampleFill, outputUnit);
-        return MathBlockOperationFactory.Create(
+        var operation = MathBlockOperationFactory.Create(
             $"{FormFamily}.{form.Source.Identifier}",
             form.FormArity,
             form.FormTypeResolver,
@@ -244,6 +244,8 @@ internal static class WindowMathBlocks
             1e-12,
             16,
             MathBlockCausalityInfo.Trailing(form.FormArity - 2));
+        operation.TypeSignatureFactory = () => form.CreateSignature(operation.Identity, validity: false);
+        return operation;
     }
 
     private static MathBlockOperation CreateValidity(WindowSource definition, MathBlockWindowForm form)
@@ -255,7 +257,7 @@ internal static class WindowMathBlocks
         var expected = new bool[definition.Expected.Length];
         for (var index = 0; index < expected.Length; index++)
             expected[index] = !double.IsNaN(definition.Expected[index]);
-        return MathBlockOperationFactory.Create(
+        var operation = MathBlockOperationFactory.Create(
             $"{ValidityFamily}.{form.Source.Identifier}",
             form.ValidityArity,
             form.ValidityTypeResolver,
@@ -264,6 +266,8 @@ internal static class WindowMathBlocks
             MathBlockValue.BooleanVector(expected),
             performanceIterations: 16,
             causality: MathBlockCausalityInfo.Trailing(form.ValidityArity - 1));
+        operation.TypeSignatureFactory = () => form.CreateSignature(operation.Identity, validity: true);
+        return operation;
     }
 
     // Create builds an independent instance of the source operation; Sample holds the source inputs used for the

@@ -26,6 +26,28 @@ internal sealed class MathBlockElementwiseForm
 
     internal int FormArity => source.Arity + 1;
 
+    // The signature of the form or of its validity sibling: the lifted operation's signature row embedded in a lift row.
+    internal MathBlockTypeSignature? CreateSignature(string identity, bool validity)
+    {
+        if (source.TypeSignature is not { RuleKind: MathBlockTypeRuleKind.Composed } inner)
+            return null;
+        var operands = new List<MathBlockTypeOperand>(inner.Operands.Count + 1);
+        foreach (var operand in inner.Operands)
+        {
+            var mask = operand.AcceptedKindMask;
+            if (operand.Accepts(MathBlockValueKind.Scalar))
+                mask |= MathBlockTypeOperand.KindBit(MathBlockValueKind.Vector);
+            operands.Add(operand with { AcceptedKindMask = mask, IsConstant = false });
+        }
+        if (!validity)
+            operands.Add(new MathBlockTypeOperand(MathBlockTypeOperand.KindBit(MathBlockValueKind.Scalar), MathBlockTypeOperand.AnyUnit, false));
+        return new MathBlockTypeSignature(
+            identity,
+            MathBlockTypeRuleKind.ElementwiseForm,
+            [validity ? 1 : 0, .. inner.ToRow()],
+            operands);
+    }
+
     internal int ValidityArity => source.Arity;
 
     // The unit of the source result for the given argument types, which the fill must carry.

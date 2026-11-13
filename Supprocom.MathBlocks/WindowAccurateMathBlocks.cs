@@ -84,7 +84,7 @@ internal static class WindowAccurateMathBlocks
                 ? WindowMathBlocks.SampleFill
                 : definition.Expected[index];
         }
-        return MathBlockOperationFactory.Create(
+        var operation = MathBlockOperationFactory.Create(
             $"{FormFamily}.{definition.Name}",
             form.FormArity,
             form.FormTypeResolver,
@@ -94,6 +94,8 @@ internal static class WindowAccurateMathBlocks
             1e-12,
             64,
             MathBlockCausalityInfo.Trailing(form.FormArity - 2));
+        operation.TypeSignatureFactory = () => form.CreateSignature(operation.Identity, validity: false);
+        return operation;
     }
 
     private static MathBlockOperation CreateValidity(AccurateDefinition definition, MathBlockWindowForm form)
@@ -101,7 +103,7 @@ internal static class WindowAccurateMathBlocks
         var expected = new bool[definition.Expected.Length];
         for (var index = 0; index < expected.Length; index++)
             expected[index] = !double.IsNaN(definition.Expected[index]);
-        return MathBlockOperationFactory.Create(
+        var operation = MathBlockOperationFactory.Create(
             $"{ValidityFamily}.{definition.Name}",
             form.ValidityArity,
             form.ValidityTypeResolver,
@@ -110,6 +112,8 @@ internal static class WindowAccurateMathBlocks
             MathBlockValue.BooleanVector(expected),
             performanceIterations: 64,
             causality: MathBlockCausalityInfo.Trailing(form.ValidityArity - 1));
+        operation.TypeSignatureFactory = () => form.CreateSignature(operation.Identity, validity: true);
+        return operation;
     }
 
     private sealed record AccurateDefinition(

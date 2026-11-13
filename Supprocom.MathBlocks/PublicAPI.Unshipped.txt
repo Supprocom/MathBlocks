@@ -213,3 +213,61 @@ Supprocom.MathBlocks.MathBlockOperation.Evaluate(System.Collections.Generic.IRea
 Supprocom.MathBlocks.MathBlocksCoreCLRWorker.DomainOptions.get -> Supprocom.MathBlocks.MathBlockDomainOptions!
 const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.VirtualLaneCount = 128 -> int
 Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.PlanCUDA(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! prototypeInputs, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions, int blockSize) -> Supprocom.MathBlocks.Cuda.MathBlockCudaOperationPlan
+const Supprocom.MathBlocks.Cuda.MathBlockCudaTypeRuleModule.DeviceTypeSize = 44 -> int
+const Supprocom.MathBlocks.Cuda.MathBlockCudaTypeRuleModule.FunctionName = "mathblocks_type_resolve" -> string!
+const Supprocom.MathBlocks.Cuda.MathBlockCudaTypeRuleModule.Signature = "__device__ void mathblocks_type_resolve(const int* signature_row, const MathBlockDeviceType* inputs, int count, MathBlockDeviceType* output)" -> string!
+const Supprocom.MathBlocks.Cuda.MathBlockCudaTypeRuleModule.TypeName = "MathBlockDeviceType" -> string!
+const Supprocom.MathBlocks.MathBlockTypeOperand.AnyUnit = -1 -> int
+const Supprocom.MathBlocks.MathBlockTypeOperand.DimensionlessUnit = -2 -> int
+const Supprocom.MathBlocks.MathBlockTypeSignatures.DeviceTypeSize = 44 -> int
+const Supprocom.MathBlocks.MathBlockTypeSignatures.InvalidKind = -1 -> int
+override Supprocom.MathBlocks.MathBlockTypeOperand.Equals(object? obj) -> bool
+override Supprocom.MathBlocks.MathBlockTypeOperand.GetHashCode() -> int
+override Supprocom.MathBlocks.MathBlockTypeOperand.ToString() -> string!
+override Supprocom.MathBlocks.MathBlockTypeSignature.Equals(object? obj) -> bool
+override Supprocom.MathBlocks.MathBlockTypeSignature.GetHashCode() -> int
+override Supprocom.MathBlocks.MathBlockTypeSignature.ToString() -> string!
+static Supprocom.MathBlocks.Cuda.MathBlockCudaTypeRuleModule.Source.get -> string!
+static Supprocom.MathBlocks.Cuda.MathBlockCudaTypeRuleModule.SourceFingerprint.get -> string!
+static Supprocom.MathBlocks.MathBlockTypeOperand.KindBit(Supprocom.MathBlocks.MathBlockValueKind kind) -> int
+static Supprocom.MathBlocks.MathBlockTypeOperand.operator !=(Supprocom.MathBlocks.MathBlockTypeOperand? left, Supprocom.MathBlocks.MathBlockTypeOperand? right) -> bool
+static Supprocom.MathBlocks.MathBlockTypeOperand.operator ==(Supprocom.MathBlocks.MathBlockTypeOperand? left, Supprocom.MathBlocks.MathBlockTypeOperand? right) -> bool
+static Supprocom.MathBlocks.MathBlockTypeSignature.operator !=(Supprocom.MathBlocks.MathBlockTypeSignature? left, Supprocom.MathBlocks.MathBlockTypeSignature? right) -> bool
+static Supprocom.MathBlocks.MathBlockTypeSignature.operator ==(Supprocom.MathBlocks.MathBlockTypeSignature? left, Supprocom.MathBlocks.MathBlockTypeSignature? right) -> bool
+static Supprocom.MathBlocks.MathBlockTypeSignatures.All.get -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockTypeSignature!>!
+static Supprocom.MathBlocks.MathBlockTypeSignatures.Get(string! identity) -> Supprocom.MathBlocks.MathBlockTypeSignature?
+static Supprocom.MathBlocks.MathBlockTypeSignatures.IndexOf(string! identity) -> int
+static Supprocom.MathBlocks.MathBlockTypeSignatures.Resolve(Supprocom.MathBlocks.MathBlockTypeSignature! signature, System.ReadOnlySpan<Supprocom.MathBlocks.MathBlockType> inputs) -> Supprocom.MathBlocks.MathBlockType
+static Supprocom.MathBlocks.MathBlockTypeSignatures.TableFingerprint.get -> string!
+static Supprocom.MathBlocks.MathBlockTypeSignatures.TryResolve(Supprocom.MathBlocks.MathBlockTypeSignature! signature, System.ReadOnlySpan<Supprocom.MathBlocks.MathBlockType> inputs, out Supprocom.MathBlocks.MathBlockType output) -> bool
+static Supprocom.MathBlocks.MathBlockTypeSignatures.WriteJson(System.Text.Json.Utf8JsonWriter! writer) -> void
+static Supprocom.MathBlocks.MathBlockTypeSignatures.WriteTable(out int[]! offsets, out int[]! rows) -> void
+Supprocom.MathBlocks.Cuda.MathBlockCudaTypeRuleModule
+Supprocom.MathBlocks.MathBlockOperation.TypeSignature.get -> Supprocom.MathBlocks.MathBlockTypeSignature?
+Supprocom.MathBlocks.MathBlockTypeOperand
+Supprocom.MathBlocks.MathBlockTypeOperand.<Clone>$() -> Supprocom.MathBlocks.MathBlockTypeOperand!
+Supprocom.MathBlocks.MathBlockTypeOperand.AcceptedKindMask.get -> int
+Supprocom.MathBlocks.MathBlockTypeOperand.AcceptedKindMask.init -> void
+Supprocom.MathBlocks.MathBlockTypeOperand.Accepts(Supprocom.MathBlocks.MathBlockValueKind kind) -> bool
+Supprocom.MathBlocks.MathBlockTypeOperand.Deconstruct(out int AcceptedKindMask, out int UnitConstraint, out bool IsConstant) -> void
+Supprocom.MathBlocks.MathBlockTypeOperand.Equals(Supprocom.MathBlocks.MathBlockTypeOperand? other) -> bool
+Supprocom.MathBlocks.MathBlockTypeOperand.IsConstant.get -> bool
+Supprocom.MathBlocks.MathBlockTypeOperand.IsConstant.init -> void
+Supprocom.MathBlocks.MathBlockTypeOperand.MathBlockTypeOperand(int AcceptedKindMask, int UnitConstraint, bool IsConstant) -> void
+Supprocom.MathBlocks.MathBlockTypeOperand.UnitConstraint.get -> int
+Supprocom.MathBlocks.MathBlockTypeOperand.UnitConstraint.init -> void
+Supprocom.MathBlocks.MathBlockTypeRuleKind
+Supprocom.MathBlocks.MathBlockTypeRuleKind.None = 0 -> Supprocom.MathBlocks.MathBlockTypeRuleKind
+Supprocom.MathBlocks.MathBlockTypeRuleKind.Composed = 1 -> Supprocom.MathBlocks.MathBlockTypeRuleKind
+Supprocom.MathBlocks.MathBlockTypeRuleKind.ElementwiseForm = 2 -> Supprocom.MathBlocks.MathBlockTypeRuleKind
+Supprocom.MathBlocks.MathBlockTypeRuleKind.WindowForm = 3 -> Supprocom.MathBlocks.MathBlockTypeRuleKind
+Supprocom.MathBlocks.MathBlockTypeSignature
+Supprocom.MathBlocks.MathBlockTypeSignature.<Clone>$() -> Supprocom.MathBlocks.MathBlockTypeSignature!
+Supprocom.MathBlocks.MathBlockTypeSignature.Equals(Supprocom.MathBlocks.MathBlockTypeSignature? other) -> bool
+Supprocom.MathBlocks.MathBlockTypeSignature.Identity.get -> string!
+Supprocom.MathBlocks.MathBlockTypeSignature.MathBlockTypeSignature(string! identity, Supprocom.MathBlocks.MathBlockTypeRuleKind ruleKind, System.Collections.Generic.IReadOnlyList<int>! parameters, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockTypeOperand!>! operands) -> void
+Supprocom.MathBlocks.MathBlockTypeSignature.Operands.get -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockTypeOperand!>!
+Supprocom.MathBlocks.MathBlockTypeSignature.Parameters.get -> System.Collections.Generic.IReadOnlyList<int>!
+Supprocom.MathBlocks.MathBlockTypeSignature.RuleKind.get -> Supprocom.MathBlocks.MathBlockTypeRuleKind
+Supprocom.MathBlocks.MathBlockTypeSignature.ToRow() -> System.Collections.Generic.IReadOnlyList<int>!
+Supprocom.MathBlocks.MathBlockTypeSignatures

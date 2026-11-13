@@ -136,6 +136,7 @@ internal static class ElementwiseMathBlocks
             1e-12,
             64,
             MathBlockCausalityInfo.Pointwise);
+        operation.TypeSignatureFactory = () => form.CreateSignature(operation.Identity, validity: false);
         lifts.Add(operation, form);
         return operation;
     }
@@ -155,6 +156,7 @@ internal static class ElementwiseMathBlocks
             MathBlockValue.BooleanVector(expected),
             performanceIterations: 64,
             causality: MathBlockCausalityInfo.Pointwise);
+        operation.TypeSignatureFactory = () => form.CreateSignature(operation.Identity, validity: true);
         lifts.Add(operation, form);
         return operation;
     }
