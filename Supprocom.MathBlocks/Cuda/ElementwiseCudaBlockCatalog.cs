@@ -139,12 +139,12 @@ internal static class ElementwiseCudaBlockCatalog
 
     // One thread per row, in blocks of 128, at least one block and at most MaximumGridX; the rows stripe over the
     // grid when there are more.
-    internal static int GridX(int rows) => GridX(rows, (int)BlockSize, MaximumGridX);
+    internal static int GridX(int rows) => GridXFor(rows, (int)BlockSize, MaximumGridX);
 
     // The blocks of a launch of blockSize threads per block, clamped to maximumGridX; wanted is the count before the clamp.
-    internal static int GridX(int rows, int blockSize, int maximumGridX) => GridX(rows, blockSize, maximumGridX, out _);
+    internal static int GridXFor(int rows, int blockSize, int maximumGridX) => GridXFor(rows, blockSize, maximumGridX, out _);
 
-    internal static int GridX(int rows, int blockSize, int maximumGridX, out long wanted)
+    internal static int GridXFor(int rows, int blockSize, int maximumGridX, out long wanted)
     {
         wanted = rows <= blockSize ? 1L : ((long)rows + blockSize - 1L) / blockSize;
         return wanted > maximumGridX ? maximumGridX : (int)wanted;

@@ -2055,7 +2055,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     {
         if (!ElementwiseCudaBlockCatalog.IsElementwiseIdentity(node.OperationIdentity))
             return ResolveWindowLaunch(node, payloadLayout, options, enforceWindowBudget);
-        var gridX = ElementwiseCudaBlockCatalog.GridX(
+        var gridX = ElementwiseCudaBlockCatalog.GridXFor(
             payloadLayout.Capacities[node.Index], options.BlockSize, options.MaximumGridX, out var wanted);
         return new RowStripedPlan(
             new WindowLaunch(gridX, 0, 0),
