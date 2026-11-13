@@ -28,7 +28,9 @@ public sealed class MathBlockCudaTranspilationTests
     public void CUDAScalarUnitMatchesTheCSharp2CUDA031Golden()
     {
         AssertGeneratedUnit("Scalar", 0);
-        Assert.Equal(CreateExpectedSource(), MathBlockCudaDeviceModule.Source);
+        // The device source is the domain-limit prelude followed by the generated units.
+        Assert.EndsWith(CreateExpectedSource(), MathBlockCudaDeviceModule.Source, StringComparison.Ordinal);
+        Assert.Equal(MathBlockCudaDeviceModule.GetSource(MathBlockDomainOptions.Default), MathBlockCudaDeviceModule.Source);
         Assert.Equal(
             "73B34A68E63D6838B5BDD3119B18DDD2FBB1039343ABC5261721FF6F6E3CB8E3",
             MathBlockCudaDeviceModule.SourceFingerprint);
@@ -101,16 +103,20 @@ public sealed class MathBlockCudaTranspilationTests
     [Fact]
     public void CUDADeviceDispatchUnitMatchesTheCSharp2CUDA031Golden()
     {
-        var source = MathBlockCudaDeviceModule.Source;
+        var source = GeneratedUnits();
         var start = OperationCatalogs.Sum(catalog => ReadGolden(catalog).Length + 1) + 1;
         var golden = ReadGolden("DeviceDispatch");
 
         Assert.Equal(golden, source[start..]);
     }
 
+    // The device source after its domain-limit prelude: the generated units.
+    private static string GeneratedUnits() =>
+        MathBlockCudaDeviceModule.Source[^CreateExpectedSource().Length..];
+
     private static void AssertGeneratedUnit(string catalog, int catalogIndex)
     {
-        var source = MathBlockCudaDeviceModule.Source;
+        var source = GeneratedUnits();
         var start = OperationCatalogs
             .Take(catalogIndex)
             .Sum(previous => ReadGolden(previous).Length + 1);

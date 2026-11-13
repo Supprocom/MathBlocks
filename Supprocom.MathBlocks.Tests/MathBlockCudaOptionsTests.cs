@@ -51,6 +51,28 @@ public sealed class MathBlockCudaOptionsTests
         Assert.Equal(MathBlockCudaDeviceModule.DispatcherBlockSize, MathBlockCudaDeviceModule.VirtualLaneCount);
     }
 
+    /// <summary>Verifies the device ordinal and the fused row block default to today's values, are range-checked before any device call, and reach the limit catalog.</summary>
+    [Fact]
+    public void TheDeviceOrdinalAndTheFusedRowBlockAreRangeChecked()
+    {
+        Assert.Equal(0, MathBlocksCudaOptions.Default.DeviceOrdinal);
+        Assert.Equal(8192, MathBlocksCudaOptions.Default.FusedRowBlock);
+        var (program, inputs) = ElementwiseProgram(100);
+
+        var ordinal = Assert.Throws<ArgumentOutOfRangeException>(() => new MathBlocksCUDAWorker().CompileWithOptions(
+            program, new MathBlocksCudaOptions { DeviceOrdinal = -1 }, inputs));
+        var rowBlock = Assert.Throws<ArgumentOutOfRangeException>(() => new MathBlocksCUDAWorker().CompileWithOptions(
+            program, new MathBlocksCudaOptions { FusedRowBlock = 0 }, inputs));
+
+        Assert.Equal(nameof(MathBlocksCudaOptions.DeviceOrdinal), ordinal.ParamName);
+        Assert.Contains("cuDeviceGetCount", ordinal.Message, StringComparison.Ordinal);
+        Assert.Equal(nameof(MathBlocksCudaOptions.FusedRowBlock), rowBlock.ParamName);
+        var limits = MathBlockLimits.Resolve(new MathBlocksCudaOptions { DeviceOrdinal = 2, FusedRowBlock = 100 });
+        Assert.Equal(2L, limits.Single(limit => string.Equals(limit.Name, "cuda.device-ordinal", StringComparison.Ordinal)).Value);
+        Assert.Equal(100L, limits.Single(limit => string.Equals(limit.Name, "fused.row-block", StringComparison.Ordinal)).Value);
+        Assert.Throws<ArgumentOutOfRangeException>(() => MathBlockLimits.Resolve(new MathBlocksCudaOptions { DeviceOrdinal = -1 }));
+    }
+
     /// <summary>Verifies a value below 1 throws before any device call, naming the option and the limit.</summary>
     [Theory]
     [MemberData(nameof(BelowOne))]
@@ -370,20 +392,23 @@ public sealed class MathBlockCudaOptionsTests
 
         Assert.Throws<ArgumentOutOfRangeException>(() => contract.PlanCUDA(inputs, MathBlockDomainOptions.Default, 0));
         Assert.Throws<ArgumentNullException>(() => contract.PlanCUDA(inputs, null!, 128));
-        Assert.Throws<NotSupportedException>(() => contract.PlanCUDA(inputs, new MathBlockDomainOptions { MaximumStateCount = 10 }, 128));
+        Assert.Throws<ArgumentOutOfRangeException>(() => contract.PlanCUDA(inputs, new MathBlockDomainOptions { MaximumStateCount = 0 }, 128));
     }
 
-    /// <summary>Verifies CompileWithOptions rejects a domain limit other than the default, which the CUDA kernels do not apply yet.</summary>
+    /// <summary>Verifies CompileWithOptions rejects a domain option outside its range before it touches a CUDA device.</summary>
     [Fact]
-    public void CompileWithOptionsRejectsADomainOptionTheKernelsDoNotApply()
+    public void CompileWithOptionsRejectsADomainOptionOutsideItsRange()
     {
         var (program, inputs) = ElementwiseProgram(10);
 
-        Assert.Throws<NotSupportedException>(() => new MathBlocksCUDAWorker().CompileWithOptions(
+        var thrown = Assert.Throws<ArgumentOutOfRangeException>(() => new MathBlocksCUDAWorker().CompileWithOptions(
             program,
             MathBlocksCudaOptions.Default,
             inputs,
-            new MathBlockDomainOptions { MaximumExplicitSubsetSize = 10 }));
+            new MathBlockDomainOptions { MaximumExplicitSubsetSize = 27 }));
+
+        Assert.Contains("MaximumExplicitSubsetSize", thrown.Message, StringComparison.Ordinal);
+        Assert.Contains("26", thrown.Message, StringComparison.Ordinal);
     }
 
     private static (MathBlockProgram Program, Dictionary<string, MathBlockValue> Inputs) WindowProgram(string source, int count, int width)
@@ -428,7 +453,7 @@ public sealed class MathBlockCudaOptionsTests
     // The planning of CompileWithOptions up to its first device call; the result's Launches is the launch geometry.
     private static PlanResult Plan(MathBlockProgram program, Dictionary<string, MathBlockValue> inputs, MathBlocksCudaOptions options, bool enforce)
     {
-        var plan = PlanArenaFor.Invoke(null, [program, inputs, options, enforce])!;
+        var plan = PlanArenaFor.Invoke(null, [program, inputs, options, MathBlockDomainOptions.Default, enforce])!;
         var launches = (IReadOnlyList<MathBlockCudaLaunch>)plan.GetType().GetProperty("Launches")!.GetValue(plan)!;
         return new PlanResult(launches);
     }

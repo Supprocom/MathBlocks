@@ -86,7 +86,7 @@ public sealed class MathBlockStableSortTests
             var layout = typeof(MathBlockCudaDeviceModule).Assembly.GetType("Supprocom.MathBlocks.Cuda.MathBlocksCUDAProgram", throwOnError: true)!
                 .GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
                 .Single(method => string.Equals(method.Name, "ResolvePayloadLayout", StringComparison.Ordinal))
-                .Invoke(null, [program.PlanNodes, null, null, null, null])!;
+                .Invoke(null, [program.PlanNodes, null, null, null, null, null])!;
             var scratch = typeof(MathBlockCudaDeviceModule).Assembly.GetType("Supprocom.MathBlocks.Cuda.MathBlocksCUDAProgram", throwOnError: true)!
                 .GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
                 .Single(method => string.Equals(method.Name, "ResolveScratchBytes", StringComparison.Ordinal) && method.GetParameters().Length == 3);
@@ -127,7 +127,7 @@ public sealed class MathBlockStableSortTests
         void Plan(int width)
         {
             var built = Build(width);
-            var layout = program.GetMethods(BindingFlags.Static | BindingFlags.NonPublic).Single(method => string.Equals(method.Name, "ResolvePayloadLayout", StringComparison.Ordinal)).Invoke(null, [built.PlanNodes, null, null, null, null])!;
+            var layout = program.GetMethods(BindingFlags.Static | BindingFlags.NonPublic).Single(method => string.Equals(method.Name, "ResolvePayloadLayout", StringComparison.Ordinal)).Invoke(null, [built.PlanNodes, null, null, null, null, null])!;
             var scratch = program.GetMethods(BindingFlags.Static | BindingFlags.NonPublic).Single(method => string.Equals(method.Name, "ResolveScratchBytes", StringComparison.Ordinal) && method.GetParameters().Length == 3);
             try
             {

@@ -24,7 +24,23 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
         ["base-opcode/vector-vector"] = ("elementwise.scalar.maximum@1", () => [Vector(1d, 2d, 3d), Vector(0.25d, -4d, 8d), Scalar(Fill)]),
         ["base-opcode/sibling-vector-vector"] = ("elementwise-valid.scalar.maximum@1", () => [Vector(1d, 2d, 3d), Vector(0.25d, -4d, 8d)]),
         // Rows outside the domain of logit: invalid on CoreCLR, so the fill path of the dispatcher is checked too.
-        ["base-opcode/unary-vector-invalid-rows"] = ("elementwise.scalar.logit@1", () => [Vector(0.25d, 2d, 0.5d, -1d), Scalar(Fill)])
+        ["base-opcode/unary-vector-invalid-rows"] = ("elementwise.scalar.logit@1", () => [Vector(0.25d, 2d, 0.5d, -1d), Scalar(Fill)]),
+        // The scalar operations whose vector twin has whole-value validity: one bad row (divide by 0, a logarithm or root out of domain, overflow) is invalid alone.
+        ["lift/absolute"] = ("elementwise.scalar.absolute@1", () => [Vector(-2d, -0.5d, 0d, 3d, -1e300d), Scalar(Fill)]),
+        ["lift/add"] = ("elementwise.scalar.add@1", () => [Vector(1d, 2d, 1e308d, -1d), Vector(2d, -2d, 1e308d, 1d), Scalar(Fill)]),
+        ["lift/subtract"] = ("elementwise.scalar.subtract@1", () => [Vector(5d, 2d, -1e308d, 1d), Vector(2d, 2d, 1e308d, -1d), Scalar(Fill)]),
+        ["lift/multiply"] = ("elementwise.scalar.multiply@1", () => [Vector(2d, -3d, 1e200d, 0d), Vector(3d, 3d, 1e200d, 5d), Scalar(Fill)]),
+        ["lift/divide"] = ("elementwise.scalar.divide@1", () => [Vector(6d, 1d, -3d, 1d, 0d, 1e308d), Vector(3d, 0d, 2d, 4d, 5d, 1e-10d), Scalar(Fill)]),
+        ["lift/divide-scalar-divisor"] = ("elementwise.scalar.divide@1", () => [Vector(6d, 1d, -3d), Scalar(0d), Scalar(Fill)]),
+        ["lift/power"] = ("elementwise.scalar.power@1", () => [Vector(2d, 9d, -8d, 2d, 0d, 10d), Vector(3d, 0.5d, 0.5d, -1d, -1d, 400d), Scalar(Fill)]),
+        ["lift/natural-logarithm"] = ("elementwise.scalar.natural-logarithm@1", () => [Vector(1d, 2d, 0.5d, 0d, -1d, 10d), Scalar(Fill)]),
+        ["lift/square-root"] = ("elementwise.scalar.square-root@1", () => [Vector(0d, 1d, 4d, 2d, -1d, 0.25d), Scalar(Fill)]),
+        ["lift/square"] = ("elementwise.scalar.square@1", () => [Vector(-2d, -0.5d, 0d, 1.5d, 1e200d, 3d), Scalar(Fill)]),
+        ["lift/exponential"] = ("elementwise.scalar.exponential@1", () => [Vector(0d, 1d, -1d, 0.5d, 800d, -800d), Scalar(Fill)]),
+        ["lift/positive-part"] = ("elementwise.scalar.positive-part@1", () => [Vector(-2d, -0.5d, 0d, 0.5d, 3d), Scalar(Fill)]),
+        ["lift/sign"] = ("elementwise.scalar.sign@1", () => [Vector(-2d, -0.5d, 0d, 0.5d, 3d), Scalar(Fill)]),
+        ["lift/sibling-divide"] = ("elementwise-valid.scalar.divide@1", () => [Vector(6d, 1d, -3d, 1e308d), Vector(3d, 0d, 2d, 1e-10d)]),
+        ["lift/sibling-natural-logarithm"] = ("elementwise-valid.scalar.natural-logarithm@1", () => [Vector(1d, 0d, -1d, 5d)])
     };
 
     /// <summary>Gets the case names.</summary>
@@ -55,6 +71,55 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var (identity, create) = BlockSizedCases[name];
         RunDispatch(identity, create(), blockSize == 0 ? DeviceMaximumThreadsPerBlock() : blockSize);
+    }
+
+    // Argument rows a MathBlockValue cannot hold: (input index, row) is the patched vector row, and row -1 patches a scalar slot.
+    private static readonly Dictionary<string, (string Identity, Func<MathBlockValue[]> Inputs, (int Input, int Row, double Value)[] Patches)> NonFiniteCases = new(StringComparer.Ordinal)
+    {
+        // maximum(1, -Inf) is finite, so only the input check makes these rows invalid.
+        ["non-finite/vector-vector"] = (
+            "elementwise.scalar.maximum@1",
+            () => [Vector(1d, 2d, 3d, 4d, 5d, 6d, 7d), Vector(0d, 0d, 0d, 0d, 0d, 0d, 0d), Scalar(Fill)],
+            [(0, 1, double.PositiveInfinity), (0, 2, double.NegativeInfinity), (0, 3, double.NaN), (1, 4, double.NegativeInfinity), (1, 5, double.NaN), (1, 6, double.PositiveInfinity)]),
+        ["non-finite/vector-scalar-broadcast"] = (
+            "elementwise.scalar.maximum@1",
+            () => [Vector(1d, 2d, 3d), Scalar(0.5d), Scalar(Fill)],
+            [(1, -1, double.NegativeInfinity)]),
+        ["non-finite/scalar-vector-broadcast"] = (
+            "elementwise.scalar.maximum@1",
+            () => [Scalar(0.5d), Vector(1d, 2d, 3d), Scalar(Fill)],
+            [(0, -1, double.NaN)]),
+        ["non-finite/unary"] = (
+            "elementwise.scalar.negate@1",
+            () => [Vector(1d, 2d, 3d, 4d), Scalar(Fill)],
+            [(0, 0, double.PositiveInfinity), (0, 2, double.NaN)]),
+        // divide(1, +-Inf) is 0 and valid without the input check; with it the row is invalid.
+        ["non-finite/divide"] = (
+            "elementwise.scalar.divide@1",
+            () => [Vector(1d, 1d, 1d, 4d, 6d), Vector(2d, 2d, 2d, 2d, 3d), Scalar(Fill)],
+            [(1, 0, double.PositiveInfinity), (1, 1, double.NegativeInfinity), (1, 2, double.NaN), (0, 3, double.PositiveInfinity)]),
+        ["non-finite/square-root"] = (
+            "elementwise.scalar.square-root@1",
+            () => [Vector(4d, 9d, 16d), Scalar(Fill)],
+            [(0, 0, double.PositiveInfinity), (0, 2, double.NaN)]),
+        ["non-finite/sibling"] = (
+            "elementwise-valid.scalar.maximum@1",
+            () => [Vector(1d, 2d, 3d, 4d), Vector(0d, 0d, 0d, 0d)],
+            [(0, 1, double.NegativeInfinity), (1, 3, double.NaN)])
+    };
+
+    /// <summary>Gets the non-finite case names.</summary>
+    public static TheoryData<string> NonFiniteCaseNames => [.. NonFiniteCases.Keys.Order(StringComparer.Ordinal)];
+
+    /// <summary>Verifies the dispatcher gives the CoreCLR row for non-finite arguments: invalid before the source runs, vector rows and broadcast scalars alike.</summary>
+    [Theory]
+    [MemberData(nameof(NonFiniteCaseNames))]
+    public void CUDADeviceDispatchGivesTheCoreCLRRowForNonFiniteArguments(string name)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
+        var (identity, create, patches) = NonFiniteCases[name];
+        RunDispatch(identity, create(), MathBlockCudaDeviceModule.DispatcherBlockSize, patches);
     }
 
     /// <summary>Gets each block-sized case with each block size; 0 stands for the device maximum.</summary>
@@ -97,11 +162,11 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
 
     // The launch and the resource lifetime stay in one visible path, as in the package-only consumer.
 #pragma warning disable MA0051
-    private static void RunDispatch(string identity, MathBlockValue[] inputs, int blockSize)
+    private static void RunDispatch(string identity, MathBlockValue[] inputs, int blockSize, (int Input, int Row, double Value)[]? patches = null)
     {
         var contract = MathBlockCudaDeviceModule.GetOperation(identity);
         Assert.True(contract.Opcode < 128, "The public opcode carries no mask.");
-        var expected = contract.EvaluateCoreCLR(inputs);
+        var expected = patches is null ? contract.EvaluateCoreCLR(inputs) : PatchedExpected(identity, inputs, patches);
         var plan = contract.PlanCUDA(inputs, MathBlockDomainOptions.Default, blockSize);
 
         var slotCount = inputs.Length + 1;
@@ -139,6 +204,14 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
                     0ul,
                     MathBlockCudaValueCodec.GetElementCount(inputs[index]),
                     inputs[index]);
+            }
+
+            foreach (var (input, row, value) in patches ?? [])
+            {
+                if (row < 0)
+                    Marshal.WriteInt64(host, input * MathBlockCudaSlotLayout.Size + MathBlockCudaSlotLayout.ScalarValueOffset, BitConverter.DoubleToInt64Bits(value));
+                else
+                    Marshal.WriteInt64(host, inputOffsets[input] + row * sizeof(double), BitConverter.DoubleToInt64Bits(value));
             }
 
             MathBlockCudaValueCodec.WriteHeader(
@@ -217,6 +290,37 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
         }
         """;
 #pragma warning restore MA0136
+
+    // CoreCLR's result for the inputs with the patched rows: each row through the elementwise form's own row function. A form holds the fill
+    // where the row is invalid and its sibling holds whether the row was computed.
+    private static MathBlockValue PatchedExpected(string identity, MathBlockValue[] inputs, (int Input, int Row, double Value)[] patches)
+    {
+        var sibling = identity.StartsWith("elementwise-valid.", StringComparison.Ordinal);
+        var source = identity[(identity.IndexOf('.', StringComparison.Ordinal) + 1)..identity.LastIndexOf('@')];
+        var arity = MathBlockCatalog.Standard.Get(source).Arity;
+        var columns = new double[arity][];
+        for (var index = 0; index < arity; index++)
+        {
+            columns[index] = inputs[index].Type.Kind == MathBlockValueKind.Vector
+                ? inputs[index].AsVector().ToArray()
+                : [inputs[index].AsScalar()];
+        }
+
+        foreach (var (input, row, value) in patches)
+            columns[input][row < 0 ? 0 : row] = value;
+        var rows = columns.Where((_, index) => inputs[index].Type.Kind == MathBlockValueKind.Vector).First().Length;
+        var values = new double[rows];
+        var computed = new bool[rows];
+        for (var row = 0; row < rows; row++)
+        {
+            var arguments = columns.Select((column, index) => column[inputs[index].Type.Kind == MathBlockValueKind.Vector ? row : 0]).ToArray();
+            var (isComputed, value) = MathBlockElementwiseRowReference.Row(source, arguments);
+            computed[row] = isComputed;
+            values[row] = isComputed ? value : sibling ? 0d : inputs[arity].AsScalar();
+        }
+
+        return sibling ? MathBlockValue.BooleanVector(computed) : MathBlockValue.Vector(values);
+    }
 
     private static MathBlockValue Vector(params double[] values) => MathBlockValue.Vector(values);
 
