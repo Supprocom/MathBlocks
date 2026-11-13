@@ -90,7 +90,7 @@ public sealed class MathBlockCudaOperationContract
     public MathBlockCudaOperationFamily Family { get; }
     /// <summary>Gets the opcode value.</summary>
     public int Opcode { get; }
-    /// <summary>Gets the required block size value.</summary>
+    /// <summary>Gets the default block size of the dispatcher; any block size from 1 up to the CUDA device maximum gives the same results.</summary>
     public int RequiredBlockSize => MathBlockCudaDeviceModule.DispatcherBlockSize;
     /// <summary>Gets the native block size value.</summary>
     public uint NativeBlockSize { get; }
@@ -142,10 +142,32 @@ public sealed class MathBlockCudaOperationContract
     public MathBlockValue EvaluateCoreCLR(IReadOnlyList<MathBlockValue> inputs) =>
         operation.Evaluate(inputs);
 
-    /// <summary>Plans CUDA shape, capacity, and scratch storage for inputs.</summary>
-    public MathBlockCudaOperationPlan PlanCUDA(IReadOnlyList<MathBlockValue> prototypeInputs)
+    /// <summary>Plans CUDA shape, capacity, and scratch storage for inputs, for the default block size of <see cref="MathBlockCudaDeviceModule.DispatcherBlockSize"/> threads.</summary>
+    public MathBlockCudaOperationPlan PlanCUDA(IReadOnlyList<MathBlockValue> prototypeInputs) =>
+        PlanCUDA(prototypeInputs, MathBlockDomainOptions.Default, MathBlockCudaDeviceModule.DispatcherBlockSize);
+
+    /// <summary>Plans CUDA shape, capacity, and scratch storage for inputs when the dispatcher runs in blocks of <paramref name="blockSize"/> threads.</summary>
+    /// <param name="prototypeInputs">The inputs the plan is made for.</param>
+    /// <param name="domainOptions">The domain limits; the CUDA kernels apply only the defaults yet.</param>
+    /// <param name="blockSize">The threads per block the consumer launches the dispatcher with, from 1 up to the CUDA device maximum.</param>
+    /// <remarks>
+    /// The dispatcher gives every operation the same results at every block size. Only the scratch of the window forms depends on it: each of
+    /// the block's threads owns its own slice of the scratch, so <see cref="MathBlockCudaOperationPlan.ScratchBytes"/> grows with <paramref name="blockSize"/>
+    /// (and the largest window width shrinks with it). The scratch of every other operation, including the rolling median and quantile, does not depend on it.
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="blockSize"/> is below 1.</exception>
+    public MathBlockCudaOperationPlan PlanCUDA(
+        IReadOnlyList<MathBlockValue> prototypeInputs,
+        MathBlockDomainOptions domainOptions,
+        int blockSize)
     {
         ArgumentNullException.ThrowIfNull(prototypeInputs);
+        ArgumentNullException.ThrowIfNull(domainOptions);
+        _ = MathBlocksCudaOptionsValidator.RequireDefaultDomain(domainOptions);
+        ArgumentOutOfRangeException.ThrowIfLessThan(blockSize, 1);
+        var options = blockSize == MathBlockCudaDeviceModule.DispatcherBlockSize
+            ? MathBlocksCudaOptions.Default
+            : new MathBlocksCudaOptions { BlockSize = blockSize };
         if (prototypeInputs.Count != Arity)
         {
             throw new ArgumentException(
@@ -175,7 +197,9 @@ public sealed class MathBlockCudaOperationContract
         var scratchBytes = MathBlocksCUDAProgram.ResolveScratchBytesOrMarkInvalid(
             outputNode,
             program.PlanNodes,
-            layout);
+            layout,
+            options,
+            enforceWindowBudget: false);
         return new MathBlockCudaOperationPlan(
             outputNode.Type,
             layout.Capacities[output],

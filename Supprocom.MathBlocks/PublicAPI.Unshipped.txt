@@ -212,3 +212,4 @@ Supprocom.MathBlocks.MathBlockDomainOptions.MaximumStateCount.init -> void
 Supprocom.MathBlocks.MathBlockOperation.Evaluate(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! inputs, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> Supprocom.MathBlocks.MathBlockValue
 Supprocom.MathBlocks.MathBlocksCoreCLRWorker.DomainOptions.get -> Supprocom.MathBlocks.MathBlockDomainOptions!
 const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.VirtualLaneCount = 128 -> int
+Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.PlanCUDA(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! prototypeInputs, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions, int blockSize) -> Supprocom.MathBlocks.Cuda.MathBlockCudaOperationPlan
