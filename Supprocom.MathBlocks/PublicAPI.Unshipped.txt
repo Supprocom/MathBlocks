@@ -271,3 +271,25 @@ static Supprocom.MathBlocks.MathBlockFormulaInterchange.TryReadUtf8(System.IO.St
 static Supprocom.MathBlocks.MathBlockFormulaInterchange.Validate(string? source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaValidationResult!
 static Supprocom.MathBlocks.MathBlockFormulaInterchange.ValidateUtf8(System.ReadOnlySpan<byte> source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaValidationResult!
 static Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions.Default.get -> Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions!
+Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.EvaluateCoreCLR(System.ReadOnlySpan<Supprocom.MathBlocks.MathBlockValue> inputs, System.Span<double> output, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> Supprocom.MathBlocks.MathBlockEvaluation
+Supprocom.MathBlocks.MathBlockEvaluation
+Supprocom.MathBlocks.MathBlockEvaluation.Deconstruct(out bool IsValid, out int Rows, out long NonConvergedCount) -> void
+Supprocom.MathBlocks.MathBlockEvaluation.Equals(Supprocom.MathBlocks.MathBlockEvaluation other) -> bool
+Supprocom.MathBlocks.MathBlockEvaluation.IsValid.get -> bool
+Supprocom.MathBlocks.MathBlockEvaluation.IsValid.init -> void
+Supprocom.MathBlocks.MathBlockEvaluation.MathBlockEvaluation() -> void
+Supprocom.MathBlocks.MathBlockEvaluation.MathBlockEvaluation(bool IsValid, int Rows, long NonConvergedCount) -> void
+Supprocom.MathBlocks.MathBlockEvaluation.NonConvergedCount.get -> long
+Supprocom.MathBlocks.MathBlockEvaluation.NonConvergedCount.init -> void
+Supprocom.MathBlocks.MathBlockEvaluation.Rows.get -> int
+Supprocom.MathBlocks.MathBlockEvaluation.Rows.init -> void
+override Supprocom.MathBlocks.MathBlockEvaluation.GetHashCode() -> int
+static Supprocom.MathBlocks.MathBlockCatalog.TryGetVectorTwin(string! scalarIdentity, out string! vectorIdentity) -> bool
+static Supprocom.MathBlocks.MathBlockEvaluation.operator !=(Supprocom.MathBlocks.MathBlockEvaluation left, Supprocom.MathBlocks.MathBlockEvaluation right) -> bool
+static Supprocom.MathBlocks.MathBlockEvaluation.operator ==(Supprocom.MathBlocks.MathBlockEvaluation left, Supprocom.MathBlocks.MathBlockEvaluation right) -> bool
+~override Supprocom.MathBlocks.MathBlockEvaluation.Equals(object obj) -> bool
+~override Supprocom.MathBlocks.MathBlockEvaluation.ToString() -> string
+Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.EvaluateCoreCLR(System.ReadOnlySpan<Supprocom.MathBlocks.MathBlockValue> inputs, System.Span<double> output, System.Span<bool> rowValid, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> Supprocom.MathBlocks.MathBlockEvaluation
+static Supprocom.MathBlocks.MathBlockCatalog.TryGetElementwiseTwin(string! scalarIdentity, out string! elementwiseIdentity) -> bool
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.ElementwiseValidityElementBytes = 4 -> int
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.ElementwiseValueElementBytes = 8 -> int

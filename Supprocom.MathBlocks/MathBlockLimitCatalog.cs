@@ -76,6 +76,7 @@ internal static class MathBlockLimitCatalog
             "the CUDA device that runs the programs; its compute capability sets the architecture string; the valid maximum is the device count"));
         AddSlotLayout(limits);
         AddAccumulator(limits);
+        AddElementwiseLayout(limits);
     }
 
     private static void AddSlotLayout(List<MathBlockLimit> limits)
@@ -100,6 +101,22 @@ internal static class MathBlockLimitCatalog
             "the variance and deviation forms keep two accumulators of 285 words each, whatever the width"));
         limits.Add(Fixed("cuda.window-accurate.carry-flush-additions", MathBlockLimitDevice.Cuda, 1L << 27, "additions",
             "each addition puts a piece below 2^33 into a 64-bit chunk, so a carry flush every 2^27 additions keeps every chunk below 2^60 < 2^63"));
+    }
+
+    private static void AddElementwiseLayout(List<MathBlockLimit> limits)
+    {
+        limits.Add(Fixed("cuda.elementwise.value-element-bytes", MathBlockLimitDevice.Cuda, Cuda.MathBlockCudaDeviceModule.ElementwiseValueElementBytes, "bytes",
+            "the values form elementwise.<source> writes a double per row at an 8-byte stride in data_pointer; a row that is not computed holds the fill"));
+        limits.Add(Fixed("cuda.elementwise.validity-element-bytes", MathBlockLimitDevice.Cuda, Cuda.MathBlockCudaDeviceModule.ElementwiseValidityElementBytes, "bytes",
+            "the validity form elementwise-valid.<source> writes an int32 0 or 1 per row at a 4-byte stride in data_pointer"));
+        limits.Add(Fixed("cuda.elementwise.invalid-result-rows", MathBlockLimitDevice.Cuda, 0, "rows",
+            "both forms set rows and count of the output slot to the row count, and to 0 when the whole result is invalid"));
+        limits.Add(Fixed("cuda.elementwise.opcode-source-multiplier", MathBlockLimitDevice.Cuda, 2, "opcodes",
+            "opcode = 2 * source + sibling, with sibling 1 for the validity form"));
+        limits.Add(Fixed("cuda.elementwise.opcode-mask-multiplier", MathBlockLimitDevice.Cuda, 128, "opcodes",
+            "a consumer may add 128 * mask, bit i marking argument i as a vector; without it the device derives the mask from the input slots"));
+        limits.Add(Fixed("cuda.elementwise.fill-input", MathBlockLimitDevice.Cuda, null, "input index",
+            "the fill of the values form is the last input, inputs[arity], a Scalar slot with the source result unit of which CUDA reads only scalar_value; the validity form has no fill input"));
     }
 
     // One record per window form: the largest width whose scratch for one block fits int byte offsets, which follows
@@ -331,7 +348,7 @@ internal static class MathBlockLimitCatalog
             "0 returns the eigenvalues at the budget, 1 returns an invalid row, when the off-diagonal part is not zero at the budget");
     }
 
-    private static MathBlockLimit Fixed(string name, MathBlockLimitDevice device, long value, string unit, string rule) =>
+    private static MathBlockLimit Fixed(string name, MathBlockLimitDevice device, long? value, string unit, string rule) =>
         new(name, null, MathBlockLimitKind.Fixed, device, null, null, value, unit, null, NoDrivers, rule);
 
     private static MathBlockLimit Fixed(string name, string operation, MathBlockLimitDevice device, long value, string unit, string rule) =>

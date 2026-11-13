@@ -15,6 +15,20 @@ public static class MathBlockCudaDeviceModule
     public const int AbiVersion = 2;
     /// <summary>Gets the dispatcher block size value.</summary>
     public const int DispatcherBlockSize = 128;
+    /// <summary>Gets the byte stride of one row of the values form <c>elementwise.&lt;source&gt;</c>: a double, written at <c>data_pointer</c>.</summary>
+    /// <remarks>
+    /// The elementwise device layout, as <c>mathblocks_elementwise_run</c> in the generated source implements it:
+    /// <list type="bullet">
+    /// <item>The values form <c>elementwise.&lt;source&gt;</c> writes one double per row at an 8-byte stride from the output slot's <c>data_pointer</c>; a row that is not computed holds the fill.</item>
+    /// <item>The validity form <c>elementwise-valid.&lt;source&gt;</c> writes one int32, 0 or 1, per row at a 4-byte stride from <c>data_pointer</c>.</item>
+    /// <item>Both set <c>rows</c> and <c>count</c> of the output slot to the row count, and to 0 when the whole result is invalid; <c>columns</c> is 0.</item>
+    /// <item>The opcode is <c>2 * source + sibling</c>, plus <c>128 * mask</c> when the consumer passes the vector-argument mask (bit i set when argument i is a vector); without a mask the device derives it from the input slots, a slot with <c>count</c> above 0 being a vector.</item>
+    /// <item>The inputs are the source's arguments; the values form has one more input, the fill, at <c>inputs[arity]</c>. CUDA reads only the fill slot's <c>scalar_value</c>; the host gives the slot the unit of the source result. The validity form has no fill input.</item>
+    /// </list>
+    /// </remarks>
+    public const int ElementwiseValueElementBytes = 8;
+    /// <summary>Gets the byte stride of one row of the validity form <c>elementwise-valid.&lt;source&gt;</c>: an int32, written at <c>data_pointer</c>; see <see cref="ElementwiseValueElementBytes"/>.</summary>
+    public const int ElementwiseValidityElementBytes = 4;
     /// <summary>Gets the dispatch function name value.</summary>
     public const string DispatchFunctionName = "mathblocks_operation_dispatch";
     /// <summary>Gets the dispatch signature value.</summary>
