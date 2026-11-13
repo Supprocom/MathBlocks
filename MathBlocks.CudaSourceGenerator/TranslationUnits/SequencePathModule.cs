@@ -112,8 +112,12 @@ internal static unsafe class SequencePathModule
         int* upper_heap = lower_heap + output->boolean_value;
         int* positions = upper_heap + output->boolean_value;
         int* kinds = positions + count;
+        // The radix passes run on a fixed partition of 128 virtual lanes (MathBlockCudaDeviceModule.VirtualLaneCount): a real thread
+        // t takes the lanes t, t + block size, ... below 128, so the chunks, the counts and the scratch layout do not depend on
+        // the block size, and a block larger than 128 leaves its extra threads idle in the lane phases.
+        const int virtual_lanes = 128;
         int* zero_counts = kinds + count;
-        int* zero_prefix = zero_counts + 128;
+        int* zero_prefix = zero_counts + virtual_lanes;
 
         for (int index = thread; index < count; index += Cuda.BlockDim.X)
         {
@@ -132,18 +136,21 @@ internal static unsafe class SequencePathModule
         int* destination_indexes = second_indexes;
         for (int bit = 0; bit < 64; bit++)
         {
-            int begin = (int)(((long)count * thread) / Cuda.BlockDim.X);
-            int end = (int)(((long)count * (thread + 1)) / Cuda.BlockDim.X);
-            int zeros = 0;
-            for (int index = begin; index < end; index++)
-                if (((source_keys[index] >> bit) & 1UL) == 0UL)
-                    zeros++;
-            zero_counts[thread] = zeros;
+            for (int lane = thread; lane < virtual_lanes; lane += (int)Cuda.BlockDim.X)
+            {
+                int begin = (int)(((long)count * lane) / virtual_lanes);
+                int end = (int)(((long)count * (lane + 1)) / virtual_lanes);
+                int zeros = 0;
+                for (int index = begin; index < end; index++)
+                    if (((source_keys[index] >> bit) & 1UL) == 0UL)
+                        zeros++;
+                zero_counts[lane] = zeros;
+            }
             Cuda.SyncThreads();
             if (thread == 0)
             {
                 int prefix = 0;
-                for (int lane = 0; lane < Cuda.BlockDim.X; lane++)
+                for (int lane = 0; lane < virtual_lanes; lane++)
                 {
                     zero_prefix[lane] = prefix;
                     prefix += zero_counts[lane];
@@ -151,16 +158,21 @@ internal static unsafe class SequencePathModule
                 output->columns = prefix;
             }
             Cuda.SyncThreads();
-            int zero_destination = zero_prefix[thread];
-            int one_destination = output->columns + begin - zero_destination;
-            for (int index = begin; index < end; index++)
+            for (int lane = thread; lane < virtual_lanes; lane += (int)Cuda.BlockDim.X)
             {
-                ulong key = source_keys[index];
-                int destination = ((key >> bit) & 1UL) == 0UL
-                    ? zero_destination++
-                    : one_destination++;
-                destination_keys[destination] = key;
-                destination_indexes[destination] = source_indexes[index];
+                int begin = (int)(((long)count * lane) / virtual_lanes);
+                int end = (int)(((long)count * (lane + 1)) / virtual_lanes);
+                int zero_destination = zero_prefix[lane];
+                int one_destination = output->columns + begin - zero_destination;
+                for (int index = begin; index < end; index++)
+                {
+                    ulong key = source_keys[index];
+                    int destination = ((key >> bit) & 1UL) == 0UL
+                        ? zero_destination++
+                        : one_destination++;
+                    destination_keys[destination] = key;
+                    destination_indexes[destination] = source_indexes[index];
+                }
             }
             Cuda.SyncThreads();
             ulong* key_swap = source_keys;
