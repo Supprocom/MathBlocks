@@ -19,9 +19,9 @@ public sealed class MathBlockCudaOperationContractTests
             .ToArray();
         var contracts = MathBlockCudaDeviceModule.Operations;
 
-        Assert.Equal(537, contracts.Count);
+        Assert.Equal(561, contracts.Count);
         Assert.Equal(expectedIdentities, contracts.Select(contract => contract.Identity), StringComparer.Ordinal);
-        Assert.Equal(537, contracts.Select(contract => (contract.Family, contract.Opcode)).Distinct().Count());
+        Assert.Equal(561, contracts.Select(contract => (contract.Family, contract.Opcode)).Distinct().Count());
         Assert.Equal(
             Enum.GetValues<MathBlockCudaOperationFamily>().Order(),
             contracts.Select(contract => contract.Family).Distinct().Order());

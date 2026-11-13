@@ -190,6 +190,43 @@ public sealed class MathBlockDomainWiringTests
         Assert.Same(MathBlockDomainOptions.Default, MathBlocksCoreCLRWorker.Shared.DomainOptions);
     }
 
+    /// <summary>Verifies the Taylor terms of the matrix exponential and the Newton steps of the cube root reach the operations and the elementwise form, and are range-checked.</summary>
+    [Fact]
+    public void TheTaylorTermsAndTheNewtonStepsReachTheOperations()
+    {
+        var exponential = Operation("matrix.exponential@1");
+        MathBlockValue[] matrix = [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0.5d, 0.3d, 0.2d, 0.1d]))];
+        var defaults = exponential.Evaluate(matrix);
+
+        Assert.True(Same(defaults, exponential.Evaluate(matrix, MathBlockDomainOptions.Default)));
+        Assert.True(Same(defaults, exponential.Evaluate(matrix, new MathBlockDomainOptions { MatrixExponentialTaylorTerms = 48 })));
+        Assert.False(Same(defaults, exponential.Evaluate(matrix, new MathBlockDomainOptions { MatrixExponentialTaylorTerms = 2 })));
+
+        var cube = Operation("scalar.cube-root@1");
+        MathBlockValue[] number = [MathBlockValue.Scalar(10d)];
+        var noSteps = new MathBlockDomainOptions { CubeRootNewtonSteps = 0 };
+        Assert.True(Same(cube.Evaluate(number), cube.Evaluate(number, new MathBlockDomainOptions { CubeRootNewtonSteps = 3 })));
+        // The start alone is within about 3e-14 of the root, so only some arguments differ from the refined value.
+        Assert.Contains(
+            new[] { 2d, 3d, 5d, 7d, 10d, 100d, 1e10d, 0.3d, 12345.678d },
+            value => !Same(cube.Evaluate([MathBlockValue.Scalar(value)]), cube.Evaluate([MathBlockValue.Scalar(value)], noSteps)));
+
+        // The elementwise form runs the same evaluation, not the default kernel, under non-default options.
+        var form = Operation("elementwise.scalar.cube-root@1");
+        MathBlockValue[] rows = [MathBlockValue.Vector([10d, 20d]), MathBlockValue.Scalar(-1d)];
+        Assert.True(Same(form.Evaluate(rows), form.Evaluate(rows, new MathBlockDomainOptions())));
+        foreach (var value in new[] { 2d, 3d, 5d, 7d, 10d, 100d, 1e10d, 0.3d, 12345.678d })
+        {
+            Assert.Equal(
+                BitConverter.DoubleToInt64Bits(cube.Evaluate([MathBlockValue.Scalar(value)], noSteps).AsScalar()),
+                BitConverter.DoubleToInt64Bits(form.Evaluate([MathBlockValue.Vector([value, value]), MathBlockValue.Scalar(-1d)], noSteps).AsVector()[0]));
+        }
+
+        var thrown = Assert.Throws<ArgumentOutOfRangeException>(() => cube.Evaluate(number, new MathBlockDomainOptions { CubeRootNewtonSteps = -1 }));
+        Assert.Contains("CubeRootNewtonSteps", thrown.Message, StringComparison.Ordinal);
+        Assert.Throws<ArgumentOutOfRangeException>(() => exponential.Evaluate(matrix, new MathBlockDomainOptions { MatrixExponentialTaylorTerms = 0 }));
+    }
+
     /// <summary>Verifies the device source of the default options is <see cref="MathBlockCudaDeviceModule.Source"/> and that each option reaches it.</summary>
     [Fact]
     public void TheDeviceSourceCarriesEveryDomainOption()
@@ -218,6 +255,8 @@ public sealed class MathBlockDomainWiringTests
             ("mathblocks_limit_incomplete_beta_tolerance() { return 1E-10; }", new() { IncompleteBetaTolerance = 1e-10 }),
             ("mathblocks_limit_incomplete_beta_policy() { return 1; }", new() { IncompleteBetaNonConvergence = MathBlockNonConvergencePolicy.Invalid }),
             ("mathblocks_limit_jacobi_policy() { return 1; }", new() { JacobiNonConvergence = MathBlockNonConvergencePolicy.Invalid }),
+            ("mathblocks_limit_matrix_exponential_taylor_terms() { return 12; }", new() { MatrixExponentialTaylorTerms = 12 }),
+            ("mathblocks_limit_cube_root_newton_steps() { return 5; }", new() { CubeRootNewtonSteps = 5 }),
             ("(long long)512 * size * size", new() { JacobiRotationMultiplier = 512 })
         };
         var generated = defaults[defaults.IndexOf("#ifndef CSHARP2CUDA_INTEGER_SEMANTICS_0_1", StringComparison.Ordinal)..];

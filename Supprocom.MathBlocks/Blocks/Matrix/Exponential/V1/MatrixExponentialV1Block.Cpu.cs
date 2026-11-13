@@ -4,7 +4,10 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockAdvanced
 {
     /// <summary>Computes the <c>matrix.exponential@1</c> mathematical operation.</summary>
-    public static MathBlockMatrix MatrixExponential(MathBlockMatrix matrix)
+    public static MathBlockMatrix MatrixExponential(MathBlockMatrix matrix) => MatrixExponential(matrix, MathBlockDomainOptions.Default.MatrixExponentialTaylorTerms);
+
+    // The Taylor series of the scaled matrix has the given number of terms.
+    internal static MathBlockMatrix MatrixExponential(MathBlockMatrix matrix, int taylorTerms)
     {
         ArgumentNullException.ThrowIfNull(matrix);
         var norm = 0d;
@@ -32,7 +35,7 @@ public static partial class MathBlockAdvanced
         var scaled = MathBlockLinearAlgebra.Scale(matrix, Math.Pow(2d, -scaling));
         var result = MathBlockLinearAlgebra.Identity(matrix.Rows);
         var term = MathBlockLinearAlgebra.Identity(matrix.Rows);
-        for (var order = 1; order <= 48; order++)
+        for (var order = 1; order <= taylorTerms; order++)
         {
             term = MathBlockLinearAlgebra.Scale(MathBlockLinearAlgebra.Multiply(term, scaled), 1d / order);
             result = MathBlockLinearAlgebra.Add(result, term);

@@ -6,6 +6,9 @@ using Supprocom.CSharp2CUDA;
 [TranspileToCUDA]
 internal static unsafe class ScalarModule
 {
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_cube_root_newton_steps() => throw new NotSupportedException();
+
     public struct MathBlockSlot
     {
         public double scalar_value;
@@ -155,14 +158,18 @@ internal static unsafe class ScalarModule
         return mathblocks_exponential(exponent * mathblocks_natural_logarithm(value));
     }
 
+    // The cube root with the default three Newton steps, which the complex cube root of the probability family uses.
     [CudaDevice]
-    private static double mathblocks_cube_root(double value)
+    private static double mathblocks_cube_root(double value) => mathblocks_cube_root_steps(value, 3);
+
+    [CudaDevice]
+    private static double mathblocks_cube_root_steps(double value, int newton_steps)
     {
         if (value == 0.0)
             return value;
         double magnitude = Math.Abs(value);
         double estimate = mathblocks_exponential(mathblocks_natural_logarithm(magnitude) / 3.0);
-        for (int iteration = 0; iteration < 3; iteration++)
+        for (int iteration = 0; iteration < newton_steps; iteration++)
             estimate = (2.0 * estimate + magnitude / (estimate * estimate)) / 3.0;
         return Math.CopySign(estimate, value);
     }
@@ -387,7 +394,7 @@ internal static unsafe class ScalarModule
             case 12: result = a * a; break;
             case 13: result = a * a * a; break;
             case 14: result = mathblocks_square_root(a); break;
-            case 15: result = mathblocks_cube_root(a); break;
+            case 15: result = mathblocks_cube_root_steps(a, mathblocks_limit_cube_root_newton_steps()); break;
             case 16: result = mathblocks_power(a, b); break;
             case 17: result = mathblocks_exponential(a); break;
             case 18: result = mathblocks_natural_logarithm(a); break;

@@ -14,10 +14,10 @@ The profile supports two XML vocabularies:
 - Strict Content MathML 3.0.
 
 Both vocabularies carry the same content-dictionary symbols. The operation
-mapping manifest contains exactly 537 entries in standard-catalog order. An
+mapping manifest contains exactly 561 entries in standard-catalog order. An
 entry explicitly classifies its representation as `direct-mapping`,
 `canonical-pattern-mapping`, or `unsupported`, independently of symbol
-provenance. Profile 2 has 537 direct mappings and zero canonical-pattern or
+provenance. Profile 2 has 561 direct mappings and zero canonical-pattern or
 unsupported mappings. A direct mapping uses either a public OpenMath
 content-dictionary symbol with exact applicability or an exact symbol from
 `mathblocks_formula_operations2`. Every operation keeps the public symbol it
@@ -88,7 +88,7 @@ XML elements and 256 expression levels.
 - `mathblocks_formula_operations2.ocd` defines exact extension operations.
 - `mathblocks_formula_values2.ocd` defines structured constants.
 - `mathblocks_formula_profile2.cdg` binds the profile and public dictionaries.
-- `mathblocks_formula_mappings2.xml` maps all 537 operations.
+- `mathblocks_formula_mappings2.xml` maps all 561 operations.
 - `mathblocks_formula_mappings2.rnc` defines the mapping-manifest grammar.
 - `mathblocks_formula_openmath2.rnc` restricts the OpenMath vocabulary.
 - `mathblocks_formula_mathml2.rnc` restricts the Content MathML vocabulary.

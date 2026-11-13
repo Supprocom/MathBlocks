@@ -144,7 +144,8 @@ internal sealed class MathBlockElementwiseForm
         bool[]? valid,
         MathBlockDomainContext domain)
     {
-        if (count > 0 && TryRunKernel(inputs, count, fill, values, valid))
+        // The kernel path runs the default evaluation, so a source that reads domain options takes it only under the defaults.
+        if (count > 0 && (source.DomainEvaluator is null || ReferenceEquals(domain.Options, MathBlockDomainOptions.Default)) && TryRunKernel(inputs, count, fill, values, valid))
             return;
 
         var rowInputs = new MathBlockValue[source.Arity];

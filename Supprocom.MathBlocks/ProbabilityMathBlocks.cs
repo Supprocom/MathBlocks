@@ -14,7 +14,7 @@ public static partial class MathBlockProbability
         1.5056327351493116e-7
     ];
 
-    // The continued fraction stops at the first step whose factor is within tolerance of 1; converged is false when it
+    // The continued fraction stops at the first step whose correction is within tolerance of 1; converged is false when it
     // used all maximumIterations steps without that.
     private static double BetaContinuedFraction(
         double x,

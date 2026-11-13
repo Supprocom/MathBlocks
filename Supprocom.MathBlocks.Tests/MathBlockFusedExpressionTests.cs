@@ -421,7 +421,7 @@ public sealed class MathBlockFusedExpressionTests
 
     /// <summary>
     /// Every Pointwise Standard operation is either fusable or excluded with a stated reason: the 28 per-block
-    /// Pointwise operations and the 82 elementwise forms, which are fused through their row form.
+    /// Pointwise operations and the 106 elementwise forms, which are fused through their row form.
     /// </summary>
     [Fact]
     public void EveryPointwiseStandardOperationIsFusableOrExcludedWithAReason()
@@ -434,8 +434,8 @@ public sealed class MathBlockFusedExpressionTests
             .Where(operation => operation.Causality.Kind == MathBlockCausality.Pointwise)
             .Select(operation => operation.Identity)
             .ToArray();
-        Assert.Equal(110, pointwise.Length);
-        Assert.Equal(82, elementwise.Count);
+        Assert.Equal(134, pointwise.Length);
+        Assert.Equal(106, elementwise.Count);
         Assert.All(elementwise, identity => Assert.Contains(identity, pointwise, StringComparer.Ordinal));
         Assert.Equal(
             ["polynomial.derivative@1", "vector.append@1"],

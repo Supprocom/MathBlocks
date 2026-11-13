@@ -173,9 +173,11 @@ internal static class WindowCudaBlockCatalog
     // width shrinks with it (the results of the widths that fit do not depend on it).
     internal static long MaximumWidth(int source, int blockSize)
     {
-        if (ScratchDoubles(source, 1) == 0)
-            return int.MaxValue;
         long limit = int.MaxValue / (sizeof(double) * (long)blockSize);
+        // A source has no limit only when even the widest width fits: the scratch at width 1 can be 0 while it grows with the width
+        // (theil-sen-slope needs width squared doubles per thread), so that is not the test.
+        if (ScratchDoubles(source, int.MaxValue) <= limit)
+            return int.MaxValue;
         long low = 1;
         long high = int.MaxValue;
         while (low < high)

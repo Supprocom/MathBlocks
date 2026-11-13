@@ -7,6 +7,9 @@ using Supprocom.CSharp2CUDA;
 internal static unsafe class MatrixModule
 {
     [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_matrix_exponential_taylor_terms() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
     private static int mathblocks_limit_matrix_size() => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
@@ -937,7 +940,7 @@ internal static unsafe class MatrixModule
                 result[index * size + index] = 1.0;
                 term[index * size + index] = 1.0;
             }
-            for (int order = 1; order <= 48; order++)
+            for (int order = 1; order <= mathblocks_limit_matrix_exponential_taylor_terms(); order++)
             {
                 mathblocks_matrix_multiply_square(term, scaled, size, temporary);
                 double order_scale = 1.0 / order;

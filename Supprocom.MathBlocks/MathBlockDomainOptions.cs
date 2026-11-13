@@ -59,6 +59,14 @@ public sealed class MathBlockDomainOptions
     /// <summary>Gets what the incomplete beta function returns when the continued fraction has not converged at its iteration budget.</summary>
     public MathBlockNonConvergencePolicy IncompleteBetaNonConvergence { get; init; } = MathBlockNonConvergencePolicy.Estimate;
 
+    /// <summary>Gets the number of Taylor terms of <c>matrix.exponential@1</c> after the matrix is scaled to norm at most 1. The range is 1 to 2,147,483,646.</summary>
+    /// <remarks>A free choice, not derived for correct rounding: the remainder after n terms is below 1/(n + 1)!, under 2^-53 from n = 18, and the default 48 is a margin. The count is part of the bit contract between CoreCLR and CUDA, which use the same value.</remarks>
+    public int MatrixExponentialTaylorTerms { get; init; } = 48;
+
+    /// <summary>Gets the number of Newton steps of <c>scalar.cube-root@1</c> after the exp(ln(x) / 3) start. The range is 0 to 2,147,483,646.</summary>
+    /// <remarks>A free choice, not derived for correct rounding: the start is within about 3e-14 relative (estimated, not measured), and one step squares that error below 2^-53. The count is part of the bit contract between CoreCLR and CUDA, which use the same value in the scalar operation and its elementwise forms.</remarks>
+    public int CubeRootNewtonSteps { get; init; } = 3;
+
     /// <summary>Gets the multiplier of the Jacobi eigenvalue rotation budget, which is the multiplier times n times n rotations for an n by n matrix. The range is 1 to 2,147,483,647; the budget is counted in 64-bit integers.</summary>
     public int JacobiRotationMultiplier { get; init; } = 64;
 
@@ -93,6 +101,8 @@ public sealed class MathBlockDomainOptions
                 IncompleteBetaNonConvergence,
                 "IncompleteBetaNonConvergence is not a defined policy.");
         }
+        Require(MatrixExponentialTaylorTerms, 1, int.MaxValue - 1, nameof(MatrixExponentialTaylorTerms), "the term counter is an int that must not wrap");
+        Require(CubeRootNewtonSteps, 0, int.MaxValue - 1, nameof(CubeRootNewtonSteps), "the step counter is an int that must not wrap");
         Require(JacobiRotationMultiplier, 1, int.MaxValue, nameof(JacobiRotationMultiplier), "the budget is counted in 64-bit integers, so the multiplier is an int");
         if (!Enum.IsDefined(JacobiNonConvergence))
         {

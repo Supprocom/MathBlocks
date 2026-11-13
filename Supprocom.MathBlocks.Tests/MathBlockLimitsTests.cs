@@ -33,7 +33,7 @@ public sealed class MathBlockLimitsTests(ITestOutputHelper output)
         ["N-MB-8"] = ["domain.maximum-iteration-count"],
         ["N-MB-9"] = ["openmath.maximum-document-characters", "openmath.maximum-document-bytes", "interchange.maximum-document-characters", "interchange.maximum-document-utf8-bytes", "interchange.maximum-expression-elements", "interchange.maximum-expression-depth"],
         ["N-MB-10"] = ["cuda.device-ordinal"],
-        ["N-MB-11"] = ["domain.jacobi-rotation-multiplier", "domain.jacobi-non-convergence", "matrix.exponential.taylor-terms", "scalar.cube-root.newton-steps"],
+        ["N-MB-11"] = ["domain.jacobi-rotation-multiplier", "domain.jacobi-non-convergence", "domain.matrix-exponential-taylor-terms", "domain.cube-root-newton-steps"],
         ["N-MB-12"] = ["packaging.target-framework", "packaging.cuda-toolkit-minimum-major", "packaging.profile-1-operation-count"]
     };
 
@@ -97,8 +97,8 @@ public sealed class MathBlockLimitsTests(ITestOutputHelper output)
         Assert.Equal(256, Value("domain.incomplete-beta-maximum-iterations", "special.regularized-incomplete-beta@1"));
         Assert.Equal(0, Value("domain.incomplete-beta-non-convergence", "special.regularized-incomplete-beta@1"));
         Assert.Equal(64, Value("domain.jacobi-rotation-multiplier", "matrix.symmetric-eigenvalues@1"));
-        Assert.Equal(48, Value("matrix.exponential.taylor-terms", "matrix.exponential@1"));
-        Assert.Equal(3, Value("scalar.cube-root.newton-steps", "scalar.cube-root@1"));
+        Assert.Equal(48, Value("domain.matrix-exponential-taylor-terms", "matrix.exponential@1"));
+        Assert.Equal(3, Value("domain.cube-root-newton-steps", "scalar.cube-root@1"));
         Assert.Equal(16 * 1024 * 1024, Value("openmath.maximum-document-characters"));
         Assert.Equal((16 * 1024 * 1024 * 3) + 3, Value("openmath.maximum-document-bytes"));
         Assert.Equal(6 * 16 * 1024 * 1024, Value("interchange.maximum-document-characters"));

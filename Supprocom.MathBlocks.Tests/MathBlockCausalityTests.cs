@@ -9,7 +9,7 @@ namespace Supprocom.MathBlocks.Tests;
 public sealed class MathBlockCausalityTests
 {
     private const string StandardCausalityFingerprint =
-        "3d25163eb2f29ef0eddb85d7cdd40bdd1144515bdc172a02cc62b4fd962fbe32";
+        "eab861dc019e2651207c2d13c0a24a8b3fb9f11ea793b4050d0b8546d9a59f19";
 
     /// <summary>
     /// Verifies every standard operation has an explicit causality label: in its block definition for the 337
@@ -23,9 +23,9 @@ public sealed class MathBlockCausalityTests
         var operations = MathBlockCatalog.Standard.Operations;
         var windowed = MathBlockWindowTestSupport.Windowed.Operations;
         var elementwise = MathBlockElementwiseTestSupport.Elementwise.Operations;
-        Assert.Equal(537, operations.Count);
+        Assert.Equal(561, operations.Count);
         Assert.Equal(118, windowed.Count);
-        Assert.Equal(82, elementwise.Count);
+        Assert.Equal(106, elementwise.Count);
         Assert.All(windowed, operation => Assert.Equal(MathBlockCausality.Trailing, operation.Causality.Kind));
         Assert.All(elementwise, operation => Assert.Equal(MathBlockCausality.Pointwise, operation.Causality.Kind));
         Assert.All(operations, operation =>
@@ -68,7 +68,9 @@ public sealed class MathBlockCausalityTests
         var expected = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(material)));
 
         Assert.Equal(expected, MathBlockCatalog.Standard.CausalityFingerprint);
-        Assert.Equal(StandardCausalityFingerprint, MathBlockCatalog.Standard.CausalityFingerprint);
+        Assert.True(
+            string.Equals(StandardCausalityFingerprint, MathBlockCatalog.Standard.CausalityFingerprint, StringComparison.Ordinal),
+            "The causality fingerprint is " + MathBlockCatalog.Standard.CausalityFingerprint);
     }
 
     /// <summary>Verifies an operation is NotSeries exactly when it has no vector-kind input.</summary>

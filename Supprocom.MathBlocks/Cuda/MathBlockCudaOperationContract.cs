@@ -8,6 +8,10 @@ public sealed class MathBlockCudaOperationContract
 {
     private readonly MathBlockOperation operation;
     private readonly IReadOnlyList<MathBlockCudaContractCase> contractCases;
+    private MathBlockSpanKernels.Kernel? spanKernel;
+    private MathBlockSpanKernels.RowKernel? spanRowKernel;
+    private bool spanKernelResolved;
+    private bool spanRowKernelResolved;
 
     internal MathBlockCudaOperationContract(
         MathBlockOperation operation,
@@ -146,6 +150,124 @@ public sealed class MathBlockCudaOperationContract
     /// <exception cref="ArgumentOutOfRangeException">An option is outside the range its limit allows.</exception>
     public MathBlockValue EvaluateCoreCLR(IReadOnlyList<MathBlockValue> inputs, MathBlockDomainOptions domainOptions) =>
         operation.Evaluate(inputs, domainOptions);
+
+    /// <summary>Evaluates a vector-to-vector operation on CoreCLR into a caller-owned span without allocating in the common case.</summary>
+    /// <remarks>
+    /// Rows are written as doubles; a Boolean vector writes 1 and 0. The span holds the rows of a valid result; for an
+    /// invalid result its contents are unspecified. The result equals the one of <see cref="EvaluateCoreCLR(IReadOnlyList{MathBlockValue})"/>
+    /// bit for bit. Operations without a span kernel, and inputs outside the common case (an invalid input, a unit, an
+    /// empty or unequal vector), take that allocating evaluation and copy its rows.
+    /// </remarks>
+    /// <exception cref="ArgumentException">The output span is shorter than the rows of the result; the message names the needed length.</exception>
+    public MathBlockEvaluation EvaluateCoreCLR(ReadOnlySpan<MathBlockValue> inputs, Span<double> output, MathBlockDomainOptions domainOptions)
+    {
+        ArgumentNullException.ThrowIfNull(domainOptions);
+        domainOptions.Validate();
+        if (SpanKernel is { } kernel && kernel(inputs, output, out var kernelRows, out var kernelValid))
+            return new MathBlockEvaluation(kernelValid, kernelRows, 0);
+
+        var values = inputs.ToArray();
+        var context = new MathBlockDomainContext(domainOptions);
+        var result = operation.Evaluate(values, context);
+        return CopyResult(result, output, context.NonConverged);
+    }
+
+    /// <summary>Evaluates an elementwise form on CoreCLR into caller-owned spans with a validity flag per row, without allocating in the common case.</summary>
+    /// <remarks>
+    /// <paramref name="output"/> equals the value of the form bit for bit, with the fill in every row that was not
+    /// computed, and <paramref name="rowValid"/> equals the validity sibling. The result is invalid only when the
+    /// evaluation as a whole cannot run, such as an input of the wrong kind; invalid rows alone never make it so.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">The operation is not an <c>elementwise.*</c> form.</exception>
+    /// <exception cref="ArgumentException">A span is shorter than the rows of the result; the message names the needed length.</exception>
+    public MathBlockEvaluation EvaluateCoreCLR(ReadOnlySpan<MathBlockValue> inputs, Span<double> output, Span<bool> rowValid, MathBlockDomainOptions domainOptions)
+    {
+        ArgumentNullException.ThrowIfNull(domainOptions);
+        domainOptions.Validate();
+        if (SpanRowKernel is { } kernel && kernel(inputs, output, rowValid, out var kernelRows))
+            return new MathBlockEvaluation(true, kernelRows, 0);
+
+        const string formPrefix = "elementwise.";
+        if (!Identity.StartsWith(formPrefix, StringComparison.Ordinal))
+            throw new InvalidOperationException($"'{Identity}' is not an elementwise form.");
+
+        var values = inputs.ToArray();
+        var context = new MathBlockDomainContext(domainOptions);
+        var form = operation.Evaluate(values, context);
+        if (!form.IsValid)
+            return new MathBlockEvaluation(false, form.Type.Rows, context.NonConverged);
+        var validityIdentity = "elementwise-valid." + Identity[formPrefix.Length..];
+        var validityOperation = MathBlockCatalog.Standard.Get(validityIdentity[..^2], 1);
+        var validity = validityOperation.Evaluate(values.AsSpan(0, values.Length - 1).ToArray(), new MathBlockDomainContext(domainOptions, counting: false));
+        if (!validity.IsValid)
+            return new MathBlockEvaluation(false, validity.Type.Rows, context.NonConverged);
+        var vector = form.AsVector();
+        var flags = validity.AsBooleanVector();
+        RequireOutput(output, vector.Count);
+        if (rowValid.Length < flags.Count)
+        {
+            throw new ArgumentException(
+                string.Create(System.Globalization.CultureInfo.InvariantCulture, $"The row validity span needs {flags.Count} elements; it has {rowValid.Length}."),
+                nameof(rowValid));
+        }
+
+        vector.Span.CopyTo(output);
+        for (var index = 0; index < flags.Count; index++)
+            rowValid[index] = flags[index];
+        return new MathBlockEvaluation(true, vector.Count, context.NonConverged);
+    }
+
+    // The identity text is built on every Identity read, so the span kernels are resolved once and kept.
+    private MathBlockSpanKernels.Kernel? SpanKernel => spanKernelResolved ? spanKernel : ResolveSpanKernel();
+
+    private MathBlockSpanKernels.RowKernel? SpanRowKernel => spanRowKernelResolved ? spanRowKernel : ResolveSpanRowKernel();
+
+    private MathBlockSpanKernels.Kernel? ResolveSpanKernel()
+    {
+        spanKernel = MathBlockSpanKernels.Find(Identity);
+        spanKernelResolved = true;
+        return spanKernel;
+    }
+
+    private MathBlockSpanKernels.RowKernel? ResolveSpanRowKernel()
+    {
+        spanRowKernel = MathBlockSpanKernels.FindRows(Identity);
+        spanRowKernelResolved = true;
+        return spanRowKernel;
+    }
+
+    private static MathBlockEvaluation CopyResult(MathBlockValue result, Span<double> output, long nonConverged)
+    {
+        if (!result.IsValid)
+            return new MathBlockEvaluation(false, result.Type.Rows, nonConverged);
+        switch (result.Type.Kind)
+        {
+            case MathBlockValueKind.Vector:
+                var vector = result.AsVector();
+                RequireOutput(output, vector.Count);
+                vector.Span.CopyTo(output);
+                return new MathBlockEvaluation(true, vector.Count, nonConverged);
+            case MathBlockValueKind.BooleanVector:
+                var flags = result.AsBooleanVector();
+                RequireOutput(output, flags.Count);
+                for (var index = 0; index < flags.Count; index++)
+                    output[index] = flags[index] ? 1d : 0d;
+                return new MathBlockEvaluation(true, flags.Count, nonConverged);
+            default:
+                throw new InvalidOperationException("The operation does not return a vector or a Boolean vector.");
+        }
+    }
+
+    private static void RequireOutput(Span<double> output, int rows)
+    {
+        if (output.Length < rows)
+        {
+            throw new ArgumentException(
+                string.Create(System.Globalization.CultureInfo.InvariantCulture, $"The output span needs {rows} elements; it has {output.Length}."),
+                nameof(output));
+        }
+    }
+
 
     /// <summary>Plans CUDA shape, capacity, and scratch storage for inputs, for the default block size of <see cref="MathBlockCudaDeviceModule.DispatcherBlockSize"/> threads.</summary>
     public MathBlockCudaOperationPlan PlanCUDA(IReadOnlyList<MathBlockValue> prototypeInputs) =>

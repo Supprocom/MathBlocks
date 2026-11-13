@@ -6,6 +6,17 @@ internal static partial class ScalarMathBlocks
     {
         internal const string Identity = "scalar.cube-root@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => MathBlockOperationFactory.ScalarUnary("scalar.cube-root", MathBlockScalar.CubeRoot, -8d, -2d, MathBlockTypeRules.CubeRootScalar);
+        internal static MathBlockOperation Create()
+        {
+            var operation = MathBlockOperationFactory.ScalarUnary("scalar.cube-root", MathBlockScalar.CubeRoot, -8d, -2d, MathBlockTypeRules.CubeRootScalar);
+            // The same evaluation with the Newton step count of the domain options; the unary kernel is the default's.
+            operation.DomainEvaluator = (inputs, domain) =>
+            {
+                MathBlockTypeResolver resolver = MathBlockTypeRules.CubeRootScalar;
+                var outputType = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
+                return MathBlockValue.Scalar(MathBlockScalar.CubeRoot(inputs[0].AsScalar(), domain.Options.CubeRootNewtonSteps), outputType.Unit);
+            };
+            return operation;
+        }
     }
 }

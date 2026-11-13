@@ -16,8 +16,8 @@ public sealed partial class MathBlockCudaTestIdentityTests
     [GeneratedRegex("\"(?<name>[a-z][a-z0-9-]*(?:\\.[a-z0-9-]+)+)(?<version>@[0-9]+)?(?:/[^\"]*)?\"", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 10_000)]
     private static partial Regex Literal();
 
-    // String literals that have the shape of an identity but are not a contract identity: a file name, and the window batch test's own version 2 operation.
-    private static readonly HashSet<string> NotIdentities = new(StringComparer.Ordinal) { "base-opcode-dispatch.cu", "window-accurate.sum" };
+    // String literals that have the shape of an identity but are not a contract identity: a file name, the window batch test's own version 2 operation, a limit record name, and an identity the span tests invent to see the error.
+    private static readonly HashSet<string> NotIdentities = new(StringComparer.Ordinal) { "base-opcode-dispatch.cu", "window-accurate.sum", "elementwise.maximum-source-count", "scalar.no-such" };
 
     /// <summary>Verifies every identity named in the CUDA test sources is a CUDA operation.</summary>
     [Fact]

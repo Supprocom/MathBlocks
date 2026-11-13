@@ -266,8 +266,8 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
             StringComparison.Ordinal);
     }
 
-    // The 41 sources, each with a form and a sibling.
-    internal const int ElementwiseFeatureCount = 82;
+    // The 53 sources, each with a form and a sibling.
+    internal const int ElementwiseFeatureCount = 106;
 
     // Per source and mask: seeded rows with fill -0, then the edge grid with each grid scalar as every broadcast
     // scalar and as the fill.

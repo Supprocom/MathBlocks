@@ -28,7 +28,7 @@ public sealed class MathBlockElementwiseDispatchSourceTests
     public void PublicElementwiseOpcodesAreBaseOpcodes()
     {
         var elementwise = MathBlockCudaDeviceModule.Operations.Where(contract => contract.Family == MathBlockCudaOperationFamily.Elementwise).ToArray();
-        Assert.Equal(82, elementwise.Length);
+        Assert.Equal(106, elementwise.Length);
         Assert.All(elementwise, contract => Assert.InRange(contract.Opcode, 0, 127));
     }
 }

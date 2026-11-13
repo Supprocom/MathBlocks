@@ -32,7 +32,17 @@ internal static class MathBlockCudaDevicePrelude
     ];
 
     // The identities that have a counter slot; the counters are indexed by position in MathBlockCudaDeviceModule.Operations.
-    internal static IEnumerable<string> CountedIdentities => Recorders.SelectMany(recorder => recorder.Identities);
+    internal static IEnumerable<string> CountedIdentities
+    {
+        get
+        {
+            foreach (var recorder in Recorders)
+            {
+                foreach (var identity in recorder.Identities)
+                    yield return identity;
+            }
+        }
+    }
 
     internal static string Create(MathBlockDomainOptions domain, IReadOnlyList<string> operations)
     {
@@ -52,6 +62,8 @@ internal static class MathBlockCudaDevicePrelude
         text.Append("static __device__ __forceinline__ double mathblocks_limit_incomplete_beta_tolerance() { return ")
             .Append(DoubleLiteral(domain.IncompleteBetaTolerance)).Append("; }\n");
         Limit(text, "incomplete_beta_policy", (int)domain.IncompleteBetaNonConvergence);
+        Limit(text, "matrix_exponential_taylor_terms", domain.MatrixExponentialTaylorTerms);
+        Limit(text, "cube_root_newton_steps", domain.CubeRootNewtonSteps);
         Limit(text, "jacobi_policy", (int)domain.JacobiNonConvergence);
         text.Append("static __device__ __forceinline__ long long mathblocks_limit_jacobi_rotation_budget(int size) { return (long long)")
             .Append(domain.JacobiRotationMultiplier.ToString(CultureInfo.InvariantCulture))

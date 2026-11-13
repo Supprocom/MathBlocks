@@ -70,7 +70,7 @@ public sealed class MathBlockNonConvergenceTests
     [Fact]
     public void TheToleranceDecidesConvergence()
     {
-        var loose = Beta1(new MathBlockDomainOptions { IncompleteBetaTolerance = 1e-6 });
+        var loose = Beta1(new MathBlockDomainOptions { IncompleteBetaTolerance = 1d });
 
         Assert.Empty(loose.NonConvergedEvaluations);
         Assert.True(loose.Outputs["result"].IsValid);

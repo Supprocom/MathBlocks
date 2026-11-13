@@ -53,11 +53,17 @@ public sealed class MathBlockElementwiseFormTests
         Assert.Equal(41, SourceIdentifiers.Length);
         Assert.Equal(scalarOnly.Where(identifier => !HasVectorForm(identifier)), SourceIdentifiers, StringComparer.Ordinal);
 
-        var expected = SourceIdentifiers
+        // The 41 sources without a Pointwise vector form, then the 12 whose vector twin has whole-value validity (sources 41 to 52).
+        var allSources = SourceIdentifiers.Concat(new[]
+        {
+            "scalar.absolute", "scalar.add", "scalar.subtract", "scalar.multiply", "scalar.divide", "scalar.power",
+            "scalar.natural-logarithm", "scalar.square-root", "scalar.square", "scalar.exponential", "scalar.positive-part", "scalar.sign"
+        }).ToArray();
+        var expected = allSources
             .SelectMany(source => new[] { $"elementwise.{source}@1", $"elementwise-valid.{source}@1" })
             .Order(StringComparer.Ordinal);
         Assert.Equal(expected, Elementwise.Operations.Select(operation => operation.Identity), StringComparer.Ordinal);
-        foreach (var source in SourceIdentifiers)
+        foreach (var source in allSources)
         {
             Assert.Equal(SourceArity(source) + 1, Form(source).Arity);
             Assert.Equal(SourceArity(source), Validity(source).Arity);

@@ -235,6 +235,16 @@
     <Description>This application identifies MathBlocks operation elementwise-valid.probability.poisson-pmf@1. It requires 2 ordered operand references.</Description>
   </CDDefinition>
   <CDDefinition>
+    <Name>op.elementwise-valid.scalar.absolute.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.absolute@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.add.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.add@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
     <Name>op.elementwise-valid.scalar.arc-cosine.v1</Name>
     <Role>application</Role>
     <Description>This application identifies MathBlocks operation elementwise-valid.scalar.arc-cosine@1. It requires 1 ordered operand references.</Description>
@@ -288,6 +298,16 @@
     <Name>op.elementwise-valid.scalar.cube.v1</Name>
     <Role>application</Role>
     <Description>This application identifies MathBlocks operation elementwise-valid.scalar.cube@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.divide.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.divide@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.exponential.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.exponential@1. It requires 1 ordered operand references.</Description>
   </CDDefinition>
   <CDDefinition>
     <Name>op.elementwise-valid.scalar.floor.v1</Name>
@@ -355,9 +375,29 @@
     <Description>This application identifies MathBlocks operation elementwise-valid.scalar.modulo@1. It requires 2 ordered operand references.</Description>
   </CDDefinition>
   <CDDefinition>
+    <Name>op.elementwise-valid.scalar.multiply.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.multiply@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.natural-logarithm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.natural-logarithm@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
     <Name>op.elementwise-valid.scalar.negate.v1</Name>
     <Role>application</Role>
     <Description>This application identifies MathBlocks operation elementwise-valid.scalar.negate@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.positive-part.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.positive-part@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.power.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.power@1. It requires 2 ordered operand references.</Description>
   </CDDefinition>
   <CDDefinition>
     <Name>op.elementwise-valid.scalar.reciprocal.v1</Name>
@@ -370,6 +410,11 @@
     <Description>This application identifies MathBlocks operation elementwise-valid.scalar.round@1. It requires 1 ordered operand references.</Description>
   </CDDefinition>
   <CDDefinition>
+    <Name>op.elementwise-valid.scalar.sign.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.sign@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
     <Name>op.elementwise-valid.scalar.sine.v1</Name>
     <Role>application</Role>
     <Description>This application identifies MathBlocks operation elementwise-valid.scalar.sine@1. It requires 1 ordered operand references.</Description>
@@ -378,6 +423,21 @@
     <Name>op.elementwise-valid.scalar.softplus.v1</Name>
     <Role>application</Role>
     <Description>This application identifies MathBlocks operation elementwise-valid.scalar.softplus@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.square-root.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.square-root@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.square.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.square@1. It requires 1 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise-valid.scalar.subtract.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise-valid.scalar.subtract@1. It requires 2 ordered operand references.</Description>
   </CDDefinition>
   <CDDefinition>
     <Name>op.elementwise-valid.scalar.tangent.v1</Name>
@@ -440,6 +500,16 @@
     <Description>This application identifies MathBlocks operation elementwise.probability.poisson-pmf@1. It requires 3 ordered operand references.</Description>
   </CDDefinition>
   <CDDefinition>
+    <Name>op.elementwise.scalar.absolute.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.absolute@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.add.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.add@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
     <Name>op.elementwise.scalar.arc-cosine.v1</Name>
     <Role>application</Role>
     <Description>This application identifies MathBlocks operation elementwise.scalar.arc-cosine@1. It requires 2 ordered operand references.</Description>
@@ -493,6 +563,16 @@
     <Name>op.elementwise.scalar.cube.v1</Name>
     <Role>application</Role>
     <Description>This application identifies MathBlocks operation elementwise.scalar.cube@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.divide.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.divide@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.exponential.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.exponential@1. It requires 2 ordered operand references.</Description>
   </CDDefinition>
   <CDDefinition>
     <Name>op.elementwise.scalar.floor.v1</Name>
@@ -560,9 +640,29 @@
     <Description>This application identifies MathBlocks operation elementwise.scalar.modulo@1. It requires 3 ordered operand references.</Description>
   </CDDefinition>
   <CDDefinition>
+    <Name>op.elementwise.scalar.multiply.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.multiply@1. It requires 3 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.natural-logarithm.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.natural-logarithm@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
     <Name>op.elementwise.scalar.negate.v1</Name>
     <Role>application</Role>
     <Description>This application identifies MathBlocks operation elementwise.scalar.negate@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.positive-part.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.positive-part@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.power.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.power@1. It requires 3 ordered operand references.</Description>
   </CDDefinition>
   <CDDefinition>
     <Name>op.elementwise.scalar.reciprocal.v1</Name>
@@ -575,6 +675,11 @@
     <Description>This application identifies MathBlocks operation elementwise.scalar.round@1. It requires 2 ordered operand references.</Description>
   </CDDefinition>
   <CDDefinition>
+    <Name>op.elementwise.scalar.sign.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.sign@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
     <Name>op.elementwise.scalar.sine.v1</Name>
     <Role>application</Role>
     <Description>This application identifies MathBlocks operation elementwise.scalar.sine@1. It requires 2 ordered operand references.</Description>
@@ -583,6 +688,21 @@
     <Name>op.elementwise.scalar.softplus.v1</Name>
     <Role>application</Role>
     <Description>This application identifies MathBlocks operation elementwise.scalar.softplus@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.square-root.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.square-root@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.square.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.square@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.elementwise.scalar.subtract.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation elementwise.scalar.subtract@1. It requires 3 ordered operand references.</Description>
   </CDDefinition>
   <CDDefinition>
     <Name>op.elementwise.scalar.tangent.v1</Name>
