@@ -211,3 +211,32 @@ Supprocom.MathBlocks.MathBlockDomainOptions.MaximumStateCount.get -> int
 Supprocom.MathBlocks.MathBlockDomainOptions.MaximumStateCount.init -> void
 Supprocom.MathBlocks.MathBlockOperation.Evaluate(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! inputs, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> Supprocom.MathBlocks.MathBlockValue
 Supprocom.MathBlocks.MathBlocksCoreCLRWorker.DomainOptions.get -> Supprocom.MathBlocks.MathBlockDomainOptions!
+Supprocom.MathBlocks.MathBlockDomainOptions.IncompleteBetaMaximumIterations.get -> int
+Supprocom.MathBlocks.MathBlockDomainOptions.IncompleteBetaMaximumIterations.init -> void
+Supprocom.MathBlocks.MathBlockDomainOptions.IncompleteBetaNonConvergence.get -> Supprocom.MathBlocks.MathBlockNonConvergencePolicy
+Supprocom.MathBlocks.MathBlockDomainOptions.IncompleteBetaNonConvergence.init -> void
+Supprocom.MathBlocks.MathBlockDomainOptions.IncompleteBetaTolerance.get -> double
+Supprocom.MathBlocks.MathBlockDomainOptions.IncompleteBetaTolerance.init -> void
+Supprocom.MathBlocks.MathBlockDomainOptions.JacobiNonConvergence.get -> Supprocom.MathBlocks.MathBlockNonConvergencePolicy
+Supprocom.MathBlocks.MathBlockDomainOptions.JacobiNonConvergence.init -> void
+Supprocom.MathBlocks.MathBlockDomainOptions.JacobiRotationFactor.get -> int
+Supprocom.MathBlocks.MathBlockDomainOptions.JacobiRotationFactor.init -> void
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumChoquetPlayerCount.get -> int
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumChoquetPlayerCount.init -> void
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumGeneratedVectorLength.get -> int
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumGeneratedVectorLength.init -> void
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumIterationCount.get -> int
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumIterationCount.init -> void
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumMatrixSize.get -> int
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumMatrixSize.init -> void
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumMaximalMinorColumns.get -> int
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumMaximalMinorColumns.init -> void
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumShapleyCoalitionValues.get -> int
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumShapleyCoalitionValues.init -> void
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumSubmodularSetFunctionValues.get -> int
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumSubmodularSetFunctionValues.init -> void
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumTotallyNonnegativeSize.get -> int
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumTotallyNonnegativeSize.init -> void
+Supprocom.MathBlocks.MathBlockNonConvergencePolicy
+Supprocom.MathBlocks.MathBlockNonConvergencePolicy.Estimate = 0 -> Supprocom.MathBlocks.MathBlockNonConvergencePolicy
+Supprocom.MathBlocks.MathBlockNonConvergencePolicy.Invalid = 1 -> Supprocom.MathBlocks.MathBlockNonConvergencePolicy
