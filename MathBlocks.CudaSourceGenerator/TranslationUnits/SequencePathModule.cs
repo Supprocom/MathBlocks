@@ -772,6 +772,8 @@ internal static unsafe class SequencePathModule
                 Cuda.SyncThreads();
                 width = output->boolean_value;
                 probability = output->scalar_value;
+                // Thread 0 reuses both fields for the work counters below; every thread must have read them first.
+                Cuda.SyncThreads();
                 if (!output->valid)
                     break;
                 if (width == 1)
