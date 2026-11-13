@@ -24,6 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="TypeSignatureScope.txt" LogicalName="TypeSignatureScope.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="..\Supprocom.MathBlocks\Blocks\**\*.Tests.cs" LinkBase="Blocks" />
     <Compile Include="..\MathBlocks.OpenMathProfileGenerator\OpenMathProfileArtifacts.cs"
              Link="Generators\OpenMathProfileArtifacts.cs" />
