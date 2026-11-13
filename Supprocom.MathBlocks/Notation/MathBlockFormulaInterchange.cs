@@ -259,16 +259,25 @@ public static partial class MathBlockFormulaInterchange
     /// <summary>Imports one canonical formula document.</summary>
     public static MathBlockFormulaImportResult Import(
         string source,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format) =>
+        Import(source, format, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>Imports one canonical formula document with the specified size ceilings.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static MathBlockFormulaImportResult Import(
+        string source,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaInterchangeOptions options)
     {
         ArgumentNullException.ThrowIfNull(source);
+        RequireOptions(options);
         RequireFormat(format);
         if (source.Length == 0)
             throw new FormatException("The formula source is empty.");
-        if (source.Length > MaximumDocumentCharacters)
+        if (source.Length > options.MaximumDocumentCharacters)
             throw new FormatException("The formula source exceeds the character limit.");
 
-        return ImportCore(source, format, PublishedProfiles);
+        return ImportCore(source, format, PublishedProfiles, options);
     }
 
     // Imports with an explicit ascending profile list instead of the published profiles.
@@ -283,7 +292,7 @@ public static partial class MathBlockFormulaInterchange
             throw new FormatException("The formula source is empty.");
         if (source.Length > MaximumDocumentCharacters)
             throw new FormatException("The formula source exceeds the character limit.");
-        return ImportCore(source, format, CreateCandidates(profiles));
+        return ImportCore(source, format, CreateCandidates(profiles), MathBlockFormulaInterchangeOptions.Default);
     }
 
     // The document's cdgroup selects the profile, and the exact annotation must be a canonical
@@ -292,13 +301,14 @@ public static partial class MathBlockFormulaInterchange
     private static MathBlockFormulaImportResult ImportCore(
         string source,
         MathBlockFormulaFormat format,
-        Lazy<MathBlockFormulaProfileDescriptor>[] profiles)
+        Lazy<MathBlockFormulaProfileDescriptor>[] profiles,
+        MathBlockFormulaInterchangeOptions options)
     {
-        var exact = ExtractExactAnnotation(source, format, profiles, out var profile);
+        var exact = ExtractExactAnnotation(source, format, profiles, options, out var profile);
         MathBlockOpenMathImportResult imported;
         try
         {
-            imported = MathBlockOpenMath.Import(exact, null, [profile.OpenMathProfile]);
+            imported = MathBlockOpenMath.Import(exact, options.OpenMathOptions, [profile.OpenMathProfile]);
         }
         catch (FormatException exception)
         {
@@ -321,15 +331,24 @@ public static partial class MathBlockFormulaInterchange
     /// <summary>Imports one canonical formula from contiguous UTF-8.</summary>
     public static MathBlockFormulaImportResult ImportUtf8(
         ReadOnlySpan<byte> source,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format) =>
+        ImportUtf8(source, format, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>Imports one canonical formula from contiguous UTF-8 with the specified size ceilings.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static MathBlockFormulaImportResult ImportUtf8(
+        ReadOnlySpan<byte> source,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaInterchangeOptions options)
     {
+        RequireOptions(options);
         if (source.Length == 0)
             throw new FormatException("The formula source is empty.");
-        if (source.Length > MaximumDocumentUtf8Bytes)
+        if (source.Length > options.MaximumDocumentUtf8Bytes)
             throw new FormatException("The formula source exceeds the byte limit.");
         try
         {
-            return Import(StrictUtf8.GetString(source), format);
+            return Import(StrictUtf8.GetString(source), format, options);
         }
         catch (DecoderFallbackException exception)
         {
@@ -340,88 +359,166 @@ public static partial class MathBlockFormulaInterchange
     /// <summary>Imports one canonical formula from segmented UTF-8.</summary>
     public static MathBlockFormulaImportResult ImportUtf8(
         ReadOnlySequence<byte> source,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format) =>
+        ImportUtf8(source, format, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>Imports one canonical formula from segmented UTF-8 with the specified size ceilings.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static MathBlockFormulaImportResult ImportUtf8(
+        ReadOnlySequence<byte> source,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaInterchangeOptions options)
     {
+        RequireOptions(options);
         if (source.IsEmpty)
             throw new FormatException("The formula source is empty.");
-        if (source.Length > MaximumDocumentUtf8Bytes)
+        if (source.Length > options.MaximumDocumentUtf8Bytes)
             throw new FormatException("The formula source exceeds the byte limit.");
-        return ImportUtf8(source.ToArray(), format);
+        return ImportUtf8(source.ToArray(), format, options);
     }
 
     /// <summary>Normalizes an already canonical formula and verifies its exact annotation.</summary>
-    public static string Normalize(string source, MathBlockFormulaFormat format)
+    public static string Normalize(string source, MathBlockFormulaFormat format) =>
+        Normalize(source, format, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>Normalizes an already canonical formula with the specified size ceilings and verifies its exact annotation.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static string Normalize(
+        string source,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaInterchangeOptions options)
     {
-        var result = Import(source, format);
+        var result = Import(source, format, options);
         return Export(result.Program, result.OutputName, format, result.Profile);
     }
 
     /// <summary>Normalizes a canonical UTF-8 formula.</summary>
     public static byte[] NormalizeUtf8(
         ReadOnlySpan<byte> source,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format) =>
+        NormalizeUtf8(source, format, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>Normalizes a canonical UTF-8 formula with the specified size ceilings.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static byte[] NormalizeUtf8(
+        ReadOnlySpan<byte> source,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaInterchangeOptions options)
     {
-        var result = ImportUtf8(source, format);
+        var result = ImportUtf8(source, format, options);
         return ExportUtf8(result.Program, result.OutputName, format, result.Profile);
     }
 
     /// <summary>Reads one canonical formula from a caller-owned character reader.</summary>
     public static MathBlockFormulaImportResult Read(
         TextReader source,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format) =>
+        Read(source, format, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>Reads one canonical formula from a caller-owned character reader with the specified size ceilings.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static MathBlockFormulaImportResult Read(
+        TextReader source,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaInterchangeOptions options)
     {
         ArgumentNullException.ThrowIfNull(source);
+        RequireOptions(options);
         RequireFormat(format);
-        return Import(ReadCharacters(source), format);
+        return Import(ReadCharacters(source, options), format, options);
     }
 
     /// <summary>Reads one canonical formula asynchronously from a character reader.</summary>
+#pragma warning disable RS0027 // The overload with options has a required token and one parameter more; callers of this shipped signature still bind here.
+    public static Task<MathBlockFormulaImportResult> ReadAsync(
+        TextReader source,
+        MathBlockFormulaFormat format,
+        CancellationToken cancellationToken = default) =>
+        ReadAsync(source, format, MathBlockFormulaInterchangeOptions.Default, cancellationToken);
+#pragma warning restore RS0027
+
+    /// <summary>Reads one canonical formula asynchronously from a character reader with the specified size ceilings.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
     public static async Task<MathBlockFormulaImportResult> ReadAsync(
         TextReader source,
         MathBlockFormulaFormat format,
-        CancellationToken cancellationToken = default)
+        MathBlockFormulaInterchangeOptions options,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(source);
+        RequireOptions(options);
         RequireFormat(format);
         cancellationToken.ThrowIfCancellationRequested();
         return Import(
-            await ReadCharactersAsync(source, cancellationToken).ConfigureAwait(false),
-            format);
+            await ReadCharactersAsync(source, options, cancellationToken).ConfigureAwait(false),
+            format,
+            options);
     }
 
     /// <summary>Reads one canonical UTF-8 formula from a caller-owned stream.</summary>
     public static MathBlockFormulaImportResult ReadUtf8(
         Stream source,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format) =>
+        ReadUtf8(source, format, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>Reads one canonical UTF-8 formula from a caller-owned stream with the specified size ceilings.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static MathBlockFormulaImportResult ReadUtf8(
+        Stream source,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaInterchangeOptions options)
     {
         ArgumentNullException.ThrowIfNull(source);
+        RequireOptions(options);
         RequireFormat(format);
         if (!source.CanRead)
             throw new ArgumentException("The source stream must support reading.", nameof(source));
-        return ImportUtf8(ReadBytes(source), format);
+        return ImportUtf8(ReadBytes(source, options), format, options);
     }
 
     /// <summary>Reads one canonical UTF-8 formula asynchronously from a caller-owned stream.</summary>
+#pragma warning disable RS0027 // The overload with options has a required token and one parameter more; callers of this shipped signature still bind here.
+    public static Task<MathBlockFormulaImportResult> ReadUtf8Async(
+        Stream source,
+        MathBlockFormulaFormat format,
+        CancellationToken cancellationToken = default) =>
+        ReadUtf8Async(source, format, MathBlockFormulaInterchangeOptions.Default, cancellationToken);
+#pragma warning restore RS0027
+
+    /// <summary>Reads one canonical UTF-8 formula asynchronously from a caller-owned stream with the specified size ceilings.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
     public static async Task<MathBlockFormulaImportResult> ReadUtf8Async(
         Stream source,
         MathBlockFormulaFormat format,
-        CancellationToken cancellationToken = default)
+        MathBlockFormulaInterchangeOptions options,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(source);
+        RequireOptions(options);
         RequireFormat(format);
         if (!source.CanRead)
             throw new ArgumentException("The source stream must support reading.", nameof(source));
         cancellationToken.ThrowIfCancellationRequested();
         return ImportUtf8(
-            await ReadBytesAsync(source, cancellationToken).ConfigureAwait(false),
-            format);
+            await ReadBytesAsync(source, options, cancellationToken).ConfigureAwait(false),
+            format,
+            options);
     }
 
     /// <summary>Attempts to import one canonical formula document.</summary>
     public static MathBlockFormulaImportAttempt TryImport(
         string? source,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format) =>
+        TryImport(source, format, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>Attempts to import one canonical formula document with the specified size ceilings.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static MathBlockFormulaImportAttempt TryImport(
+        string? source,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaInterchangeOptions options)
     {
+        RequireOptions(options);
         RequireFormat(format);
         if (source is null)
         {
@@ -432,7 +529,7 @@ public static partial class MathBlockFormulaInterchange
         }
         try
         {
-            return MathBlockFormulaImportAttempt.Success(Import(source, format));
+            return MathBlockFormulaImportAttempt.Success(Import(source, format, options));
         }
         catch (FormatException exception)
         {
@@ -443,11 +540,20 @@ public static partial class MathBlockFormulaInterchange
     /// <summary>Attempts to import one canonical formula from contiguous UTF-8.</summary>
     public static MathBlockFormulaImportAttempt TryImportUtf8(
         ReadOnlySpan<byte> source,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format) =>
+        TryImportUtf8(source, format, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>Attempts to import one canonical formula from contiguous UTF-8 with the specified size ceilings.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static MathBlockFormulaImportAttempt TryImportUtf8(
+        ReadOnlySpan<byte> source,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaInterchangeOptions options)
     {
+        RequireOptions(options);
         try
         {
-            return MathBlockFormulaImportAttempt.Success(ImportUtf8(source, format));
+            return MathBlockFormulaImportAttempt.Success(ImportUtf8(source, format, options));
         }
         catch (FormatException exception)
         {
@@ -458,11 +564,20 @@ public static partial class MathBlockFormulaInterchange
     /// <summary>Attempts to import one canonical formula from segmented UTF-8.</summary>
     public static MathBlockFormulaImportAttempt TryImportUtf8(
         ReadOnlySequence<byte> source,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format) =>
+        TryImportUtf8(source, format, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>Attempts to import one canonical formula from segmented UTF-8 with the specified size ceilings.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static MathBlockFormulaImportAttempt TryImportUtf8(
+        ReadOnlySequence<byte> source,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaInterchangeOptions options)
     {
+        RequireOptions(options);
         try
         {
-            return MathBlockFormulaImportAttempt.Success(ImportUtf8(source, format));
+            return MathBlockFormulaImportAttempt.Success(ImportUtf8(source, format, options));
         }
         catch (FormatException exception)
         {
@@ -473,8 +588,17 @@ public static partial class MathBlockFormulaInterchange
     /// <summary>Attempts to read one canonical formula from a character reader.</summary>
     public static MathBlockFormulaImportAttempt TryRead(
         TextReader? source,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format) =>
+        TryRead(source, format, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>Attempts to read one canonical formula from a character reader with the specified size ceilings.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static MathBlockFormulaImportAttempt TryRead(
+        TextReader? source,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaInterchangeOptions options)
     {
+        RequireOptions(options);
         RequireFormat(format);
         if (source is null)
         {
@@ -485,7 +609,7 @@ public static partial class MathBlockFormulaInterchange
         }
         try
         {
-            return MathBlockFormulaImportAttempt.Success(Read(source, format));
+            return MathBlockFormulaImportAttempt.Success(Read(source, format, options));
         }
         catch (FormatException exception)
         {
@@ -496,8 +620,17 @@ public static partial class MathBlockFormulaInterchange
     /// <summary>Attempts to read one canonical UTF-8 formula from a stream.</summary>
     public static MathBlockFormulaImportAttempt TryReadUtf8(
         Stream? source,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format) =>
+        TryReadUtf8(source, format, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>Attempts to read one canonical UTF-8 formula from a stream with the specified size ceilings.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static MathBlockFormulaImportAttempt TryReadUtf8(
+        Stream? source,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaInterchangeOptions options)
     {
+        RequireOptions(options);
         RequireFormat(format);
         if (source is null)
         {
@@ -508,7 +641,7 @@ public static partial class MathBlockFormulaInterchange
         }
         try
         {
-            return MathBlockFormulaImportAttempt.Success(ReadUtf8(source, format));
+            return MathBlockFormulaImportAttempt.Success(ReadUtf8(source, format, options));
         }
         catch (FormatException exception)
         {
@@ -519,18 +652,34 @@ public static partial class MathBlockFormulaInterchange
     /// <summary>Validates one formula document completely.</summary>
     public static MathBlockFormulaValidationResult Validate(
         string? source,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format) =>
+        Validate(source, format, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>Validates one formula document completely with the specified size ceilings.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static MathBlockFormulaValidationResult Validate(
+        string? source,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaInterchangeOptions options)
     {
-        var attempt = TryImport(source, format);
+        var attempt = TryImport(source, format, options);
         return new MathBlockFormulaValidationResult(attempt.Succeeded, attempt.Diagnostic);
     }
 
     /// <summary>Validates one contiguous UTF-8 formula completely.</summary>
     public static MathBlockFormulaValidationResult ValidateUtf8(
         ReadOnlySpan<byte> source,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format) =>
+        ValidateUtf8(source, format, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>Validates one contiguous UTF-8 formula completely with the specified size ceilings.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static MathBlockFormulaValidationResult ValidateUtf8(
+        ReadOnlySpan<byte> source,
+        MathBlockFormulaFormat format,
+        MathBlockFormulaInterchangeOptions options)
     {
-        var attempt = TryImportUtf8(source, format);
+        var attempt = TryImportUtf8(source, format, options);
         return new MathBlockFormulaValidationResult(attempt.Succeeded, attempt.Diagnostic);
     }
 
@@ -599,7 +748,7 @@ public static partial class MathBlockFormulaInterchange
         }
     }
 
-    private static string ReadCharacters(TextReader source)
+    private static string ReadCharacters(TextReader source, MathBlockFormulaInterchangeOptions options)
     {
         var result = new StringBuilder();
         var buffer = new char[8192];
@@ -608,7 +757,7 @@ public static partial class MathBlockFormulaInterchange
             var count = source.Read(buffer, 0, buffer.Length);
             if (count == 0)
                 return result.ToString();
-            if (count > MaximumDocumentCharacters - result.Length)
+            if (count > options.MaximumDocumentCharacters - result.Length)
                 throw new FormatException("The formula source exceeds the character limit.");
             result.Append(buffer, 0, count);
         }
@@ -616,6 +765,7 @@ public static partial class MathBlockFormulaInterchange
 
     private static async Task<string> ReadCharactersAsync(
         TextReader source,
+        MathBlockFormulaInterchangeOptions options,
         CancellationToken cancellationToken)
     {
         var result = new StringBuilder();
@@ -626,13 +776,13 @@ public static partial class MathBlockFormulaInterchange
                 .ConfigureAwait(false);
             if (count == 0)
                 return result.ToString();
-            if (count > MaximumDocumentCharacters - result.Length)
+            if (count > options.MaximumDocumentCharacters - result.Length)
                 throw new FormatException("The formula source exceeds the character limit.");
             result.Append(buffer, 0, count);
         }
     }
 
-    private static byte[] ReadBytes(Stream source)
+    private static byte[] ReadBytes(Stream source, MathBlockFormulaInterchangeOptions options)
     {
         var result = new ArrayBufferWriter<byte>();
         var buffer = new byte[8192];
@@ -641,7 +791,7 @@ public static partial class MathBlockFormulaInterchange
             var count = source.Read(buffer, 0, buffer.Length);
             if (count == 0)
                 return result.WrittenSpan.ToArray();
-            if (count > MaximumDocumentUtf8Bytes - result.WrittenCount)
+            if (count > options.MaximumDocumentUtf8Bytes - result.WrittenCount)
                 throw new FormatException("The formula source exceeds the byte limit.");
             result.Write(buffer.AsSpan(0, count));
         }
@@ -649,6 +799,7 @@ public static partial class MathBlockFormulaInterchange
 
     private static async Task<byte[]> ReadBytesAsync(
         Stream source,
+        MathBlockFormulaInterchangeOptions options,
         CancellationToken cancellationToken)
     {
         var result = new ArrayBufferWriter<byte>();
@@ -659,7 +810,7 @@ public static partial class MathBlockFormulaInterchange
                 .ConfigureAwait(false);
             if (count == 0)
                 return result.WrittenSpan.ToArray();
-            if (count > MaximumDocumentUtf8Bytes - result.WrittenCount)
+            if (count > options.MaximumDocumentUtf8Bytes - result.WrittenCount)
                 throw new FormatException("The formula source exceeds the byte limit.");
             result.Write(buffer.AsSpan(0, count));
         }
@@ -1320,6 +1471,7 @@ public static partial class MathBlockFormulaInterchange
         string source,
         MathBlockFormulaFormat format,
         Lazy<MathBlockFormulaProfileDescriptor>[] profiles,
+        MathBlockFormulaInterchangeOptions options,
         out MathBlockFormulaProfileDescriptor profile)
     {
         profile = profiles[0].Value;
@@ -1327,7 +1479,7 @@ public static partial class MathBlockFormulaInterchange
         {
             DtdProcessing = DtdProcessing.Prohibit,
             XmlResolver = null,
-            MaxCharactersInDocument = MaximumDocumentCharacters,
+            MaxCharactersInDocument = options.MaximumDocumentCharacters,
             IgnoreComments = false,
             IgnoreProcessingInstructions = false,
             IgnoreWhitespace = false,
@@ -1423,6 +1575,14 @@ string.Equals(reader.GetAttribute("encoding"), profile.ExactAnnotationMediaType,
             }
         }
         return profiles[0].Value;
+    }
+
+    // Validates the size ceilings and the OpenMath options of the exact annotation before any source is read.
+    private static void RequireOptions(MathBlockFormulaInterchangeOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        options.Validate();
+        MathBlockOpenMath.RequireOptions(options.OpenMathOptions);
     }
 
     private static void RequireFormat(MathBlockFormulaFormat format)

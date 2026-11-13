@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml;
 
@@ -13,28 +14,41 @@ public static partial class MathBlockFormulaInterchange
         string source,
         MathBlockFormulaFormat format,
         IReadOnlyDictionary<string, MathBlockType> inputTypes,
-        string outputName)
+        string outputName) =>
+        Import(source, format, inputTypes, outputName, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>
+    /// Imports the visible expression using explicit input types and the specified size ceilings.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static MathBlockFormulaImportResult Import(
+        string source,
+        MathBlockFormulaFormat format,
+        IReadOnlyDictionary<string, MathBlockType> inputTypes,
+        string outputName,
+        MathBlockFormulaInterchangeOptions options)
     {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(inputTypes);
+        RequireOptions(options);
         RequireFormat(format);
         if (source.Length == 0)
             throw new FormatException("The formula source is empty.");
-        if (source.Length > MaximumDocumentCharacters)
+        if (source.Length > options.MaximumDocumentCharacters)
             throw new FormatException("The formula source exceeds the character limit.");
         if (string.IsNullOrWhiteSpace(outputName) || !string.Equals(outputName, outputName.Trim(), StringComparison.Ordinal))
             throw new ArgumentException("A canonical output name is required.", nameof(outputName));
 
         var bindings = CopyBindings(inputTypes);
-        var expression = ReadVisibleExpression(source, format);
+        var expression = ReadVisibleExpression(source, format, options);
         RequireFormulaVocabulary(expression, format);
-        var state = new VisibleExpressionState(bindings);
+        var state = new VisibleExpressionState(bindings, options.MaximumExpressionDepth);
         int output;
         try
         {
             output = ParseExpression(expression, state, format, 0);
             var program = state.Builder.Output(outputName, output).Build();
-            var exact = MathBlockOpenMath.Import(MathBlockOpenMath.Export(program));
+            var exact = MathBlockOpenMath.Import(MathBlockOpenMath.Export(program), options.OpenMathOptions);
             return new MathBlockFormulaImportResult(
                 exact,
                 ProfileForOpenMath(exact.Profile),
@@ -54,6 +68,10 @@ public static partial class MathBlockFormulaInterchange
         {
             throw new FormatException("The visible formula expression is invalid.", exception);
         }
+        catch (InsufficientExecutionStackException exception)
+        {
+            throw new FormatException("The formula expression nests deeper than the stack allows.", exception);
+        }
     }
 
     /// <summary>
@@ -63,15 +81,28 @@ public static partial class MathBlockFormulaInterchange
         ReadOnlySpan<byte> source,
         MathBlockFormulaFormat format,
         IReadOnlyDictionary<string, MathBlockType> inputTypes,
-        string outputName)
+        string outputName) =>
+        ImportUtf8(source, format, inputTypes, outputName, MathBlockFormulaInterchangeOptions.Default);
+
+    /// <summary>
+    /// Imports a visible UTF-8 expression using explicit input types and the specified size ceilings.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">A ceiling is above the .NET limit it is bounded by.</exception>
+    public static MathBlockFormulaImportResult ImportUtf8(
+        ReadOnlySpan<byte> source,
+        MathBlockFormulaFormat format,
+        IReadOnlyDictionary<string, MathBlockType> inputTypes,
+        string outputName,
+        MathBlockFormulaInterchangeOptions options)
     {
+        RequireOptions(options);
         if (source.Length == 0)
             throw new FormatException("The formula source is empty.");
-        if (source.Length > MaximumDocumentUtf8Bytes)
+        if (source.Length > options.MaximumDocumentUtf8Bytes)
             throw new FormatException("The formula source exceeds the byte limit.");
         try
         {
-            return Import(StrictUtf8.GetString(source), format, inputTypes, outputName);
+            return Import(StrictUtf8.GetString(source), format, inputTypes, outputName, options);
         }
         catch (DecoderFallbackException exception)
         {
@@ -106,13 +137,14 @@ public static partial class MathBlockFormulaInterchange
 
     private static FormulaXmlElement ReadVisibleExpression(
         string source,
-        MathBlockFormulaFormat format)
+        MathBlockFormulaFormat format,
+        MathBlockFormulaInterchangeOptions options)
     {
         var settings = new XmlReaderSettings
         {
             DtdProcessing = DtdProcessing.Prohibit,
             XmlResolver = null,
-            MaxCharactersInDocument = MaximumDocumentCharacters,
+            MaxCharactersInDocument = options.MaximumDocumentCharacters,
             IgnoreComments = false,
             IgnoreProcessingInstructions = false,
             IgnoreWhitespace = false,
@@ -136,7 +168,7 @@ public static partial class MathBlockFormulaInterchange
                 {
                     if (root is not null)
                         throw new FormatException("The formula source is not valid XML.");
-                    root = BufferCurrentElement(reader);
+                    root = BufferCurrentElement(reader, options.MaximumExpressionElements);
                     continue;
                 }
                 if ((reader.NodeType is XmlNodeType.Text or XmlNodeType.CDATA) &&
@@ -243,7 +275,7 @@ public static partial class MathBlockFormulaInterchange
         return element.Children[0];
     }
 
-    private static FormulaXmlElement BufferCurrentElement(XmlReader reader)
+    private static FormulaXmlElement BufferCurrentElement(XmlReader reader, int maximumElements)
     {
         using var subtree = reader.ReadSubtree();
         var frames = new Stack<FormulaXmlFrame>();
@@ -255,7 +287,7 @@ public static partial class MathBlockFormulaInterchange
             {
                 case XmlNodeType.Element:
                     elementCount++;
-                    if (elementCount > MaximumExpressionElements)
+                    if (elementCount > maximumElements)
                         throw new FormatException("The formula expression exceeds the element limit.");
                     var frame = new FormulaXmlFrame(
                         subtree,
@@ -323,8 +355,10 @@ public static partial class MathBlockFormulaInterchange
         MathBlockFormulaFormat format,
         int depth)
     {
-        if (depth > MaximumExpressionDepth)
+        if (depth > state.MaximumDepth)
             throw new FormatException("The formula expression exceeds the nesting limit.");
+        // The parser recurses once per nesting level, so a raised depth ceiling is bounded by the stack too.
+        RuntimeHelpers.EnsureSufficientExecutionStack();
 
         if (IsFormulaElement(element, "OMATTR", OpenMathNamespace))
         {
@@ -1042,8 +1076,10 @@ string.Equals(attribute.LocalName, name, StringComparison.Ordinal))
         string namespaceName) => string.Equals(element.LocalName, localName, StringComparison.Ordinal) && string.Equals(element.NamespaceName, namespaceName, StringComparison.Ordinal);
 
     private sealed class VisibleExpressionState(
-        IReadOnlyDictionary<string, MathBlockType> bindings)
+        IReadOnlyDictionary<string, MathBlockType> bindings,
+        int maximumDepth)
     {
+        public int MaximumDepth { get; } = maximumDepth;
         public MathBlockProgramBuilder Builder { get; } =
             new(MathBlockCatalog.Standard);
         public IReadOnlyDictionary<string, MathBlockType> Bindings { get; } = bindings;

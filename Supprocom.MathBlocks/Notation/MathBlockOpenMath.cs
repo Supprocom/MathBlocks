@@ -19,10 +19,10 @@ public static partial class MathBlockOpenMath
     /// <summary>Gets the canonical XML algorithm URI.</summary>
     public const string CanonicalizationAlgorithm = "http://www.w3.org/2006/12/xml-c14n11";
 
-    /// <summary>Gets the compatibility maximum for decoded source characters.</summary>
+    /// <summary>Gets the default maximum for decoded source characters; <see cref="MathBlockOpenMathImportOptions.MaximumDocumentCharacters"/> can raise it to the longest .NET string.</summary>
     public const int MaximumDocumentCharacters = 16 * 1024 * 1024;
 
-    /// <summary>Gets the compatibility maximum for UTF-8 source bytes.</summary>
+    /// <summary>Gets the default maximum for UTF-8 source bytes; <see cref="MathBlockOpenMathImportOptions.MaximumDocumentBytes"/> can raise it to the longest .NET byte array.</summary>
     public const int MaximumDocumentUtf8Bytes = MaximumDocumentCharacters * 3 + 3;
 
     /// <summary>Gets the fixed Profile 1 content dictionary base URI.</summary>

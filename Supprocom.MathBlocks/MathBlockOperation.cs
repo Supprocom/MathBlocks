@@ -77,7 +77,7 @@ public sealed class MathBlockOperation
         => throw new NotSupportedException("Not implemented yet.");
 
     /// <summary>Gets the limits that apply to the operation, resolved with <see cref="Cuda.MathBlocksCudaOptions.Default"/>.</summary>
-    public IReadOnlyList<MathBlockLimit> Limits => throw new NotSupportedException("Not implemented yet.");
+    public IReadOnlyList<MathBlockLimit> Limits => MathBlockLimitCatalog.For(Identity, Cuda.MathBlocksCudaOptions.Default, MathBlockDomainOptions.Default);
 
     /// <summary>Gets the identifier value.</summary>
     public string Identifier { get; }

@@ -6,11 +6,14 @@ public sealed class MathBlockOpenMathImportOptions
     /// <summary>Gets the compatibility-preserving option set.</summary>
     public static MathBlockOpenMathImportOptions Default { get; } = new();
 
-    /// <summary>Gets the maximum number of decoded document characters.</summary>
+    // The longest .NET string: 0x3FFFFFDF characters.
+    internal const int MaximumStringLength = 0x3FFFFFDF;
+
+    /// <summary>Gets the maximum number of decoded document characters. The range is 1 to 1,073,741,791, the longest .NET string.</summary>
     public int MaximumDocumentCharacters { get; init; } =
         MathBlockOpenMath.MaximumDocumentCharacters;
 
-    /// <summary>Gets the maximum number of source bytes.</summary>
+    /// <summary>Gets the maximum number of source bytes. The range is 1 to 2,147,483,591, the longest .NET byte array.</summary>
     public int MaximumDocumentBytes { get; init; } =
         MathBlockOpenMath.MaximumDocumentUtf8Bytes;
 
