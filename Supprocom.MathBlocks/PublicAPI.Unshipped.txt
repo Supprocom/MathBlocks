@@ -123,8 +123,8 @@ static Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.WriteJson(System.Text.Json.
 static Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.Default.get -> Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions!
 static Supprocom.MathBlocks.MathBlockLimit.operator !=(Supprocom.MathBlocks.MathBlockLimit? left, Supprocom.MathBlocks.MathBlockLimit? right) -> bool
 static Supprocom.MathBlocks.MathBlockLimit.operator ==(Supprocom.MathBlocks.MathBlockLimit? left, Supprocom.MathBlocks.MathBlockLimit? right) -> bool
-static Supprocom.MathBlocks.MathBlockLimits.For(string! operationIdentity, Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions? options = null) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockLimit!>!
-static Supprocom.MathBlocks.MathBlockLimits.Resolve(Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions? options = null) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockLimit!>!
+static Supprocom.MathBlocks.MathBlockLimits.For(string! operationIdentity, Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions? cuda = null, Supprocom.MathBlocks.MathBlockDomainOptions? domain = null) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockLimit!>!
+static Supprocom.MathBlocks.MathBlockLimits.Resolve(Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions? cuda = null, Supprocom.MathBlocks.MathBlockDomainOptions? domain = null) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockLimit!>!
 static Supprocom.MathBlocks.MathBlockLimits.WriteJson(System.Text.Json.Utf8JsonWriter! writer, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockLimit!>! limits) -> void
 Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch
 Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.Blocks.get -> int
