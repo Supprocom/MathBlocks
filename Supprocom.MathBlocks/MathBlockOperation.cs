@@ -7,6 +7,7 @@ public sealed class MathBlockOperation
     private readonly MathBlockEvaluator evaluator;
     private MathBlockDomainEvaluator? domainEvaluator;
     private readonly MathBlockCausalityInfo? causality;
+    private readonly Lazy<MathBlockTypeSignature?> typeSignature;
 
     /// <summary>Creates a versioned operation with type and evaluation contracts.</summary>
     /// <remarks>
@@ -71,6 +72,9 @@ public sealed class MathBlockOperation
                 throw new ArgumentException("The width input index is outside the operation arity.", nameof(causality));
         }
         this.causality = causality;
+        typeSignature = new Lazy<MathBlockTypeSignature?>(
+            () => TypeSignatureFactory?.Invoke() ?? MathBlockTypeSignatureCatalog.Create(Identity),
+            LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
     /// <summary>Evaluates the operation with the given domain limits.</summary>
@@ -117,6 +121,21 @@ public sealed class MathBlockOperation
     public MathBlockCausalityInfo Causality =>
         causality ?? throw new InvalidOperationException($"Operation '{Identity}' has no causality label.");
 
+    /// <summary>Gets the data form of the output-type rule, or null when no signature covers the operation.</summary>
+    /// <remarks>
+    /// When the operation has a signature, <see cref="ResolveOutputType"/> resolves through it, with the same code the CUDA
+    /// type-rule module runs.
+    /// </remarks>
+    public MathBlockTypeSignature? TypeSignature => typeSignature.Value;
+
+    // Builds the signature of an operation that is a lift of another operation, where the signature follows from the
+    // source's. Other operations take theirs from MathBlockTypeSignatureCatalog.
+    internal Func<MathBlockTypeSignature?>? TypeSignatureFactory { get; set; }
+
+    // The resolver delegate the operation was created with. It is the reference the signature is tested against, and it
+    // supplies the exception of a rejected input and the type of an operation without a signature.
+    internal MathBlockTypeResolver LegacyTypeResolver => typeResolver;
+
     // Refines the resolved output type from the inputs that are program constants (null for every other input), for
     // an operation whose output shape depends on an input value, such as a rolling window's width. The program
     // builder applies it, so a length that follows from constants is part of the node type at build time.
@@ -133,7 +152,13 @@ public sealed class MathBlockOperation
     {
         ArgumentNullException.ThrowIfNull(inputTypes);
         RequireArity(inputTypes.Count);
-        return typeResolver(inputTypes);
+        if (TypeSignature is not { } signature)
+            return typeResolver(inputTypes);
+        if (MathBlockTypeSignatures.ResolveListStatus(signature, inputTypes, out var resolved) == MathBlockTypeRuleStatus.Ok)
+            return resolved;
+        // The inputs are rejected: the delegate raises the exception callers have always received for them.
+        _ = typeResolver(inputTypes);
+        throw new InvalidOperationException($"The type signature of '{Identity}' rejects inputs that its resolver accepts.");
     }
 
     /// <summary>Evaluates the operation with positional input values.</summary>

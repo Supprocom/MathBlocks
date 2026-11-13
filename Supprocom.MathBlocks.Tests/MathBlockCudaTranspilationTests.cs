@@ -31,12 +31,18 @@ public sealed class MathBlockCudaTranspilationTests
         // The device source is the domain-limit prelude followed by the generated units.
         Assert.EndsWith(CreateExpectedSource(), MathBlockCudaDeviceModule.Source, StringComparison.Ordinal);
         Assert.Equal(MathBlockCudaDeviceModule.GetSource(MathBlockDomainOptions.Default), MathBlockCudaDeviceModule.Source);
-        Assert.Equal(
-            "73B34A68E63D6838B5BDD3119B18DDD2FBB1039343ABC5261721FF6F6E3CB8E3",
-            MathBlockCudaDeviceModule.SourceFingerprint);
-        Assert.Equal(
-            "0E9F668A26D40E3B8704D3D5AB0A116FD7AA45D75D6E7593B0B2F58E0E0DA3D7",
-            MathBlockCudaDeviceModule.Abi.OperationTableFingerprint);
+        Assert.True(
+            string.Equals(
+                "331B5C81CF60DE3A6FAFE5C675438EFDEA4B1653882A84C3EFC8DDC21DA09B9B",
+                MathBlockCudaDeviceModule.SourceFingerprint,
+                StringComparison.Ordinal),
+            "The source fingerprint is " + MathBlockCudaDeviceModule.SourceFingerprint);
+        Assert.True(
+            string.Equals(
+                "05FFF782B2FC827AF1159311646D91A7FC2D54D3EE38B3C08F9EEF1910F66E5F",
+                MathBlockCudaDeviceModule.Abi.OperationTableFingerprint,
+                StringComparison.Ordinal),
+            "The operation table fingerprint is " + MathBlockCudaDeviceModule.Abi.OperationTableFingerprint);
     }
 
     /// <summary>Verifies cudavector unit matches the csharp 2 cuda 031 golden.</summary>

@@ -173,6 +173,7 @@ internal static class ElementwiseMathBlocks
             MathBlockCausalityInfo.Pointwise);
         if (form.Source.DomainEvaluator is not null)
             operation.DomainEvaluator = form.EvaluateForm;
+        operation.TypeSignatureFactory = () => form.CreateSignature(operation.Identity, validity: false);
         lifts.Add(operation, form);
         return operation;
     }
@@ -194,6 +195,7 @@ internal static class ElementwiseMathBlocks
             causality: MathBlockCausalityInfo.Pointwise);
         if (form.Source.DomainEvaluator is not null)
             operation.DomainEvaluator = form.EvaluateValidity;
+        operation.TypeSignatureFactory = () => form.CreateSignature(operation.Identity, validity: true);
         lifts.Add(operation, form);
         return operation;
     }

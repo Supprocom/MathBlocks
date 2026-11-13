@@ -213,3 +213,19 @@ dotnet_diagnostic.HLQ006.severity = none
 # IReadOnlyList<T> implementations; current callers are not a type contract.
 [Supprocom.MathBlocks/Primitives/MathBlockCollectionPrimitives.cs]
 dotnet_diagnostic.CA1859.severity = suggestion
+
+# The type-rule translation unit is the input of the CUDA transpiler as well as host code. Its form (snake_case C
+# fields and function names, pointer access, int status codes, one flat statement style) is dictated by the CUDA
+# source it becomes, so the analyzers that judge the C# idiom are off for this one file.
+[MathBlocks.CudaSourceGenerator/TranslationUnits/TypeRuleUnit.cs]
+dotnet_analyzer_diagnostic.severity = none
+dotnet_analyzer_diagnostic.category-Security.severity = none
+dotnet_analyzer_diagnostic.category-Reliability.severity = none
+dotnet_analyzer_diagnostic.category-Performance.severity = none
+dotnet_analyzer_diagnostic.category-Usage.severity = none
+dotnet_diagnostic.IDE0005.severity = none
+dotnet_diagnostic.IDE0044.severity = none
+dotnet_diagnostic.IDE0051.severity = none
+dotnet_diagnostic.IDE0055.severity = none
+dotnet_diagnostic.IDE0059.severity = none
+dotnet_diagnostic.IDE0060.severity = none
