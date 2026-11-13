@@ -9,37 +9,41 @@ internal static class MathBlocksCudaKernelModule
     public static IReadOnlyCollection<string> SupportedBlockIdentities { get; } =
         MathBlockCudaFeatureIndex.SupportedIdentities;
 
-    public static KernelBinding Resolve(string identity)
+    public static KernelBinding Resolve(string identity) => Resolve(identity, (int)VectorCudaBlockCatalog.BlockSize);
+
+    // The binding of an operation for a launch of blockSize threads per block; the scalar family always runs one thread.
+    public static KernelBinding Resolve(string identity, int blockSize)
     {
+        var block = (uint)blockSize;
         var feature = MathBlockCudaFeatureIndex.Resolve(identity);
         return feature.Family switch
         {
             MathBlockCudaFamily.Scalar => new KernelBinding(state.Value.ScalarFunction, feature.Opcode, 1),
             MathBlockCudaFamily.Vector => new KernelBinding(
-                state.Value.VectorFunction, feature.Opcode, VectorCudaBlockCatalog.BlockSize),
+                state.Value.VectorFunction, feature.Opcode, block),
             MathBlockCudaFamily.Complex => new KernelBinding(
-                state.Value.ComplexFunction, feature.Opcode, ComplexCudaBlockCatalog.BlockSize),
+                state.Value.ComplexFunction, feature.Opcode, block),
             MathBlockCudaFamily.Matrix => new KernelBinding(
-                state.Value.MatrixFunction, feature.Opcode, MatrixCudaBlockCatalog.BlockSize),
+                state.Value.MatrixFunction, feature.Opcode, block),
             MathBlockCudaFamily.Probability => new KernelBinding(
-                state.Value.ProbabilityFunction, feature.Opcode, ProbabilityCudaBlockCatalog.BlockSize),
+                state.Value.ProbabilityFunction, feature.Opcode, block),
             MathBlockCudaFamily.SequencePath => new KernelBinding(
-                state.Value.SequencePathFunction, feature.Opcode, SequencePathCudaBlockCatalog.BlockSize),
+                state.Value.SequencePathFunction, feature.Opcode, block),
             MathBlockCudaFamily.Statistics => new KernelBinding(
-                state.Value.StatisticsFunction, feature.Opcode, StatisticsCudaBlockCatalog.BlockSize),
+                state.Value.StatisticsFunction, feature.Opcode, block),
             MathBlockCudaFamily.Geometry => new KernelBinding(
-                state.Value.GeometryFunction, feature.Opcode, GeometryCudaBlockCatalog.BlockSize),
+                state.Value.GeometryFunction, feature.Opcode, block),
             MathBlockCudaFamily.Graph => new KernelBinding(
-                state.Value.GraphFunction, feature.Opcode, GraphCudaBlockCatalog.BlockSize),
+                state.Value.GraphFunction, feature.Opcode, block),
             MathBlockCudaFamily.Advanced => new KernelBinding(
-                state.Value.AdvancedFunction, feature.Opcode, AdvancedCudaBlockCatalog.BlockSize),
+                state.Value.AdvancedFunction, feature.Opcode, block),
             MathBlockCudaFamily.Transport => new KernelBinding(
-                state.Value.TransportFunction, feature.Opcode, TransportCudaBlockCatalog.BlockSize),
+                state.Value.TransportFunction, feature.Opcode, block),
             MathBlockCudaFamily.Window => new KernelBinding(
-                state.Value.WindowFunction, feature.Opcode, WindowCudaBlockCatalog.BlockSize, RowStriped: true,
+                state.Value.WindowFunction, feature.Opcode, block, RowStriped: true,
                 ScratchCapacityArgument: true),
             MathBlockCudaFamily.Elementwise => new KernelBinding(
-                state.Value.ElementwiseFunction, feature.Opcode, ElementwiseCudaBlockCatalog.BlockSize, RowStriped: true),
+                state.Value.ElementwiseFunction, feature.Opcode, block, RowStriped: true),
             _ => throw new InvalidOperationException($"CUDA family '{feature.Family}' is not supported.")
         };
     }

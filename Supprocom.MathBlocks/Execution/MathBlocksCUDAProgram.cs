@@ -9,6 +9,9 @@ public sealed class MathBlocksCUDAProgram : IDisposable
 
     private readonly Lock stateLock = new();
     private readonly MathBlockProgram program;
+    private readonly MathBlocksCudaOptions options;
+    private readonly MathBlockDomainOptions domainOptions;
+    private readonly IReadOnlyList<MathBlockCudaLaunch> launches;
     private readonly int[] slotOffsets;
     private readonly int[] payloadOffsets;
     private readonly int[] payloadCapacities;
@@ -31,6 +34,9 @@ public sealed class MathBlocksCUDAProgram : IDisposable
 
     private MathBlocksCUDAProgram(
         MathBlockProgram program,
+        MathBlocksCudaOptions options,
+        MathBlockDomainOptions domainOptions,
+        IReadOnlyList<MathBlockCudaLaunch> launches,
         int[] slotOffsets,
         int[] payloadOffsets,
         int[] payloadCapacities,
@@ -50,6 +56,9 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         bool inputsUploaded)
     {
         this.program = program;
+        this.options = options;
+        this.domainOptions = domainOptions;
+        this.launches = launches;
         this.slotOffsets = slotOffsets;
         this.payloadOffsets = payloadOffsets;
         this.payloadCapacities = payloadCapacities;
@@ -72,13 +81,13 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     }
 
     /// <summary>Gets the launch options the program was compiled with.</summary>
-    public MathBlocksCudaOptions Options => throw new NotSupportedException("Not implemented yet.");
+    public MathBlocksCudaOptions Options => options;
 
     /// <summary>Gets the domain limits the program was compiled with.</summary>
-    public MathBlockDomainOptions DomainOptions => throw new NotSupportedException("Not implemented yet.");
+    public MathBlockDomainOptions DomainOptions => domainOptions;
 
     /// <summary>Gets the launch geometry of each kernel launch, fixed when the program is compiled from its planned row counts.</summary>
-    public IReadOnlyList<MathBlockCudaLaunch> Launches => throw new NotSupportedException("Not implemented yet.");
+    public IReadOnlyList<MathBlockCudaLaunch> Launches => launches;
 
     /// <summary>Gets the program fingerprint value.</summary>
     public string ProgramFingerprint => program.Fingerprint;
@@ -113,7 +122,16 @@ public sealed class MathBlocksCUDAProgram : IDisposable
 #pragma warning disable MA0051
     internal static ArenaPlan PlanArena(
         MathBlockProgram program,
-        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs)
+        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs) =>
+        PlanArenaFor(program, prototypeInputs, MathBlocksCudaOptions.Default, enforceWindowBudget: false);
+
+    // The same planning for the given launch options. With enforceWindowBudget (CompileWithOptions) a window scratch budget below
+    // one block of a window form is an error; without it (Compile) such a form runs on one block over the budget, as before.
+    internal static ArenaPlan PlanArenaFor(
+        MathBlockProgram program,
+        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
+        MathBlocksCudaOptions options,
+        bool enforceWindowBudget)
     {
         ValidateProgram(program);
 
@@ -123,6 +141,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         var plannedPayloadCapacities = payloadLayout.Capacities;
         var plannedInputPointerOffsets = CreateFilledIntArray(program.PlanNodes.Count, -1);
         var scratchOffsets = CreateFilledIntArray(program.PlanNodes.Count, -1);
+        var scratchSizes = new int[program.PlanNodes.Count];
 
         var outputNodeIndexes = new bool[program.PlanNodes.Count];
         foreach (var outputNodeIndex in program.OutputNodeIndexes.Values)
@@ -155,7 +174,9 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         {
             if (node.Kind != MathBlockProgramNodeKind.Operation || payloadLayout.AlwaysInvalid[node.Index])
                 continue;
-            var scratchBytes = ResolveScratchBytesOrMarkInvalid(node, program.PlanNodes, payloadLayout);
+            var scratchBytes = ResolveScratchBytesOrMarkInvalid(
+                node, program.PlanNodes, payloadLayout, options, enforceWindowBudget);
+            scratchSizes[node.Index] = scratchBytes;
             if (scratchBytes == 0)
                 continue;
             scratchOffsets[node.Index] = AlignArenaOffset(plannedArenaSize);
@@ -168,6 +189,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 AllocateNode(node);
         plannedArenaSize = AlignArenaOffset(plannedArenaSize);
         var plannedDownloadArenaSize = checked(plannedArenaSize - plannedDownloadArenaOffset);
+        var plannedLaunches = ResolveLaunches(program, payloadLayout, scratchSizes, options, enforceWindowBudget);
         return new ArenaPlan(
             plannedSlotOffsets,
             plannedPayloadOffsets,
@@ -176,7 +198,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             scratchOffsets,
             plannedArenaSize,
             plannedDownloadArenaOffset,
-            plannedDownloadArenaSize);
+            plannedDownloadArenaSize,
+            plannedLaunches);
     }
 #pragma warning restore MA0051
 
@@ -188,7 +211,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         int[] ScratchOffsets,
         int ArenaSize,
         int DownloadArenaOffset,
-        int DownloadArenaSize);
+        int DownloadArenaSize,
+        IReadOnlyList<MathBlockCudaLaunch> Launches);
 
     // Keep allocation, graph construction, and rollback in one auditable transaction.
 #pragma warning disable MA0051
@@ -198,6 +222,31 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     {
         MathBlocksCudaNative.EnsureContext();
         var arenaPlan = PlanArena(program, prototypeInputs);
+        return Create(program, prototypeInputs, arenaPlan, MathBlocksCudaOptions.Default, MathBlockDomainOptions.Default);
+    }
+
+    // CompileWithOptions: the options are checked before the device is touched where they can be (ranges, the window scratch
+    // budget against the planned forms), then against the device and each compiled kernel.
+    internal static MathBlocksCUDAProgram CreateWithOptions(
+        MathBlockProgram program,
+        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
+        MathBlocksCudaOptions options,
+        MathBlockDomainOptions domainOptions)
+    {
+        MathBlocksCudaOptionsValidator.ValidateRanges(options);
+        var arenaPlan = PlanArenaFor(program, prototypeInputs, options, enforceWindowBudget: true);
+        MathBlocksCudaNative.EnsureContext();
+        MathBlocksCudaOptionsValidator.ValidateDevice(options, MathBlocksCudaNative.GetDeviceLimits());
+        return Create(program, prototypeInputs, arenaPlan, options, domainOptions);
+    }
+
+    private static MathBlocksCUDAProgram Create(
+        MathBlockProgram program,
+        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
+        ArenaPlan arenaPlan,
+        MathBlocksCudaOptions options,
+        MathBlockDomainOptions domainOptions)
+    {
         var plannedSlotOffsets = arenaPlan.SlotOffsets;
         var plannedPayloadOffsets = arenaPlan.PayloadOffsets;
         var payloadLayout = arenaPlan.Layout;
@@ -209,6 +258,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         var plannedDownloadArenaSize = arenaPlan.DownloadArenaSize;
         var plannedGraphNodes = new IntPtr[program.PlanNodes.Count];
         var arguments = new List<KernelArgumentStorage>();
+        var kernels = ResolveKernels(program, payloadLayout, options);
 
         var allocatedDeviceArena = 0ul;
         var allocatedUploadArena = IntPtr.Zero;
@@ -307,9 +357,9 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             {
                 if (node.Kind != MathBlockProgramNodeKind.Operation || payloadLayout.AlwaysInvalid[node.Index])
                     continue;
-                var kernel = MathBlocksCudaKernelModule.Resolve(node.OperationIdentity!);
+                var kernel = kernels[node.Index];
                 var launch = kernel.RowStriped
-                    ? ResolveRowStripedLaunch(node, payloadLayout)
+                    ? ResolveRowStripedLaunch(node, payloadLayout, options, enforceWindowBudget: false).Launch
                     : new WindowLaunch(1, 0, 0);
                 var inputPointers = checked(allocatedDeviceArena + (ulong)plannedInputPointerOffsets[node.Index]);
                 var output = checked(allocatedDeviceArena + (ulong)plannedSlotOffsets[node.Index]);
@@ -362,6 +412,9 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 "cuGraphInstantiate(mathblocks)");
             return new MathBlocksCUDAProgram(
                 program,
+                options,
+                domainOptions,
+                arenaPlan.Launches,
                 plannedSlotOffsets,
                 plannedPayloadOffsets,
                 plannedPayloadCapacities,
@@ -1732,13 +1785,21 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     internal static int ResolveScratchBytesOrMarkInvalid(
         MathBlockProgramNode node,
         IReadOnlyList<MathBlockProgramNode> nodes,
-        MathBlockCudaPayloadLayout payloadLayout)
+        MathBlockCudaPayloadLayout payloadLayout) =>
+        ResolveScratchBytesOrMarkInvalid(node, nodes, payloadLayout, MathBlocksCudaOptions.Default, enforceWindowBudget: false);
+
+    internal static int ResolveScratchBytesOrMarkInvalid(
+        MathBlockProgramNode node,
+        IReadOnlyList<MathBlockProgramNode> nodes,
+        MathBlockCudaPayloadLayout payloadLayout,
+        MathBlocksCudaOptions options,
+        bool enforceWindowBudget)
     {
         if (payloadLayout.AlwaysInvalid[node.Index])
             return 0;
         try
         {
-            return ResolveScratchBytes(node, nodes, payloadLayout);
+            return ResolveScratchBytes(node, nodes, payloadLayout, options, enforceWindowBudget);
         }
         catch (StaticDomainException)
         {
@@ -1750,12 +1811,20 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     internal static int ResolveScratchBytes(
         MathBlockProgramNode node,
         IReadOnlyList<MathBlockProgramNode> nodes,
-        MathBlockCudaPayloadLayout payloadLayout)
+        MathBlockCudaPayloadLayout payloadLayout) =>
+        ResolveScratchBytes(node, nodes, payloadLayout, MathBlocksCudaOptions.Default, enforceWindowBudget: false);
+
+    internal static int ResolveScratchBytes(
+        MathBlockProgramNode node,
+        IReadOnlyList<MathBlockProgramNode> nodes,
+        MathBlockCudaPayloadLayout payloadLayout,
+        MathBlocksCudaOptions options,
+        bool enforceWindowBudget)
     {
         if (node.Kind != MathBlockProgramNodeKind.Operation)
             return 0;
         if (WindowCudaBlockCatalog.IsWindowIdentity(node.OperationIdentity))
-            return ResolveWindowLaunch(node, payloadLayout).ScratchBytes;
+            return ResolveWindowLaunch(node, payloadLayout, options, enforceWindowBudget).Launch.ScratchBytes;
         var inputTypes = new MathBlockType[node.Inputs.Count];
         var inputCapacities = new int[node.Inputs.Count];
         var inputShapeRows = new int[node.Inputs.Count];
@@ -1976,14 +2045,24 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         return checked(2 * (1 << size));
     }
 
-    // A row-striped kernel: the window launch below, or one thread per elementwise row in blocks of 128, with the
+    // A row-striped kernel: the window launch below, or one thread per elementwise row in blocks of the block size, with the
     // rows striped over at most MaximumGridX blocks and no scratch.
-    private static WindowLaunch ResolveRowStripedLaunch(
+    private static RowStripedPlan ResolveRowStripedLaunch(
         MathBlockProgramNode node,
-        MathBlockCudaPayloadLayout payloadLayout) =>
-        ElementwiseCudaBlockCatalog.IsElementwiseIdentity(node.OperationIdentity)
-            ? new WindowLaunch(ElementwiseCudaBlockCatalog.GridX(payloadLayout.Capacities[node.Index]), 0, 0)
-            : ResolveWindowLaunch(node, payloadLayout);
+        MathBlockCudaPayloadLayout payloadLayout,
+        MathBlocksCudaOptions options,
+        bool enforceWindowBudget)
+    {
+        if (!ElementwiseCudaBlockCatalog.IsElementwiseIdentity(node.OperationIdentity))
+            return ResolveWindowLaunch(node, payloadLayout, options, enforceWindowBudget);
+        var gridX = ElementwiseCudaBlockCatalog.GridX(
+            payloadLayout.Capacities[node.Index], options.BlockSize, options.MaximumGridX, out var wanted);
+        return new RowStripedPlan(
+            new WindowLaunch(gridX, 0, 0),
+            wanted,
+            0L,
+            gridX < wanted ? ClampedByMaximumGridX : null);
+    }
 
     // An elementwise kernel receives the kinds of its arguments in the opcode; every other kernel receives the
     // contract opcode.
@@ -2000,14 +2079,17 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         return ElementwiseCudaBlockCatalog.DispatchOpcode(opcode, inputTypes);
     }
 
-    // A window kernel runs GridX blocks of 128 threads over the rows, one row or one block of rows per thread
+    // A window kernel runs GridX blocks of the block size over the rows, one row or one block of rows per thread
     // (WindowCudaBlockCatalog.RowsPerThread). Each thread owns ScratchCapacity doubles for the planned width, so
     // ScratchBytes = ScratchCapacity * 8 * threads. The width is the exact width input (a constant or prototype);
     // without one, the series length bounds the width of the O(w) sources. The grid is the smaller of the blocks
-    // the rows need and the blocks whose slices fit the scratch budget, and at least one block.
-    internal static WindowLaunch ResolveWindowLaunch(
+    // the rows need (WantedBlocks), MaximumGridX, and the blocks whose slices fit the scratch budget, and at least one
+    // block. With enforceWindowBudget a budget below one block is an error.
+    internal static RowStripedPlan ResolveWindowLaunch(
         MathBlockProgramNode node,
-        MathBlockCudaPayloadLayout payloadLayout)
+        MathBlockCudaPayloadLayout payloadLayout,
+        MathBlocksCudaOptions options,
+        bool enforceWindowBudget)
     {
         var identity = node.OperationIdentity!;
         var source = WindowCudaBlockCatalog.Resolve(identity).Opcode / 2;
@@ -2029,26 +2111,121 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         {
             width = rows;
         }
-        var blockSize = (long)WindowCudaBlockCatalog.BlockSize;
+        var blockSize = (long)options.BlockSize;
         var rowsPerThread = WindowCudaBlockCatalog.RowsPerThread(source, plannedWidth);
         var threads = (rows + rowsPerThread - 1L) / rowsPerThread;
-        var rowBlocks = threads <= blockSize ? 1L : (threads + blockSize - 1L) / blockSize;
-        if (rowBlocks > WindowCudaBlockCatalog.MaximumGridX)
-            rowBlocks = WindowCudaBlockCatalog.MaximumGridX;
+        var wantedBlocks = threads <= blockSize ? 1L : (threads + blockSize - 1L) / blockSize;
+        var rowBlocks = wantedBlocks;
+        if (rowBlocks > options.MaximumGridX)
+            rowBlocks = options.MaximumGridX;
         var perThread = WindowCudaBlockCatalog.ScratchDoubles(source, width);
         if (perThread == 0L)
-            return new WindowLaunch((int)rowBlocks, 0, 0);
+            return new RowStripedPlan(
+                new WindowLaunch((int)rowBlocks, 0, 0),
+                wantedBlocks,
+                0L,
+                rowBlocks < wantedBlocks ? ClampedByMaximumGridX : null);
         if (perThread > int.MaxValue / (sizeof(double) * blockSize))
         {
             throw new InvalidOperationException(string.Create(
                 System.Globalization.CultureInfo.InvariantCulture,
-                $"{identity}: CUDA supports widths of at most {WindowCudaBlockCatalog.MaximumWidth(source):N0} for this operation (scratch byte count); got {width:N0}."));
+                $"{identity}: CUDA supports widths of at most {WindowCudaBlockCatalog.MaximumWidth(source, options.BlockSize):N0} for this operation (scratch byte count); got {width:N0}."));
         }
         var blockBytes = perThread * sizeof(double) * blockSize;
-        var budgetBlocks = WindowCudaBlockCatalog.ScratchBudgetBytes / blockBytes;
+        if (enforceWindowBudget)
+            MathBlocksCudaOptionsValidator.ValidateWindowBudget(options, identity, perThread, blockBytes);
+        var budgetBlocks = options.WindowScratchBudgetBytes / blockBytes;
         var gridX = budgetBlocks < 1L ? 1L : budgetBlocks < rowBlocks ? budgetBlocks : rowBlocks;
         var bytes = blockBytes * gridX;
-        return new WindowLaunch((int)gridX, (int)perThread, (int)bytes);
+        var clampedBy = gridX >= wantedBlocks
+            ? null
+            : budgetBlocks < rowBlocks ? ClampedByWindowScratchBudgetBytes : ClampedByMaximumGridX;
+        return new RowStripedPlan(
+            new WindowLaunch((int)gridX, (int)perThread, (int)bytes),
+            wantedBlocks,
+            blockBytes,
+            clampedBy);
+    }
+
+    private const string ClampedByMaximumGridX = nameof(MathBlocksCudaOptions.MaximumGridX);
+    private const string ClampedByWindowScratchBudgetBytes = nameof(MathBlocksCudaOptions.WindowScratchBudgetBytes);
+
+    // One row-striped launch with what the CompileWithOptions launch geometry reports: the blocks the rows call for before any
+    // clamp, the scratch bytes of one block, and the option that reduced the grid.
+    internal readonly record struct RowStripedPlan(WindowLaunch Launch, long WantedBlocks, long ScratchBytesPerBlock, string? ClampedBy);
+
+    // The launch geometry of every operation node that runs: one block of the block size for a family kernel (one thread for the
+    // scalar family), the row-striped plan for the window and elementwise kernels.
+    private static List<MathBlockCudaLaunch> ResolveLaunches(
+        MathBlockProgram program,
+        MathBlockCudaPayloadLayout payloadLayout,
+        int[] scratchSizes,
+        MathBlocksCudaOptions options,
+        bool enforceWindowBudget)
+    {
+        var result = new List<MathBlockCudaLaunch>();
+        foreach (var node in program.PlanNodes)
+        {
+            if (node.Kind != MathBlockProgramNodeKind.Operation || payloadLayout.AlwaysInvalid[node.Index])
+                continue;
+            var identity = node.OperationIdentity!;
+            var family = MathBlockCudaFeatureIndex.Resolve(identity).Family;
+            if (family is MathBlockCudaFamily.Window or MathBlockCudaFamily.Elementwise)
+            {
+                var plan = ResolveRowStripedLaunch(node, payloadLayout, options, enforceWindowBudget);
+                result.Add(new MathBlockCudaLaunch(
+                    identity,
+                    node.Index,
+                    plan.Launch.GridX,
+                    options.BlockSize,
+                    plan.ScratchBytesPerBlock,
+                    plan.WantedBlocks,
+                    plan.ClampedBy));
+            }
+            else
+            {
+                result.Add(new MathBlockCudaLaunch(
+                    identity,
+                    node.Index,
+                    1,
+                    family == MathBlockCudaFamily.Scalar ? 1 : options.BlockSize,
+                    scratchSizes[node.Index],
+                    1L,
+                    null));
+            }
+        }
+        return result;
+    }
+
+    // The kernel of every operation node that runs, for the block size, each checked against its own thread limit.
+    private static MathBlocksCudaKernelModule.KernelBinding[] ResolveKernels(
+        MathBlockProgram program,
+        MathBlockCudaPayloadLayout payloadLayout,
+        MathBlocksCudaOptions options)
+    {
+        var kernels = new MathBlocksCudaKernelModule.KernelBinding[program.PlanNodes.Count];
+        var maximums = new Dictionary<IntPtr, int>();
+        foreach (var node in program.PlanNodes)
+        {
+            if (node.Kind != MathBlockProgramNodeKind.Operation || payloadLayout.AlwaysInvalid[node.Index])
+                continue;
+            var kernel = MathBlocksCudaKernelModule.Resolve(node.OperationIdentity!, options.BlockSize);
+            kernels[node.Index] = kernel;
+            if (kernel.BlockX == 1u && options.BlockSize != 1)
+                continue;
+            if (!maximums.TryGetValue(kernel.Function, out var maximum))
+            {
+                maximum = MathBlocksCudaNative.GetKernelMaximumThreadsPerBlock(kernel.Function);
+                maximums.Add(kernel.Function, maximum);
+            }
+            MathBlocksCudaOptionsValidator.ValidateKernel(
+                options.BlockSize,
+                maximum,
+                nameof(MathBlocksCudaOptions.BlockSize),
+                MathBlockCudaFeatureIndex.Resolve(node.OperationIdentity!).Family.ToString(),
+                node.OperationIdentity!);
+        }
+        return kernels;
     }
 
     // The width follows the source inputs: second to last for a form (fill is last), last for a sibling.
@@ -2087,7 +2264,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         var bytes = checked(
             checked((long)inputCount * 36) +
             checked((long)windowWidth * 8) +
-            checked((long)(int)SequencePathCudaBlockCatalog.BlockSize * sizeof(int) * 2));
+            checked((long)MathBlockCudaDeviceModule.VirtualLaneCount * sizeof(int) * 2));
         if (bytes > int.MaxValue)
         {
             throw new InvalidOperationException(

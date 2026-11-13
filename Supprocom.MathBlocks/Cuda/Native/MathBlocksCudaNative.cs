@@ -59,6 +59,24 @@ internal static class MathBlocksCudaNative
         }
     }
 
+    // The limits of the device that EnsureContext selects: CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK (1) and
+    // CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_X (5).
+    public static MathBlockCudaDeviceLimits GetDeviceLimits()
+    {
+        EnsureContext();
+        ThrowIfFailed(cuDeviceGet(out var device, 0), "cuDeviceGet");
+        ThrowIfFailed(cuDeviceGetAttribute(out var threads, 1, device), "cuDeviceGetAttribute(max threads per block)");
+        ThrowIfFailed(cuDeviceGetAttribute(out var grid, 5, device), "cuDeviceGetAttribute(max grid dim x)");
+        return new MathBlockCudaDeviceLimits(threads, grid);
+    }
+
+    // CU_FUNC_ATTRIBUTE_MAX_THREADS_PER_BLOCK (0): the most threads per block this compiled kernel can launch with.
+    public static int GetKernelMaximumThreadsPerBlock(IntPtr function)
+    {
+        ThrowIfFailed(cuFuncGetAttribute(out var threads, 0, function), "cuFuncGetAttribute(max threads per block)");
+        return threads;
+    }
+
     public static byte[] CompilePtx(string source, string name)
     {
         EnsureContext();
@@ -285,6 +303,9 @@ internal static class MathBlocksCudaNative
 
     [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int cuDeviceGetAttribute(out int value, int attribute, int device);
+
+    [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int cuFuncGetAttribute(out int value, int attribute, IntPtr function);
 
     [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int cuDevicePrimaryCtxRetain(out IntPtr context, int device);

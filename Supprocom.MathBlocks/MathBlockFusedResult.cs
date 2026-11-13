@@ -27,7 +27,13 @@ public sealed class MathBlockFusedResult
     public IReadOnlyDictionary<string, MathBlockValue> Validity { get; }
 
     /// <summary>Gets the geometry of the kernel launch that produced the result, or null when it came from CoreCLR.</summary>
-    public MathBlockCudaLaunch? Launch => throw new NotSupportedException("Not implemented yet.");
+    /// <remarks>
+    /// <see cref="MathBlockCudaLaunch.WantedBlocks"/> is the blocks the rows call for with <see cref="MathBlocksCudaOptions.FusedBlockSize"/> threads each, and
+    /// <see cref="MathBlockCudaLaunch.ClampedBy"/> is <c>FusedMaximumBlocks</c> when <see cref="MathBlocksCudaOptions.FusedMaximumBlocks"/> cut the grid. The clamp is
+    /// speed-only: the rows stripe over the remaining blocks (row = block * block size + thread, stepping by blocks * block size), every row is computed by the same
+    /// expression, and the result is unchanged. A launch with no rows has zero blocks.
+    /// </remarks>
+    public MathBlockCudaLaunch? Launch { get; internal set; }
 
     /// <summary>Gets the invalid mask: bit k is set when operation node k produced a nonfinite row.</summary>
     /// <remarks>Operation nodes are numbered in program node order; see <see cref="MathBlockFusedExpression.MaskNodeIndexes"/>.</remarks>

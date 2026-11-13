@@ -19,13 +19,27 @@ public sealed class MathBlocksCUDAWorker
     }
 
     /// <summary>Compiles a typed program into a resident CUDA program with the given launch options.</summary>
+    /// <remarks>
+    /// Every option is checked before the program is built, and an out-of-range value throws an <see cref="ArgumentOutOfRangeException"/> whose
+    /// message names the limit and its cause: a value below 1; <see cref="MathBlocksCudaOptions.BlockSize"/> and
+    /// <see cref="MathBlocksCudaOptions.FusedBlockSize"/> above the device maximum threads per block (and <see cref="MathBlocksCudaOptions.BlockSize"/>
+    /// above the maximum of any compiled kernel the program launches); <see cref="MathBlocksCudaOptions.MaximumGridX"/> and
+    /// <see cref="MathBlocksCudaOptions.FusedMaximumBlocks"/> above the device maximum grid X; <see cref="MathBlocksCudaOptions.WindowScratchBudgetBytes"/>
+    /// above <see cref="int.MaxValue"/> (the scratch is addressed with int byte offsets) or below the scratch of one block of a window form of the program.
+    /// <see cref="Compile"/> uses <see cref="MathBlocksCudaOptions.Default"/>.
+    /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">An option is outside the range the CUDA device or the program allows.</exception>
     public MathBlocksCUDAProgram CompileWithOptions(
         MathBlockProgram program,
         MathBlocksCudaOptions options,
         IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs = null,
         MathBlockDomainOptions? domainOptions = null)
-        => throw new NotSupportedException("Not implemented yet.");
+    {
+        ArgumentNullException.ThrowIfNull(program);
+        ArgumentNullException.ThrowIfNull(options);
+        var domain = MathBlocksCudaOptionsValidator.RequireDefaultDomain(domainOptions);
+        return MathBlocksCUDAProgram.CreateWithOptions(program, prototypeInputs, options, domain);
+    }
 
     /// <summary>Plans scratch work for a rolling order-statistic operation.</summary>
     public MathBlockRollingOrderStatisticWorkPlan PlanRollingOrderStatisticWork(

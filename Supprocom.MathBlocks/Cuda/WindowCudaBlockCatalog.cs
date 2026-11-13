@@ -167,11 +167,15 @@ internal static class WindowCudaBlockCatalog
 
     // The largest width whose scratch for one block of threads fits the int byte count of the plan (the plan needs at least
     // one block); a source whose scratch does not depend on the width has no limit.
-    internal static long MaximumWidth(int source)
+    internal static long MaximumWidth(int source) => MaximumWidth(source, (int)BlockSize);
+
+    // The same for a launch of blockSize threads per block: the one block's scratch grows with the block size, so the largest
+    // width shrinks with it (the results of the widths that fit do not depend on it).
+    internal static long MaximumWidth(int source, int blockSize)
     {
         if (ScratchDoubles(source, 1) == 0)
             return int.MaxValue;
-        long limit = int.MaxValue / (sizeof(double) * (long)BlockSize);
+        long limit = int.MaxValue / (sizeof(double) * (long)blockSize);
         long low = 1;
         long high = int.MaxValue;
         while (low < high)

@@ -13,8 +13,17 @@ public static class MathBlockCudaDeviceModule
 
     /// <summary>Gets the abi version value.</summary>
     public const int AbiVersion = 2;
-    /// <summary>Gets the dispatcher block size value.</summary>
+    /// <summary>Gets the default threads per block of the dispatcher, the value the ABI fingerprint and <see cref="MathBlockCudaOperationContract.PlanCUDA(IReadOnlyList{MathBlockValue})"/> use.</summary>
+    /// <remarks>The dispatcher accepts any block size from 1 up to the CUDA device maximum with the same results; plan the scratch with <see cref="MathBlockCudaOperationContract.PlanCUDA(IReadOnlyList{MathBlockValue}, MathBlockDomainOptions, int)"/> when launching another size.</remarks>
     public const int DispatcherBlockSize = 128;
+    /// <summary>Gets the number of virtual lanes of the cooperative kernels whose result or scratch layout would otherwise depend on the block size.</summary>
+    /// <remarks>
+    /// The rank radix sort of <c>sequence.rolling-median@1</c> and <c>sequence.rolling-quantile@1</c> splits its keys into this many
+    /// chunks whatever the block size: a thread of a block of B threads takes the lanes t, t + B, ... below this count, and a block
+    /// larger than this count leaves its extra threads idle in those phases. The scratch of that sort holds this many counters, so
+    /// its size does not depend on the block size.
+    /// </remarks>
+    public const int VirtualLaneCount = 128;
     /// <summary>Gets the dispatch function name value.</summary>
     public const string DispatchFunctionName = "mathblocks_operation_dispatch";
     /// <summary>Gets the dispatch signature value.</summary>

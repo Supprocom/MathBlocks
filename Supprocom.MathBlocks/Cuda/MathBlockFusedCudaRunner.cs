@@ -8,9 +8,6 @@ namespace Supprocom.MathBlocks.Cuda;
 // invalid validity inputs are passed as zero-filled buffers.
 internal static class MathBlockFusedCudaRunner
 {
-    private const int BlockSize = 256;
-    private const int MaximumBlocks = 4096;
-
     // The launch-to-synchronize time of each case of the latest run, in milliseconds.
     public static IReadOnlyList<double> LaunchMilliseconds { get; private set; } = [];
 
@@ -19,8 +16,19 @@ internal static class MathBlockFusedCudaRunner
         bool fusedMultiplyAdd,
         IReadOnlyList<MathBlockFusedExpression> expressions,
         IReadOnlyList<IReadOnlyDictionary<string, MathBlockValue>> inputs,
-        IReadOnlyList<IReadOnlyDictionary<string, MathBlockValue>?> validity)
+        IReadOnlyList<IReadOnlyDictionary<string, MathBlockValue>?> validity) =>
+        RunWithOptions(consumerSource, fusedMultiplyAdd, expressions, inputs, validity, MathBlocksCudaOptions.Default);
+
+    // The same run with the fused launch options: FusedBlockSize threads per block and at most FusedMaximumBlocks blocks.
+    public static MathBlockFusedResult[] RunWithOptions(
+        string consumerSource,
+        bool fusedMultiplyAdd,
+        IReadOnlyList<MathBlockFusedExpression> expressions,
+        IReadOnlyList<IReadOnlyDictionary<string, MathBlockValue>> inputs,
+        IReadOnlyList<IReadOnlyDictionary<string, MathBlockValue>?> validity,
+        MathBlocksCudaOptions options)
     {
+        MathBlocksCudaOptionsValidator.ValidateRanges(options);
         ArgumentException.ThrowIfNullOrWhiteSpace(consumerSource);
         ArgumentNullException.ThrowIfNull(expressions);
         ArgumentNullException.ThrowIfNull(inputs);
@@ -28,6 +36,7 @@ internal static class MathBlockFusedCudaRunner
         if (inputs.Count != expressions.Count || validity.Count != expressions.Count)
             throw new ArgumentException("Each case requires an expression, its inputs and its validity.", nameof(inputs));
 
+        MathBlocksCudaOptionsValidator.ValidateDevice(options, MathBlocksCudaNative.GetDeviceLimits());
         var ptx = MathBlocksCudaNative.CompilePtx(
             MathBlockCudaDeviceModule.ComposeSource(consumerSource),
             "mathblocks-fused.cu",
@@ -38,7 +47,7 @@ internal static class MathBlockFusedCudaRunner
             var results = new MathBlockFusedResult[expressions.Count];
             var times = new double[expressions.Count];
             for (var index = 0; index < results.Length; index++)
-                results[index] = RunCase(module, expressions[index], inputs[index], validity[index], out times[index]);
+                results[index] = RunCase(module, expressions[index], inputs[index], validity[index], options, out times[index]);
             LaunchMilliseconds = times;
             return results;
         }
@@ -53,11 +62,18 @@ internal static class MathBlockFusedCudaRunner
         MathBlockFusedExpression expression,
         IReadOnlyDictionary<string, MathBlockValue> inputs,
         IReadOnlyDictionary<string, MathBlockValue>? validity,
+        MathBlocksCudaOptions options,
         out double launchMilliseconds)
     {
         MathBlocksCudaNative.ThrowIfFailed(
             MathBlocksCudaNative.cuModuleGetFunction(out var function, module, expression.CudaKernelName),
             "cuModuleGetFunction");
+        MathBlocksCudaOptionsValidator.ValidateKernel(
+            options.FusedBlockSize,
+            MathBlocksCudaNative.GetKernelMaximumThreadsPerBlock(function),
+            nameof(MathBlocksCudaOptions.FusedBlockSize),
+            expression.CudaKernelName,
+            "the fused-expression kernel");
         var program = expression.Program;
         var rows = 0;
         foreach (var name in expression.VectorInputNames)
@@ -102,9 +118,11 @@ internal static class MathBlockFusedCudaRunner
         var outputValidityTable = allocations.Upload(outputValidityPointers);
         var mask = allocations.Upload(new ulong[1]);
         var rowCount = (long)rows;
+        var wantedBlocks = rows > 0 ? ((long)rows + options.FusedBlockSize - 1L) / options.FusedBlockSize : 0L;
+        var blocks = Math.Min(options.FusedMaximumBlocks, wantedBlocks);
         var watch = Stopwatch.StartNew();
         if (rows > 0)
-            Launch(function, rows, inputTable, scalarTable, validityTable, rowCount, outputTable, outputValidityTable, mask);
+            Launch(function, (uint)blocks, options.FusedBlockSize, inputTable, scalarTable, validityTable, rowCount, outputTable, outputValidityTable, mask);
         launchMilliseconds = watch.Elapsed.TotalMilliseconds;
 
         var outputs = new Array[outputCount];
@@ -117,12 +135,22 @@ internal static class MathBlockFusedCudaRunner
             validityOutputs[index] = Download<int>(outputValidityPointers[index], rows);
         }
         var invalidMask = Download<ulong>(mask, 1)[0];
-        return expression.CreateCudaResult(inputs, validity, outputs, validityOutputs, invalidMask);
+        var result = expression.CreateCudaResult(inputs, validity, outputs, validityOutputs, invalidMask);
+        result.Launch = new MathBlockCudaLaunch(
+            expression.CudaKernelName,
+            null,
+            (int)blocks,
+            options.FusedBlockSize,
+            0L,
+            wantedBlocks,
+            blocks < wantedBlocks ? nameof(MathBlocksCudaOptions.FusedMaximumBlocks) : null);
+        return result;
     }
 
     private static unsafe void Launch(
         IntPtr function,
-        int rows,
+        uint blocks,
+        int blockSize,
         ulong inputTable,
         ulong scalarTable,
         ulong validityTable,
@@ -131,7 +159,6 @@ internal static class MathBlockFusedCudaRunner
         ulong outputValidityTable,
         ulong mask)
     {
-        var blocks = (uint)Math.Min(MaximumBlocks, (rows + BlockSize - 1) / BlockSize);
         var parameters = stackalloc IntPtr[7];
         parameters[0] = (IntPtr)(&inputTable);
         parameters[1] = (IntPtr)(&scalarTable);
@@ -142,7 +169,7 @@ internal static class MathBlockFusedCudaRunner
         parameters[6] = (IntPtr)(&mask);
         MathBlocksCudaNative.ThrowIfFailed(
             NativeMethods.cuLaunchKernel(
-                function, blocks, 1, 1, BlockSize, 1, 1, 0, IntPtr.Zero, (IntPtr)parameters, IntPtr.Zero),
+                function, blocks, 1, 1, (uint)blockSize, 1, 1, 0, IntPtr.Zero, (IntPtr)parameters, IntPtr.Zero),
             "cuLaunchKernel");
         MathBlocksCudaNative.ThrowIfFailed(NativeMethods.cuCtxSynchronize(), "cuCtxSynchronize");
     }
