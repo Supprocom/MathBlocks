@@ -47,7 +47,9 @@ internal static class MathBlockCudaDevicePrelude
     internal static string Create(MathBlockDomainOptions domain, IReadOnlyList<string> operations)
     {
         var text = new StringBuilder(4096);
-        text.Append("// MathBlocks domain limits and non-convergence counters.\n");
+        // The macro makes the generated source skip its own default definitions of the same functions (MathBlocks.CudaSourceGenerator), so
+        // each function is defined once, with this domain's value.
+        text.Append("// MathBlocks domain limits and non-convergence counters.\n#define MATHBLOCKS_DOMAIN_PRELUDE 1\n");
         Limit(text, "explicit_subset_size", domain.MaximumExplicitSubsetSize);
         Limit(text, "state_count", domain.MaximumStateCount);
         Limit(text, "generated_vector_length", domain.MaximumGeneratedVectorLength);

@@ -26,8 +26,22 @@ internal static class MathBlockFusedCudaRunner
         IReadOnlyList<MathBlockFusedExpression> expressions,
         IReadOnlyList<IReadOnlyDictionary<string, MathBlockValue>> inputs,
         IReadOnlyList<IReadOnlyDictionary<string, MathBlockValue>?> validity,
-        MathBlocksCudaOptions options)
+        MathBlocksCudaOptions options) =>
+        RunWithDomain(consumerSource, fusedMultiplyAdd, expressions, inputs, validity, options, MathBlockDomainOptions.Default);
+
+    // The same run with the device source built for the domain options, so an elementwise row evaluates its source under them. Each case
+    // zeroes the module's non-convergence counters before its launch and reports them by operation identity in NonConvergedEvaluations.
+    public static MathBlockFusedResult[] RunWithDomain(
+        string consumerSource,
+        bool fusedMultiplyAdd,
+        IReadOnlyList<MathBlockFusedExpression> expressions,
+        IReadOnlyList<IReadOnlyDictionary<string, MathBlockValue>> inputs,
+        IReadOnlyList<IReadOnlyDictionary<string, MathBlockValue>?> validity,
+        MathBlocksCudaOptions options,
+        MathBlockDomainOptions domainOptions)
     {
+        ArgumentNullException.ThrowIfNull(domainOptions);
+        domainOptions.Validate();
         MathBlocksCudaOptionsValidator.ValidateRanges(options);
         ArgumentException.ThrowIfNullOrWhiteSpace(consumerSource);
         ArgumentNullException.ThrowIfNull(expressions);
@@ -38,17 +52,22 @@ internal static class MathBlockFusedCudaRunner
 
         MathBlocksCudaOptionsValidator.ValidateDevice(options, MathBlocksCudaNative.GetDeviceLimits(options.DeviceOrdinal));
         var ptx = MathBlocksCudaNative.CompilePtx(
-            MathBlockCudaDeviceModule.ComposeSource(consumerSource),
+            MathBlockCudaDeviceModule.ComposeSource(consumerSource, domainOptions),
             "mathblocks-fused.cu",
             fusedMultiplyAdd,
             options.DeviceOrdinal);
         MathBlocksCudaNative.ThrowIfFailed(MathBlocksCudaNative.cuModuleLoadData(out var module, ptx), "cuModuleLoadData");
         try
         {
+            MathBlocksCudaNative.ThrowIfFailed(
+                MathBlocksCudaNative.cuModuleGetGlobal(
+                    out var countsPointer, out var countsBytes, module, MathBlockCudaDeviceModule.NonConvergenceCountsSymbol),
+                "cuModuleGetGlobal(mathblocks_nonconvergence_counts)");
+            var counters = (countsPointer, checked((int)countsBytes));
             var results = new MathBlockFusedResult[expressions.Count];
             var times = new double[expressions.Count];
             for (var index = 0; index < results.Length; index++)
-                results[index] = RunCase(module, expressions[index], inputs[index], validity[index], options, out times[index]);
+                results[index] = RunCase(module, expressions[index], inputs[index], validity[index], options, counters, out times[index]);
             LaunchMilliseconds = times;
             return results;
         }
@@ -64,6 +83,7 @@ internal static class MathBlockFusedCudaRunner
         IReadOnlyDictionary<string, MathBlockValue> inputs,
         IReadOnlyDictionary<string, MathBlockValue>? validity,
         MathBlocksCudaOptions options,
+        (ulong Pointer, int Bytes) counters,
         out double launchMilliseconds)
     {
         MathBlocksCudaNative.ThrowIfFailed(
@@ -121,6 +141,7 @@ internal static class MathBlockFusedCudaRunner
         var rowCount = (long)rows;
         var wantedBlocks = rows > 0 ? ((long)rows + options.FusedBlockSize - 1L) / options.FusedBlockSize : 0L;
         var blocks = Math.Min(options.FusedMaximumBlocks, wantedBlocks);
+        ZeroCounters(counters);
         var watch = Stopwatch.StartNew();
         if (rows > 0)
             Launch(function, (uint)blocks, options.FusedBlockSize, inputTable, scalarTable, validityTable, rowCount, outputTable, outputValidityTable, mask);
@@ -136,7 +157,9 @@ internal static class MathBlockFusedCudaRunner
             validityOutputs[index] = Download<int>(outputValidityPointers[index], rows);
         }
         var invalidMask = Download<ulong>(mask, 1)[0];
+        var nonConverged = ReadCounters(counters);
         var result = expression.CreateCudaResult(inputs, validity, outputs, validityOutputs, invalidMask);
+        result.NonConvergedEvaluations = nonConverged;
         result.Launch = new MathBlockCudaLaunch(
             expression.CudaKernelName,
             null,
@@ -146,6 +169,30 @@ internal static class MathBlockFusedCudaRunner
             wantedBlocks,
             blocks < wantedBlocks ? nameof(MathBlocksCudaOptions.FusedMaximumBlocks) : null);
         return result;
+    }
+
+    private static unsafe void ZeroCounters((ulong Pointer, int Bytes) counters)
+    {
+        var zeros = new byte[counters.Bytes];
+        fixed (byte* source = zeros)
+            MathBlocksCudaNative.ThrowIfFailed(
+                MathBlocksCudaNative.cuMemcpyHtoD(counters.Pointer, (IntPtr)source, (UIntPtr)(uint)counters.Bytes),
+                "cuMemcpyHtoD(non-convergence counters)");
+    }
+
+    // The counters by operation identity, in the order of MathBlockCudaDeviceModule.Operations; empty when no evaluation failed to converge.
+    private static IReadOnlyDictionary<string, long> ReadCounters((ulong Pointer, int Bytes) counters)
+    {
+        var counts = Download<long>(counters.Pointer, counters.Bytes / sizeof(long));
+        var identities = MathBlockCudaDeviceModule.OperationIdentities;
+        var result = new Dictionary<string, long>(StringComparer.Ordinal);
+        for (var index = 0; index < counts.Length && index < identities.Count; index++)
+        {
+            if (counts[index] != 0)
+                result[identities[index]] = counts[index];
+        }
+
+        return result.Count == 0 ? MathBlockFusedResult.NoNonConverged : result;
     }
 
     private static unsafe void Launch(

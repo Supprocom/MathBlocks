@@ -264,6 +264,10 @@ internal static class MathBlockLimitCatalog
             "units.exponent-component", null, MathBlockLimitKind.Fixed, MathBlockLimitDevice.All,
             int.MinValue, int.MaxValue, null, "integer", null, NoDrivers,
             "exponents are rationals whose numerator and denominator are int32; a power or product that leaves int32 throws OverflowException instead of giving Invalid"));
+        limits.Add(Fixed("cube-root.internal-newton-steps", "polynomial.cubic-roots@1", MathBlockLimitDevice.Cuda, 3, "steps",
+            "the complex cube root inside the cubic solver on CUDA uses the default 3 Newton steps whatever CubeRootNewtonSteps is"));
+        limits.Add(Fixed("cube-root.internal-system-cbrt", "polynomial.cubic-roots@1", MathBlockLimitDevice.CoreCLR, 0, "steps",
+            "the complex cube root inside the cubic solver on CoreCLR is Math.Cbrt, with no Newton step count; CubeRootNewtonSteps does not reach it"));
         limits.Add(Fixed("packaging.cuda-toolkit-minimum-major", MathBlockLimitDevice.Cuda, 12, "version",
             "the NVRTC loader accepts CUDA Toolkit 12.0 or later"));
         limits.Add(Fixed("packaging.profile-1-operation-count", MathBlockLimitDevice.All, MathBlockFeatureIndex.Count, "operations",
@@ -332,7 +336,7 @@ internal static class MathBlockLimitCatalog
         yield return new("domain.cube-root-newton-steps", nameof(MathBlockDomainOptions.CubeRootNewtonSteps), "steps",
             0, int.MaxValue - 1, d => d.CubeRootNewtonSteps,
             ["scalar.cube-root@1", "elementwise.scalar.cube-root@1", "elementwise-valid.scalar.cube-root@1"],
-            "a free choice: the exp(ln(x) / 3) start is within about 3e-14 relative (estimated, not measured), and one Newton step squares that error below 2^-53, and the count is part of the bit contract between CoreCLR and CUDA");
+            "applies to scalar.cube-root and its elementwise lifts only. A free choice: the exp(ln(x) / 3) start is within about 3e-14 relative (estimated, not measured), and one Newton step squares that error below 2^-53, and the count is part of the bit contract between CoreCLR and CUDA");
         string[] jacobi = ["matrix.symmetric-eigenvalues@1", "matrix.largest-symmetric-eigenvalue@1", "matrix.smallest-symmetric-eigenvalue@1", "matrix.spectral-norm@1", "graph.algebraic-connectivity@1"];
         yield return new("domain.jacobi-rotation-multiplier", nameof(MathBlockDomainOptions.JacobiRotationMultiplier), "rotations per n x n",
             1, int.MaxValue, d => d.JacobiRotationMultiplier, jacobi,
@@ -344,6 +348,9 @@ internal static class MathBlockLimitCatalog
 
     private static MathBlockLimit Fixed(string name, MathBlockLimitDevice device, long? value, string unit, string rule) =>
         new(name, null, MathBlockLimitKind.Fixed, device, null, null, value, unit, null, NoDrivers, rule);
+
+    private static MathBlockLimit Fixed(string name, string operation, MathBlockLimitDevice device, long value, string unit, string rule) =>
+        new(name, operation, MathBlockLimitKind.Fixed, device, null, null, value, unit, null, NoDrivers, rule);
 
     private static MathBlockLimit Option(
         string name,

@@ -368,6 +368,30 @@ internal static class MathBlockFusedTestSupport
         }
     }
 
+    public static MathBlockFusedResult[] RunCudaWithDomain(
+        string consumerSource,
+        IReadOnlyList<MathBlockFusedExpression> expressions,
+        IReadOnlyList<IReadOnlyDictionary<string, MathBlockValue>> inputs,
+        MathBlocksCudaOptions options,
+        MathBlockDomainOptions domainOptions)
+    {
+        var runner = typeof(MathBlocksCUDAWorker).Assembly.GetType(
+            "Supprocom.MathBlocks.Cuda.MathBlockFusedCudaRunner",
+            throwOnError: true)!;
+        var run = runner.GetMethod("RunWithDomain", BindingFlags.Public | BindingFlags.Static)!;
+        IReadOnlyList<IReadOnlyDictionary<string, MathBlockValue>?> validity = [.. expressions.Select(_ => (IReadOnlyDictionary<string, MathBlockValue>?)null)];
+        try
+        {
+            return (MathBlockFusedResult[])run.Invoke(
+                null,
+                [consumerSource, false, expressions, inputs, validity, options, domainOptions])!;
+        }
+        catch (TargetInvocationException exception) when (exception.InnerException is not null)
+        {
+            throw exception.InnerException;
+        }
+    }
+
     private static int PickNode(Random random, List<int> nodes) =>
         random.Next(3) == 0 ? nodes[random.Next(nodes.Count)] : nodes[Math.Max(0, nodes.Count - 1 - random.Next(3))];
 

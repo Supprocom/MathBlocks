@@ -23,6 +23,9 @@ internal static class Program
         new("Elementwise", "ElementwiseModule.cs")
     ];
 
+    private const string DomainPreludeDefaults =
+        "// The default domain limits and no-op non-convergence recorders, so the generated source compiles on its own. A source built for domain\n// options (MathBlockCudaDeviceModule.GetSource) starts with its own definitions and the macro below, which skips this block.\n#ifndef MATHBLOCKS_DOMAIN_PRELUDE\nstatic __device__ __forceinline__ int mathblocks_limit_explicit_subset_size() { return 20; }\nstatic __device__ __forceinline__ int mathblocks_limit_state_count() { return 4096; }\nstatic __device__ __forceinline__ int mathblocks_limit_generated_vector_length() { return 1000000; }\nstatic __device__ __forceinline__ int mathblocks_limit_submodular_set_function_values() { return 4096; }\nstatic __device__ __forceinline__ int mathblocks_limit_shapley_coalition_values() { return 1048576; }\nstatic __device__ __forceinline__ int mathblocks_limit_choquet_player_count() { return 30; }\nstatic __device__ __forceinline__ int mathblocks_limit_maximal_minor_columns() { return 20; }\nstatic __device__ __forceinline__ int mathblocks_limit_totally_nonnegative_size() { return 8; }\nstatic __device__ __forceinline__ int mathblocks_limit_matrix_size() { return 4096; }\nstatic __device__ __forceinline__ int mathblocks_limit_iteration_count() { return 10000; }\nstatic __device__ __forceinline__ int mathblocks_limit_incomplete_beta_maximum_iterations() { return 256; }\nstatic __device__ __forceinline__ double mathblocks_limit_incomplete_beta_tolerance() { return 3E-14; }\nstatic __device__ __forceinline__ int mathblocks_limit_incomplete_beta_policy() { return 0; }\nstatic __device__ __forceinline__ int mathblocks_limit_matrix_exponential_taylor_terms() { return 48; }\nstatic __device__ __forceinline__ int mathblocks_limit_cube_root_newton_steps() { return 3; }\nstatic __device__ __forceinline__ int mathblocks_limit_jacobi_policy() { return 0; }\nstatic __device__ __forceinline__ long long mathblocks_limit_jacobi_rotation_budget(int size) { return (long long)64 * size * size; }\nstatic __device__ __forceinline__ int mathblocks_limit_elementwise_source_count() { return 53; }\n__device__ unsigned long long mathblocks_nonconvergence_counts[1];\nstatic __device__ void mathblocks_nonconvergence_record_probability(int opcode) {}\nstatic __device__ void mathblocks_nonconvergence_record_elementwise(int opcode) {}\nstatic __device__ void mathblocks_nonconvergence_record_matrix(int opcode) {}\nstatic __device__ void mathblocks_nonconvergence_record_graph(int opcode) {}\n#endif\n\n";
+
     private static int Main(string[] args)
     {
         try
@@ -46,12 +49,12 @@ internal static class Program
             NewLine = "\n",
             SourceRoot = Path.GetFullPath(options.TranslationRoot)
         };
-        var fullSource = string.Concat(GenerateUnits(options, transpilationOptions)) + "\n" +
+        var fullSource = DomainPreludeDefaults + string.Concat(GenerateUnits(options, transpilationOptions)) + "\n" +
                          GenerateDispatch(options, transpilationOptions);
         var fullBytes = Encoding.UTF8.GetBytes(fullSource);
         var fullHash = Convert.ToHexString(SHA256.HashData(fullBytes));
         const string expectedFullHash =
-            "584C24E3B43935C2AA4E5804515B70C1B01DD99DE155AEDC7993E3AA72321763";
+            "A5E77D01A3EA431268A83687F16C052C48B44A2901604F7E8C15F563341C93D7";
         if (!string.Equals(fullHash, expectedFullHash, StringComparison.Ordinal))
             throw new InvalidOperationException(
                 $"Full CUDA source hash mismatch. Expected {expectedFullHash}, actual {fullHash}.");
