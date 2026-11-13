@@ -55,6 +55,23 @@ internal static partial class GraphMathBlocks
         },
         [sample], MathBlockValue.Scalar(expected), 1e-8, 4);
 
+    // A scalar of the Jacobi eigenvalues of a graph: the function returns null for an evaluation the Invalid policy rejects.
+    private static MathBlockOperation CreateJacobiScalar(
+        string identifier,
+        Func<MathBlockGraph, MathBlockDomainContext, double?> function,
+        MathBlockValue sample,
+        double expected,
+        MathBlockTypeResolver resolver) => MathBlockOperationFactory.CreateDomain(
+        identifier, 1, resolver,
+        (inputs, domain) =>
+        {
+            var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
+            return function(inputs[0].AsGraph(), domain) is { } value
+                ? MathBlockValue.Scalar(value, type.Unit)
+                : MathBlockValue.Invalid(type, "The Jacobi iteration did not converge.");
+        },
+        [sample], MathBlockValue.Scalar(expected), 1e-8, 4);
+
     private static MathBlockOperation CreateVector(
         string identifier,
         Func<MathBlockGraph, double[]> function,

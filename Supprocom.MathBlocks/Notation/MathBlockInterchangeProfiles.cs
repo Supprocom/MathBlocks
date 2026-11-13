@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 internal static class MathBlockInterchangeProfiles
 {
     /// <summary>Gets the number of standard operations that Profile 2 binds.</summary>
-    internal const int Profile2OperationCount = 537;
+    internal const int Profile2OperationCount = 561;
 
     // The 337 operation identities of MathBlocks 0.5.2, in ordinal order. OpenMath Profile 1 and
     // Formula Interchange Profile 1 bind exactly these identities, whatever else the standard

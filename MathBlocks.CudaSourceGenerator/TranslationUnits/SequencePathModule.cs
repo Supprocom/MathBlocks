@@ -6,6 +6,9 @@ using Supprocom.CSharp2CUDA;
 [TranspileToCUDA]
 internal static unsafe class SequencePathModule
 {
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_state_count() => throw new NotSupportedException();
+
     [CudaExternal]
     public struct MathBlockSlot
     {
@@ -1447,7 +1450,7 @@ internal static unsafe class SequencePathModule
                 if (thread == 0)
                 {
                     int state_count = 0;
-                    if (!mathblocks_sequence_positive_integer(second->scalar_value, &state_count) || state_count > 4096)
+                    if (!mathblocks_sequence_positive_integer(second->scalar_value, &state_count) || state_count > mathblocks_limit_state_count())
                     {
                         output->valid = 0;
                     }

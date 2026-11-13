@@ -2,12 +2,12 @@ namespace Supprocom.MathBlocks.Cuda;
 
 // The elementwise.* forms and elementwise-valid.* siblings run in one kernel that stripes rows across the grid.
 // Contract opcode 2 * source + sibling, with source the index in the elementwise source list
-// (ElementwiseMathBlocks). The dispatched opcode adds 128 * mask, where bit k of mask is set when argument k is a
-// vector, because a Scalar slot and an empty Vector slot carry the same header.
+// (ElementwiseMathBlocks). The dispatched opcode adds the mask, where bit k of mask is set when argument k is a
+// vector, because a Scalar slot and an empty Vector slot carry the same header; MathBlockCudaElementwiseOpcode
+// has the encoding.
 internal static class ElementwiseCudaBlockCatalog
 {
     internal const int MaximumGridX = 65_535;
-    internal const int ArgumentMaskMultiplier = 128;
 
     public static string KernelEntryPoint => "mathblocks_elementwise";
     public static uint BlockSize => 128;
@@ -95,7 +95,31 @@ internal static class ElementwiseCudaBlockCatalog
         new("elementwise.special.log-gamma@1", MathBlockCudaFamily.Elementwise, 78),
         new("elementwise-valid.special.log-gamma@1", MathBlockCudaFamily.Elementwise, 79),
         new("elementwise.special.regularized-incomplete-beta@1", MathBlockCudaFamily.Elementwise, 80),
-        new("elementwise-valid.special.regularized-incomplete-beta@1", MathBlockCudaFamily.Elementwise, 81)
+        new("elementwise-valid.special.regularized-incomplete-beta@1", MathBlockCudaFamily.Elementwise, 81),
+        new("elementwise.scalar.absolute@1", MathBlockCudaFamily.Elementwise, 82),
+        new("elementwise-valid.scalar.absolute@1", MathBlockCudaFamily.Elementwise, 83),
+        new("elementwise.scalar.add@1", MathBlockCudaFamily.Elementwise, 84),
+        new("elementwise-valid.scalar.add@1", MathBlockCudaFamily.Elementwise, 85),
+        new("elementwise.scalar.subtract@1", MathBlockCudaFamily.Elementwise, 86),
+        new("elementwise-valid.scalar.subtract@1", MathBlockCudaFamily.Elementwise, 87),
+        new("elementwise.scalar.multiply@1", MathBlockCudaFamily.Elementwise, 88),
+        new("elementwise-valid.scalar.multiply@1", MathBlockCudaFamily.Elementwise, 89),
+        new("elementwise.scalar.divide@1", MathBlockCudaFamily.Elementwise, 90),
+        new("elementwise-valid.scalar.divide@1", MathBlockCudaFamily.Elementwise, 91),
+        new("elementwise.scalar.power@1", MathBlockCudaFamily.Elementwise, 92),
+        new("elementwise-valid.scalar.power@1", MathBlockCudaFamily.Elementwise, 93),
+        new("elementwise.scalar.natural-logarithm@1", MathBlockCudaFamily.Elementwise, 94),
+        new("elementwise-valid.scalar.natural-logarithm@1", MathBlockCudaFamily.Elementwise, 95),
+        new("elementwise.scalar.square-root@1", MathBlockCudaFamily.Elementwise, 96),
+        new("elementwise-valid.scalar.square-root@1", MathBlockCudaFamily.Elementwise, 97),
+        new("elementwise.scalar.square@1", MathBlockCudaFamily.Elementwise, 98),
+        new("elementwise-valid.scalar.square@1", MathBlockCudaFamily.Elementwise, 99),
+        new("elementwise.scalar.exponential@1", MathBlockCudaFamily.Elementwise, 100),
+        new("elementwise-valid.scalar.exponential@1", MathBlockCudaFamily.Elementwise, 101),
+        new("elementwise.scalar.positive-part@1", MathBlockCudaFamily.Elementwise, 102),
+        new("elementwise-valid.scalar.positive-part@1", MathBlockCudaFamily.Elementwise, 103),
+        new("elementwise.scalar.sign@1", MathBlockCudaFamily.Elementwise, 104),
+        new("elementwise-valid.scalar.sign@1", MathBlockCudaFamily.Elementwise, 105)
     ];
 
     private static readonly Dictionary<string, MathBlockCudaFeature> featuresByIdentity = CreateIndex();
@@ -117,7 +141,7 @@ internal static class ElementwiseCudaBlockCatalog
         for (var index = 0; index < inputTypes.Length; index++)
             if (inputTypes[index].Kind == MathBlockValueKind.Vector)
                 mask |= 1 << index;
-        return checked(opcode + ArgumentMaskMultiplier * mask);
+        return MathBlockCudaElementwiseOpcode.AddMask(opcode, mask);
     }
 
     // Two non-empty vector arguments of different lengths give the result no row authority, as the CoreCLR type

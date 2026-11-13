@@ -142,13 +142,18 @@ public sealed class MathBlockCudaOperationContract
     public MathBlockValue EvaluateCoreCLR(IReadOnlyList<MathBlockValue> inputs) =>
         operation.Evaluate(inputs);
 
+    /// <summary>Evaluates the operation on CoreCLR under the given domain options, which are the options the CUDA device source is compiled with.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">An option is outside the range its limit allows.</exception>
+    public MathBlockValue EvaluateCoreCLR(IReadOnlyList<MathBlockValue> inputs, MathBlockDomainOptions domainOptions) =>
+        operation.Evaluate(inputs, domainOptions);
+
     /// <summary>Plans CUDA shape, capacity, and scratch storage for inputs, for the default block size of <see cref="MathBlockCudaDeviceModule.DispatcherBlockSize"/> threads.</summary>
     public MathBlockCudaOperationPlan PlanCUDA(IReadOnlyList<MathBlockValue> prototypeInputs) =>
         PlanCUDA(prototypeInputs, MathBlockDomainOptions.Default, MathBlockCudaDeviceModule.DispatcherBlockSize);
 
     /// <summary>Plans CUDA shape, capacity, and scratch storage for inputs when the dispatcher runs in blocks of <paramref name="blockSize"/> threads.</summary>
     /// <param name="prototypeInputs">The inputs the plan is made for.</param>
-    /// <param name="domainOptions">The domain limits; the CUDA kernels apply only the defaults yet.</param>
+    /// <param name="domainOptions">The domain limits the consumer compiles the device source with (<see cref="MathBlockCudaDeviceModule.GetSource(MathBlockDomainOptions)"/>).</param>
     /// <param name="blockSize">The threads per block the consumer launches the dispatcher with, from 1 up to the CUDA device maximum.</param>
     /// <remarks>
     /// The dispatcher gives every operation the same results at every block size. Only the scratch of the window forms depends on it: each of
@@ -163,7 +168,7 @@ public sealed class MathBlockCudaOperationContract
     {
         ArgumentNullException.ThrowIfNull(prototypeInputs);
         ArgumentNullException.ThrowIfNull(domainOptions);
-        _ = MathBlocksCudaOptionsValidator.RequireDefaultDomain(domainOptions);
+        domainOptions.Validate();
         ArgumentOutOfRangeException.ThrowIfLessThan(blockSize, 1);
         var options = blockSize == MathBlockCudaDeviceModule.DispatcherBlockSize
             ? MathBlocksCudaOptions.Default
@@ -191,7 +196,7 @@ public sealed class MathBlockCudaOperationContract
         var output = builder.Apply(Identifier, Version, indexes);
         var program = builder.Output("output", output).Build();
         MathBlocksCUDAProgram.ValidateProgram(program);
-        var layout = MathBlocksCUDAProgram.ResolvePayloadLayout(program.PlanNodes, prototypes);
+        var layout = MathBlocksCUDAProgram.ResolvePayloadLayout(program.PlanNodes, prototypes, domainOptions: domainOptions);
         var outputNode = program.PlanNodes[output];
         // An always-invalid output (inputs outside the domain for this plan) has no payload and no scratch.
         var scratchBytes = MathBlocksCUDAProgram.ResolveScratchBytesOrMarkInvalid(
@@ -199,6 +204,7 @@ public sealed class MathBlockCudaOperationContract
             program.PlanNodes,
             layout,
             options,
+            domainOptions,
             enforceWindowBudget: false);
         return new MathBlockCudaOperationPlan(
             outputNode.Type,

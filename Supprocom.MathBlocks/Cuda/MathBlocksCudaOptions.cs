@@ -28,6 +28,14 @@ public sealed class MathBlocksCudaOptions
     /// <remarks>From 1 up to the CUDA device maximum grid X. Rows beyond the clamped grid stripe over the blocks.</remarks>
     public int FusedMaximumBlocks { get; init; } = 4_096;
 
+    /// <summary>Gets the number of rows one CoreCLR task evaluates in a fused expression.</summary>
+    /// <remarks>At least 1. Every row is independent and the invalid masks combine by bitwise or, so the value changes only the speed of <see cref="MathBlockFusedExpression.EvaluateCoreCLR(System.Collections.Generic.IReadOnlyDictionary{string, MathBlockValue}, System.Collections.Generic.IReadOnlyDictionary{string, MathBlockValue}?, MathBlockDomainOptions, MathBlocksCudaOptions)"/>.</remarks>
+    public int FusedRowBlock { get; init; } = 8192;
+
+    /// <summary>Gets the ordinal of the CUDA device the program runs on.</summary>
+    /// <remarks>From 0 up to one less than the number of CUDA devices (<c>cuDeviceGetCount</c>); an ordinal outside that range is an <see cref="ArgumentOutOfRangeException"/> that names the count. The device's architecture, its limits and its primary context are those of this ordinal, and every call of the program runs in that context.</remarks>
+    public int DeviceOrdinal { get; init; }
+
     /// <summary>Gets the block size of a fused-expression launch.</summary>
     /// <remarks>From 1 up to the CUDA device maximum threads per block.</remarks>
     public int FusedBlockSize { get; init; } = 256;

@@ -36,11 +36,12 @@ internal static class MathBlockFusedCudaRunner
         if (inputs.Count != expressions.Count || validity.Count != expressions.Count)
             throw new ArgumentException("Each case requires an expression, its inputs and its validity.", nameof(inputs));
 
-        MathBlocksCudaOptionsValidator.ValidateDevice(options, MathBlocksCudaNative.GetDeviceLimits());
+        MathBlocksCudaOptionsValidator.ValidateDevice(options, MathBlocksCudaNative.GetDeviceLimits(options.DeviceOrdinal));
         var ptx = MathBlocksCudaNative.CompilePtx(
             MathBlockCudaDeviceModule.ComposeSource(consumerSource),
             "mathblocks-fused.cu",
-            fusedMultiplyAdd);
+            fusedMultiplyAdd,
+            options.DeviceOrdinal);
         MathBlocksCudaNative.ThrowIfFailed(MathBlocksCudaNative.cuModuleLoadData(out var module, ptx), "cuModuleLoadData");
         try
         {

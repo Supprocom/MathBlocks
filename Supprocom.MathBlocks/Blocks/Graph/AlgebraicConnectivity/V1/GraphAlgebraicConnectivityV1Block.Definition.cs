@@ -6,6 +6,6 @@ internal static partial class GraphMathBlocks
     {
         internal const string Identity = "graph.algebraic-connectivity@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => CreateScalar("graph.algebraic-connectivity", MathBlockGraphMath.AlgebraicConnectivity, triangle, 3d, WeightedGraphScalar);
+        internal static MathBlockOperation Create() => CreateJacobiScalar("graph.algebraic-connectivity", MathBlockGraphMath.AlgebraicConnectivity, triangle, 3d, WeightedGraphScalar);
     }
 }

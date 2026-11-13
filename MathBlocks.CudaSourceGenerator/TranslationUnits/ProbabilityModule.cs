@@ -6,6 +6,21 @@ using Supprocom.CSharp2CUDA;
 [TranspileToCUDA]
 internal static unsafe class ProbabilityModule
 {
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_explicit_subset_size() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_incomplete_beta_maximum_iterations() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_limit_incomplete_beta_tolerance() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_incomplete_beta_policy() => throw new NotSupportedException();
+
+    [CudaExternal]
+    private static void mathblocks_nonconvergence_record_probability(int opcode) => throw new NotSupportedException();
+
     [CudaExternal]
     public struct MathBlockSlot
     {
@@ -195,11 +210,12 @@ internal static unsafe class ProbabilityModule
     }
 
     [CudaDevice]
-    private static double mathblocks_probability_beta_fraction(double x, double left, double right)
+    private static double mathblocks_probability_beta_fraction(double x, double left, double right, bool* converged)
     {
-        const int maximum_iterations = 256;
-        const double tolerance = 3e-14;
+        int maximum_iterations = mathblocks_limit_incomplete_beta_maximum_iterations();
+        double tolerance = mathblocks_limit_incomplete_beta_tolerance();
         const double minimum = 1e-300;
+        *converged = false;
         double qab = left + right;
         double qap = left + 1.0;
         double qam = left - 1.0;
@@ -229,7 +245,10 @@ internal static unsafe class ProbabilityModule
             double delta = d * c;
             result *= delta;
             if (Math.Abs(delta - 1.0) <= tolerance)
+            {
+                *converged = true;
                 break;
+            }
         }
         return result;
     }
@@ -238,8 +257,10 @@ internal static unsafe class ProbabilityModule
     private static double mathblocks_probability_incomplete_beta(
         double x,
         double left,
-        double right)
+        double right,
+        bool* converged)
     {
+        *converged = true;
         if (x == 0.0) return 0.0;
         if (x == 1.0) return 1.0;
         double front = mathblocks_exponential(
@@ -249,8 +270,8 @@ internal static unsafe class ProbabilityModule
             left * mathblocks_natural_logarithm(x) +
             right * mathblocks_log_one_plus(-x));
         return x < (left + 1.0) / (left + right + 2.0)
-            ? front * mathblocks_probability_beta_fraction(x, left, right) / left
-            : 1.0 - front * mathblocks_probability_beta_fraction(1.0 - x, right, left) / right;
+            ? front * mathblocks_probability_beta_fraction(x, left, right, converged) / left
+            : 1.0 - front * mathblocks_probability_beta_fraction(1.0 - x, right, left, converged) / right;
     }
 
     [CudaDevice]
@@ -297,9 +318,10 @@ internal static unsafe class ProbabilityModule
     // (30). Writes the result to value and returns whether it is valid: in the source's domain and finite. The
     // probability dispatcher and the elementwise forms both evaluate their rows here.
     [CudaDevice]
-    private static bool mathblocks_probability_scalar_value(int opcode, double a, double b, double c, double* value)
+    private static bool mathblocks_probability_scalar_value(int opcode, double a, double b, double c, double* value, bool* converged)
     {
         *value = 0.0;
+        *converged = true;
         if (opcode == 0 || opcode == 1 || opcode == 2)
         {
             int first_integer = 0;
@@ -408,7 +430,10 @@ internal static unsafe class ProbabilityModule
         {
             if (a < 0.0 || a > 1.0 || b <= 0.0 || c <= 0.0)
                 return false;
-            *value = mathblocks_probability_incomplete_beta(a, b, c);
+            *value = mathblocks_probability_incomplete_beta(a, b, c, converged);
+            // The Invalid policy makes a non-converged row invalid; the caller counts the row from converged.
+            if (!*converged && mathblocks_limit_incomplete_beta_policy() == 1)
+                return false;
         }
         else
         {
@@ -452,7 +477,7 @@ internal static unsafe class ProbabilityModule
         if (opcode == 3)
         {
             // The domain test reads only the input, so every thread takes the same exit before the barrier below.
-            if (first->count > 20)
+            if (first->count > mathblocks_limit_explicit_subset_size())
             {
                 if (thread == 0)
                     output->valid = 0;
@@ -535,12 +560,15 @@ internal static unsafe class ProbabilityModule
             opcode == 28 || opcode == 29 || opcode == 30)
         {
             double value = 0.0;
+            bool converged = true;
             bool valid = mathblocks_probability_scalar_value(
                 opcode,
                 first == null ? 0.0 : first->scalar_value,
                 second == null ? 0.0 : second->scalar_value,
                 third == null ? 0.0 : third->scalar_value,
-                &value);
+                &value,
+                &converged);
+            if (!converged) mathblocks_nonconvergence_record_probability(opcode);
             output->scalar_value = value;
             if (!valid) output->valid = 0;
             return;

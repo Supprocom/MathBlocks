@@ -7,20 +7,20 @@ internal static partial class PathMathBlocks
         internal const string Identity = "state.transition-counts@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateTransitionCounts();
-        private static MathBlockOperation CreateTransitionCounts() => MathBlockOperationFactory.Create("state.transition-counts", 2, types =>
+        private static MathBlockOperation CreateTransitionCounts() => MathBlockOperationFactory.CreateDomain("state.transition-counts", 2, types =>
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Vector);
             MathBlockTypeRules.RequireDimensionless(types[0]);
             MathBlockTypeRules.RequireKind(types[1], MathBlockValueKind.Scalar);
             MathBlockTypeRules.RequireDimensionless(types[1]);
             return MathBlockType.Matrix();
-        }, inputs =>
+        }, (inputs, domain) =>
         {
             var states = inputs[0].AsVector();
             var countValue = inputs[1].AsScalar();
             if (countValue != Math.Truncate(countValue) ||
                 countValue <= 0d ||
-                countValue > 4096d ||
+                countValue > domain.Options.MaximumStateCount ||
                 MathBlockCollectionPrimitives.Any(
                     states,
                     value => value != Math.Truncate(value) || value < 0d || value >= countValue))

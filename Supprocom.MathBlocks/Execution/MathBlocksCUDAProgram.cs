@@ -31,6 +31,11 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     private bool inputsUploaded;
     private bool executionInFlight;
     private bool disposed;
+    private readonly MathBlocksCudaKernelModule.ModuleState? counterModule;
+    private IReadOnlyDictionary<string, long> nonConverged = EmptyNonConverged;
+
+    private static readonly IReadOnlyDictionary<string, long> EmptyNonConverged =
+        new System.Collections.ObjectModel.ReadOnlyDictionary<string, long>(new Dictionary<string, long>(StringComparer.Ordinal));
 
     private MathBlocksCUDAProgram(
         MathBlockProgram program,
@@ -78,6 +83,37 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         this.inputsUploaded = inputsUploaded;
         OperationNodeCount = CountOperationNodes(program.PlanNodes);
         MaximumParallelWidth = CalculateMaximumParallelWidth(program.PlanNodes);
+        if (HasNonConvergenceCounters(program.PlanNodes))
+            counterModule = MathBlocksCudaKernelModule.GetState(options.DeviceOrdinal, domainOptions);
+    }
+
+    // Whether any operation of the program can end without converging; only then does an execution zero and read the counters.
+    private static bool HasNonConvergenceCounters(IReadOnlyList<MathBlockProgramNode> nodes)
+    {
+        var counted = new HashSet<string>(MathBlockCudaDevicePrelude.CountedIdentities, StringComparer.Ordinal);
+        foreach (var node in nodes)
+        {
+            if (node.Kind == MathBlockProgramNodeKind.Operation && counted.Contains(node.OperationIdentity!))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Gets, by operation identity, the evaluations of the latest synchronized execution that ended without converging; empty when there are none.</summary>
+    /// <remarks>
+    /// Each execution zeroes the module's counters before the launch, and the read after the synchronization fills this value. The counters belong to the
+    /// compiled device module, which programs with the same <see cref="MathBlocksCudaOptions.DeviceOrdinal"/> and domain options share; <see cref="ExecuteWithDiagnostics"/>
+    /// holds the module for the whole execution, so concurrent programs do not mix their counts, and a launch through <see cref="ExecuteResident"/> alone gives
+    /// no such guarantee.
+    /// </remarks>
+    public IReadOnlyDictionary<string, long> NonConvergedEvaluations
+    {
+        get
+        {
+            lock (stateLock)
+                return nonConverged;
+        }
     }
 
     /// <summary>Gets the launch options the program was compiled with.</summary>
@@ -123,7 +159,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     internal static ArenaPlan PlanArena(
         MathBlockProgram program,
         IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs) =>
-        PlanArenaFor(program, prototypeInputs, MathBlocksCudaOptions.Default, enforceWindowBudget: false);
+        PlanArenaFor(program, prototypeInputs, MathBlocksCudaOptions.Default, MathBlockDomainOptions.Default, enforceWindowBudget: false);
 
     // The same planning for the given launch options. With enforceWindowBudget (CompileWithOptions) a window scratch budget below
     // one block of a window form is an error; without it (Compile) such a form runs on one block over the budget, as before.
@@ -131,13 +167,14 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         MathBlockProgram program,
         IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
         MathBlocksCudaOptions options,
+        MathBlockDomainOptions domainOptions,
         bool enforceWindowBudget)
     {
         ValidateProgram(program);
 
         var plannedSlotOffsets = new int[program.PlanNodes.Count];
         var plannedPayloadOffsets = CreateFilledIntArray(program.PlanNodes.Count, -1);
-        var payloadLayout = ResolvePayloadLayout(program.PlanNodes, prototypeInputs);
+        var payloadLayout = ResolvePayloadLayout(program.PlanNodes, prototypeInputs, domainOptions: domainOptions);
         var plannedPayloadCapacities = payloadLayout.Capacities;
         var plannedInputPointerOffsets = CreateFilledIntArray(program.PlanNodes.Count, -1);
         var scratchOffsets = CreateFilledIntArray(program.PlanNodes.Count, -1);
@@ -175,7 +212,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             if (node.Kind != MathBlockProgramNodeKind.Operation || payloadLayout.AlwaysInvalid[node.Index])
                 continue;
             var scratchBytes = ResolveScratchBytesOrMarkInvalid(
-                node, program.PlanNodes, payloadLayout, options, enforceWindowBudget);
+                node, program.PlanNodes, payloadLayout, options, domainOptions, enforceWindowBudget);
             scratchSizes[node.Index] = scratchBytes;
             if (scratchBytes == 0)
                 continue;
@@ -220,7 +257,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         MathBlockProgram program,
         IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs)
     {
-        MathBlocksCudaNative.EnsureContext();
+        MathBlocksCudaNative.EnsureContext(0);
         var arenaPlan = PlanArena(program, prototypeInputs);
         return Create(program, prototypeInputs, arenaPlan, MathBlocksCudaOptions.Default, MathBlockDomainOptions.Default);
     }
@@ -234,9 +271,9 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         MathBlockDomainOptions domainOptions)
     {
         MathBlocksCudaOptionsValidator.ValidateRanges(options);
-        var arenaPlan = PlanArenaFor(program, prototypeInputs, options, enforceWindowBudget: true);
-        MathBlocksCudaNative.EnsureContext();
-        MathBlocksCudaOptionsValidator.ValidateDevice(options, MathBlocksCudaNative.GetDeviceLimits());
+        var arenaPlan = PlanArenaFor(program, prototypeInputs, options, domainOptions, enforceWindowBudget: true);
+        MathBlocksCudaNative.EnsureContext(options.DeviceOrdinal);
+        MathBlocksCudaOptionsValidator.ValidateDevice(options, MathBlocksCudaNative.GetDeviceLimits(options.DeviceOrdinal));
         return Create(program, prototypeInputs, arenaPlan, options, domainOptions);
     }
 
@@ -258,7 +295,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         var plannedDownloadArenaSize = arenaPlan.DownloadArenaSize;
         var plannedGraphNodes = new IntPtr[program.PlanNodes.Count];
         var arguments = new List<KernelArgumentStorage>();
-        var kernels = ResolveKernels(program, payloadLayout, options);
+        var kernels = ResolveKernels(program, payloadLayout, options, domainOptions);
 
         var allocatedDeviceArena = 0ul;
         var allocatedUploadArena = IntPtr.Zero;
@@ -351,7 +388,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                     null,
                     UIntPtr.Zero,
                     ref uploadCopy,
-                    MathBlocksCudaNative.CurrentContext),
+                    MathBlocksCudaNative.ContextFor(options.DeviceOrdinal)),
                 "cuGraphAddMemcpyNode(mathblocks upload)");
             foreach (var node in program.PlanNodes)
             {
@@ -404,7 +441,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                     terminalDependencies,
                     new UIntPtr((uint)terminalDependencies.Length),
                     ref downloadCopy,
-                    MathBlocksCudaNative.CurrentContext),
+                    MathBlocksCudaNative.ContextFor(options.DeviceOrdinal)),
                 "cuGraphAddMemcpyNode(mathblocks download)");
 
             MathBlocksCudaNative.ThrowIfFailed(
@@ -493,14 +530,28 @@ public sealed class MathBlocksCUDAProgram : IDisposable
 
     /// <summary>Runs the resident graph and downloads named outputs.</summary>
     public IReadOnlyDictionary<string, MathBlockValue> Execute(
+        IReadOnlyDictionary<string, MathBlockValue> inputs) => ExecuteWithDiagnostics(inputs).Outputs;
+
+    /// <summary>Runs the resident graph, downloads named outputs, and reports the evaluations that ended without converging.</summary>
+    public MathBlockExecutionResult ExecuteWithDiagnostics(
         IReadOnlyDictionary<string, MathBlockValue> inputs)
     {
         ArgumentNullException.ThrowIfNull(inputs);
         lock (stateLock)
         {
             UploadInputs(inputs);
-            ExecuteResident();
-            return ReadOutputs();
+            if (counterModule is null)
+            {
+                ExecuteResident();
+                return new MathBlockExecutionResult(ReadOutputs(), EmptyNonConverged);
+            }
+
+            lock (counterModule.CountsLock)
+            {
+                ExecuteResident();
+                var outputs = ReadOutputs();
+                return new MathBlockExecutionResult(outputs, nonConverged);
+            }
         }
     }
 
@@ -512,7 +563,13 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             ThrowIfDisposed();
             if (!inputsUploaded)
                 throw new InvalidOperationException("CUDA inputs are not available.");
-            MathBlocksCudaNative.EnsureContext();
+            MathBlocksCudaNative.EnsureContext(options.DeviceOrdinal);
+            if (counterModule is not null)
+            {
+                MathBlocksCudaNative.ThrowIfFailed(
+                    MathBlocksCudaNative.cuMemsetD8OnStream(counterModule.CountsPointer, 0, new UIntPtr((uint)counterModule.CountsBytes), stream),
+                    "cuMemsetD8Async(mathblocks non-convergence counters)");
+            }
             MathBlocksCudaNative.ThrowIfFailed(
                 MathBlocksCudaNative.cuGraphLaunch(executable, stream),
                 "cuGraphLaunch(mathblocks)");
@@ -531,12 +588,13 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             ThrowIfDisposed();
             if (!executionInFlight)
                 return;
-            MathBlocksCudaNative.EnsureContext();
+            MathBlocksCudaNative.EnsureContext(options.DeviceOrdinal);
             MathBlocksCudaNative.ThrowIfFailed(
                 MathBlocksCudaNative.cuStreamSynchronize(stream),
                 "cuStreamSynchronize(mathblocks)");
             executionInFlight = false;
             SynchronizationCount++;
+            ReadNonConvergence();
         }
     }
 
@@ -575,7 +633,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         {
             if (disposed)
                 return;
-            MathBlocksCudaNative.EnsureContext();
+            MathBlocksCudaNative.EnsureContext(options.DeviceOrdinal);
             if (executionInFlight)
             {
                 _ = MathBlocksCudaNative.cuStreamSynchronize(stream);
@@ -607,12 +665,42 @@ public sealed class MathBlocksCUDAProgram : IDisposable
 
     private void SynchronizeCore()
     {
-        MathBlocksCudaNative.EnsureContext();
+        MathBlocksCudaNative.EnsureContext(options.DeviceOrdinal);
         MathBlocksCudaNative.ThrowIfFailed(
             MathBlocksCudaNative.cuStreamSynchronize(stream),
             "cuStreamSynchronize(mathblocks)");
         executionInFlight = false;
         SynchronizationCount++;
+        ReadNonConvergence();
+    }
+
+    // Reads the module's counters, which the synchronized execution filled, into nonConverged by operation identity.
+    private void ReadNonConvergence()
+    {
+        if (counterModule is null)
+            return;
+        var counts = new long[counterModule.CountsBytes / sizeof(long)];
+        var handle = GCHandle.Alloc(counts, GCHandleType.Pinned);
+        try
+        {
+            MathBlocksCudaNative.ThrowIfFailed(
+                MathBlocksCudaNative.cuMemcpyDtoH(handle.AddrOfPinnedObject(), counterModule.CountsPointer, new UIntPtr((uint)counterModule.CountsBytes)),
+                "cuMemcpyDtoH(mathblocks non-convergence counters)");
+        }
+        finally
+        {
+            handle.Free();
+        }
+
+        var identities = MathBlockCudaDeviceModule.OperationIdentities;
+        var result = new Dictionary<string, long>(StringComparer.Ordinal);
+        for (var index = 0; index < counts.Length && index < identities.Count; index++)
+        {
+            if (counts[index] != 0)
+                result[identities[index]] = counts[index];
+        }
+
+        nonConverged = result.Count == 0 ? EmptyNonConverged : new System.Collections.ObjectModel.ReadOnlyDictionary<string, long>(result);
     }
 
     private static int[] CreateFilledIntArray(int count, int value)
@@ -650,8 +738,10 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
         IReadOnlyDictionary<string, int>? inputCapacityOverrides = null,
         IReadOnlyDictionary<string, MathBlockCudaShapeAuthority>? inputShapeOverrides = null,
-        IReadOnlyList<bool>? activeNodes = null)
+        IReadOnlyList<bool>? activeNodes = null,
+        MathBlockDomainOptions? domainOptions = null)
     {
+        domainOptions ??= MathBlockDomainOptions.Default;
         var capacities = new int[nodes.Count];
         var shapeRows = new int[nodes.Count];
         var shapeColumns = new int[nodes.Count];
@@ -711,7 +801,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                         node,
                         inputCapacities,
                         inputShapeRows,
-                        inputExactValues);
+                        inputExactValues,
+                        domainOptions);
                 }
                 else
                 {
@@ -726,7 +817,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                     inputShapeColumns,
                     prototypeInputs,
                     inputCapacityOverrides,
-                    inputExactValues);
+                    inputExactValues,
+                    domainOptions);
                 if (capacity < 0)
                     throw new InvalidOperationException($"CUDA payload capacity for node {node.Index} is negative.");
                 shape = ResolveShapeAuthority(
@@ -938,7 +1030,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         MathBlockProgramNode node,
         int[] inputCapacities,
         IReadOnlyList<int> inputShapeRows,
-        IReadOnlyList<MathBlockValue?> inputExactValues)
+        IReadOnlyList<MathBlockValue?> inputExactValues,
+        MathBlockDomainOptions domainOptions)
     {
         var identity = node.OperationIdentity!;
         if (string.Equals(identity, "sequence.difference@1", StringComparison.Ordinal) &&
@@ -984,7 +1077,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             if (TryGetExactInteger(inputExactValues, countInput, out var count))
             {
                 var minimum = string.Equals(identity, "vector.repeat@1", StringComparison.Ordinal) ? 0 : 1;
-                RequireDomain(count >= minimum && count <= 1_000_000, node, "output length");
+                RequireDomain(count >= minimum && count <= domainOptions.MaximumGeneratedVectorLength, node, "output length");
             }
         }
         if (string.Equals(identity, "vector.slice@1", StringComparison.Ordinal) &&
@@ -999,7 +1092,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         if (string.Equals(identity, "matrix.identity@1", StringComparison.Ordinal) &&
             TryGetExactInteger(inputExactValues, 0, out var matrixSize))
         {
-            RequireDomain(matrixSize > 0 && matrixSize <= 4096, node, "matrix size");
+            RequireDomain(matrixSize > 0 && matrixSize <= domainOptions.MaximumMatrixSize, node, "matrix size");
         }
         if (string.Equals(identity, "matrix.reshape@1", StringComparison.Ordinal) &&
             TryGetExactInteger(inputExactValues, 1, out var rows) &&
@@ -1228,7 +1321,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         IReadOnlyList<int> inputShapeColumns,
         IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs,
         IReadOnlyDictionary<string, int>? inputCapacityOverrides,
-        IReadOnlyList<MathBlockValue?> inputExactValues)
+        IReadOnlyList<MathBlockValue?> inputExactValues,
+        MathBlockDomainOptions domainOptions)
     {
         if (node.Type.Kind is MathBlockValueKind.Scalar or MathBlockValueKind.Boolean)
             return 0;
@@ -1309,7 +1403,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             if (string.Equals(identity, "matrix.principal-minors@1", StringComparison.Ordinal))
             {
                 var rows = RequireInputShapeRows(node, 0, inputShapeRows);
-                if (rows < 0 || rows > 20)
+                if (rows < 0 || rows > domainOptions.MaximumExplicitSubsetSize)
                     throw new StaticDomainException("CUDA principal-minor shape is outside the operation domain.");
                 return checked((1 << rows) - 1);
             }
@@ -1327,7 +1421,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             if (string.Equals(identity, "combinatorics.nonempty-subset-sums@1", StringComparison.Ordinal))
             {
                 var count = inputCapacities[0];
-                if (count < 0 || count > 20)
+                if (count < 0 || count > domainOptions.MaximumExplicitSubsetSize)
                     throw new StaticDomainException("CUDA subset-sum shape is outside the operation domain.");
                 return checked((1 << count) - 1);
             }
@@ -1786,20 +1880,21 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         MathBlockProgramNode node,
         IReadOnlyList<MathBlockProgramNode> nodes,
         MathBlockCudaPayloadLayout payloadLayout) =>
-        ResolveScratchBytesOrMarkInvalid(node, nodes, payloadLayout, MathBlocksCudaOptions.Default, enforceWindowBudget: false);
+        ResolveScratchBytesOrMarkInvalid(node, nodes, payloadLayout, MathBlocksCudaOptions.Default, MathBlockDomainOptions.Default, enforceWindowBudget: false);
 
     internal static int ResolveScratchBytesOrMarkInvalid(
         MathBlockProgramNode node,
         IReadOnlyList<MathBlockProgramNode> nodes,
         MathBlockCudaPayloadLayout payloadLayout,
         MathBlocksCudaOptions options,
+        MathBlockDomainOptions domainOptions,
         bool enforceWindowBudget)
     {
         if (payloadLayout.AlwaysInvalid[node.Index])
             return 0;
         try
         {
-            return ResolveScratchBytes(node, nodes, payloadLayout, options, enforceWindowBudget);
+            return ResolveScratchBytes(node, nodes, payloadLayout, options, domainOptions, enforceWindowBudget);
         }
         catch (StaticDomainException)
         {
@@ -1812,13 +1907,14 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         MathBlockProgramNode node,
         IReadOnlyList<MathBlockProgramNode> nodes,
         MathBlockCudaPayloadLayout payloadLayout) =>
-        ResolveScratchBytes(node, nodes, payloadLayout, MathBlocksCudaOptions.Default, enforceWindowBudget: false);
+        ResolveScratchBytes(node, nodes, payloadLayout, MathBlocksCudaOptions.Default, MathBlockDomainOptions.Default, enforceWindowBudget: false);
 
     internal static int ResolveScratchBytes(
         MathBlockProgramNode node,
         IReadOnlyList<MathBlockProgramNode> nodes,
         MathBlockCudaPayloadLayout payloadLayout,
         MathBlocksCudaOptions options,
+        MathBlockDomainOptions domainOptions,
         bool enforceWindowBudget)
     {
         if (node.Kind != MathBlockProgramNodeKind.Operation)
@@ -1865,7 +1961,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             inputTypes,
             inputCapacities,
             inputShapeRows,
-            inputShapeColumns);
+            inputShapeColumns,
+            domainOptions);
     }
 
     internal static int ResolveScratchBytes(
@@ -1874,7 +1971,17 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         Supprocom.MathBlocks.MathBlockType[] inputTypes,
         int[] inputCapacities,
         int[] inputShapeRows,
-        int[] inputShapeColumns)
+        int[] inputShapeColumns) =>
+        ResolveScratchBytes(identity, outputType, inputTypes, inputCapacities, inputShapeRows, inputShapeColumns, MathBlockDomainOptions.Default);
+
+    internal static int ResolveScratchBytes(
+        string identity,
+        MathBlockType outputType,
+        Supprocom.MathBlocks.MathBlockType[] inputTypes,
+        int[] inputCapacities,
+        int[] inputShapeRows,
+        int[] inputShapeColumns,
+        MathBlockDomainOptions domainOptions)
     {
         if (inputTypes.Length != inputCapacities.Length ||
             inputTypes.Length != inputShapeRows.Length ||
@@ -1899,7 +2006,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 throw new InvalidOperationException($"CUDA scratch row authority is unavailable for '{identity}'.");
             if (RequiresScratchColumns(identity) && columns <= 0)
                 throw new InvalidOperationException($"CUDA scratch column authority is unavailable for '{identity}'.");
-            var doubleCount = ResolveScratchDoubles(identity, firstCount, rows, columns, inputCapacities);
+            var doubleCount = ResolveScratchDoubles(identity, firstCount, rows, columns, inputCapacities, domainOptions);
             if (doubleCount != 0)
                 return ToScratchBytes(identity, doubleCount, firstCount);
         }
@@ -1963,7 +2070,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 $"{identity}: the CUDA scratch of {bytes:N0} bytes for this shape exceeds the supported {int.MaxValue:N0} bytes."));
     }
 
-    private static long ResolveScratchDoubles(string identity, long firstCount, long rows, long columns, int[] inputCapacities)
+    private static long ResolveScratchDoubles(string identity, long firstCount, long rows, long columns, int[] inputCapacities, MathBlockDomainOptions domainOptions)
     {
         if (ScratchDoublesOfRows(identity, firstCount) is { } byRows)
             return byRows;
@@ -2014,7 +2121,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             "shape.greatest-convex-minorant@1" or
                 "shape.is-completely-monotone@1" or
                 "shape.least-concave-majorant@1" => firstCount,
-            "transport.minimum-assignment@1" => ResolveAssignmentScratch(checked((int)rows)),
+            "transport.minimum-assignment@1" => ResolveAssignmentScratch(checked((int)rows), domainOptions),
             "transport.sinkhorn-coupling@1" => checked(firstCount + rows + columns),
             "transport.weighted-wasserstein-1@1" => checked(
                 firstCount + inputCapacities[2]),
@@ -2038,9 +2145,9 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         return checked((int)result);
     }
 
-    private static int ResolveAssignmentScratch(int size)
+    private static int ResolveAssignmentScratch(int size, MathBlockDomainOptions domainOptions)
     {
-        if (size < 0 || size > 20)
+        if (size < 0 || size > domainOptions.MaximumExplicitSubsetSize)
             throw new StaticDomainException("CUDA assignment shape is outside the operation domain.");
         return checked(2 * (1 << size));
     }
@@ -2201,7 +2308,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     private static MathBlocksCudaKernelModule.KernelBinding[] ResolveKernels(
         MathBlockProgram program,
         MathBlockCudaPayloadLayout payloadLayout,
-        MathBlocksCudaOptions options)
+        MathBlocksCudaOptions options,
+        MathBlockDomainOptions domainOptions)
     {
         var kernels = new MathBlocksCudaKernelModule.KernelBinding[program.PlanNodes.Count];
         var maximums = new Dictionary<IntPtr, int>();
@@ -2209,7 +2317,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         {
             if (node.Kind != MathBlockProgramNodeKind.Operation || payloadLayout.AlwaysInvalid[node.Index])
                 continue;
-            var kernel = MathBlocksCudaKernelModule.Resolve(node.OperationIdentity!, options.BlockSize);
+            var kernel = MathBlocksCudaKernelModule.Resolve(node.OperationIdentity!, options.BlockSize, options.DeviceOrdinal, domainOptions);
             kernels[node.Index] = kernel;
             if (kernel.BlockX == 1u && options.BlockSize != 1)
                 continue;

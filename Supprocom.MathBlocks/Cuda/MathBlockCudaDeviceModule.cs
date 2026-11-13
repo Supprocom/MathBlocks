@@ -25,22 +25,51 @@ public static class MathBlockCudaDeviceModule
     /// </remarks>
     public const int VirtualLaneCount = 128;
     /// <summary>Gets the dispatch function name value.</summary>
+    /// <summary>The name of the module-global array of non-converged evaluation counts, one <c>unsigned long long</c> per entry of <see cref="Operations"/>, in that order.</summary>
+    /// <remarks>
+    /// The incomplete-beta continued fraction and the Jacobi eigenvalue iteration add one to their operation's entry, with <c>atomicAdd</c>, when they stop at their
+    /// iteration budget without converging, under both <see cref="MathBlockNonConvergencePolicy"/> values. A consumer's own kernel that calls them adds to the
+    /// same array. Read it with <c>cuModuleGetGlobal</c> after a launch, and zero it before.
+    /// </remarks>
+    public const string NonConvergenceCountsSymbol = "mathblocks_nonconvergence_counts";
+    /// <summary>Gets the dispatch function name value.</summary>
     public const string DispatchFunctionName = "mathblocks_operation_dispatch";
     /// <summary>Gets the dispatch signature value.</summary>
     public const string DispatchSignature =
         "__device__ void mathblocks_operation_dispatch(int family, int opcode, " +
         "const MathBlockSlot* const* inputs, int input_count, MathBlockSlot* output)";
 
+    // CA1721: GetSource(MathBlockDomainOptions) and GetSourceFingerprint(MathBlockDomainOptions) are the names the 0.7.0 interface fixes, and Source and
+    // SourceFingerprint are the shipped properties of the default options.
+#pragma warning disable CA1721
     /// <summary>Gets the source value.</summary>
     public static string Source => state.Value.Source;
     /// <summary>Gets the source fingerprint value.</summary>
     public static string SourceFingerprint => state.Value.SourceFingerprint;
+#pragma warning restore CA1721
+
+    /// <summary>Gets the device source for the given domain options.</summary>
+    /// <remarks>The generated operation text is the same at every option value; each limit is the value of a small function that comes before it. <see cref="Source"/> is this text for <see cref="MathBlockDomainOptions.Default"/>.</remarks>
+    /// <exception cref="ArgumentOutOfRangeException">An option is outside the range its limit allows.</exception>
+    public static string GetSource(MathBlockDomainOptions domainOptions)
+    {
+        ArgumentNullException.ThrowIfNull(domainOptions);
+        domainOptions.Validate();
+        return MathBlockCudaDevicePrelude.Create(domainOptions, state.Value.OperationIdentities) + CreateSource();
+    }
+
+    /// <summary>Gets the fingerprint of <see cref="GetSource(MathBlockDomainOptions)"/>, the SHA-256 of the source in upper-case hexadecimal.</summary>
+    public static string GetSourceFingerprint(MathBlockDomainOptions domainOptions) =>
+        MathBlockCudaContractHash.Create(GetSource(domainOptions));
     /// <summary>Gets the abi value.</summary>
     public static MathBlockCudaDeviceAbi Abi => state.Value.Abi;
     /// <summary>Gets the abi fingerprint value.</summary>
     public static string AbiFingerprint => state.Value.Abi.Fingerprint;
     /// <summary>Gets the operations value.</summary>
     public static IReadOnlyList<MathBlockCudaOperationContract> Operations => state.Value.Operations;
+
+    // The operation identities in the order of Operations, which index the non-convergence counters.
+    internal static IReadOnlyList<string> OperationIdentities => state.Value.OperationIdentities;
     /// <summary>Gets the supported operation identities value.</summary>
     public static IReadOnlyCollection<string> SupportedOperationIdentities =>
         state.Value.SupportedOperationIdentities;
@@ -61,18 +90,38 @@ public static class MathBlockCudaDeviceModule
         return Source + "\n" + consumerSource;
     }
 
+    /// <summary>Appends a consumer's source to the device source for the given domain options.</summary>
+    public static string ComposeSource(string consumerSource, MathBlockDomainOptions domainOptions)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(consumerSource);
+        return GetSource(domainOptions) + "\n" + consumerSource;
+    }
+
     /// <summary>Compiles the composed CUDA source to PTX with NVRTC.</summary>
+    // RS0027: the shipped overload has an optional parameter and fewer parameters than the domain-options overload, whose signature the 0.7.0 interface fixes.
+#pragma warning disable RS0027
     public static byte[] CompilePtx(string consumerSource, string sourceName = "mathblocks-consumer.cu")
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sourceName);
         return MathBlocksCudaNative.CompilePtx(ComposeSource(consumerSource), sourceName);
     }
+#pragma warning restore RS0027
+
+    /// <summary>Compiles a consumer's source after the device source for the given domain options.</summary>
+    public static byte[] CompilePtx(string consumerSource, string sourceName, MathBlockDomainOptions domainOptions)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sourceName);
+        return MathBlocksCudaNative.CompilePtx(ComposeSource(consumerSource, domainOptions), sourceName);
+    }
 
     private static ModuleState CreateState()
     {
-        var source = CreateSource();
-        var sourceFingerprint = MathBlockCudaContractHash.Create(source);
         var registryOperations = MathBlockCatalog.Standard.Operations;
+        var operationIdentities = new string[registryOperations.Count];
+        for (var index = 0; index < operationIdentities.Length; index++)
+            operationIdentities[index] = registryOperations[index].Identity;
+        var source = MathBlockCudaDevicePrelude.Create(MathBlockDomainOptions.Default, operationIdentities) + CreateSource();
+        var sourceFingerprint = MathBlockCudaContractHash.Create(source);
         var contracts = new MathBlockCudaOperationContract[registryOperations.Count];
         var contractsByIdentity = new Dictionary<string, MathBlockCudaOperationContract>(
             registryOperations.Count,
@@ -144,7 +193,8 @@ public static class MathBlockCudaDeviceModule
             abi,
             Array.AsReadOnly(contracts),
             contractsByIdentity,
-            Array.AsReadOnly(identities));
+            Array.AsReadOnly(identities),
+            operationIdentities);
     }
 
     private static int OffsetOf<T>(string fieldName) where T : struct =>
@@ -180,5 +230,6 @@ public static class MathBlockCudaDeviceModule
         MathBlockCudaDeviceAbi Abi,
         IReadOnlyList<MathBlockCudaOperationContract> Operations,
         IReadOnlyDictionary<string, MathBlockCudaOperationContract> ContractsByIdentity,
-        IReadOnlyCollection<string> SupportedOperationIdentities);
+        IReadOnlyCollection<string> SupportedOperationIdentities,
+        IReadOnlyList<string> OperationIdentities);
 }

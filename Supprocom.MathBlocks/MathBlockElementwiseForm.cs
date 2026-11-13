@@ -48,23 +48,27 @@ internal sealed class MathBlockElementwiseForm
         return MathBlockType.BooleanVector(rows);
     }
 
-    internal MathBlockValue EvaluateForm(IReadOnlyList<MathBlockValue> inputs)
+    internal MathBlockValue EvaluateForm(IReadOnlyList<MathBlockValue> inputs) => EvaluateForm(inputs, MathBlockDomainContext.Default);
+
+    internal MathBlockValue EvaluateForm(IReadOnlyList<MathBlockValue> inputs, MathBlockDomainContext domain)
     {
         var type = FormTypeResolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
         if (!TryResolveCount(inputs, type, out var count, out var invalid))
             return invalid;
         var values = new double[count];
-        Run(inputs, count, inputs[source.Arity].AsScalar(), values, null);
+        Run(inputs, count, inputs[source.Arity].AsScalar(), values, null, domain);
         return MathBlockValue.Vector(values, type.Unit, true);
     }
 
-    internal MathBlockValue EvaluateValidity(IReadOnlyList<MathBlockValue> inputs)
+    internal MathBlockValue EvaluateValidity(IReadOnlyList<MathBlockValue> inputs) => EvaluateValidity(inputs, MathBlockDomainContext.Default);
+
+    internal MathBlockValue EvaluateValidity(IReadOnlyList<MathBlockValue> inputs, MathBlockDomainContext domain)
     {
         var type = ValidityTypeResolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
         if (!TryResolveCount(inputs, type, out var count, out var invalid))
             return invalid;
         var valid = new bool[count];
-        Run(inputs, count, 0d, null, valid);
+        Run(inputs, count, 0d, null, valid, domain);
         return MathBlockValue.BooleanVector(valid, true);
     }
 
@@ -137,7 +141,8 @@ internal sealed class MathBlockElementwiseForm
         int count,
         double fill,
         double[]? values,
-        bool[]? valid)
+        bool[]? valid,
+        MathBlockDomainContext domain)
     {
         if (count > 0 && TryRunKernel(inputs, count, fill, values, valid))
             return;
@@ -165,7 +170,7 @@ internal sealed class MathBlockElementwiseForm
                 if (vectors[index] is { } vector)
                     rowInputs[index] = MathBlockValue.Scalar(vector[row], units[index]);
             }
-            var computed = EvaluateRow(rowInputs, out var value);
+            var computed = EvaluateRow(rowInputs, out var value, domain);
             if (valid is not null)
                 valid[row] = computed;
             if (values is not null)
@@ -372,9 +377,12 @@ internal sealed class MathBlockElementwiseForm
     // One row: the source operation's own CoreCLR evaluation on the row's scalar arguments. Returns whether the
     // source result is valid (the row is computed) and its value, or 0 when it is not. The form, the sibling and the
     // fused expression's elementwise rows all evaluate their rows here.
-    internal bool EvaluateRow(MathBlockValue[] rowInputs, out double value)
+    internal bool EvaluateRow(MathBlockValue[] rowInputs, out double value) => EvaluateRow(rowInputs, out value, MathBlockDomainContext.Default);
+
+    // The row under the context's domain options, which count the source's non-converged evaluations.
+    internal bool EvaluateRow(MathBlockValue[] rowInputs, out double value, MathBlockDomainContext domain)
     {
-        var result = source.Evaluate(rowInputs);
+        var result = source.Evaluate(rowInputs, domain);
         value = result.IsValid ? result.AsScalar() : 0d;
         return result.IsValid;
     }

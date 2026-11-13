@@ -30,6 +30,7 @@ internal static class MathBlockLimitCatalog
         AddCuda(limits, cuda);
         AddWindowWidths(limits, cuda);
         AddFused(limits, cuda);
+        AddElementwiseSources(limits);
         AddDomain(limits, domain);
         AddWindowAndSequenceRules(limits);
         AddDeviceModule(limits, cuda, domain);
@@ -72,7 +73,7 @@ internal static class MathBlockLimitCatalog
         limits.Add(new MathBlockLimit(
             "cuda.device-ordinal", null, MathBlockLimitKind.Option, MathBlockLimitDevice.Cuda,
             0, null, MathBlockLimitSeam.DeviceOrdinal(cuda), "device",
-            $"{CudaOptions}.DeviceOrdinal", NoDrivers,
+            $"{CudaOptions}.{nameof(MathBlocksCudaOptions.DeviceOrdinal)}", NoDrivers,
             "the CUDA device that runs the programs; its compute capability sets the architecture string; the valid maximum is the device count"));
         AddSlotLayout(limits);
         AddAccumulator(limits);
@@ -161,7 +162,7 @@ internal static class MathBlockLimitCatalog
         limits.Add(new MathBlockLimit(
             "fused.row-block", null, MathBlockLimitKind.Launch, MathBlockLimitDevice.CoreCLR,
             1, int.MaxValue, MathBlockLimitSeam.FusedRowBlock(cuda), "rows",
-            $"{CudaOptions}.FusedRowBlock", NoDrivers,
+            $"{CudaOptions}.{nameof(MathBlocksCudaOptions.FusedRowBlock)}", NoDrivers,
             "rows one CoreCLR task evaluates; every row is independent and the invalid masks combine by bitwise or, so " + SpeedOnly));
         limits.Add(Fixed("fused.maximum-operation-nodes", MathBlockLimitDevice.All, MathBlockFusedExpression.MaximumOperationNodes, "nodes",
             "one invalid-mask bit per operation node, and the mask is 64 bits wide"));
@@ -174,6 +175,13 @@ internal static class MathBlockLimitCatalog
         limits.Add(Fixed("fused.operation-count", MathBlockLimitDevice.All, 26 + ElementwiseCudaBlockCatalog.Features.Length, "operations",
             "the 26 pointwise operations and the elementwise forms with their valid siblings are the only operations a fused expression accepts; vector constants come in as inputs"));
     }
+
+    private static void AddElementwiseSources(List<MathBlockLimit> limits) =>
+        limits.Add(new MathBlockLimit(
+            "elementwise.maximum-source-count", null, MathBlockLimitKind.Derived, MathBlockLimitDevice.All,
+            null, MathBlockCudaElementwiseOpcode.MaximumSourceCount, ElementwiseMathBlocks.SourceCount, "sources",
+            null, NoDrivers,
+            "from the int32 opcode and 3 mask bits: sources below 64 keep 2 * source + sibling + 128 * mask, larger ones are 1024 + 2 * source + sibling + 65536 * mask"));
 
     private static void AddWindowAndSequenceRules(List<MathBlockLimit> limits)
     {

@@ -37,7 +37,7 @@ public sealed class MathBlocksCUDAWorker
     {
         ArgumentNullException.ThrowIfNull(program);
         ArgumentNullException.ThrowIfNull(options);
-        var domain = MathBlocksCudaOptionsValidator.RequireDefaultDomain(domainOptions);
+        var domain = MathBlocksCudaOptionsValidator.RequireDomain(domainOptions);
         return MathBlocksCUDAProgram.CreateWithOptions(program, prototypeInputs, options, domain);
     }
 

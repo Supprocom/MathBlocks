@@ -33,7 +33,6 @@ public sealed class MathBlockFusedExpression
     public const int MaximumOutputs = 4;
 
     private const string FingerprintFormat = "mathblocks-fused-expression-v1";
-    private const int RowBlock = 8192;
 
     private readonly MathBlockProgram program;
     private readonly Step[] steps;
@@ -231,24 +230,49 @@ public sealed class MathBlockFusedExpression
             nodeKinds);
     }
 
-    /// <summary>Evaluates the fused expression on CoreCLR, one row at a time.</summary>
+    /// <summary>Evaluates the fused expression on CoreCLR, one row at a time, optionally under domain options and a row block.</summary>
     /// <param name="inputs">The program inputs by name. Vector inputs that are valid have one common length.</param>
-    /// <param name="validity">
-    /// Optional BooleanVector validity inputs, keyed by vector input name, each as long as the vector inputs.
-    /// </param>
-    /// <returns>The outputs, equal to the unfused program's outputs, with each output's row validity.</returns>
-    /// <exception cref="ArgumentException">Vector input lengths differ, or a validity input does not fit.</exception>
+    /// <param name="validity">Optional BooleanVector validity inputs, keyed by vector input name, each as long as the vector inputs.</param>
+    /// <param name="domainOptions">The domain limits (null for the defaults) of the elementwise rows, the options <see cref="MathBlockCudaDeviceModule.GetSource(MathBlockDomainOptions)"/> compiles into the device source.</param>
+    /// <param name="options">The launch options (null for the defaults); <see cref="MathBlocksCudaOptions.FusedRowBlock"/> is the number of rows one CoreCLR task evaluates.</param>
+    /// <returns>The outputs and each output's row validity; <see cref="MathBlockFusedResult.NonConvergedEvaluations"/> counts the non-converged rows by operation identity.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">An option is outside the range its limit allows.</exception>
     public MathBlockFusedResult EvaluateCoreCLR(
         IReadOnlyDictionary<string, MathBlockValue> inputs,
-        IReadOnlyDictionary<string, MathBlockValue>? validity = null)
+        IReadOnlyDictionary<string, MathBlockValue>? validity = null,
+        MathBlockDomainOptions? domainOptions = null,
+        MathBlocksCudaOptions? options = null)
     {
+        domainOptions ??= MathBlockDomainOptions.Default;
+        options ??= MathBlocksCudaOptions.Default;
+        domainOptions.Validate();
+        MathBlockLimitSeam.ValidateCuda(options);
         var values = program.CreateValueBuffer(inputs);
         var rows = ResolveRows(values);
         var validityValues = ResolveValidity(validity, rows);
         var columns = new Array[outputNodes.Length];
         var validityColumns = new bool[outputNodes.Length][];
-        var mask = EvaluateRows(values, validityValues, rows, columns, validityColumns);
-        return CreateResult(values, validityValues, rows, columns, validityColumns, mask);
+        var contexts = new MathBlockDomainContext?[steps.Length];
+        for (var stepIndex = 0; stepIndex < steps.Length; stepIndex++)
+        {
+            if (steps[stepIndex].Lift is not null)
+                contexts[stepIndex] = new MathBlockDomainContext(domainOptions);
+        }
+
+        var mask = EvaluateRows(values, validityValues, rows, columns, validityColumns, contexts, MathBlockLimitSeam.FusedRowBlock(options));
+        var result = CreateResult(values, validityValues, rows, columns, validityColumns, mask);
+        var counts = new Dictionary<string, long>(StringComparer.Ordinal);
+        for (var stepIndex = 0; stepIndex < contexts.Length; stepIndex++)
+        {
+            if (contexts[stepIndex] is { NonConverged: > 0 } context)
+            {
+                var identity = program.Nodes[steps[stepIndex].Node].Operation!.Identity;
+                counts[identity] = counts.GetValueOrDefault(identity) + context.NonConverged;
+            }
+        }
+
+        result.NonConvergedEvaluations = counts.Count == 0 ? MathBlockFusedResult.NoNonConverged : counts;
+        return result;
     }
 
     /// <summary>Rebuilds the outputs of a CUDA launch of <see cref="CudaKernelName"/>.</summary>
@@ -460,7 +484,9 @@ public sealed class MathBlockFusedExpression
         MathBlockValue?[] validity,
         int rows,
         Array[] columns,
-        bool[][] validityColumns)
+        bool[][] validityColumns,
+        MathBlockDomainContext?[] contexts,
+        int rowBlock)
     {
         // Invalid inputs and validity inputs carry no rows; their registers keep zero (false) and their row
         // validity true. Every node they reach is invalid in the rebuilt result, so those row values are unused.
@@ -485,11 +511,17 @@ public sealed class MathBlockFusedExpression
         // Rows are independent, so blocks of rows run in parallel; each row's arithmetic is the same in any order,
         // and the invalid mask is an OR over all rows.
         var mask = 0ul;
-        var blocks = (rows + RowBlock - 1) / RowBlock;
+        var blocks = (int)(((long)rows + rowBlock - 1) / rowBlock);
         Parallel.For(0, blocks, block =>
         {
             var blockMask = EvaluateBlock(
-                values, source, block * RowBlock, Math.Min(rows, (block + 1) * RowBlock), columns, validityColumns);
+                values,
+                source,
+                (int)((long)block * rowBlock),
+                (int)Math.Min(rows, ((long)block + 1) * rowBlock),
+                columns,
+                validityColumns,
+                contexts);
             if (blockMask != 0)
                 Interlocked.Or(ref mask, blockMask);
         });
@@ -502,7 +534,8 @@ public sealed class MathBlockFusedExpression
         int start,
         int end,
         Array[] columns,
-        bool[][] validityColumns)
+        bool[][] validityColumns,
+        MathBlockDomainContext?[] contexts)
     {
         var count = values.Length;
         var number = new double[count];
@@ -539,7 +572,7 @@ public sealed class MathBlockFusedExpression
             {
                 var step = steps[stepIndex];
                 if (step.Lift is not null)
-                    EvaluateElementwiseStep(step, rowArguments[stepIndex], number, flag, rowValid);
+                    EvaluateElementwiseStep(step, rowArguments[stepIndex], number, flag, rowValid, contexts[stepIndex]!);
                 else if (!EvaluateStep(step, number, flag, complex, rowValid))
                     mask |= 1ul << stepIndex;
             }
@@ -608,13 +641,14 @@ public sealed class MathBlockFusedExpression
         MathBlockValue[] rowArguments,
         double[] number,
         bool[] flag,
-        bool[] rowValid)
+        bool[] rowValid,
+        MathBlockDomainContext domain)
     {
         var arguments = step.Arguments;
         var node = step.Node;
         for (var argument = 0; argument < rowArguments.Length; argument++)
             rowArguments[argument] = MathBlockValue.Scalar(number[arguments[argument]], step.ArgumentUnits![argument]);
-        var computed = step.Lift!.EvaluateRow(rowArguments, out var value);
+        var computed = step.Lift!.EvaluateRow(rowArguments, out var value, domain);
         var valid = true;
         foreach (var argument in arguments)
             valid &= rowValid[argument];

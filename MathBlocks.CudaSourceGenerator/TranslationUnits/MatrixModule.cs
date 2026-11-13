@@ -6,6 +6,30 @@ using Supprocom.CSharp2CUDA;
 [TranspileToCUDA]
 internal static unsafe class MatrixModule
 {
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_matrix_size() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_totally_nonnegative_size() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_maximal_minor_columns() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_explicit_subset_size() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_iteration_count() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_jacobi_policy() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static long mathblocks_limit_jacobi_rotation_budget(int size) => throw new NotSupportedException();
+
+    [CudaExternal]
+    private static void mathblocks_nonconvergence_record_matrix(int opcode) => throw new NotSupportedException();
+
     [CudaExternal]
     public struct MathBlockSlot
     {
@@ -277,7 +301,7 @@ internal static unsafe class MatrixModule
     private static double* mathblocks_stable_merge_sort(double* values, double* buffer, int count, bool descending) => throw new NotSupportedException();
 
     [CudaDevice]
-    private static void mathblocks_matrix_symmetric_eigenvalues(
+    private static bool mathblocks_matrix_symmetric_eigenvalues(
         [CudaReadOnly] double* source,
         int size,
         double* work,
@@ -285,7 +309,11 @@ internal static unsafe class MatrixModule
         double* buffer)
     {
         mathblocks_matrix_copy(source, work, size * size);
-        for (int iteration = 0; iteration < 64 * size * size; iteration++)
+        long budget = mathblocks_limit_jacobi_rotation_budget(size);
+        bool converged = false;
+        // The scan that finds the pivot is also the convergence test: the sweep ends converged at the first scan with no
+        // off-diagonal entry, and unconverged when the rotation budget is used up with one left.
+        for (long iteration = 0; iteration <= budget; iteration++)
         {
             int pivot_row = 0;
             int pivot_column = 0;
@@ -303,6 +331,11 @@ internal static unsafe class MatrixModule
                 }
             }
             if (largest == 0.0)
+            {
+                converged = true;
+                break;
+            }
+            if (iteration >= budget)
                 break;
             double angle = 0.5 * mathblocks_arc_tangent_2(
                 2.0 * work[pivot_row * size + pivot_column],
@@ -340,6 +373,7 @@ internal static unsafe class MatrixModule
         if (sorted != eigenvalues)
             for (int index = 0; index < size; index++)
                 eigenvalues[index] = sorted[index];
+        return converged;
     }
 
     [CudaDevice]
@@ -670,7 +704,7 @@ internal static unsafe class MatrixModule
             if (thread == 0)
             {
                 mathblocks_matrix_shape(output, size, size);
-                if (!valid_size || size <= 0 || size > 4096) output->valid = 0;
+                if (!valid_size || size <= 0 || size > mathblocks_limit_matrix_size()) output->valid = 0;
             }
             Cuda.SyncThreads();
             for (int flat = thread; output->valid && flat < size * size; flat += Cuda.BlockDim.X)
@@ -1001,7 +1035,7 @@ internal static unsafe class MatrixModule
 
         if (opcode == 32)
         {
-            if (first->rows > 8 || first->columns > 8 || scratch == null)
+            if (first->rows > mathblocks_limit_totally_nonnegative_size() || first->columns > mathblocks_limit_totally_nonnegative_size() || scratch == null)
             {
                 output->valid = 0;
                 return;
@@ -1055,7 +1089,16 @@ internal static unsafe class MatrixModule
                 return;
             }
             if (opcode == 43) mathblocks_set_vector_shape(output, size);
-            mathblocks_matrix_symmetric_eigenvalues(a, size, scratch, eigenvalues, scratch + first->count + (opcode == 43 ? 0 : size));
+            bool converged = mathblocks_matrix_symmetric_eigenvalues(a, size, scratch, eigenvalues, scratch + first->count + (opcode == 43 ? 0 : size));
+            if (!converged)
+            {
+                mathblocks_nonconvergence_record_matrix(opcode);
+                if (mathblocks_limit_jacobi_policy() == 1)
+                {
+                    output->valid = 0;
+                    return;
+                }
+            }
             if (opcode == 33) output->scalar_value = eigenvalues[size - 1];
             else if (opcode == 40) output->scalar_value = eigenvalues[0];
             for (int index = 0; index < size; index++)
@@ -1065,7 +1108,7 @@ internal static unsafe class MatrixModule
 
         if (opcode == 34)
         {
-            if (first->rows > first->columns || first->columns > 20 || scratch == null)
+            if (first->rows > first->columns || first->columns > mathblocks_limit_maximal_minor_columns() || scratch == null)
             {
                 output->valid = 0;
                 return;
@@ -1103,7 +1146,7 @@ internal static unsafe class MatrixModule
             int size = first->rows;
             if (size != first->columns ||
                 !mathblocks_nonnegative_integer(second->scalar_value, &iterations) ||
-                iterations <= 0 || iterations > 10000 || scratch == null)
+                iterations <= 0 || iterations > mathblocks_limit_iteration_count() || scratch == null)
             {
                 output->valid = 0;
                 return;
@@ -1158,7 +1201,7 @@ internal static unsafe class MatrixModule
         if (opcode == 37)
         {
             int size = first->rows;
-            if (size != first->columns || size > 20 || scratch == null)
+            if (size != first->columns || size > mathblocks_limit_explicit_subset_size() || scratch == null)
             {
                 output->valid = 0;
                 return;
@@ -1298,7 +1341,7 @@ internal static unsafe class MatrixModule
         {
             int iterations = 0;
             if (!mathblocks_nonnegative_integer(second->scalar_value, &iterations) ||
-                iterations <= 0 || iterations > 10000 || scratch == null)
+                iterations <= 0 || iterations > mathblocks_limit_iteration_count() || scratch == null)
             {
                 output->valid = 0;
                 return;
@@ -1324,7 +1367,16 @@ internal static unsafe class MatrixModule
                     gram[row * size + column] = sum;
                 }
             }
-            mathblocks_matrix_symmetric_eigenvalues(gram, size, work, eigenvalues, eigenvalues + size);
+            bool converged = mathblocks_matrix_symmetric_eigenvalues(gram, size, work, eigenvalues, eigenvalues + size);
+            if (!converged)
+            {
+                mathblocks_nonconvergence_record_matrix(opcode);
+                if (mathblocks_limit_jacobi_policy() == 1)
+                {
+                    output->valid = 0;
+                    return;
+                }
+            }
             double largest = eigenvalues[size - 1];
             // The owned maximum, as CoreCLR's Math.Max(0, largest): NaN propagates and a negative zero becomes +0.
             largest = mathblocks_maximum(0.0, largest);

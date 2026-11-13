@@ -3,16 +3,19 @@
 using System;
 using Supprocom.CSharp2CUDA;
 
-// Elementwise forms of the 41 scalar sources. Opcode 2 * source + sibling + 128 * mask, with source the index in
-// the elementwise source list and bit k of mask set when argument k is a vector (the other arguments are
+// Elementwise forms of the scalar sources. Opcode 2 * source + sibling + 128 * mask for sources below 64 (1024 + 2 * source + sibling + 65536 * mask
+// above), with source the index in the elementwise source list and bit k of mask set when argument k is a vector (the other arguments are
 // broadcast scalars). A mask of 0 in the opcode is derived from the input slots (a slot with elements is a vector). Every thread checks the inputs itself and then evaluates the rows thread, thread + threads,
 // ...: the elementwise kernel passes the grid-wide thread index and count, the device dispatch path the thread
 // index in the block. Row i calls the source's per-row function, the one its scalar operation uses, on row i of
-// every vector argument and the scalar arguments; rows whose source result is invalid hold the fill (form) or
+// every vector argument and the scalar arguments; rows with a non-finite argument or an invalid source result hold the fill (form) or
 // false (sibling).
 [TranspileToCUDA]
 internal static unsafe class ElementwiseModule
 {
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_elementwise_source_count() => throw new NotSupportedException();
+
     [CudaExternal]
     public struct MathBlockSlot
     {
@@ -31,7 +34,10 @@ internal static unsafe class ElementwiseModule
     private static bool mathblocks_scalar_value(int opcode, double a, double b, double c, double* value) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static bool mathblocks_probability_scalar_value(int opcode, double a, double b, double c, double* value) => throw new NotSupportedException();
+    private static bool mathblocks_probability_scalar_value(int opcode, double a, double b, double c, double* value, bool* converged) => throw new NotSupportedException();
+
+    [CudaExternal]
+    private static void mathblocks_nonconvergence_record_elementwise(int opcode) => throw new NotSupportedException();
 
     // The source's opcode in its own family: the Scalar opcode, or 64 plus the Probability opcode.
     [CudaDevice]
@@ -80,6 +86,18 @@ internal static unsafe class ElementwiseModule
             case 38: return 43;
             case 39: return 93;
             case 40: return 94;
+            case 41: return 5;
+            case 42: return 0;
+            case 43: return 1;
+            case 44: return 2;
+            case 45: return 3;
+            case 46: return 16;
+            case 47: return 18;
+            case 48: return 14;
+            case 49: return 12;
+            case 50: return 17;
+            case 51: return 7;
+            case 52: return 6;
             default: return -1;
         }
     }
@@ -99,6 +117,11 @@ internal static unsafe class ElementwiseModule
             case 28:
             case 29:
             case 37:
+            case 42:
+            case 43:
+            case 44:
+            case 45:
+            case 46:
                 return 2;
             case 12:
             case 40:
@@ -109,10 +132,11 @@ internal static unsafe class ElementwiseModule
     }
 
     [CudaDevice]
-    private static bool mathblocks_elementwise_row_value(int source_opcode, double a, double b, double c, double* value)
+    private static bool mathblocks_elementwise_row_value(int source_opcode, double a, double b, double c, double* value, bool* converged)
     {
+        *converged = true;
         return source_opcode >= 64
-            ? mathblocks_probability_scalar_value(source_opcode - 64, a, b, c, value)
+            ? mathblocks_probability_scalar_value(source_opcode - 64, a, b, c, value, converged)
             : mathblocks_scalar_value(source_opcode, a, b, c, value);
     }
 
@@ -148,8 +172,16 @@ internal static unsafe class ElementwiseModule
         int thread,
         int threads)
     {
+        // Opcodes below 1024 are 2 * source + sibling + 128 * mask for sources below 64; larger sources are 1024 + (2 * source + sibling) + 65536 * mask
+        // (MathBlockCudaElementwiseOpcode on the host).
         int passed_mask = opcode / 128;
         int form = opcode % 128;
+        if (opcode >= 1024)
+        {
+            int relative = opcode - 1024;
+            passed_mask = relative / 65536;
+            form = relative % 65536;
+        }
         int source = form / 2;
         bool sibling = form % 2 != 0;
         int arity = mathblocks_elementwise_source_arity(source);
@@ -162,7 +194,7 @@ internal static unsafe class ElementwiseModule
             if (inputs[index] != null && inputs[index]->count > 0)
                 derived_mask |= 1 << index;
         int mask = passed_mask == 0 ? derived_mask : passed_mask;
-        bool valid = opcode >= 0 && source < 41 && mask > 0 && mask < (1 << arity) &&
+        bool valid = opcode >= 0 && source < mathblocks_limit_elementwise_source_count() && mask > 0 && mask < (1 << arity) &&
             (derived_mask & ~mask) == 0 && input_count == arity + (sibling ? 0 : 1);
         for (int index = 0; valid && index < input_count; index++)
             if (inputs[index] == null || !inputs[index]->valid)
@@ -196,12 +228,24 @@ internal static unsafe class ElementwiseModule
         for (int row = thread; row < count; row += threads)
         {
             double value = 0.0;
-            bool row_valid = mathblocks_elementwise_row_value(
-                source_opcode,
-                mathblocks_elementwise_argument(first, first_vector, row),
-                mathblocks_elementwise_argument(second, second_vector, row),
-                mathblocks_elementwise_argument(third, third_vector, row),
-                &value);
+            bool converged = true;
+            double argument_a = mathblocks_elementwise_argument(first, first_vector, row);
+            double argument_b = mathblocks_elementwise_argument(second, second_vector, row);
+            double argument_c = mathblocks_elementwise_argument(third, third_vector, row);
+            // As CoreCLR's row: a non-finite argument, a vector row or a broadcast scalar, makes the row invalid before the source
+            // is evaluated; the source's own result is checked after.
+            bool row_valid = double.IsFinite(argument_a) &&
+                (arity < 2 || double.IsFinite(argument_b)) &&
+                (arity < 3 || double.IsFinite(argument_c));
+            if (row_valid)
+                row_valid = mathblocks_elementwise_row_value(
+                    source_opcode,
+                    argument_a,
+                    argument_b,
+                    argument_c,
+                    &value,
+                    &converged);
+            if (!converged) mathblocks_nonconvergence_record_elementwise(form);
             if (sibling)
                 boolean_result[row] = row_valid;
             else

@@ -9,15 +9,11 @@ internal static class MathBlocksCudaOptionsValidator
 {
     private const string BudgetOption = nameof(MathBlocksCudaOptions.WindowScratchBudgetBytes);
 
-    // The CUDA kernels apply the default domain limits only; the kernels do not read a MathBlockDomainOptions yet.
-    internal static MathBlockDomainOptions RequireDefaultDomain(MathBlockDomainOptions? domainOptions)
+    // The domain options of a program; null is the defaults. An option outside its range throws ArgumentOutOfRangeException.
+    internal static MathBlockDomainOptions RequireDomain(MathBlockDomainOptions? domainOptions)
     {
         var domain = domainOptions ?? MathBlockDomainOptions.Default;
-        if (domain.MaximumExplicitSubsetSize != MathBlockDomainOptions.Default.MaximumExplicitSubsetSize ||
-            domain.MaximumStateCount != MathBlockDomainOptions.Default.MaximumStateCount)
-        {
-            throw new NotSupportedException("CUDA kernels apply only the default domain options; a different domain limit is not supported yet.");
-        }
+        domain.Validate();
         return domain;
     }
 
@@ -29,6 +25,14 @@ internal static class MathBlocksCudaOptionsValidator
         AtLeastOne(options.MaximumGridX, nameof(MathBlocksCudaOptions.MaximumGridX), "a launch needs at least one block");
         AtLeastOne(options.FusedMaximumBlocks, nameof(MathBlocksCudaOptions.FusedMaximumBlocks), "a launch needs at least one block");
         AtLeastOne(options.FusedBlockSize, nameof(MathBlocksCudaOptions.FusedBlockSize), "a launch needs at least one thread per block");
+        AtLeastOne(options.FusedRowBlock, nameof(MathBlocksCudaOptions.FusedRowBlock), "a task evaluates at least one row");
+        if (options.DeviceOrdinal < 0)
+        {
+            throw Range(
+                nameof(MathBlocksCudaOptions.DeviceOrdinal),
+                options.DeviceOrdinal,
+                $"MathBlocksCudaOptions.DeviceOrdinal is {Format(options.DeviceOrdinal)}; it must be at least 0, and below the number of CUDA devices that cuDeviceGetCount reports.");
+        }
         if (options.WindowScratchBudgetBytes > int.MaxValue)
         {
             throw Range(
@@ -103,6 +107,13 @@ internal static class MathBlocksCudaOptionsValidator
             $"MathBlocksCudaOptions.{BudgetOption} is {Format(options.WindowScratchBudgetBytes)}; {identity} needs at least {Format(blockBytes)} bytes: one block of " +
             $"{Format(options.BlockSize)} threads with {Format(scratchDoublesPerThread)} doubles of scratch each, and a launch needs at least one block.");
     }
+
+    // An ordinal outside 0 to the device count minus one; the message names the count the driver reports.
+    internal static ArgumentOutOfRangeException DeviceOrdinalOutOfRange(int ordinal, int count) =>
+        Range(
+            nameof(MathBlocksCudaOptions.DeviceOrdinal),
+            ordinal,
+            $"MathBlocksCudaOptions.DeviceOrdinal must be from 0 to {Format(count - 1L)}: cuDeviceGetCount reports {Format(count)} CUDA device(s) and the ordinal is {Format(ordinal)}.");
 
     private static void AtLeastOne(long value, string option, string cause)
     {

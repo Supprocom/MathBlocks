@@ -64,7 +64,6 @@ Supprocom.MathBlocks.MathBlockFusedExpression.CreateCudaResult(System.Collection
 Supprocom.MathBlocks.MathBlockFusedExpression.CudaFunctionName.get -> string!
 Supprocom.MathBlocks.MathBlockFusedExpression.CudaKernelName.get -> string!
 Supprocom.MathBlocks.MathBlockFusedExpression.CudaSource.get -> string!
-Supprocom.MathBlocks.MathBlockFusedExpression.EvaluateCoreCLR(System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>? validity = null) -> Supprocom.MathBlocks.MathBlockFusedResult!
 Supprocom.MathBlocks.MathBlockFusedExpression.Fingerprint.get -> string!
 Supprocom.MathBlocks.MathBlockFusedExpression.MaskNodeIndexes.get -> System.Collections.Generic.IReadOnlyList<int>!
 Supprocom.MathBlocks.MathBlockFusedExpression.OutputNames.get -> System.Collections.Generic.IReadOnlyList<string!>!
@@ -273,3 +272,21 @@ static Supprocom.MathBlocks.MathBlockFormulaInterchange.TryReadUtf8(System.IO.St
 static Supprocom.MathBlocks.MathBlockFormulaInterchange.Validate(string? source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaValidationResult!
 static Supprocom.MathBlocks.MathBlockFormulaInterchange.ValidateUtf8(System.ReadOnlySpan<byte> source, Supprocom.MathBlocks.MathBlockFormulaFormat format, Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions! options) -> Supprocom.MathBlocks.MathBlockFormulaValidationResult!
 static Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions.Default.get -> Supprocom.MathBlocks.MathBlockFormulaInterchangeOptions!
+Supprocom.MathBlocks.MathBlockExecutionResult
+Supprocom.MathBlocks.MathBlockExecutionResult.NonConvergedEvaluations.get -> System.Collections.Generic.IReadOnlyDictionary<string!, long>!
+Supprocom.MathBlocks.MathBlockExecutionResult.Outputs.get -> System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>!
+Supprocom.MathBlocks.MathBlocksCoreCLRWorker.ExecuteWithDiagnostics(Supprocom.MathBlocks.MathBlockProgram! program, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs) -> Supprocom.MathBlocks.MathBlockExecutionResult!
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.NonConvergenceCountsSymbol = "mathblocks_nonconvergence_counts" -> string!
+static Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.ComposeSource(string! consumerSource, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> string!
+static Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.CompilePtx(string! consumerSource, string! sourceName, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> byte[]!
+static Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.GetSource(Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> string!
+static Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.GetSourceFingerprint(Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> string!
+Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.EvaluateCoreCLR(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! inputs, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> Supprocom.MathBlocks.MathBlockValue
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.DeviceOrdinal.get -> int
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.DeviceOrdinal.init -> void
+Supprocom.MathBlocks.Cuda.MathBlocksCUDAProgram.ExecuteWithDiagnostics(System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs) -> Supprocom.MathBlocks.MathBlockExecutionResult!
+Supprocom.MathBlocks.Cuda.MathBlocksCUDAProgram.NonConvergedEvaluations.get -> System.Collections.Generic.IReadOnlyDictionary<string!, long>!
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.FusedRowBlock.get -> int
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.FusedRowBlock.init -> void
+Supprocom.MathBlocks.MathBlockFusedResult.NonConvergedEvaluations.get -> System.Collections.Generic.IReadOnlyDictionary<string!, long>!
+Supprocom.MathBlocks.MathBlockFusedExpression.EvaluateCoreCLR(System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>? validity = null, Supprocom.MathBlocks.MathBlockDomainOptions? domainOptions = null, Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions? options = null) -> Supprocom.MathBlocks.MathBlockFusedResult!

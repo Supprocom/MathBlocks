@@ -38,4 +38,11 @@ public sealed class MathBlockFusedResult
     /// <summary>Gets the invalid mask: bit k is set when operation node k produced a nonfinite row.</summary>
     /// <remarks>Operation nodes are numbered in program node order; see <see cref="MathBlockFusedExpression.MaskNodeIndexes"/>.</remarks>
     public ulong InvalidMask { get; }
+
+    internal static readonly IReadOnlyDictionary<string, long> NoNonConverged =
+        new System.Collections.ObjectModel.ReadOnlyDictionary<string, long>(new Dictionary<string, long>(StringComparer.Ordinal));
+
+    /// <summary>Gets, by operation identity, the rows that ended without converging; empty when there are none, and always empty for a result from CUDA.</summary>
+    /// <remarks>A CUDA launch counts in the module-global array named by <see cref="MathBlockCudaDeviceModule.NonConvergenceCountsSymbol"/>, which the consumer that launched it reads.</remarks>
+    public IReadOnlyDictionary<string, long> NonConvergedEvaluations { get; internal set; } = NoNonConverged;
 }

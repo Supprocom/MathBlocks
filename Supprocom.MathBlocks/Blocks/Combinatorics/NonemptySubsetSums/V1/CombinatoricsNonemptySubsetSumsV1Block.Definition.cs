@@ -7,14 +7,14 @@ internal static partial class ProbabilityMathBlocks
         internal const string Identity = "combinatorics.nonempty-subset-sums@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Expanding;
         internal static MathBlockOperation Create() => CreateSubsetSums();
-        private static MathBlockOperation CreateSubsetSums() => MathBlockOperationFactory.Create("combinatorics.nonempty-subset-sums", 1, types =>
+        private static MathBlockOperation CreateSubsetSums() => MathBlockOperationFactory.CreateDomain("combinatorics.nonempty-subset-sums", 1, types =>
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Vector);
             return MathBlockType.Vector(types[0].Unit);
-        }, inputs =>
+        }, (inputs, domain) =>
         {
             var values = inputs[0].AsVector();
-            return values.Count <= 20 ? MathBlockValue.Vector(MathBlockProbability.NonemptySubsetSums(values), inputs[0].Type.Unit, true) : MathBlockValue.Invalid(MathBlockType.Vector(inputs[0].Type.Unit), "The vector is too large for explicit subset enumeration.");
+            return values.Count <= domain.Options.MaximumExplicitSubsetSize ? MathBlockValue.Vector(MathBlockProbability.NonemptySubsetSums(values), inputs[0].Type.Unit, true) : MathBlockValue.Invalid(MathBlockType.Vector(inputs[0].Type.Unit), "The vector is too large for explicit subset enumeration.");
         }, [MathBlockValue.Vector([1d, 2d])], MathBlockValue.Vector([1d, 2d, 3d]), performanceIterations: 4);
     }
 }

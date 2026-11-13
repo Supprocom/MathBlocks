@@ -7,7 +7,7 @@ namespace Supprocom.MathBlocks.Cuda;
 internal static class MathBlocksCudaNative
 {
     private static readonly Lock contextLock = new();
-    private static IntPtr primaryContext;
+    private static readonly Dictionary<int, IntPtr> primaryContexts = new();
 
     // Logical import name; the resolver maps it to the NVRTC that MathBlocksNvrtcLoader found.
     private const string Nvrtc = "nvrtc";
@@ -21,7 +21,7 @@ internal static class MathBlocksCudaNative
     {
         try
         {
-            EnsureContext();
+            EnsureContext(0);
             return true;
         }
         // Availability is a non-throwing probe across driver/load/runtime failures.
@@ -33,38 +33,54 @@ internal static class MathBlocksCudaNative
 #pragma warning restore CA1031
     }
 
-    public static IntPtr CurrentContext
+    // The primary context of the device with the given ordinal, made current on the calling thread.
+    public static IntPtr ContextFor(int ordinal)
     {
-        get
-        {
-            EnsureContext();
-            return primaryContext;
-        }
+        EnsureContext(ordinal);
+        lock (contextLock)
+            return primaryContexts[ordinal];
     }
 
     public static int cuMemAllocHost(out IntPtr pointer, UIntPtr bytes) =>
         cuMemHostAlloc(out pointer, bytes, 0);
 
-    public static void EnsureContext()
+    // Makes the primary context of the device with the given ordinal current on the calling thread. The ordinal is checked
+    // against the number of CUDA devices, and the error names that number.
+    public static void EnsureContext(int ordinal)
     {
         lock (contextLock)
         {
             ThrowIfFailed(cuInit(0), "cuInit");
-            if (primaryContext == IntPtr.Zero)
+            if (!primaryContexts.TryGetValue(ordinal, out var context))
             {
-                ThrowIfFailed(cuDeviceGet(out var device, 0), "cuDeviceGet");
-                ThrowIfFailed(cuDevicePrimaryCtxRetain(out primaryContext, device), "cuDevicePrimaryCtxRetain");
+                var device = GetDevice(ordinal);
+                ThrowIfFailed(cuDevicePrimaryCtxRetain(out context, device), "cuDevicePrimaryCtxRetain");
+                primaryContexts.Add(ordinal, context);
             }
-            ThrowIfFailed(cuCtxSetCurrent(primaryContext), "cuCtxSetCurrent");
+            ThrowIfFailed(cuCtxSetCurrent(context), "cuCtxSetCurrent");
         }
     }
 
-    // The limits of the device that EnsureContext selects: CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK (1) and
-    // CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_X (5).
-    public static MathBlockCudaDeviceLimits GetDeviceLimits()
+    // The device handle for an ordinal from 0 up to the device count; any other ordinal is an ArgumentOutOfRangeException that
+    // names the count. cuInit has run.
+    internal static int GetDevice(int ordinal)
     {
-        EnsureContext();
-        ThrowIfFailed(cuDeviceGet(out var device, 0), "cuDeviceGet");
+        ThrowIfFailed(cuDeviceGetCount(out var count), "cuDeviceGetCount");
+        if (ordinal < 0 || ordinal >= count)
+        {
+            throw MathBlocksCudaOptionsValidator.DeviceOrdinalOutOfRange(ordinal, count);
+        }
+
+        ThrowIfFailed(cuDeviceGet(out var device, ordinal), "cuDeviceGet");
+        return device;
+    }
+
+    // The limits of the device with the given ordinal: CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK (1) and
+    // CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_X (5).
+    public static MathBlockCudaDeviceLimits GetDeviceLimits(int ordinal)
+    {
+        EnsureContext(ordinal);
+        var device = GetDevice(ordinal);
         ThrowIfFailed(cuDeviceGetAttribute(out var threads, 1, device), "cuDeviceGetAttribute(max threads per block)");
         ThrowIfFailed(cuDeviceGetAttribute(out var grid, 5, device), "cuDeviceGetAttribute(max grid dim x)");
         return new MathBlockCudaDeviceLimits(threads, grid);
@@ -77,18 +93,24 @@ internal static class MathBlocksCudaNative
         return threads;
     }
 
-    public static byte[] CompilePtx(string source, string name)
+    public static byte[] CompilePtx(string source, string name) => CompilePtx(source, name, 0);
+
+    // For the architecture of the device with the given ordinal.
+    public static byte[] CompilePtx(string source, string name, int ordinal)
     {
-        EnsureContext();
-        return CompilePtxForArchitecture(source, name, ResolvePtxArchitecture());
+        EnsureContext(ordinal);
+        return CompilePtxForArchitecture(source, name, ResolvePtxArchitecture(ordinal));
     }
 
     // Compiles with --fmad=true or --fmad=false, for checks that code written with explicit rounding intrinsics
     // keeps its bits under either contraction setting a consumer may choose.
-    public static byte[] CompilePtx(string source, string name, bool fusedMultiplyAdd)
+    public static byte[] CompilePtx(string source, string name, bool fusedMultiplyAdd) =>
+        CompilePtx(source, name, fusedMultiplyAdd, 0);
+
+    public static byte[] CompilePtx(string source, string name, bool fusedMultiplyAdd, int ordinal)
     {
-        EnsureContext();
-        return CompileForArchitecture(source, name, ResolvePtxArchitecture(), fusedMultiplyAdd);
+        EnsureContext(ordinal);
+        return CompileForArchitecture(source, name, ResolvePtxArchitecture(ordinal), fusedMultiplyAdd);
     }
 
     // Compiles for a fixed architecture, as production does (--fmad=false), without a context or a device. For the PTX
@@ -163,9 +185,9 @@ internal static class MathBlocksCudaNative
             throw new InvalidOperationException($"{operation} failed with NVRTC result {result}.");
     }
 
-    private static string ResolvePtxArchitecture()
+    private static string ResolvePtxArchitecture(int ordinal)
     {
-        ThrowIfFailed(cuDeviceGet(out var device, 0), "cuDeviceGet");
+        var device = GetDevice(ordinal);
         ThrowIfFailed(cuDeviceGetAttribute(out var major, 75, device), "cuDeviceGetAttribute(major)");
         ThrowIfFailed(cuDeviceGetAttribute(out var minor, 76, device), "cuDeviceGetAttribute(minor)");
         return $"compute_{major}{minor}";
@@ -302,6 +324,9 @@ internal static class MathBlocksCudaNative
     internal static extern int cuDeviceGet(out int device, int ordinal);
 
     [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int cuDeviceGetCount(out int count);
+
+    [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int cuDeviceGetAttribute(out int value, int attribute, int device);
 
     [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -325,6 +350,20 @@ internal static class MathBlocksCudaNative
 
     [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int cuModuleUnload(IntPtr module);
+
+    [DllImport("nvcuda.dll", EntryPoint = "cuModuleGetGlobal_v2", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi,
+        BestFitMapping = false, ThrowOnUnmappableChar = true)]
+    internal static extern int cuModuleGetGlobal(
+        out ulong devicePointer,
+        out UIntPtr bytes,
+        IntPtr module,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
+
+    [DllImport("nvcuda.dll", EntryPoint = "cuMemcpyDtoH_v2", CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int cuMemcpyDtoH(IntPtr destination, ulong source, UIntPtr bytes);
+
+    [DllImport("nvcuda.dll", EntryPoint = "cuMemsetD8Async", CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int cuMemsetD8OnStream(ulong devicePointer, byte value, UIntPtr count, IntPtr stream);
 
     [DllImport("nvcuda.dll", EntryPoint = "cuMemAlloc_v2", CallingConvention = CallingConvention.Cdecl)]
     internal static extern int cuMemAlloc(out ulong devicePointer, UIntPtr bytes);

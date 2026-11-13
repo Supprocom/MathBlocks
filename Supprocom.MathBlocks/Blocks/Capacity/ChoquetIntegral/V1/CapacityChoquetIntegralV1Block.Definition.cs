@@ -7,13 +7,13 @@ internal static partial class AdvancedMathBlocks
         internal const string Identity = "capacity.choquet-integral@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateChoquet();
-        private static MathBlockOperation CreateChoquet() => MathBlockOperationFactory.Create("capacity.choquet-integral", 2, types =>
+        private static MathBlockOperation CreateChoquet() => MathBlockOperationFactory.CreateDomain("capacity.choquet-integral", 2, types =>
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Vector);
             MathBlockTypeRules.RequireKind(types[1], MathBlockValueKind.Vector);
             MathBlockTypeRules.RequireDimensionless(types[1]);
             return MathBlockType.Scalar(types[0].Unit);
-        }, inputs => inputs[0].AsVector().Count < 31 &&
+        }, (inputs, domain) => inputs[0].AsVector().Count <= domain.Options.MaximumChoquetPlayerCount &&
                      inputs[1].AsVector().Count == 1 << inputs[0].AsVector().Count &&
                      MathBlockCollectionPrimitives.All(inputs[0].AsVector(), value => value >= 0d)
             ? MathBlockValue.Scalar(

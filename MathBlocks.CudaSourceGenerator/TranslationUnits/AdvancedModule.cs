@@ -6,6 +6,18 @@ using Supprocom.CSharp2CUDA;
 [TranspileToCUDA]
 internal static unsafe class AdvancedModule
 {
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_choquet_player_count() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_submodular_set_function_values() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_shapley_coalition_values() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_iteration_count() => throw new NotSupportedException();
+
     [CudaExternal]
     public struct MathBlockSlot
     {
@@ -188,7 +200,7 @@ internal static unsafe class AdvancedModule
             switch (opcode)
             {
                 case 0:
-                    if (first->count <= 0 || first->count >= 31 ||
+                    if (first->count <= 0 || first->count > mathblocks_limit_choquet_player_count() ||
                         second->count != (1 << first->count) || scratch == null)
                     {
                         output->valid = 0;
@@ -226,7 +238,7 @@ internal static unsafe class AdvancedModule
                     }
                     break;
                 case 1:
-                    if (!mathblocks_advanced_power_of_two(first->count) || first->count > (1 << 12))
+                    if (!mathblocks_advanced_power_of_two(first->count) || first->count > mathblocks_limit_submodular_set_function_values())
                     {
                         output->valid = 0;
                         break;
@@ -255,7 +267,7 @@ internal static unsafe class AdvancedModule
                                 result[mask] -= result[mask ^ (1 << bit)];
                     break;
                 case 3:
-                    if (!mathblocks_advanced_power_of_two(first->count) || first->count > (1 << 20))
+                    if (!mathblocks_advanced_power_of_two(first->count) || first->count > mathblocks_limit_shapley_coalition_values())
                     {
                         output->valid = 0;
                         break;
@@ -362,7 +374,7 @@ internal static unsafe class AdvancedModule
                     }
                 {
                     int iterations = 0;
-                    if (!mathblocks_sequence_positive_integer(second->scalar_value, &iterations) || iterations > 10000)
+                    if (!mathblocks_sequence_positive_integer(second->scalar_value, &iterations) || iterations > mathblocks_limit_iteration_count())
                     {
                         output->valid = 0;
                         break;

@@ -52,12 +52,29 @@ public static partial class MathBlockLinearAlgebra
     }
 
     /// <summary>Computes eigenvalues of a symmetric matrix.</summary>
-    public static double[] SymmetricEigenvalues(MathBlockMatrix matrix)
+    public static double[] SymmetricEigenvalues(MathBlockMatrix matrix) => SymmetricEigenvalues(matrix, 64, out _);
+
+    // Jacobi under the context's options. An evaluation that stops at the rotation budget with off-diagonal entries left is
+    // counted; under the Invalid policy it returns null.
+    internal static double[]? SymmetricEigenvalues(MathBlockMatrix matrix, MathBlockDomainContext domain)
+    {
+        var eigenvalues = SymmetricEigenvalues(matrix, domain.Options.JacobiRotationMultiplier, out var converged);
+        if (converged)
+            return eigenvalues;
+        domain.RecordNonConvergence();
+        return domain.Options.JacobiNonConvergence == MathBlockNonConvergencePolicy.Invalid ? null : eigenvalues;
+    }
+
+    // The rotation budget is rotationMultiplier * n * n, counted in 64-bit integers. converged is false when the budget ended
+    // the sweep with a nonzero off-diagonal entry; the scan that finds the pivot is also the convergence test.
+    internal static double[] SymmetricEigenvalues(MathBlockMatrix matrix, int rotationMultiplier, out bool converged)
     {
         ArgumentNullException.ThrowIfNull(matrix);
         var size = matrix.Rows;
         var values = matrix.ToArray();
-        for (var iteration = 0; iteration < 64 * size * size; iteration++)
+        var budget = (long)rotationMultiplier * size * size;
+        converged = false;
+        for (var iteration = 0L; ; iteration++)
         {
             var pivotRow = 0;
             var pivotColumn = 0;
@@ -75,6 +92,11 @@ public static partial class MathBlockLinearAlgebra
                 }
             }
             if (largest == 0d)
+            {
+                converged = true;
+                break;
+            }
+            if (iteration >= budget)
                 break;
             var angle = 0.5d * Math.Atan2(
                 2d * values[pivotRow * size + pivotColumn],
@@ -174,6 +196,24 @@ internal static partial class MatrixMathBlocks
             return MathBlockValue.Matrix(function(inputs[0].AsMatrix(), inputs[1].AsMatrix()), type.Unit);
         },
         [matrixA, matrixB], MathBlockValue.Matrix(expected), 1e-9, 8);
+
+    // A scalar reduction of a symmetric matrix through Jacobi eigenvalues: the function reads the eigenvalues, ascending.
+    private static MathBlockOperation CreateEigenvalueReduction(
+        string identifier,
+        Func<double[], double> function,
+        MathBlockValue sample,
+        double expected,
+        MathBlockTypeResolver resolver) => MathBlockOperationFactory.CreateDomain(
+        identifier, 1, resolver,
+        (inputs, domain) =>
+        {
+            var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
+            var eigenvalues = MathBlockLinearAlgebra.SymmetricEigenvalues(inputs[0].AsMatrix(), domain);
+            return eigenvalues is null
+                ? MathBlockValue.Invalid(type, "The Jacobi iteration did not converge.")
+                : MathBlockValue.Scalar(function(eigenvalues), type.Unit);
+        },
+        [sample], MathBlockValue.Scalar(expected), 1e-9, 8);
 
     private static MathBlockOperation CreateScalarMatrixReduction(
         string identifier,

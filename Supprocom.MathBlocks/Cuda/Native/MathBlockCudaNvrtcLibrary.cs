@@ -13,7 +13,7 @@ public sealed class MathBlockCudaNvrtcLibrary
     }
 
     /// <summary>
-    /// Gets the NVRTC library that <see cref="MathBlockCudaDeviceModule.CompilePtx"/> uses, loading it on first access.
+    /// Gets the NVRTC library that <see cref="MathBlockCudaDeviceModule.CompilePtx(string, string)"/> uses, loading it on first access.
     /// </summary>
     /// <exception cref="InvalidOperationException">
     /// No installed NVRTC of a supported version was found; the message names the requirement and lists every

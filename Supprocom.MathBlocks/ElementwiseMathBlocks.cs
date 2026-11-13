@@ -8,8 +8,10 @@ internal static class ElementwiseMathBlocks
     internal const string ValidityFamily = "elementwise-valid";
     internal const double SampleFill = -1d;
 
-    // The 41 M4 sources in catalog order: the scalar-only Standard operations without a Pointwise
-    // vector.<name> form of the same meaning.
+    // The sources in catalog order, so each source's index, and with it every opcode, is fixed once it is added. The first 41 are the
+    // scalar-only Standard operations without a Pointwise vector.<name> form of the same meaning. The last 12 are the double-valued
+    // scalar operations whose vector.<name> twin has whole-value validity (one bad row invalidates the vector): the lifts give each row its own
+    // validity, as the elementwise forms of the others do.
     private static readonly ElementwiseSource[] Sources =
     [
         new(AdvancedMathBlocks.CombinatoricsBallotCountV1Block.Create, [MathBlockValue.Vector([3.0d, 4.0d, 5.0d, 2.0d, 3.0d, 6.0d]), MathBlockValue.Vector([1.0d, 2.0d, 1.0d, 2.0d, 0.0d, 2.5d])],
@@ -93,8 +95,35 @@ internal static class ElementwiseMathBlocks
         new(ProbabilityMathBlocks.SpecialLogGammaV1Block.Create, [MathBlockValue.Vector([0.5d, 1.0d, 2.0d, 5.0d, 0.0d, -1.0d])],
             [0.5723649429246995d, -8.881784197001252e-16d, 0.0d, 3.178053830347944d, double.NaN, double.NaN]),
         new(ProbabilityMathBlocks.SpecialRegularizedIncompleteBetaV1Block.Create, [MathBlockValue.Vector([0.0d, 0.25d, 0.5d, 1.0d, 1.5d, -0.1d]), MathBlockValue.Scalar(2.0d), MathBlockValue.Vector([1.0d, 2.0d, 3.0d, 0.5d, 1.0d, 1.0d])],
-            [0.0d, 0.15625d, 0.6875000000000009d, 1.0d, double.NaN, double.NaN])
+            [0.0d, 0.15625d, 0.6875000000000009d, 1.0d, double.NaN, double.NaN]),
+        new(ScalarMathBlocks.ScalarAbsoluteV1Block.Create, [MathBlockValue.Vector([-2.0d, -0.5d, 0.0d, 0.5d, 3.0d, -1e300d])],
+            [2.0d, 0.5d, 0.0d, 0.5d, 3.0d, 1e300d]),
+        new(ScalarMathBlocks.ScalarAddV1Block.Create, [MathBlockValue.Vector([1.0d, 2.0d, 3.0d, 1e308d, -1.0d, 0.5d]), MathBlockValue.Vector([2.0d, -2.0d, 0.5d, 1e308d, 1.0d, 0.25d])],
+            [3.0d, 0.0d, 3.5d, double.NaN, 0.0d, 0.75d]),
+        new(ScalarMathBlocks.ScalarSubtractV1Block.Create, [MathBlockValue.Vector([5.0d, 2.0d, 3.0d, -1e308d, 1.0d, 0.5d]), MathBlockValue.Vector([2.0d, 2.0d, 0.5d, 1e308d, -1.0d, 0.25d])],
+            [3.0d, 0.0d, 2.5d, double.NaN, 2.0d, 0.25d]),
+        new(ScalarMathBlocks.ScalarMultiplyV1Block.Create, [MathBlockValue.Vector([2.0d, -3.0d, 0.5d, 1e200d, 0.0d, 4.0d]), MathBlockValue.Vector([3.0d, 3.0d, 0.5d, 1e200d, 5.0d, 0.25d])],
+            [6.0d, -9.0d, 0.25d, double.NaN, 0.0d, 1.0d]),
+        new(ScalarMathBlocks.ScalarDivideV1Block.Create, [MathBlockValue.Vector([6.0d, 1.0d, -3.0d, 1.0d, 0.0d, 5.0d]), MathBlockValue.Vector([3.0d, 0.0d, 2.0d, 4.0d, 5.0d, -2.0d])],
+            [2.0d, double.NaN, -1.5d, 0.25d, 0.0d, -2.5d]),
+        new(ScalarMathBlocks.ScalarPowerV1Block.Create, [MathBlockValue.Vector([2.0d, 9.0d, -8.0d, 2.0d, 0.0d, 10.0d]), MathBlockValue.Vector([3.0d, 0.5d, 0.5d, -1.0d, -1.0d, 400.0d])],
+            [8.0d, 3.0d, double.NaN, 0.5d, double.NaN, double.NaN]),
+        new(ScalarMathBlocks.ScalarNaturalLogarithmV1Block.Create, [MathBlockValue.Vector([1.0d, 2.0d, 0.5d, 0.0d, -1.0d, 10.0d])],
+            [0.0d, 0.6931471805599453d, -0.6931471805599453d, double.NaN, double.NaN, 2.302585092994046d]),
+        new(ScalarMathBlocks.ScalarSquareRootV1Block.Create, [MathBlockValue.Vector([0.0d, 1.0d, 4.0d, 2.0d, -1.0d, 0.25d])],
+            [0.0d, 1.0d, 2.0d, 1.4142135623730951d, double.NaN, 0.5d]),
+        new(ScalarMathBlocks.ScalarSquareV1Block.Create, [MathBlockValue.Vector([-2.0d, -0.5d, 0.0d, 1.5d, 1e200d, 3.0d])],
+            [4.0d, 0.25d, 0.0d, 2.25d, double.NaN, 9.0d]),
+        new(ScalarMathBlocks.ScalarExponentialV1Block.Create, [MathBlockValue.Vector([0.0d, 1.0d, -1.0d, 0.5d, 800.0d, -800.0d])],
+            [1.0d, 2.718281828459045d, 0.36787944117144233d, 1.6487212707001282d, double.NaN, 0.0d]),
+        new(ScalarMathBlocks.ScalarPositivePartV1Block.Create, [MathBlockValue.Vector([-2.0d, -0.5d, 0.0d, 0.5d, 1.0d, 3.0d])],
+            [0.0d, 0.0d, 0.0d, 0.5d, 1.0d, 3.0d]),
+        new(ScalarMathBlocks.ScalarSignV1Block.Create, [MathBlockValue.Vector([-2.0d, -0.5d, 0.0d, 0.5d, 1.0d, 3.0d])],
+            [-1.0d, -1.0d, 0.0d, 1.0d, 1.0d, 1.0d])
     ];
+
+    // The number of elementwise sources. The opcode encoding (ElementwiseCudaBlockCatalog) holds at most MaximumSourceCount.
+    internal static int SourceCount => Sources.Length;
 
     // The lift behind each form and sibling operation instance, so the fused expression evaluates their rows with
     // the same row function.
@@ -106,6 +135,12 @@ internal static class ElementwiseMathBlocks
     internal static MathBlockOperation[] CreateOperations()
     {
         var sources = Sources;
+        if (sources.Length > Cuda.MathBlockCudaElementwiseOpcode.MaximumSourceCount)
+        {
+            throw new InvalidOperationException(
+                $"The elementwise opcode encoding holds at most {Cuda.MathBlockCudaElementwiseOpcode.MaximumSourceCount} sources, and there are {sources.Length}.");
+        }
+
         var result = new MathBlockOperation[sources.Length * 2];
         for (var index = 0; index < sources.Length; index++)
         {
@@ -136,6 +171,8 @@ internal static class ElementwiseMathBlocks
             1e-12,
             64,
             MathBlockCausalityInfo.Pointwise);
+        if (form.Source.DomainEvaluator is not null)
+            operation.DomainEvaluator = form.EvaluateForm;
         lifts.Add(operation, form);
         return operation;
     }
@@ -155,6 +192,8 @@ internal static class ElementwiseMathBlocks
             MathBlockValue.BooleanVector(expected),
             performanceIterations: 64,
             causality: MathBlockCausalityInfo.Pointwise);
+        if (form.Source.DomainEvaluator is not null)
+            operation.DomainEvaluator = form.EvaluateValidity;
         lifts.Add(operation, form);
         return operation;
     }

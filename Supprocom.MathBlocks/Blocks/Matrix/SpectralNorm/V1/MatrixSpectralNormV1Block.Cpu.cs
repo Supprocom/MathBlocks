@@ -9,8 +9,13 @@ public static partial class MathBlockAdvanced
     /// the eigenvalue step never sees a non-finite entry (as <c>vector.l2-norm</c> and <c>matrix.frobenius-norm</c>
     /// give an invalid value when their sum of squares overflows).
     /// </returns>
-    public static double SpectralNorm(MathBlockMatrix matrix, int _)
+    public static double SpectralNorm(MathBlockMatrix matrix, int _) => SpectralNorm(matrix, MathBlockDomainContext.Default, out bool _);
+
+    // The spectral norm under the context's Jacobi options. nonconverged is true under the Invalid policy when Jacobi stopped at
+    // its budget, and the result is then NaN.
+    internal static double SpectralNorm(MathBlockMatrix matrix, MathBlockDomainContext domain, out bool nonconverged)
     {
+        nonconverged = false;
         var gram = MathBlockLinearAlgebra.Gram(matrix);
         for (var row = 0; row < gram.Rows; row++)
         {
@@ -23,6 +28,13 @@ public static partial class MathBlockAdvanced
             }
         }
 
-        return Math.Sqrt(Math.Max(0d, MathBlockLinearAlgebra.SymmetricEigenvalues(gram)[^1]));
+        var eigenvalues = MathBlockLinearAlgebra.SymmetricEigenvalues(gram, domain);
+        if (eigenvalues is null)
+        {
+            nonconverged = true;
+            return double.NaN;
+        }
+
+        return Math.Sqrt(Math.Max(0d, eigenvalues[^1]));
     }
 }

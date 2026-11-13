@@ -6,6 +6,12 @@ using Supprocom.CSharp2CUDA;
 [TranspileToCUDA]
 internal static unsafe class TransportModule
 {
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_explicit_subset_size() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_iteration_count() => throw new NotSupportedException();
+
     [CudaExternal]
     public struct MathBlockSlot
     {
@@ -169,7 +175,7 @@ internal static unsafe class TransportModule
                     break;
                 }
                 case 3:
-                    if (first->rows != first->columns || first->rows > 20 || scratch == null)
+                    if (first->rows != first->columns || first->rows > mathblocks_limit_explicit_subset_size() || scratch == null)
                     {
                         output->valid = 0;
                         break;
@@ -275,7 +281,7 @@ internal static unsafe class TransportModule
                     }
                 {
                     int iterations = 0;
-                    if (!mathblocks_sequence_positive_integer(fifth->scalar_value, &iterations) || iterations > 10000)
+                    if (!mathblocks_sequence_positive_integer(fifth->scalar_value, &iterations) || iterations > mathblocks_limit_iteration_count())
                     {
                         output->valid = 0;
                         break;

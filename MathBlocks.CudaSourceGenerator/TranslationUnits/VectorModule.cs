@@ -6,6 +6,9 @@ using Supprocom.CSharp2CUDA;
 [TranspileToCUDA]
 internal static unsafe class VectorModule
 {
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_generated_vector_length() => throw new NotSupportedException();
+
     [CudaExternal]
     public struct MathBlockSlot
     {
@@ -589,7 +592,7 @@ internal static unsafe class VectorModule
                 if (thread == 0)
                 {
                     int count = 0;
-                    if (!mathblocks_nonnegative_integer(third->scalar_value, &count) || count <= 0 || count > 1000000)
+                    if (!mathblocks_nonnegative_integer(third->scalar_value, &count) || count <= 0 || count > mathblocks_limit_generated_vector_length())
                         output->valid = 0;
                     else
                         mathblocks_set_vector_shape(output, count);
@@ -725,7 +728,7 @@ internal static unsafe class VectorModule
                 if (thread == 0)
                 {
                     int count = 0;
-                    if (!mathblocks_nonnegative_integer(second->scalar_value, &count) || count > 1000000)
+                    if (!mathblocks_nonnegative_integer(second->scalar_value, &count) || count > mathblocks_limit_generated_vector_length())
                         output->valid = 0;
                     else
                         mathblocks_set_vector_shape(output, count);

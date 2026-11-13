@@ -5,6 +5,7 @@ public sealed class MathBlockOperation
 {
     private readonly MathBlockTypeResolver typeResolver;
     private readonly MathBlockEvaluator evaluator;
+    private MathBlockDomainEvaluator? domainEvaluator;
     private readonly MathBlockCausalityInfo? causality;
 
     /// <summary>Creates a versioned operation with type and evaluation contracts.</summary>
@@ -74,7 +75,27 @@ public sealed class MathBlockOperation
 
     /// <summary>Evaluates the operation with the given domain limits.</summary>
     public MathBlockValue Evaluate(IReadOnlyList<MathBlockValue> inputs, MathBlockDomainOptions domainOptions)
-        => throw new NotSupportedException("Not implemented yet.");
+    {
+        ArgumentNullException.ThrowIfNull(inputs);
+        ArgumentNullException.ThrowIfNull(domainOptions);
+        domainOptions.Validate();
+        return Evaluate(inputs, new MathBlockDomainContext(domainOptions));
+    }
+
+    // Evaluates under the context's options; the context counts the evaluations that do not converge. An operation with no
+    // domain-dependent check evaluates as Evaluate(inputs) does.
+    internal MathBlockValue Evaluate(IReadOnlyList<MathBlockValue> inputs, MathBlockDomainContext context) =>
+        domainEvaluator is { } domain
+            ? EvaluateWith(inputs, values => domain(values, context))
+            : Evaluate(inputs);
+
+    // The evaluator that reads domain options; set by MathBlockOperationFactory.CreateDomain, whose Evaluate(inputs) is this
+    // evaluator under the default context.
+    internal MathBlockDomainEvaluator? DomainEvaluator
+    {
+        get => domainEvaluator;
+        set => domainEvaluator = value;
+    }
 
     /// <summary>Gets the limits that apply to the operation, resolved with <see cref="Cuda.MathBlocksCudaOptions.Default"/>.</summary>
     public IReadOnlyList<MathBlockLimit> Limits => MathBlockLimitCatalog.For(Identity, Cuda.MathBlocksCudaOptions.Default, MathBlockDomainOptions.Default);

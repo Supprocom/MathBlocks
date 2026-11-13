@@ -22,6 +22,32 @@ internal static class MathBlockOperationFactory
             new MathBlockPerformanceCase(sampleInputs, performanceIterations),
             causality ?? MathBlockCausalityIndex.Resolve($"{identifier}@1"));
 
+    // As Create, for an evaluator that reads domain options. Evaluate(inputs) runs it under the default context.
+    public static MathBlockOperation CreateDomain(
+        string identifier,
+        int arity,
+        MathBlockTypeResolver typeResolver,
+        MathBlockDomainEvaluator evaluator,
+        IReadOnlyList<MathBlockValue> sampleInputs,
+        MathBlockValue sampleOutput,
+        double tolerance = 1e-10,
+        int performanceIterations = 64,
+        MathBlockCausalityInfo? causality = null)
+    {
+        var operation = Create(
+            identifier,
+            arity,
+            typeResolver,
+            inputs => evaluator(inputs, MathBlockDomainContext.Default),
+            sampleInputs,
+            sampleOutput,
+            tolerance,
+            performanceIterations,
+            causality);
+        operation.DomainEvaluator = evaluator;
+        return operation;
+    }
+
     public static MathBlockOperation ScalarUnary(
         string identifier,
         Func<double, double> function,

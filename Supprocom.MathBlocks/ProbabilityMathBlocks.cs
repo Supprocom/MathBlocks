@@ -14,11 +14,18 @@ public static partial class MathBlockProbability
         1.5056327351493116e-7
     ];
 
-    private static double BetaContinuedFraction(double x, double left, double right)
+    // The continued fraction stops at the first step whose factor is within tolerance of 1; converged is false when it
+    // used all maximumIterations steps without that.
+    private static double BetaContinuedFraction(
+        double x,
+        double left,
+        double right,
+        int maximumIterations,
+        double tolerance,
+        out bool converged)
     {
-        const int maximumIterations = 256;
-        const double tolerance = 3e-14;
         const double minimum = 1e-300;
+        converged = false;
         var qab = left + right;
         var qap = left + 1d;
         var qam = left - 1d;
@@ -53,7 +60,10 @@ public static partial class MathBlockProbability
             var delta = d * c;
             result *= delta;
             if (Math.Abs(delta - 1d) <= tolerance)
+            {
+                converged = true;
                 break;
+            }
         }
         return result;
     }

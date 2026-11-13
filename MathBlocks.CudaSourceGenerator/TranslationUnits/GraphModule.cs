@@ -6,6 +6,15 @@ using Supprocom.CSharp2CUDA;
 [TranspileToCUDA]
 internal static unsafe class GraphModule
 {
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_iteration_count() => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static int mathblocks_limit_jacobi_policy() => throw new NotSupportedException();
+
+    [CudaExternal]
+    private static void mathblocks_nonconvergence_record_graph(int opcode) => throw new NotSupportedException();
+
     [CudaExternal]
     public struct MathBlockSlot
     {
@@ -21,7 +30,7 @@ internal static unsafe class GraphModule
     }
 
     [CudaExternal]
-    private static void mathblocks_matrix_symmetric_eigenvalues([CudaReadOnly] double* source, int size, double* work, double* eigenvalues, double* buffer) => throw new NotSupportedException();
+    private static bool mathblocks_matrix_symmetric_eigenvalues([CudaReadOnly] double* source, int size, double* work, double* eigenvalues, double* buffer) => throw new NotSupportedException();
 
     [CudaExternal]
     private static bool mathblocks_matrix_try_solve([CudaReadOnly] double* matrix, [CudaReadOnly] double* right, int size, double* augmented, double* solution) => throw new NotSupportedException();
@@ -222,12 +231,21 @@ internal static unsafe class GraphModule
                         laplacian[from * vertex_count + to] -= weight;
                         laplacian[to * vertex_count + from] -= weight;
                     }
-                    mathblocks_matrix_symmetric_eigenvalues(
+                    bool converged = mathblocks_matrix_symmetric_eigenvalues(
                         laplacian,
                         vertex_count,
                         work,
                         eigenvalues,
                         eigenvalues + vertex_count);
+                    if (!converged)
+                    {
+                        mathblocks_nonconvergence_record_graph(opcode);
+                        if (mathblocks_limit_jacobi_policy() == 1)
+                        {
+                            output->valid = 0;
+                            break;
+                        }
+                    }
                     output->scalar_value = eigenvalues[1];
                     break;
                 }
@@ -461,7 +479,7 @@ internal static unsafe class GraphModule
                     int iterations = 0;
                     if (damping < 0.0 || damping > 1.0 ||
                         !mathblocks_sequence_positive_integer(third->scalar_value, &iterations) ||
-                        iterations > 10000)
+                        iterations > mathblocks_limit_iteration_count())
                     {
                         output->valid = 0;
                         break;
