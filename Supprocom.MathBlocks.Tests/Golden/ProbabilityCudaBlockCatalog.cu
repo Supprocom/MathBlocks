@@ -1364,25 +1364,28 @@ __device__ void mathblocks_probability_dispatch(
     if (((opcode) == (3)))
 #line 453 "ProbabilityModule.cs"
     {
-#line 454 "ProbabilityModule.cs"
-        if (((thread) == (0)))
 #line 455 "ProbabilityModule.cs"
+#line 455 "ProbabilityModule.cs"
+        int csharp2cuda_temp_23 = (first)->count;
+        if (((csharp2cuda_temp_23) > (20)))
+#line 456 "ProbabilityModule.cs"
         {
-#line 456 "ProbabilityModule.cs"
-#line 456 "ProbabilityModule.cs"
-            int csharp2cuda_temp_23 = (first)->count;
-            if (((csharp2cuda_temp_23) > (20)))
 #line 457 "ProbabilityModule.cs"
+            if (((thread) == (0)))
             {
 #line 458 "ProbabilityModule.cs"
 #line 458 "ProbabilityModule.cs"
                 int* csharp2cuda_temp_24 = &((output)->valid);
                 (*(csharp2cuda_temp_24) = 0);
-#line 459 "ProbabilityModule.cs"
-                return;
             }
+#line 459 "ProbabilityModule.cs"
+            return;
+        }
 #line 461 "ProbabilityModule.cs"
-#line 461 "ProbabilityModule.cs"
+        if (((thread) == (0)))
+        {
+#line 462 "ProbabilityModule.cs"
+#line 462 "ProbabilityModule.cs"
             int csharp2cuda_temp_25 = (first)->count;
             mathblocks_set_vector_shape(output, csharp2cuda_i32_sub(csharp2cuda_i32_shl(1, csharp2cuda_temp_25), 1));
         }
