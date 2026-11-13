@@ -18,6 +18,15 @@ public sealed class MathBlocksCUDAWorker
         return MathBlocksCUDAProgram.Create(program, prototypeInputs);
     }
 
+    /// <summary>Compiles a typed program into a resident CUDA program with the given launch options.</summary>
+    /// <exception cref="ArgumentOutOfRangeException">An option is outside the range the CUDA device or the program allows.</exception>
+    public MathBlocksCUDAProgram CompileWithOptions(
+        MathBlockProgram program,
+        MathBlocksCudaOptions options,
+        IReadOnlyDictionary<string, MathBlockValue>? prototypeInputs = null,
+        MathBlockDomainOptions? domainOptions = null)
+        => throw new NotSupportedException("Not implemented yet.");
+
     /// <summary>Plans scratch work for a rolling order-statistic operation.</summary>
     public MathBlockRollingOrderStatisticWorkPlan PlanRollingOrderStatisticWork(
         int inputCount,

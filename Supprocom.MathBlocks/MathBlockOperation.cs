@@ -72,6 +72,13 @@ public sealed class MathBlockOperation
         this.causality = causality;
     }
 
+    /// <summary>Evaluates the operation with the given domain limits.</summary>
+    public MathBlockValue Evaluate(IReadOnlyList<MathBlockValue> inputs, MathBlockDomainOptions domainOptions)
+        => throw new NotSupportedException("Not implemented yet.");
+
+    /// <summary>Gets the limits that apply to the operation, resolved with <see cref="Cuda.MathBlocksCudaOptions.Default"/>.</summary>
+    public IReadOnlyList<MathBlockLimit> Limits => throw new NotSupportedException("Not implemented yet.");
+
     /// <summary>Gets the identifier value.</summary>
     public string Identifier { get; }
     /// <summary>Gets the version value.</summary>

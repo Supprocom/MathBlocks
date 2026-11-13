@@ -1,3 +1,5 @@
+using Supprocom.MathBlocks.Cuda;
+
 namespace Supprocom.MathBlocks;
 
 /// <summary>Holds the outputs of a fused expression, each output's row validity, and the invalid mask.</summary>
@@ -23,6 +25,9 @@ public sealed class MathBlockFusedResult
     /// is valid in every row.
     /// </remarks>
     public IReadOnlyDictionary<string, MathBlockValue> Validity { get; }
+
+    /// <summary>Gets the geometry of the kernel launch that produced the result, or null when it came from CoreCLR.</summary>
+    public MathBlockCudaLaunch? Launch => throw new NotSupportedException("Not implemented yet.");
 
     /// <summary>Gets the invalid mask: bit k is set when operation node k produced a nonfinite row.</summary>
     /// <remarks>Operation nodes are numbered in program node order; see <see cref="MathBlockFusedExpression.MaskNodeIndexes"/>.</remarks>

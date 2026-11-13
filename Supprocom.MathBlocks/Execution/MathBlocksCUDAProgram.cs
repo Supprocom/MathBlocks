@@ -71,6 +71,15 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         MaximumParallelWidth = CalculateMaximumParallelWidth(program.PlanNodes);
     }
 
+    /// <summary>Gets the launch options the program was compiled with.</summary>
+    public MathBlocksCudaOptions Options => throw new NotSupportedException("Not implemented yet.");
+
+    /// <summary>Gets the domain limits the program was compiled with.</summary>
+    public MathBlockDomainOptions DomainOptions => throw new NotSupportedException("Not implemented yet.");
+
+    /// <summary>Gets the launch geometry of each kernel launch, fixed when the program is compiled from its planned row counts.</summary>
+    public IReadOnlyList<MathBlockCudaLaunch> Launches => throw new NotSupportedException("Not implemented yet.");
+
     /// <summary>Gets the program fingerprint value.</summary>
     public string ProgramFingerprint => program.Fingerprint;
     /// <summary>Gets the operation node count value.</summary>

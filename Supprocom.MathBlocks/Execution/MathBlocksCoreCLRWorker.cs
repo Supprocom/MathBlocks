@@ -19,8 +19,14 @@ public sealed class MathBlocksCoreCLRWorker
         parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = maximumConcurrency };
     }
 
+    /// <summary>Creates a CoreCLR executor that applies the given domain limits and an optional concurrency limit.</summary>
+    public static MathBlocksCoreCLRWorker Create(MathBlockDomainOptions domainOptions, int maximumConcurrency = -1)
+        => throw new NotSupportedException("Not implemented yet.");
+
     /// <summary>Gets the shared value.</summary>
     public static MathBlocksCoreCLRWorker Shared => shared.Value;
+    /// <summary>Gets the domain limits applied to the program's operations.</summary>
+    public MathBlockDomainOptions DomainOptions => throw new NotSupportedException("Not implemented yet.");
     /// <summary>Gets the maximum concurrency value.</summary>
     public int MaximumConcurrency { get; }
 

@@ -111,3 +111,103 @@ Supprocom.MathBlocks.MathBlocksCoreCLRWorker
 Supprocom.MathBlocks.MathBlocksCoreCLRWorker.Execute(Supprocom.MathBlocks.MathBlockProgram! program, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs) -> System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>!
 Supprocom.MathBlocks.MathBlocksCoreCLRWorker.MathBlocksCoreCLRWorker(int maximumConcurrency = -1) -> void
 Supprocom.MathBlocks.MathBlocksCoreCLRWorker.MaximumConcurrency.get -> int
+override Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.Equals(object? obj) -> bool
+override Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.GetHashCode() -> int
+override Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.ToString() -> string!
+override Supprocom.MathBlocks.MathBlockLimit.Equals(object? obj) -> bool
+override Supprocom.MathBlocks.MathBlockLimit.GetHashCode() -> int
+override Supprocom.MathBlocks.MathBlockLimit.ToString() -> string!
+static Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.operator !=(Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch? left, Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch? right) -> bool
+static Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.operator ==(Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch? left, Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch? right) -> bool
+static Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.WriteJson(System.Text.Json.Utf8JsonWriter! writer, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch!>! launches) -> void
+static Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.Default.get -> Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions!
+static Supprocom.MathBlocks.MathBlockLimit.operator !=(Supprocom.MathBlocks.MathBlockLimit? left, Supprocom.MathBlocks.MathBlockLimit? right) -> bool
+static Supprocom.MathBlocks.MathBlockLimit.operator ==(Supprocom.MathBlocks.MathBlockLimit? left, Supprocom.MathBlocks.MathBlockLimit? right) -> bool
+static Supprocom.MathBlocks.MathBlockLimits.For(string! operationIdentity, Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions? options = null) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockLimit!>!
+static Supprocom.MathBlocks.MathBlockLimits.Resolve(Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions? options = null) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockLimit!>!
+static Supprocom.MathBlocks.MathBlockLimits.WriteJson(System.Text.Json.Utf8JsonWriter! writer, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockLimit!>! limits) -> void
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.Blocks.get -> int
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.Blocks.init -> void
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.ClampedBy.get -> string?
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.ClampedBy.init -> void
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.<Clone>$() -> Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch!
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.Deconstruct(out string! Operation, out int? NodeIndex, out int Blocks, out int ThreadsPerBlock, out long ScratchBytesPerBlock, out long WantedBlocks, out string? ClampedBy) -> void
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.Equals(Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch? other) -> bool
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.MathBlockCudaLaunch(string! Operation, int? NodeIndex, int Blocks, int ThreadsPerBlock, long ScratchBytesPerBlock, long WantedBlocks, string? ClampedBy) -> void
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.NodeIndex.get -> int?
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.NodeIndex.init -> void
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.Operation.get -> string!
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.Operation.init -> void
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.ScratchBytesPerBlock.get -> long
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.ScratchBytesPerBlock.init -> void
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.ThreadsPerBlock.get -> int
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.ThreadsPerBlock.init -> void
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.WantedBlocks.get -> long
+Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch.WantedBlocks.init -> void
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.FusedBlockSize.get -> int
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.FusedBlockSize.init -> void
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.FusedMaximumBlocks.get -> int
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.FusedMaximumBlocks.init -> void
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.MathBlocksCudaOptions() -> void
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.MaximumGridX.get -> int
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.MaximumGridX.init -> void
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.WindowScratchBudgetBytes.get -> long
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.WindowScratchBudgetBytes.init -> void
+Supprocom.MathBlocks.Cuda.MathBlocksCUDAProgram.Launches.get -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch!>!
+Supprocom.MathBlocks.Cuda.MathBlocksCUDAProgram.Options.get -> Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions!
+Supprocom.MathBlocks.MathBlockFusedResult.Launch.get -> Supprocom.MathBlocks.Cuda.MathBlockCudaLaunch?
+Supprocom.MathBlocks.MathBlockLimit
+Supprocom.MathBlocks.MathBlockLimit.<Clone>$() -> Supprocom.MathBlocks.MathBlockLimit!
+Supprocom.MathBlocks.MathBlockLimit.Deconstruct(out string! Name, out string? Operation, out Supprocom.MathBlocks.MathBlockLimitKind Kind, out Supprocom.MathBlocks.MathBlockLimitDevice Device, out long? Minimum, out long? Maximum, out long? Value, out string! Unit, out string? Option, out System.Collections.Generic.IReadOnlyList<string!>! DrivenBy, out string! Rule) -> void
+Supprocom.MathBlocks.MathBlockLimitDevice
+Supprocom.MathBlocks.MathBlockLimitDevice.All = 0 -> Supprocom.MathBlocks.MathBlockLimitDevice
+Supprocom.MathBlocks.MathBlockLimitDevice.CoreCLR = 1 -> Supprocom.MathBlocks.MathBlockLimitDevice
+Supprocom.MathBlocks.MathBlockLimitDevice.Cuda = 2 -> Supprocom.MathBlocks.MathBlockLimitDevice
+Supprocom.MathBlocks.MathBlockLimit.Device.get -> Supprocom.MathBlocks.MathBlockLimitDevice
+Supprocom.MathBlocks.MathBlockLimit.Device.init -> void
+Supprocom.MathBlocks.MathBlockLimit.DrivenBy.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Supprocom.MathBlocks.MathBlockLimit.DrivenBy.init -> void
+Supprocom.MathBlocks.MathBlockLimit.Equals(Supprocom.MathBlocks.MathBlockLimit? other) -> bool
+Supprocom.MathBlocks.MathBlockLimitKind
+Supprocom.MathBlocks.MathBlockLimitKind.Derived = 2 -> Supprocom.MathBlocks.MathBlockLimitKind
+Supprocom.MathBlocks.MathBlockLimitKind.Domain = 4 -> Supprocom.MathBlocks.MathBlockLimitKind
+Supprocom.MathBlocks.MathBlockLimitKind.Fixed = 3 -> Supprocom.MathBlocks.MathBlockLimitKind
+Supprocom.MathBlocks.MathBlockLimit.Kind.get -> Supprocom.MathBlocks.MathBlockLimitKind
+Supprocom.MathBlocks.MathBlockLimit.Kind.init -> void
+Supprocom.MathBlocks.MathBlockLimitKind.Launch = 0 -> Supprocom.MathBlocks.MathBlockLimitKind
+Supprocom.MathBlocks.MathBlockLimitKind.Option = 1 -> Supprocom.MathBlocks.MathBlockLimitKind
+Supprocom.MathBlocks.MathBlockLimit.MathBlockLimit(string! Name, string? Operation, Supprocom.MathBlocks.MathBlockLimitKind Kind, Supprocom.MathBlocks.MathBlockLimitDevice Device, long? Minimum, long? Maximum, long? Value, string! Unit, string? Option, System.Collections.Generic.IReadOnlyList<string!>! DrivenBy, string! Rule) -> void
+Supprocom.MathBlocks.MathBlockLimit.Maximum.get -> long?
+Supprocom.MathBlocks.MathBlockLimit.Maximum.init -> void
+Supprocom.MathBlocks.MathBlockLimit.Minimum.get -> long?
+Supprocom.MathBlocks.MathBlockLimit.Minimum.init -> void
+Supprocom.MathBlocks.MathBlockLimit.Name.get -> string!
+Supprocom.MathBlocks.MathBlockLimit.Name.init -> void
+Supprocom.MathBlocks.MathBlockLimit.Operation.get -> string?
+Supprocom.MathBlocks.MathBlockLimit.Operation.init -> void
+Supprocom.MathBlocks.MathBlockLimit.Option.get -> string?
+Supprocom.MathBlocks.MathBlockLimit.Option.init -> void
+Supprocom.MathBlocks.MathBlockLimit.Rule.get -> string!
+Supprocom.MathBlocks.MathBlockLimit.Rule.init -> void
+Supprocom.MathBlocks.MathBlockLimits
+Supprocom.MathBlocks.MathBlockLimit.Unit.get -> string!
+Supprocom.MathBlocks.MathBlockLimit.Unit.init -> void
+Supprocom.MathBlocks.MathBlockLimit.Value.get -> long?
+Supprocom.MathBlocks.MathBlockLimit.Value.init -> void
+Supprocom.MathBlocks.MathBlockOperation.Limits.get -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockLimit!>!
+static Supprocom.MathBlocks.MathBlockDomainOptions.Default.get -> Supprocom.MathBlocks.MathBlockDomainOptions!
+static Supprocom.MathBlocks.MathBlocksCoreCLRWorker.Create(Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions, int maximumConcurrency = -1) -> Supprocom.MathBlocks.MathBlocksCoreCLRWorker!
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.BlockSize.get -> int
+Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.BlockSize.init -> void
+Supprocom.MathBlocks.Cuda.MathBlocksCUDAProgram.DomainOptions.get -> Supprocom.MathBlocks.MathBlockDomainOptions!
+Supprocom.MathBlocks.Cuda.MathBlocksCUDAWorker.CompileWithOptions(Supprocom.MathBlocks.MathBlockProgram! program, Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions! options, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>? prototypeInputs = null, Supprocom.MathBlocks.MathBlockDomainOptions? domainOptions = null) -> Supprocom.MathBlocks.Cuda.MathBlocksCUDAProgram!
+Supprocom.MathBlocks.MathBlockDomainOptions
+Supprocom.MathBlocks.MathBlockDomainOptions.MathBlockDomainOptions() -> void
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumExplicitSubsetSize.get -> int
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumExplicitSubsetSize.init -> void
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumStateCount.get -> int
+Supprocom.MathBlocks.MathBlockDomainOptions.MaximumStateCount.init -> void
+Supprocom.MathBlocks.MathBlockOperation.Evaluate(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! inputs, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> Supprocom.MathBlocks.MathBlockValue
+Supprocom.MathBlocks.MathBlocksCoreCLRWorker.DomainOptions.get -> Supprocom.MathBlocks.MathBlockDomainOptions!
