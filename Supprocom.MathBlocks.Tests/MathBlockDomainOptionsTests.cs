@@ -21,7 +21,7 @@ public sealed class MathBlockDomainOptionsTests
         [nameof(MathBlockDomainOptions.MaximumMatrixSize)] = v => new() { MaximumMatrixSize = v },
         [nameof(MathBlockDomainOptions.MaximumIterationCount)] = v => new() { MaximumIterationCount = v },
         [nameof(MathBlockDomainOptions.IncompleteBetaMaximumIterations)] = v => new() { IncompleteBetaMaximumIterations = v },
-        [nameof(MathBlockDomainOptions.JacobiRotationFactor)] = v => new() { JacobiRotationFactor = v }
+        [nameof(MathBlockDomainOptions.JacobiRotationMultiplier)] = v => new() { JacobiRotationMultiplier = v }
     };
 
     /// <summary>Verifies every default is the literal earlier versions hard-coded.</summary>
@@ -43,7 +43,7 @@ public sealed class MathBlockDomainOptionsTests
         Assert.Equal(256, options.IncompleteBetaMaximumIterations);
         Assert.Equal(3e-14, options.IncompleteBetaTolerance);
         Assert.Equal(MathBlockNonConvergencePolicy.Estimate, options.IncompleteBetaNonConvergence);
-        Assert.Equal(64, options.JacobiRotationFactor);
+        Assert.Equal(64, options.JacobiRotationMultiplier);
         Assert.Equal(MathBlockNonConvergencePolicy.Estimate, options.JacobiNonConvergence);
         Assert.NotEmpty(MathBlockLimits.Resolve(domain: options));
     }
@@ -61,7 +61,7 @@ public sealed class MathBlockDomainOptionsTests
     [InlineData(nameof(MathBlockDomainOptions.MaximumMatrixSize), 1, MaximumSquareSize)]
     [InlineData(nameof(MathBlockDomainOptions.MaximumIterationCount), 1, int.MaxValue)]
     [InlineData(nameof(MathBlockDomainOptions.IncompleteBetaMaximumIterations), 1, int.MaxValue - 1)]
-    [InlineData(nameof(MathBlockDomainOptions.JacobiRotationFactor), 1, int.MaxValue)]
+    [InlineData(nameof(MathBlockDomainOptions.JacobiRotationMultiplier), 1, int.MaxValue)]
     public void RangesAreLoadTimeErrorsNamingTheOption(string name, int minimum, int maximum)
     {
         var create = Factories[name];

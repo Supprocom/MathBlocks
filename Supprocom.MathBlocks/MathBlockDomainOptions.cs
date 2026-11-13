@@ -59,8 +59,8 @@ public sealed class MathBlockDomainOptions
     /// <summary>Gets what the incomplete beta function returns when the continued fraction has not converged at its iteration budget.</summary>
     public MathBlockNonConvergencePolicy IncompleteBetaNonConvergence { get; init; } = MathBlockNonConvergencePolicy.Estimate;
 
-    /// <summary>Gets the factor of the Jacobi eigenvalue rotation budget, which is the factor times n times n rotations for an n by n matrix. The range is 1 to 2,147,483,647; the budget is counted in 64-bit integers.</summary>
-    public int JacobiRotationFactor { get; init; } = 64;
+    /// <summary>Gets the multiplier of the Jacobi eigenvalue rotation budget, which is the multiplier times n times n rotations for an n by n matrix. The range is 1 to 2,147,483,647; the budget is counted in 64-bit integers.</summary>
+    public int JacobiRotationMultiplier { get; init; } = 64;
 
     /// <summary>Gets what the Jacobi eigenvalue computation returns when the rotation budget ends before the off-diagonal part is zero.</summary>
     public MathBlockNonConvergencePolicy JacobiNonConvergence { get; init; } = MathBlockNonConvergencePolicy.Estimate;
@@ -93,7 +93,7 @@ public sealed class MathBlockDomainOptions
                 IncompleteBetaNonConvergence,
                 "IncompleteBetaNonConvergence is not a defined policy.");
         }
-        Require(JacobiRotationFactor, 1, int.MaxValue, nameof(JacobiRotationFactor), "the budget is counted in 64-bit integers, so the factor is an int");
+        Require(JacobiRotationMultiplier, 1, int.MaxValue, nameof(JacobiRotationMultiplier), "the budget is counted in 64-bit integers, so the multiplier is an int");
         if (!Enum.IsDefined(JacobiNonConvergence))
         {
             throw new ArgumentOutOfRangeException(

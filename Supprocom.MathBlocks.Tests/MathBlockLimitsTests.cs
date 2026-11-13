@@ -33,7 +33,7 @@ public sealed class MathBlockLimitsTests(ITestOutputHelper output)
         ["N-MB-8"] = ["domain.maximum-iteration-count"],
         ["N-MB-9"] = ["openmath.maximum-document-characters", "openmath.maximum-document-bytes", "interchange.maximum-document-characters", "interchange.maximum-document-utf8-bytes", "interchange.maximum-expression-elements", "interchange.maximum-expression-depth"],
         ["N-MB-10"] = ["cuda.device-ordinal"],
-        ["N-MB-11"] = ["domain.jacobi-rotation-factor", "domain.jacobi-non-convergence", "matrix.exponential.taylor-terms", "scalar.cube-root.newton-steps"],
+        ["N-MB-11"] = ["domain.jacobi-rotation-multiplier", "domain.jacobi-non-convergence", "matrix.exponential.taylor-terms", "scalar.cube-root.newton-steps"],
         ["N-MB-12"] = ["packaging.target-framework", "packaging.cuda-toolkit-minimum-major", "packaging.profile-1-operation-count"]
     };
 
@@ -96,7 +96,7 @@ public sealed class MathBlockLimitsTests(ITestOutputHelper output)
         Assert.Equal(4_096, Value("domain.maximum-matrix-size", "matrix.identity@1"));
         Assert.Equal(256, Value("domain.incomplete-beta-maximum-iterations", "special.regularized-incomplete-beta@1"));
         Assert.Equal(0, Value("domain.incomplete-beta-non-convergence", "special.regularized-incomplete-beta@1"));
-        Assert.Equal(64, Value("domain.jacobi-rotation-factor", "matrix.symmetric-eigenvalues@1"));
+        Assert.Equal(64, Value("domain.jacobi-rotation-multiplier", "matrix.symmetric-eigenvalues@1"));
         Assert.Equal(48, Value("matrix.exponential.taylor-terms", "matrix.exponential@1"));
         Assert.Equal(3, Value("scalar.cube-root.newton-steps", "scalar.cube-root@1"));
         Assert.Equal(16 * 1024 * 1024, Value("openmath.maximum-document-characters"));
@@ -164,7 +164,7 @@ public sealed class MathBlockLimitsTests(ITestOutputHelper output)
             FusedMaximumBlocks = 7,
             FusedBlockSize = 32
         };
-        var domain = new MathBlockDomainOptions { MaximumMatrixSize = 99, MaximumExplicitSubsetSize = 22, JacobiRotationFactor = 5 };
+        var domain = new MathBlockDomainOptions { MaximumMatrixSize = 99, MaximumExplicitSubsetSize = 22, JacobiRotationMultiplier = 5 };
 
         var limits = MathBlockLimits.Resolve(cuda, domain);
 
@@ -175,7 +175,7 @@ public sealed class MathBlockLimitsTests(ITestOutputHelper output)
         Assert.Equal(99, limits.Single(limit => Named(limit, "domain.maximum-matrix-size")).Value);
         Assert.Equal(99, limits.Single(limit => Named(limit, "cuda.device-module.maximum-matrix-size")).Value);
         Assert.All(limits.Where(limit => Named(limit, "domain.maximum-explicit-subset-size")), limit => Assert.Equal(22, limit.Value));
-        Assert.All(limits.Where(limit => Named(limit, "domain.jacobi-rotation-factor")), limit => Assert.Equal(5, limit.Value));
+        Assert.All(limits.Where(limit => Named(limit, "domain.jacobi-rotation-multiplier")), limit => Assert.Equal(5, limit.Value));
     }
 
     /// <summary>Verifies the kinds, the devices and the rules the records carry.</summary>

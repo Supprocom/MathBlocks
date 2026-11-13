@@ -219,8 +219,8 @@ Supprocom.MathBlocks.MathBlockDomainOptions.IncompleteBetaTolerance.get -> doubl
 Supprocom.MathBlocks.MathBlockDomainOptions.IncompleteBetaTolerance.init -> void
 Supprocom.MathBlocks.MathBlockDomainOptions.JacobiNonConvergence.get -> Supprocom.MathBlocks.MathBlockNonConvergencePolicy
 Supprocom.MathBlocks.MathBlockDomainOptions.JacobiNonConvergence.init -> void
-Supprocom.MathBlocks.MathBlockDomainOptions.JacobiRotationFactor.get -> int
-Supprocom.MathBlocks.MathBlockDomainOptions.JacobiRotationFactor.init -> void
+Supprocom.MathBlocks.MathBlockDomainOptions.JacobiRotationMultiplier.get -> int
+Supprocom.MathBlocks.MathBlockDomainOptions.JacobiRotationMultiplier.init -> void
 Supprocom.MathBlocks.MathBlockDomainOptions.MaximumChoquetPlayerCount.get -> int
 Supprocom.MathBlocks.MathBlockDomainOptions.MaximumChoquetPlayerCount.init -> void
 Supprocom.MathBlocks.MathBlockDomainOptions.MaximumGeneratedVectorLength.get -> int

@@ -323,9 +323,9 @@ internal static class MathBlockLimitCatalog
             ["special.regularized-incomplete-beta@1"],
             "0 returns the last estimate as a valid value, 1 returns an invalid row, when the continued fraction has not converged");
         string[] jacobi = ["matrix.symmetric-eigenvalues@1", "matrix.largest-symmetric-eigenvalue@1", "matrix.smallest-symmetric-eigenvalue@1", "matrix.spectral-norm@1", "graph.algebraic-connectivity@1"];
-        yield return new("domain.jacobi-rotation-factor", nameof(MathBlockDomainOptions.JacobiRotationFactor), "rotations per n x n",
-            1, int.MaxValue, d => d.JacobiRotationFactor, jacobi,
-            "the rotation budget is the factor x n x n, counted in 64-bit integers");
+        yield return new("domain.jacobi-rotation-multiplier", nameof(MathBlockDomainOptions.JacobiRotationMultiplier), "rotations per n x n",
+            1, int.MaxValue, d => d.JacobiRotationMultiplier, jacobi,
+            "the rotation budget is the multiplier x n x n, counted in 64-bit integers");
         yield return new("domain.jacobi-non-convergence", nameof(MathBlockDomainOptions.JacobiNonConvergence), "policy",
             0, 1, d => (long)d.JacobiNonConvergence, jacobi,
             "0 returns the eigenvalues at the budget, 1 returns an invalid row, when the off-diagonal part is not zero at the budget");
