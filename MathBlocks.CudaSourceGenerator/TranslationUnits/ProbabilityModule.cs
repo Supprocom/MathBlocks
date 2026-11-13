@@ -451,15 +451,15 @@ internal static unsafe class ProbabilityModule
 
         if (opcode == 3)
         {
-            if (thread == 0)
+            // The domain test reads only the input, so every thread takes the same exit before the barrier below.
+            if (first->count > 20)
             {
-                if (first->count > 20)
-                {
+                if (thread == 0)
                     output->valid = 0;
-                    return;
-                }
-                mathblocks_set_vector_shape(output, (1 << first->count) - 1);
+                return;
             }
+            if (thread == 0)
+                mathblocks_set_vector_shape(output, (1 << first->count) - 1);
             Cuda.SyncThreads();
             for (int mask = thread + 1; output->valid && mask <= output->count; mask += Cuda.BlockDim.X)
             {
