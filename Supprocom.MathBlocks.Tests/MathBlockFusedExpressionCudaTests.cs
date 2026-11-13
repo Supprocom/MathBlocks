@@ -48,6 +48,81 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
         Assert.True(filled > 0, "No filled row of a valid output was compared.");
     }
 
+    /// <summary>
+    /// The fused CUDA kernel equals EvaluateCoreCLR bit for bit, including invalid state, row validity and the invalid mask, at fused block sizes
+    /// of 1, 7, 32, 100, 129, 256 and the device maximum and at fused grids of 1 and 7 blocks, and reports the geometry of its launch.
+    /// </summary>
+    [Theory]
+    [Trait("Category", "CudaDevice")]
+    [Trait("Category", "LaunchOptions")]
+    [InlineData("block-1")]
+    [InlineData("block-7")]
+    [InlineData("block-32")]
+    [InlineData("block-100")]
+    [InlineData("block-129")]
+    [InlineData("block-256")]
+    [InlineData("block-device-maximum")]
+    [InlineData("blocks-1")]
+    [InlineData("blocks-7")]
+    [InlineData("block-7-blocks-3")]
+    public void CUDAFusedKernelEqualsCoreCLRUnderFusedLaunchOptions(string optionSet)
+    {
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
+        var cases = CreateCases();
+        var options = optionSet switch
+        {
+            "block-device-maximum" => new MathBlocksCudaOptions { FusedBlockSize = DeviceMaximumThreadsPerBlock() },
+            "blocks-1" => new MathBlocksCudaOptions { FusedMaximumBlocks = 1 },
+            "blocks-7" => new MathBlocksCudaOptions { FusedMaximumBlocks = 7 },
+            "block-7-blocks-3" => new MathBlocksCudaOptions { FusedBlockSize = 7, FusedMaximumBlocks = 3 },
+            _ => new MathBlocksCudaOptions { FusedBlockSize = int.Parse(optionSet["block-".Length..], System.Globalization.CultureInfo.InvariantCulture) },
+        };
+        var expressions = cases.Select(item => item.Expression).ToArray();
+        var source = string.Concat(expressions.DistinctBy(expression => expression.Fingerprint, StringComparer.Ordinal).Select(expression => expression.CudaSource + "\n"));
+
+        var results = RunCudaWithOptions(
+            source,
+            false,
+            expressions,
+            cases.Select(item => (IReadOnlyDictionary<string, MathBlockValue>)item.Inputs).ToArray(),
+            cases.Select(item => (IReadOnlyDictionary<string, MathBlockValue>?)item.Validity).ToArray(),
+            options);
+
+        var clamped = 0;
+        for (var index = 0; index < cases.Length; index++)
+        {
+            var (name, expression, inputs, validity) = cases[index];
+            var context = $"{name} {optionSet}";
+            var reference = expression.EvaluateCoreCLR(inputs, validity);
+            Assert.Equal(reference.InvalidMask, results[index].InvalidMask);
+            foreach (var (outputName, value) in reference.Outputs)
+            {
+                AssertSameValue(value, results[index].Outputs[outputName], $"{context} output {outputName}");
+                AssertSameValue(reference.Validity[outputName], results[index].Validity[outputName], $"{context} validity {outputName}");
+            }
+
+            var launch = results[index].Launch;
+            Assert.NotNull(launch);
+            Assert.Equal(expression.CudaKernelName, launch.Operation);
+            Assert.Null(launch.NodeIndex);
+            Assert.Equal(options.FusedBlockSize, launch.ThreadsPerBlock);
+            Assert.Equal(Math.Min(options.FusedMaximumBlocks, launch.WantedBlocks), launch.Blocks);
+            Assert.Equal(launch.Blocks < launch.WantedBlocks ? "FusedMaximumBlocks" : null, launch.ClampedBy);
+            if (launch.ClampedBy is not null)
+                clamped++;
+        }
+
+        if (options.FusedMaximumBlocks < 8)
+            Assert.True(clamped > 0, $"{optionSet}: no case had more rows than the clamped grid covers.");
+    }
+
+    private static int DeviceMaximumThreadsPerBlock()
+    {
+        var native = typeof(MathBlocksCUDAWorker).Assembly.GetType("Supprocom.MathBlocks.Cuda.MathBlocksCudaNative", throwOnError: true)!;
+        var limits = native.GetMethod("GetDeviceLimits")!.Invoke(null, null)!;
+        return (int)limits.GetType().GetProperty("MaximumThreadsPerBlock")!.GetValue(limits)!;
+    }
+
     // Runs the cases in one NVRTC program and compares each with EvaluateCoreCLR and the generic dispatcher. Returns
     // the cases compared, the valid outputs and the rows of valid outputs that are not valid in their row validity.
     private (int Ran, int Valid, long Filled) AssertCudaCases(

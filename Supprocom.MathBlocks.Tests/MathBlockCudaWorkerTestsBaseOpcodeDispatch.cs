@@ -40,11 +40,69 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
         ArgumentException.ThrowIfNullOrEmpty(name);
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var (identity, create) = Cases[name];
-        var inputs = create();
+        RunDispatch(identity, create(), MathBlockCudaDeviceModule.DispatcherBlockSize);
+    }
+
+    /// <summary>
+    /// Verifies the dispatcher gives the CoreCLR result at block sizes of 1, 7, 32, 100, 129, 256 and the device maximum, with the scratch that
+    /// <see cref="MathBlockCudaOperationContract.PlanCUDA(IReadOnlyList{MathBlockValue}, MathBlockDomainOptions, int)"/> plans for the block size.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(BlockSizedCaseNames))]
+    public void CUDADeviceDispatchGivesTheCoreCLRResultAtEveryBlockSize(string name, int blockSize)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
+        var (identity, create) = BlockSizedCases[name];
+        RunDispatch(identity, create(), blockSize == 0 ? DeviceMaximumThreadsPerBlock() : blockSize);
+    }
+
+    /// <summary>Gets each block-sized case with each block size; 0 stands for the device maximum.</summary>
+    public static TheoryData<string, int> BlockSizedCaseNames
+    {
+        get
+        {
+            var data = new TheoryData<string, int>();
+            foreach (var name in BlockSizedCases.Keys.Order(StringComparer.Ordinal))
+                foreach (var blockSize in new[] { 1, 7, 32, 100, 129, 256, 0 })
+                    data.Add(name, blockSize);
+            return data;
+        }
+    }
+
+    private static readonly Dictionary<string, (string Identity, Func<MathBlockValue[]> Inputs)> BlockSizedCases = new(StringComparer.Ordinal)
+    {
+        ["block-sized/unary-vector"] = ("elementwise.scalar.negate@1", () => [Vector(Enumerable.Range(0, 300).Select(index => index * 0.5d - 20d).ToArray()), Scalar(Fill)]),
+        ["block-sized/rolling-median"] = ("sequence.rolling-median@1", () => [Vector(Enumerable.Range(0, 300).Select(index => (index * 37 % 101) * 0.5d - (index % 2 == 0 ? 0d : 0.25d)).ToArray()), Scalar(17d)]),
+        ["block-sized/rolling-quantile"] = ("sequence.rolling-quantile@1", () => [Vector(Enumerable.Range(0, 300).Select(index => (index * 53 % 97) * 0.5d).ToArray()), Scalar(33d), Scalar(0.9d)]),
+        ["block-sized/window-theil-sen"] = ("window.statistics.theil-sen-slope@1", () => WindowInputs("statistics.theil-sen-slope", 300, 17)),
+        ["block-sized/window-median"] = ("window.vector.median@1", () => WindowInputs("vector.median", 300, 17)),
+        ["block-sized/window-distance-correlation"] = ("window.statistics.distance-correlation@1", () => WindowInputs("statistics.distance-correlation", 300, 17)),
+    };
+
+    private static MathBlockValue[] WindowInputs(string source, int count, int width)
+    {
+        var series = MathBlockWindowTestSupport.CreateSourceInputs(source, count, width, 11);
+        var unit = MathBlockWindowTestSupport.Form(source).ResolveOutputType(
+            [.. series.Select(input => input.Type), MathBlockType.Scalar(), MathBlockType.Scalar()]).Unit;
+        return MathBlockWindowTestSupport.FormInputs(series, width, MathBlockValue.Scalar(Fill, unit));
+    }
+
+    private static int DeviceMaximumThreadsPerBlock()
+    {
+        var native = typeof(MathBlocksCUDAWorker).Assembly.GetType("Supprocom.MathBlocks.Cuda.MathBlocksCudaNative", throwOnError: true)!;
+        var limits = native.GetMethod("GetDeviceLimits")!.Invoke(null, null)!;
+        return (int)limits.GetType().GetProperty("MaximumThreadsPerBlock")!.GetValue(limits)!;
+    }
+
+    // The launch and the resource lifetime stay in one visible path, as in the package-only consumer.
+#pragma warning disable MA0051
+    private static void RunDispatch(string identity, MathBlockValue[] inputs, int blockSize)
+    {
         var contract = MathBlockCudaDeviceModule.GetOperation(identity);
         Assert.True(contract.Opcode < 128, "The public opcode carries no mask.");
         var expected = contract.EvaluateCoreCLR(inputs);
-        var plan = contract.PlanCUDA(inputs);
+        var plan = contract.PlanCUDA(inputs, MathBlockDomainOptions.Default, blockSize);
 
         var slotCount = inputs.Length + 1;
         var cursor = Align(slotCount * MathBlockCudaSlotLayout.Size);
@@ -57,6 +115,7 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
 
         var outputBytes = MathBlockCudaValueCodec.GetPayloadByteCount(plan.OutputType.Kind, plan.OutputCapacity);
         var outputOffset = Allocate(ref cursor, outputBytes);
+        var scratchOffset = Allocate(ref cursor, plan.ScratchBytes);
         var arenaBytes = Align(cursor);
         var host = Marshal.AllocHGlobal(arenaBytes);
         var device = 0ul;
@@ -86,7 +145,7 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
                 host,
                 inputs.Length * MathBlockCudaSlotLayout.Size,
                 outputOffset < 0 ? 0ul : device + (ulong)outputOffset,
-                0ul,
+                scratchOffset < 0 ? 0ul : device + (ulong)scratchOffset,
                 plan.OutputCapacity,
                 new MathBlockType(plan.OutputType.Kind, plan.OutputType.Unit, plan.OutputRows, plan.OutputColumns),
                 valid: false);
@@ -105,7 +164,7 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
             for (var index = 0; index < parameters.Count; index++)
                 Marshal.WriteIntPtr(parameterArray, index * IntPtr.Size, parameters[index]);
             CudaDriver.Require(
-                CudaDriver.cuLaunchKernel(function, 1, 1, 1, (uint)MathBlockCudaDeviceModule.DispatcherBlockSize, 1, 1, 0, stream, parameterArray, IntPtr.Zero),
+                CudaDriver.cuLaunchKernel(function, 1, 1, 1, (uint)blockSize, 1, 1, 0, stream, parameterArray, IntPtr.Zero),
                 "cuLaunchKernel");
             CudaDriver.Require(CudaDriver.cuStreamSynchronize(stream), "cuStreamSynchronize");
             CudaDriver.Require(CudaDriver.cuMemcpyDtoH(host, device, new UIntPtr((uint)arenaBytes)), "cuMemcpyDtoH");
