@@ -118,6 +118,10 @@ internal static class MathBlocksCudaNative
     internal static byte[] CompilePtxWithoutDevice(string source, string name, string architecture) =>
         CompileForArchitecture(source, name, architecture, fusedMultiplyAdd: false);
 
+    // The same, with either contraction setting, for the fused-expression sources a consumer compiles with --fmad=true or false.
+    internal static byte[] CompilePtxWithoutDevice(string source, string name, string architecture, bool fusedMultiplyAdd) =>
+        CompileForArchitecture(source, name, architecture, fusedMultiplyAdd);
+
     private static byte[] CompilePtxForArchitecture(string source, string name, string architecture) =>
         CompileForArchitecture(source, name, architecture, fusedMultiplyAdd: false);
 

@@ -9,7 +9,7 @@ public sealed class MathBlockFusedDomainTests
     private const string Sibling = "elementwise-valid.special.regularized-incomplete-beta@1";
     private const int Rows = 5;
 
-    private static (MathBlockFusedExpression Expression, Dictionary<string, MathBlockValue> Inputs) BetaExpression()
+    internal static (MathBlockFusedExpression Expression, Dictionary<string, MathBlockValue> Inputs) BetaExpression()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var x = builder.Input("x", MathBlockType.Vector(length: Rows));
@@ -33,7 +33,7 @@ public sealed class MathBlockFusedDomainTests
     /// <summary>Gets the option sets: the defaults, a policy, and an iteration count that converges.</summary>
     public static TheoryData<string> OptionSets => ["defaults", "invalid", "converging", "tolerance"];
 
-    private static MathBlockDomainOptions Options(string name) => name switch
+    internal static MathBlockDomainOptions Options(string name) => name switch
     {
         "invalid" => new() { IncompleteBetaNonConvergence = MathBlockNonConvergencePolicy.Invalid },
         "converging" => new() { IncompleteBetaMaximumIterations = 513 },
