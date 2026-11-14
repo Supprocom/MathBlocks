@@ -289,7 +289,7 @@ Supprocom.MathBlocks.Cuda.MathBlocksCUDAProgram.NonConvergedEvaluations.get -> S
 Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.FusedRowBlock.get -> int
 Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.FusedRowBlock.init -> void
 Supprocom.MathBlocks.MathBlockFusedResult.NonConvergedEvaluations.get -> System.Collections.Generic.IReadOnlyDictionary<string!, long>!
-Supprocom.MathBlocks.MathBlockFusedExpression.EvaluateCoreCLR(System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>? validity = null, Supprocom.MathBlocks.MathBlockDomainOptions? domainOptions = null, Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions? options = null) -> Supprocom.MathBlocks.MathBlockFusedResult!
+Supprocom.MathBlocks.MathBlockFusedExpression.EvaluateCoreCLR(System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>? validity, Supprocom.MathBlocks.MathBlockDomainOptions? domainOptions, Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions? options) -> Supprocom.MathBlocks.MathBlockFusedResult!
 Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.EvaluateCoreCLR(System.ReadOnlySpan<Supprocom.MathBlocks.MathBlockValue> inputs, System.Span<double> output, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> Supprocom.MathBlocks.MathBlockEvaluation
 Supprocom.MathBlocks.MathBlockEvaluation
 Supprocom.MathBlocks.MathBlockEvaluation.Deconstruct(out bool IsValid, out int Rows, out long NonConvergedCount) -> void
@@ -374,3 +374,4 @@ Supprocom.MathBlocks.MathBlockTypeSignature.Parameters.get -> System.Collections
 Supprocom.MathBlocks.MathBlockTypeSignature.RuleKind.get -> Supprocom.MathBlocks.MathBlockTypeRuleKind
 Supprocom.MathBlocks.MathBlockTypeSignature.ToRow() -> System.Collections.Generic.IReadOnlyList<int>!
 Supprocom.MathBlocks.MathBlockTypeSignatures
+Supprocom.MathBlocks.MathBlockFusedExpression.EvaluateCoreCLR(System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>? validity = null) -> Supprocom.MathBlocks.MathBlockFusedResult!

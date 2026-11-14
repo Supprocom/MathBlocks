@@ -230,18 +230,34 @@ public sealed class MathBlockFusedExpression
             nodeKinds);
     }
 
-    /// <summary>Evaluates the fused expression on CoreCLR, one row at a time, optionally under domain options and a row block.</summary>
+    /// <summary>Evaluates the fused expression on CoreCLR, one row at a time, under the default domain and launch options.</summary>
     /// <param name="inputs">The program inputs by name. Vector inputs that are valid have one common length.</param>
     /// <param name="validity">Optional BooleanVector validity inputs, keyed by vector input name, each as long as the vector inputs.</param>
+    /// <returns>The outputs and each output's row validity.</returns>
+    // RS0027 wants the overload with optional parameters to have the most parameters. The 0.6.1 binary signature must keep its optional
+    // validity parameter, and the overload that adds the domain and launch options takes them as required parameters, so the rule is
+    // suppressed on this one method.
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "ApiDesign",
+        "RS0027:API with optional parameter(s) should have the most parameters amongst its public overloads",
+        Justification = "The 0.6.1 signature is binary-compatible API; the overload with the domain and launch options has required parameters so that it can not replace it.")]
+    public MathBlockFusedResult EvaluateCoreCLR(
+        IReadOnlyDictionary<string, MathBlockValue> inputs,
+        IReadOnlyDictionary<string, MathBlockValue>? validity = null) =>
+        EvaluateCoreCLR(inputs, validity, null, null);
+
+    /// <summary>Evaluates the fused expression on CoreCLR, one row at a time, under domain options and a row block.</summary>
+    /// <param name="inputs">The program inputs by name. Vector inputs that are valid have one common length.</param>
+    /// <param name="validity">BooleanVector validity inputs, keyed by vector input name, each as long as the vector inputs, or null for none.</param>
     /// <param name="domainOptions">The domain limits (null for the defaults) of the elementwise rows, the options <see cref="MathBlockCudaDeviceModule.GetSource(MathBlockDomainOptions)"/> compiles into the device source.</param>
     /// <param name="options">The launch options (null for the defaults); <see cref="MathBlocksCudaOptions.FusedRowBlock"/> is the number of rows one CoreCLR task evaluates.</param>
     /// <returns>The outputs and each output's row validity; <see cref="MathBlockFusedResult.NonConvergedEvaluations"/> counts the non-converged rows by operation identity.</returns>
     /// <exception cref="ArgumentOutOfRangeException">An option is outside the range its limit allows.</exception>
     public MathBlockFusedResult EvaluateCoreCLR(
         IReadOnlyDictionary<string, MathBlockValue> inputs,
-        IReadOnlyDictionary<string, MathBlockValue>? validity = null,
-        MathBlockDomainOptions? domainOptions = null,
-        MathBlocksCudaOptions? options = null)
+        IReadOnlyDictionary<string, MathBlockValue>? validity,
+        MathBlockDomainOptions? domainOptions,
+        MathBlocksCudaOptions? options)
     {
         domainOptions ??= MathBlockDomainOptions.Default;
         options ??= MathBlocksCudaOptions.Default;
