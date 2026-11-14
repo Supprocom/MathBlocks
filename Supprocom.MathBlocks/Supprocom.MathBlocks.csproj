@@ -6,8 +6,8 @@
     <RootNamespace>Supprocom.MathBlocks</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>Supprocom.MathBlocks</PackageId>
-    <Version>0.6.1</Version>
-    <AssemblyVersion>0.6.1.0</AssemblyVersion>
+    <Version>0.7.0</Version>
+    <AssemblyVersion>0.7.0.0</AssemblyVersion>
     <Authors>Supprocom</Authors>
     <Company>Supprocom</Company>
     <Copyright>Copyright (C) 2026 mkn8rn</Copyright>
@@ -19,7 +19,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>mathematics;openmath;mathml;content-mathml;operation-contract;computation-graph;coreclr;cuda;deterministic;numerics</PackageTags>
-    <PackageReleaseNotes>Patch release. Results are bit-identical to 0.6.0 on CoreCLR and CUDA, except one fix: sequence.convolution@1 with exactly one empty operand is now invalid on CoreCLR, as it already was on CUDA. Faster on CoreCLR: elementwise forms, especially minimum and maximum; vector arithmetic and finiteness checks; and window.path.total-variation@1. Faster on CUDA: Spearman rank counts, Poisson CDF, distance correlation, Whitney and McShane extensions, dynamic time warping, and convolution. Adopt 0.6.1 at a run boundary: the CUDA device source, the operation table, the value codec implementation, and the device ABI fingerprint pins differ from 0.6.0, so a consumer that compares contract pins cannot resume or replay runs recorded on 0.6.0. The value codec schema and the causality pins are unchanged. CUDA execution uses the installed NVIDIA driver and CUDA Toolkit 12.0 or later; the package ships no native binaries.</PackageReleaseNotes>
+    <PackageReleaseNotes>Minor release. Adds configurable limits, CUDA launch options, non-convergence counts and type rules. No public API is removed or changed, and existing calls keep the 0.6.1 defaults. Limits: MathBlockLimits reports each operation's limits, and MathBlockDomainOptions raises them (state counts and matrix sizes up to 16,383) and sets the iteration counts of incomplete beta, Jacobi, matrix exponential and cube root, the tolerance of incomplete beta, and the non-convergence policy of incomplete beta and Jacobi. CUDA: MathBlocksCudaOptions sets block size, grid size, window scratch budget, fused launch settings and the device. A value the device or a kernel can't run is refused at compile time with an error naming the limit. Results on CoreCLR and CUDA report how many evaluations did not converge. MathBlockTypeSignatures gives the type rule of 501 of the 561 operations, including every row-causal one, on the host and as a CUDA device function. 12 new elementwise forms, each with its validity form: 24 new operations, 561 in total. Fixes: the Jacobi iteration budget no longer overflows above n = 5,792; CUDA matrix.identity and state.transition-counts work at sizes of 216 and above; CUDA elementwise forms treat non-finite inputs as invalid, as CoreCLR does; two CUDA thread-synchronisation faults are fixed; capacity.mobius-transform, combinatorics.nonempty-subset-sums and survival.discrete-hazard are now labelled WholeSeries instead of Expanding, because their validity depends on the whole series. Adopt 0.7.0 at a run boundary: the CUDA device source, operation table, causality, device ABI and value codec implementation pins differ from 0.6.1. The value codec schema is unchanged. CUDA execution uses the installed NVIDIA driver and CUDA Toolkit 12.0 or later; the package ships no native binaries.</PackageReleaseNotes>
     <EnablePackageValidation>true</EnablePackageValidation>
     <PackageValidationBaselineVersion>0.6.1</PackageValidationBaselineVersion>
     <IncludeSymbols>true</IncludeSymbols>
