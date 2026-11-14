@@ -8,14 +8,13 @@ namespace Supprocom.MathBlocks.Tests;
 /// </summary>
 public sealed class MathBlockCudaDomainDeviceTests
 {
-    // The larger values of the device run: subset size 24, 8192 states, 2,000,000 generated elements.
+    // The larger values of the device run: subset size 24 and 2,000,000 generated elements. The square matrices at 8,192 and 16,383 are in
+    // MathBlockCudaDomainLargeDeviceTests, which needs more memory than the 4 GB cap.
     private static IEnumerable<MathBlockDomainWiringTests.Case> LargeCases()
     {
         yield return new("combinatorics.nonempty-subset-sums@1", [MathBlockValue.Vector(Enumerable.Range(1, 24).Select(value => (double)value))], new() { MaximumExplicitSubsetSize = 24 });
-        yield return new("state.transition-counts@1", [MathBlockValue.Vector([0d, 1d, 8191d, 1d]), MathBlockValue.Scalar(8192d)], new() { MaximumStateCount = 8192 });
         yield return new("vector.repeat@1", [MathBlockValue.Scalar(1.25d), MathBlockValue.Scalar(2_000_000d)], new() { MaximumGeneratedVectorLength = 2_000_000 });
         yield return new("vector.linspace@1", [MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d), MathBlockValue.Scalar(2_000_000d)], new() { MaximumGeneratedVectorLength = 2_000_000 });
-        yield return new("matrix.identity@1", [MathBlockValue.Scalar(5_000d)], new() { MaximumMatrixSize = 5_000 });
     }
 
     /// <summary>Gets the names of the cases of each direction, as <c>direction:identity</c>.</summary>
@@ -44,7 +43,7 @@ public sealed class MathBlockCudaDomainDeviceTests
         return cases.First(item => string.Equals(item.Identity, identity, StringComparison.Ordinal));
     }
 
-    private static (MathBlockProgram Program, Dictionary<string, MathBlockValue> Inputs) Build(string identity, IReadOnlyList<MathBlockValue> values)
+    internal static (MathBlockProgram Program, Dictionary<string, MathBlockValue> Inputs) Build(string identity, IReadOnlyList<MathBlockValue> values)
     {
         var separator = identity.LastIndexOf('@');
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
