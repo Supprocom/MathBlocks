@@ -11,8 +11,17 @@ namespace Supprocom.MathBlocks.Tests;
 /// result bit for bit with CoreCLR. The elementwise dispatcher derives the argument kinds from the input slots.
 /// </summary>
 [Trait("Category", "CudaDevice")]
-public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
+public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch : IClassFixture<MathBlockCudaDispatchModuleFixture>
 {
+    private readonly MathBlockCudaTestModuleCache modules;
+
+    /// <summary>Creates the test class with the fixture that holds the compiled consumer module.</summary>
+    public MathBlockCudaWorkerTestsBaseOpcodeDispatch(MathBlockCudaDispatchModuleFixture fixture)
+    {
+        ArgumentNullException.ThrowIfNull(fixture);
+        modules = fixture.Modules;
+    }
+
     private const double Fill = -98_765.25d;
     private const int Alignment = 16;
 
@@ -56,7 +65,7 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
         ArgumentException.ThrowIfNullOrEmpty(name);
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var (identity, create) = Cases[name];
-        RunDispatch(identity, create(), MathBlockCudaDeviceModule.DispatcherBlockSize);
+        RunDispatch(modules, identity, create(), MathBlockCudaDeviceModule.DispatcherBlockSize);
     }
 
     /// <summary>
@@ -70,7 +79,7 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
         ArgumentException.ThrowIfNullOrEmpty(name);
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var (identity, create) = BlockSizedCases[name];
-        RunDispatch(identity, create(), blockSize == 0 ? DispatchKernelMaximumThreadsPerBlock() : blockSize);
+        RunDispatch(modules, identity, create(), blockSize == 0 ? DispatchKernelMaximumThreadsPerBlock(modules) : blockSize);
     }
 
     // Argument rows a MathBlockValue cannot hold: (input index, row) is the patched vector row, and row -1 patches a scalar slot.
@@ -119,7 +128,7 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
         ArgumentException.ThrowIfNullOrEmpty(name);
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var (identity, create, patches) = NonFiniteCases[name];
-        RunDispatch(identity, create(), MathBlockCudaDeviceModule.DispatcherBlockSize, patches);
+        RunDispatch(modules, identity, create(), MathBlockCudaDeviceModule.DispatcherBlockSize, patches);
     }
 
     /// <summary>Gets each block-sized case with each block size; 0 stands for the device maximum.</summary>
@@ -155,28 +164,32 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
 
     // The most threads per block the compiled dispatch kernel launches with, read with cuFuncGetAttribute: below the device maximum when the
     // kernel's registers limit it (CU_FUNC_ATTRIBUTE_MAX_THREADS_PER_BLOCK), and the largest block size the dispatcher can be launched with.
-    private static int DispatchKernelMaximumThreadsPerBlock()
+    private static int DispatchKernelMaximumThreadsPerBlock(MathBlockCudaTestModuleCache modules)
     {
-        var module = IntPtr.Zero;
-        try
+        CudaDriver.Initialize();
+        var (_, function) = LoadDispatchModule(modules);
+        CudaDriver.Require(CudaDriver.cuFuncGetAttribute(out var threads, 0, function), "cuFuncGetAttribute");
+        return threads;
+    }
+
+    // The consumer module is compiled and loaded once per distinct compile input and reused by every case of the class. The block size is a launch
+    // argument, not part of the source or the options.
+    private static (IntPtr Module, IntPtr Function) LoadDispatchModule(MathBlockCudaTestModuleCache modules)
+    {
+        const string name = "base-opcode-dispatch.cu";
+        var key = MathBlockCudaTestModuleCache.Key(KernelSource, name, MathBlockDomainOptions.Default, MathBlockCudaTestModuleCache.DeviceCompileOptions());
+        return modules.GetOrLoad(key, () =>
         {
-            CudaDriver.Initialize();
-            var ptx = MathBlockCudaDeviceModule.CompilePtx(KernelSource, "base-opcode-dispatch.cu");
-            CudaDriver.Require(CudaDriver.cuModuleLoadData(out module, ptx), "cuModuleLoadData");
+            var ptx = MathBlockCudaDeviceModule.CompilePtx(KernelSource, name);
+            CudaDriver.Require(CudaDriver.cuModuleLoadData(out var module, ptx), "cuModuleLoadData");
             CudaDriver.Require(CudaDriver.cuModuleGetFunction(out var function, module, "base_opcode_dispatch"), "cuModuleGetFunction");
-            CudaDriver.Require(CudaDriver.cuFuncGetAttribute(out var threads, 0, function), "cuFuncGetAttribute");
-            return threads;
-        }
-        finally
-        {
-            if (module != IntPtr.Zero)
-                _ = CudaDriver.cuModuleUnload(module);
-        }
+            return (module, function);
+        });
     }
 
     // The launch and the resource lifetime stay in one visible path, as in the package-only consumer.
 #pragma warning disable MA0051
-    private static void RunDispatch(string identity, MathBlockValue[] inputs, int blockSize, (int Input, int Row, double Value)[]? patches = null)
+    private static void RunDispatch(MathBlockCudaTestModuleCache modules, string identity, MathBlockValue[] inputs, int blockSize, (int Input, int Row, double Value)[]? patches = null)
     {
         var contract = MathBlockCudaDeviceModule.GetOperation(identity);
         Assert.True(contract.Opcode < 128, "The public opcode carries no mask.");
@@ -198,7 +211,6 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
         var arenaBytes = Align(cursor);
         var host = Marshal.AllocHGlobal(arenaBytes);
         var device = 0ul;
-        var module = IntPtr.Zero;
         var stream = IntPtr.Zero;
         var parameters = new List<IntPtr>();
         var parameterArray = IntPtr.Zero;
@@ -238,9 +250,7 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
                 valid: false);
             CudaDriver.Require(CudaDriver.cuMemcpyHtoD(device, host, new UIntPtr((uint)arenaBytes)), "cuMemcpyHtoD");
 
-            var ptx = MathBlockCudaDeviceModule.CompilePtx(KernelSource, "base-opcode-dispatch.cu");
-            CudaDriver.Require(CudaDriver.cuModuleLoadData(out module, ptx), "cuModuleLoadData");
-            CudaDriver.Require(CudaDriver.cuModuleGetFunction(out var function, module, "base_opcode_dispatch"), "cuModuleGetFunction");
+            var (_, function) = LoadDispatchModule(modules);
             CudaDriver.Require(CudaDriver.cuStreamCreate(out stream, 1), "cuStreamCreate");
             parameters.Add(AllocateUInt64(device));
             parameters.Add(AllocateInt32((int)contract.Family));
@@ -282,8 +292,6 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
                 Marshal.FreeHGlobal(parameterArray);
             if (stream != IntPtr.Zero)
                 _ = CudaDriver.cuStreamDestroy(stream);
-            if (module != IntPtr.Zero)
-                _ = CudaDriver.cuModuleUnload(module);
             if (device != 0ul)
                 _ = CudaDriver.cuMemFree(device);
             Marshal.FreeHGlobal(host);
@@ -366,7 +374,7 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
         return pointer;
     }
 
-    private static class CudaDriver
+    internal static class CudaDriver
     {
         static CudaDriver()
         {

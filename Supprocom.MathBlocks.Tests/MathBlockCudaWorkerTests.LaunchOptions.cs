@@ -275,22 +275,44 @@ public sealed partial class MathBlockCudaWorkerTests
         }
     }
 
-    /// <summary>Verifies that the device maximum block size with the default window scratch budget is rejected at load time by the budget, which the error names.</summary>
+    /// <summary>
+    /// Verifies each load-time error of the device maximum block for a window form on its own input. The device maximum exceeds the compiled kernel's own maximum
+    /// (its register use), so with a large budget the error names BlockSize and that kernel maximum; at the kernel's maximum with a budget one byte under
+    /// the scratch of one block the error names the budget.
+    /// </summary>
     [Fact]
     [Trait("Category", "CudaDevice")]
     [Trait("Category", "LaunchOptions")]
-    public void DeviceMaximumBlockWithDefaultBudgetNamesTheBudget()
+    public void DeviceMaximumBlockNamesTheKernelMaximumAndTheKernelMaximumBlockNamesTheBudget()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var windowCase = CreateWindowCases("vector.median").First();
         var program = BuildSingleOperationProgram(MathBlockWindowTestSupport.Windowed, windowCase.Operation, windowCase.Prototype);
-        var options = new MathBlocksCudaOptions { BlockSize = DeviceMaximumThreadsPerBlock() };
+        var inputs = NameWindowInputs(windowCase.Prototype);
 
-        var exception = Assert.Throws<ArgumentOutOfRangeException>(() =>
-            new MathBlocksCUDAWorker().CompileWithOptions(program, options, NameWindowInputs(windowCase.Prototype)));
+        // (a) Only the kernel maximum check can fail: the budget is the largest the options allow.
+        var deviceMaximum = DeviceMaximumThreadsPerBlock();
+        var first = Assert.Throws<ArgumentOutOfRangeException>(() => new MathBlocksCUDAWorker().CompileWithOptions(
+            program, new MathBlocksCudaOptions { BlockSize = deviceMaximum, WindowScratchBudgetBytes = int.MaxValue }, inputs));
+        Assert.Equal(nameof(MathBlocksCudaOptions.BlockSize), first.ParamName);
+        const string marker = "launches at most ";
+        var start = first.Message.IndexOf(marker, StringComparison.Ordinal);
+        Assert.True(start >= 0, first.Message);
+        var digits = new string([.. first.Message[(start + marker.Length)..].TakeWhile(character => char.IsDigit(character) || character == ',')
+            .Where(char.IsDigit)]);
+        var kernelMaximum = int.Parse(digits, System.Globalization.CultureInfo.InvariantCulture);
+        Assert.InRange(kernelMaximum, 1, deviceMaximum - 1);
 
-        Assert.Equal(nameof(MathBlocksCudaOptions.WindowScratchBudgetBytes), exception.ParamName);
-        Assert.Contains($"MathBlocksCudaOptions.{nameof(MathBlocksCudaOptions.WindowScratchBudgetBytes)} is", exception.Message, StringComparison.Ordinal);
+        // (b) At the kernel maximum the block passes the kernel check; the budget one byte under one block's scratch is the only failure.
+        long blockBytes;
+        using (var probe = new MathBlocksCUDAWorker().CompileWithOptions(
+            program, new MathBlocksCudaOptions { BlockSize = kernelMaximum, WindowScratchBudgetBytes = int.MaxValue }, inputs))
+            blockBytes = probe.Launches.Max(launch => launch.ScratchBytesPerBlock);
+        Assert.True(blockBytes >= 2, "One block of the window form has scratch.");
+        var second = Assert.Throws<ArgumentOutOfRangeException>(() => new MathBlocksCUDAWorker().CompileWithOptions(
+            program, new MathBlocksCudaOptions { BlockSize = kernelMaximum, WindowScratchBudgetBytes = blockBytes - 1 }, inputs));
+        Assert.Equal(nameof(MathBlocksCudaOptions.WindowScratchBudgetBytes), second.ParamName);
+        Assert.Contains($"MathBlocksCudaOptions.{nameof(MathBlocksCudaOptions.WindowScratchBudgetBytes)} is", second.Message, StringComparison.Ordinal);
     }
 
     // The single-operation program whose inputs are the prototype's values, in order.
