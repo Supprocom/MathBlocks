@@ -205,9 +205,7 @@ public sealed partial class MathBlockCudaWorkerTests
         MathBlockValue[] inputs,
         string optionSet)
     {
-        var builder = new MathBlockProgramBuilder(registry);
-        var nodes = prototype.Select((input, index) => builder.Input($"input-{index}", input.Type)).ToArray();
-        var program = builder.Output("result", builder.Apply(operation.Identifier, operation.Version, nodes)).Build();
+        var program = BuildSingleOperationProgram(registry, operation, prototype);
         var named = NameWindowInputs(prototype);
         var options = CreateLaunchOptions(optionSet, program, named);
         using var compiled = CompileForOptionSet(optionSet, program, named, ref options);
@@ -243,11 +241,13 @@ public sealed partial class MathBlockCudaWorkerTests
                 Assert.Contains($"MathBlocksCudaOptions.{nameof(MathBlocksCudaOptions.BlockSize)} is", exception.Message, StringComparison.Ordinal);
                 var maximum = MathBlockKernelMaximumMessage.Parse(exception.Message);
                 Assert.True(maximum >= 1 && maximum < options.BlockSize, $"{optionSet}: kernel maximum {maximum} is not below the block size {options.BlockSize}.");
-                options = new MathBlocksCudaOptions { BlockSize = maximum };
+                options = new MathBlocksCudaOptions { BlockSize = maximum, WindowScratchBudgetBytes = options.WindowScratchBudgetBytes };
             }
         }
     }
 
+    // The option set "block-device-maximum" sets the window scratch budget to its maximum as well, so that the block-size limit of the kernel,
+    // not the budget, is the limit the compile reaches. The budget's own load-time error is checked separately with the default budget.
     private static MathBlocksCudaOptions CreateLaunchOptions(
         string optionSet,
         MathBlockProgram program,
@@ -256,7 +256,7 @@ public sealed partial class MathBlockCudaWorkerTests
         switch (optionSet)
         {
             case "block-device-maximum":
-                return new MathBlocksCudaOptions { BlockSize = DeviceMaximumThreadsPerBlock() };
+                return new MathBlocksCudaOptions { BlockSize = DeviceMaximumThreadsPerBlock(), WindowScratchBudgetBytes = int.MaxValue };
             case "grid-1":
                 return new MathBlocksCudaOptions { MaximumGridX = 1 };
             case "grid-7":
@@ -273,6 +273,32 @@ public sealed partial class MathBlockCudaWorkerTests
                 var size = int.Parse(optionSet["block-".Length..], System.Globalization.CultureInfo.InvariantCulture);
                 return new MathBlocksCudaOptions { BlockSize = size };
         }
+    }
+
+    /// <summary>Verifies that the device maximum block size with the default window scratch budget is rejected at load time by the budget, which the error names.</summary>
+    [Fact]
+    [Trait("Category", "CudaDevice")]
+    [Trait("Category", "LaunchOptions")]
+    public void DeviceMaximumBlockWithDefaultBudgetNamesTheBudget()
+    {
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
+        var windowCase = CreateWindowCases("vector.median").First();
+        var program = BuildSingleOperationProgram(MathBlockWindowTestSupport.Windowed, windowCase.Operation, windowCase.Prototype);
+        var options = new MathBlocksCudaOptions { BlockSize = DeviceMaximumThreadsPerBlock() };
+
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            new MathBlocksCUDAWorker().CompileWithOptions(program, options, NameWindowInputs(windowCase.Prototype)));
+
+        Assert.Equal(nameof(MathBlocksCudaOptions.WindowScratchBudgetBytes), exception.ParamName);
+        Assert.Contains($"MathBlocksCudaOptions.{nameof(MathBlocksCudaOptions.WindowScratchBudgetBytes)} is", exception.Message, StringComparison.Ordinal);
+    }
+
+    // The single-operation program whose inputs are the prototype's values, in order.
+    private static MathBlockProgram BuildSingleOperationProgram(MathBlockRegistry registry, MathBlockOperation operation, MathBlockValue[] prototype)
+    {
+        var builder = new MathBlockProgramBuilder(registry);
+        var nodes = prototype.Select((input, index) => builder.Input($"input-{index}", input.Type)).ToArray();
+        return builder.Output("result", builder.Apply(operation.Identifier, operation.Version, nodes)).Build();
     }
 
     private static int DeviceMaximumThreadsPerBlock()
