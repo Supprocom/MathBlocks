@@ -112,8 +112,9 @@ internal static class Program
     // Supprocom.MathBlocks, where the host resolver calls it.
     private static void GenerateTypeRules(GeneratorOptions options, CudaTranspilationOptions transpilationOptions)
     {
-        var result = CudaTranspiler.TranspileFile(
-            Path.Combine(options.TranslationRoot, "TypeRuleUnit.cs"), options: transpilationOptions);
+        var result = CudaTranspiler.TranspileFiles(
+            [Path.Combine(options.TranslationRoot, "TypeRuleUnit.cs"), Path.Combine(options.TranslationRoot, "TypeRuleDeviceUnit.cs")],
+            options: transpilationOptions);
         if (!result.Succeeded)
             throw new InvalidOperationException(
                 $"Type-rule CUDA translation failed: {string.Join(Environment.NewLine, result.Diagnostics)}");
