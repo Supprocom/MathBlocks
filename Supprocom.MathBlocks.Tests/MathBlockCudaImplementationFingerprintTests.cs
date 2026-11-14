@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text.RegularExpressions;
 using Supprocom.MathBlocks.Cuda;
 
 namespace Supprocom.MathBlocks.Tests;
@@ -17,12 +16,9 @@ public sealed class MathBlockCudaImplementationFingerprintTests
     // The pins of a Release build of this library. A Debug build compiles different IL, so the pin test asserts only
     // in an optimized assembly.
     private const string ReleaseCodecImplementationFingerprint =
-        "PENDING";
+        "286E0256EC1A4AE0355BE9DC542E1EB97389FD1053D4CFCE7E775DC0E8D7275A";
     private const string ReleaseDeviceAbiFingerprint =
-        "PENDING";
-
-    private static readonly Regex RawHexadecimalLine =
-        new("^(il:)?[0-9A-F]{16,}$", RegexOptions.CultureInvariant, TimeSpan.FromSeconds(5));
+        "192FE472E59928550614ECC2DF0EE93349B762709B115D25BA34DE1FBE251545";
 
     // Resolved lazily by name and allowed to be absent, so that this class also compiles and runs against a library
     // that has the older definition: the tests that need the new writer then fail on their own.
@@ -48,7 +44,7 @@ public sealed class MathBlockCudaImplementationFingerprintTests
         foreach (var line in material.Split('\n'))
         {
             // A raw IL dump is one long line of hexadecimal digits; a resolved instruction names its opcode first.
-            Assert.DoesNotMatch(RawHexadecimalLine, line);
+            Assert.False(IsHexadecimalRun(line), "The material holds a raw hexadecimal line: " + line);
         }
 
         Assert.Contains(
@@ -117,9 +113,9 @@ public sealed class MathBlockCudaImplementationFingerprintTests
         var bumped = EmitProbe(new ProbeShape(new Version(9, 8, 7, 6), 1, "probe-literal", TrimEnd: true));
 
         // The unrelated types shift the metadata rows and the user-string heap offsets that the raw IL names.
-        Assert.NotEqual(RawIl(baseline, "Run"), RawIl(shifted, "Run"));
-        Assert.NotEqual(RawIl(baseline, "Run"), RawIl(bumped, "Run"));
-        Assert.NotEqual(RawIl(shifted, "Run"), RawIl(bumped, "Run"));
+        Assert.NotEqual(RawIl(baseline, "Run"), RawIl(shifted, "Run"), StringComparer.Ordinal);
+        Assert.NotEqual(RawIl(baseline, "Run"), RawIl(bumped, "Run"), StringComparer.Ordinal);
+        Assert.NotEqual(RawIl(shifted, "Run"), RawIl(bumped, "Run"), StringComparer.Ordinal);
         Assert.NotEqual(baseline.Assembly.GetName().Version, shifted.Assembly.GetName().Version);
 
         var expected = CreateImplementation(baseline);
@@ -143,10 +139,10 @@ public sealed class MathBlockCudaImplementationFingerprintTests
         var otherBody = CreateImplementation(
             EmitProbe(new ProbeShape(new Version(0, 7, 0, 0), 2, "probe-literal", TrimEnd: true, Addend: 2)));
 
-        Assert.NotEqual(baseline, otherString);
-        Assert.NotEqual(baseline, otherCallee);
-        Assert.NotEqual(baseline, otherBody);
-        Assert.NotEqual(otherString, otherCallee);
+        Assert.NotEqual(baseline, otherString, StringComparer.Ordinal);
+        Assert.NotEqual(baseline, otherCallee, StringComparer.Ordinal);
+        Assert.NotEqual(baseline, otherBody, StringComparer.Ordinal);
+        Assert.NotEqual(otherString, otherCallee, StringComparer.Ordinal);
     }
 
     /// <summary>Verifies an indirect call through a function pointer is written with its signature and no token.</summary>
@@ -206,6 +202,20 @@ public sealed class MathBlockCudaImplementationFingerprintTests
                 MathBlockCudaDeviceModule.AbiFingerprint,
                 StringComparison.Ordinal),
             "The device ABI fingerprint is " + MathBlockCudaDeviceModule.AbiFingerprint);
+    }
+
+    private static bool IsHexadecimalRun(string line)
+    {
+        var start = line.StartsWith("il:", StringComparison.Ordinal) ? 3 : 0;
+        if (line.Length - start < 16)
+            return false;
+        for (var index = start; index < line.Length; index++)
+        {
+            if (!char.IsAsciiHexDigitUpper(line[index]))
+                return false;
+        }
+
+        return true;
     }
 
     private static string CreateMaterial(Type type) =>
