@@ -252,7 +252,7 @@ public sealed partial class MathBlockCudaWorkerTests
     private static int DeviceMaximumThreadsPerBlock()
     {
         var native = typeof(MathBlocksCUDAWorker).Assembly.GetType("Supprocom.MathBlocks.Cuda.MathBlocksCudaNative", throwOnError: true)!;
-        var limits = native.GetMethod("GetDeviceLimits")!.Invoke(null, null)!;
+        var limits = native.GetMethod("GetDeviceLimits")!.Invoke(null, [0])!;
         return (int)limits.GetType().GetProperty("MaximumThreadsPerBlock")!.GetValue(limits)!;
     }
 }
