@@ -99,13 +99,22 @@ public static class MathBlockCudaValueCodec
             Count = type.Kind is MathBlockValueKind.Matrix or MathBlockValueKind.ComplexMatrix &&
                     type.Rows > 0 &&
                     type.Columns > 0
-                ? checked(type.Rows * type.Columns)
+                ? MatrixHeaderCount(type, capacity)
                 : type.Kind == MathBlockValueKind.Complex
                     ? 1
                     : capacity,
             Capacity = capacity
         };
         *(MathBlockCudaSlotDescriptor*)((byte*)arena + slotOffset) = slot;
+    }
+
+    // The header count of a matrix slot is rows * columns. A matrix whose shape is known only at run time (matrix.identity@1,
+    // state.transition-counts@1) is planned with both dimensions equal to its capacity, so the product is capacity squared, which does not fit an
+    // int from a capacity of 46,341; the kernel that publishes the slot writes the shape and count, and the capacity is the bound the header holds.
+    private static int MatrixHeaderCount(MathBlockType type, int capacity)
+    {
+        var product = (long)type.Rows * type.Columns;
+        return product > capacity ? capacity : (int)product;
     }
 
     /// <summary>Writes a formula or typed MathBlocks program in the selected interchange format.</summary>
