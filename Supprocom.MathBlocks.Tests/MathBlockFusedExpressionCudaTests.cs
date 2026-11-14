@@ -80,13 +80,28 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
         var expressions = cases.Select(item => item.Expression).ToArray();
         var source = string.Concat(expressions.DistinctBy(expression => expression.Fingerprint, StringComparer.Ordinal).Select(expression => expression.CudaSource + "\n"));
 
-        var results = RunCudaWithOptions(
+        MathBlockFusedResult[] Run(MathBlocksCudaOptions launchOptions) => RunCudaWithOptions(
             source,
             false,
             expressions,
             cases.Select(item => (IReadOnlyDictionary<string, MathBlockValue>)item.Inputs).ToArray(),
             cases.Select(item => (IReadOnlyDictionary<string, MathBlockValue>?)item.Validity).ToArray(),
-            options);
+            launchOptions);
+
+        MathBlockFusedResult[] results;
+        try
+        {
+            results = Run(options);
+        }
+        catch (ArgumentOutOfRangeException exception) when (string.Equals(optionSet, "block-device-maximum", StringComparison.Ordinal))
+        {
+            // A fused kernel whose register use limits it below the device maximum is rejected at launch setup with an error that names the
+            // kernel and its own maximum; the case then runs at that maximum.
+            var maximum = MathBlockKernelMaximumMessage.Parse(exception.Message);
+            Assert.True(maximum >= 1 && maximum < options.FusedBlockSize, $"{optionSet}: kernel maximum {maximum}, block size {options.FusedBlockSize}.");
+            options = new MathBlocksCudaOptions { FusedBlockSize = maximum };
+            results = Run(options);
+        }
 
         var clamped = 0;
         for (var index = 0; index < cases.Length; index++)

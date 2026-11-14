@@ -210,7 +210,7 @@ public sealed partial class MathBlockCudaWorkerTests
         var program = builder.Output("result", builder.Apply(operation.Identifier, operation.Version, nodes)).Build();
         var named = NameWindowInputs(prototype);
         var options = CreateLaunchOptions(optionSet, program, named);
-        using var compiled = new MathBlocksCUDAWorker().CompileWithOptions(program, options, named);
+        using var compiled = CompileForOptionSet(optionSet, program, named, ref options);
         foreach (var launch in compiled.Launches)
         {
             Assert.True(launch.Blocks >= 1 && launch.Blocks <= options.MaximumGridX, $"{optionSet}: {launch.Operation} launched {launch.Blocks} blocks.");
@@ -220,6 +220,32 @@ public sealed partial class MathBlockCudaWorkerTests
             Assert.True(launch.Blocks == launch.WantedBlocks || launch.ClampedBy is not null, $"{optionSet}: {launch.Operation} lost blocks without naming a clamp.");
         }
         return compiled.Execute(NameWindowInputs(inputs))["result"];
+    }
+
+    // Compiles with the options. For "block-device-maximum" the block size is the device's maximum, which a kernel whose register use limits it
+    // below that rejects at compile time with an ArgumentOutOfRangeException that names the kernel and its own maximum; the test checks that error
+    // and compiles again at the kernel maximum the error names (once per kernel that is limited), so the case compares the largest launch the program allows.
+    private static MathBlocksCUDAProgram CompileForOptionSet(
+        string optionSet,
+        MathBlockProgram program,
+        IReadOnlyDictionary<string, MathBlockValue> prototype,
+        ref MathBlocksCudaOptions options)
+    {
+        for (var attempt = 0; ; attempt++)
+        {
+            try
+            {
+                return new MathBlocksCUDAWorker().CompileWithOptions(program, options, prototype);
+            }
+            catch (ArgumentOutOfRangeException exception) when (string.Equals(optionSet, "block-device-maximum", StringComparison.Ordinal) && attempt < 8)
+            {
+                Assert.Contains("the compiled kernel ", exception.Message, StringComparison.Ordinal);
+                Assert.Contains($"MathBlocksCudaOptions.{nameof(MathBlocksCudaOptions.BlockSize)} is", exception.Message, StringComparison.Ordinal);
+                var maximum = MathBlockKernelMaximumMessage.Parse(exception.Message);
+                Assert.True(maximum >= 1 && maximum < options.BlockSize, $"{optionSet}: kernel maximum {maximum} is not below the block size {options.BlockSize}.");
+                options = new MathBlocksCudaOptions { BlockSize = maximum };
+            }
+        }
     }
 
     private static MathBlocksCudaOptions CreateLaunchOptions(

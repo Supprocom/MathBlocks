@@ -70,7 +70,7 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
         ArgumentException.ThrowIfNullOrEmpty(name);
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var (identity, create) = BlockSizedCases[name];
-        RunDispatch(identity, create(), blockSize == 0 ? DeviceMaximumThreadsPerBlock() : blockSize);
+        RunDispatch(identity, create(), blockSize == 0 ? DispatchKernelMaximumThreadsPerBlock() : blockSize);
     }
 
     // Argument rows a MathBlockValue cannot hold: (input index, row) is the patched vector row, and row -1 patches a scalar slot.
@@ -153,11 +153,25 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
         return MathBlockWindowTestSupport.FormInputs(series, width, MathBlockValue.Scalar(Fill, unit));
     }
 
-    private static int DeviceMaximumThreadsPerBlock()
+    // The most threads per block the compiled dispatch kernel launches with, read with cuFuncGetAttribute: below the device maximum when the
+    // kernel's registers limit it (CU_FUNC_ATTRIBUTE_MAX_THREADS_PER_BLOCK), and the largest block size the dispatcher can be launched with.
+    private static int DispatchKernelMaximumThreadsPerBlock()
     {
-        var native = typeof(MathBlocksCUDAWorker).Assembly.GetType("Supprocom.MathBlocks.Cuda.MathBlocksCudaNative", throwOnError: true)!;
-        var limits = native.GetMethod("GetDeviceLimits")!.Invoke(null, [0])!;
-        return (int)limits.GetType().GetProperty("MaximumThreadsPerBlock")!.GetValue(limits)!;
+        var module = IntPtr.Zero;
+        try
+        {
+            CudaDriver.Initialize();
+            var ptx = MathBlockCudaDeviceModule.CompilePtx(KernelSource, "base-opcode-dispatch.cu");
+            CudaDriver.Require(CudaDriver.cuModuleLoadData(out module, ptx), "cuModuleLoadData");
+            CudaDriver.Require(CudaDriver.cuModuleGetFunction(out var function, module, "base_opcode_dispatch"), "cuModuleGetFunction");
+            CudaDriver.Require(CudaDriver.cuFuncGetAttribute(out var threads, 0, function), "cuFuncGetAttribute");
+            return threads;
+        }
+        finally
+        {
+            if (module != IntPtr.Zero)
+                _ = CudaDriver.cuModuleUnload(module);
+        }
     }
 
     // The launch and the resource lifetime stay in one visible path, as in the package-only consumer.
@@ -356,15 +370,7 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
     {
         static CudaDriver()
         {
-            if (!OperatingSystem.IsWindows())
-            {
-                NativeLibrary.SetDllImportResolver(
-                    typeof(CudaDriver).Assembly,
-                    static (name, _, _) =>
-                        string.Equals(name, "nvcuda.dll", StringComparison.Ordinal)
-                            ? LoadCuda()
-                            : IntPtr.Zero);
-            }
+            MathBlockCudaTestDriverResolver.Register();
         }
 
         public static void Initialize()
@@ -379,13 +385,6 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
         {
             if (result != 0)
                 throw new InvalidOperationException($"{operation} failed with CUDA result {result}.");
-        }
-
-        private static IntPtr LoadCuda()
-        {
-            if (NativeLibrary.TryLoad("libcuda.so.1", out var handle))
-                return handle;
-            return NativeLibrary.TryLoad("libcuda.so", out handle) ? handle : IntPtr.Zero;
         }
 
         [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -412,6 +411,9 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch
 
         [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int cuModuleUnload(IntPtr module);
+
+        [DllImport("nvcuda.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int cuFuncGetAttribute(out int value, int attribute, IntPtr function);
 
         [DllImport("nvcuda.dll", EntryPoint = "cuMemAlloc_v2", CallingConvention = CallingConvention.Cdecl)]
         public static extern int cuMemAlloc(out ulong devicePointer, UIntPtr bytes);

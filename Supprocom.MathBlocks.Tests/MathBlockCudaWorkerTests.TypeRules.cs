@@ -124,7 +124,7 @@ public sealed partial class MathBlockCudaWorkerTests
             typeof(MathBlockCatalog).Assembly
                 .GetType("Supprocom.MathBlocks.Cuda.MathBlocksCudaNative", throwOnError: true)!
                 .GetMethod("EnsureContext", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)!
-                .Invoke(null, null);
+                .Invoke(null, [0]);
             Check(cuModuleLoadData(out var module, ptx), "cuModuleLoadData");
             Check(cuModuleGetFunction(out var function, module, "mathblocks_type_resolve_grid\0"u8.ToArray()), "cuModuleGetFunction");
             var caseCount = counts.Length;
@@ -199,11 +199,7 @@ public sealed partial class MathBlockCudaWorkerTests
 
         private static bool Register()
         {
-            NativeLibrary.SetDllImportResolver(typeof(TypeRuleDevice).Assembly, (name, _, _) =>
-                string.Equals(name, "nvcuda.dll", StringComparison.Ordinal) && !OperatingSystem.IsWindows() &&
-                (NativeLibrary.TryLoad("libcuda.so.1", out var handle) || NativeLibrary.TryLoad("libcuda.so", out handle))
-                    ? handle
-                    : IntPtr.Zero);
+            MathBlockCudaTestDriverResolver.Register();
             return true;
         }
 
