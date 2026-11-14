@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 
 namespace Supprocom.MathBlocks.Tests;
 
@@ -7,6 +8,8 @@ namespace Supprocom.MathBlocks.Tests;
 /// Vector-kind inputs are generated from a domain found per input; every other input keeps the operation's
 /// performance-case value, except the width input of a Trailing label, which takes each tested width. Output rows are
 /// matched to input rows by the row mapping documented on <see cref="MathBlockCausality"/>.
+/// A Pointwise, Trailing or Expanding label is also swept over its regression inputs in two value regimes: the full
+/// run at several lengths is compared with every prefix, in value and in validity.
 /// </remarks>
 internal static class MathBlockCausalityChecks
 {
@@ -21,11 +24,32 @@ internal static class MathBlockCausalityChecks
         Domain.Probability
     ];
 
-    // A causal operation whose input must be a whole probability distribution has no proper prefix in its domain,
-    // so its independence from the series length cannot be checked on a prefix.
-    private static readonly Dictionary<string, string> PrefixExemptions = new(StringComparer.Ordinal)
+    private const int SweepSeeds = 2;
+    private const int SweepCombinationsPerRegime = 2;
+    private const int SweepOwnLengthLimit = 40;
+    private static readonly int[] SweepLengths = [1, 2, 3, 4, 5, 7, 8, 12, 17, 24, 33];
+    private static readonly int[] SweepProbeLengths = [8, 17, 33];
+
+    // Value regimes of the sweep: small positive and structured rows, and mixed-sign or large rows.
+    private static readonly Domain[] FirstRegimeDomains =
+        [Domain.Positive, Domain.Unit, Domain.Probability, Domain.SmallMass, Domain.Count, Domain.Index, Domain.Sorted];
+    private static readonly Domain[] SecondRegimeDomains =
+        [Domain.Real, Domain.LargeReal, Domain.Integer, Domain.LargePositive];
+
+    // Labelled Expanding although the call is valid only once the prefix holds as many rows as the width or lag in
+    // input 1 (a Trailing label would say so, and sequence.difference omits lag rows, not lag - 1). Every row that
+    // exists matches the full run, so these are not look-ahead. A later item relabels or documents them.
+    private static readonly Dictionary<string, string> WarmUpExemptions = new(StringComparer.Ordinal)
     {
-        ["survival.discrete-hazard@1"] = "its input must sum to one, so no proper prefix is in its domain"
+        ["sequence.rolling-sum@1"] = "valid only from a prefix of width rows",
+        ["sequence.rolling-mean@1"] = "valid only from a prefix of width rows",
+        ["sequence.difference@1"] = "valid only from a prefix of lag + 1 rows"
+    };
+
+    // The input must be a whole probability distribution, which leaves no second value regime.
+    private static readonly HashSet<string> SingleRegimeOperations = new(StringComparer.Ordinal)
+    {
+        "survival.discrete-hazard@1"
     };
 
     private static readonly Domain[] VectorDomainsWithWhole =
@@ -46,7 +70,11 @@ internal static class MathBlockCausalityChecks
         Sorted,
         Probability,
         Boolean,
-        Complex
+        Complex,
+        LargeReal,
+        LargePositive,
+        BooleanMostlyTrue,
+        ComplexLarge
     }
 
     /// <summary>Returns every way the operation's evaluator contradicts its label; empty when the label holds.</summary>
@@ -84,7 +112,6 @@ internal static class MathBlockCausalityChecks
         }
 
         var kind = context.Operation.Causality.Kind;
-        var prefixChecks = 0;
         foreach (var length in plan.Lengths)
             foreach (var width in context.Widths(length))
                 for (var seed = 0; seed < SeedCount; seed++)
@@ -120,17 +147,12 @@ internal static class MathBlockCausalityChecks
                             RequireUnchanged(context, plan, inputs, width, baseline, inputRow, random, row => row < first, $"rows before the window start {first} were perturbed", where);
                             RequireUnchanged(context, plan, inputs, width, baseline, inputRow, random, row => row < first || row > inputRow, $"every row outside the window {first}..{inputRow} was perturbed", where);
                         }
-                        if (inputRow < length - 1 && RequirePrefixUnchanged(context, inputs, width, baseline, inputRow, length, where))
-                            prefixChecks++;
                         if (context.Failures.Count != 0)
                             return;
                     }
                 }
-        var exempt = PrefixExemptions.ContainsKey(context.Operation.Identity);
-        if (prefixChecks == 0 && !exempt)
-            context.Fail("was never valid on a prefix shorter than the tested series, so its row independence from the series length is unchecked");
-        if (prefixChecks != 0 && exempt)
-            context.Fail("is valid on a prefix, so its prefix exemption is no longer needed");
+        if (context.Failures.Count == 0)
+            CheckPrefixSweep(context.Operation, context.Failures);
     }
 
     private static void RequireUnchanged(
@@ -159,36 +181,10 @@ internal static class MathBlockCausalityChecks
             context.Fail($"changed output row {expectedRow} when {perturbation} ({where})");
     }
 
-    private static bool RequirePrefixUnchanged(
-        Context context,
-        Series[] inputs,
-        int width,
-        MathBlockValue baseline,
-        int inputRow,
-        int length,
-        string where)
-    {
-        for (var prefix = inputRow + 1; prefix < length; prefix++)
-        {
-            if (context.Operation.Causality.Kind == MathBlockCausality.Trailing && prefix < width)
-                continue;
-            var truncated = Array.ConvertAll(inputs, input => input.Truncate(prefix));
-            var result = context.Evaluate(truncated, width);
-            if (!result.IsValid || !IsSeriesKind(result.Type.Kind))
-                continue;
-            var expectedRow = OutputRow(inputRow, length, SeriesLength(baseline));
-            var actualRow = OutputRow(inputRow, prefix, SeriesLength(result));
-            if (!RowEquals(baseline, expectedRow, result, actualRow))
-                context.Fail($"changed the row for input row {inputRow} when evaluated on the first {prefix} rows only ({where})");
-            return true;
-        }
-        return false;
-    }
-
     private static void CheckNonCausal(Context context)
     {
         var plan = FindPlan(context, VectorDomainsWithWhole, requirePerturbableRows: false, minimumLengths: 1);
-        if (plan is not null && ReverseCheckGenerated(context, plan))
+        if (plan is not null && (ReverseCheckGenerated(context, plan) || ReverseCheckLengthValidity(context, plan)))
             return;
         if (ReverseCheckSamples(context))
             return;
@@ -201,7 +197,7 @@ internal static class MathBlockCausalityChecks
         }
         context.Fail(plan is null
             ? "has no valid input domain, and no single-row change of its sample inputs changed the output"
-            : "never changed an output row (or its non-vector output) when later rows or the series length changed");
+            : "never changed an output row (or its non-vector output) or its validity when later rows or the series length changed");
     }
 
     /// <summary>
@@ -349,11 +345,258 @@ internal static class MathBlockCausalityChecks
         {
             operation.ResolveOutputType(Array.ConvertAll(inputs, input => input.Type));
         }
-        catch (InvalidOperationException exception)
+        catch (Exception exception) when (exception is InvalidOperationException or ArgumentException)
         {
             return MathBlockValue.Invalid(MathBlockType.Scalar(), exception.Message);
         }
         return operation.Evaluate(inputs);
+    }
+
+    private static bool TypeResolves(MathBlockOperation operation, MathBlockValue[] inputs)
+    {
+        try
+        {
+            operation.ResolveOutputType(Array.ConvertAll(inputs, input => input.Type));
+            return true;
+        }
+        catch (Exception exception) when (exception is InvalidOperationException or ArgumentException)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Sweeps a Pointwise, Trailing or Expanding label over the regression inputs of the operation, in two value
+    /// regimes, at several lengths. Row t of the full run must equal the matching row of the run on the first t rows
+    /// in value, and the run on the first t rows must be valid exactly when the full run is. Only inputs inside the
+    /// operation's domain count: an out-of-domain or overflowing row invalidates a whole vector result by design, so
+    /// a full run that fails while the prefix is valid is accepted when repeating the prefix rows to the full length
+    /// gives a valid run.
+    /// </summary>
+    private static void CheckPrefixSweep(MathBlockOperation operation, List<string> failures)
+    {
+        var templates = new List<IReadOnlyList<MathBlockValue>>();
+        var keys = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var inputs in operation.RegressionCases.Select(regression => regression.Inputs).Append(operation.PerformanceCase.Inputs))
+            if (keys.Add(TemplateKey(inputs)))
+                templates.Add(inputs);
+        var regimes = new HashSet<int>();
+        foreach (var template in templates.ToArray())
+        {
+            var context = new Context(operation, failures, template);
+            var combinations = SweepCombinations(context);
+            if (combinations.Count == 0)
+            {
+                context.Fail("has no input inside its domain for the prefix sweep");
+                return;
+            }
+            foreach (var (domains, regime) in combinations)
+            {
+                regimes.Add(regime);
+                if (!SweepPrefixes(context, template, domains))
+                    return;
+            }
+        }
+        var single = SingleRegimeOperations.Contains(operation.Identity);
+        if (regimes.Count < 2 && !single)
+            failures.Add($"{operation.Identity} ({operation.Causality}) was swept in only one value regime");
+        if (regimes.Count >= 2 && single)
+            failures.Add($"{operation.Identity} ({operation.Causality}) has a second value regime, so its single-regime exemption is no longer needed");
+    }
+
+    private static bool SweepPrefixes(Context context, IReadOnlyList<MathBlockValue> template, Domain[] domains)
+    {
+        var operation = context.Operation;
+        var width = SweepWidth(context);
+        var warmUpLimit = SweepWarmUpLimit(operation, template, width);
+        var lengths = new SortedSet<int>(SweepLengths);
+        if (context.SeriesInputs.Length != 0 && SeriesLength(template[context.SeriesInputs[0]]) <= SweepOwnLengthLimit)
+            lengths.Add(SeriesLength(template[context.SeriesInputs[0]]));
+        foreach (var length in lengths)
+            for (var seed = 0; seed < SweepSeeds; seed++)
+            {
+                var random = new Random(Seed(operation.Identity, length, width, 1000 + seed));
+                var full = Array.ConvertAll(domains, domain => Series.Generate(domain, random, length));
+                if (!context.Accepts(full, width))
+                    continue;
+                var baseline = context.Evaluate(full, width);
+                if (baseline.IsValid && !IsSeriesKind(baseline.Type.Kind))
+                {
+                    context.Fail($"returned {baseline.Type.Kind}, not a series, at n={length}");
+                    return false;
+                }
+                for (var prefix = 1; prefix <= length; prefix++)
+                {
+                    var truncated = prefix == length ? full : Array.ConvertAll(full, input => input.Truncate(prefix));
+                    if (!context.Accepts(truncated, width))
+                        continue;
+                    var result = prefix == length ? baseline : context.Evaluate(truncated, width);
+                    var failure = ComparePrefix(context, full, baseline, result, length, prefix, width, warmUpLimit);
+                    if (failure is not null)
+                    {
+                        context.Fail($"{failure} (n={length}, t={prefix}, seed={seed}, domains={string.Join('/', domains)})");
+                        return false;
+                    }
+                }
+            }
+        return true;
+    }
+
+    private static string? ComparePrefix(
+        Context context,
+        Series[] full,
+        MathBlockValue baseline,
+        MathBlockValue result,
+        int length,
+        int prefix,
+        int width,
+        int warmUpLimit)
+    {
+        if (!baseline.IsValid && !result.IsValid)
+            return null;
+        if (!result.IsValid)
+        {
+            return prefix <= warmUpLimit
+                ? null
+                : $"is valid on the full series but invalid on its first {prefix} rows ({result.InvalidReason}), so validity depends on rows after row {prefix - 1} or on their number";
+        }
+        if (!baseline.IsValid)
+        {
+            var repeated = Array.ConvertAll(full, input => input.Cycle(prefix, length));
+            return !context.Accepts(repeated, width) || context.Evaluate(repeated, width).IsValid
+                ? null
+                : $"is invalid on the full series ({baseline.InvalidReason}) but valid on its first {prefix} rows, and rows repeating those are invalid at the full length, so validity depends on rows after row {prefix - 1} or on their number";
+        }
+        if (!IsSeriesKind(result.Type.Kind))
+            return $"returned {result.Type.Kind}, not a series, on the first {prefix} rows";
+        var fullRows = SeriesLength(baseline);
+        var prefixRows = SeriesLength(result);
+        for (var row = 0; row < prefixRows; row++)
+        {
+            var inputRow = InputRow(row, prefix, prefixRows);
+            if (inputRow >= prefix)
+                continue;
+            var fullRow = OutputRow(inputRow, length, fullRows);
+            // The full run omits leading rows (a warm-up or a degenerate length), so it has no row to compare.
+            if (fullRow < 0)
+                continue;
+            if (!RowEquals(baseline, fullRow, result, row))
+                return $"changed output row {fullRow} (input row {inputRow}) when evaluated on the first {prefix} rows only";
+        }
+        return null;
+    }
+
+    private static int SweepWidth(Context context) =>
+        context.Operation.Causality.WidthInputIndex is { } widthIndex
+            ? (int)context.Template[widthIndex].AsScalar()
+            : 0;
+
+    // The number of leading prefix lengths whose run may be invalid because the window or lag is not yet covered.
+    private static int SweepWarmUpLimit(MathBlockOperation operation, IReadOnlyList<MathBlockValue> template, int width)
+    {
+        if (operation.Causality.Kind == MathBlockCausality.Trailing)
+            return width - 1;
+        return WarmUpExemptions.ContainsKey(operation.Identity) ? (int)template[1].AsScalar() : 0;
+    }
+
+    private static List<(Domain[] Domains, int Regime)> SweepCombinations(Context context)
+    {
+        var choices = new Domain[context.SeriesInputs.Length][];
+        for (var index = 0; index < choices.Length; index++)
+            choices[index] = context.Template[context.SeriesInputs[index]].Type.Kind switch
+            {
+                MathBlockValueKind.BooleanVector => [Domain.Boolean, Domain.BooleanMostlyTrue],
+                MathBlockValueKind.ComplexVector => [Domain.Complex, Domain.ComplexLarge],
+                _ => [.. FirstRegimeDomains, .. SecondRegimeDomains]
+            };
+        var width = SweepWidth(context);
+        var lengths = new SortedSet<int>(SweepProbeLengths);
+        if (context.SeriesInputs.Length != 0)
+            lengths.Add(SeriesLength(context.Template[context.SeriesInputs[0]]));
+        var chosen = new List<(Domain[] Domains, int Regime)>();
+        var perRegime = new int[3];
+        foreach (var domains in SweepProducts(choices))
+        {
+            var regime = SweepRegime(domains);
+            if (perRegime[regime] >= SweepCombinationsPerRegime)
+                continue;
+            var inDomain = false;
+            foreach (var length in lengths)
+            {
+                var random = new Random(Seed(context.Operation.Identity, length, width, 99));
+                var series = Array.ConvertAll(domains, domain => Series.Generate(domain, random, length));
+                if (context.Accepts(series, width) && context.Evaluate(series, width).IsValid)
+                {
+                    inDomain = true;
+                    break;
+                }
+            }
+            if (!inDomain)
+                continue;
+            perRegime[regime]++;
+            chosen.Add((domains, regime));
+        }
+        return chosen;
+    }
+
+    // Every combination for one or two series inputs; one shared domain for three or more.
+    private static IEnumerable<Domain[]> SweepProducts(Domain[][] choices)
+    {
+        if (choices.Length <= 2)
+        {
+            foreach (var domains in Combinations(choices, uniformOnly: false))
+                yield return domains;
+            yield break;
+        }
+        var shared = FirstRegimeDomains.Length + SecondRegimeDomains.Length;
+        for (var position = 0; position < shared; position++)
+        {
+            var second = position >= FirstRegimeDomains.Length;
+            yield return Array.ConvertAll(choices, choice => choice.Length == 2 ? choice[second ? 1 : 0] : choice[position]);
+        }
+    }
+
+    // 0 for the first value regime, 1 for the second, 2 for a mix of both.
+    private static int SweepRegime(Domain[] domains)
+    {
+        var second = domains.Count(domain => Array.IndexOf(SecondRegimeDomains, domain) >= 0 ||
+                                             domain is Domain.BooleanMostlyTrue or Domain.ComplexLarge);
+        return second == 0 ? 0 : second == domains.Length ? 1 : 2;
+    }
+
+    private static string TemplateKey(IReadOnlyList<MathBlockValue> template)
+    {
+        var key = new StringBuilder();
+        foreach (var value in template)
+        {
+            key.Append(value.Type.Kind.ToString()).Append(':');
+            if (value.Type.Kind == MathBlockValueKind.Scalar)
+                key.Append(value.AsScalar().ToString("R", CultureInfo.InvariantCulture));
+            else if (value.Type.Kind == MathBlockValueKind.Boolean)
+                key.Append(value.AsBoolean() ? "true" : "false");
+            else if (!IsSeriesKind(value.Type.Kind))
+                key.Append(value.Type.ToString());
+            key.Append(';');
+        }
+        return key.ToString();
+    }
+
+    /// <summary>
+    /// Whether an in-domain series gives a run that is valid at some lengths and invalid at others, which is a
+    /// dependence on the number of rows.
+    /// </summary>
+    private static bool ReverseCheckLengthValidity(Context context, Plan plan)
+    {
+        var random = new Random(Seed(context.Operation.Identity, 0, 0, 1));
+        var inputs = plan.Generate(random, SweepLengths[^1]);
+        var outcomes = new HashSet<bool>();
+        foreach (var length in SweepLengths)
+        {
+            var truncated = Array.ConvertAll(inputs, input => input.Truncate(length));
+            if (context.Accepts(truncated, 0))
+                outcomes.Add(context.Evaluate(truncated, 0).IsValid);
+        }
+        return outcomes.Count == 2;
     }
 
     private static bool Changed(MathBlockValue baseline, MathBlockValue result, int length, int resultLength)
@@ -554,14 +797,19 @@ internal static class MathBlockCausalityChecks
             return [.. widths];
         }
 
-        public MathBlockValue Evaluate(Series[] series, int width)
+        public MathBlockValue Evaluate(Series[] series, int width) => EvaluateTyped(Operation, BuildInputs(series, width));
+
+        /// <summary>Gets whether the type resolver accepts the series, as opposed to the operation judging them invalid.</summary>
+        public bool Accepts(Series[] series, int width) => TypeResolves(Operation, BuildInputs(series, width));
+
+        private MathBlockValue[] BuildInputs(Series[] series, int width)
         {
             var inputs = Template.ToArray();
             for (var index = 0; index < SeriesInputs.Length; index++)
                 inputs[SeriesInputs[index]] = series[index].ToValue(Template[SeriesInputs[index]].Type.Unit);
             if (Operation.Causality.WidthInputIndex is { } widthIndex)
                 inputs[widthIndex] = MathBlockValue.Scalar(width, Template[widthIndex].Type.Unit);
-            return EvaluateTyped(Operation, inputs);
+            return inputs;
         }
     }
 
@@ -642,18 +890,19 @@ internal static class MathBlockCausalityChecks
 
         public static Series Generate(Domain domain, Random random, int length)
         {
-            if (domain == Domain.Boolean)
+            if (domain is Domain.Boolean or Domain.BooleanMostlyTrue)
             {
                 var flags = new bool[length];
                 for (var index = 0; index < length; index++)
-                    flags[index] = random.Next(2) == 1;
+                    flags[index] = domain == Domain.Boolean ? random.Next(2) == 1 : random.NextDouble() < 0.85d;
                 return new Series(null, flags, null);
             }
-            if (domain == Domain.Complex)
+            if (domain is Domain.Complex or Domain.ComplexLarge)
             {
+                var scale = domain == Domain.Complex ? 2d : 1000d;
                 var numbers = new Complex[length];
                 for (var index = 0; index < length; index++)
-                    numbers[index] = new Complex(Uniform(random, -2d, 2d), Uniform(random, -2d, 2d));
+                    numbers[index] = new Complex(Uniform(random, -scale, scale), Uniform(random, -scale, scale));
                 return new Series(null, null, numbers);
             }
             var values = new double[length];
@@ -730,6 +979,12 @@ internal static class MathBlockCausalityChecks
 
         public Series Truncate(int length) => Copy(length);
 
+        /// <summary>Returns a series of the given length that repeats the first rows in order.</summary>
+        public Series Cycle(int rows, int length) => new(
+            real is null ? null : Enumerable.Range(0, length).Select(row => real[row % rows]).ToArray(),
+            boolean is null ? null : Enumerable.Range(0, length).Select(row => boolean[row % rows]).ToArray(),
+            complex is null ? null : Enumerable.Range(0, length).Select(row => complex[row % rows]).ToArray());
+
         public IEnumerable<MathBlockValue> Jitter(int row, MathBlockUnit unit)
         {
             if (real is not null)
@@ -780,6 +1035,8 @@ internal static class MathBlockCausalityChecks
             // Integers on both sides of zero, so an integer-only operation is valid on some rows and invalid on
             // others, and so is its validity sibling.
             Domain.Integer => random.Next(-2, 6),
+            Domain.LargeReal => Uniform(random, -1000d, 1000d),
+            Domain.LargePositive => Uniform(random, 100d, 10000d),
             _ => throw new InvalidOperationException($"Domain '{domain}' has no independent rows.")
         };
 

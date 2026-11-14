@@ -88,7 +88,11 @@ public sealed class MathBlockCausalityTests
         });
     }
 
-    /// <summary>Verifies every Pointwise, Trailing and Expanding label against seeded random perturbations.</summary>
+    /// <summary>
+    /// Verifies every Pointwise, Trailing and Expanding label against seeded random perturbations, and by a sweep over
+    /// the regression inputs in two value regimes at several lengths: every prefix must give the full run's rows, in
+    /// value and in validity.
+    /// </summary>
     [Fact]
     [Trait("Category", "CausalityContract")]
     public void CausalLabelsHoldUnderLaterAndOutOfWindowPerturbations()
@@ -106,6 +110,27 @@ public sealed class MathBlockCausalityTests
         var failures = CheckLabels(MathBlockCatalog.Standard, causal: false, out var checkedCount);
         Assert.True(failures.Count == 0, MathBlockCausalityChecks.Format(failures));
         Assert.True(checkedCount > 0, "No non-causal label was checked.");
+    }
+
+    /// <summary>
+    /// Verifies the prefix sweep rejects the operations whose validity depends on the whole series when they are
+    /// labelled Expanding, as they were in 0.7.0-local.3: a power-of-two length, a length limit and a total of 1.
+    /// </summary>
+    [Theory]
+    [Trait("Category", "CausalityContract")]
+    [InlineData("capacity.mobius-transform")]
+    [InlineData("combinatorics.nonempty-subset-sums")]
+    [InlineData("survival.discrete-hazard")]
+    public void PrefixSweepRejectsAWholeSeriesValidityRuleLabelledExpanding(string identifier)
+    {
+        var operation = MathBlockCatalog.Standard.Get(identifier);
+        Assert.Equal(MathBlockCausality.WholeSeries, operation.Causality.Kind);
+        Assert.Empty(MathBlockCausalityChecks.Check(operation));
+
+        var mislabelled = Relabel(operation, MathBlockCausalityInfo.Expanding);
+
+        var failures = MathBlockCausalityChecks.Check(mislabelled);
+        Assert.Contains(failures, failure => failure.Contains("validity depends on rows after row", StringComparison.Ordinal));
     }
 
     /// <summary>Verifies the property check rejects whole-series and expanding operations labelled Pointwise.</summary>
@@ -243,20 +268,16 @@ public sealed class MathBlockCausalityTests
 
     internal static List<string> CheckLabels(MathBlockRegistry registry, bool causal, out int checkedCount)
     {
-        var failures = new List<string>();
-        checkedCount = 0;
-        foreach (var operation in registry.Operations)
+        var selected = registry.Operations.Where(operation =>
         {
             var kind = operation.Causality.Kind;
-            if (kind == MathBlockCausality.NotSeries ||
-                causal != (kind is MathBlockCausality.Pointwise or MathBlockCausality.Trailing or MathBlockCausality.Expanding))
-            {
-                continue;
-            }
-            checkedCount++;
-            failures.AddRange(MathBlockCausalityChecks.Check(operation));
-        }
-        return failures;
+            return kind != MathBlockCausality.NotSeries &&
+                   causal == (kind is MathBlockCausality.Pointwise or MathBlockCausality.Trailing or MathBlockCausality.Expanding);
+        }).ToList();
+        checkedCount = selected.Count;
+        var results = new List<string>[selected.Count];
+        Parallel.For(0, selected.Count, index => results[index] = MathBlockCausalityChecks.Check(selected[index]));
+        return [.. results.SelectMany(result => result)];
     }
 
     internal static MathBlockOperation Relabel(MathBlockOperation source, MathBlockCausalityInfo causality) =>
