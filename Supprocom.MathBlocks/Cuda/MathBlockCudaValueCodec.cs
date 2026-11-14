@@ -33,9 +33,20 @@ public static class MathBlockCudaValueCodec
     /// <summary>Gets the schema fingerprint value.</summary>
     public static string SchemaFingerprint => Schema.Fingerprint;
 
-    /// <summary>Gets the implementation fingerprint value.</summary>
-    public static string ImplementationFingerprint { get; } =
-        MathBlockCudaContractHash.CreateImplementation(typeof(MathBlockCudaValueCodec));
+    /// <summary>
+    /// Gets the implementation fingerprint value: SHA-256 over the codec schema fingerprint and the bytes that the
+    /// codec's own write, header and read paths produce for a fixed, versioned corpus of values, headers and device
+    /// slots (every value kind, the edge values, units, shapes and every invalid state). It changes when what the codec
+    /// writes or reads changes, and for no other reason.
+    /// </summary>
+    public static string ImplementationFingerprint => implementationFingerprint.Value;
+
+    private static readonly Lazy<string> implementationFingerprint = new(
+        () => MathBlockCudaContractHash.CreateCodecImplementation(
+            MathBlockCudaValueCodecCorpus.Version,
+            SchemaFingerprint,
+            MathBlockCudaContractHash.EncodeCorpus()),
+        LazyThreadSafetyMode.ExecutionAndPublication);
 
     /// <summary>Computes the device payload size for a value kind and capacity.</summary>
     public static unsafe int GetPayloadByteCount(MathBlockValueKind kind, int capacity)
