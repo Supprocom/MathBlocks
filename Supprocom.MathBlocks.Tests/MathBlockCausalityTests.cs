@@ -9,7 +9,7 @@ namespace Supprocom.MathBlocks.Tests;
 public sealed class MathBlockCausalityTests
 {
     private const string StandardCausalityFingerprint =
-        "eab861dc019e2651207c2d13c0a24a8b3fb9f11ea793b4050d0b8546d9a59f19";
+        "571c6e49268b098b09d75332dab5971ab2f98524cd07fcfecc9b6f89f4d09eb4";
 
     /// <summary>
     /// Verifies every standard operation has an explicit causality label: in its block definition for the 337

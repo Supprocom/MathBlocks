@@ -5,7 +5,7 @@ internal static partial class ProbabilityMathBlocks
     internal static class CombinatoricsNonemptySubsetSumsV1Block
     {
         internal const string Identity = "combinatorics.nonempty-subset-sums@1";
-        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Expanding;
+        internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateSubsetSums();
         private static MathBlockOperation CreateSubsetSums() => MathBlockOperationFactory.CreateDomain("combinatorics.nonempty-subset-sums", 1, types =>
         {

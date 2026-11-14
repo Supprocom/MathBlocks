@@ -14,8 +14,15 @@ namespace Supprocom.MathBlocks;
 /// follow the last input row.
 /// </para>
 /// <para>
-/// For <see cref="Pointwise"/>, <see cref="Trailing"/> and <see cref="Expanding"/>, output row t does not depend on
-/// the values of input rows after t, nor on how many rows follow t.
+/// A label states how output row t's value and its validity depend on the input rows, for inputs inside the
+/// operation's domain. For <see cref="Pointwise"/>, <see cref="Trailing"/> and <see cref="Expanding"/>, neither the value
+/// nor the validity of row t depends on the values of input rows after t, nor on how many rows follow t; a call is
+/// valid only once the rows up to t cover its window or lag. A validity rule over the whole series, such as a
+/// power-of-two length, a length limit or a total of 1, makes an operation <see cref="WholeSeries"/>.
+/// </para>
+/// <para>
+/// A vector-valued result is valid or invalid as a whole: an out-of-domain or overflowing value in any row
+/// invalidates the whole result, and per-row validity is provided by the elementwise-valid forms.
 /// </para>
 /// </remarks>
 public enum MathBlockCausality
@@ -31,7 +38,7 @@ public enum MathBlockCausality
     Expanding,
     /// <summary>
     /// An output row, or an output that is not a vector kind, can read every input row, including rows after it, or
-    /// depends on the number of rows.
+    /// its value or validity depends on the number of rows.
     /// </summary>
     WholeSeries,
     /// <summary>Output row t reads input rows after t.</summary>
