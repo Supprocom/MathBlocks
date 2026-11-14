@@ -51,11 +51,13 @@ public sealed class MathBlockFusedExpressionSourceTests
         foreach (var row in new[]
                  {
                      "const int k34 = isfinite(n32) && isfinite(n3) && mathblocks_elementwise_row_value(" +
-                     "mathblocks_elementwise_source_opcode(8), n32, n3, 0.0, &v34);",
+                     "mathblocks_elementwise_source_opcode(8), n32, n3, 0.0, &v34, &g34);",
+                     "bool g34 = true;",
+                     "if (!g34) mathblocks_nonconvergence_record_elementwise(16);",
                      "const double n34 = k34 ? v34 : n33;",
                      "const int r34 = r32 & k34;",
-                     "mathblocks_elementwise_source_opcode(3), n34, 0.0, 0.0, &v35);",
-                     "mathblocks_elementwise_source_opcode(12), n35, n4, n1, &v36);",
+                     "mathblocks_elementwise_source_opcode(3), n34, 0.0, 0.0, &v35, &g35);",
+                     "mathblocks_elementwise_source_opcode(12), n35, n4, n1, &v36, &g36);",
                      "const int r36 = r35 & r1 & k36;",
                      "const int b37 = k37;",
                      "const int r37 = r0 & r1;"

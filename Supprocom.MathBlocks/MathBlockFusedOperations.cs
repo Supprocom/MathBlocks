@@ -148,13 +148,14 @@ internal static class MathBlockFusedOperations
 
     // The CUDA test of one elementwise row: every argument is finite and the source's per-row function computes it.
     // mathblocks_elementwise_row_value and mathblocks_elementwise_source_opcode are the functions the elementwise
-    // kernel calls, so the row's value and computed flag are the kernel's. A nonfinite argument (a row of a node
-    // that is invalid as a whole) is not computed, as on CoreCLR, where it is not a valid scalar.
+    // kernel calls, so the row's value, computed flag and converged flag are the kernel's. A nonfinite argument (a row
+    // of a node that is invalid as a whole) is not computed, as on CoreCLR, where it is not a valid scalar.
     public static string CudaElementwiseRow(
         int source,
         ReadOnlySpan<string> arguments,
         string[] sourceArguments,
-        string value)
+        string value,
+        string converged)
     {
         var text = new System.Text.StringBuilder();
         foreach (ref readonly var argument in arguments)
@@ -162,7 +163,7 @@ internal static class MathBlockFusedOperations
         text.Append("mathblocks_elementwise_row_value(mathblocks_elementwise_source_opcode(")
             .Append(source.ToString(System.Globalization.CultureInfo.InvariantCulture)).Append("), ")
             .Append(sourceArguments[0]).Append(", ").Append(sourceArguments[1]).Append(", ")
-            .Append(sourceArguments[2]).Append(", ").Append(value).Append(')');
+            .Append(sourceArguments[2]).Append(", ").Append(value).Append(", ").Append(converged).Append(')');
         return text.ToString();
     }
 

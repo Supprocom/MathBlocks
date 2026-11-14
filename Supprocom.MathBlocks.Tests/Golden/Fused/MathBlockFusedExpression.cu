@@ -176,22 +176,30 @@ __device__ void mathblocks_fused_<fused-fingerprint>(
     const int r32 = r31 & r30;
     // node 34 elementwise.scalar.arc-tangent-2@1
     double v34 = 0.0;
-    const int k34 = isfinite(n32) && isfinite(n3) && mathblocks_elementwise_row_value(mathblocks_elementwise_source_opcode(8), n32, n3, 0.0, &v34);
+    bool g34 = true;
+    const int k34 = isfinite(n32) && isfinite(n3) && mathblocks_elementwise_row_value(mathblocks_elementwise_source_opcode(8), n32, n3, 0.0, &v34, &g34);
+    if (!g34) mathblocks_nonconvergence_record_elementwise(16);
     const double n34 = k34 ? v34 : n33;
     const int r34 = r32 & k34;
     // node 35 elementwise.probability.normal-cdf@1
     double v35 = 0.0;
-    const int k35 = isfinite(n34) && mathblocks_elementwise_row_value(mathblocks_elementwise_source_opcode(3), n34, 0.0, 0.0, &v35);
+    bool g35 = true;
+    const int k35 = isfinite(n34) && mathblocks_elementwise_row_value(mathblocks_elementwise_source_opcode(3), n34, 0.0, 0.0, &v35, &g35);
+    if (!g35) mathblocks_nonconvergence_record_elementwise(6);
     const double n35 = k35 ? v35 : n33;
     const int r35 = r34 & k35;
     // node 36 elementwise.scalar.clamp@1
     double v36 = 0.0;
-    const int k36 = isfinite(n35) && isfinite(n4) && isfinite(n1) && mathblocks_elementwise_row_value(mathblocks_elementwise_source_opcode(12), n35, n4, n1, &v36);
+    bool g36 = true;
+    const int k36 = isfinite(n35) && isfinite(n4) && isfinite(n1) && mathblocks_elementwise_row_value(mathblocks_elementwise_source_opcode(12), n35, n4, n1, &v36, &g36);
+    if (!g36) mathblocks_nonconvergence_record_elementwise(24);
     const double n36 = k36 ? v36 : n33;
     const int r36 = r35 & r1 & k36;
     // node 37 elementwise-valid.special.beta@1
     double v37 = 0.0;
-    const int k37 = isfinite(n0) && isfinite(n1) && mathblocks_elementwise_row_value(mathblocks_elementwise_source_opcode(37), n0, n1, 0.0, &v37);
+    bool g37 = true;
+    const int k37 = isfinite(n0) && isfinite(n1) && mathblocks_elementwise_row_value(mathblocks_elementwise_source_opcode(37), n0, n1, 0.0, &v37, &g37);
+    if (!g37) mathblocks_nonconvergence_record_elementwise(75);
     const int b37 = k37;
     const int r37 = r0 & r1;
     // node 38 vector.add@1

@@ -160,15 +160,23 @@ internal static class MathBlockFusedCudaSource
         var sourceArguments = new string[3];
         for (var index = 0; index < sourceArguments.Length; index++)
             sourceArguments[index] = index < sourceArity ? arguments[index] : "0.0";
+        // The converged flag is the kernel's: a row that does not converge is recorded under the form's contract opcode (2 * source +
+        // sibling), as mathblocks_elementwise_run records it, so the module's counters hold the same counts as CoreCLR's.
+        var sibling = step.Operation.Opcode == MathBlockFusedOpcode.ElementwiseValidity;
+        var form = 2 * step.Operation.ElementwiseSource + (sibling ? 1 : 0);
         builder.Append("    double v").Append(node).Append(" = 0.0;\n")
+            .Append("    bool g").Append(node).Append(" = true;\n")
             .Append("    const int k").Append(node).Append(" = ")
             .Append(MathBlockFusedOperations.CudaElementwiseRow(
                 step.Operation.ElementwiseSource,
                 arguments.AsSpan(0, sourceArity),
                 sourceArguments,
-                "&v" + node))
-            .Append(";\n");
-        if (step.Operation.Opcode == MathBlockFusedOpcode.ElementwiseValidity)
+                "&v" + node,
+                "&g" + node))
+            .Append(";\n")
+            .Append("    if (!g").Append(node).Append(") mathblocks_nonconvergence_record_elementwise(")
+            .Append(Number(form)).Append(");\n");
+        if (sibling)
         {
             builder.Append("    const int b").Append(node).Append(" = k").Append(node).Append(";\n");
             AppendRowValidity(builder, expression, step, null);
