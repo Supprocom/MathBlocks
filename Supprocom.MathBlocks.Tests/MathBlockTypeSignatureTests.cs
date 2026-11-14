@@ -13,7 +13,7 @@ public sealed class MathBlockTypeSignatureTests
 {
     // The pins move with the operation order of the standard catalog and with any signature; update them with the catalog.
     private const string StandardTableFingerprint = "95BC6A09B5F747ED1AB354B808D49511C54FB4EEA2BCEDDD93FF7B1781FBF5D5";
-    private const string TypeRuleSourceFingerprint = "7ED8CF83B06FA8747E703A16895DC218885D8AF71E3376C3BE757D87CF398FE5";
+    private const string TypeRuleSourceFingerprint = "8962F39B2728D87760C7CEA3B9FE2AB50B0AD8EFA9D2D96415CD797D0D4B33FE";
 
     private static readonly MathBlockCausality[] RowCausal = [MathBlockCausality.Pointwise, MathBlockCausality.Trailing, MathBlockCausality.Expanding];
 

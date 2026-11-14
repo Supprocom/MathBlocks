@@ -656,79 +656,82 @@ struct MathBlockDeviceType
     int unit_denominator3;
 };
 
-#line 243 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_check_operands(
-    const int* row,
+#line 232 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_CheckOperands_23fc675e4357bd71(
+    int* row,
     int start,
-    const MathBlockDeviceType* inputs,
+    MathBlockDeviceType* inputs,
     int count,
     int mode,
     int seriesMask);
 
-#line 145 "TypeRuleUnit.cs"
-__device__ void mathblocks_type_clear(MathBlockDeviceType* value, int kind);
+#line 140 "TypeRuleUnit.cs"
+__device__ void cs2cuda_global_namespace_MathBlockTypeRuleModule_Clear_b4f1dffbb6be6302(MathBlockDeviceType* value, int kind);
 
-#line 188 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_combine_unit(
-    const MathBlockDeviceType* left,
-    const MathBlockDeviceType* right,
+#line 179 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_CombineUnit_6e4d2fcd23f06e4c(
+    MathBlockDeviceType* left,
+    MathBlockDeviceType* right,
     int rightSign,
     int exponentNumerator,
     int exponentDenominator,
     MathBlockDeviceType* target);
 
-#line 328 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_composed(
-    const int* row,
+#line 315 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_Composed_c47f5cbbb56e7775(
+    int* row,
     int start,
-    const MathBlockDeviceType* inputs,
+    MathBlockDeviceType* inputs,
     int count,
     MathBlockDeviceType* output,
     int mode,
     int seriesMask);
 
-#line 155 "TypeRuleUnit.cs"
-__device__ void mathblocks_type_copy_unit(const MathBlockDeviceType* source, MathBlockDeviceType* target);
+#line 149 "TypeRuleUnit.cs"
+__device__ void cs2cuda_global_namespace_MathBlockTypeRuleModule_CopyUnit_e45f8d38f29eb6ea(MathBlockDeviceType* source, MathBlockDeviceType* target);
 
-#line 426 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_core(
-    const int* row,
+#line 412 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_Core_367ffc9d1aef367e(
+    int* row,
     int start,
-    const MathBlockDeviceType* inputs,
+    MathBlockDeviceType* inputs,
     int count,
     MathBlockDeviceType* output,
     int mode,
     int seriesMask);
 
-#line 473 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_elementwise_form(
-    const int* row,
-    const MathBlockDeviceType* inputs,
+#line 457 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_ElementwiseForm_ba1101e991286add(
+    int* row,
+    MathBlockDeviceType* inputs,
     int count,
     MathBlockDeviceType* output);
 
 #line 54 "TypeRuleUnit.cs"
-__device__ long long mathblocks_type_gcd(long long left, long long right);
+__device__ long long cs2cuda_global_namespace_MathBlockTypeRuleModule_GreatestCommonDivisor_8904907116a5352b(long long left, long long right);
 
-#line 220 "TypeRuleUnit.cs"
-__device__ MathBlockDeviceType mathblocks_type_input(
-    const MathBlockDeviceType* inputs,
+#line 210 "TypeRuleUnit.cs"
+__device__ MathBlockDeviceType cs2cuda_global_namespace_MathBlockTypeRuleModule_Input_db1595f5c742dfbb(
+    MathBlockDeviceType* inputs,
     int index,
     int mode,
     int seriesMask);
 
-#line 445 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_lift_result(
-    const MathBlockDeviceType* inputs,
-    const MathBlockDeviceType* sourceResult,
+#line 166 "TypeRuleUnit.cs"
+__device__ bool cs2cuda_global_namespace_MathBlockTypeRuleModule_IsDimensionless_218062d4a9810326(MathBlockDeviceType* value);
+
+#line 430 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_LiftResult_bbd399c38824e4e5(
+    MathBlockDeviceType* inputs,
+    MathBlockDeviceType* sourceResult,
     int validity,
     int fillIndex,
     int rows,
     MathBlockDeviceType* output);
 
-#line 281 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_merge_shape(
-    const MathBlockDeviceType* inputs,
+#line 269 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_MergeShape_465b8917d10391b0(
+    MathBlockDeviceType* inputs,
     int checkMask,
     int outputMask,
     int mode,
@@ -736,540 +739,537 @@ __device__ int mathblocks_type_merge_shape(
     int count,
     MathBlockDeviceType* output);
 
-#line 126 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_normalize(MathBlockDeviceType* value, int dimension, long long numerator, long long denominator);
+#line 552 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_ResolveStatus_cee4bdaf27ba1fb5(
+    int* signature_row,
+    MathBlockDeviceType* inputs,
+    int count,
+    MathBlockDeviceType* output);
 
-#line 590 "TypeRuleUnit.cs"
+#line 122 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_SetUnitChecked_fa7acb8e9bbc530a(MathBlockDeviceType* value, int dimension, long long numerator, long long denominator);
+
+#line 97 "TypeRuleUnit.cs"
+__device__ void cs2cuda_global_namespace_MathBlockTypeRuleModule_SetUnit_9260a5921a632c79(MathBlockDeviceType* value, int dimension, int numerator, int denominator);
+
+#line 86 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitDenominator_ebbd4adaf715b6b5(MathBlockDeviceType* value, int dimension);
+
+#line 75 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitNumerator_33ce368a9b11f062(MathBlockDeviceType* value, int dimension);
+
+#line 155 "TypeRuleUnit.cs"
+__device__ bool cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitsEqual_61fd1d4392d22a54(MathBlockDeviceType* left, MathBlockDeviceType* right);
+
+#line 500 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_WindowForm_697d38b0e4d94f7f(
+    int* row,
+    MathBlockDeviceType* inputs,
+    int count,
+    MathBlockDeviceType* output);
+
+#line 10 "TypeRuleDeviceUnit.cs"
 __device__ void mathblocks_type_resolve(
     const int* signature_row,
     const MathBlockDeviceType* inputs,
     int count,
     MathBlockDeviceType* output);
 
-#line 570 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_resolve_status(
-    const int* signature_row,
-    const MathBlockDeviceType* inputs,
-    int count,
-    MathBlockDeviceType* output);
-
-#line 100 "TypeRuleUnit.cs"
-__device__ void mathblocks_type_set_unit(MathBlockDeviceType* value, int dimension, int numerator, int denominator);
-
-#line 88 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_unit_denominator(const MathBlockDeviceType* value, int dimension);
-
-#line 162 "TypeRuleUnit.cs"
-__device__ bool mathblocks_type_unit_equal(const MathBlockDeviceType* left, const MathBlockDeviceType* right);
-
-#line 174 "TypeRuleUnit.cs"
-__device__ bool mathblocks_type_unit_is_dimensionless(const MathBlockDeviceType* value);
-
-#line 76 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_unit_numerator(const MathBlockDeviceType* value, int dimension);
-
-#line 517 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_window_form(
-    const int* row,
-    const MathBlockDeviceType* inputs,
-    int count,
-    MathBlockDeviceType* output);
-
-#line 243 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_check_operands(
-    const int* row,
+#line 232 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_CheckOperands_23fc675e4357bd71(
+    int* row,
     int start,
-    const MathBlockDeviceType* inputs,
+    MathBlockDeviceType* inputs,
     int count,
     int mode,
     int seriesMask)
-#line 251 "TypeRuleUnit.cs"
+#line 239 "TypeRuleUnit.cs"
 {
-#line 252 "TypeRuleUnit.cs"
+#line 240 "TypeRuleUnit.cs"
     int csharp2cuda_temp_0 = (row)[csharp2cuda_i32_add(start, 1)];
-#line 252 "TypeRuleUnit.cs"
+#line 240 "TypeRuleUnit.cs"
     int operandStart = csharp2cuda_i32_add(csharp2cuda_i32_add(start, 2), csharp2cuda_temp_0);
-#line 253 "TypeRuleUnit.cs"
-#line 253 "TypeRuleUnit.cs"
+#line 241 "TypeRuleUnit.cs"
+#line 241 "TypeRuleUnit.cs"
     int csharp2cuda_temp_1 = (row)[operandStart];
     if (((csharp2cuda_temp_1) != (count)))
     {
-#line 254 "TypeRuleUnit.cs"
+#line 242 "TypeRuleUnit.cs"
         return 1;
     }
-#line 255 "TypeRuleUnit.cs"
+#line 243 "TypeRuleUnit.cs"
     {
-#line 255 "TypeRuleUnit.cs"
+#line 243 "TypeRuleUnit.cs"
         int index = 0;
         while (true)
         {
             if (!(((index) < (count))))
                 break;
-#line 256 "TypeRuleUnit.cs"
+#line 244 "TypeRuleUnit.cs"
             {
-#line 257 "TypeRuleUnit.cs"
-                MathBlockDeviceType input = mathblocks_type_input(inputs, index, mode, seriesMask);
-#line 258 "TypeRuleUnit.cs"
+#line 245 "TypeRuleUnit.cs"
+                MathBlockDeviceType input = cs2cuda_global_namespace_MathBlockTypeRuleModule_Input_db1595f5c742dfbb(inputs, index, mode, seriesMask);
+#line 246 "TypeRuleUnit.cs"
                 int kind = (input).kind;
-#line 259 "TypeRuleUnit.cs"
+#line 247 "TypeRuleUnit.cs"
                 int mask = (row)[csharp2cuda_i32_add(csharp2cuda_i32_add(operandStart, 1), csharp2cuda_i32_mul(index, 3))];
-#line 260 "TypeRuleUnit.cs"
+#line 248 "TypeRuleUnit.cs"
                 int constraint = (row)[csharp2cuda_i32_add(csharp2cuda_i32_add(operandStart, 2), csharp2cuda_i32_mul(index, 3))];
-#line 261 "TypeRuleUnit.cs"
-#line 261 "TypeRuleUnit.cs"
+#line 249 "TypeRuleUnit.cs"
+#line 249 "TypeRuleUnit.cs"
                 bool csharp2cuda_temp_3;
-#line 261 "TypeRuleUnit.cs"
+#line 249 "TypeRuleUnit.cs"
                 if (!(((kind) < (1))))
                 {
-#line 261 "TypeRuleUnit.cs"
+#line 249 "TypeRuleUnit.cs"
                     csharp2cuda_temp_3 = ((kind) > (31));
                 }
                 else
                 {
-#line 261 "TypeRuleUnit.cs"
+#line 249 "TypeRuleUnit.cs"
                     csharp2cuda_temp_3 = true;
                 }
-#line 261 "TypeRuleUnit.cs"
+#line 249 "TypeRuleUnit.cs"
                 bool csharp2cuda_temp_4;
-#line 261 "TypeRuleUnit.cs"
+#line 249 "TypeRuleUnit.cs"
                 if (!(csharp2cuda_temp_3))
                 {
-#line 261 "TypeRuleUnit.cs"
+#line 249 "TypeRuleUnit.cs"
                     csharp2cuda_temp_4 = ((csharp2cuda_i32_and(csharp2cuda_i32_shr(mask, kind), 1)) == (0));
                 }
                 else
                 {
-#line 261 "TypeRuleUnit.cs"
+#line 249 "TypeRuleUnit.cs"
                     csharp2cuda_temp_4 = true;
                 }
                 if (csharp2cuda_temp_4)
                 {
-#line 262 "TypeRuleUnit.cs"
+#line 250 "TypeRuleUnit.cs"
                     return 2;
                 }
-#line 263 "TypeRuleUnit.cs"
+#line 251 "TypeRuleUnit.cs"
                 if (((constraint) == (csharp2cuda_i32_neg(2))))
-#line 264 "TypeRuleUnit.cs"
+#line 252 "TypeRuleUnit.cs"
                 {
-#line 265 "TypeRuleUnit.cs"
-#line 265 "TypeRuleUnit.cs"
+#line 253 "TypeRuleUnit.cs"
+#line 253 "TypeRuleUnit.cs"
                     MathBlockDeviceType* csharp2cuda_temp_5 = &(input);
-#line 265 "TypeRuleUnit.cs"
-                    bool csharp2cuda_temp_6 = mathblocks_type_unit_is_dimensionless(csharp2cuda_temp_5);
+#line 253 "TypeRuleUnit.cs"
+                    bool csharp2cuda_temp_6 = cs2cuda_global_namespace_MathBlockTypeRuleModule_IsDimensionless_218062d4a9810326(csharp2cuda_temp_5);
                     if ((!(csharp2cuda_temp_6)))
                     {
-#line 266 "TypeRuleUnit.cs"
+#line 254 "TypeRuleUnit.cs"
                         return 3;
                     }
                 }
                 else
                 {
-#line 268 "TypeRuleUnit.cs"
+#line 256 "TypeRuleUnit.cs"
                     if (((constraint) >= (0)))
-#line 269 "TypeRuleUnit.cs"
+#line 257 "TypeRuleUnit.cs"
                     {
-#line 270 "TypeRuleUnit.cs"
-                        MathBlockDeviceType other = mathblocks_type_input(inputs, constraint, mode, seriesMask);
-#line 271 "TypeRuleUnit.cs"
-#line 271 "TypeRuleUnit.cs"
+#line 258 "TypeRuleUnit.cs"
+                        MathBlockDeviceType other = cs2cuda_global_namespace_MathBlockTypeRuleModule_Input_db1595f5c742dfbb(inputs, constraint, mode, seriesMask);
+#line 259 "TypeRuleUnit.cs"
+#line 259 "TypeRuleUnit.cs"
                         MathBlockDeviceType* csharp2cuda_temp_7 = &(input);
-#line 271 "TypeRuleUnit.cs"
+#line 259 "TypeRuleUnit.cs"
                         MathBlockDeviceType* csharp2cuda_temp_8 = &(other);
-#line 271 "TypeRuleUnit.cs"
-                        bool csharp2cuda_temp_9 = mathblocks_type_unit_equal(csharp2cuda_temp_7, csharp2cuda_temp_8);
+#line 259 "TypeRuleUnit.cs"
+                        bool csharp2cuda_temp_9 = cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitsEqual_61fd1d4392d22a54(csharp2cuda_temp_7, csharp2cuda_temp_8);
                         if ((!(csharp2cuda_temp_9)))
                         {
-#line 272 "TypeRuleUnit.cs"
+#line 260 "TypeRuleUnit.cs"
                             return 4;
                         }
                     }
                 }
             }
-#line 255 "TypeRuleUnit.cs"
+#line 243 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_2 = &(index);
             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_2));
         }
     }
-#line 275 "TypeRuleUnit.cs"
+#line 263 "TypeRuleUnit.cs"
     return 0;
 }
 
-#line 145 "TypeRuleUnit.cs"
-__device__ void mathblocks_type_clear(MathBlockDeviceType* value, int kind)
-#line 147 "TypeRuleUnit.cs"
+#line 140 "TypeRuleUnit.cs"
+__device__ void cs2cuda_global_namespace_MathBlockTypeRuleModule_Clear_b4f1dffbb6be6302(MathBlockDeviceType* value, int kind)
+#line 141 "TypeRuleUnit.cs"
 {
-#line 148 "TypeRuleUnit.cs"
-#line 148 "TypeRuleUnit.cs"
+#line 142 "TypeRuleUnit.cs"
+#line 142 "TypeRuleUnit.cs"
     int* csharp2cuda_temp_0 = &((value)->kind);
     (*(csharp2cuda_temp_0) = kind);
-#line 149 "TypeRuleUnit.cs"
-#line 149 "TypeRuleUnit.cs"
+#line 143 "TypeRuleUnit.cs"
+#line 143 "TypeRuleUnit.cs"
     int* csharp2cuda_temp_1 = &((value)->rows);
     (*(csharp2cuda_temp_1) = 0);
-#line 150 "TypeRuleUnit.cs"
-#line 150 "TypeRuleUnit.cs"
+#line 144 "TypeRuleUnit.cs"
+#line 144 "TypeRuleUnit.cs"
     int* csharp2cuda_temp_2 = &((value)->columns);
     (*(csharp2cuda_temp_2) = 0);
-#line 151 "TypeRuleUnit.cs"
+#line 145 "TypeRuleUnit.cs"
     {
-#line 151 "TypeRuleUnit.cs"
+#line 145 "TypeRuleUnit.cs"
         int dimension = 0;
         while (true)
         {
             if (!(((dimension) < (4))))
                 break;
-#line 152 "TypeRuleUnit.cs"
-            mathblocks_type_set_unit(value, dimension, 0, 1);
-#line 151 "TypeRuleUnit.cs"
+#line 146 "TypeRuleUnit.cs"
+            cs2cuda_global_namespace_MathBlockTypeRuleModule_SetUnit_9260a5921a632c79(value, dimension, 0, 1);
+#line 145 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_3 = &(dimension);
             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_3));
         }
     }
 }
 
-#line 188 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_combine_unit(
-    const MathBlockDeviceType* left,
-    const MathBlockDeviceType* right,
+#line 179 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_CombineUnit_6e4d2fcd23f06e4c(
+    MathBlockDeviceType* left,
+    MathBlockDeviceType* right,
     int rightSign,
     int exponentNumerator,
     int exponentDenominator,
     MathBlockDeviceType* target)
-#line 196 "TypeRuleUnit.cs"
+#line 186 "TypeRuleUnit.cs"
 {
-#line 197 "TypeRuleUnit.cs"
+#line 187 "TypeRuleUnit.cs"
     {
-#line 197 "TypeRuleUnit.cs"
+#line 187 "TypeRuleUnit.cs"
         int dimension = 0;
         while (true)
         {
             if (!(((dimension) < (4))))
                 break;
-#line 198 "TypeRuleUnit.cs"
+#line 188 "TypeRuleUnit.cs"
             {
-#line 199 "TypeRuleUnit.cs"
-                int csharp2cuda_temp_1 = mathblocks_type_unit_numerator(left, dimension);
-#line 199 "TypeRuleUnit.cs"
+#line 189 "TypeRuleUnit.cs"
+                int csharp2cuda_temp_1 = cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitNumerator_33ce368a9b11f062(left, dimension);
+#line 189 "TypeRuleUnit.cs"
                 long long numerator = ((long long)(csharp2cuda_temp_1));
-#line 200 "TypeRuleUnit.cs"
-                int csharp2cuda_temp_2 = mathblocks_type_unit_denominator(left, dimension);
-#line 200 "TypeRuleUnit.cs"
+#line 190 "TypeRuleUnit.cs"
+                int csharp2cuda_temp_2 = cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitDenominator_ebbd4adaf715b6b5(left, dimension);
+#line 190 "TypeRuleUnit.cs"
                 long long denominator = ((long long)(csharp2cuda_temp_2));
-#line 201 "TypeRuleUnit.cs"
+#line 191 "TypeRuleUnit.cs"
                 if (((((void*)(right))) != (((void*)(nullptr)))))
-#line 202 "TypeRuleUnit.cs"
+#line 192 "TypeRuleUnit.cs"
                 {
-#line 203 "TypeRuleUnit.cs"
-                    int csharp2cuda_temp_3 = mathblocks_type_unit_numerator(right, dimension);
-#line 203 "TypeRuleUnit.cs"
+#line 193 "TypeRuleUnit.cs"
+                    int csharp2cuda_temp_3 = cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitNumerator_33ce368a9b11f062(right, dimension);
+#line 193 "TypeRuleUnit.cs"
                     long long rightNumerator = ((long long)(csharp2cuda_temp_3));
-#line 204 "TypeRuleUnit.cs"
-                    int csharp2cuda_temp_4 = mathblocks_type_unit_denominator(right, dimension);
-#line 204 "TypeRuleUnit.cs"
+#line 194 "TypeRuleUnit.cs"
+                    int csharp2cuda_temp_4 = cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitDenominator_ebbd4adaf715b6b5(right, dimension);
+#line 194 "TypeRuleUnit.cs"
                     long long rightDenominator = ((long long)(csharp2cuda_temp_4));
-#line 205 "TypeRuleUnit.cs"
+#line 195 "TypeRuleUnit.cs"
                     long long sum = csharp2cuda_i64_add(csharp2cuda_i64_mul(numerator, rightDenominator), csharp2cuda_i64_mul(csharp2cuda_i64_mul(((long long)(rightSign)), rightNumerator), denominator));
-#line 206 "TypeRuleUnit.cs"
+#line 196 "TypeRuleUnit.cs"
                     long long product = csharp2cuda_i64_mul(denominator, rightDenominator);
-#line 207 "TypeRuleUnit.cs"
-#line 207 "TypeRuleUnit.cs"
-                    int csharp2cuda_temp_5 = mathblocks_type_normalize(target, dimension, sum, product);
+#line 197 "TypeRuleUnit.cs"
+#line 197 "TypeRuleUnit.cs"
+                    int csharp2cuda_temp_5 = cs2cuda_global_namespace_MathBlockTypeRuleModule_SetUnitChecked_fa7acb8e9bbc530a(target, dimension, sum, product);
                     if (((csharp2cuda_temp_5) == (0)))
                     {
-#line 208 "TypeRuleUnit.cs"
+#line 198 "TypeRuleUnit.cs"
                         return 0;
                     }
-#line 209 "TypeRuleUnit.cs"
-#line 209 "TypeRuleUnit.cs"
+#line 199 "TypeRuleUnit.cs"
+#line 199 "TypeRuleUnit.cs"
                     long long* csharp2cuda_temp_6 = &(numerator);
-#line 209 "TypeRuleUnit.cs"
-                    int csharp2cuda_temp_7 = mathblocks_type_unit_numerator(target, dimension);
+#line 199 "TypeRuleUnit.cs"
+                    int csharp2cuda_temp_7 = cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitNumerator_33ce368a9b11f062(target, dimension);
                     (*(csharp2cuda_temp_6) = ((long long)(csharp2cuda_temp_7)));
-#line 210 "TypeRuleUnit.cs"
-#line 210 "TypeRuleUnit.cs"
+#line 200 "TypeRuleUnit.cs"
+#line 200 "TypeRuleUnit.cs"
                     long long* csharp2cuda_temp_8 = &(denominator);
-#line 210 "TypeRuleUnit.cs"
-                    int csharp2cuda_temp_9 = mathblocks_type_unit_denominator(target, dimension);
+#line 200 "TypeRuleUnit.cs"
+                    int csharp2cuda_temp_9 = cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitDenominator_ebbd4adaf715b6b5(target, dimension);
                     (*(csharp2cuda_temp_8) = ((long long)(csharp2cuda_temp_9)));
                 }
-#line 212 "TypeRuleUnit.cs"
-#line 212 "TypeRuleUnit.cs"
-                int csharp2cuda_temp_10 = mathblocks_type_normalize(target, dimension, csharp2cuda_i64_mul(numerator, ((long long)(exponentNumerator))), csharp2cuda_i64_mul(denominator, ((long long)(exponentDenominator))));
+#line 202 "TypeRuleUnit.cs"
+#line 202 "TypeRuleUnit.cs"
+                int csharp2cuda_temp_10 = cs2cuda_global_namespace_MathBlockTypeRuleModule_SetUnitChecked_fa7acb8e9bbc530a(target, dimension, csharp2cuda_i64_mul(numerator, ((long long)(exponentNumerator))), csharp2cuda_i64_mul(denominator, ((long long)(exponentDenominator))));
                 if (((csharp2cuda_temp_10) == (0)))
                 {
-#line 213 "TypeRuleUnit.cs"
+#line 203 "TypeRuleUnit.cs"
                     return 0;
                 }
             }
-#line 197 "TypeRuleUnit.cs"
+#line 187 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_0 = &(dimension);
             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_0));
         }
     }
-#line 215 "TypeRuleUnit.cs"
+#line 205 "TypeRuleUnit.cs"
     return 1;
 }
 
-#line 328 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_composed(
-    const int* row,
+#line 315 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_Composed_c47f5cbbb56e7775(
+    int* row,
     int start,
-    const MathBlockDeviceType* inputs,
+    MathBlockDeviceType* inputs,
     int count,
     MathBlockDeviceType* output,
     int mode,
     int seriesMask)
-#line 337 "TypeRuleUnit.cs"
+#line 323 "TypeRuleUnit.cs"
 {
-#line 338 "TypeRuleUnit.cs"
+#line 324 "TypeRuleUnit.cs"
     int p = csharp2cuda_i32_add(start, 2);
-#line 339 "TypeRuleUnit.cs"
+#line 325 "TypeRuleUnit.cs"
     int outputKind = (row)[csharp2cuda_i32_add(p, 0)];
-#line 340 "TypeRuleUnit.cs"
+#line 326 "TypeRuleUnit.cs"
     if (((outputKind) <= (0)))
     {
-#line 341 "TypeRuleUnit.cs"
-#line 341 "TypeRuleUnit.cs"
+#line 327 "TypeRuleUnit.cs"
+#line 327 "TypeRuleUnit.cs"
         int* csharp2cuda_temp_0 = &(outputKind);
-#line 341 "TypeRuleUnit.cs"
-        MathBlockDeviceType csharp2cuda_temp_1 = mathblocks_type_input(inputs, csharp2cuda_i32_neg(outputKind), mode, seriesMask);
-#line 341 "TypeRuleUnit.cs"
+#line 327 "TypeRuleUnit.cs"
+        MathBlockDeviceType csharp2cuda_temp_1 = cs2cuda_global_namespace_MathBlockTypeRuleModule_Input_db1595f5c742dfbb(inputs, csharp2cuda_i32_neg(outputKind), mode, seriesMask);
+#line 327 "TypeRuleUnit.cs"
         int csharp2cuda_temp_2 = (csharp2cuda_temp_1).kind;
         (*(csharp2cuda_temp_0) = csharp2cuda_temp_2);
     }
-#line 342 "TypeRuleUnit.cs"
-    mathblocks_type_clear(output, outputKind);
-#line 344 "TypeRuleUnit.cs"
+#line 328 "TypeRuleUnit.cs"
+    cs2cuda_global_namespace_MathBlockTypeRuleModule_Clear_b4f1dffbb6be6302(output, outputKind);
+#line 330 "TypeRuleUnit.cs"
     int shapeMode = (row)[csharp2cuda_i32_add(p, 1)];
-#line 345 "TypeRuleUnit.cs"
-#line 345 "TypeRuleUnit.cs"
+#line 331 "TypeRuleUnit.cs"
+#line 331 "TypeRuleUnit.cs"
     bool csharp2cuda_temp_3;
-#line 345 "TypeRuleUnit.cs"
+#line 331 "TypeRuleUnit.cs"
     if (!(((shapeMode) == (2))))
     {
-#line 345 "TypeRuleUnit.cs"
+#line 331 "TypeRuleUnit.cs"
         csharp2cuda_temp_3 = ((shapeMode) == (4));
     }
     else
     {
-#line 345 "TypeRuleUnit.cs"
+#line 331 "TypeRuleUnit.cs"
         csharp2cuda_temp_3 = true;
     }
-#line 345 "TypeRuleUnit.cs"
+#line 331 "TypeRuleUnit.cs"
     bool csharp2cuda_temp_4;
-#line 345 "TypeRuleUnit.cs"
+#line 331 "TypeRuleUnit.cs"
     if (!(csharp2cuda_temp_3))
     {
-#line 345 "TypeRuleUnit.cs"
+#line 331 "TypeRuleUnit.cs"
         csharp2cuda_temp_4 = ((shapeMode) == (7));
     }
     else
     {
-#line 345 "TypeRuleUnit.cs"
+#line 331 "TypeRuleUnit.cs"
         csharp2cuda_temp_4 = true;
     }
     if (csharp2cuda_temp_4)
-#line 346 "TypeRuleUnit.cs"
+#line 332 "TypeRuleUnit.cs"
     {
-#line 347 "TypeRuleUnit.cs"
+#line 333 "TypeRuleUnit.cs"
         int csharp2cuda_temp_5 = (row)[csharp2cuda_i32_add(p, 2)];
-#line 347 "TypeRuleUnit.cs"
+#line 333 "TypeRuleUnit.cs"
         int csharp2cuda_temp_6 = (row)[csharp2cuda_i32_add(p, 3)];
-#line 347 "TypeRuleUnit.cs"
-        int merged = mathblocks_type_merge_shape(inputs, csharp2cuda_temp_5, csharp2cuda_temp_6, mode, seriesMask, count, output);
-#line 348 "TypeRuleUnit.cs"
+#line 333 "TypeRuleUnit.cs"
+        int merged = cs2cuda_global_namespace_MathBlockTypeRuleModule_MergeShape_465b8917d10391b0(inputs, csharp2cuda_temp_5, csharp2cuda_temp_6, mode, seriesMask, count, output);
+#line 334 "TypeRuleUnit.cs"
         if (((merged) != (0)))
         {
-#line 349 "TypeRuleUnit.cs"
+#line 335 "TypeRuleUnit.cs"
             return merged;
         }
-#line 350 "TypeRuleUnit.cs"
+#line 336 "TypeRuleUnit.cs"
         if (((shapeMode) == (4)))
         {
-#line 351 "TypeRuleUnit.cs"
-#line 351 "TypeRuleUnit.cs"
+#line 337 "TypeRuleUnit.cs"
+#line 337 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_7 = &((output)->columns);
             (*(csharp2cuda_temp_7) = 0);
         }
         else
         {
-#line 352 "TypeRuleUnit.cs"
+#line 338 "TypeRuleUnit.cs"
             if (((shapeMode) == (7)))
             {
-#line 353 "TypeRuleUnit.cs"
-#line 353 "TypeRuleUnit.cs"
+#line 339 "TypeRuleUnit.cs"
+#line 339 "TypeRuleUnit.cs"
                 int* csharp2cuda_temp_8 = &((output)->rows);
                 (*(csharp2cuda_temp_8) = 0);
             }
         }
-#line 354 "TypeRuleUnit.cs"
+#line 340 "TypeRuleUnit.cs"
         if (((shapeMode) == (7)))
         {
-#line 355 "TypeRuleUnit.cs"
-#line 355 "TypeRuleUnit.cs"
+#line 341 "TypeRuleUnit.cs"
+#line 341 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_9 = &((output)->columns);
             (*(csharp2cuda_temp_9) = 0);
         }
     }
     else
     {
-#line 357 "TypeRuleUnit.cs"
+#line 343 "TypeRuleUnit.cs"
         if (((shapeMode) >= (1)))
-#line 358 "TypeRuleUnit.cs"
+#line 344 "TypeRuleUnit.cs"
         {
-#line 359 "TypeRuleUnit.cs"
+#line 345 "TypeRuleUnit.cs"
             int csharp2cuda_temp_10 = (row)[csharp2cuda_i32_add(p, 2)];
-#line 359 "TypeRuleUnit.cs"
-            MathBlockDeviceType shapeA = mathblocks_type_input(inputs, csharp2cuda_temp_10, mode, seriesMask);
-#line 360 "TypeRuleUnit.cs"
+#line 345 "TypeRuleUnit.cs"
+            MathBlockDeviceType shapeA = cs2cuda_global_namespace_MathBlockTypeRuleModule_Input_db1595f5c742dfbb(inputs, csharp2cuda_temp_10, mode, seriesMask);
+#line 346 "TypeRuleUnit.cs"
             if (((shapeMode) == (1)))
-#line 361 "TypeRuleUnit.cs"
+#line 347 "TypeRuleUnit.cs"
             {
-#line 362 "TypeRuleUnit.cs"
-#line 362 "TypeRuleUnit.cs"
+#line 348 "TypeRuleUnit.cs"
+#line 348 "TypeRuleUnit.cs"
                 int* csharp2cuda_temp_11 = &((output)->rows);
-#line 362 "TypeRuleUnit.cs"
+#line 348 "TypeRuleUnit.cs"
                 int csharp2cuda_temp_12 = (shapeA).rows;
                 (*(csharp2cuda_temp_11) = csharp2cuda_temp_12);
-#line 363 "TypeRuleUnit.cs"
-#line 363 "TypeRuleUnit.cs"
+#line 349 "TypeRuleUnit.cs"
+#line 349 "TypeRuleUnit.cs"
                 int* csharp2cuda_temp_13 = &((output)->columns);
-#line 363 "TypeRuleUnit.cs"
+#line 349 "TypeRuleUnit.cs"
                 int csharp2cuda_temp_14 = (shapeA).columns;
                 (*(csharp2cuda_temp_13) = csharp2cuda_temp_14);
             }
             else
             {
-#line 365 "TypeRuleUnit.cs"
+#line 351 "TypeRuleUnit.cs"
                 if (((shapeMode) == (3)))
-#line 366 "TypeRuleUnit.cs"
+#line 352 "TypeRuleUnit.cs"
                 {
-#line 367 "TypeRuleUnit.cs"
-#line 367 "TypeRuleUnit.cs"
+#line 353 "TypeRuleUnit.cs"
+#line 353 "TypeRuleUnit.cs"
                     int* csharp2cuda_temp_15 = &((output)->rows);
-#line 367 "TypeRuleUnit.cs"
+#line 353 "TypeRuleUnit.cs"
                     int csharp2cuda_temp_16 = (shapeA).rows;
                     (*(csharp2cuda_temp_15) = csharp2cuda_temp_16);
                 }
                 else
                 {
-#line 369 "TypeRuleUnit.cs"
+#line 355 "TypeRuleUnit.cs"
                     if (((shapeMode) == (5)))
-#line 370 "TypeRuleUnit.cs"
+#line 356 "TypeRuleUnit.cs"
                     {
-#line 371 "TypeRuleUnit.cs"
+#line 357 "TypeRuleUnit.cs"
                         int csharp2cuda_temp_17 = (row)[csharp2cuda_i32_add(p, 3)];
-#line 371 "TypeRuleUnit.cs"
-                        MathBlockDeviceType shapeB = mathblocks_type_input(inputs, csharp2cuda_temp_17, mode, seriesMask);
-#line 372 "TypeRuleUnit.cs"
-#line 372 "TypeRuleUnit.cs"
+#line 357 "TypeRuleUnit.cs"
+                        MathBlockDeviceType shapeB = cs2cuda_global_namespace_MathBlockTypeRuleModule_Input_db1595f5c742dfbb(inputs, csharp2cuda_temp_17, mode, seriesMask);
+#line 358 "TypeRuleUnit.cs"
+#line 358 "TypeRuleUnit.cs"
                         int csharp2cuda_temp_18 = (shapeA).rows;
-#line 372 "TypeRuleUnit.cs"
+#line 358 "TypeRuleUnit.cs"
                         bool csharp2cuda_temp_19;
-#line 372 "TypeRuleUnit.cs"
+#line 358 "TypeRuleUnit.cs"
                         if (((csharp2cuda_temp_18) > (0)))
                         {
-#line 372 "TypeRuleUnit.cs"
+#line 358 "TypeRuleUnit.cs"
                             int csharp2cuda_temp_20 = (shapeB).rows;
-#line 372 "TypeRuleUnit.cs"
+#line 358 "TypeRuleUnit.cs"
                             csharp2cuda_temp_19 = ((csharp2cuda_temp_20) > (0));
                         }
                         else
                         {
-#line 372 "TypeRuleUnit.cs"
+#line 358 "TypeRuleUnit.cs"
                             csharp2cuda_temp_19 = false;
                         }
                         if (csharp2cuda_temp_19)
-#line 373 "TypeRuleUnit.cs"
+#line 359 "TypeRuleUnit.cs"
                         {
-#line 374 "TypeRuleUnit.cs"
+#line 360 "TypeRuleUnit.cs"
                             int csharp2cuda_temp_21 = (shapeA).rows;
-#line 374 "TypeRuleUnit.cs"
+#line 360 "TypeRuleUnit.cs"
                             int csharp2cuda_temp_22 = (shapeB).rows;
-#line 374 "TypeRuleUnit.cs"
+#line 360 "TypeRuleUnit.cs"
                             long long total = csharp2cuda_i64_add(((long long)(csharp2cuda_temp_21)), ((long long)(csharp2cuda_temp_22)));
-#line 375 "TypeRuleUnit.cs"
+#line 361 "TypeRuleUnit.cs"
                             if (((total) > (2147483647LL)))
                             {
-#line 376 "TypeRuleUnit.cs"
+#line 362 "TypeRuleUnit.cs"
                                 return 6;
                             }
-#line 377 "TypeRuleUnit.cs"
-#line 377 "TypeRuleUnit.cs"
+#line 363 "TypeRuleUnit.cs"
+#line 363 "TypeRuleUnit.cs"
                             int* csharp2cuda_temp_23 = &((output)->rows);
                             (*(csharp2cuda_temp_23) = csharp2cuda_i32_from_bits(total));
                         }
                     }
                     else
                     {
-#line 380 "TypeRuleUnit.cs"
+#line 366 "TypeRuleUnit.cs"
                         if (((shapeMode) == (6)))
-#line 381 "TypeRuleUnit.cs"
+#line 367 "TypeRuleUnit.cs"
                         {
-#line 382 "TypeRuleUnit.cs"
-#line 382 "TypeRuleUnit.cs"
+#line 368 "TypeRuleUnit.cs"
+#line 368 "TypeRuleUnit.cs"
                             int csharp2cuda_temp_24 = (shapeA).rows;
                             if (((csharp2cuda_temp_24) > (0)))
-#line 383 "TypeRuleUnit.cs"
+#line 369 "TypeRuleUnit.cs"
                             {
-#line 384 "TypeRuleUnit.cs"
+#line 370 "TypeRuleUnit.cs"
                                 int csharp2cuda_temp_25 = (shapeA).rows;
-#line 384 "TypeRuleUnit.cs"
+#line 370 "TypeRuleUnit.cs"
                                 int csharp2cuda_temp_26 = (row)[csharp2cuda_i32_add(p, 3)];
-#line 384 "TypeRuleUnit.cs"
+#line 370 "TypeRuleUnit.cs"
                                 long long total = csharp2cuda_i64_add(((long long)(csharp2cuda_temp_25)), ((long long)(csharp2cuda_temp_26)));
-#line 385 "TypeRuleUnit.cs"
+#line 371 "TypeRuleUnit.cs"
                                 if (((total) > (2147483647LL)))
                                 {
-#line 386 "TypeRuleUnit.cs"
+#line 372 "TypeRuleUnit.cs"
                                     return 6;
                                 }
-#line 387 "TypeRuleUnit.cs"
-#line 387 "TypeRuleUnit.cs"
+#line 373 "TypeRuleUnit.cs"
+#line 373 "TypeRuleUnit.cs"
                                 int* csharp2cuda_temp_27 = &((output)->rows);
                                 (*(csharp2cuda_temp_27) = csharp2cuda_i32_from_bits(total));
                             }
                         }
                         else
                         {
-#line 390 "TypeRuleUnit.cs"
+#line 376 "TypeRuleUnit.cs"
                             if (((shapeMode) == (9)))
-#line 391 "TypeRuleUnit.cs"
+#line 377 "TypeRuleUnit.cs"
                             {
-#line 392 "TypeRuleUnit.cs"
-#line 392 "TypeRuleUnit.cs"
+#line 378 "TypeRuleUnit.cs"
+#line 378 "TypeRuleUnit.cs"
                                 int csharp2cuda_temp_28 = (shapeA).rows;
                                 if (((csharp2cuda_temp_28) > (0)))
                                 {
-#line 393 "TypeRuleUnit.cs"
-#line 393 "TypeRuleUnit.cs"
+#line 379 "TypeRuleUnit.cs"
+#line 379 "TypeRuleUnit.cs"
                                     int* csharp2cuda_temp_29 = &((output)->rows);
-#line 393 "TypeRuleUnit.cs"
+#line 379 "TypeRuleUnit.cs"
                                     int csharp2cuda_temp_30 = (shapeA).rows;
-#line 393 "TypeRuleUnit.cs"
+#line 379 "TypeRuleUnit.cs"
                                     int csharp2cuda_temp_31 = (row)[csharp2cuda_i32_add(p, 3)];
                                     (*(csharp2cuda_temp_29) = csharp2cuda_i32_from_bits(csharp2cuda_i64_add(((long long)(csharp2cuda_temp_30)), ((long long)(csharp2cuda_temp_31)))));
                                 }
                             }
                             else
                             {
-#line 395 "TypeRuleUnit.cs"
+#line 381 "TypeRuleUnit.cs"
                                 if (((shapeMode) == (8)))
-#line 396 "TypeRuleUnit.cs"
+#line 382 "TypeRuleUnit.cs"
                                 {
-#line 397 "TypeRuleUnit.cs"
-#line 397 "TypeRuleUnit.cs"
+#line 383 "TypeRuleUnit.cs"
+#line 383 "TypeRuleUnit.cs"
                                     int* csharp2cuda_temp_32 = &((output)->rows);
                                     (*(csharp2cuda_temp_32) = 1);
-#line 398 "TypeRuleUnit.cs"
-#line 398 "TypeRuleUnit.cs"
+#line 384 "TypeRuleUnit.cs"
+#line 384 "TypeRuleUnit.cs"
                                     int csharp2cuda_temp_33 = (shapeA).rows;
                                     if (((csharp2cuda_temp_33) > (1)))
                                     {
-#line 399 "TypeRuleUnit.cs"
-#line 399 "TypeRuleUnit.cs"
+#line 385 "TypeRuleUnit.cs"
+#line 385 "TypeRuleUnit.cs"
                                         int* csharp2cuda_temp_34 = &((output)->rows);
-#line 399 "TypeRuleUnit.cs"
+#line 385 "TypeRuleUnit.cs"
                                         int csharp2cuda_temp_35 = (shapeA).rows;
                                         (*(csharp2cuda_temp_34) = csharp2cuda_i32_sub(csharp2cuda_temp_35, 1));
                                     }
@@ -1281,236 +1281,236 @@ __device__ int mathblocks_type_composed(
             }
         }
     }
-#line 403 "TypeRuleUnit.cs"
+#line 389 "TypeRuleUnit.cs"
     int unitMode = (row)[csharp2cuda_i32_add(p, 4)];
-#line 404 "TypeRuleUnit.cs"
+#line 390 "TypeRuleUnit.cs"
     if (((unitMode) == (0)))
     {
-#line 405 "TypeRuleUnit.cs"
+#line 391 "TypeRuleUnit.cs"
         return 0;
     }
-#line 406 "TypeRuleUnit.cs"
+#line 392 "TypeRuleUnit.cs"
     int csharp2cuda_temp_36 = (row)[csharp2cuda_i32_add(p, 5)];
-#line 406 "TypeRuleUnit.cs"
-    MathBlockDeviceType unitA = mathblocks_type_input(inputs, csharp2cuda_temp_36, mode, seriesMask);
-#line 407 "TypeRuleUnit.cs"
+#line 392 "TypeRuleUnit.cs"
+    MathBlockDeviceType unitA = cs2cuda_global_namespace_MathBlockTypeRuleModule_Input_db1595f5c742dfbb(inputs, csharp2cuda_temp_36, mode, seriesMask);
+#line 393 "TypeRuleUnit.cs"
     MathBlockDeviceType unitB;
-#line 408 "TypeRuleUnit.cs"
-#line 408 "TypeRuleUnit.cs"
+#line 394 "TypeRuleUnit.cs"
+#line 394 "TypeRuleUnit.cs"
     MathBlockDeviceType* csharp2cuda_temp_37 = &(unitB);
-    mathblocks_type_clear(csharp2cuda_temp_37, 0);
-#line 409 "TypeRuleUnit.cs"
+    cs2cuda_global_namespace_MathBlockTypeRuleModule_Clear_b4f1dffbb6be6302(csharp2cuda_temp_37, 0);
+#line 395 "TypeRuleUnit.cs"
     if (((unitMode) >= (3)))
     {
-#line 410 "TypeRuleUnit.cs"
-#line 410 "TypeRuleUnit.cs"
+#line 396 "TypeRuleUnit.cs"
+#line 396 "TypeRuleUnit.cs"
         MathBlockDeviceType* csharp2cuda_temp_38 = &(unitB);
-#line 410 "TypeRuleUnit.cs"
+#line 396 "TypeRuleUnit.cs"
         int csharp2cuda_temp_39 = (row)[csharp2cuda_i32_add(p, 6)];
-#line 410 "TypeRuleUnit.cs"
-        MathBlockDeviceType csharp2cuda_temp_40 = mathblocks_type_input(inputs, csharp2cuda_temp_39, mode, seriesMask);
+#line 396 "TypeRuleUnit.cs"
+        MathBlockDeviceType csharp2cuda_temp_40 = cs2cuda_global_namespace_MathBlockTypeRuleModule_Input_db1595f5c742dfbb(inputs, csharp2cuda_temp_39, mode, seriesMask);
         (*(csharp2cuda_temp_38) = csharp2cuda_temp_40);
     }
-#line 411 "TypeRuleUnit.cs"
+#line 397 "TypeRuleUnit.cs"
     int combined = 1;
-#line 412 "TypeRuleUnit.cs"
+#line 398 "TypeRuleUnit.cs"
     if (((unitMode) == (1)))
     {
-#line 413 "TypeRuleUnit.cs"
-#line 413 "TypeRuleUnit.cs"
+#line 399 "TypeRuleUnit.cs"
+#line 399 "TypeRuleUnit.cs"
         MathBlockDeviceType* csharp2cuda_temp_41 = &(unitA);
-        mathblocks_type_copy_unit(csharp2cuda_temp_41, output);
+        cs2cuda_global_namespace_MathBlockTypeRuleModule_CopyUnit_e45f8d38f29eb6ea(csharp2cuda_temp_41, output);
     }
     else
     {
-#line 414 "TypeRuleUnit.cs"
+#line 400 "TypeRuleUnit.cs"
         if (((unitMode) == (2)))
         {
-#line 415 "TypeRuleUnit.cs"
-#line 415 "TypeRuleUnit.cs"
+#line 401 "TypeRuleUnit.cs"
+#line 401 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_42 = &(combined);
-#line 415 "TypeRuleUnit.cs"
+#line 401 "TypeRuleUnit.cs"
             MathBlockDeviceType* csharp2cuda_temp_43 = &(unitA);
-#line 415 "TypeRuleUnit.cs"
+#line 401 "TypeRuleUnit.cs"
             int csharp2cuda_temp_44 = (row)[csharp2cuda_i32_add(p, 7)];
-#line 415 "TypeRuleUnit.cs"
+#line 401 "TypeRuleUnit.cs"
             int csharp2cuda_temp_45 = (row)[csharp2cuda_i32_add(p, 8)];
-#line 415 "TypeRuleUnit.cs"
-            int csharp2cuda_temp_46 = mathblocks_type_combine_unit(csharp2cuda_temp_43, ((MathBlockDeviceType*)(nullptr)), 1, csharp2cuda_temp_44, csharp2cuda_temp_45, output);
+#line 401 "TypeRuleUnit.cs"
+            int csharp2cuda_temp_46 = cs2cuda_global_namespace_MathBlockTypeRuleModule_CombineUnit_6e4d2fcd23f06e4c(csharp2cuda_temp_43, ((MathBlockDeviceType*)(nullptr)), 1, csharp2cuda_temp_44, csharp2cuda_temp_45, output);
             (*(csharp2cuda_temp_42) = csharp2cuda_temp_46);
         }
         else
         {
-#line 416 "TypeRuleUnit.cs"
+#line 402 "TypeRuleUnit.cs"
             if (((unitMode) == (3)))
             {
-#line 417 "TypeRuleUnit.cs"
-#line 417 "TypeRuleUnit.cs"
+#line 403 "TypeRuleUnit.cs"
+#line 403 "TypeRuleUnit.cs"
                 int* csharp2cuda_temp_47 = &(combined);
-#line 417 "TypeRuleUnit.cs"
+#line 403 "TypeRuleUnit.cs"
                 MathBlockDeviceType* csharp2cuda_temp_48 = &(unitA);
-#line 417 "TypeRuleUnit.cs"
+#line 403 "TypeRuleUnit.cs"
                 MathBlockDeviceType* csharp2cuda_temp_49 = &(unitB);
-#line 417 "TypeRuleUnit.cs"
-                int csharp2cuda_temp_50 = mathblocks_type_combine_unit(csharp2cuda_temp_48, csharp2cuda_temp_49, 1, 1, 1, output);
+#line 403 "TypeRuleUnit.cs"
+                int csharp2cuda_temp_50 = cs2cuda_global_namespace_MathBlockTypeRuleModule_CombineUnit_6e4d2fcd23f06e4c(csharp2cuda_temp_48, csharp2cuda_temp_49, 1, 1, 1, output);
                 (*(csharp2cuda_temp_47) = csharp2cuda_temp_50);
             }
             else
             {
-#line 418 "TypeRuleUnit.cs"
+#line 404 "TypeRuleUnit.cs"
                 if (((unitMode) == (4)))
                 {
-#line 419 "TypeRuleUnit.cs"
-#line 419 "TypeRuleUnit.cs"
+#line 405 "TypeRuleUnit.cs"
+#line 405 "TypeRuleUnit.cs"
                     int* csharp2cuda_temp_51 = &(combined);
-#line 419 "TypeRuleUnit.cs"
+#line 405 "TypeRuleUnit.cs"
                     MathBlockDeviceType* csharp2cuda_temp_52 = &(unitA);
-#line 419 "TypeRuleUnit.cs"
+#line 405 "TypeRuleUnit.cs"
                     MathBlockDeviceType* csharp2cuda_temp_53 = &(unitB);
-#line 419 "TypeRuleUnit.cs"
-                    int csharp2cuda_temp_54 = mathblocks_type_combine_unit(csharp2cuda_temp_52, csharp2cuda_temp_53, csharp2cuda_i32_neg(1), 1, 1, output);
+#line 405 "TypeRuleUnit.cs"
+                    int csharp2cuda_temp_54 = cs2cuda_global_namespace_MathBlockTypeRuleModule_CombineUnit_6e4d2fcd23f06e4c(csharp2cuda_temp_52, csharp2cuda_temp_53, csharp2cuda_i32_neg(1), 1, 1, output);
                     (*(csharp2cuda_temp_51) = csharp2cuda_temp_54);
                 }
             }
         }
     }
-#line 420 "TypeRuleUnit.cs"
+#line 406 "TypeRuleUnit.cs"
     if (((combined) == (0)))
     {
-#line 421 "TypeRuleUnit.cs"
+#line 407 "TypeRuleUnit.cs"
         return 6;
     }
-#line 422 "TypeRuleUnit.cs"
+#line 408 "TypeRuleUnit.cs"
     return 0;
 }
 
-#line 155 "TypeRuleUnit.cs"
-__device__ void mathblocks_type_copy_unit(const MathBlockDeviceType* source, MathBlockDeviceType* target)
-#line 157 "TypeRuleUnit.cs"
+#line 149 "TypeRuleUnit.cs"
+__device__ void cs2cuda_global_namespace_MathBlockTypeRuleModule_CopyUnit_e45f8d38f29eb6ea(MathBlockDeviceType* source, MathBlockDeviceType* target)
+#line 150 "TypeRuleUnit.cs"
 {
-#line 158 "TypeRuleUnit.cs"
+#line 151 "TypeRuleUnit.cs"
     {
-#line 158 "TypeRuleUnit.cs"
+#line 151 "TypeRuleUnit.cs"
         int dimension = 0;
         while (true)
         {
             if (!(((dimension) < (4))))
                 break;
-#line 159 "TypeRuleUnit.cs"
-#line 159 "TypeRuleUnit.cs"
-            int csharp2cuda_temp_1 = mathblocks_type_unit_numerator(source, dimension);
-#line 159 "TypeRuleUnit.cs"
-            int csharp2cuda_temp_2 = mathblocks_type_unit_denominator(source, dimension);
-            mathblocks_type_set_unit(target, dimension, csharp2cuda_temp_1, csharp2cuda_temp_2);
-#line 158 "TypeRuleUnit.cs"
+#line 152 "TypeRuleUnit.cs"
+#line 152 "TypeRuleUnit.cs"
+            int csharp2cuda_temp_1 = cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitNumerator_33ce368a9b11f062(source, dimension);
+#line 152 "TypeRuleUnit.cs"
+            int csharp2cuda_temp_2 = cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitDenominator_ebbd4adaf715b6b5(source, dimension);
+            cs2cuda_global_namespace_MathBlockTypeRuleModule_SetUnit_9260a5921a632c79(target, dimension, csharp2cuda_temp_1, csharp2cuda_temp_2);
+#line 151 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_0 = &(dimension);
             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_0));
         }
     }
 }
 
-#line 426 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_core(
-    const int* row,
+#line 412 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_Core_367ffc9d1aef367e(
+    int* row,
     int start,
-    const MathBlockDeviceType* inputs,
+    MathBlockDeviceType* inputs,
     int count,
     MathBlockDeviceType* output,
     int mode,
     int seriesMask)
-#line 435 "TypeRuleUnit.cs"
+#line 420 "TypeRuleUnit.cs"
 {
-#line 436 "TypeRuleUnit.cs"
-    int checkedOperands = mathblocks_type_check_operands(row, start, inputs, count, mode, seriesMask);
-#line 437 "TypeRuleUnit.cs"
+#line 421 "TypeRuleUnit.cs"
+    int checkedOperands = cs2cuda_global_namespace_MathBlockTypeRuleModule_CheckOperands_23fc675e4357bd71(row, start, inputs, count, mode, seriesMask);
+#line 422 "TypeRuleUnit.cs"
     if (((checkedOperands) != (0)))
     {
-#line 438 "TypeRuleUnit.cs"
+#line 423 "TypeRuleUnit.cs"
         return checkedOperands;
     }
-#line 439 "TypeRuleUnit.cs"
-#line 439 "TypeRuleUnit.cs"
+#line 424 "TypeRuleUnit.cs"
+#line 424 "TypeRuleUnit.cs"
     int csharp2cuda_temp_0 = (row)[start];
     if (((csharp2cuda_temp_0) == (1)))
     {
-#line 440 "TypeRuleUnit.cs"
-        return mathblocks_type_composed(row, start, inputs, count, output, mode, seriesMask);
+#line 425 "TypeRuleUnit.cs"
+        return cs2cuda_global_namespace_MathBlockTypeRuleModule_Composed_c47f5cbbb56e7775(row, start, inputs, count, output, mode, seriesMask);
     }
-#line 441 "TypeRuleUnit.cs"
+#line 426 "TypeRuleUnit.cs"
     return 7;
 }
 
-#line 473 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_elementwise_form(
-    const int* row,
-    const MathBlockDeviceType* inputs,
+#line 457 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_ElementwiseForm_ba1101e991286add(
+    int* row,
+    MathBlockDeviceType* inputs,
     int count,
     MathBlockDeviceType* output)
-#line 479 "TypeRuleUnit.cs"
+#line 462 "TypeRuleUnit.cs"
 {
-#line 480 "TypeRuleUnit.cs"
+#line 463 "TypeRuleUnit.cs"
     int validity = (row)[2];
-#line 481 "TypeRuleUnit.cs"
+#line 464 "TypeRuleUnit.cs"
     int source = 3;
-#line 482 "TypeRuleUnit.cs"
+#line 465 "TypeRuleUnit.cs"
     int csharp2cuda_temp_0 = (row)[csharp2cuda_i32_add(source, 1)];
-#line 482 "TypeRuleUnit.cs"
+#line 465 "TypeRuleUnit.cs"
     int sourceArity = (row)[csharp2cuda_i32_add(csharp2cuda_i32_add(source, 2), csharp2cuda_temp_0)];
-#line 483 "TypeRuleUnit.cs"
+#line 466 "TypeRuleUnit.cs"
     if (((count) != (csharp2cuda_i32_sub(csharp2cuda_i32_add(sourceArity, 1), validity))))
     {
-#line 484 "TypeRuleUnit.cs"
+#line 467 "TypeRuleUnit.cs"
         return 1;
     }
-#line 485 "TypeRuleUnit.cs"
+#line 468 "TypeRuleUnit.cs"
     int rows = 0;
-#line 486 "TypeRuleUnit.cs"
+#line 469 "TypeRuleUnit.cs"
     int vectors = 0;
-#line 487 "TypeRuleUnit.cs"
+#line 470 "TypeRuleUnit.cs"
     int consistent = 1;
-#line 488 "TypeRuleUnit.cs"
+#line 471 "TypeRuleUnit.cs"
     {
-#line 488 "TypeRuleUnit.cs"
+#line 471 "TypeRuleUnit.cs"
         int index = 0;
         while (true)
         {
             if (!(((index) < (sourceArity))))
                 break;
-#line 489 "TypeRuleUnit.cs"
+#line 472 "TypeRuleUnit.cs"
             {
-#line 490 "TypeRuleUnit.cs"
-#line 490 "TypeRuleUnit.cs"
+#line 473 "TypeRuleUnit.cs"
+#line 473 "TypeRuleUnit.cs"
                 int csharp2cuda_temp_2 = ((inputs)[index]).kind;
                 if (((csharp2cuda_temp_2) != (4)))
                 {
-#line 491 "TypeRuleUnit.cs"
+#line 474 "TypeRuleUnit.cs"
                     goto csharp2cuda_for_continue_0;
                 }
-#line 492 "TypeRuleUnit.cs"
-#line 492 "TypeRuleUnit.cs"
+#line 475 "TypeRuleUnit.cs"
+#line 475 "TypeRuleUnit.cs"
                 int* csharp2cuda_temp_3 = &(vectors);
                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_3));
-#line 493 "TypeRuleUnit.cs"
+#line 476 "TypeRuleUnit.cs"
                 int length = ((inputs)[index]).rows;
-#line 494 "TypeRuleUnit.cs"
+#line 477 "TypeRuleUnit.cs"
                 if (((length) > (0)))
-#line 495 "TypeRuleUnit.cs"
+#line 478 "TypeRuleUnit.cs"
                 {
-#line 496 "TypeRuleUnit.cs"
+#line 479 "TypeRuleUnit.cs"
                     if (((rows) == (0)))
                     {
-#line 497 "TypeRuleUnit.cs"
-#line 497 "TypeRuleUnit.cs"
+#line 480 "TypeRuleUnit.cs"
+#line 480 "TypeRuleUnit.cs"
                         int* csharp2cuda_temp_4 = &(rows);
                         (*(csharp2cuda_temp_4) = length);
                     }
                     else
                     {
-#line 498 "TypeRuleUnit.cs"
+#line 481 "TypeRuleUnit.cs"
                         if (((rows) != (length)))
                         {
-#line 499 "TypeRuleUnit.cs"
-#line 499 "TypeRuleUnit.cs"
+#line 482 "TypeRuleUnit.cs"
+#line 482 "TypeRuleUnit.cs"
                             int* csharp2cuda_temp_5 = &(consistent);
                             (*(csharp2cuda_temp_5) = 0);
                         }
@@ -1518,616 +1518,636 @@ __device__ int mathblocks_type_elementwise_form(
                 }
             }
             csharp2cuda_for_continue_0:
-#line 488 "TypeRuleUnit.cs"
+#line 471 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_1 = &(index);
             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_1));
         }
     }
-#line 502 "TypeRuleUnit.cs"
+#line 485 "TypeRuleUnit.cs"
     if (((vectors) == (0)))
     {
-#line 503 "TypeRuleUnit.cs"
+#line 486 "TypeRuleUnit.cs"
         return 7;
     }
-#line 504 "TypeRuleUnit.cs"
+#line 487 "TypeRuleUnit.cs"
     if (((consistent) == (0)))
     {
-#line 505 "TypeRuleUnit.cs"
-#line 505 "TypeRuleUnit.cs"
+#line 488 "TypeRuleUnit.cs"
+#line 488 "TypeRuleUnit.cs"
         int* csharp2cuda_temp_6 = &(rows);
         (*(csharp2cuda_temp_6) = 0);
     }
-#line 506 "TypeRuleUnit.cs"
+#line 489 "TypeRuleUnit.cs"
     MathBlockDeviceType result;
-#line 507 "TypeRuleUnit.cs"
-#line 507 "TypeRuleUnit.cs"
+#line 490 "TypeRuleUnit.cs"
+#line 490 "TypeRuleUnit.cs"
     MathBlockDeviceType* csharp2cuda_temp_7 = &(result);
-    mathblocks_type_clear(csharp2cuda_temp_7, 0);
-#line 508 "TypeRuleUnit.cs"
+    cs2cuda_global_namespace_MathBlockTypeRuleModule_Clear_b4f1dffbb6be6302(csharp2cuda_temp_7, 0);
+#line 491 "TypeRuleUnit.cs"
     MathBlockDeviceType* csharp2cuda_temp_8 = &(result);
-#line 508 "TypeRuleUnit.cs"
-    int status = mathblocks_type_core(row, source, inputs, sourceArity, csharp2cuda_temp_8, 1, 0);
-#line 509 "TypeRuleUnit.cs"
+#line 491 "TypeRuleUnit.cs"
+    int status = cs2cuda_global_namespace_MathBlockTypeRuleModule_Core_367ffc9d1aef367e(row, source, inputs, sourceArity, csharp2cuda_temp_8, 1, 0);
+#line 492 "TypeRuleUnit.cs"
     if (((status) != (0)))
     {
-#line 510 "TypeRuleUnit.cs"
+#line 493 "TypeRuleUnit.cs"
         return status;
     }
-#line 511 "TypeRuleUnit.cs"
-#line 511 "TypeRuleUnit.cs"
+#line 494 "TypeRuleUnit.cs"
+#line 494 "TypeRuleUnit.cs"
     int csharp2cuda_temp_9 = (result).kind;
     if (((csharp2cuda_temp_9) != (1)))
     {
-#line 512 "TypeRuleUnit.cs"
+#line 495 "TypeRuleUnit.cs"
         return 2;
     }
-#line 513 "TypeRuleUnit.cs"
-#line 513 "TypeRuleUnit.cs"
+#line 496 "TypeRuleUnit.cs"
+#line 496 "TypeRuleUnit.cs"
     MathBlockDeviceType* csharp2cuda_temp_10 = &(result);
-    return mathblocks_type_lift_result(inputs, csharp2cuda_temp_10, validity, sourceArity, rows, output);
+    return cs2cuda_global_namespace_MathBlockTypeRuleModule_LiftResult_bbd399c38824e4e5(inputs, csharp2cuda_temp_10, validity, sourceArity, rows, output);
 }
 
 #line 54 "TypeRuleUnit.cs"
-__device__ long long mathblocks_type_gcd(long long left, long long right)
-#line 56 "TypeRuleUnit.cs"
+__device__ long long cs2cuda_global_namespace_MathBlockTypeRuleModule_GreatestCommonDivisor_8904907116a5352b(long long left, long long right)
+#line 55 "TypeRuleUnit.cs"
 {
-#line 57 "TypeRuleUnit.cs"
+#line 56 "TypeRuleUnit.cs"
     if (((left) < (((long long)(0)))))
     {
-#line 58 "TypeRuleUnit.cs"
-#line 58 "TypeRuleUnit.cs"
+#line 57 "TypeRuleUnit.cs"
+#line 57 "TypeRuleUnit.cs"
         long long* csharp2cuda_temp_0 = &(left);
         (*(csharp2cuda_temp_0) = csharp2cuda_i64_neg(left));
     }
-#line 59 "TypeRuleUnit.cs"
+#line 58 "TypeRuleUnit.cs"
     if (((right) < (((long long)(0)))))
     {
-#line 60 "TypeRuleUnit.cs"
-#line 60 "TypeRuleUnit.cs"
+#line 59 "TypeRuleUnit.cs"
+#line 59 "TypeRuleUnit.cs"
         long long* csharp2cuda_temp_1 = &(right);
         (*(csharp2cuda_temp_1) = csharp2cuda_i64_neg(right));
     }
-#line 61 "TypeRuleUnit.cs"
+#line 60 "TypeRuleUnit.cs"
     if (((left) == (((long long)(0)))))
-#line 62 "TypeRuleUnit.cs"
+#line 61 "TypeRuleUnit.cs"
     {
-#line 63 "TypeRuleUnit.cs"
+#line 62 "TypeRuleUnit.cs"
         if (((right) == (((long long)(0)))))
         {
-#line 64 "TypeRuleUnit.cs"
+#line 63 "TypeRuleUnit.cs"
             return ((long long)(1));
         }
-#line 65 "TypeRuleUnit.cs"
+#line 64 "TypeRuleUnit.cs"
         return right;
     }
-#line 67 "TypeRuleUnit.cs"
+#line 66 "TypeRuleUnit.cs"
     while (true)
     {
         if (!(((right) != (((long long)(0))))))
             break;
-#line 68 "TypeRuleUnit.cs"
+#line 67 "TypeRuleUnit.cs"
         {
-#line 69 "TypeRuleUnit.cs"
+#line 68 "TypeRuleUnit.cs"
             long long next = csharp2cuda_i64_rem(left, right);
-#line 70 "TypeRuleUnit.cs"
-#line 70 "TypeRuleUnit.cs"
+#line 69 "TypeRuleUnit.cs"
+#line 69 "TypeRuleUnit.cs"
             long long* csharp2cuda_temp_2 = &(left);
             (*(csharp2cuda_temp_2) = right);
-#line 71 "TypeRuleUnit.cs"
-#line 71 "TypeRuleUnit.cs"
+#line 70 "TypeRuleUnit.cs"
+#line 70 "TypeRuleUnit.cs"
             long long* csharp2cuda_temp_3 = &(right);
             (*(csharp2cuda_temp_3) = next);
         }
     }
-#line 73 "TypeRuleUnit.cs"
+#line 72 "TypeRuleUnit.cs"
     return left;
 }
 
-#line 220 "TypeRuleUnit.cs"
-__device__ MathBlockDeviceType mathblocks_type_input(
-    const MathBlockDeviceType* inputs,
+#line 210 "TypeRuleUnit.cs"
+__device__ MathBlockDeviceType cs2cuda_global_namespace_MathBlockTypeRuleModule_Input_db1595f5c742dfbb(
+    MathBlockDeviceType* inputs,
     int index,
     int mode,
     int seriesMask)
-#line 226 "TypeRuleUnit.cs"
+#line 215 "TypeRuleUnit.cs"
 {
-#line 227 "TypeRuleUnit.cs"
+#line 216 "TypeRuleUnit.cs"
     MathBlockDeviceType value = (inputs)[index];
-#line 228 "TypeRuleUnit.cs"
-#line 228 "TypeRuleUnit.cs"
+#line 217 "TypeRuleUnit.cs"
+#line 217 "TypeRuleUnit.cs"
     bool csharp2cuda_temp_0;
-#line 228 "TypeRuleUnit.cs"
+#line 217 "TypeRuleUnit.cs"
     if (((mode) == (1)))
     {
-#line 228 "TypeRuleUnit.cs"
+#line 217 "TypeRuleUnit.cs"
         int csharp2cuda_temp_1 = (value).kind;
-#line 228 "TypeRuleUnit.cs"
+#line 217 "TypeRuleUnit.cs"
         csharp2cuda_temp_0 = ((csharp2cuda_temp_1) == (4));
     }
     else
     {
-#line 228 "TypeRuleUnit.cs"
+#line 217 "TypeRuleUnit.cs"
         csharp2cuda_temp_0 = false;
     }
     if (csharp2cuda_temp_0)
-#line 229 "TypeRuleUnit.cs"
+#line 218 "TypeRuleUnit.cs"
     {
-#line 230 "TypeRuleUnit.cs"
-#line 230 "TypeRuleUnit.cs"
+#line 219 "TypeRuleUnit.cs"
+#line 219 "TypeRuleUnit.cs"
         int* csharp2cuda_temp_2 = &((value).kind);
         (*(csharp2cuda_temp_2) = 1);
-#line 231 "TypeRuleUnit.cs"
-#line 231 "TypeRuleUnit.cs"
+#line 220 "TypeRuleUnit.cs"
+#line 220 "TypeRuleUnit.cs"
         int* csharp2cuda_temp_3 = &((value).rows);
         (*(csharp2cuda_temp_3) = 0);
-#line 232 "TypeRuleUnit.cs"
-#line 232 "TypeRuleUnit.cs"
+#line 221 "TypeRuleUnit.cs"
+#line 221 "TypeRuleUnit.cs"
         int* csharp2cuda_temp_4 = &((value).columns);
         (*(csharp2cuda_temp_4) = 0);
     }
     else
     {
-#line 234 "TypeRuleUnit.cs"
-#line 234 "TypeRuleUnit.cs"
+#line 223 "TypeRuleUnit.cs"
+#line 223 "TypeRuleUnit.cs"
         bool csharp2cuda_temp_5;
-#line 234 "TypeRuleUnit.cs"
+#line 223 "TypeRuleUnit.cs"
         if (((mode) == (2)))
         {
-#line 234 "TypeRuleUnit.cs"
+#line 223 "TypeRuleUnit.cs"
             csharp2cuda_temp_5 = ((csharp2cuda_i32_and(csharp2cuda_i32_shr(seriesMask, index), 1)) != (0));
         }
         else
         {
-#line 234 "TypeRuleUnit.cs"
+#line 223 "TypeRuleUnit.cs"
             csharp2cuda_temp_5 = false;
         }
         if (csharp2cuda_temp_5)
-#line 235 "TypeRuleUnit.cs"
+#line 224 "TypeRuleUnit.cs"
         {
-#line 236 "TypeRuleUnit.cs"
-#line 236 "TypeRuleUnit.cs"
+#line 225 "TypeRuleUnit.cs"
+#line 225 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_6 = &((value).rows);
             (*(csharp2cuda_temp_6) = 0);
-#line 237 "TypeRuleUnit.cs"
-#line 237 "TypeRuleUnit.cs"
+#line 226 "TypeRuleUnit.cs"
+#line 226 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_7 = &((value).columns);
             (*(csharp2cuda_temp_7) = 0);
         }
     }
-#line 239 "TypeRuleUnit.cs"
+#line 228 "TypeRuleUnit.cs"
     return value;
 }
 
-#line 445 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_lift_result(
-    const MathBlockDeviceType* inputs,
-    const MathBlockDeviceType* sourceResult,
+#line 166 "TypeRuleUnit.cs"
+__device__ bool cs2cuda_global_namespace_MathBlockTypeRuleModule_IsDimensionless_218062d4a9810326(MathBlockDeviceType* value)
+#line 167 "TypeRuleUnit.cs"
+{
+#line 168 "TypeRuleUnit.cs"
+    {
+#line 168 "TypeRuleUnit.cs"
+        int dimension = 0;
+        while (true)
+        {
+            if (!(((dimension) < (4))))
+                break;
+#line 169 "TypeRuleUnit.cs"
+            {
+#line 170 "TypeRuleUnit.cs"
+#line 170 "TypeRuleUnit.cs"
+                int csharp2cuda_temp_1 = cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitNumerator_33ce368a9b11f062(value, dimension);
+                if (((csharp2cuda_temp_1) != (0)))
+                {
+#line 171 "TypeRuleUnit.cs"
+                    return false;
+                }
+            }
+#line 168 "TypeRuleUnit.cs"
+            int* csharp2cuda_temp_0 = &(dimension);
+            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_0));
+        }
+    }
+#line 173 "TypeRuleUnit.cs"
+    return true;
+}
+
+#line 430 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_LiftResult_bbd399c38824e4e5(
+    MathBlockDeviceType* inputs,
+    MathBlockDeviceType* sourceResult,
     int validity,
     int fillIndex,
     int rows,
     MathBlockDeviceType* output)
-#line 453 "TypeRuleUnit.cs"
+#line 437 "TypeRuleUnit.cs"
 {
-#line 454 "TypeRuleUnit.cs"
+#line 438 "TypeRuleUnit.cs"
     if (((validity) != (0)))
-#line 455 "TypeRuleUnit.cs"
+#line 439 "TypeRuleUnit.cs"
     {
-#line 456 "TypeRuleUnit.cs"
-        mathblocks_type_clear(output, 11);
-#line 457 "TypeRuleUnit.cs"
-#line 457 "TypeRuleUnit.cs"
+#line 440 "TypeRuleUnit.cs"
+        cs2cuda_global_namespace_MathBlockTypeRuleModule_Clear_b4f1dffbb6be6302(output, 11);
+#line 441 "TypeRuleUnit.cs"
+#line 441 "TypeRuleUnit.cs"
         int* csharp2cuda_temp_0 = &((output)->rows);
         (*(csharp2cuda_temp_0) = rows);
-#line 458 "TypeRuleUnit.cs"
+#line 442 "TypeRuleUnit.cs"
         return 0;
     }
-#line 460 "TypeRuleUnit.cs"
+#line 444 "TypeRuleUnit.cs"
     MathBlockDeviceType fill = (inputs)[fillIndex];
-#line 461 "TypeRuleUnit.cs"
-#line 461 "TypeRuleUnit.cs"
+#line 445 "TypeRuleUnit.cs"
+#line 445 "TypeRuleUnit.cs"
     int csharp2cuda_temp_1 = (fill).kind;
     if (((csharp2cuda_temp_1) != (1)))
     {
-#line 462 "TypeRuleUnit.cs"
+#line 446 "TypeRuleUnit.cs"
         return 2;
     }
-#line 463 "TypeRuleUnit.cs"
-#line 463 "TypeRuleUnit.cs"
+#line 447 "TypeRuleUnit.cs"
+#line 447 "TypeRuleUnit.cs"
     MathBlockDeviceType* csharp2cuda_temp_2 = &(fill);
-#line 463 "TypeRuleUnit.cs"
-    bool csharp2cuda_temp_3 = mathblocks_type_unit_equal(csharp2cuda_temp_2, sourceResult);
+#line 447 "TypeRuleUnit.cs"
+    bool csharp2cuda_temp_3 = cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitsEqual_61fd1d4392d22a54(csharp2cuda_temp_2, sourceResult);
     if ((!(csharp2cuda_temp_3)))
     {
-#line 464 "TypeRuleUnit.cs"
+#line 448 "TypeRuleUnit.cs"
         return 4;
     }
-#line 465 "TypeRuleUnit.cs"
-    mathblocks_type_copy_unit(sourceResult, output);
-#line 466 "TypeRuleUnit.cs"
-#line 466 "TypeRuleUnit.cs"
+#line 449 "TypeRuleUnit.cs"
+    cs2cuda_global_namespace_MathBlockTypeRuleModule_CopyUnit_e45f8d38f29eb6ea(sourceResult, output);
+#line 450 "TypeRuleUnit.cs"
+#line 450 "TypeRuleUnit.cs"
     int* csharp2cuda_temp_4 = &((output)->kind);
     (*(csharp2cuda_temp_4) = 4);
-#line 467 "TypeRuleUnit.cs"
-#line 467 "TypeRuleUnit.cs"
+#line 451 "TypeRuleUnit.cs"
+#line 451 "TypeRuleUnit.cs"
     int* csharp2cuda_temp_5 = &((output)->rows);
     (*(csharp2cuda_temp_5) = rows);
-#line 468 "TypeRuleUnit.cs"
-#line 468 "TypeRuleUnit.cs"
+#line 452 "TypeRuleUnit.cs"
+#line 452 "TypeRuleUnit.cs"
     int* csharp2cuda_temp_6 = &((output)->columns);
     (*(csharp2cuda_temp_6) = 0);
-#line 469 "TypeRuleUnit.cs"
+#line 453 "TypeRuleUnit.cs"
     return 0;
 }
 
-#line 281 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_merge_shape(
-    const MathBlockDeviceType* inputs,
+#line 269 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_MergeShape_465b8917d10391b0(
+    MathBlockDeviceType* inputs,
     int checkMask,
     int outputMask,
     int mode,
     int seriesMask,
     int count,
     MathBlockDeviceType* output)
-#line 290 "TypeRuleUnit.cs"
+#line 277 "TypeRuleUnit.cs"
 {
-#line 291 "TypeRuleUnit.cs"
+#line 278 "TypeRuleUnit.cs"
     if (((outputMask) == (0)))
     {
-#line 292 "TypeRuleUnit.cs"
-#line 292 "TypeRuleUnit.cs"
+#line 279 "TypeRuleUnit.cs"
+#line 279 "TypeRuleUnit.cs"
         int* csharp2cuda_temp_0 = &(outputMask);
         (*(csharp2cuda_temp_0) = checkMask);
     }
-#line 293 "TypeRuleUnit.cs"
+#line 280 "TypeRuleUnit.cs"
     int rows = 0;
-#line 294 "TypeRuleUnit.cs"
+#line 281 "TypeRuleUnit.cs"
     int columns = 0;
-#line 295 "TypeRuleUnit.cs"
+#line 282 "TypeRuleUnit.cs"
     int outputRows = 0;
-#line 296 "TypeRuleUnit.cs"
+#line 283 "TypeRuleUnit.cs"
     int outputColumns = 0;
-#line 297 "TypeRuleUnit.cs"
+#line 284 "TypeRuleUnit.cs"
     {
-#line 297 "TypeRuleUnit.cs"
+#line 284 "TypeRuleUnit.cs"
         int index = 0;
         while (true)
         {
             if (!(((index) < (count))))
                 break;
-#line 298 "TypeRuleUnit.cs"
+#line 285 "TypeRuleUnit.cs"
             {
-#line 299 "TypeRuleUnit.cs"
+#line 286 "TypeRuleUnit.cs"
                 if (((csharp2cuda_i32_and(csharp2cuda_i32_shr(checkMask, index), 1)) == (0)))
                 {
-#line 300 "TypeRuleUnit.cs"
+#line 287 "TypeRuleUnit.cs"
                     goto csharp2cuda_for_continue_0;
                 }
-#line 301 "TypeRuleUnit.cs"
-                MathBlockDeviceType input = mathblocks_type_input(inputs, index, mode, seriesMask);
-#line 302 "TypeRuleUnit.cs"
-#line 302 "TypeRuleUnit.cs"
+#line 288 "TypeRuleUnit.cs"
+                MathBlockDeviceType input = cs2cuda_global_namespace_MathBlockTypeRuleModule_Input_db1595f5c742dfbb(inputs, index, mode, seriesMask);
+#line 289 "TypeRuleUnit.cs"
+#line 289 "TypeRuleUnit.cs"
                 int csharp2cuda_temp_2 = (input).rows;
                 if (((csharp2cuda_temp_2) != (0)))
-#line 303 "TypeRuleUnit.cs"
+#line 290 "TypeRuleUnit.cs"
                 {
-#line 304 "TypeRuleUnit.cs"
-#line 304 "TypeRuleUnit.cs"
+#line 291 "TypeRuleUnit.cs"
+#line 291 "TypeRuleUnit.cs"
                     bool csharp2cuda_temp_3;
-#line 304 "TypeRuleUnit.cs"
+#line 291 "TypeRuleUnit.cs"
                     if (((rows) != (0)))
                     {
-#line 304 "TypeRuleUnit.cs"
+#line 291 "TypeRuleUnit.cs"
                         int csharp2cuda_temp_4 = (input).rows;
-#line 304 "TypeRuleUnit.cs"
+#line 291 "TypeRuleUnit.cs"
                         csharp2cuda_temp_3 = ((rows) != (csharp2cuda_temp_4));
                     }
                     else
                     {
-#line 304 "TypeRuleUnit.cs"
+#line 291 "TypeRuleUnit.cs"
                         csharp2cuda_temp_3 = false;
                     }
                     if (csharp2cuda_temp_3)
                     {
-#line 305 "TypeRuleUnit.cs"
+#line 292 "TypeRuleUnit.cs"
                         return 5;
                     }
-#line 306 "TypeRuleUnit.cs"
-#line 306 "TypeRuleUnit.cs"
+#line 293 "TypeRuleUnit.cs"
+#line 293 "TypeRuleUnit.cs"
                     int* csharp2cuda_temp_5 = &(rows);
-#line 306 "TypeRuleUnit.cs"
+#line 293 "TypeRuleUnit.cs"
                     int csharp2cuda_temp_6 = (input).rows;
                     (*(csharp2cuda_temp_5) = csharp2cuda_temp_6);
                 }
-#line 308 "TypeRuleUnit.cs"
-#line 308 "TypeRuleUnit.cs"
+#line 295 "TypeRuleUnit.cs"
+#line 295 "TypeRuleUnit.cs"
                 int csharp2cuda_temp_7 = (input).columns;
                 if (((csharp2cuda_temp_7) != (0)))
-#line 309 "TypeRuleUnit.cs"
+#line 296 "TypeRuleUnit.cs"
                 {
-#line 310 "TypeRuleUnit.cs"
-#line 310 "TypeRuleUnit.cs"
+#line 297 "TypeRuleUnit.cs"
+#line 297 "TypeRuleUnit.cs"
                     bool csharp2cuda_temp_8;
-#line 310 "TypeRuleUnit.cs"
+#line 297 "TypeRuleUnit.cs"
                     if (((columns) != (0)))
                     {
-#line 310 "TypeRuleUnit.cs"
+#line 297 "TypeRuleUnit.cs"
                         int csharp2cuda_temp_9 = (input).columns;
-#line 310 "TypeRuleUnit.cs"
+#line 297 "TypeRuleUnit.cs"
                         csharp2cuda_temp_8 = ((columns) != (csharp2cuda_temp_9));
                     }
                     else
                     {
-#line 310 "TypeRuleUnit.cs"
+#line 297 "TypeRuleUnit.cs"
                         csharp2cuda_temp_8 = false;
                     }
                     if (csharp2cuda_temp_8)
                     {
-#line 311 "TypeRuleUnit.cs"
+#line 298 "TypeRuleUnit.cs"
                         return 5;
                     }
-#line 312 "TypeRuleUnit.cs"
-#line 312 "TypeRuleUnit.cs"
+#line 299 "TypeRuleUnit.cs"
+#line 299 "TypeRuleUnit.cs"
                     int* csharp2cuda_temp_10 = &(columns);
-#line 312 "TypeRuleUnit.cs"
+#line 299 "TypeRuleUnit.cs"
                     int csharp2cuda_temp_11 = (input).columns;
                     (*(csharp2cuda_temp_10) = csharp2cuda_temp_11);
                 }
-#line 314 "TypeRuleUnit.cs"
+#line 301 "TypeRuleUnit.cs"
                 if (((csharp2cuda_i32_and(csharp2cuda_i32_shr(outputMask, index), 1)) != (0)))
-#line 315 "TypeRuleUnit.cs"
+#line 302 "TypeRuleUnit.cs"
                 {
-#line 316 "TypeRuleUnit.cs"
+#line 303 "TypeRuleUnit.cs"
                     if (((outputRows) == (0)))
                     {
-#line 317 "TypeRuleUnit.cs"
-#line 317 "TypeRuleUnit.cs"
+#line 304 "TypeRuleUnit.cs"
+#line 304 "TypeRuleUnit.cs"
                         int* csharp2cuda_temp_12 = &(outputRows);
-#line 317 "TypeRuleUnit.cs"
+#line 304 "TypeRuleUnit.cs"
                         int csharp2cuda_temp_13 = (input).rows;
                         (*(csharp2cuda_temp_12) = csharp2cuda_temp_13);
                     }
-#line 318 "TypeRuleUnit.cs"
+#line 305 "TypeRuleUnit.cs"
                     if (((outputColumns) == (0)))
                     {
-#line 319 "TypeRuleUnit.cs"
-#line 319 "TypeRuleUnit.cs"
+#line 306 "TypeRuleUnit.cs"
+#line 306 "TypeRuleUnit.cs"
                         int* csharp2cuda_temp_14 = &(outputColumns);
-#line 319 "TypeRuleUnit.cs"
+#line 306 "TypeRuleUnit.cs"
                         int csharp2cuda_temp_15 = (input).columns;
                         (*(csharp2cuda_temp_14) = csharp2cuda_temp_15);
                     }
                 }
             }
             csharp2cuda_for_continue_0:
-#line 297 "TypeRuleUnit.cs"
+#line 284 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_1 = &(index);
             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_1));
         }
     }
-#line 322 "TypeRuleUnit.cs"
-#line 322 "TypeRuleUnit.cs"
+#line 309 "TypeRuleUnit.cs"
+#line 309 "TypeRuleUnit.cs"
     int* csharp2cuda_temp_16 = &((output)->rows);
     (*(csharp2cuda_temp_16) = outputRows);
-#line 323 "TypeRuleUnit.cs"
-#line 323 "TypeRuleUnit.cs"
+#line 310 "TypeRuleUnit.cs"
+#line 310 "TypeRuleUnit.cs"
     int* csharp2cuda_temp_17 = &((output)->columns);
     (*(csharp2cuda_temp_17) = outputColumns);
-#line 324 "TypeRuleUnit.cs"
+#line 311 "TypeRuleUnit.cs"
     return 0;
 }
 
-#line 126 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_normalize(MathBlockDeviceType* value, int dimension, long long numerator, long long denominator)
-#line 128 "TypeRuleUnit.cs"
-{
-#line 129 "TypeRuleUnit.cs"
-    long long divisor = mathblocks_type_gcd(numerator, denominator);
-#line 130 "TypeRuleUnit.cs"
-#line 130 "TypeRuleUnit.cs"
-    long long* csharp2cuda_temp_0 = &(numerator);
-#line 130 "TypeRuleUnit.cs"
-    long long csharp2cuda_temp_1 = *(csharp2cuda_temp_0);
-    (*(csharp2cuda_temp_0) = csharp2cuda_i64_div(csharp2cuda_temp_1, divisor));
-#line 131 "TypeRuleUnit.cs"
-#line 131 "TypeRuleUnit.cs"
-    long long* csharp2cuda_temp_2 = &(denominator);
-#line 131 "TypeRuleUnit.cs"
-    long long csharp2cuda_temp_3 = *(csharp2cuda_temp_2);
-    (*(csharp2cuda_temp_2) = csharp2cuda_i64_div(csharp2cuda_temp_3, divisor));
-#line 132 "TypeRuleUnit.cs"
-    if (((denominator) < (((long long)(0)))))
-#line 133 "TypeRuleUnit.cs"
-    {
-#line 134 "TypeRuleUnit.cs"
-#line 134 "TypeRuleUnit.cs"
-        long long* csharp2cuda_temp_4 = &(numerator);
-        (*(csharp2cuda_temp_4) = csharp2cuda_i64_neg(numerator));
-#line 135 "TypeRuleUnit.cs"
-#line 135 "TypeRuleUnit.cs"
-        long long* csharp2cuda_temp_5 = &(denominator);
-        (*(csharp2cuda_temp_5) = csharp2cuda_i64_neg(denominator));
-    }
-#line 137 "TypeRuleUnit.cs"
-#line 137 "TypeRuleUnit.cs"
-    bool csharp2cuda_temp_6;
-#line 137 "TypeRuleUnit.cs"
-    if (!(((numerator) < (csharp2cuda_i64_neg(2147483648LL)))))
-    {
-#line 137 "TypeRuleUnit.cs"
-        csharp2cuda_temp_6 = ((numerator) > (2147483647LL));
-    }
-    else
-    {
-#line 137 "TypeRuleUnit.cs"
-        csharp2cuda_temp_6 = true;
-    }
-#line 137 "TypeRuleUnit.cs"
-    bool csharp2cuda_temp_7;
-#line 137 "TypeRuleUnit.cs"
-    if (!(csharp2cuda_temp_6))
-    {
-#line 137 "TypeRuleUnit.cs"
-        csharp2cuda_temp_7 = ((denominator) < (((long long)(1))));
-    }
-    else
-    {
-#line 137 "TypeRuleUnit.cs"
-        csharp2cuda_temp_7 = true;
-    }
-#line 137 "TypeRuleUnit.cs"
-    bool csharp2cuda_temp_8;
-#line 137 "TypeRuleUnit.cs"
-    if (!(csharp2cuda_temp_7))
-    {
-#line 137 "TypeRuleUnit.cs"
-        csharp2cuda_temp_8 = ((denominator) > (2147483647LL));
-    }
-    else
-    {
-#line 137 "TypeRuleUnit.cs"
-        csharp2cuda_temp_8 = true;
-    }
-    if (csharp2cuda_temp_8)
-    {
-#line 138 "TypeRuleUnit.cs"
-        return 0;
-    }
-#line 139 "TypeRuleUnit.cs"
-    if (((numerator) == (((long long)(0)))))
-    {
-#line 140 "TypeRuleUnit.cs"
-#line 140 "TypeRuleUnit.cs"
-        long long* csharp2cuda_temp_9 = &(denominator);
-        (*(csharp2cuda_temp_9) = ((long long)(1)));
-    }
-#line 141 "TypeRuleUnit.cs"
-    mathblocks_type_set_unit(value, dimension, csharp2cuda_i32_from_bits(numerator), csharp2cuda_i32_from_bits(denominator));
-#line 142 "TypeRuleUnit.cs"
-    return 1;
-}
-
-#line 590 "TypeRuleUnit.cs"
-__device__ void mathblocks_type_resolve(
-    const int* signature_row,
-    const MathBlockDeviceType* inputs,
+#line 552 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_ResolveStatus_cee4bdaf27ba1fb5(
+    int* signature_row,
+    MathBlockDeviceType* inputs,
     int count,
     MathBlockDeviceType* output)
-#line 596 "TypeRuleUnit.cs"
+#line 557 "TypeRuleUnit.cs"
 {
-#line 597 "TypeRuleUnit.cs"
-    mathblocks_type_resolve_status(signature_row, inputs, count, output);
-}
-
-#line 570 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_resolve_status(
-    const int* signature_row,
-    const MathBlockDeviceType* inputs,
-    int count,
-    MathBlockDeviceType* output)
-#line 576 "TypeRuleUnit.cs"
-{
-#line 577 "TypeRuleUnit.cs"
+#line 558 "TypeRuleUnit.cs"
     int rule = (signature_row)[0];
-#line 578 "TypeRuleUnit.cs"
+#line 559 "TypeRuleUnit.cs"
     int status = 7;
-#line 579 "TypeRuleUnit.cs"
+#line 560 "TypeRuleUnit.cs"
     if (((rule) == (2)))
     {
-#line 580 "TypeRuleUnit.cs"
-#line 580 "TypeRuleUnit.cs"
+#line 561 "TypeRuleUnit.cs"
+#line 561 "TypeRuleUnit.cs"
         int* csharp2cuda_temp_0 = &(status);
-#line 580 "TypeRuleUnit.cs"
-        int csharp2cuda_temp_1 = mathblocks_type_elementwise_form(signature_row, inputs, count, output);
+#line 561 "TypeRuleUnit.cs"
+        int csharp2cuda_temp_1 = cs2cuda_global_namespace_MathBlockTypeRuleModule_ElementwiseForm_ba1101e991286add(signature_row, inputs, count, output);
         (*(csharp2cuda_temp_0) = csharp2cuda_temp_1);
     }
     else
     {
-#line 581 "TypeRuleUnit.cs"
+#line 562 "TypeRuleUnit.cs"
         if (((rule) == (3)))
         {
-#line 582 "TypeRuleUnit.cs"
-#line 582 "TypeRuleUnit.cs"
+#line 563 "TypeRuleUnit.cs"
+#line 563 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_2 = &(status);
-#line 582 "TypeRuleUnit.cs"
-            int csharp2cuda_temp_3 = mathblocks_type_window_form(signature_row, inputs, count, output);
+#line 563 "TypeRuleUnit.cs"
+            int csharp2cuda_temp_3 = cs2cuda_global_namespace_MathBlockTypeRuleModule_WindowForm_697d38b0e4d94f7f(signature_row, inputs, count, output);
             (*(csharp2cuda_temp_2) = csharp2cuda_temp_3);
         }
         else
         {
-#line 584 "TypeRuleUnit.cs"
-#line 584 "TypeRuleUnit.cs"
+#line 565 "TypeRuleUnit.cs"
+#line 565 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_4 = &(status);
-#line 584 "TypeRuleUnit.cs"
-            int csharp2cuda_temp_5 = mathblocks_type_core(signature_row, 0, inputs, count, output, 0, 0);
+#line 565 "TypeRuleUnit.cs"
+            int csharp2cuda_temp_5 = cs2cuda_global_namespace_MathBlockTypeRuleModule_Core_367ffc9d1aef367e(signature_row, 0, inputs, count, output, 0, 0);
             (*(csharp2cuda_temp_4) = csharp2cuda_temp_5);
         }
     }
-#line 585 "TypeRuleUnit.cs"
+#line 566 "TypeRuleUnit.cs"
     if (((status) != (0)))
     {
-#line 586 "TypeRuleUnit.cs"
-        mathblocks_type_clear(output, csharp2cuda_i32_neg(1));
+#line 567 "TypeRuleUnit.cs"
+        cs2cuda_global_namespace_MathBlockTypeRuleModule_Clear_b4f1dffbb6be6302(output, csharp2cuda_i32_neg(1));
     }
-#line 587 "TypeRuleUnit.cs"
+#line 568 "TypeRuleUnit.cs"
     return status;
 }
 
-#line 100 "TypeRuleUnit.cs"
-__device__ void mathblocks_type_set_unit(MathBlockDeviceType* value, int dimension, int numerator, int denominator)
-#line 102 "TypeRuleUnit.cs"
+#line 122 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_SetUnitChecked_fa7acb8e9bbc530a(MathBlockDeviceType* value, int dimension, long long numerator, long long denominator)
+#line 123 "TypeRuleUnit.cs"
 {
-#line 103 "TypeRuleUnit.cs"
-    if (((dimension) == (0)))
-#line 104 "TypeRuleUnit.cs"
+#line 124 "TypeRuleUnit.cs"
+    long long divisor = cs2cuda_global_namespace_MathBlockTypeRuleModule_GreatestCommonDivisor_8904907116a5352b(numerator, denominator);
+#line 125 "TypeRuleUnit.cs"
+#line 125 "TypeRuleUnit.cs"
+    long long* csharp2cuda_temp_0 = &(numerator);
+#line 125 "TypeRuleUnit.cs"
+    long long csharp2cuda_temp_1 = *(csharp2cuda_temp_0);
+    (*(csharp2cuda_temp_0) = csharp2cuda_i64_div(csharp2cuda_temp_1, divisor));
+#line 126 "TypeRuleUnit.cs"
+#line 126 "TypeRuleUnit.cs"
+    long long* csharp2cuda_temp_2 = &(denominator);
+#line 126 "TypeRuleUnit.cs"
+    long long csharp2cuda_temp_3 = *(csharp2cuda_temp_2);
+    (*(csharp2cuda_temp_2) = csharp2cuda_i64_div(csharp2cuda_temp_3, divisor));
+#line 127 "TypeRuleUnit.cs"
+    if (((denominator) < (((long long)(0)))))
+#line 128 "TypeRuleUnit.cs"
     {
-#line 105 "TypeRuleUnit.cs"
-#line 105 "TypeRuleUnit.cs"
+#line 129 "TypeRuleUnit.cs"
+#line 129 "TypeRuleUnit.cs"
+        long long* csharp2cuda_temp_4 = &(numerator);
+        (*(csharp2cuda_temp_4) = csharp2cuda_i64_neg(numerator));
+#line 130 "TypeRuleUnit.cs"
+#line 130 "TypeRuleUnit.cs"
+        long long* csharp2cuda_temp_5 = &(denominator);
+        (*(csharp2cuda_temp_5) = csharp2cuda_i64_neg(denominator));
+    }
+#line 132 "TypeRuleUnit.cs"
+#line 132 "TypeRuleUnit.cs"
+    bool csharp2cuda_temp_6;
+#line 132 "TypeRuleUnit.cs"
+    if (!(((numerator) < (csharp2cuda_i64_neg(2147483648LL)))))
+    {
+#line 132 "TypeRuleUnit.cs"
+        csharp2cuda_temp_6 = ((numerator) > (2147483647LL));
+    }
+    else
+    {
+#line 132 "TypeRuleUnit.cs"
+        csharp2cuda_temp_6 = true;
+    }
+#line 132 "TypeRuleUnit.cs"
+    bool csharp2cuda_temp_7;
+#line 132 "TypeRuleUnit.cs"
+    if (!(csharp2cuda_temp_6))
+    {
+#line 132 "TypeRuleUnit.cs"
+        csharp2cuda_temp_7 = ((denominator) < (((long long)(1))));
+    }
+    else
+    {
+#line 132 "TypeRuleUnit.cs"
+        csharp2cuda_temp_7 = true;
+    }
+#line 132 "TypeRuleUnit.cs"
+    bool csharp2cuda_temp_8;
+#line 132 "TypeRuleUnit.cs"
+    if (!(csharp2cuda_temp_7))
+    {
+#line 132 "TypeRuleUnit.cs"
+        csharp2cuda_temp_8 = ((denominator) > (2147483647LL));
+    }
+    else
+    {
+#line 132 "TypeRuleUnit.cs"
+        csharp2cuda_temp_8 = true;
+    }
+    if (csharp2cuda_temp_8)
+    {
+#line 133 "TypeRuleUnit.cs"
+        return 0;
+    }
+#line 134 "TypeRuleUnit.cs"
+    if (((numerator) == (((long long)(0)))))
+    {
+#line 135 "TypeRuleUnit.cs"
+#line 135 "TypeRuleUnit.cs"
+        long long* csharp2cuda_temp_9 = &(denominator);
+        (*(csharp2cuda_temp_9) = ((long long)(1)));
+    }
+#line 136 "TypeRuleUnit.cs"
+    cs2cuda_global_namespace_MathBlockTypeRuleModule_SetUnit_9260a5921a632c79(value, dimension, csharp2cuda_i32_from_bits(numerator), csharp2cuda_i32_from_bits(denominator));
+#line 137 "TypeRuleUnit.cs"
+    return 1;
+}
+
+#line 97 "TypeRuleUnit.cs"
+__device__ void cs2cuda_global_namespace_MathBlockTypeRuleModule_SetUnit_9260a5921a632c79(MathBlockDeviceType* value, int dimension, int numerator, int denominator)
+#line 98 "TypeRuleUnit.cs"
+{
+#line 99 "TypeRuleUnit.cs"
+    if (((dimension) == (0)))
+#line 100 "TypeRuleUnit.cs"
+    {
+#line 101 "TypeRuleUnit.cs"
+#line 101 "TypeRuleUnit.cs"
         int* csharp2cuda_temp_0 = &((value)->unit_numerator0);
         (*(csharp2cuda_temp_0) = numerator);
-#line 106 "TypeRuleUnit.cs"
-#line 106 "TypeRuleUnit.cs"
+#line 102 "TypeRuleUnit.cs"
+#line 102 "TypeRuleUnit.cs"
         int* csharp2cuda_temp_1 = &((value)->unit_denominator0);
         (*(csharp2cuda_temp_1) = denominator);
     }
     else
     {
-#line 108 "TypeRuleUnit.cs"
+#line 104 "TypeRuleUnit.cs"
         if (((dimension) == (1)))
-#line 109 "TypeRuleUnit.cs"
+#line 105 "TypeRuleUnit.cs"
         {
-#line 110 "TypeRuleUnit.cs"
-#line 110 "TypeRuleUnit.cs"
+#line 106 "TypeRuleUnit.cs"
+#line 106 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_2 = &((value)->unit_numerator1);
             (*(csharp2cuda_temp_2) = numerator);
-#line 111 "TypeRuleUnit.cs"
-#line 111 "TypeRuleUnit.cs"
+#line 107 "TypeRuleUnit.cs"
+#line 107 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_3 = &((value)->unit_denominator1);
             (*(csharp2cuda_temp_3) = denominator);
         }
         else
         {
-#line 113 "TypeRuleUnit.cs"
+#line 109 "TypeRuleUnit.cs"
             if (((dimension) == (2)))
-#line 114 "TypeRuleUnit.cs"
+#line 110 "TypeRuleUnit.cs"
             {
-#line 115 "TypeRuleUnit.cs"
-#line 115 "TypeRuleUnit.cs"
+#line 111 "TypeRuleUnit.cs"
+#line 111 "TypeRuleUnit.cs"
                 int* csharp2cuda_temp_4 = &((value)->unit_numerator2);
                 (*(csharp2cuda_temp_4) = numerator);
-#line 116 "TypeRuleUnit.cs"
-#line 116 "TypeRuleUnit.cs"
+#line 112 "TypeRuleUnit.cs"
+#line 112 "TypeRuleUnit.cs"
                 int* csharp2cuda_temp_5 = &((value)->unit_denominator2);
                 (*(csharp2cuda_temp_5) = denominator);
             }
             else
-#line 119 "TypeRuleUnit.cs"
+#line 115 "TypeRuleUnit.cs"
             {
-#line 120 "TypeRuleUnit.cs"
-#line 120 "TypeRuleUnit.cs"
+#line 116 "TypeRuleUnit.cs"
+#line 116 "TypeRuleUnit.cs"
                 int* csharp2cuda_temp_6 = &((value)->unit_numerator3);
                 (*(csharp2cuda_temp_6) = numerator);
-#line 121 "TypeRuleUnit.cs"
-#line 121 "TypeRuleUnit.cs"
+#line 117 "TypeRuleUnit.cs"
+#line 117 "TypeRuleUnit.cs"
                 int* csharp2cuda_temp_7 = &((value)->unit_denominator3);
                 (*(csharp2cuda_temp_7) = denominator);
             }
@@ -2135,229 +2155,197 @@ __device__ void mathblocks_type_set_unit(MathBlockDeviceType* value, int dimensi
     }
 }
 
-#line 88 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_unit_denominator(const MathBlockDeviceType* value, int dimension)
-#line 90 "TypeRuleUnit.cs"
+#line 86 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitDenominator_ebbd4adaf715b6b5(MathBlockDeviceType* value, int dimension)
+#line 87 "TypeRuleUnit.cs"
 {
-#line 91 "TypeRuleUnit.cs"
+#line 88 "TypeRuleUnit.cs"
     if (((dimension) == (0)))
     {
-#line 92 "TypeRuleUnit.cs"
+#line 89 "TypeRuleUnit.cs"
         return (value)->unit_denominator0;
     }
-#line 93 "TypeRuleUnit.cs"
+#line 90 "TypeRuleUnit.cs"
     if (((dimension) == (1)))
     {
-#line 94 "TypeRuleUnit.cs"
+#line 91 "TypeRuleUnit.cs"
         return (value)->unit_denominator1;
     }
-#line 95 "TypeRuleUnit.cs"
+#line 92 "TypeRuleUnit.cs"
     if (((dimension) == (2)))
     {
-#line 96 "TypeRuleUnit.cs"
+#line 93 "TypeRuleUnit.cs"
         return (value)->unit_denominator2;
     }
-#line 97 "TypeRuleUnit.cs"
+#line 94 "TypeRuleUnit.cs"
     return (value)->unit_denominator3;
 }
 
-#line 162 "TypeRuleUnit.cs"
-__device__ bool mathblocks_type_unit_equal(const MathBlockDeviceType* left, const MathBlockDeviceType* right)
-#line 164 "TypeRuleUnit.cs"
+#line 75 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitNumerator_33ce368a9b11f062(MathBlockDeviceType* value, int dimension)
+#line 76 "TypeRuleUnit.cs"
 {
-#line 165 "TypeRuleUnit.cs"
+#line 77 "TypeRuleUnit.cs"
+    if (((dimension) == (0)))
     {
-#line 165 "TypeRuleUnit.cs"
+#line 78 "TypeRuleUnit.cs"
+        return (value)->unit_numerator0;
+    }
+#line 79 "TypeRuleUnit.cs"
+    if (((dimension) == (1)))
+    {
+#line 80 "TypeRuleUnit.cs"
+        return (value)->unit_numerator1;
+    }
+#line 81 "TypeRuleUnit.cs"
+    if (((dimension) == (2)))
+    {
+#line 82 "TypeRuleUnit.cs"
+        return (value)->unit_numerator2;
+    }
+#line 83 "TypeRuleUnit.cs"
+    return (value)->unit_numerator3;
+}
+
+#line 155 "TypeRuleUnit.cs"
+__device__ bool cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitsEqual_61fd1d4392d22a54(MathBlockDeviceType* left, MathBlockDeviceType* right)
+#line 156 "TypeRuleUnit.cs"
+{
+#line 157 "TypeRuleUnit.cs"
+    {
+#line 157 "TypeRuleUnit.cs"
         int dimension = 0;
         while (true)
         {
             if (!(((dimension) < (4))))
                 break;
-#line 166 "TypeRuleUnit.cs"
+#line 158 "TypeRuleUnit.cs"
             {
-#line 167 "TypeRuleUnit.cs"
-#line 167 "TypeRuleUnit.cs"
-                int csharp2cuda_temp_1 = mathblocks_type_unit_numerator(left, dimension);
-#line 167 "TypeRuleUnit.cs"
-                int csharp2cuda_temp_2 = mathblocks_type_unit_numerator(right, dimension);
-#line 167 "TypeRuleUnit.cs"
+#line 159 "TypeRuleUnit.cs"
+#line 159 "TypeRuleUnit.cs"
+                int csharp2cuda_temp_1 = cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitNumerator_33ce368a9b11f062(left, dimension);
+#line 159 "TypeRuleUnit.cs"
+                int csharp2cuda_temp_2 = cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitNumerator_33ce368a9b11f062(right, dimension);
+#line 159 "TypeRuleUnit.cs"
                 bool csharp2cuda_temp_3;
-#line 167 "TypeRuleUnit.cs"
+#line 159 "TypeRuleUnit.cs"
                 if (!(((csharp2cuda_temp_1) != (csharp2cuda_temp_2))))
                 {
-#line 168 "TypeRuleUnit.cs"
-                    int csharp2cuda_temp_4 = mathblocks_type_unit_denominator(left, dimension);
-#line 168 "TypeRuleUnit.cs"
-                    int csharp2cuda_temp_5 = mathblocks_type_unit_denominator(right, dimension);
-#line 167 "TypeRuleUnit.cs"
+#line 160 "TypeRuleUnit.cs"
+                    int csharp2cuda_temp_4 = cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitDenominator_ebbd4adaf715b6b5(left, dimension);
+#line 160 "TypeRuleUnit.cs"
+                    int csharp2cuda_temp_5 = cs2cuda_global_namespace_MathBlockTypeRuleModule_UnitDenominator_ebbd4adaf715b6b5(right, dimension);
+#line 159 "TypeRuleUnit.cs"
                     csharp2cuda_temp_3 = ((csharp2cuda_temp_4) != (csharp2cuda_temp_5));
                 }
                 else
                 {
-#line 167 "TypeRuleUnit.cs"
+#line 159 "TypeRuleUnit.cs"
                     csharp2cuda_temp_3 = true;
                 }
                 if (csharp2cuda_temp_3)
                 {
-#line 169 "TypeRuleUnit.cs"
+#line 161 "TypeRuleUnit.cs"
                     return false;
                 }
             }
-#line 165 "TypeRuleUnit.cs"
+#line 157 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_0 = &(dimension);
             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_0));
         }
     }
-#line 171 "TypeRuleUnit.cs"
+#line 163 "TypeRuleUnit.cs"
     return true;
 }
 
-#line 174 "TypeRuleUnit.cs"
-__device__ bool mathblocks_type_unit_is_dimensionless(const MathBlockDeviceType* value)
-#line 176 "TypeRuleUnit.cs"
-{
-#line 177 "TypeRuleUnit.cs"
-    {
-#line 177 "TypeRuleUnit.cs"
-        int dimension = 0;
-        while (true)
-        {
-            if (!(((dimension) < (4))))
-                break;
-#line 178 "TypeRuleUnit.cs"
-            {
-#line 179 "TypeRuleUnit.cs"
-#line 179 "TypeRuleUnit.cs"
-                int csharp2cuda_temp_1 = mathblocks_type_unit_numerator(value, dimension);
-                if (((csharp2cuda_temp_1) != (0)))
-                {
-#line 180 "TypeRuleUnit.cs"
-                    return false;
-                }
-            }
-#line 177 "TypeRuleUnit.cs"
-            int* csharp2cuda_temp_0 = &(dimension);
-            csharp2cuda_i32_post_increment(*(csharp2cuda_temp_0));
-        }
-    }
-#line 182 "TypeRuleUnit.cs"
-    return true;
-}
-
-#line 76 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_unit_numerator(const MathBlockDeviceType* value, int dimension)
-#line 78 "TypeRuleUnit.cs"
-{
-#line 79 "TypeRuleUnit.cs"
-    if (((dimension) == (0)))
-    {
-#line 80 "TypeRuleUnit.cs"
-        return (value)->unit_numerator0;
-    }
-#line 81 "TypeRuleUnit.cs"
-    if (((dimension) == (1)))
-    {
-#line 82 "TypeRuleUnit.cs"
-        return (value)->unit_numerator1;
-    }
-#line 83 "TypeRuleUnit.cs"
-    if (((dimension) == (2)))
-    {
-#line 84 "TypeRuleUnit.cs"
-        return (value)->unit_numerator2;
-    }
-#line 85 "TypeRuleUnit.cs"
-    return (value)->unit_numerator3;
-}
-
-#line 517 "TypeRuleUnit.cs"
-__device__ int mathblocks_type_window_form(
-    const int* row,
-    const MathBlockDeviceType* inputs,
+#line 500 "TypeRuleUnit.cs"
+__device__ int cs2cuda_global_namespace_MathBlockTypeRuleModule_WindowForm_697d38b0e4d94f7f(
+    int* row,
+    MathBlockDeviceType* inputs,
     int count,
     MathBlockDeviceType* output)
-#line 523 "TypeRuleUnit.cs"
+#line 505 "TypeRuleUnit.cs"
 {
-#line 524 "TypeRuleUnit.cs"
+#line 506 "TypeRuleUnit.cs"
     int validity = (row)[2];
-#line 525 "TypeRuleUnit.cs"
+#line 507 "TypeRuleUnit.cs"
     int lastRow = (row)[3];
-#line 526 "TypeRuleUnit.cs"
+#line 508 "TypeRuleUnit.cs"
     int seriesMask = (row)[4];
-#line 527 "TypeRuleUnit.cs"
+#line 509 "TypeRuleUnit.cs"
     int source = 5;
-#line 528 "TypeRuleUnit.cs"
+#line 510 "TypeRuleUnit.cs"
     int csharp2cuda_temp_0 = (row)[csharp2cuda_i32_add(source, 1)];
-#line 528 "TypeRuleUnit.cs"
+#line 510 "TypeRuleUnit.cs"
     int sourceArity = (row)[csharp2cuda_i32_add(csharp2cuda_i32_add(source, 2), csharp2cuda_temp_0)];
-#line 529 "TypeRuleUnit.cs"
+#line 511 "TypeRuleUnit.cs"
     if (((count) != (csharp2cuda_i32_sub(csharp2cuda_i32_add(sourceArity, 2), validity))))
     {
-#line 530 "TypeRuleUnit.cs"
+#line 512 "TypeRuleUnit.cs"
         return 1;
     }
-#line 531 "TypeRuleUnit.cs"
+#line 513 "TypeRuleUnit.cs"
     int rows = 0;
-#line 532 "TypeRuleUnit.cs"
+#line 514 "TypeRuleUnit.cs"
     int consistent = 1;
-#line 533 "TypeRuleUnit.cs"
+#line 515 "TypeRuleUnit.cs"
     {
-#line 533 "TypeRuleUnit.cs"
+#line 515 "TypeRuleUnit.cs"
         int index = 0;
         while (true)
         {
             if (!(((index) < (sourceArity))))
                 break;
-#line 534 "TypeRuleUnit.cs"
+#line 516 "TypeRuleUnit.cs"
             {
-#line 535 "TypeRuleUnit.cs"
+#line 517 "TypeRuleUnit.cs"
                 if (((csharp2cuda_i32_and(csharp2cuda_i32_shr(seriesMask, index), 1)) == (0)))
                 {
-#line 536 "TypeRuleUnit.cs"
+#line 518 "TypeRuleUnit.cs"
                     goto csharp2cuda_for_continue_0;
                 }
-#line 537 "TypeRuleUnit.cs"
+#line 519 "TypeRuleUnit.cs"
                 int kind = ((inputs)[index]).kind;
-#line 538 "TypeRuleUnit.cs"
-#line 538 "TypeRuleUnit.cs"
+#line 520 "TypeRuleUnit.cs"
+#line 520 "TypeRuleUnit.cs"
                 bool csharp2cuda_temp_2;
-#line 538 "TypeRuleUnit.cs"
+#line 520 "TypeRuleUnit.cs"
                 if (((kind) != (4)))
                 {
-#line 538 "TypeRuleUnit.cs"
+#line 520 "TypeRuleUnit.cs"
                     csharp2cuda_temp_2 = ((kind) != (11));
                 }
                 else
                 {
-#line 538 "TypeRuleUnit.cs"
+#line 520 "TypeRuleUnit.cs"
                     csharp2cuda_temp_2 = false;
                 }
                 if (csharp2cuda_temp_2)
                 {
-#line 539 "TypeRuleUnit.cs"
+#line 521 "TypeRuleUnit.cs"
                     return 2;
                 }
-#line 540 "TypeRuleUnit.cs"
+#line 522 "TypeRuleUnit.cs"
                 int length = ((inputs)[index]).rows;
-#line 541 "TypeRuleUnit.cs"
+#line 523 "TypeRuleUnit.cs"
                 if (((length) > (0)))
-#line 542 "TypeRuleUnit.cs"
+#line 524 "TypeRuleUnit.cs"
                 {
-#line 543 "TypeRuleUnit.cs"
+#line 525 "TypeRuleUnit.cs"
                     if (((rows) == (0)))
                     {
-#line 544 "TypeRuleUnit.cs"
-#line 544 "TypeRuleUnit.cs"
+#line 526 "TypeRuleUnit.cs"
+#line 526 "TypeRuleUnit.cs"
                         int* csharp2cuda_temp_3 = &(rows);
                         (*(csharp2cuda_temp_3) = length);
                     }
                     else
                     {
-#line 545 "TypeRuleUnit.cs"
+#line 527 "TypeRuleUnit.cs"
                         if (((rows) != (length)))
                         {
-#line 546 "TypeRuleUnit.cs"
-#line 546 "TypeRuleUnit.cs"
+#line 528 "TypeRuleUnit.cs"
+#line 528 "TypeRuleUnit.cs"
                             int* csharp2cuda_temp_4 = &(consistent);
                             (*(csharp2cuda_temp_4) = 0);
                         }
@@ -2365,75 +2353,87 @@ __device__ int mathblocks_type_window_form(
                 }
             }
             csharp2cuda_for_continue_0:
-#line 533 "TypeRuleUnit.cs"
+#line 515 "TypeRuleUnit.cs"
             int* csharp2cuda_temp_1 = &(index);
             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_1));
         }
     }
-#line 549 "TypeRuleUnit.cs"
+#line 531 "TypeRuleUnit.cs"
     if (((consistent) == (0)))
     {
-#line 550 "TypeRuleUnit.cs"
-#line 550 "TypeRuleUnit.cs"
+#line 532 "TypeRuleUnit.cs"
+#line 532 "TypeRuleUnit.cs"
         int* csharp2cuda_temp_5 = &(rows);
         (*(csharp2cuda_temp_5) = 0);
     }
-#line 551 "TypeRuleUnit.cs"
+#line 533 "TypeRuleUnit.cs"
     MathBlockDeviceType result;
-#line 552 "TypeRuleUnit.cs"
-#line 552 "TypeRuleUnit.cs"
+#line 534 "TypeRuleUnit.cs"
+#line 534 "TypeRuleUnit.cs"
     MathBlockDeviceType* csharp2cuda_temp_6 = &(result);
-    mathblocks_type_clear(csharp2cuda_temp_6, 0);
-#line 553 "TypeRuleUnit.cs"
+    cs2cuda_global_namespace_MathBlockTypeRuleModule_Clear_b4f1dffbb6be6302(csharp2cuda_temp_6, 0);
+#line 535 "TypeRuleUnit.cs"
     MathBlockDeviceType* csharp2cuda_temp_7 = &(result);
-#line 553 "TypeRuleUnit.cs"
-    int status = mathblocks_type_core(row, source, inputs, sourceArity, csharp2cuda_temp_7, 2, seriesMask);
-#line 554 "TypeRuleUnit.cs"
+#line 535 "TypeRuleUnit.cs"
+    int status = cs2cuda_global_namespace_MathBlockTypeRuleModule_Core_367ffc9d1aef367e(row, source, inputs, sourceArity, csharp2cuda_temp_7, 2, seriesMask);
+#line 536 "TypeRuleUnit.cs"
     if (((status) != (0)))
     {
-#line 555 "TypeRuleUnit.cs"
+#line 537 "TypeRuleUnit.cs"
         return status;
     }
-#line 556 "TypeRuleUnit.cs"
+#line 538 "TypeRuleUnit.cs"
     int expectedKind = 1;
-#line 557 "TypeRuleUnit.cs"
+#line 539 "TypeRuleUnit.cs"
     if (((lastRow) != (0)))
     {
-#line 558 "TypeRuleUnit.cs"
-#line 558 "TypeRuleUnit.cs"
+#line 540 "TypeRuleUnit.cs"
+#line 540 "TypeRuleUnit.cs"
         int* csharp2cuda_temp_8 = &(expectedKind);
         (*(csharp2cuda_temp_8) = 4);
     }
-#line 559 "TypeRuleUnit.cs"
-#line 559 "TypeRuleUnit.cs"
+#line 541 "TypeRuleUnit.cs"
+#line 541 "TypeRuleUnit.cs"
     int csharp2cuda_temp_9 = (result).kind;
     if (((csharp2cuda_temp_9) != (expectedKind)))
     {
-#line 560 "TypeRuleUnit.cs"
+#line 542 "TypeRuleUnit.cs"
         return 2;
     }
-#line 561 "TypeRuleUnit.cs"
+#line 543 "TypeRuleUnit.cs"
     MathBlockDeviceType width = (inputs)[sourceArity];
-#line 562 "TypeRuleUnit.cs"
-#line 562 "TypeRuleUnit.cs"
+#line 544 "TypeRuleUnit.cs"
+#line 544 "TypeRuleUnit.cs"
     int csharp2cuda_temp_10 = (width).kind;
     if (((csharp2cuda_temp_10) != (1)))
     {
-#line 563 "TypeRuleUnit.cs"
+#line 545 "TypeRuleUnit.cs"
         return 2;
     }
-#line 564 "TypeRuleUnit.cs"
-#line 564 "TypeRuleUnit.cs"
+#line 546 "TypeRuleUnit.cs"
+#line 546 "TypeRuleUnit.cs"
     MathBlockDeviceType* csharp2cuda_temp_11 = &(width);
-#line 564 "TypeRuleUnit.cs"
-    bool csharp2cuda_temp_12 = mathblocks_type_unit_is_dimensionless(csharp2cuda_temp_11);
+#line 546 "TypeRuleUnit.cs"
+    bool csharp2cuda_temp_12 = cs2cuda_global_namespace_MathBlockTypeRuleModule_IsDimensionless_218062d4a9810326(csharp2cuda_temp_11);
     if ((!(csharp2cuda_temp_12)))
     {
-#line 565 "TypeRuleUnit.cs"
+#line 547 "TypeRuleUnit.cs"
         return 3;
     }
-#line 566 "TypeRuleUnit.cs"
-#line 566 "TypeRuleUnit.cs"
+#line 548 "TypeRuleUnit.cs"
+#line 548 "TypeRuleUnit.cs"
     MathBlockDeviceType* csharp2cuda_temp_13 = &(result);
-    return mathblocks_type_lift_result(inputs, csharp2cuda_temp_13, validity, csharp2cuda_i32_add(sourceArity, 1), rows, output);
+    return cs2cuda_global_namespace_MathBlockTypeRuleModule_LiftResult_bbd399c38824e4e5(inputs, csharp2cuda_temp_13, validity, csharp2cuda_i32_add(sourceArity, 1), rows, output);
+}
+
+#line 10 "TypeRuleDeviceUnit.cs"
+__device__ void mathblocks_type_resolve(
+    const int* signature_row,
+    const MathBlockDeviceType* inputs,
+    int count,
+    MathBlockDeviceType* output)
+#line 16 "TypeRuleDeviceUnit.cs"
+{
+#line 19 "TypeRuleDeviceUnit.cs"
+    cs2cuda_global_namespace_MathBlockTypeRuleModule_ResolveStatus_cee4bdaf27ba1fb5(((int*)(((unsigned long long)(signature_row)))), ((MathBlockDeviceType*)(((unsigned long long)(inputs)))), count, output);
 }

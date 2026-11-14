@@ -1,11 +1,11 @@
 #pragma warning disable CS0078, CS0649
 
-using Supprocom.CSharp2CUDA;
-
-// The output-type rules of the row-causal operations. This one file is compiled twice: into Supprocom.MathBlocks,
-// where the host resolver calls it directly, and by MathBlocks.CudaSourceGenerator, which emits it as the CUDA
-// module Supprocom.MathBlocks.Cuda.MathBlockCudaTypeRuleModule. Both therefore run the same statements over the same
-// int32 layout. It uses only ints, longs, pointers and the struct below.
+// The output-type rules of the row-causal operations. This one file, free of any CSharp2CUDA type, is compiled twice:
+// into Supprocom.MathBlocks, where the host resolver calls it directly, and by MathBlocks.CudaSourceGenerator, which
+// emits it as the CUDA module Supprocom.MathBlocks.Cuda.MathBlockCudaTypeRuleModule. Both therefore run the same
+// statements over the same int32 layout. It uses only ints, longs, pointers and the struct below. The generator also
+// compiles TypeRuleDeviceUnit.cs, the one entry point that carries the CSharp2CUDA attributes, so the shipped assembly
+// holds none of them; the helpers below are ordinary static methods that the transpiler reaches from that entry point.
 //
 // A signature row is the int sequence: rule, P, parameters[P], N, then N operand triples (accepted kind mask,
 // unit constraint, constant-slot flag). The unit constraint is -1 for any unit, -2 for dimensionless and k (an
@@ -51,7 +51,6 @@ internal static unsafe class MathBlockTypeRuleModule
     private const int StatusOverflow = 6;
     private const int StatusRule = 7;
 
-    [CudaDevice(Name = "mathblocks_type_gcd")]
     private static long GreatestCommonDivisor(long left, long right)
     {
         if (left < 0)
@@ -73,8 +72,7 @@ internal static unsafe class MathBlockTypeRuleModule
         return left;
     }
 
-    [CudaDevice(Name = "mathblocks_type_unit_numerator")]
-    private static int UnitNumerator([CudaReadOnly] MathBlockDeviceType* value, int dimension)
+    private static int UnitNumerator(MathBlockDeviceType* value, int dimension)
     {
         if (dimension == 0)
             return value->unit_numerator0;
@@ -85,8 +83,7 @@ internal static unsafe class MathBlockTypeRuleModule
         return value->unit_numerator3;
     }
 
-    [CudaDevice(Name = "mathblocks_type_unit_denominator")]
-    private static int UnitDenominator([CudaReadOnly] MathBlockDeviceType* value, int dimension)
+    private static int UnitDenominator(MathBlockDeviceType* value, int dimension)
     {
         if (dimension == 0)
             return value->unit_denominator0;
@@ -97,7 +94,6 @@ internal static unsafe class MathBlockTypeRuleModule
         return value->unit_denominator3;
     }
 
-    [CudaDevice(Name = "mathblocks_type_set_unit")]
     private static void SetUnit(MathBlockDeviceType* value, int dimension, int numerator, int denominator)
     {
         if (dimension == 0)
@@ -123,7 +119,6 @@ internal static unsafe class MathBlockTypeRuleModule
     }
 
     // MathRational.CreateChecked: reduce, move the sign to the numerator, reject a result outside int32.
-    [CudaDevice(Name = "mathblocks_type_normalize")]
     private static int SetUnitChecked(MathBlockDeviceType* value, int dimension, long numerator, long denominator)
     {
         long divisor = GreatestCommonDivisor(numerator, denominator);
@@ -142,7 +137,6 @@ internal static unsafe class MathBlockTypeRuleModule
         return 1;
     }
 
-    [CudaDevice(Name = "mathblocks_type_clear")]
     private static void Clear(MathBlockDeviceType* value, int kind)
     {
         value->kind = kind;
@@ -152,15 +146,13 @@ internal static unsafe class MathBlockTypeRuleModule
             SetUnit(value, dimension, 0, 1);
     }
 
-    [CudaDevice(Name = "mathblocks_type_copy_unit")]
-    private static void CopyUnit([CudaReadOnly] MathBlockDeviceType* source, MathBlockDeviceType* target)
+    private static void CopyUnit(MathBlockDeviceType* source, MathBlockDeviceType* target)
     {
         for (int dimension = 0; dimension < 4; dimension++)
             SetUnit(target, dimension, UnitNumerator(source, dimension), UnitDenominator(source, dimension));
     }
 
-    [CudaDevice(Name = "mathblocks_type_unit_equal")]
-    private static bool UnitsEqual([CudaReadOnly] MathBlockDeviceType* left, [CudaReadOnly] MathBlockDeviceType* right)
+    private static bool UnitsEqual(MathBlockDeviceType* left, MathBlockDeviceType* right)
     {
         for (int dimension = 0; dimension < 4; dimension++)
         {
@@ -171,8 +163,7 @@ internal static unsafe class MathBlockTypeRuleModule
         return true;
     }
 
-    [CudaDevice(Name = "mathblocks_type_unit_is_dimensionless")]
-    private static bool IsDimensionless([CudaReadOnly] MathBlockDeviceType* value)
+    private static bool IsDimensionless(MathBlockDeviceType* value)
     {
         for (int dimension = 0; dimension < 4; dimension++)
         {
@@ -185,10 +176,9 @@ internal static unsafe class MathBlockTypeRuleModule
     // Writes left^leftSign * right^rightSign * exponent into target, dimension by dimension, where the right
     // operand may be absent (a null pointer) and the exponent is exponentNumerator / exponentDenominator. Each
     // dimension is the exact checked rational sum, as the host MathRational operators compute it.
-    [CudaDevice(Name = "mathblocks_type_combine_unit")]
     private static int CombineUnit(
-        [CudaReadOnly] MathBlockDeviceType* left,
-        [CudaReadOnly] MathBlockDeviceType* right,
+        MathBlockDeviceType* left,
+        MathBlockDeviceType* right,
         int rightSign,
         int exponentNumerator,
         int exponentDenominator,
@@ -217,9 +207,8 @@ internal static unsafe class MathBlockTypeRuleModule
 
     // The input i as the operation under resolution sees it: unchanged (mode 0), a vector as the scalar of its unit
     // (mode 1, the elementwise lift), or a series input as the unit-carrying type without a length (mode 2).
-    [CudaDevice(Name = "mathblocks_type_input")]
     private static MathBlockDeviceType Input(
-        [CudaReadOnly] MathBlockDeviceType* inputs,
+        MathBlockDeviceType* inputs,
         int index,
         int mode,
         int seriesMask)
@@ -240,11 +229,10 @@ internal static unsafe class MathBlockTypeRuleModule
     }
 
     // The common checks of a row: operand count, accepted kinds and unit constraints.
-    [CudaDevice(Name = "mathblocks_type_check_operands")]
     private static int CheckOperands(
-        [CudaReadOnly] int* row,
+        int* row,
         int start,
-        [CudaReadOnly] MathBlockDeviceType* inputs,
+        MathBlockDeviceType* inputs,
         int count,
         int mode,
         int seriesMask)
@@ -278,9 +266,8 @@ internal static unsafe class MathBlockTypeRuleModule
     // The operands named by checkMask must agree on their rows, and on their columns, wherever they know them. The
     // output takes the first known rows and the first known columns among the operands named by outputMask, or by
     // checkMask when outputMask is 0.
-    [CudaDevice(Name = "mathblocks_type_merge_shape")]
     private static int MergeShape(
-        [CudaReadOnly] MathBlockDeviceType* inputs,
+        MathBlockDeviceType* inputs,
         int checkMask,
         int outputMask,
         int mode,
@@ -325,11 +312,10 @@ internal static unsafe class MathBlockTypeRuleModule
     }
 
     // Resolves a rule-1 row.
-    [CudaDevice(Name = "mathblocks_type_composed")]
     private static int Composed(
-        [CudaReadOnly] int* row,
+        int* row,
         int start,
-        [CudaReadOnly] MathBlockDeviceType* inputs,
+        MathBlockDeviceType* inputs,
         int count,
         MathBlockDeviceType* output,
         int mode,
@@ -423,11 +409,10 @@ internal static unsafe class MathBlockTypeRuleModule
     }
 
     // Resolves a plain (non-lift) row against the inputs as seen under the mode.
-    [CudaDevice(Name = "mathblocks_type_core")]
     private static int Core(
-        [CudaReadOnly] int* row,
+        int* row,
         int start,
-        [CudaReadOnly] MathBlockDeviceType* inputs,
+        MathBlockDeviceType* inputs,
         int count,
         MathBlockDeviceType* output,
         int mode,
@@ -442,10 +427,9 @@ internal static unsafe class MathBlockTypeRuleModule
     }
 
     // The fill operand of a lift is a scalar of the unit of the lifted result.
-    [CudaDevice(Name = "mathblocks_type_lift_result")]
     private static int LiftResult(
-        [CudaReadOnly] MathBlockDeviceType* inputs,
-        [CudaReadOnly] MathBlockDeviceType* sourceResult,
+        MathBlockDeviceType* inputs,
+        MathBlockDeviceType* sourceResult,
         int validity,
         int fillIndex,
         int rows,
@@ -470,10 +454,9 @@ internal static unsafe class MathBlockTypeRuleModule
     }
 
     // Resolves a rule-2 row: the elementwise form of a scalar operation, or its validity sibling.
-    [CudaDevice(Name = "mathblocks_type_elementwise_form")]
     private static int ElementwiseForm(
-        [CudaReadOnly] int* row,
-        [CudaReadOnly] MathBlockDeviceType* inputs,
+        int* row,
+        MathBlockDeviceType* inputs,
         int count,
         MathBlockDeviceType* output)
     {
@@ -514,10 +497,9 @@ internal static unsafe class MathBlockTypeRuleModule
     }
 
     // Resolves a rule-3 row: the trailing-window form of a series operation, or its validity sibling.
-    [CudaDevice(Name = "mathblocks_type_window_form")]
     private static int WindowForm(
-        [CudaReadOnly] int* row,
-        [CudaReadOnly] MathBlockDeviceType* inputs,
+        int* row,
+        MathBlockDeviceType* inputs,
         int count,
         MathBlockDeviceType* output)
     {
@@ -567,10 +549,9 @@ internal static unsafe class MathBlockTypeRuleModule
     }
 
     // Resolves a signature row and returns the status: 0 for a valid type, otherwise the first failing check.
-    [CudaDevice(Name = "mathblocks_type_resolve_status")]
     internal static int ResolveStatus(
-        [CudaReadOnly] int* signature_row,
-        [CudaReadOnly] MathBlockDeviceType* inputs,
+        int* signature_row,
+        MathBlockDeviceType* inputs,
         int count,
         MathBlockDeviceType* output)
     {
@@ -585,15 +566,5 @@ internal static unsafe class MathBlockTypeRuleModule
         if (status != StatusOk)
             Clear(output, -1);
         return status;
-    }
-
-    [CudaDevice(Name = "mathblocks_type_resolve")]
-    private static void Resolve(
-        [CudaReadOnly] int* signature_row,
-        [CudaReadOnly] MathBlockDeviceType* inputs,
-        int count,
-        MathBlockDeviceType* output)
-    {
-        ResolveStatus(signature_row, inputs, count, output);
     }
 }
