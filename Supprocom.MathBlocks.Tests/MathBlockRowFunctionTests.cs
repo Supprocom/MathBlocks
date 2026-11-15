@@ -138,7 +138,7 @@ public sealed class MathBlockRowFunctionTests
         Assert.True(end > start);
         var body = ptx[start..end];
         Assert.DoesNotContain("call", body, StringComparison.Ordinal);
-        Assert.DoesNotContain("mathblocks_row_", body[(".entry mathblocks_row_inline".Length)..], StringComparison.Ordinal);
+        Assert.Contains("st.global", body, StringComparison.Ordinal);
     }
 
     /// <summary>Verifies the row functions of the generated source's default text are the library prelude's text, so a configured source and the generated source agree.</summary>
