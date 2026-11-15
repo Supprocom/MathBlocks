@@ -171,6 +171,10 @@ scalar.truncate@1
 sequence.convolution@1
 sequence.difference@1
 sequence.exponential-moving-average@1
+sequence.first-true-offset-valid@1
+sequence.first-true-offset@1
+sequence.maximum-over-offsets-valid@1
+sequence.maximum-over-offsets@1
 sequence.rolling-maximum@1
 sequence.rolling-mean@1
 sequence.rolling-median@1
@@ -179,6 +183,8 @@ sequence.rolling-quantile@1
 sequence.rolling-standard-deviation@1
 sequence.rolling-sum@1
 sequence.rolling-variance@1
+sequence.sum-over-offsets-valid@1
+sequence.sum-over-offsets@1
 special.beta@1
 special.error-function@1
 special.log-gamma@1

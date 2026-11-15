@@ -567,6 +567,181 @@ internal static unsafe class SequencePathModule
         return (double)changes;
     }
 
+    // An integer offset that fits int32 without its extreme negative value, as MathBlockVectorMath.TryReadOffset accepts.
+    [CudaDevice]
+    private static bool mathblocks_sequence_offset(double value, int* result)
+    {
+        if (value != Math.Truncate(value) || value > 2147483647.0 || value < -2147483647.0)
+            return false;
+        *result = (int)value;
+        return true;
+    }
+
+    // Row row + offset exists and is chained to row: a later row by the counts at that row, an earlier row by the counts at row.
+    [CudaDevice]
+    private static bool mathblocks_sequence_offset_reachable(
+        [CudaReadOnly] double* counts,
+        int count,
+        int row,
+        long offset)
+    {
+        long target = row + offset;
+        if (target < 0 || target >= count)
+            return false;
+        if (offset < 0)
+            return counts[row] >= (double)(-offset);
+        return counts[(int)target] >= (double)offset;
+    }
+
+    // One row of sequence.first-true-offset (kind 0), sequence.sum-over-offsets (kind 1) or sequence.maximum-over-offsets (kind 2),
+    // the loops of MathBlockVectorMath.FirstTrueOffsetRow, SumOverOffsetsRow and MaximumOverOffsetsRow. The maximum starts at the
+    // first row of the span, which is what a start at negative infinity gives under Math.Max. Returns the validity of the row.
+    [CudaDevice]
+    private static bool mathblocks_sequence_offset_row(
+        int kind,
+        [CudaReadOnly] double* values,
+        [CudaReadOnly] CudaInt32* values_valid,
+        [CudaReadOnly] double* counts,
+        int count,
+        int row,
+        int start,
+        int end,
+        double no_match,
+        double* result)
+    {
+        *result = 0.0;
+        if (kind == 0)
+        {
+            for (long offset = start; offset <= end; offset++)
+            {
+                if (!mathblocks_sequence_offset_reachable(counts, count, row, offset))
+                    return false;
+                int target = (int)(row + offset);
+                if (!values_valid[target])
+                    return false;
+                if (values[target] != 0.0)
+                {
+                    *result = (double)offset;
+                    return true;
+                }
+            }
+            *result = no_match;
+            return true;
+        }
+        long before = 0L;
+        if (start < 0)
+            before = -(long)start;
+        long after = 0L;
+        if (end > 0)
+            after = (long)end;
+        if ((long)row + start < 0 || counts[row] < (double)before)
+            return false;
+        long last = row + after;
+        if (last >= count || counts[(int)last] < (double)after)
+            return false;
+        long first = (long)row + start;
+        double accumulator = 0.0;
+        for (long index = first; index <= (long)row + end; index++)
+        {
+            if (!values_valid[(int)index])
+                return false;
+            if (kind == 1)
+            {
+                accumulator += values[(int)index];
+                if (!double.IsFinite(accumulator))
+                    return false;
+            }
+            else if (index == first)
+            {
+                accumulator = values[(int)index];
+            }
+            else
+            {
+                accumulator = Math.Max(accumulator, values[(int)index]);
+            }
+        }
+        *result = accumulator;
+        return true;
+    }
+
+    // Opcodes 37 to 42: the value (odd) and validity (even) operations of first-true-offset, sum-over-offsets and
+    // maximum-over-offsets. Inputs: the series, its validity (a Boolean vector), the counts, start and end, then for a value
+    // operation the fill and, for first-true, the no-match offset before it. Every row is independent, so thread t takes the rows
+    // t, t + block size, ...; an input that is not valid, a length that differs, a count that is not a non-negative integer, or an
+    // offset that is not an integer or has start above end invalidates the whole call, as on CoreCLR.
+    [CudaDevice]
+    private static void mathblocks_sequence_offsets(
+        int opcode,
+        MathBlockSlot** inputs,
+        int input_count,
+        MathBlockSlot* output)
+    {
+        int thread = (int)Cuda.ThreadIdx.X;
+        MathBlockSlot* series = Cuda.ReadOnly(inputs[0]);
+        MathBlockSlot* flags = Cuda.ReadOnly(inputs[1]);
+        MathBlockSlot* counts_slot = Cuda.ReadOnly(inputs[2]);
+        MathBlockSlot* start_slot = Cuda.ReadOnly(inputs[3]);
+        MathBlockSlot* end_slot = Cuda.ReadOnly(inputs[4]);
+        int kind = (opcode - 37) / 2;
+        bool validity = (opcode & 1) == 0;
+        int start = 0;
+        int end = 0;
+        bool offsets_valid = mathblocks_sequence_offset(start_slot->scalar_value, &start);
+        if (offsets_valid)
+            offsets_valid = mathblocks_sequence_offset(end_slot->scalar_value, &end);
+        if (offsets_valid)
+            offsets_valid = start <= end;
+        if (thread == 0)
+        {
+            output->valid = series->valid && flags->valid && counts_slot->valid && start_slot->valid && end_slot->valid;
+            for (int index = 5; index < input_count; index++)
+            {
+                MathBlockSlot* extra = Cuda.ReadOnly(inputs[index]);
+                output->valid = output->valid && extra->valid;
+            }
+            mathblocks_sequence_set_vector_shape(output, series->count);
+            if (flags->count != series->count || counts_slot->count != series->count || !offsets_valid)
+                output->valid = 0;
+        }
+        Cuda.SyncThreads();
+        double* values = Cuda.ReadOnly((double*)series->data_pointer);
+        CudaInt32* values_valid = Cuda.ReadOnly((CudaInt32*)flags->data_pointer);
+        double* counts = Cuda.ReadOnly((double*)counts_slot->data_pointer);
+        for (int index = thread; output->valid && index < series->count; index += (int)Cuda.BlockDim.X)
+        {
+            if (!(counts[index] >= 0.0) || counts[index] != Math.Truncate(counts[index]))
+                Cuda.AtomicExchange(ref output->valid, 0);
+        }
+        Cuda.SyncThreads();
+        if (!output->valid)
+            return;
+
+        double no_match = 0.0;
+        double fill = 0.0;
+        if (!validity)
+        {
+            MathBlockSlot* fill_slot = Cuda.ReadOnly(inputs[input_count - 1]);
+            fill = fill_slot->scalar_value;
+            if (kind == 0)
+            {
+                MathBlockSlot* no_match_slot = Cuda.ReadOnly(inputs[5]);
+                no_match = no_match_slot->scalar_value;
+            }
+        }
+        double* result = (double*)output->data_pointer;
+        CudaInt32* boolean_result = (CudaInt32*)output->data_pointer;
+        for (int row = thread; row < series->count; row += (int)Cuda.BlockDim.X)
+        {
+            double value = 0.0;
+            bool row_valid = mathblocks_sequence_offset_row(
+                kind, values, values_valid, counts, series->count, row, start, end, no_match, &value);
+            if (validity)
+                boolean_result[row] = row_valid;
+            else
+                result[row] = row_valid ? value : fill;
+        }
+    }
+
     [CudaDevice(Name = "mathblocks_sequence_path_dispatch")]
     private static void mathblocks_sequence_path(
         int opcode,
@@ -1535,6 +1710,14 @@ internal static unsafe class SequencePathModule
                 }
                 break;
             }
+            case 37:
+            case 38:
+            case 39:
+            case 40:
+            case 41:
+            case 42:
+                mathblocks_sequence_offsets(opcode, inputs, input_count, output);
+                break;
         }
     }
 }
