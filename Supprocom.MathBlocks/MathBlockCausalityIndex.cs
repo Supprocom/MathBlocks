@@ -186,6 +186,8 @@ internal static class MathBlockCausalityIndex
         VectorMathBlocks.VectorSliceV1Block.Identity => VectorMathBlocks.VectorSliceV1Block.Causality,
         VectorMathBlocks.VectorConcatenateV1Block.Identity => VectorMathBlocks.VectorConcatenateV1Block.Causality,
         VectorMathBlocks.VectorReverseV1Block.Identity => VectorMathBlocks.VectorReverseV1Block.Causality,
+        VectorMathBlocks.SequencePrefixDifferenceOverOffsetsV1Block.Identity => VectorMathBlocks.SequencePrefixDifferenceOverOffsetsV1Block.Causality,
+        VectorMathBlocks.SequencePrefixDifferenceOverOffsetsValidV1Block.Identity => VectorMathBlocks.SequencePrefixDifferenceOverOffsetsValidV1Block.Causality,
         VectorMathBlocks.VectorSortV1Block.Identity => VectorMathBlocks.VectorSortV1Block.Causality,
         VectorMathBlocks.VectorRankV1Block.Identity => VectorMathBlocks.VectorRankV1Block.Causality,
         VectorMathBlocks.SequenceRollingSumV1Block.Identity => VectorMathBlocks.SequenceRollingSumV1Block.Causality,

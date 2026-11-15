@@ -199,6 +199,8 @@ internal static class MathBlockFeatureIndex
             VectorMathBlocks.SequenceRollingMedianV1Block.Create(),
             VectorMathBlocks.SequenceRollingQuantileV1Block.Create(),
             VectorMathBlocks.SequenceExponentialMovingAverageV1Block.Create(),
+            VectorMathBlocks.SequencePrefixDifferenceOverOffsetsV1Block.Create(),
+            VectorMathBlocks.SequencePrefixDifferenceOverOffsetsValidV1Block.Create(),
             VectorMathBlocks.VectorLessThanV1Block.Create(),
             VectorMathBlocks.VectorGreaterThanV1Block.Create(),
             VectorMathBlocks.VectorEqualV1Block.Create(),
