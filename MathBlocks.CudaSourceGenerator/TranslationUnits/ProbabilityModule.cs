@@ -21,6 +21,14 @@ internal static unsafe class ProbabilityModule
     [CudaExternal]
     private static void mathblocks_nonconvergence_record_probability(int opcode) => throw new NotSupportedException();
 
+    // The accessors of the binomial table, which the device prelude defines: the library's prelude reads and writes the module-global table,
+    // the generator's default prelude has a load that returns 0 and a store that does nothing.
+    [CudaExternal]
+    private static double mathblocks_binomial_table_load(int index) => throw new NotSupportedException();
+
+    [CudaExternal]
+    private static void mathblocks_binomial_table_store(int index, double value) => throw new NotSupportedException();
+
     [CudaExternal]
     public struct MathBlockSlot
     {
@@ -133,6 +141,26 @@ internal static unsafe class ProbabilityModule
         for (int index = 1; index <= k; index++)
             result = result * (n - k + index) / index;
         return result;
+    }
+
+    // The binomial coefficient through a table of the symmetric half of C(n, k), 0 <= k <= n <= 1023. The entry of (n, k) is at the offset of
+    // row n, floor(n / 2) * floor((n - 1) / 2) + n (the entries of the rows below it, floor(m / 2) + 1 for row m), plus min(k, n - k). A
+    // zero entry is unfilled, since a coefficient in this range is at least 1 or +infinity. The first evaluation of a pair stores the
+    // helper's own result, so a later load returns the same bits; the stores are aligned 64-bit writes, so two threads that fill one entry
+    // write the same bits, and a thread that reads a zero evaluates the helper itself. A pair outside the range goes straight to the helper.
+    [CudaDevice]
+    private static double mathblocks_probability_binomial_memo(int n, int k)
+    {
+        if (k < 0 || k > n || n > 1023)
+            return mathblocks_probability_binomial(n, k);
+        int half = k > n - k ? n - k : k;
+        int index = (n / 2) * ((n - 1) / 2) + n + half;
+        double entry = mathblocks_binomial_table_load(index);
+        if (entry != 0.0)
+            return entry;
+        entry = mathblocks_probability_binomial(n, k);
+        mathblocks_binomial_table_store(index, entry);
+        return entry;
     }
 
     [CudaDevice]
@@ -337,11 +365,11 @@ internal static unsafe class ProbabilityModule
             {
                 *value = (double)(first_integer - second_integer) /
                     (first_integer + second_integer) *
-                    mathblocks_probability_binomial(first_integer + second_integer, second_integer);
+                    mathblocks_probability_binomial_memo(first_integer + second_integer, second_integer);
             }
             else if (opcode == 1)
             {
-                *value = mathblocks_probability_binomial(first_integer, second_integer);
+                *value = mathblocks_probability_binomial_memo(first_integer, second_integer);
             }
             else
             {
