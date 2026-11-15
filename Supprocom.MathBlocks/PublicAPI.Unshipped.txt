@@ -277,6 +277,8 @@ Supprocom.MathBlocks.MathBlockExecutionResult.NonConvergedEvaluations.get -> Sys
 Supprocom.MathBlocks.MathBlockExecutionResult.Outputs.get -> System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>!
 Supprocom.MathBlocks.MathBlocksCoreCLRWorker.ExecuteWithDiagnostics(Supprocom.MathBlocks.MathBlockProgram! program, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs) -> Supprocom.MathBlocks.MathBlockExecutionResult!
 const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.NonConvergenceCountsSymbol = "mathblocks_nonconvergence_counts" -> string!
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.BinomialTableSymbol = "mathblocks_binomial_table" -> string!
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.BinomialTableEntryCount = 262656 -> int
 static Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.ComposeSource(string! consumerSource, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> string!
 static Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.CompilePtx(string! consumerSource, string! sourceName, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> byte[]!
 static Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.GetSource(Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> string!

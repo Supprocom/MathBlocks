@@ -3,8 +3,8 @@ using System.Text;
 
 namespace Supprocom.MathBlocks.Cuda;
 
-// The device source text that comes before the generated units: one function per domain limit, which the units call, and the
-// non-convergence counters. A MathBlockDomainOptions value becomes the return value of its function, so the generated units are the
+// The device source text that comes before the generated units: one function per domain limit, which the units call, the
+// non-convergence counters and the binomial table. A MathBlockDomainOptions value becomes the return value of its function, so the generated units are the
 // same text at every option value and only this prelude differs.
 internal static class MathBlockCudaDevicePrelude
 {
@@ -75,6 +75,14 @@ internal static class MathBlockCudaDevicePrelude
             .Append(Math.Max(1, operations.Count).ToString(CultureInfo.InvariantCulture)).Append("];\n");
         text.Append("static __device__ __forceinline__ void mathblocks_nonconvergence_add(int slot) { atomicAdd(&")
             .Append(MathBlockCudaDeviceModule.NonConvergenceCountsSymbol).Append("[slot], 1ull); }\n");
+        // The binomial table and its accessors: the translation unit reaches the table through these two functions only, so the generator's
+        // default prelude can define them as a load that returns 0 and a store that does nothing.
+        text.Append("__device__ double ").Append(MathBlockCudaDeviceModule.BinomialTableSymbol).Append('[')
+            .Append(MathBlockCudaDeviceModule.BinomialTableEntryCount.ToString(CultureInfo.InvariantCulture)).Append("];\n");
+        text.Append("static __device__ __forceinline__ double mathblocks_binomial_table_load(int index) { return ")
+            .Append(MathBlockCudaDeviceModule.BinomialTableSymbol).Append("[index]; }\n");
+        text.Append("static __device__ __forceinline__ void mathblocks_binomial_table_store(int index, double value) { ")
+            .Append(MathBlockCudaDeviceModule.BinomialTableSymbol).Append("[index] = value; }\n");
         foreach (var (suffix, family, identities) in Recorders)
             AppendRecorder(text, suffix, family, identities, operations);
         text.Append('\n');

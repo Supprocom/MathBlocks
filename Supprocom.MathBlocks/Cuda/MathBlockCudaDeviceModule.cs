@@ -31,6 +31,16 @@ public static class MathBlockCudaDeviceModule
     /// same array. Read it with <c>cuModuleGetGlobal</c> after a launch, and zero it before.
     /// </remarks>
     public const string NonConvergenceCountsSymbol = "mathblocks_nonconvergence_counts";
+    /// <summary>The name of the module-global table of binomial coefficients, <see cref="BinomialTableEntryCount"/> doubles.</summary>
+    /// <remarks>
+    /// The table holds <c>C(n, k)</c> for <c>0 &lt;= k &lt;= n &lt;= 1023</c> on the symmetric half <c>k &lt;= n / 2</c>: row <c>n</c> starts at entry
+    /// <c>(n / 2) * ((n - 1) / 2) + n</c> and has <c>n / 2 + 1</c> entries. An entry is 0 until a device thread evaluates its pair, which stores the result of the
+    /// same loop that evaluates a pair outside the table, so a lookup returns the bits the loop returns. The module zero-initializes it. A consumer's own kernel
+    /// that calls the ballot-count or binomial-coefficient operations fills the same table.
+    /// </remarks>
+    public const string BinomialTableSymbol = "mathblocks_binomial_table";
+    /// <summary>The number of doubles in the module-global table named by <see cref="BinomialTableSymbol"/>: the sum of <c>n / 2 + 1</c> over <c>n</c> from 0 to 1023, which is 2,101,248 bytes.</summary>
+    public const int BinomialTableEntryCount = 262656;
     /// <summary>Gets the byte stride of one row of the values form <c>elementwise.&lt;source&gt;</c>: a double, written at <c>data_pointer</c>.</summary>
     /// <remarks>
     /// The elementwise device layout, as <c>mathblocks_elementwise_run</c> in the generated source implements it:
