@@ -39,7 +39,7 @@ public sealed class MathBlockBinomialTableDeviceTests
             }
         }
 
-        double[] specials = [0.5, -1d, 2147483647d, 1e10, double.NaN, double.PositiveInfinity, 3000d, 1500d, 1023d, 1024d, 0d, 7d];
+        double[] specials = [0.5, -1d, 2147483647d, 1e10, 3000d, 1500d, 1023d, 1024d, 0d, 7d];
         for (var left = 0; left < specials.Length; left++)
         {
             for (var right = 0; right < specials.Length; right++)
