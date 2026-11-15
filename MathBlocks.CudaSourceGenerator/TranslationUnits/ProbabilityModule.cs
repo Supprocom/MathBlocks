@@ -144,6 +144,20 @@ internal static unsafe class ProbabilityModule
                 break;
         }
 
+        if (double.IsInfinity(result))
+            return mathblocks_probability_binomial_ordered(n, k);
+        return result;
+    }
+
+    // Recomputes C(n, k) for 0 <= k <= n - k when the product loop above overflowed: each step multiplies by the already divided factor
+    // (n - k + index) / index, so the running value after step i is about C(n - k + i, i), never above the final value; the result is +infinity
+    // only when C(n, k) itself exceeds the largest double.
+    [CudaDevice]
+    private static double mathblocks_probability_binomial_ordered(long n, int k)
+    {
+        double result = 1.0;
+        for (int index = 1; index <= k; index++)
+            result = result * ((double)(n - k + index) / index);
         return result;
     }
 
