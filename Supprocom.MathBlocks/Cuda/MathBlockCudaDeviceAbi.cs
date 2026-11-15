@@ -28,6 +28,9 @@ public readonly record struct MathBlockCudaDeviceAbi(
     string SourceFingerprint,
     string OperationTableFingerprint)
 {
+    /// <summary>Gets the signature of the single-row elementwise function; it is part of <see cref="Fingerprint"/>.</summary>
+    public string ElementwiseRowSignature { get; init; } = MathBlockCudaDeviceModule.ElementwiseRowSignature;
+
     /// <summary>Gets the fingerprint of the CUDA device ABI contract.</summary>
     public string Fingerprint => MathBlockCudaContractHash.Create(CreateFingerprintMaterial());
 
@@ -61,6 +64,7 @@ public readonly record struct MathBlockCudaDeviceAbi(
         Append(builder, ValueCodecImplementationFingerprint);
         Append(builder, SourceFingerprint);
         Append(builder, OperationTableFingerprint);
+        Append(builder, ElementwiseRowSignature);
         return builder.ToString();
     }
 

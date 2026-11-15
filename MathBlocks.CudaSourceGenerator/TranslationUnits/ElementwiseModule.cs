@@ -162,6 +162,58 @@ internal static unsafe class ElementwiseModule
         output->valid = valid;
     }
 
+    // Opcodes below 1024 are 2 * source + sibling + 128 * mask for sources below 64; larger sources are 1024 + (2 * source + sibling) + 65536 * mask
+    // (MathBlockCudaElementwiseOpcode on the host). Returns the form, 2 * source + sibling, and gives the passed mask, the source and
+    // whether the form is the sibling (validity) one.
+    [CudaDevice]
+    private static int mathblocks_elementwise_decode(int opcode, int* passed_mask, int* source, bool* sibling)
+    {
+        int mask = opcode / 128;
+        int form = opcode % 128;
+        if (opcode >= 1024)
+        {
+            int relative = opcode - 1024;
+            mask = relative / 65536;
+            form = relative % 65536;
+        }
+        *passed_mask = mask;
+        *source = form / 2;
+        *sibling = form % 2 != 0;
+        return form;
+    }
+
+    // One row: the per-node values (form, the source's opcode in its family and arity) arrive from the caller, which reads the arguments. As
+    // CoreCLR's row: a non-finite argument, a vector row or a broadcast scalar, makes the row invalid before the source is evaluated; the
+    // source's own result is checked after. Writes the value, or the fill for an invalid row, and returns the row's validity.
+    [CudaDevice]
+    private static bool mathblocks_elementwise_row_core(
+        int form,
+        int source_opcode,
+        int arity,
+        double a,
+        double b,
+        double c,
+        double fill,
+        double* result)
+    {
+        double value = 0.0;
+        bool converged = true;
+        bool row_valid = double.IsFinite(a) &&
+            (arity < 2 || double.IsFinite(b)) &&
+            (arity < 3 || double.IsFinite(c));
+        if (row_valid)
+            row_valid = mathblocks_elementwise_row_value(
+                source_opcode,
+                a,
+                b,
+                c,
+                &value,
+                &converged);
+        if (!converged) mathblocks_nonconvergence_record_elementwise(form);
+        *result = row_valid ? value : fill;
+        return row_valid;
+    }
+
     // thread is this thread's index among the threads that evaluate rows, and threads their count.
     [CudaDevice]
     private static void mathblocks_elementwise_run(
@@ -172,18 +224,10 @@ internal static unsafe class ElementwiseModule
         int thread,
         int threads)
     {
-        // Opcodes below 1024 are 2 * source + sibling + 128 * mask for sources below 64; larger sources are 1024 + (2 * source + sibling) + 65536 * mask
-        // (MathBlockCudaElementwiseOpcode on the host).
-        int passed_mask = opcode / 128;
-        int form = opcode % 128;
-        if (opcode >= 1024)
-        {
-            int relative = opcode - 1024;
-            passed_mask = relative / 65536;
-            form = relative % 65536;
-        }
-        int source = form / 2;
-        bool sibling = form % 2 != 0;
+        int passed_mask = 0;
+        int source = 0;
+        bool sibling = false;
+        int form = mathblocks_elementwise_decode(opcode, &passed_mask, &source, &sibling);
         int arity = mathblocks_elementwise_source_arity(source);
         // The argument kinds come from the input slots: a slot with elements (count > 0) is a vector, and a scalar has count 0 in the value
         // ABI. So the base opcode (mask bits 0) is enough; a consumer need not pass the mask. An empty vector has count 0 as a scalar does, so
@@ -228,29 +272,46 @@ internal static unsafe class ElementwiseModule
         for (int row = thread; row < count; row += threads)
         {
             double value = 0.0;
-            bool converged = true;
             double argument_a = mathblocks_elementwise_argument(first, first_vector, row);
             double argument_b = mathblocks_elementwise_argument(second, second_vector, row);
             double argument_c = mathblocks_elementwise_argument(third, third_vector, row);
-            // As CoreCLR's row: a non-finite argument, a vector row or a broadcast scalar, makes the row invalid before the source
-            // is evaluated; the source's own result is checked after.
-            bool row_valid = double.IsFinite(argument_a) &&
-                (arity < 2 || double.IsFinite(argument_b)) &&
-                (arity < 3 || double.IsFinite(argument_c));
-            if (row_valid)
-                row_valid = mathblocks_elementwise_row_value(
-                    source_opcode,
-                    argument_a,
-                    argument_b,
-                    argument_c,
-                    &value,
-                    &converged);
-            if (!converged) mathblocks_nonconvergence_record_elementwise(form);
+            bool row_valid = mathblocks_elementwise_row_core(
+                form,
+                source_opcode,
+                arity,
+                argument_a,
+                argument_b,
+                argument_c,
+                fill,
+                &value);
             if (sibling)
                 boolean_result[row] = row_valid;
             else
-                result[row] = row_valid ? value : fill;
+                result[row] = value;
         }
+    }
+
+    // The public single-row entry point of the module (MathBlockCudaDeviceModule.ElementwiseRowSignature): one row of an elementwise
+    // source with the dispatch's semantics. The opcode is the one the dispatch takes, narrow or wide, values or validity form; its mask
+    // bits are ignored, and a broadcast scalar is passed as a plain value. An opcode that is negative or names a source past the source
+    // count gives the fill and false without evaluating. Arguments beyond the source's arity read 0, as the dispatch's absent slots do.
+    // Both forms compute the same way: *result is the value, or the fill for an invalid row, and the return value is the row's validity.
+    [CudaDevice(Name = "mathblocks_elementwise_row")]
+    private static bool mathblocks_elementwise_row_entry(int opcode, double a, double b, double c, double fill, double* result)
+    {
+        int passed_mask = 0;
+        int source = 0;
+        bool sibling = false;
+        int form = mathblocks_elementwise_decode(opcode, &passed_mask, &source, &sibling);
+        if (opcode < 0 || source >= mathblocks_limit_elementwise_source_count())
+        {
+            *result = fill;
+            return false;
+        }
+        int arity = mathblocks_elementwise_source_arity(source);
+        double argument_b = arity > 1 ? b : 0.0;
+        double argument_c = arity > 2 ? c : 0.0;
+        return mathblocks_elementwise_row_core(form, mathblocks_elementwise_source_opcode(source), arity, a, argument_b, argument_c, fill, result);
     }
 
     [CudaDevice(Name = "mathblocks_elementwise_dispatch")]

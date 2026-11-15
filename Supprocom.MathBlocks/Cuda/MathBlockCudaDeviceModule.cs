@@ -51,6 +51,19 @@ public static class MathBlockCudaDeviceModule
     public const string DispatchSignature =
         "__device__ void mathblocks_operation_dispatch(int family, int opcode, " +
         "const MathBlockSlot* const* inputs, int input_count, MathBlockSlot* output)";
+    /// <summary>Gets the signature of the single-row elementwise function <c>mathblocks_elementwise_row</c>, as declared in <see cref="Source"/>.</summary>
+    /// <remarks>
+    /// Evaluates one row of an elementwise source with the semantics of <c>mathblocks_operation_dispatch</c> for family 12, in the same device function the dispatch's row loop calls:
+    /// <list type="bullet">
+    /// <item><c>opcode</c> is the elementwise opcode a consumer passes to the dispatch, narrow or wide, values form (even) or validity form (odd); its mask bits are ignored, and a broadcast scalar is passed as a plain value.</item>
+    /// <item><c>a</c>, <c>b</c> and <c>c</c> are the row's arguments; those beyond the source's arity read 0.</item>
+    /// <item>The return value is whether the row is valid: every argument the source takes is finite and the source's result is valid. <c>*result</c> receives the row's value, or <c>fill</c> when the row is invalid.</item>
+    /// <item>A negative opcode or a source index at or past the source count writes <c>fill</c> and returns false without evaluating.</item>
+    /// <item>A row whose source does not converge is counted in <see cref="NonConvergenceCountsSymbol"/> under the opcode's form, as the dispatch counts it.</item>
+    /// </list>
+    /// </remarks>
+    public const string ElementwiseRowSignature =
+        "__device__ bool mathblocks_elementwise_row(int opcode, double a, double b, double c, double fill, double* result)";
 
     // CA1721: GetSource(MathBlockDomainOptions) and GetSourceFingerprint(MathBlockDomainOptions) are the names the 0.7.0 interface fixes, and Source and
     // SourceFingerprint are the shipped properties of the default options.

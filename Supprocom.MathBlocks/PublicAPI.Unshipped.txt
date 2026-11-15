@@ -375,3 +375,6 @@ Supprocom.MathBlocks.MathBlockTypeSignature.RuleKind.get -> Supprocom.MathBlocks
 Supprocom.MathBlocks.MathBlockTypeSignature.ToRow() -> System.Collections.Generic.IReadOnlyList<int>!
 Supprocom.MathBlocks.MathBlockTypeSignatures
 Supprocom.MathBlocks.MathBlockFusedExpression.EvaluateCoreCLR(System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>? validity = null) -> Supprocom.MathBlocks.MathBlockFusedResult!
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.ElementwiseRowSignature = "__device__ bool mathblocks_elementwise_row(int opcode, double a, double b, double c, double fill, double* result)" -> string!
+Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceAbi.ElementwiseRowSignature.get -> string!
+Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceAbi.ElementwiseRowSignature.init -> void

@@ -17,7 +17,8 @@ public sealed class MathBlockElementwiseDispatchSourceTests
         Assert.True(end > 0, "The publish call is missing.");
         body = body[..end];
 
-        Assert.Contains("int passed_mask = csharp2cuda_i32_div(opcode, 128);", body, StringComparison.Ordinal);
+        Assert.Contains("int mask = csharp2cuda_i32_div(opcode, 128);", body, StringComparison.Ordinal);
+        Assert.Contains("mathblocks_elementwise_decode(opcode,", body, StringComparison.Ordinal);
         Assert.Contains("int derived_mask = 0;", body, StringComparison.Ordinal);
         Assert.Contains("((passed_mask) == (0))", body, StringComparison.Ordinal);
         Assert.Contains("(csharp2cuda_i32_and(derived_mask, csharp2cuda_i32_not(mask))) == (0)", body, StringComparison.Ordinal);

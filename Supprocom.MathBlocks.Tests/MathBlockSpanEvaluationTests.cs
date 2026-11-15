@@ -265,9 +265,15 @@ public sealed class MathBlockSpanEvaluationTests
         Assert.Contains("&((result)[row])", body, StringComparison.Ordinal);
         Assert.Contains("&((boolean_result)[row])", body, StringComparison.Ordinal);
         Assert.Contains("->data_pointer", body, StringComparison.Ordinal);
-        Assert.Contains("csharp2cuda_i32_div(opcode, 128)", body, StringComparison.Ordinal);
-        Assert.Contains("csharp2cuda_i32_div(form, 2)", body, StringComparison.Ordinal);
-        Assert.Contains("csharp2cuda_i32_rem(form, 2)", body, StringComparison.Ordinal);
+        // The opcode decode is one function that the dispatch's run function and the single-row entry point both call.
+        var decodeStart = source.LastIndexOf("__device__ int mathblocks_elementwise_decode(", StringComparison.Ordinal);
+        Assert.True(decodeStart >= 0);
+        var decodeEnd = source.IndexOf("\n__device__ ", decodeStart + 10, StringComparison.Ordinal);
+        var decode = decodeEnd < 0 ? source[decodeStart..] : source[decodeStart..decodeEnd];
+        Assert.Contains("mathblocks_elementwise_decode(opcode,", body, StringComparison.Ordinal);
+        Assert.Contains("csharp2cuda_i32_div(opcode, 128)", decode, StringComparison.Ordinal);
+        Assert.Contains("csharp2cuda_i32_div(form, 2)", decode, StringComparison.Ordinal);
+        Assert.Contains("csharp2cuda_i32_rem(form, 2)", decode, StringComparison.Ordinal);
         Assert.Contains("->scalar_value", body, StringComparison.Ordinal);
 
         var limits = MathBlockLimits.Resolve();

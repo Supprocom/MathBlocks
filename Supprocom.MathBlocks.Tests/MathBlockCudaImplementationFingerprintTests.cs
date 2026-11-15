@@ -20,11 +20,11 @@ public sealed class MathBlockCudaImplementationFingerprintTests
     private const string CodecImplementationFingerprint =
         "5F0FB495A844D087E764092BD2375535443378A79884441051ADEBAE958AE760";
     private const string DeviceAbiFingerprint =
-        "A474D9DE5B08D66611455EEB0AB8F196C95E3E4630856ED7C229DEFEE59D9F5D";
+        "2801350B3F0A228AA0099025E0D95E35718D4ADEB9EFEC7434B963F62942F1EC";
 
     // The SHA-256 of the full generated CUDA source (the generator checks the same value when it runs).
     private const string FullGeneratedSourceSha256 =
-        "A5E77D01A3EA431268A83687F16C052C48B44A2901604F7E8C15F563341C93D7";
+        "416461309967AD99FEC46E71AA38DA8B16E74F92C42077909BC1E604AF14E3B1";
 
     private const string CorpusVersion = "mathblocks-value-codec-corpus-v1";
 
