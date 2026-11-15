@@ -1470,6 +1470,71 @@ internal static unsafe class SequencePathModule
                     }
                 }
                 break;
+            // sequence.lead (33), sequence.lead-valid (34), sequence.lag (35) and sequence.lag-valid (36). The inputs are the series,
+            // its availability flags, the counts of contiguous steps before each row, the offset and, for the value forms, the fill.
+            // The whole call is invalid when the lengths differ, the offset is not an integer of at least 1, or a count is not a
+            // non-negative integer. Each row is then independent: it holds the shifted value (or true) when the shifted row exists,
+            // the rows between are chained and the shifted row is available, and the fill (or false) otherwise. The offset is limited to
+            // the row count, which leaves every row unavailable and keeps the index arithmetic in int, as on CoreCLR.
+            case 33:
+            case 34:
+            case 35:
+            case 36:
+            {
+                bool shift_forward = opcode < 35;
+                bool shift_sibling = opcode % 2 == 0;
+                MathBlockSlot* shift_offset_input = Cuda.ReadOnly(input_count > 3 ? inputs[3] : null);
+                MathBlockSlot* shift_fill_input = Cuda.ReadOnly(input_count > 4 ? inputs[4] : null);
+                CudaInt32* shift_flags = Cuda.ReadOnly((CudaInt32*)second->data_pointer);
+                double* shift_counts = Cuda.ReadOnly((double*)third->data_pointer);
+                CudaInt32* shift_boolean = (CudaInt32*)output->data_pointer;
+                int shift_rows = first->count;
+                if (thread == 0)
+                {
+                    mathblocks_sequence_set_vector_shape(output, shift_rows);
+                    double shift_offset_value = shift_offset_input == null ? 0.0 : shift_offset_input->scalar_value;
+                    if (input_count != (shift_sibling ? 4 : 5) || !shift_offset_input->valid || (!shift_sibling && !shift_fill_input->valid) ||
+                        second->count != shift_rows || third->count != shift_rows ||
+                        !(shift_offset_value >= 1.0) || shift_offset_value != Math.Truncate(shift_offset_value))
+                        output->valid = 0;
+                    output->scalar_value = shift_offset_value < (double)shift_rows ? shift_offset_value : (double)shift_rows;
+                }
+                Cuda.SyncThreads();
+                for (int shift_index = thread; output->valid && shift_index < shift_rows; shift_index += Cuda.BlockDim.X)
+                {
+                    double shift_count_value = shift_counts[shift_index];
+                    if (!(shift_count_value >= 0.0) || shift_count_value != Math.Truncate(shift_count_value) || !double.IsFinite(shift_count_value))
+                        Cuda.AtomicExchange(ref output->valid, 0);
+                }
+                Cuda.SyncThreads();
+                int shift_offset = (int)output->scalar_value;
+                double shift_fill = 0.0;
+                if (output->valid && !shift_sibling)
+                    shift_fill = shift_fill_input->scalar_value;
+                for (int shift_index = thread; output->valid && shift_index < shift_rows; shift_index += Cuda.BlockDim.X)
+                {
+                    bool shift_available = false;
+                    int shift_source = 0;
+                    if (shift_forward)
+                    {
+                        if (shift_index < shift_rows - shift_offset)
+                        {
+                            shift_source = shift_index + shift_offset;
+                            shift_available = shift_counts[shift_source] >= (double)shift_offset && shift_flags[shift_source];
+                        }
+                    }
+                    else if (shift_index >= shift_offset)
+                    {
+                        shift_source = shift_index - shift_offset;
+                        shift_available = shift_counts[shift_index] >= (double)shift_offset && shift_flags[shift_source];
+                    }
+                    if (shift_sibling)
+                        shift_boolean[shift_index] = shift_available;
+                    else
+                        result[shift_index] = shift_available ? a[shift_source] : shift_fill;
+                }
+                break;
+            }
         }
     }
 }

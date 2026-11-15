@@ -46,6 +46,16 @@ internal static class MathBlockCausalityChecks
         ["sequence.difference@1"] = "valid only from a prefix of lag + 1 rows"
     };
 
+    // The counts input must be non-negative integers, and the sweep draws every series input from one shared domain. Of the second
+    // regime's domains only the integer one can then give valid counts, and it does so only for a series that happens to hold no
+    // negative draw, so a second regime is neither required nor forbidden. MathBlockSequenceShiftTests.LagRowsDoNotChangeWhenLaterRowsAreRemoved runs the
+    // same prefix-invariance check for these operations with integer counts, so their Expanding label is still checked in value and validity.
+    private static readonly HashSet<string> CountsInputOperations = new(StringComparer.Ordinal)
+    {
+        "sequence.lag@1",
+        "sequence.lag-valid@1"
+    };
+
     // The input must be a whole probability distribution, which leaves no second value regime.
     private static readonly HashSet<string> SingleRegimeOperations = new(StringComparer.Ordinal)
     {
@@ -397,6 +407,8 @@ internal static class MathBlockCausalityChecks
                     return;
             }
         }
+        if (CountsInputOperations.Contains(operation.Identity))
+            return;
         var single = SingleRegimeOperations.Contains(operation.Identity);
         if (regimes.Count < 2 && !single)
             failures.Add($"{operation.Identity} ({operation.Causality}) was swept in only one value regime");
