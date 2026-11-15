@@ -48,7 +48,8 @@ internal static class MathBlockCausalityChecks
 
     // The counts input must be non-negative integers, and the sweep draws every series input from one shared domain. Of the second
     // regime's domains only the integer one can then give valid counts, and it does so only for a series that happens to hold no
-    // negative draw, so a second regime is neither required nor forbidden.
+    // negative draw, so a second regime is neither required nor forbidden. MathBlockSequenceShiftTests.LagRowsDoNotChangeWhenLaterRowsAreRemoved runs the
+    // same prefix-invariance check for these operations with integer counts, so their Expanding label is still checked in value and validity.
     private static readonly HashSet<string> CountsInputOperations = new(StringComparer.Ordinal)
     {
         "sequence.lag@1",

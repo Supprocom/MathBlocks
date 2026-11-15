@@ -264,6 +264,50 @@ public sealed class MathBlockSequenceShiftTests
         }
     }
 
+    /// <summary>
+    /// Verifies the Expanding label of the lag and its validity sibling by prefix invariance: with integer counts, for several series lengths and offsets,
+    /// every output row of the run on the first t rows equals the same row of the run on the whole series, in value and in validity, and the run on a
+    /// prefix is never invalid when the whole run is valid. This is the check the causality sweep makes for the other Expanding operations, which it
+    /// cannot make for the lag because its counts input must be integers.
+    /// </summary>
+    [Theory]
+    [Trait("Category", "CausalityContract")]
+    [InlineData("sequence.lag")]
+    [InlineData("sequence.lag-valid")]
+    public void LagRowsDoNotChangeWhenLaterRowsAreRemoved(string identifier)
+    {
+        ArgumentNullException.ThrowIfNull(identifier);
+        var random = new Random(0x1a6);
+        foreach (var length in new[] { 1, 2, 3, 4, 5, 7, 8, 12, 17, 24, 33 })
+        {
+            for (var seed = 0; seed < 3; seed++)
+            {
+                var values = new double[length];
+                var available = new bool[length];
+                var counts = new double[length];
+                for (var index = 0; index < length; index++)
+                {
+                    values[index] = random.Next(-40, 40) * 0.5d;
+                    available[index] = random.Next(4) != 0;
+                    counts[index] = index > 0 && random.Next(5) != 0 ? counts[index - 1] + 1d : 0d;
+                }
+
+                foreach (var offset in new[] { 1d, 2d, 3d, 5d, length })
+                {
+                    var full = Evaluate(identifier, values, available, counts, offset, Fill);
+                    Assert.True(full.IsValid, $"{identifier} n={length} k={offset}");
+                    for (var prefix = 1; prefix <= length; prefix++)
+                    {
+                        var truncated = Evaluate(identifier, values[..prefix], available[..prefix], counts[..prefix], offset, Fill);
+                        Assert.True(truncated.IsValid, $"{identifier} n={length} k={offset} prefix={prefix}");
+                        for (var row = 0; row < prefix; row++)
+                            Assert.True(SameRow(full, truncated, row), $"{identifier} n={length} k={offset} prefix={prefix} row={row}");
+                    }
+                }
+            }
+        }
+    }
+
     /// <summary>Verifies the forms run inside a program, with the offset as an input, and give the same rows.</summary>
     [Fact]
     [Trait("Category", "BlockContract")]
@@ -297,6 +341,11 @@ public sealed class MathBlockSequenceShiftTests
         Assert.True(Evaluate("sequence.lag", Series, Available, Counts, 1d, Fill).ApproximatelyEquals(outputs["lag"], 0d));
         Assert.True(Evaluate("sequence.lag-valid", Series, Available, Counts, 1d, Fill).ApproximatelyEquals(outputs["lagValid"], 0d));
     }
+
+    private static bool SameRow(MathBlockValue left, MathBlockValue right, int row) =>
+        left.Type.Kind == MathBlockValueKind.BooleanVector
+            ? left.AsBooleanVector()[row] == right.AsBooleanVector()[row]
+            : BitConverter.DoubleToInt64Bits(left.AsVector()[row]) == BitConverter.DoubleToInt64Bits(right.AsVector()[row]);
 
     private static double[] WithCount(int index, double value)
     {
