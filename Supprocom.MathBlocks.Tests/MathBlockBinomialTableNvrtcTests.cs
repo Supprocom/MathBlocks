@@ -18,7 +18,7 @@ public sealed partial class MathBlockBinomialTableNvrtcTests
             [typeof(string), typeof(string), typeof(string), typeof(bool)])!;
 
     // A consumer kernel that reads and writes the table through its public name, and evaluates a pair through the memo function.
-    private static readonly string Consumer =
+    private const string Consumer =
         "extern \"C\" __global__ void consumer_binomial(double* output, int n, int k)\n" +
         "{\n" +
         "    double value = mathblocks_probability_binomial_memo(n, k);\n" +
@@ -67,7 +67,7 @@ public sealed partial class MathBlockBinomialTableNvrtcTests
         var ptx = CompileConsumer(MathBlockDomainOptions.Default);
         var declarations = TableDeclaration().Matches(ptx);
 
-        Assert.Equal(1, declarations.Count);
+        Assert.Single(declarations);
         var size = int.Parse(declarations[0].Groups["size"].Value, System.Globalization.CultureInfo.InvariantCulture);
         Assert.True(
             size == MathBlockCudaDeviceModule.BinomialTableEntryCount * sizeof(double) || size == MathBlockCudaDeviceModule.BinomialTableEntryCount,

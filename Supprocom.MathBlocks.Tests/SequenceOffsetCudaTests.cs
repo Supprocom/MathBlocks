@@ -24,6 +24,7 @@ public sealed class SequenceOffsetCudaTests
     [MemberData(nameof(Identifiers))]
     public void CUDAEqualsCoreCLRBitForBit(string identifier)
     {
+        ArgumentException.ThrowIfNullOrEmpty(identifier);
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var series = new double[][]
         {

@@ -240,6 +240,7 @@ public sealed class SequenceOffsetOperationTests
     [InlineData("sequence.maximum-over-offsets-valid@1")]
     public void CausalityIsForwardAndTheOutputKeepsTheSeriesLength(string identity)
     {
+        ArgumentException.ThrowIfNullOrEmpty(identity);
         var separator = identity.IndexOf('@', StringComparison.Ordinal);
         var operation = MathBlockCatalog.Standard.Get(identity[..separator], 1);
         Assert.Equal(MathBlockCausality.Forward, operation.Causality.Kind);

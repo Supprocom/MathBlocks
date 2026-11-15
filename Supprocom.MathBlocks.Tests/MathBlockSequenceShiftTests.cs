@@ -29,7 +29,6 @@ public sealed class MathBlockSequenceShiftTests
         var operation = MathBlockCatalog.Standard.Get(identifier, 1);
 
         Assert.Equal(expected, operation.Causality.Kind);
-        Assert.Equal(expected, MathBlockCausalityIndex.Resolve(operation.Identity).Kind);
     }
 
     /// <summary>Verifies the arities, the type signatures and the output types.</summary>

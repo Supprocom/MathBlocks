@@ -42,7 +42,7 @@ public sealed class MathBlockBinomialTableTests
             entries += (n / 2) + 1;
 
         Assert.Equal(262_656, entries);
-        Assert.Equal(entries, MathBlockCudaDeviceModule.BinomialTableEntryCount);
+        Assert.Equal(MathBlockCudaDeviceModule.BinomialTableEntryCount, entries);
         Assert.Equal(2_101_248L, (long)entries * sizeof(double));
     }
 

@@ -73,7 +73,7 @@ public sealed class CombinatoricsBallotCountV1BlockTests
                 else
                     Assert.True(double.IsPositiveInfinity(actual), $"BallotCount({leading}, {trailing}) = {actual}.");
                 MathBlockValue[] inputs = [MathBlockValue.Scalar(leading), MathBlockValue.Scalar(trailing)];
-            var result = operation.Evaluate(inputs);
+                var result = operation.Evaluate(inputs);
                 Assert.Equal(double.IsFinite(actual), result.IsValid);
                 if (result.IsValid)
                     finite++;
