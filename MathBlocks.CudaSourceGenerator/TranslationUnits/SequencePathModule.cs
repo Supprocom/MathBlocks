@@ -1470,6 +1470,95 @@ internal static unsafe class SequencePathModule
                     }
                 }
                 break;
+            // Prefix difference over offsets (48: the values, 49: the validity flags): one thread walks the series once. A segment
+            // starts at row 0 and at every row whose count is 0. Inside a segment two running prefixes follow the row index,
+            // P[row + start] and P[row + end + 1], each added left to right from the segment start (the sum of the rows before
+            // it, an unavailable row adding nothing, which equals adding 0), so every prefix is the sequential sum that CoreCLR
+            // forms; both positions only move forward as the row grows. The cost is one pass over the series on one thread, with
+            // no scratch. A row is valid when both ends lie in its segment, no unavailable row lies between them and the
+            // difference is finite; any other row holds the fill (48) or 0 (49).
+            case 48:
+            case 49:
+            {
+                MathBlockSlot* start_slot = Cuda.ReadOnly(input_count > 3 ? inputs[3] : null);
+                MathBlockSlot* end_slot = Cuda.ReadOnly(input_count > 4 ? inputs[4] : null);
+                MathBlockSlot* fill_slot = Cuda.ReadOnly(input_count > 5 ? inputs[5] : null);
+                CudaInt32* available = Cuda.ReadOnly(second == null ? null : (CudaInt32*)second->data_pointer);
+                double* counts = Cuda.ReadOnly(third == null ? null : (double*)third->data_pointer);
+                CudaInt32* flags = (CudaInt32*)output->data_pointer;
+                if (thread == 0)
+                {
+                    int count = first->count;
+                    double start = start_slot->scalar_value;
+                    double end = end_slot->scalar_value;
+                    double fill = 0.0;
+                    if (opcode == 48)
+                        fill = fill_slot->scalar_value;
+                    mathblocks_sequence_set_vector_shape(output, count);
+                    if (!start_slot->valid || !end_slot->valid || (opcode == 48 && !fill_slot->valid) ||
+                        second->count != count || third->count != count)
+                    {
+                        output->valid = 0;
+                    }
+                    if (!double.IsFinite(start) || !double.IsFinite(end) || start != Math.Floor(start) ||
+                        end != Math.Floor(end) || start > end)
+                    {
+                        output->valid = 0;
+                    }
+                    for (int row = 0; output->valid && row < count; row++)
+                        if (!double.IsFinite(counts[row]) || counts[row] < 0.0 || counts[row] != Math.Floor(counts[row]))
+                            output->valid = 0;
+                    int segment_start = 0;
+                    while (output->valid && segment_start < count)
+                    {
+                        int segment_end = segment_start + 1;
+                        while (segment_end < count && counts[segment_end] != 0.0)
+                            segment_end++;
+                        int low_position = segment_start;
+                        double low_sum = 0.0;
+                        int low_missing = 0;
+                        int high_position = segment_start;
+                        double high_sum = 0.0;
+                        int high_missing = 0;
+                        for (int row = segment_start; row < segment_end; row++)
+                        {
+                            double low = (double)row + start;
+                            double high = (double)row + end;
+                            bool row_valid = false;
+                            double difference = 0.0;
+                            if (low >= (double)segment_start && high < (double)segment_end)
+                            {
+                                int low_target = (int)low;
+                                int high_target = (int)high + 1;
+                                while (low_position < low_target)
+                                {
+                                    if (available[low_position] != 0)
+                                        low_sum += a[low_position];
+                                    else
+                                        low_missing++;
+                                    low_position++;
+                                }
+                                while (high_position < high_target)
+                                {
+                                    if (available[high_position] != 0)
+                                        high_sum += a[high_position];
+                                    else
+                                        high_missing++;
+                                    high_position++;
+                                }
+                                difference = high_sum - low_sum;
+                                row_valid = low_missing == high_missing && double.IsFinite(difference);
+                            }
+                            if (opcode == 49)
+                                flags[row] = row_valid ? 1 : 0;
+                            else
+                                result[row] = row_valid ? difference : fill;
+                        }
+                        segment_start = segment_end;
+                    }
+                }
+                break;
+            }
         }
     }
 }

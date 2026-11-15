@@ -225,6 +225,8 @@ internal static class MathBlockTypeSignatureCatalog
         E("sequence.convolution@1", [O(Ve, -1), O(Ve, -1)], 4, 0, 0, 0, 3, 0, 1, 1, 1),
         E("sequence.difference@1", [O(Ve, -1), C(Sc, -2)], 4, 0, 0, 0, 1, 0, 0, 1, 1),
         E("sequence.exponential-moving-average@1", [O(Ve, -1), O(Sc, -2)], 4, 0, 0, 0, 1, 0, 0, 1, 1),
+        E("sequence.prefix-difference-over-offsets-valid@1", [O(Ve, -1), O(BV, -1), O(Ve, -2), O(Sc, -2), O(Sc, -2)], 11, 4, 7, 0, 0, 0, 0, 1, 1),
+        E("sequence.prefix-difference-over-offsets@1", [O(Ve, -1), O(BV, -1), O(Ve, -2), O(Sc, -2), O(Sc, -2), O(Sc, 0)], 4, 4, 7, 0, 1, 0, 0, 1, 1),
         E("sequence.rolling-maximum@1", [O(Ve, -1), C(Sc, -2)], 4, 0, 0, 0, 1, 0, 0, 1, 1),
         E("sequence.rolling-mean@1", [O(Ve, -1), C(Sc, -2)], 4, 0, 0, 0, 1, 0, 0, 1, 1),
         E("sequence.rolling-median@1", [O(Ve, -1), C(Sc, -2)], 4, 0, 0, 0, 1, 0, 0, 1, 1),
