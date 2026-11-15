@@ -31,6 +31,81 @@ internal static class MathBlockCudaDevicePrelude
         ("graph", MathBlockCudaFamily.Graph, ["graph.algebraic-connectivity@1"])
     ];
 
+    // The per-row functions of the consumer-visible device source: one function per simple scalar operation (mathblocks_row_<op>), the value helpers the
+    // dispatch's scalar cases call (mathblocks_row_value_<op>), and mathblocks_row_sum. They do not depend on the domain options, so every source has the same text.
+    // The generated source's default block (MathBlocks.CudaSourceGenerator) carries the same text; a test compares the two.
+#pragma warning disable MA0136
+    internal const string RowFunctions = """
+// Per-row arithmetic for a consumer's fused kernel: mathblocks_row_<op> evaluates one row of the scalar operation with the dispatch's bits.
+// Each returns whether the row is valid (every argument finite and the value finite), and writes the value, or fill when the row is invalid, to *result.
+// No fused multiply-add, no flushing, no slot access and no synchronization.
+// The generated units define mathblocks_square_root; it is declared here so the row function can call it.
+__device__ double mathblocks_square_root(double value);
+static __device__ __forceinline__ bool mathblocks_row_finish(bool valid, double value, double fill, double* result) { *result = valid ? value : fill; return valid; }
+
+// The value of each operation on its arguments, as the dispatch computes it: the dispatch and the row functions both call these.
+// a + b, rounded to nearest
+static __device__ __forceinline__ double mathblocks_row_value_add(double a, double b) { return __dadd_rn(a, b); }
+// a - b, rounded to nearest
+static __device__ __forceinline__ double mathblocks_row_value_subtract(double a, double b) { return __dsub_rn(a, b); }
+// a * b, rounded to nearest
+static __device__ __forceinline__ double mathblocks_row_value_multiply(double a, double b) { return __dmul_rn(a, b); }
+// a / b, rounded to nearest
+static __device__ __forceinline__ double mathblocks_row_value_divide(double a, double b) { return __ddiv_rn(a, b); }
+// |a|
+static __device__ __forceinline__ double mathblocks_row_value_absolute(double a) { return fabs(a); }
+
+// The row functions. Valid when the arguments and the value are finite.
+// a + b; invalid when the sum overflows
+static __device__ __forceinline__ bool mathblocks_row_add(double a, double b, double fill, double* result)
+{
+    double value = mathblocks_row_value_add(a, b);
+    return mathblocks_row_finish(isfinite(a) && isfinite(b) && isfinite(value), value, fill, result);
+}
+// a - b; invalid when the difference overflows
+static __device__ __forceinline__ bool mathblocks_row_subtract(double a, double b, double fill, double* result)
+{
+    double value = mathblocks_row_value_subtract(a, b);
+    return mathblocks_row_finish(isfinite(a) && isfinite(b) && isfinite(value), value, fill, result);
+}
+// a * b; invalid when the product overflows
+static __device__ __forceinline__ bool mathblocks_row_multiply(double a, double b, double fill, double* result)
+{
+    double value = mathblocks_row_value_multiply(a, b);
+    return mathblocks_row_finish(isfinite(a) && isfinite(b) && isfinite(value), value, fill, result);
+}
+// a / b; invalid when b is 0.0 or the quotient overflows
+static __device__ __forceinline__ bool mathblocks_row_divide(double a, double b, double fill, double* result)
+{
+    double value = mathblocks_row_value_divide(a, b);
+    return mathblocks_row_finish(isfinite(a) && isfinite(b) && isfinite(value), value, fill, result);
+}
+// |a|
+static __device__ __forceinline__ bool mathblocks_row_absolute(double a, double fill, double* result)
+{
+    double value = mathblocks_row_value_absolute(a);
+    return mathblocks_row_finish(isfinite(a) && isfinite(value), value, fill, result);
+}
+// the square root of a; invalid when a is negative
+static __device__ __forceinline__ bool mathblocks_row_square_root(double a, double fill, double* result)
+{
+    double value = mathblocks_square_root(a);
+    return mathblocks_row_finish(isfinite(a) && isfinite(value), value, fill, result);
+}
+// The sum of values[0..count) added left to right from 0.0 with mathblocks_row_add's rule; stops at the first invalid step and gives false with fill. A count of 0 gives 0.0.
+static __device__ __forceinline__ bool mathblocks_row_sum(const double* values, int count, double fill, double* result)
+{
+    double sum = 0.0;
+    for (int index = 0; index < count; index++)
+    {
+        if (!mathblocks_row_add(sum, values[index], fill, &sum))
+            return mathblocks_row_finish(false, 0.0, fill, result);
+    }
+    return mathblocks_row_finish(true, sum, fill, result);
+}
+""";
+#pragma warning restore MA0136
+
     // The identities that have a counter slot; the counters are indexed by position in MathBlockCudaDeviceModule.Operations.
     internal static IEnumerable<string> CountedIdentities
     {
@@ -85,7 +160,7 @@ internal static class MathBlockCudaDevicePrelude
             .Append(MathBlockCudaDeviceModule.BinomialTableSymbol).Append("[index] = value; }\n");
         foreach (var (suffix, family, identities) in Recorders)
             AppendRecorder(text, suffix, family, identities, operations);
-        text.Append('\n');
+        text.Append(RowFunctions.ReplaceLineEndings("\n")).Append('\n');
         return text.ToString();
     }
 

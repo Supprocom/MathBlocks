@@ -23,8 +23,81 @@ internal static class Program
         new("Elementwise", "ElementwiseModule.cs")
     ];
 
-    private const string DomainPreludeDefaults =
-        "// The default domain limits, no-op non-convergence recorders and no-op binomial table accessors (a load that returns 0, so the loop evaluates every pair), so the generated source compiles on its own. A source built for domain\n// options (MathBlockCudaDeviceModule.GetSource) starts with its own definitions and the macro below, which skips this block.\n#ifndef MATHBLOCKS_DOMAIN_PRELUDE\nstatic __device__ __forceinline__ int mathblocks_limit_explicit_subset_size() { return 20; }\nstatic __device__ __forceinline__ int mathblocks_limit_state_count() { return 4096; }\nstatic __device__ __forceinline__ int mathblocks_limit_generated_vector_length() { return 1000000; }\nstatic __device__ __forceinline__ int mathblocks_limit_submodular_set_function_values() { return 4096; }\nstatic __device__ __forceinline__ int mathblocks_limit_shapley_coalition_values() { return 1048576; }\nstatic __device__ __forceinline__ int mathblocks_limit_choquet_player_count() { return 30; }\nstatic __device__ __forceinline__ int mathblocks_limit_maximal_minor_columns() { return 20; }\nstatic __device__ __forceinline__ int mathblocks_limit_totally_nonnegative_size() { return 8; }\nstatic __device__ __forceinline__ int mathblocks_limit_matrix_size() { return 4096; }\nstatic __device__ __forceinline__ int mathblocks_limit_iteration_count() { return 10000; }\nstatic __device__ __forceinline__ int mathblocks_limit_incomplete_beta_maximum_iterations() { return 256; }\nstatic __device__ __forceinline__ double mathblocks_limit_incomplete_beta_tolerance() { return 3E-14; }\nstatic __device__ __forceinline__ int mathblocks_limit_incomplete_beta_policy() { return 0; }\nstatic __device__ __forceinline__ int mathblocks_limit_matrix_exponential_taylor_terms() { return 48; }\nstatic __device__ __forceinline__ int mathblocks_limit_cube_root_newton_steps() { return 3; }\nstatic __device__ __forceinline__ int mathblocks_limit_jacobi_policy() { return 0; }\nstatic __device__ __forceinline__ long long mathblocks_limit_jacobi_rotation_budget(int size) { return (long long)64 * size * size; }\nstatic __device__ __forceinline__ int mathblocks_limit_elementwise_source_count() { return 53; }\n__device__ unsigned long long mathblocks_nonconvergence_counts[1];\nstatic __device__ __forceinline__ double mathblocks_binomial_table_load(int index) { return 0.0; }\nstatic __device__ __forceinline__ void mathblocks_binomial_table_store(int index, double value) {}\nstatic __device__ void mathblocks_nonconvergence_record_probability(int opcode) {}\nstatic __device__ void mathblocks_nonconvergence_record_elementwise(int opcode) {}\nstatic __device__ void mathblocks_nonconvergence_record_matrix(int opcode) {}\nstatic __device__ void mathblocks_nonconvergence_record_graph(int opcode) {}\n#endif\n\n";
+    // The per-row functions, as in MathBlockCudaDevicePrelude.RowFunctions of the library, which a test compares with this text.
+#pragma warning disable MA0136
+    private const string RowFunctions = """
+// Per-row arithmetic for a consumer's fused kernel: mathblocks_row_<op> evaluates one row of the scalar operation with the dispatch's bits.
+// Each returns whether the row is valid (every argument finite and the value finite), and writes the value, or fill when the row is invalid, to *result.
+// No fused multiply-add, no flushing, no slot access and no synchronization.
+// The generated units define mathblocks_square_root; it is declared here so the row function can call it.
+__device__ double mathblocks_square_root(double value);
+static __device__ __forceinline__ bool mathblocks_row_finish(bool valid, double value, double fill, double* result) { *result = valid ? value : fill; return valid; }
+
+// The value of each operation on its arguments, as the dispatch computes it: the dispatch and the row functions both call these.
+// a + b, rounded to nearest
+static __device__ __forceinline__ double mathblocks_row_value_add(double a, double b) { return __dadd_rn(a, b); }
+// a - b, rounded to nearest
+static __device__ __forceinline__ double mathblocks_row_value_subtract(double a, double b) { return __dsub_rn(a, b); }
+// a * b, rounded to nearest
+static __device__ __forceinline__ double mathblocks_row_value_multiply(double a, double b) { return __dmul_rn(a, b); }
+// a / b, rounded to nearest
+static __device__ __forceinline__ double mathblocks_row_value_divide(double a, double b) { return __ddiv_rn(a, b); }
+// |a|
+static __device__ __forceinline__ double mathblocks_row_value_absolute(double a) { return fabs(a); }
+
+// The row functions. Valid when the arguments and the value are finite.
+// a + b; invalid when the sum overflows
+static __device__ __forceinline__ bool mathblocks_row_add(double a, double b, double fill, double* result)
+{
+    double value = mathblocks_row_value_add(a, b);
+    return mathblocks_row_finish(isfinite(a) && isfinite(b) && isfinite(value), value, fill, result);
+}
+// a - b; invalid when the difference overflows
+static __device__ __forceinline__ bool mathblocks_row_subtract(double a, double b, double fill, double* result)
+{
+    double value = mathblocks_row_value_subtract(a, b);
+    return mathblocks_row_finish(isfinite(a) && isfinite(b) && isfinite(value), value, fill, result);
+}
+// a * b; invalid when the product overflows
+static __device__ __forceinline__ bool mathblocks_row_multiply(double a, double b, double fill, double* result)
+{
+    double value = mathblocks_row_value_multiply(a, b);
+    return mathblocks_row_finish(isfinite(a) && isfinite(b) && isfinite(value), value, fill, result);
+}
+// a / b; invalid when b is 0.0 or the quotient overflows
+static __device__ __forceinline__ bool mathblocks_row_divide(double a, double b, double fill, double* result)
+{
+    double value = mathblocks_row_value_divide(a, b);
+    return mathblocks_row_finish(isfinite(a) && isfinite(b) && isfinite(value), value, fill, result);
+}
+// |a|
+static __device__ __forceinline__ bool mathblocks_row_absolute(double a, double fill, double* result)
+{
+    double value = mathblocks_row_value_absolute(a);
+    return mathblocks_row_finish(isfinite(a) && isfinite(value), value, fill, result);
+}
+// the square root of a; invalid when a is negative
+static __device__ __forceinline__ bool mathblocks_row_square_root(double a, double fill, double* result)
+{
+    double value = mathblocks_square_root(a);
+    return mathblocks_row_finish(isfinite(a) && isfinite(value), value, fill, result);
+}
+// The sum of values[0..count) added left to right from 0.0 with mathblocks_row_add's rule; stops at the first invalid step and gives false with fill. A count of 0 gives 0.0.
+static __device__ __forceinline__ bool mathblocks_row_sum(const double* values, int count, double fill, double* result)
+{
+    double sum = 0.0;
+    for (int index = 0; index < count; index++)
+    {
+        if (!mathblocks_row_add(sum, values[index], fill, &sum))
+            return mathblocks_row_finish(false, 0.0, fill, result);
+    }
+    return mathblocks_row_finish(true, sum, fill, result);
+}
+""";
+#pragma warning restore MA0136
+
+    private static readonly string DomainPreludeDefaults =
+        "// The default domain limits, no-op non-convergence recorders and no-op binomial table accessors (a load that returns 0, so the loop evaluates every pair), so the generated source compiles on its own. A source built for domain\n// options (MathBlockCudaDeviceModule.GetSource) starts with its own definitions and the macro below, which skips this block.\n#ifndef MATHBLOCKS_DOMAIN_PRELUDE\nstatic __device__ __forceinline__ int mathblocks_limit_explicit_subset_size() { return 20; }\nstatic __device__ __forceinline__ int mathblocks_limit_state_count() { return 4096; }\nstatic __device__ __forceinline__ int mathblocks_limit_generated_vector_length() { return 1000000; }\nstatic __device__ __forceinline__ int mathblocks_limit_submodular_set_function_values() { return 4096; }\nstatic __device__ __forceinline__ int mathblocks_limit_shapley_coalition_values() { return 1048576; }\nstatic __device__ __forceinline__ int mathblocks_limit_choquet_player_count() { return 30; }\nstatic __device__ __forceinline__ int mathblocks_limit_maximal_minor_columns() { return 20; }\nstatic __device__ __forceinline__ int mathblocks_limit_totally_nonnegative_size() { return 8; }\nstatic __device__ __forceinline__ int mathblocks_limit_matrix_size() { return 4096; }\nstatic __device__ __forceinline__ int mathblocks_limit_iteration_count() { return 10000; }\nstatic __device__ __forceinline__ int mathblocks_limit_incomplete_beta_maximum_iterations() { return 256; }\nstatic __device__ __forceinline__ double mathblocks_limit_incomplete_beta_tolerance() { return 3E-14; }\nstatic __device__ __forceinline__ int mathblocks_limit_incomplete_beta_policy() { return 0; }\nstatic __device__ __forceinline__ int mathblocks_limit_matrix_exponential_taylor_terms() { return 48; }\nstatic __device__ __forceinline__ int mathblocks_limit_cube_root_newton_steps() { return 3; }\nstatic __device__ __forceinline__ int mathblocks_limit_jacobi_policy() { return 0; }\nstatic __device__ __forceinline__ long long mathblocks_limit_jacobi_rotation_budget(int size) { return (long long)64 * size * size; }\nstatic __device__ __forceinline__ int mathblocks_limit_elementwise_source_count() { return 53; }\n__device__ unsigned long long mathblocks_nonconvergence_counts[1];\nstatic __device__ __forceinline__ double mathblocks_binomial_table_load(int index) { return 0.0; }\nstatic __device__ __forceinline__ void mathblocks_binomial_table_store(int index, double value) {}\nstatic __device__ void mathblocks_nonconvergence_record_probability(int opcode) {}\nstatic __device__ void mathblocks_nonconvergence_record_elementwise(int opcode) {}\nstatic __device__ void mathblocks_nonconvergence_record_matrix(int opcode) {}\nstatic __device__ void mathblocks_nonconvergence_record_graph(int opcode) {}\n" + RowFunctions.ReplaceLineEndings("\n") + "\n#endif\n\n";
 
     private static int Main(string[] args)
     {
