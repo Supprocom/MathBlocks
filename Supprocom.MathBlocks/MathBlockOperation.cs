@@ -1,7 +1,7 @@
 namespace Supprocom.MathBlocks;
 
 /// <summary>Defines the Math Block Operation contract.</summary>
-public sealed class MathBlockOperation
+public sealed partial class MathBlockOperation
 {
     private readonly MathBlockTypeResolver typeResolver;
     private readonly MathBlockEvaluator evaluator;
