@@ -20,7 +20,7 @@ public static partial class MathBlockProbability
         for (var index = 1; index <= k; index++)
         {
             result = result * (double)(n - k + index) / index;
-            // Every factor and divisor from here on is at least 1, so +Infinity stays +Infinity.
+            // Every multiplier and divisor from here on is at least 1, so +Infinity stays +Infinity.
             if (double.IsInfinity(result))
                 break;
         }
@@ -32,7 +32,7 @@ public static partial class MathBlockProbability
 
     /// <summary>Recomputes C(n, k) for <c>0 &lt;= k &lt;= n - k</c> when the product loop of <see cref="BinomialCoefficientWide(long, int)"/> overflowed.</summary>
     /// <remarks>
-    /// Each step multiplies by the already divided factor <c>(n - k + index) / index</c>, so the running value after step <c>i</c> is about
+    /// Each step multiplies by the already divided quotient <c>(n - k + index) / index</c>, so the running value after step <c>i</c> is about
     /// C(n - k + i, i) and never exceeds the final value. The result is positive infinity only when C(n, k) itself exceeds the largest double.
     /// </remarks>
     /// <param name="n">The set size.</param>
