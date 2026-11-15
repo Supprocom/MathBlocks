@@ -94,6 +94,18 @@ public static class MathBlockCudaDeviceModule
         RowAbsoluteSignature + ";" +
         RowSquareRootSignature + ";" +
         RowSumSignature;
+
+    /// <summary>Gets the per-row function source that a consumer compiling its own translation unit apart from the module prepends to that unit.</summary>
+    /// <remarks>
+    /// The text is the definition of every function in <see cref="RowFunctionSignatures"/> and of the value helpers they call, all
+    /// <c>static __device__ __forceinline__</c>, so each unit has its own inlined copy and no symbol is defined twice when the units are linked. It defines no
+    /// <c>__device__</c> variable, and it declares <c>mathblocks_square_root</c>, which the module's unit defines, so a relocatable consumer unit links to the
+    /// module's definition. It is the same text the module source carries, and it does not depend on the domain options.
+    /// </remarks>
+    public static string ConsumerRowFunctionSource { get; } = MathBlockCudaDevicePrelude.RowFunctions.ReplaceLineEndings("\n");
+
+    /// <summary>Gets the SHA-256 fingerprint, in upper-case hexadecimal, of the UTF-8 bytes of <see cref="ConsumerRowFunctionSource"/>.</summary>
+    public static string ConsumerRowFunctionSourceFingerprint { get; } = MathBlockCudaContractHash.Create(ConsumerRowFunctionSource);
     /// <summary>Gets the dispatch function name value.</summary>
     public const string DispatchFunctionName = "mathblocks_operation_dispatch";
     /// <summary>Gets the dispatch signature value.</summary>

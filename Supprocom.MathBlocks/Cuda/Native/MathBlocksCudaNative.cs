@@ -122,6 +122,11 @@ internal static class MathBlocksCudaNative
     internal static byte[] CompilePtxWithoutDevice(string source, string name, string architecture, bool fusedMultiplyAdd) =>
         CompileForArchitecture(source, name, architecture, fusedMultiplyAdd);
 
+    // The same, optionally as relocatable device code (--relocatable-device-code=true), for the checks of a consumer that compiles its own
+    // translation unit apart from the module and links the two.
+    internal static byte[] CompilePtxWithoutDevice(string source, string name, string architecture, bool fusedMultiplyAdd, bool relocatable) =>
+        CompileForArchitecture(source, name, architecture, fusedMultiplyAdd, relocatable);
+
     private static byte[] CompilePtxForArchitecture(string source, string name, string architecture) =>
         CompileForArchitecture(source, name, architecture, fusedMultiplyAdd: false);
 
@@ -129,20 +134,29 @@ internal static class MathBlocksCudaNative
         string source,
         string name,
         string architecture,
-        bool fusedMultiplyAdd)
+        bool fusedMultiplyAdd) =>
+        CompileForArchitecture(source, name, architecture, fusedMultiplyAdd, relocatable: false);
+
+    private static byte[] CompileForArchitecture(
+        string source,
+        string name,
+        string architecture,
+        bool fusedMultiplyAdd,
+        bool relocatable)
     {
         // Loads NVRTC, or throws the requirement message, before the first NVRTC import binds.
         _ = MathBlocksNvrtcLoader.Library;
         ThrowIfFailed(nvrtcCreateProgram(out var program, source, name, 0, IntPtr.Zero, IntPtr.Zero), "nvrtcCreateProgram");
         try
         {
-            var options = new[]
-            {
+            string[] common =
+            [
                 $"--gpu-architecture={architecture}",
                 fusedMultiplyAdd ? "--fmad=true" : "--fmad=false",
                 "--prec-div=true",
                 "--prec-sqrt=true"
-            };
+            ];
+            string[] options = relocatable ? [.. common, "--relocatable-device-code=true"] : common;
             var result = CompileWithUtf8Options(program, options);
             if (result != NvrtcResult.Success)
                 throw new InvalidOperationException($"NVRTC failed: {result}. {GetProgramLog(program)}");
