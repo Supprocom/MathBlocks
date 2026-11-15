@@ -66,7 +66,7 @@ public sealed class ProbabilityPoissonCdfV1BlockTests
     // The sum of the terms in index order with only the exponent cut at -800, as PoissonCdf summed them before it stopped on an unchanged sum.
     private static double PoissonCdfOverEveryTerm(double rate, int count)
     {
-        var logRate = Math.Log(rate);
+        var logRate = MathBlockScalar.NaturalLogarithm(rate);
         double Exponent(int index) => -rate + index * logRate - MathBlockProbability.LogGamma(index + 1d);
         var peak = rate < count ? (int)rate : count;
         if (Exponent(peak) < -800d)
@@ -88,7 +88,7 @@ public sealed class ProbabilityPoissonCdfV1BlockTests
             var exponent = Exponent(index);
             if (index > rate && exponent < -800d)
                 break;
-            sum += Math.Exp(exponent);
+            sum += MathBlockScalar.Exponential(exponent);
         }
 
         return sum;

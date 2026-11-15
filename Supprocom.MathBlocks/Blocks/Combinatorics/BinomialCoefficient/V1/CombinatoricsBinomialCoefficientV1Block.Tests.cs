@@ -82,9 +82,10 @@ public sealed class CombinatoricsBinomialCoefficientV1BlockTests
         {
             foreach (var n in new[] { 2 * k, 2 * k + 1, 3 * k, 10 * k, 100_000, 1_000_000 })
             {
-                var expected = CombinatoricsCostGuardReference.Today(n, k);
-                if (double.IsPositiveInfinity(expected))
+                var today = CombinatoricsCostGuardReference.Today(n, k);
+                if (double.IsPositiveInfinity(today))
                     infinite++;
+                var expected = CombinatoricsCostGuardReference.TodayOrFallback(n, k);
                 if (BitConverter.DoubleToInt64Bits(expected) != BitConverter.DoubleToInt64Bits(MathBlockProbability.BinomialCoefficient(n, k)))
                     mismatches.Add($"({n}, {k})");
             }

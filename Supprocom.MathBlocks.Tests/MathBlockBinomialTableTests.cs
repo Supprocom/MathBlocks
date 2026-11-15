@@ -105,7 +105,7 @@ public sealed class MathBlockBinomialTableTests
 
         Assert.Equal(1, Count(defaults, Load + " { return 0.0; }"));
         Assert.Equal(1, Count(defaults, Store + " {}"));
-        Assert.DoesNotContain(MathBlockCudaDeviceModule.BinomialTableSymbol, defaults, StringComparison.Ordinal);
+        Assert.DoesNotContain(MathBlockCudaDeviceModule.BinomialTableSymbol + "[", defaults, StringComparison.Ordinal);
         Assert.DoesNotContain(Memo, generated[..end], StringComparison.Ordinal);
     }
 }

@@ -22,6 +22,19 @@ internal static class CombinatoricsCostGuardReference
         return result;
     }
 
+    /// <summary>Returns the binomial coefficient as the loop gives it when the old product loop reached +Infinity: the same value, or the ordered-product value when the coefficient fits.</summary>
+    public static double TodayOrFallback(int n, int k)
+    {
+        var today = Today(n, k);
+        if (!double.IsPositiveInfinity(today))
+            return today;
+        k = Math.Min(k, n - k);
+        var result = 1d;
+        for (var index = 1; index <= k; index++)
+            result = result * ((double)(n - k + index) / index);
+        return result;
+    }
+
     /// <summary>Returns the ballot count as the 0.6.1 expression computed it, with the sum in int arithmetic.</summary>
     public static double TodayBallot(int leading, int trailing) =>
         (double)(leading - trailing) / (leading + trailing) * Today(leading + trailing, trailing);
