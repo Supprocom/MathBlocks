@@ -21,7 +21,7 @@ public sealed class SequenceOffsetOperationTests
         double start,
         double end)
     {
-        var firstTrue = identifier == "sequence.first-true-offset";
+        var firstTrue = string.Equals(identifier, "sequence.first-true-offset", StringComparison.Ordinal);
         MathBlockValue[] common =
         [
             MathBlockValue.Vector(series), MathBlockValue.BooleanVector(seriesValid), MathBlockValue.Vector(counts),
