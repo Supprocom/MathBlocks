@@ -343,5 +343,11 @@ internal static class MathBlockFeatureIndex
             PathMathBlocks.PathLeadLagTransformV1Block.Create(),
             PathMathBlocks.PathRecurrenceRateV1Block.Create(),
             PathMathBlocks.PathLongestTrueRunV1Block.Create(),
+            VectorMathBlocks.SequenceFirstTrueOffsetV1Block.Create(),
+            VectorMathBlocks.SequenceFirstTrueOffsetValidV1Block.Create(),
+            VectorMathBlocks.SequenceSumOverOffsetsV1Block.Create(),
+            VectorMathBlocks.SequenceSumOverOffsetsValidV1Block.Create(),
+            VectorMathBlocks.SequenceMaximumOverOffsetsV1Block.Create(),
+            VectorMathBlocks.SequenceMaximumOverOffsetsValidV1Block.Create(),
         ];
 }
