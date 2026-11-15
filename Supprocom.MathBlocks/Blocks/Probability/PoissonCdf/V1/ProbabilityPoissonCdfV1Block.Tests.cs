@@ -35,4 +35,62 @@ public sealed class ProbabilityPoissonCdfV1BlockTests
         Assert.True(watch.Elapsed < TimeSpan.FromSeconds(1), $"PoissonCdf({rate}, {count}) took {watch.Elapsed.TotalMilliseconds} ms.");
         Assert.Equal(expectedBits, BitConverter.DoubleToInt64Bits(actual));
     }
+
+    /// <summary>
+    /// Checks that stopping once a term past the peak leaves the sum unchanged gives the bits of the sum over every term down to the
+    /// exponent cut at -800, on rates from 0 to 1e7 including the values just below and above integers, with counts below, at and above the peak.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "CostGuard")]
+    public void StoppingOnceTheSumIsUnchangedKeepsTheBits()
+    {
+        double[] rates = [1e-300, 1e-10, 0.001, 0.5, 1d, 2.5, 10d, 100.5, 1e3, 1e5, 1e6, 1e7, double.BitDecrement(1e3), double.BitIncrement(1e3), double.BitDecrement(1e5), double.BitIncrement(1e5)];
+        var mismatches = new List<string>();
+        var compared = 0;
+        for (var index = 0; index < rates.Length; index++)
+        {
+            var rate = rates[index];
+            var floor = (int)Math.Floor(rate);
+            foreach (var count in new[] { 0, 1, Math.Max(0, floor - 1), floor, floor + 1, (int)(rate * 1.5) + 5, (int)Math.Min(int.MaxValue, 2d * floor + 10), (int)Math.Min(int.MaxValue, 10d * floor + 1000) })
+            {
+                compared++;
+                if (BitConverter.DoubleToInt64Bits(PoissonCdfOverEveryTerm(rate, count)) != BitConverter.DoubleToInt64Bits(MathBlockAdvanced.PoissonCdf(rate, count)))
+                    mismatches.Add($"({rate:R}, {count})");
+            }
+        }
+
+        Assert.True(mismatches.Count == 0, string.Join(", ", mismatches.Take(20)));
+        Assert.True(compared > 100);
+    }
+
+    // The sum of the terms in index order with only the exponent cut at -800, as PoissonCdf summed them before it stopped on an unchanged sum.
+    private static double PoissonCdfOverEveryTerm(double rate, int count)
+    {
+        var logRate = Math.Log(rate);
+        double Exponent(int index) => -rate + index * logRate - MathBlockProbability.LogGamma(index + 1d);
+        var peak = rate < count ? (int)rate : count;
+        if (Exponent(peak) < -800d)
+            return 0d;
+        var first = 0;
+        var high = peak;
+        while (first < high)
+        {
+            var middle = first + (high - first) / 2;
+            if (Exponent(middle) >= -800d)
+                high = middle;
+            else
+                first = middle + 1;
+        }
+
+        var sum = 0d;
+        for (var index = first; index <= count; index++)
+        {
+            var exponent = Exponent(index);
+            if (index > rate && exponent < -800d)
+                break;
+            sum += Math.Exp(exponent);
+        }
+
+        return sum;
+    }
 }
