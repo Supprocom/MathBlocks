@@ -45,6 +45,45 @@ public static class MathBlockCudaDeviceModule
     public const int ElementwiseValueElementBytes = 8;
     /// <summary>Gets the byte stride of one row of the validity form <c>elementwise-valid.&lt;source&gt;</c>: an int32, written at <c>data_pointer</c>; see <see cref="ElementwiseValueElementBytes"/>.</summary>
     public const int ElementwiseValidityElementBytes = 4;
+    /// <summary>Gets the signature of <c>mathblocks_row_add</c>: a + b; see <see cref="RowFunctionSignatures"/>.</summary>
+    public const string RowAddSignature =
+        "static __device__ __forceinline__ bool mathblocks_row_add(double a, double b, double fill, double* result)";
+    /// <summary>Gets the signature of <c>mathblocks_row_subtract</c>: a - b; see <see cref="RowFunctionSignatures"/>.</summary>
+    public const string RowSubtractSignature =
+        "static __device__ __forceinline__ bool mathblocks_row_subtract(double a, double b, double fill, double* result)";
+    /// <summary>Gets the signature of <c>mathblocks_row_multiply</c>: a * b; see <see cref="RowFunctionSignatures"/>.</summary>
+    public const string RowMultiplySignature =
+        "static __device__ __forceinline__ bool mathblocks_row_multiply(double a, double b, double fill, double* result)";
+    /// <summary>Gets the signature of <c>mathblocks_row_divide</c>: a / b; see <see cref="RowFunctionSignatures"/>.</summary>
+    public const string RowDivideSignature =
+        "static __device__ __forceinline__ bool mathblocks_row_divide(double a, double b, double fill, double* result)";
+    /// <summary>Gets the signature of <c>mathblocks_row_absolute</c>: |a|; see <see cref="RowFunctionSignatures"/>.</summary>
+    public const string RowAbsoluteSignature =
+        "static __device__ __forceinline__ bool mathblocks_row_absolute(double a, double fill, double* result)";
+    /// <summary>Gets the signature of <c>mathblocks_row_square_root</c>: the square root of a; see <see cref="RowFunctionSignatures"/>.</summary>
+    public const string RowSquareRootSignature =
+        "static __device__ __forceinline__ bool mathblocks_row_square_root(double a, double fill, double* result)";
+    /// <summary>Gets the signature of <c>mathblocks_row_sum</c>: the sum of <c>values[0..count)</c> added left to right from 0.0 with the rule of <see cref="RowAddSignature"/>; it stops at the first invalid step, and a count of 0 gives 0.0; see <see cref="RowFunctionSignatures"/>.</summary>
+    public const string RowSumSignature =
+        "static __device__ __forceinline__ bool mathblocks_row_sum(const double* values, int count, double fill, double* result)";
+    /// <summary>Gets the signatures of the per-row functions <c>mathblocks_row_&lt;operation&gt;</c> of <see cref="Source"/>, separated by semicolons, in the order of the <c>Row...Signature</c> constants.</summary>
+    /// <remarks>
+    /// Each function evaluates one row of a simple scalar operation with the bits of the dispatch's scalar case, in the same inline device function the case calls:
+    /// <list type="bullet">
+    /// <item>The return value is whether the row is valid: every argument is finite and the value is finite. <c>*result</c> receives the value, or <c>fill</c> when the row is invalid.</item>
+    /// <item>The value is the plain IEEE operation: <c>|a|</c>, <c>a + b</c>, <c>a - b</c>, <c>a * b</c>, <c>a / b</c> or <c>sqrt(a)</c>, with no fused multiply-add and no flushing.</item>
+    /// <item><c>mathblocks_row_sum</c> adds <c>values[0..count)</c> left to right from 0.0 and stops at the first invalid step; a count of 0 gives 0.0 and true.</item>
+    /// <item>The functions read no slot and use no synchronization.</item>
+    /// </list>
+    /// </remarks>
+    public const string RowFunctionSignatures =
+        RowAddSignature + ";" +
+        RowSubtractSignature + ";" +
+        RowMultiplySignature + ";" +
+        RowDivideSignature + ";" +
+        RowAbsoluteSignature + ";" +
+        RowSquareRootSignature + ";" +
+        RowSumSignature;
     /// <summary>Gets the dispatch function name value.</summary>
     public const string DispatchFunctionName = "mathblocks_operation_dispatch";
     /// <summary>Gets the dispatch signature value.</summary>

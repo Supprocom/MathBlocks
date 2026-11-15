@@ -9,6 +9,23 @@ internal static unsafe class ScalarModule
     [CudaExternal(IsPure = true)]
     private static int mathblocks_limit_cube_root_newton_steps() => throw new NotSupportedException();
 
+    // The value of each of these operations is defined once, in the device prelude's mathblocks_row_value_* functions (the mathblocks_row_* functions a
+    // consumer calls wrap them), so the dispatch, the elementwise rows and a consumer's kernel give the same bits.
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_row_value_add(double a, double b) => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_row_value_subtract(double a, double b) => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_row_value_multiply(double a, double b) => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_row_value_divide(double a, double b) => throw new NotSupportedException();
+
+    [CudaExternal(IsPure = true)]
+    private static double mathblocks_row_value_absolute(double a) => throw new NotSupportedException();
+
     public struct MathBlockSlot
     {
         public double scalar_value;
@@ -370,12 +387,12 @@ internal static unsafe class ScalarModule
         double result = 0.0;
         switch (opcode)
         {
-            case 0: result = a + b; break;
-            case 1: result = a - b; break;
-            case 2: result = a * b; break;
-            case 3: result = a / b; break;
+            case 0: result = mathblocks_row_value_add(a, b); break;
+            case 1: result = mathblocks_row_value_subtract(a, b); break;
+            case 2: result = mathblocks_row_value_multiply(a, b); break;
+            case 3: result = mathblocks_row_value_divide(a, b); break;
             case 4: result = -a; break;
-            case 5: result = Math.Abs(a); break;
+            case 5: result = mathblocks_row_value_absolute(a); break;
             case 6: result = Cuda.Int(a > 0.0) - Cuda.Int(a < 0.0); break;
             case 7: result = a > 0.0 ? a : 0.0; break;
             case 8: result = Math.Min(a, b); break;
