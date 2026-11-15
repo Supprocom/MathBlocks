@@ -41,7 +41,7 @@ public enum MathBlockCausality
     /// its value or validity depends on the number of rows.
     /// </summary>
     WholeSeries,
-    /// <summary>Output row t reads input rows after t.</summary>
+    /// <summary>Output row t reads input rows after t. An output row's value and validity may depend on input rows after t, including how many follow.</summary>
     Forward,
     /// <summary>The operation has no vector-kind input, so it has no row semantics.</summary>
     NotSeries
