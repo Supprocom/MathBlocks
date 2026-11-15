@@ -40,8 +40,8 @@ public static partial class MathBlockVectorMath
     // later row (row + end, or row itself when end is negative) covers every row up to it.
     internal static bool OffsetSpanIsReachable(ReadOnlySpan<double> counts, int row, int start, int end)
     {
-        long before = Math.Max(0L, -(long)start);
-        long after = Math.Max(0L, end);
+        long before = start < 0 ? -(long)start : 0L;
+        long after = end > 0 ? end : 0L;
         if (row + (long)start < 0 || counts[row] < before)
             return false;
         var last = row + after;
