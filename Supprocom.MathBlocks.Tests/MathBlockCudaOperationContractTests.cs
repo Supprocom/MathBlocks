@@ -219,6 +219,7 @@ public sealed class MathBlockCudaOperationContractTests
 
         Assert.Equal(MathBlockCudaDeviceModule.AbiFingerprint, abi.Fingerprint);
         Assert.Equal(MathBlockCudaDeviceModule.DispatchSignature, abi.DispatchSignature);
+        Assert.Equal(MathBlockCudaDeviceModule.ElementwiseRowSignature, abi.ElementwiseRowSignature);
         Assert.Equal(MathBlockCudaSlotLayout.Size, abi.Slot.Size);
         Assert.Equal(MathBlockCudaSlotLayout.CapacityOffset, abi.Slot.CapacityOffset);
         Assert.Equal(MathBlockCudaGraphEdgeLayout.Size, abi.GraphEdge.Size);
@@ -233,6 +234,7 @@ public sealed class MathBlockCudaOperationContractTests
         Assert.Equal(64, abi.OperationTableFingerprint.Length);
 
         AssertChanged(abi with { DispatchSignature = abi.DispatchSignature + " " });
+        AssertChanged(abi with { ElementwiseRowSignature = abi.ElementwiseRowSignature + " " });
         AssertChanged(abi with
         {
             GraphEdge = abi.GraphEdge with { WeightOffset = checked(abi.GraphEdge.WeightOffset + 1) }
