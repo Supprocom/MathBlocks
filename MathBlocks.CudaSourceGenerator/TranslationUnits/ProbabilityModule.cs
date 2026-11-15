@@ -122,16 +122,28 @@ internal static unsafe class ProbabilityModule
         return true;
     }
 
+    // The binomial coefficient n choose k as the running product of the loop below, with n in 64 bits so that a sum
+    // of two int32 values does not wrap. After the symmetry step n is at least 2k, so from k = 600 on the coefficient
+    // exceeds 1e359 and the loop ends at +Infinity; that value is returned without running it. A smaller k that overflows
+    // part way stops at the first +Infinity as well.
     [CudaDevice]
-    private static double mathblocks_probability_binomial(int n, int k)
+    private static double mathblocks_probability_binomial(long n, int k)
     {
         if (k < 0 || k > n)
             return 0.0;
         if (k > n - k)
-            k = n - k;
+            k = (int)(n - k);
+        if (k >= 600)
+            return BitConverter.Int64BitsToDouble((long)0x7ff0000000000000UL);
         double result = 1.0;
         for (int index = 1; index <= k; index++)
-            result = result * (n - k + index) / index;
+        {
+            result = result * (double)(n - k + index) / index;
+            // Every factor and divisor from here on is at least 1, so +Infinity stays +Infinity.
+            if (double.IsInfinity(result))
+                break;
+        }
+
         return result;
     }
 
@@ -335,9 +347,10 @@ internal static unsafe class ProbabilityModule
             }
             if (opcode == 0)
             {
+                long total = (long)first_integer + second_integer;
                 *value = (double)(first_integer - second_integer) /
-                    (first_integer + second_integer) *
-                    mathblocks_probability_binomial(first_integer + second_integer, second_integer);
+                    (double)total *
+                    mathblocks_probability_binomial(total, second_integer);
             }
             else if (opcode == 1)
             {
@@ -395,7 +408,11 @@ internal static unsafe class ProbabilityModule
                         double exponent = -rate + index * log_rate - mathblocks_probability_log_gamma(index + 1.0);
                         if (index > rate && exponent < -800.0)
                             break;
-                        sum += mathblocks_exponential(exponent);
+                        // Past the peak the terms only fall, so once one leaves the sum unchanged every later one does too.
+                        double next_sum = sum + mathblocks_exponential(exponent);
+                        if (index > rate && next_sum == sum)
+                            break;
+                        sum = next_sum;
                     }
                 }
             }

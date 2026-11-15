@@ -32,7 +32,11 @@ public static partial class MathBlockAdvanced
             var exponent = Exponent(index);
             if (index > rate && exponent < -800d)
                 break;
-            sum += Math.Exp(exponent);
+            // Past the peak the terms only fall, so once one leaves the sum unchanged every later one does too.
+            var nextSum = sum + Math.Exp(exponent);
+            if (index > rate && nextSum == sum)
+                break;
+            sum = nextSum;
         }
 
         return sum;
