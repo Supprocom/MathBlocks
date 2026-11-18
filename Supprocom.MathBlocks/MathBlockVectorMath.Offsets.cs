@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 
 namespace Supprocom.MathBlocks;
@@ -8,6 +9,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockVectorMath
 {
     // The counts are non-negative integers (a Vector never holds a non-finite value).
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     internal static bool CountsAreValid(ReadOnlySpan<double> counts)
     {
         var index = 0;
