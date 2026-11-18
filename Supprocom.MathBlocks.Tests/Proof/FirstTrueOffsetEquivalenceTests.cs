@@ -107,6 +107,59 @@ public sealed class FirstTrueOffsetEquivalenceTests
         ProofBar.Fail("Counts validation", failures);
     }
 
+    /// <summary>
+    /// Verifies every span with a start from -30 to 30 and an end up to 45 rows after it, over short series cut into segments of every small length (also with a first count above
+    /// zero), with sparse, dense and unavailable predicate rows, so that spans start before the series and before a segment, and end inside, at and past the end of a segment.
+    /// </summary>
+    [Fact]
+    public void NegativeStartsAndSpansAcrossASegmentEndMatchTheScan()
+    {
+        var random = new Random(18112026);
+        var failures = new List<string>();
+        int[] lengths = [3, 9, 24, 40];
+        int[] segmentLengths = [1, 2, 3, 5, 11, 1000];
+        for (var lengthIndex = 0; lengthIndex < lengths.Length; lengthIndex++)
+        {
+            var length = lengths[lengthIndex];
+            for (var segmentIndex = 0; segmentIndex < segmentLengths.Length; segmentIndex++)
+            {
+                var counts = new double[length];
+                var first = segmentIndex % 2 == 1 ? 3 : 0;
+                for (var row = 0; row < length; row++)
+                    counts[row] = row % segmentLengths[segmentIndex] == 0 && row > 0 ? 0d : (row == 0 ? first : counts[row - 1] + 1d);
+                for (var shape = 0; shape < 6; shape++)
+                {
+                    var predicate = new double[length];
+                    var available = new bool[length];
+                    for (var row = 0; row < length; row++)
+                    {
+                        available[row] = shape < 2 || random.NextDouble() >= 0.15d;
+                        predicate[row] = shape switch
+                        {
+                            0 => 0d,
+                            1 => 1d,
+                            2 => row == length - 2 ? 1d : -0d,
+                            3 => random.NextDouble() < 0.1d ? 2.5d : 0d,
+                            4 => random.NextDouble() < 0.5d ? -1d : 0d,
+                            _ => row % 7 == 3 ? 1d : 0d
+                        };
+                    }
+
+                    for (var start = -30; start <= 30 && failures.Count < MaximumFailures; start++)
+                    {
+                        for (var end = start; end <= start + 45 && failures.Count < MaximumFailures; end++)
+                        {
+                            var label = string.Create(CultureInfo.InvariantCulture, $"n={length} segments {segmentLengths[segmentIndex]} first {first} shape {shape} [{start},{end}]");
+                            Compare(label, predicate, available, counts, new ParameterPair(start, end), failures);
+                        }
+                    }
+                }
+            }
+        }
+
+        ProofBar.Fail("Negative starts and segment ends", failures);
+    }
+
     // Class 0: contiguity counts with random restarts. Class 1: counts that drop to a random smaller value (still growing by at most 1). Class 2: arbitrary counts, which break the
     // growth rule most of the time. Class 3: contiguity counts with one random jump upwards.
     private static double[] RandomCounts(Random random, int length, int kind)
