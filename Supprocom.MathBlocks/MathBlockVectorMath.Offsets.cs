@@ -1,3 +1,5 @@
+using System.Runtime.Intrinsics;
+
 namespace Supprocom.MathBlocks;
 
 // The reachability rules shared by the offset operations (sequence.first-true-offset, sequence.sum-over-offsets and
@@ -8,7 +10,22 @@ public static partial class MathBlockVectorMath
     // The counts are non-negative integers (a Vector never holds a non-finite value).
     internal static bool CountsAreValid(ReadOnlySpan<double> counts)
     {
-        for (var index = 0; index < counts.Length; index++)
+        var index = 0;
+        if (MathBlockSimd.UseBlocks)
+        {
+            // Four counts at a time, with the same test as the loop below: negative, or not equal to its own truncation (which a NaN is not).
+            var broken = Vector256<double>.Zero;
+            for (; index <= counts.Length - MathBlockSimd.BlockWidth; index += MathBlockSimd.BlockWidth)
+            {
+                var block = Vector256.Create<double>(counts[index..]);
+                broken |= Vector256.LessThan(block, Vector256<double>.Zero) | ~Vector256.Equals(block, Vector256.Truncate(block));
+            }
+
+            if (broken.ExtractMostSignificantBits() != 0u)
+                return false;
+        }
+
+        for (; index < counts.Length; index++)
         {
             var count = counts[index];
             if (count < 0d || count != Math.Truncate(count))
