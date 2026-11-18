@@ -29,13 +29,7 @@ public static partial class MathBlockVectorMath
         var length = rowValid.Length;
         if (length == 0)
             return;
-        if (sum && !SumOfMagnitudesIsBelowTheBound(x))
-        {
-            for (var row = 0; row < length; row++)
-                rowValid[row] = SumOverOffsetsRow(x, xValid, counts, row, start, end, out _);
-            return;
-        }
-
+        var overflowPossible = sum && !SumOfMagnitudesIsBelowTheBound(x);
         var lastUnavailable = System.Buffers.ArrayPool<int>.Shared.Rent(length);
         try
         {
@@ -59,6 +53,124 @@ public static partial class MathBlockVectorMath
         finally
         {
             System.Buffers.ArrayPool<int>.Shared.Return(lastUnavailable);
+        }
+
+        if (overflowPossible)
+            DecideSumOverflows(x, xValid, counts, start, end, rowValid);
+    }
+
+    // The rows of the sum whose reach and availability are fine and that were found to overflow, and the rows decided exactly or sent to the sequential sum (read by tests).
+    internal static long OverflowDecidedRows;
+    internal static long OverflowBandRows;
+
+    // prefix[i] is the sum of the first i values at scale, added left to right; also the largest magnitude of a prefix sum and of a value at scale.
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    private static void BuildScaledPrefix(ReadOnlySpan<double> x, double[] prefix, out double largestPrefix, out double largestValue)
+    {
+        var running = 0d;
+        largestPrefix = 0d;
+        largestValue = 0d;
+        prefix[0] = 0d;
+        for (var index = 0; index < x.Length; index++)
+        {
+            var scaled = x[index] * PrefixScale;
+            running += scaled;
+            prefix[index + 1] = running;
+            largestPrefix = Math.Max(largestPrefix, Math.Abs(running));
+            largestValue = Math.Max(largestValue, Math.Abs(scaled));
+        }
+    }
+
+    // The scale of the prefix sums: every value times 2^-1000, so that values near the largest double and their sums stay far from overflow.
+    private const double PrefixScale = 9.332636185032189e-302;
+
+    // The largest double at that scale: 2^1024 * 2^-1000 = 2^24 (a sum rounds to infinity from just above the largest double).
+    private const double ScaledLimit = 16777216d;
+
+    // For the rows that are valid so far, decides whether a running sum, added left to right from 0.0, overflows. For finite values the sequential sum is not finite exactly when
+    // some running sum overflowed (an infinity stays one). The running sums of a row are the prefix sums minus the prefix sum before its span, up to the rounding of both: the largest
+    // and smallest prefix sum over the span (a monotonic deque slides along the rows) bound them, and the rounding is bounded by a margin. A row whose largest running sum is below
+    // the limit by more than the margin cannot overflow, one above it by more than the margin did overflow, and a row in the thin band between is added in order, as before.
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    private static void DecideSumOverflows(
+        ReadOnlySpan<double> x,
+        ReadOnlySpan<bool> xValid,
+        ReadOnlySpan<double> counts,
+        int start,
+        int end,
+        Span<bool> rowValid)
+    {
+        var length = rowValid.Length;
+        var width = (long)end - start + 1;
+        var firstRow = start < 0 ? -(long)start : 0L;
+        var lastRow = length - 1L - (end > 0 ? end : 0L);
+        if (length - 1L - end < lastRow)
+            lastRow = length - 1L - end;
+        if (firstRow > lastRow)
+            return;
+        var prefix = System.Buffers.ArrayPool<double>.Shared.Rent(length + 1);
+        var maximums = System.Buffers.ArrayPool<int>.Shared.Rent(length + 1);
+        var minimums = System.Buffers.ArrayPool<int>.Shared.Rent(length + 1);
+        long decided = 0;
+        long band = 0;
+        try
+        {
+            BuildScaledPrefix(x, prefix, out var largestPrefix, out var largestValue);
+
+            // The margin, at scale: the rounding of the prefix sums and of the running sums, and the values too small to keep at scale.
+            const double Epsilon = 2.220446049250313e-16;
+            var margin = 2d * (length + 2d) * Epsilon * largestPrefix
+                + (width + 2d) * Epsilon * width * largestValue
+                + length * 2.2250738585072014e-308
+                + ScaledLimit * 4.5e-16;
+            var headMaximum = 0;
+            var tailMaximum = 0;
+            var headMinimum = 0;
+            var tailMinimum = 0;
+            var next = firstRow + start + 1;
+            for (var row = (int)firstRow; row <= lastRow; row++)
+            {
+                var spanStart = row + (long)start;
+                var spanEnd = spanStart + width;
+                for (; next <= spanEnd; next++)
+                {
+                    var value = prefix[(int)next];
+                    while (tailMaximum > headMaximum && prefix[maximums[tailMaximum - 1]] <= value)
+                        tailMaximum--;
+                    maximums[tailMaximum++] = (int)next;
+                    while (tailMinimum > headMinimum && prefix[minimums[tailMinimum - 1]] >= value)
+                        tailMinimum--;
+                    minimums[tailMinimum++] = (int)next;
+                }
+
+                while (maximums[headMaximum] <= spanStart)
+                    headMaximum++;
+                while (minimums[headMinimum] <= spanStart)
+                    headMinimum++;
+                if (!rowValid[row])
+                    continue;
+                var before = prefix[(int)spanStart];
+                var largest = Math.Max(prefix[maximums[headMaximum]] - before, before - prefix[minimums[headMinimum]]);
+                decided++;
+                if (largest + margin < ScaledLimit)
+                    continue;
+                if (largest - margin > ScaledLimit)
+                {
+                    rowValid[row] = false;
+                    continue;
+                }
+
+                band++;
+                rowValid[row] = SumOverOffsetsRow(x, xValid, counts, row, start, end, out _);
+            }
+        }
+        finally
+        {
+            System.Buffers.ArrayPool<double>.Shared.Return(prefix);
+            System.Buffers.ArrayPool<int>.Shared.Return(maximums);
+            System.Buffers.ArrayPool<int>.Shared.Return(minimums);
+            Interlocked.Add(ref OverflowDecidedRows, decided);
+            Interlocked.Add(ref OverflowBandRows, band);
         }
     }
 
