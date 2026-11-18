@@ -250,7 +250,7 @@ internal static class ProofBar
     }
 
     /// <summary>Fails the test once with the failures of every bar that has any, or passes when no bar has.</summary>
-    internal static void FailAll(IReadOnlyList<(string Bar, List<string> Failures)> bars)
+    internal static void FailAll(List<(string Bar, List<string> Failures)> bars)
     {
         var message = new StringBuilder();
         var total = 0;
@@ -260,7 +260,7 @@ internal static class ProofBar
             if (failures.Count == 0)
                 continue;
             total += failures.Count;
-            message.Append(bar).Append(": ").Append(failures.Count.ToString(CultureInfo.InvariantCulture)).Append(" cell(s) over the limit:\n").Append(string.Join('\n', failures)).Append('\n');
+            message.Append(bar).Append(": ").Append(failures.Count.ToString(CultureInfo.InvariantCulture)).Append(" cell(s) over the limit:\n").AppendJoin('\n', failures).Append('\n');
         }
 
         Assert.True(total == 0, message.ToString());
