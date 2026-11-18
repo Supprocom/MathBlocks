@@ -53,7 +53,7 @@ public sealed class VectorBlockSafetyTests
         var failures = new List<string>();
         var calls = VectorBlockCalls.All(includeLifted: true);
         if (ProofRealData.Get() is null)
-            Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Real market class skipped: {ProofRealData.SkipReason}"));
+            Console.WriteLine($"Real market class skipped: {ProofRealData.SkipReason}");
         for (var callIndex = 0; callIndex < calls.Count; callIndex++)
         {
             var call = calls[callIndex];
@@ -135,8 +135,8 @@ public sealed class VectorBlockSafetyTests
                     outcomes[overload] = VectorBlockReference.Outcome(() => VectorBlockReference.Overloads(identity, VectorBlockCalls.Inputs(call, stepIndex, [], []), 0)[which]);
                 }
 
-                if (outcomes.Distinct(StringComparer.Ordinal).Count() != 1)
-                    failures.Add(identity + " " + call.Parameter + ": " + string.Join("\n", outcomes));
+                if (outcomes.Distinct(StringComparer.Ordinal).Take(2).Count() != 1)
+                    failures.Add(identity + " " + call.Parameter + ": " + string.Join('\n', outcomes));
             }
         }
 

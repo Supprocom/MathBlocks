@@ -40,7 +40,7 @@ public sealed class SequenceTimingTests
         var firstTrue = Array.IndexOf(names, SequenceOps.FirstTrue) >= 0;
         var sets = ProofSets.ForSequences(Rows, includeReal: true, includeAllFalse: firstTrue);
         if (ProofRealData.Get() is null)
-            Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Real market class skipped: {ProofRealData.SkipReason}"));
+            Console.WriteLine($"Real market class skipped: {ProofRealData.SkipReason}");
         var counts = new MathBlockValue[ProofCounts.TimingKinds];
         for (var kind = 0; kind < counts.Length; kind++)
             counts[kind] = MathBlockValue.Vector(ProofCounts.Build(kind, Rows, GapPeriod, SeriesPeriod));

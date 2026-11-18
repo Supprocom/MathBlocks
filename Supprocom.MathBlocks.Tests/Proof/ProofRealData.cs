@@ -33,7 +33,7 @@ internal static class ProofRealData
     {
         if (!Directory.Exists(SourceFolder))
         {
-            SkipReason = string.Create(CultureInfo.InvariantCulture, $"The real market data folder {SourceFolder} does not exist.");
+            SkipReason = $"The real market data folder {SourceFolder} does not exist.";
             return null;
         }
 

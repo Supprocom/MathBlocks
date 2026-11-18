@@ -41,7 +41,7 @@ internal static class VectorBlockReference
     internal static string? Difference(MathBlockValue expected, MathBlockValue actual)
     {
         if (expected.Type.Kind != actual.Type.Kind || expected.IsValid != actual.IsValid)
-            return string.Create(CultureInfo.InvariantCulture, $"expected {expected.Type.Kind} valid {expected.IsValid}, actual {actual.Type.Kind} valid {actual.IsValid}");
+            return $"expected {expected.Type.Kind} valid {expected.IsValid}, actual {actual.Type.Kind} valid {actual.IsValid}";
         if (!expected.IsValid)
             return null;
         if (expected.Type.Kind == MathBlockValueKind.BooleanVector)

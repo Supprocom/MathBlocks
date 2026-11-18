@@ -147,7 +147,7 @@ internal static class ProofBar
 
     /// <summary>Fails the test with the collected failures, or passes when there are none.</summary>
     internal static void Fail(string bar, List<string> failures) =>
-        Assert.True(failures.Count == 0, bar + ": " + failures.Count.ToString(CultureInfo.InvariantCulture) + " cell(s) over the limit:\n" + string.Join("\n", failures));
+        Assert.True(failures.Count == 0, bar + ": " + failures.Count.ToString(CultureInfo.InvariantCulture) + " cell(s) over the limit:\n" + string.Join('\n', failures));
 
     private static string Describe(ProofCell cell, string against, double ratio, double limit) =>
         string.Create(

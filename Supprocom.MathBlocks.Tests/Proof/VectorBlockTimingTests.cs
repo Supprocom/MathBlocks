@@ -23,7 +23,7 @@ public sealed class VectorBlockTimingTests
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         if (ProofRealData.Get() is null)
-            Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Real market class skipped: {ProofRealData.SkipReason}"));
+            Console.WriteLine($"Real market class skipped: {ProofRealData.SkipReason}");
         var measured = VectorBlockTable.Measure(VectorBlockCalls.All(includeLifted: true), VectorBlockCalls.TimingRows, Console.WriteLine);
         var table = VectorBlockTable.Render(measured);
         Console.WriteLine(table);
@@ -40,7 +40,7 @@ public sealed class VectorBlockTimingTests
         var failures = new List<string>();
         failures.AddRange(WorstClass(cells));
         failures.AddRange(Growth(measured));
-        Assert.True(failures.Count == 0, string.Create(CultureInfo.InvariantCulture, $"{failures.Count} cell(s) over a bar:\n") + string.Join("\n", failures));
+        Assert.True(failures.Count == 0, string.Create(CultureInfo.InvariantCulture, $"{failures.Count} cell(s) over a bar:\n") + string.Join('\n', failures));
     }
 
     // Bars (i) and (ii): the median ratio of every class, with the mixed warp named on its own.

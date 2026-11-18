@@ -29,7 +29,7 @@ public sealed class RowFunctionTimingTests
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var sets = ProofSets.ForRows(Rows, includeReal: true);
         if (ProofRealData.Get() is null)
-            Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Real market class skipped: {ProofRealData.SkipReason}"));
+            Console.WriteLine($"Real market class skipped: {ProofRealData.SkipReason}");
         var dispatch = DispatchNanoseconds(sets[0]);
         var cells = new List<ProofCell>();
         using (var session = new ProofDeviceSession(RowFunctionKernels.Source(), "proof-row-timing.cu"))

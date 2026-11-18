@@ -62,7 +62,7 @@ public sealed class SequenceDeviceParityTests
                     for (var parameterIndex = 0; parameterIndex < parameters.Length; parameterIndex++)
                     {
                         var inputs = Case(name, sibling == 1, sets[setIndex], kind, parameters[parameterIndex]);
-                        var label = string.Create(CultureInfo.InvariantCulture, $"{operation.Identity} class {sets[setIndex].Name} counts {ProofCounts.Name(kind, GapPeriod, SeriesPeriod)} parameter {parameters[parameterIndex].Label}");
+                        var label = $"{operation.Identity} class {sets[setIndex].Name} counts {ProofCounts.Name(kind, GapPeriod, SeriesPeriod)} parameter {parameters[parameterIndex].Label}";
                         var coreclr = operation.Evaluate(inputs);
                         compiled.UploadInputs(ProofPrograms.Named(inputs));
                         compiled.ExecuteResident();
@@ -90,7 +90,7 @@ public sealed class SequenceDeviceParityTests
             return;
         if (expected.Type != actual.Type || expected.IsValid != actual.IsValid)
         {
-            failures.Add(string.Create(CultureInfo.InvariantCulture, $"{label}: CoreCLR {expected.Type} valid {expected.IsValid}, CUDA {actual.Type} valid {actual.IsValid}"));
+            failures.Add($"{label}: CoreCLR {expected.Type} valid {expected.IsValid}, CUDA {actual.Type} valid {actual.IsValid}");
             return;
         }
 

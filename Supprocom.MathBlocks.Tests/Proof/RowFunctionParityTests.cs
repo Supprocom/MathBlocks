@@ -99,7 +99,7 @@ public sealed class RowFunctionParityTests
     private static void ReportRealSkip()
     {
         if (ProofRealData.Get() is null)
-            Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Real market class skipped: {ProofRealData.SkipReason}"));
+            Console.WriteLine($"Real market class skipped: {ProofRealData.SkipReason}");
     }
 
     private static bool IsFinite(double[] values)

@@ -3,13 +3,6 @@ using System.Text;
 
 namespace Supprocom.MathBlocks.Tests.Proof;
 
-/// <summary>One measurement of the vector-block table: a call on one input class at one row count, in nanoseconds per row.</summary>
-/// <param name="Call">The call.</param>
-/// <param name="ClassName">The input class name.</param>
-/// <param name="Rows">The row count.</param>
-/// <param name="NanosecondsPerRow">The median time per row of seven launches, measured with CUDA events.</param>
-internal sealed record VectorBlockCell(VectorBlockCall Call, string ClassName, int Rows, double NanosecondsPerRow);
-
 /// <summary>
 /// Measures the vector-block table the one way the test and the 0.6.1 baseline console share: the same calls, the same input classes and real columns, the same row counts and the same
 /// timing method. The file has no test-framework dependency; the console links it unchanged.
@@ -20,7 +13,7 @@ internal static class VectorBlockTable
     internal const string Header = "identity\troute\tparameter\tclass\trows\tns_per_row";
 
     /// <summary>Measures every call on every class at every row count; <paramref name="log"/> receives one line per cell.</summary>
-    internal static List<VectorBlockCell> Measure(IReadOnlyList<VectorBlockCall> calls, int[] rowCounts, Action<string> log)
+    internal static List<VectorBlockCell> Measure(List<VectorBlockCall> calls, int[] rowCounts, Action<string> log)
     {
         using var device = new VectorBlockDevice();
         var cells = new List<VectorBlockCell>();

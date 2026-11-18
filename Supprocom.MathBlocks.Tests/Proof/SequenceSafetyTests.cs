@@ -116,7 +116,7 @@ public sealed class SequenceSafetyTests
     {
         var sets = ProofSets.ForSequences(Rows, includeReal: true, includeAllFalse: true);
         if (ProofRealData.Get() is null)
-            Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Real market class skipped: {ProofRealData.SkipReason}"));
+            Console.WriteLine($"Real market class skipped: {ProofRealData.SkipReason}");
         var parameters = SequenceOps.Parameters(name, SequenceOps.ShiftSafety, SequenceOps.SpanSafety);
         var failures = new List<string>();
         var cases = 0;
@@ -132,7 +132,7 @@ public sealed class SequenceSafetyTests
                 for (var parameterIndex = 0; parameterIndex < parameters.Length; parameterIndex++)
                 {
                     var parameter = parameters[parameterIndex];
-                    var label = string.Create(CultureInfo.InvariantCulture, $"{name} class {set.Name} counts {ProofCounts.Name(kind, GapPeriod, SeriesPeriod)} parameter {parameter.Label}");
+                    var label = $"{name} class {set.Name} counts {ProofCounts.Name(kind, GapPeriod, SeriesPeriod)} parameter {parameter.Label}";
                     var expected = SequenceOracle.Run(name, SequenceOps.Series(name, set), set.Available, counts, (long)parameter.First, (long)parameter.Second);
                     var values = SequenceOps.Operation(name, false).Evaluate(SequenceOps.Inputs(name, false, series, availability, countsValue, parameter.First, parameter.Second));
                     var flags = SequenceOps.Operation(name, true).Evaluate(SequenceOps.Inputs(name, true, series, availability, countsValue, parameter.First, parameter.Second));
@@ -190,7 +190,7 @@ public sealed class SequenceSafetyTests
         var countsValue = MathBlockValue.Vector(counts);
         var values = SequenceOps.Operation(name, false).Evaluate(SequenceOps.Inputs(name, false, series, availability, countsValue, parameter.First, parameter.Second));
         var flags = SequenceOps.Operation(name, true).Evaluate(SequenceOps.Inputs(name, true, series, availability, countsValue, parameter.First, parameter.Second));
-        var label = string.Create(CultureInfo.InvariantCulture, $"{name} {parameter.Label}");
+        var label = $"{name} {parameter.Label}";
         if (values.IsValid || flags.IsValid)
             failures.Add(label + ": the call was valid.");
         else if (values.Type.Kind != MathBlockValueKind.Vector || flags.Type.Kind != MathBlockValueKind.BooleanVector)
@@ -209,7 +209,7 @@ public sealed class SequenceSafetyTests
             var withCounts = SequenceOps.Inputs(name, sibling == 1, series, availability, shorter, parameter.First, parameter.Second);
             var withAvailability = SequenceOps.Inputs(name, sibling == 1, series, shortAvailability, MathBlockValue.Vector(counts), parameter.First, parameter.Second);
             if (!Rejects(operation, withCounts) || !Rejects(operation, withAvailability))
-                failures.Add(string.Create(CultureInfo.InvariantCulture, $"{operation.Identity}: series of different lengths were accepted."));
+                failures.Add($"{operation.Identity}: series of different lengths were accepted.");
         }
     }
 

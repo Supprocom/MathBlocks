@@ -57,7 +57,7 @@ public sealed class VectorBlockDeviceParityTests
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         if (ProofRealData.Get() is null)
-            Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Real market class skipped: {ProofRealData.SkipReason}"));
+            Console.WriteLine($"Real market class skipped: {ProofRealData.SkipReason}");
         var failures = new List<string>();
         using var device = new VectorBlockDevice();
         var calls = VectorBlockCalls.All(includeLifted: true);
