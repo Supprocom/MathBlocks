@@ -65,7 +65,10 @@ public sealed class VectorBlockSafetyTests
         ProofBar.Fail("Overload agreement", failures);
     }
 
-    /// <summary>Verifies every call returns exactly as many rows as the series has, at several lengths.</summary>
+    /// <summary>
+    /// Verifies every call returns exactly as many rows as the series has, at several lengths, and that a window wider than the series gives a
+    /// wholly invalid result.
+    /// </summary>
     [Fact]
     public void TheOutputHasTheLengthOfTheInput()
     {
@@ -82,7 +85,9 @@ public sealed class VectorBlockSafetyTests
                     var inputs = VectorBlockCalls.Inputs(calls[callIndex], step, VectorBlockCalls.Clean(set.First), VectorBlockCalls.Clean(set.Second));
                     var result = MathBlockCudaDeviceModule.GetOperation(calls[callIndex].Contracts[step]).EvaluateCoreCLR(inputs);
                     var rows = !result.IsValid ? -1 : result.Type.Kind == MathBlockValueKind.BooleanVector ? result.AsBooleanVector().ToArray().Length : result.AsVector().ToArray().Length;
-                    if (rows != lengths[lengthIndex])
+                    // The window form refuses a width larger than the series with a wholly invalid result (MathBlockWindowForm, unchanged since 0.6.1).
+                    var expected = calls[callIndex].IsWindow && calls[callIndex].Width > lengths[lengthIndex] ? -1 : lengths[lengthIndex];
+                    if (rows != expected)
                         failures.Add(string.Create(CultureInfo.InvariantCulture, $"{calls[callIndex].Contracts[step]} {calls[callIndex].Parameter}: {rows} rows for {lengths[lengthIndex]} (-1 is invalid)"));
                 }
             }
