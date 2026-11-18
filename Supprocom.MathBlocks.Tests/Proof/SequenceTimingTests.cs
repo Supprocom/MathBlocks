@@ -48,14 +48,17 @@ public sealed class SequenceTimingTests
         for (var kind = 0; kind < counts.Length; kind++)
             counts[kind] = MathBlockValue.Vector(ProofCounts.Build(kind, Rows, GapPeriod, SeriesPeriod));
         var cells = new List<ProofCell>();
+        var bands = new System.Text.StringBuilder("operation\tclass\tcounts\tparameter\trows_decided_by_prefix_sums\trows_in_the_band_added_in_order\n");
         for (var nameIndex = 0; nameIndex < names.Length; nameIndex++)
         {
             for (var sibling = 0; sibling < 2; sibling++)
-                MeasureOperation(names[nameIndex], sibling == 1, sets, counts, parameters, cells);
+                MeasureOperation(names[nameIndex], sibling == 1, sets, counts, parameters, cells, bands);
         }
 
         ProofBar.Annotate(cells);
         _ = ProofReport.WriteText(string.Concat("l3-timing-", table, ".tsv"), ProofBar.Render(cells, Samples));
+        if (string.Equals(table, "offsets", StringComparison.Ordinal))
+            _ = ProofReport.WriteText("l3-band-offsets.tsv", bands.ToString());
         ProofBar.AssertWorstClassWithinTwiceMedian(cells, cell => !cell.Operation.Contains(SequenceOps.FirstTrue, StringComparison.Ordinal));
         ProofBar.AssertLinearGrowth(cells);
         ProofBar.AssertMedianClassWithinTwiceReference(cells, _ => true);
@@ -71,7 +74,8 @@ public sealed class SequenceTimingTests
         ProofSet[] sets,
         MathBlockValue[] counts,
         ProofParameter[] parameters,
-        List<ProofCell> cells)
+        List<ProofCell> cells,
+        System.Text.StringBuilder bands)
     {
         var operation = SequenceOps.Operation(name, sibling);
         var typical = sets[0].First;
@@ -98,6 +102,8 @@ public sealed class SequenceTimingTests
                     if (scanned)
                         scan = TimeOperation(operation, SequenceOps.Inputs(name, sibling, scanSeries, scanAvailability, counts[kind], parameter.First, parameter.Second), set.Name, kind, parameter);
                     var nanoseconds = TimeOperation(operation, inputs, set.Name, kind, parameter);
+                    if (sibling && string.Equals(name, "sum-over-offsets", StringComparison.Ordinal))
+                        RecordBand(bands, operation, inputs, set.Name, ProofCounts.Name(kind, GapPeriod, SeriesPeriod), parameter.Label);
                     cells.Add(new ProofCell(operation.Identifier, set.Name, ProofCounts.Name(kind, GapPeriod, SeriesPeriod), parameter.Label, parameter.Width, nanoseconds, reference, 0d) { FullScanNanosecondsPerRow = scan });
                 }
             }
@@ -117,4 +123,16 @@ public sealed class SequenceTimingTests
         Assert.True(valid, string.Create(CultureInfo.InvariantCulture, $"{operation.Identity} class {className} counts {kind} parameter {parameter.Label} was invalid as a whole."));
         return nanoseconds;
     }
+
+    // One extra, untimed evaluation: how many rows the prefix sums decided and how many fell in the thin band and were added in order.
+    private static void RecordBand(System.Text.StringBuilder bands, MathBlockOperation operation, MathBlockValue[] inputs, string className, string counts, string parameter)
+    {
+        var decidedBefore = ReadCounter("OverflowDecidedRows");
+        var bandBefore = ReadCounter("OverflowBandRows");
+        _ = operation.Evaluate(inputs);
+        bands.Append(string.Create(CultureInfo.InvariantCulture, $"{operation.Identifier}\t{className}\t{counts}\t{parameter}\t{ReadCounter("OverflowDecidedRows") - decidedBefore}\t{ReadCounter("OverflowBandRows") - bandBefore}\n"));
+    }
+
+    private static long ReadCounter(string name) =>
+        (long)typeof(MathBlockVectorMath).GetField(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!.GetValue(null)!;
 }

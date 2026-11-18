@@ -117,6 +117,88 @@ public sealed class OffsetValidityEquivalenceTests
         ProofBar.Fail("Negative starts and segment ends", failures);
     }
 
+    /// <summary>
+    /// Verifies the overflow decision of the sum: alternating plus and minus 1.7e308, a single huge value at every position of a span of 256, and partial sums that land a few units in
+    /// the last place below, at and above the point where a sum rounds to infinity, with the huge values cancelled again later in the span.
+    /// </summary>
+    [Fact]
+    public void RunningSumsAtTheLargestDoubleMatchTheDesign()
+    {
+        var failures = new List<string>();
+        ProofParameter[] spans = [.. SequenceOps.SpanSafety, new("[0,255]", 0d, 255d, 256d), new("[-7,3]", -7d, 3d, 11d), new("[0,63]", 0d, 63d, 64d), new("[-63,0]", -63d, 0d, 64d), new("[1,2]", 1d, 2d, 2d)];
+        var decidedBefore = ReadCounter("OverflowDecidedRows");
+        var alternating = new double[600];
+        for (var row = 0; row < alternating.Length; row++)
+            alternating[row] = row % 2 == 0 ? 1.7e308d : -1.7e308d;
+        CompareSpans("alternating", alternating, Contiguous(alternating.Length, 0), spans, failures);
+
+        var random = new Random(7);
+        foreach (var huge in new[] { 1.7976931348623157e308d, -1.7976931348623157e308d, 1e308d, 8.98846567431158e307d })
+        {
+            for (var position = 0; position < 300 && failures.Count < MaximumFailures; position++)
+            {
+                var series = new double[300];
+                for (var row = 0; row < series.Length; row++)
+                    series[row] = (random.NextDouble() - 0.5d) * 1e3d;
+                series[position] = huge;
+                CompareSpans(string.Create(CultureInfo.InvariantCulture, $"single {huge:R} at {position}"), series, Contiguous(series.Length, 0), spans, failures);
+            }
+        }
+
+        var half = Math.Pow(2d, 1023d);
+        var tie = half - Math.Pow(2d, 970d);
+        long tieBits = BitConverter.DoubleToInt64Bits(tie);
+        for (var step = -6; step <= 6 && failures.Count < MaximumFailures; step++)
+        {
+            var second = BitConverter.Int64BitsToDouble(tieBits + step);
+            for (var shape = 0; shape < 4; shape++)
+            {
+                var series = new double[64];
+                for (var row = 0; row < series.Length; row += 8)
+                {
+                    var sign = shape % 2 == 0 ? 1d : -1d;
+                    series[row] = sign * half;
+                    series[row + 1] = sign * second;
+                    series[row + 2] = shape < 2 ? -sign * half : 0.25d;
+                    series[row + 3] = shape < 2 ? -sign * second : 0d;
+                    series[row + 4] = 3d;
+                    series[row + 5] = sign * 1.7976931348623157e308d;
+                    series[row + 6] = shape == 3 ? sign * Math.Pow(2d, 970d) : 0d;
+                    series[row + 7] = -0d;
+                }
+
+                CompareSpans(string.Create(CultureInfo.InvariantCulture, $"near the limit step {step} shape {shape}"), series, Contiguous(series.Length, shape), spans, failures);
+            }
+        }
+
+        Assert.True(ReadCounter("OverflowDecidedRows") > decidedBefore, "No row was decided by the prefix sums.");
+        ProofBar.Fail("Running sums at the largest double", failures);
+    }
+
+    private static long ReadCounter(string name) =>
+        (long)typeof(MathBlockVectorMath).GetField(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!.GetValue(null)!;
+
+    // Contiguity counts that restart every 40 rows (kind 0), or never (kind 1), or every 5 rows (kind 2), or every 3 rows (kind 3).
+    private static double[] Contiguous(int length, int kind)
+    {
+        var period = kind switch { 0 => 40, 1 => int.MaxValue, 2 => 5, _ => 3 };
+        var counts = new double[length];
+        for (var row = 0; row < length; row++)
+            counts[row] = row % period == 0 ? 0d : counts[row - 1] + 1d;
+        return counts;
+    }
+
+    private static void CompareSpans(string label, double[] series, double[] counts, ProofParameter[] spans, List<string> failures)
+    {
+        var available = new bool[series.Length];
+        Array.Fill(available, true);
+        for (var index = 0; index < spans.Length && failures.Count < MaximumFailures; index++)
+        {
+            for (var nameIndex = 0; nameIndex < Names.Length; nameIndex++)
+                Compare(string.Concat(Names[nameIndex], " ", label, " ", spans[index].Label), Names[nameIndex], series, available, counts, spans[index].First, spans[index].Second, failures);
+        }
+    }
+
     // Class 0: contiguity counts with random restarts. Class 1: contiguity counts with a first count above zero. Class 2: arbitrary counts.
     private static double[] RandomCounts(Random random, int length, int kind)
     {
