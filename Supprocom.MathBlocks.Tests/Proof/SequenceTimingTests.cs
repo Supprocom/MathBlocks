@@ -15,6 +15,8 @@ public sealed class SequenceTimingTests
 
     // The number of timed evaluations behind every cell of the L3 tables (after one warm-up).
     private const int Samples = 15;
+    private const string SumOverOffsets = "sum-over-offsets";
+    private const string MixedClass = nameof(ProofClass.Mixed);
 
     private static readonly string[] SiblingClasses = [nameof(ProofClass.Typical), nameof(ProofClass.Mixed), nameof(ProofClass.Invalid), nameof(ProofClass.AllFalse)];
 
@@ -59,11 +61,18 @@ public sealed class SequenceTimingTests
         _ = ProofReport.WriteText(string.Concat("l3-timing-", table, ".tsv"), ProofBar.Render(cells, Samples));
         if (string.Equals(table, "offsets", StringComparison.Ordinal))
             _ = ProofReport.WriteText("l3-band-offsets.tsv", bands.ToString());
-        ProofBar.AssertWorstClassWithinTwiceMedian(cells, cell => !cell.Operation.Contains(SequenceOps.FirstTrue, StringComparison.Ordinal));
-        ProofBar.AssertLinearGrowth(cells);
-        ProofBar.AssertMedianClassWithinTwiceReference(cells, _ => true);
+        // Every bar is evaluated, and the test fails once with the failures of all of them.
+        List<(string Bar, List<string> Failures)> bars =
+        [
+            (ProofBar.WorstClassBar, ProofBar.CollectWorstClassWithinTwiceMedian(cells, cell => !cell.Operation.Contains(SequenceOps.FirstTrue, StringComparison.Ordinal) && !IsMixedSumValid(cell))),
+            (ProofBar.GrowthBar, ProofBar.CollectLinearGrowth(cells)),
+            (ProofBar.ReferenceBar, ProofBar.CollectMedianClassWithinTwiceReference(cells, _ => true))
+        ];
+        if (cells.Exists(cell => cell.SameClassReferenceNanosecondsPerRow > 0d))
+            bars.Add((ProofBar.SameClassBar, ProofBar.CollectWithinTwiceSameClassReference(cells)));
         if (firstTrue)
-            ProofBar.AssertWithinFullScan(cells, _ => true);
+            bars.Add((ProofBar.FullScanBar, ProofBar.CollectWithinFullScan(cells, _ => true)));
+        ProofBar.FailAll(bars);
     }
 
     // Every cell is the median of Samples timed evaluations, timed back to back with its comparison cells: first its reference (the main-era operation), then, for first-true-offset,
@@ -101,14 +110,22 @@ public sealed class SequenceTimingTests
                     var scan = 0d;
                     if (scanned)
                         scan = TimeOperation(operation, SequenceOps.Inputs(name, sibling, scanSeries, scanAvailability, counts[kind], parameter.First, parameter.Second), set.Name, kind, parameter);
+                    var sameClass = sibling && string.Equals(name, SumOverOffsets, StringComparison.Ordinal) && string.Equals(set.Name, MixedClass, StringComparison.Ordinal)
+                        ? SequenceReference.Measure(name, parameter, set.First, Samples)
+                        : 0d;
                     var nanoseconds = TimeOperation(operation, inputs, set.Name, kind, parameter);
                     if (sibling && string.Equals(name, "sum-over-offsets", StringComparison.Ordinal))
                         RecordBand(bands, operation, inputs, set.Name, ProofCounts.Name(kind, GapPeriod, SeriesPeriod), parameter.Label);
-                    cells.Add(new ProofCell(operation.Identifier, set.Name, ProofCounts.Name(kind, GapPeriod, SeriesPeriod), parameter.Label, parameter.Width, nanoseconds, reference, 0d) { FullScanNanosecondsPerRow = scan });
+                    cells.Add(new ProofCell(operation.Identifier, set.Name, ProofCounts.Name(kind, GapPeriod, SeriesPeriod), parameter.Label, parameter.Width, nanoseconds, reference, 0d) { FullScanNanosecondsPerRow = scan, SameClassReferenceNanosecondsPerRow = sameClass });
                 }
             }
         }
     }
+
+    // sum-over-offsets-valid on the Mixed class (values near the largest double, whose running sums can overflow) is judged against the rolling sum timed on the same data, and is not
+    // part of bar (i); this is the one class and form that Overwatch ruled so (16 and 18 Nov).
+    private static bool IsMixedSumValid(ProofCell cell) =>
+        string.Equals(cell.ClassName, MixedClass, StringComparison.Ordinal) && cell.Operation.EndsWith(string.Concat(SumOverOffsets, "-valid"), StringComparison.Ordinal);
 
     private static double TimeOperation(MathBlockOperation operation, MathBlockValue[] inputs, string className, int kind, ProofParameter parameter)
     {
