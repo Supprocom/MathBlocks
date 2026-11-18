@@ -2,7 +2,7 @@ namespace Supprocom.MathBlocks;
 
 public static partial class MathBlockVectorMath
 {
-    // The validity of sequence.maximum-over-offsets@1, row by row, from the same row function as its values.
+    // The validity of sequence.maximum-over-offsets@1, row by row, from the same reach and availability rules as its values.
     internal static void MaximumOverOffsetsValidity(
         ReadOnlySpan<double> x,
         ReadOnlySpan<bool> xValid,
@@ -11,7 +11,6 @@ public static partial class MathBlockVectorMath
         int end,
         Span<bool> rowValid)
     {
-        for (var row = 0; row < rowValid.Length; row++)
-            rowValid[row] = MaximumOverOffsetsRow(x, xValid, counts, row, start, end, out _);
+        OffsetValidityRows(x, xValid, counts, start, end, false, rowValid);
     }
 }
