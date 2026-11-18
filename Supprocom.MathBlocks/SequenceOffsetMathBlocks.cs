@@ -161,7 +161,8 @@ internal static partial class VectorMathBlocks
         var flags = inputs[1].AsBooleanVector().Span;
         var counts = inputs[2].AsVector().Span;
         var fill = inputs[inputs.Count - 1].AsScalar();
-        var values = new double[x.Length];
+        // first-true-offset writes every row of both arrays, so its value array needs no clearing.
+        var values = kind == OffsetKind.FirstTrue ? GC.AllocateUninitializedArray<double>(x.Length) : new double[x.Length];
         var rowValid = new bool[x.Length];
         if (kind == OffsetKind.FirstTrue)
         {
