@@ -13,6 +13,14 @@ internal static class SequenceReference
         var key = string.Concat(name, "|", parameter.Label);
         if (cache.TryGetValue(key, out var known))
             return known;
+        var nanoseconds = Measure(name, parameter, typical, ProofTiming.Samples);
+        cache[key] = nanoseconds;
+        return nanoseconds;
+    }
+
+    /// <summary>Times the main-era operation once, as the median of <paramref name="samples"/> evaluations, without the cache.</summary>
+    internal static double Measure(string name, ProofParameter parameter, double[] typical, int samples)
+    {
         var series = MathBlockValue.Vector(typical);
         MathBlockOperation operation;
         MathBlockValue[] inputs;
@@ -40,14 +48,13 @@ internal static class SequenceReference
                 break;
         }
 
-        var nanoseconds = ProofTiming.NanosecondsPerRow(
+        return ProofTiming.NanosecondsPerRow(
             () =>
             {
                 _ = operation.Evaluate(inputs);
             },
-            typical.Length);
-        cache[key] = nanoseconds;
-        return nanoseconds;
+            typical.Length,
+            samples);
     }
 
     // The indices row + shift, held inside the series, as the gather of a shifted copy reads them.

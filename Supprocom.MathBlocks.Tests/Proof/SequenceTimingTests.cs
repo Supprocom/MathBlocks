@@ -5,13 +5,16 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 /// <summary>
 /// The speed proof of the six new sequence operations on CoreCLR over 100,000 rows: every input class (the real market columns when present) against three counts classes (all
 /// contiguous, a gap every 10 rows, series starts every 1000 rows) across PatternResearcher's parameter range, as the median of five evaluations after a warm-up, in nanoseconds
-/// per row. A -valid sibling is timed on the Typical, Mixed, Invalid and AllFalse classes only. The numbers go to l3-timing-&lt;group&gt;.tsv.
+/// per row. A -valid sibling is timed on the Typical, Mixed, Invalid and AllFalse classes only. The numbers go to l3-timing-&lt;group&gt;.tsv. Each cell is the median of 15 timed evaluations.
 /// </summary>
 public sealed class SequenceTimingTests
 {
     private const int Rows = 100_000;
     private const int GapPeriod = 10;
     private const int SeriesPeriod = 1000;
+
+    // The number of timed evaluations behind every cell of the L3 tables (after one warm-up).
+    private const int Samples = 15;
 
     private static readonly string[] SiblingClasses = [nameof(ProofClass.Typical), nameof(ProofClass.Mixed), nameof(ProofClass.Invalid), nameof(ProofClass.AllFalse)];
 
@@ -44,16 +47,15 @@ public sealed class SequenceTimingTests
         var counts = new MathBlockValue[ProofCounts.TimingKinds];
         for (var kind = 0; kind < counts.Length; kind++)
             counts[kind] = MathBlockValue.Vector(ProofCounts.Build(kind, Rows, GapPeriod, SeriesPeriod));
-        var references = new Dictionary<string, double>(StringComparer.Ordinal);
         var cells = new List<ProofCell>();
         for (var nameIndex = 0; nameIndex < names.Length; nameIndex++)
         {
             for (var sibling = 0; sibling < 2; sibling++)
-                MeasureOperation(names[nameIndex], sibling == 1, sets, counts, parameters, references, cells);
+                MeasureOperation(names[nameIndex], sibling == 1, sets, counts, parameters, cells);
         }
 
         ProofBar.Annotate(cells);
-        _ = ProofReport.WriteText(string.Concat("l3-timing-", table, ".tsv"), ProofBar.Render(cells));
+        _ = ProofReport.WriteText(string.Concat("l3-timing-", table, ".tsv"), ProofBar.Render(cells, Samples));
         ProofBar.AssertWorstClassWithinTwiceMedian(cells, cell => !cell.Operation.Contains(SequenceOps.FirstTrue, StringComparison.Ordinal));
         ProofBar.AssertLinearGrowth(cells);
         ProofBar.AssertMedianClassWithinTwiceReference(cells, _ => true);
@@ -61,17 +63,20 @@ public sealed class SequenceTimingTests
             ProofBar.AssertWithinFullScan(cells, _ => true);
     }
 
+    // Every cell is the median of Samples timed evaluations, timed back to back with its comparison cells: first its reference (the main-era operation), then, for first-true-offset,
+    // the all-false full scan at the same counts class and parameter, then the cell itself, so that the three see the same load. One measurement per cell is the result.
     private static void MeasureOperation(
         string name,
         bool sibling,
         ProofSet[] sets,
         MathBlockValue[] counts,
         ProofParameter[] parameters,
-        Dictionary<string, double> references,
         List<ProofCell> cells)
     {
         var operation = SequenceOps.Operation(name, sibling);
         var typical = sets[0].First;
+        var firstTrue = string.Equals(name, SequenceOps.FirstTrue, StringComparison.Ordinal);
+        var allFalse = Array.Find(sets, set => string.Equals(set.Name, ProofBar.AllFalse, StringComparison.Ordinal));
         for (var setIndex = 0; setIndex < sets.Length; setIndex++)
         {
             var set = sets[setIndex];
@@ -79,24 +84,37 @@ public sealed class SequenceTimingTests
                 continue;
             var series = MathBlockValue.Vector(SequenceOps.Series(name, set));
             var availability = MathBlockValue.BooleanVector(set.Available);
+            var scanSeries = firstTrue && allFalse is not null ? MathBlockValue.Vector(SequenceOps.Series(name, allFalse)) : series;
+            var scanAvailability = firstTrue && allFalse is not null ? MathBlockValue.BooleanVector(allFalse.Available) : availability;
+            var scanned = firstTrue && allFalse is not null && !ReferenceEquals(set, allFalse);
             for (var kind = 0; kind < counts.Length; kind++)
             {
                 for (var parameterIndex = 0; parameterIndex < parameters.Length; parameterIndex++)
                 {
                     var parameter = parameters[parameterIndex];
                     var inputs = SequenceOps.Inputs(name, sibling, series, availability, counts[kind], parameter.First, parameter.Second);
-                    var reference = SequenceReference.Nanoseconds(name, parameter, typical, references);
-                    var valid = false;
-                    var nanoseconds = ProofTiming.NanosecondsPerRow(
-                        () =>
-                        {
-                            valid = operation.Evaluate(inputs).IsValid;
-                        },
-                        Rows);
-                    Assert.True(valid, string.Create(CultureInfo.InvariantCulture, $"{operation.Identity} class {set.Name} counts {kind} parameter {parameter.Label} was invalid as a whole."));
-                    cells.Add(new ProofCell(operation.Identifier, set.Name, ProofCounts.Name(kind, GapPeriod, SeriesPeriod), parameter.Label, parameter.Width, nanoseconds, reference, 0d));
+                    var reference = SequenceReference.Measure(name, parameter, typical, Samples);
+                    var scan = 0d;
+                    if (scanned)
+                        scan = TimeOperation(operation, SequenceOps.Inputs(name, sibling, scanSeries, scanAvailability, counts[kind], parameter.First, parameter.Second), set.Name, kind, parameter);
+                    var nanoseconds = TimeOperation(operation, inputs, set.Name, kind, parameter);
+                    cells.Add(new ProofCell(operation.Identifier, set.Name, ProofCounts.Name(kind, GapPeriod, SeriesPeriod), parameter.Label, parameter.Width, nanoseconds, reference, 0d) { FullScanNanosecondsPerRow = scan });
                 }
             }
         }
+    }
+
+    private static double TimeOperation(MathBlockOperation operation, MathBlockValue[] inputs, string className, int kind, ProofParameter parameter)
+    {
+        var valid = false;
+        var nanoseconds = ProofTiming.NanosecondsPerRow(
+            () =>
+            {
+                valid = operation.Evaluate(inputs).IsValid;
+            },
+            Rows,
+            Samples);
+        Assert.True(valid, string.Create(CultureInfo.InvariantCulture, $"{operation.Identity} class {className} counts {kind} parameter {parameter.Label} was invalid as a whole."));
+        return nanoseconds;
     }
 }

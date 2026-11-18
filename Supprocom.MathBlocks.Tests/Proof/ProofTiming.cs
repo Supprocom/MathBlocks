@@ -9,18 +9,21 @@ internal static class ProofTiming
     internal const int Samples = 5;
 
     /// <summary>Runs the delegate once to warm up, then five times with timing, and returns the median time per row in nanoseconds.</summary>
-    internal static double NanosecondsPerRow(Action run, long rows)
+    internal static double NanosecondsPerRow(Action run, long rows) => NanosecondsPerRow(run, rows, Samples);
+
+    /// <summary>Runs the delegate once to warm up, then <paramref name="samples"/> times with timing, and returns the median time per row in nanoseconds.</summary>
+    internal static double NanosecondsPerRow(Action run, long rows, int samples)
     {
         run();
-        var samples = new double[Samples];
-        for (var index = 0; index < samples.Length; index++)
+        var timed = new double[samples];
+        for (var index = 0; index < timed.Length; index++)
         {
             var started = Stopwatch.GetTimestamp();
             run();
-            samples[index] = Stopwatch.GetElapsedTime(started).TotalNanoseconds;
+            timed[index] = Stopwatch.GetElapsedTime(started).TotalNanoseconds;
         }
 
-        return Median(samples) / rows;
+        return Median(timed) / rows;
     }
 
     /// <summary>Returns the median of the values; the mean of the two middle values when their count is even.</summary>

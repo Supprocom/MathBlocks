@@ -49,9 +49,13 @@ internal static class ProofBar
     }
 
     /// <summary>Renders the table as tab-separated text, one row per cell.</summary>
-    internal static string Render(List<ProofCell> cells)
+    internal static string Render(List<ProofCell> cells) => Render(cells, 0);
+
+    /// <summary>Renders the table as tab-separated text; a positive <paramref name="samples"/> is written into the ns_per_row column header.</summary>
+    internal static string Render(List<ProofCell> cells, int samples)
     {
-        var text = new StringBuilder("operation\tclass\tcounts\tparameter\twidth\tns_per_row\tratio_to_median_class\treference_ns_per_row\tratio_to_reference\tsecond_reference_ns_per_row\tratio_to_second_reference\n");
+        var column = samples > 0 ? string.Create(CultureInfo.InvariantCulture, $"ns_per_row_median_of_{samples}") : "ns_per_row";
+        var text = new StringBuilder(string.Concat("operation\tclass\tcounts\tparameter\twidth\t", column, "\tratio_to_median_class\treference_ns_per_row\tratio_to_reference\tsecond_reference_ns_per_row\tratio_to_second_reference\n"));
         for (var index = 0; index < cells.Count; index++)
         {
             var cell = cells[index];
@@ -120,7 +124,10 @@ internal static class ProofBar
         Fail("Bar (iii), growth along the parameter", failures);
     }
 
-    /// <summary>Bar (iii) for first-true-offset: every class costs at most 1.25 times its all-false full-scan class at the same counts class and parameter.</summary>
+    /// <summary>
+    /// Bar (iii) for first-true-offset: every class costs at most 1.25 times its all-false full-scan class at the same counts class and parameter. A cell that carries a full scan timed
+    /// back to back with it is compared with that; any other cell with the all-false cell of the table.
+    /// </summary>
     internal static void AssertWithinFullScan(List<ProofCell> cells, Func<ProofCell, bool> applies)
     {
         var failures = new List<string>();
@@ -135,7 +142,10 @@ internal static class ProofBar
         for (var index = 0; index < cells.Count; index++)
         {
             var cell = cells[index];
-            if (!applies(cell) || string.Equals(cell.ClassName, AllFalse, StringComparison.Ordinal) || !scans.TryGetValue(cell.GroupKey, out var scan))
+            if (!applies(cell) || string.Equals(cell.ClassName, AllFalse, StringComparison.Ordinal))
+                continue;
+            var scan = cell.FullScanNanosecondsPerRow;
+            if (scan <= 0d && !scans.TryGetValue(cell.GroupKey, out scan))
                 continue;
             var ratio = cell.NanosecondsPerRow / scan;
             if (ratio > FullScanFactor)
