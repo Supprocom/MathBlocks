@@ -199,6 +199,37 @@ public sealed class OffsetValidityEquivalenceTests
         }
     }
 
+    /// <summary>
+    /// Verifies the maximum, in both forms, over series whose values are mostly positive zero, negative zero and a few small numbers (so the sign of a zero maximum decides the bits),
+    /// over spans that start before the series, end inside, at and past a segment's end, and spans of 256, with unavailable rows and with counts cut into segments. A vector cannot hold a
+    /// NaN, so there is none to place: building one is refused.
+    /// </summary>
+    [Fact]
+    public void MaximumsOfSignedZerosMatchTheDesignAndAVectorRefusesANaN()
+    {
+        Assert.Throws<ArgumentException>(() => MathBlockValue.Vector(new double[] { 0d, double.NaN }));
+        var random = new Random(31);
+        var failures = new List<string>();
+        ProofParameter[] spans = [.. SequenceOps.SpanSafety, new("[0,255]", 0d, 255d, 256d), new("[-7,3]", -7d, 3d, 11d), new("[-63,0]", -63d, 0d, 64d), new("[-255,255]", -255d, 255d, 511d), new("[1,2]", 1d, 2d, 2d)];
+        for (var round = 0; round < 40 && failures.Count < MaximumFailures; round++)
+        {
+            var length = round < 30 ? random.Next(1, 60) : 700;
+            var series = new double[length];
+            var available = new bool[length];
+            for (var row = 0; row < length; row++)
+            {
+                series[row] = random.Next(0, 6) switch { 0 => 0d, 1 => -0d, 2 => -0d, 3 => 0d, 4 => -1.5d, _ => 2.5d };
+                available[row] = round % 3 == 0 || random.NextDouble() >= (round % 3 == 1 ? 0.02d : 0.2d);
+            }
+
+            var counts = Contiguous(length, round % 4);
+            for (var index = 0; index < spans.Length && failures.Count < MaximumFailures; index++)
+                Compare(string.Create(CultureInfo.InvariantCulture, $"maximum zeros round {round} n={length} {spans[index].Label}"), "maximum-over-offsets", series, available, counts, spans[index].First, spans[index].Second, failures);
+        }
+
+        ProofBar.Fail("Maximums of signed zeros", failures);
+    }
+
     // Class 0: contiguity counts with random restarts. Class 1: contiguity counts with a first count above zero. Class 2: arbitrary counts.
     private static double[] RandomCounts(Random random, int length, int kind)
     {
