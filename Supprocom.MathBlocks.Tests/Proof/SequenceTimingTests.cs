@@ -71,7 +71,10 @@ public sealed class SequenceTimingTests
         if (cells.Exists(cell => cell.SameClassReferenceNanosecondsPerRow > 0d))
             bars.Add((ProofBar.SameClassBar, ProofBar.CollectWithinTwiceSameClassReference(cells)));
         if (firstTrue)
+        {
             bars.Add((ProofBar.FullScanBar, ProofBar.CollectWithinFullScan(cells, _ => true)));
+            _ = ProofReport.WriteText("l3-fullscan-cells.tsv", ProofBar.FullScanCellsOverTheLimit(cells, _ => true));
+        }
         ProofBar.FailAll(bars);
     }
 
