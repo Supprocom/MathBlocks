@@ -1665,6 +1665,56 @@
     <Description>This application identifies MathBlocks operation sequence.exponential-moving-average@1. It requires 2 ordered operand references.</Description>
   </CDDefinition>
   <CDDefinition>
+    <Name>op.sequence.first-true-offset-valid.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.first-true-offset-valid@1. It requires 5 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.first-true-offset.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.first-true-offset@1. It requires 7 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.lag-valid.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.lag-valid@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.lag.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.lag@1. It requires 5 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.lead-valid.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.lead-valid@1. It requires 4 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.lead.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.lead@1. It requires 5 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.maximum-over-offsets-valid.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.maximum-over-offsets-valid@1. It requires 5 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.maximum-over-offsets.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.maximum-over-offsets@1. It requires 6 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.prefix-difference-over-offsets-valid.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.prefix-difference-over-offsets-valid@1. It requires 5 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.prefix-difference-over-offsets.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.prefix-difference-over-offsets@1. It requires 6 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
     <Name>op.sequence.rolling-maximum.v1</Name>
     <Role>application</Role>
     <Description>This application identifies MathBlocks operation sequence.rolling-maximum@1. It requires 2 ordered operand references.</Description>
@@ -1703,6 +1753,16 @@
     <Name>op.sequence.rolling-variance.v1</Name>
     <Role>application</Role>
     <Description>This application identifies MathBlocks operation sequence.rolling-variance@1. It requires 2 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.sum-over-offsets-valid.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.sum-over-offsets-valid@1. It requires 5 ordered operand references.</Description>
+  </CDDefinition>
+  <CDDefinition>
+    <Name>op.sequence.sum-over-offsets.v1</Name>
+    <Role>application</Role>
+    <Description>This application identifies MathBlocks operation sequence.sum-over-offsets@1. It requires 6 ordered operand references.</Description>
   </CDDefinition>
   <CDDefinition>
     <Name>op.shape.greatest-convex-minorant.v1</Name>

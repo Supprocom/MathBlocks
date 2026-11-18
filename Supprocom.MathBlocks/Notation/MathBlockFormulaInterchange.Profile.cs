@@ -143,14 +143,14 @@ public static partial class MathBlockFormulaInterchange
         FormulaArtifactAuthority[] authority =
         [
             new("mathblocks_formula2.ocd", 867, "636193DEAE17ED7FE7E273F05DEDC2ADE8199BE43F927138B4C4B6E7215BFCD8", true),
-            new("mathblocks_formula_mappings2.xml", 154901, "E9E6A5A4647BAC3E165EB95E04A4DAB6E2F1E859420A4405D2D4D5F2124AD061", true),
-            new("mathblocks_formula_mappings2.rnc", 807, "AE33D1676B8443966F5C113742230FDC34A735156B78F3865A7174F21C7F4CEC", true),
+            new("mathblocks_formula_mappings2.xml", 158309, "AC7CEB802A968BDD724A0248C5D12D4E76FD8C9C02DCE0DCD49F3A7D994E1DC8", true),
+            new("mathblocks_formula_mappings2.rnc", 807, "7C4957F13D85500CBD68947580B8E711B256BD0ABE3596DE3E69B1DE7FFA4C7B", true),
             new("mathblocks_formula_mathml2.rnc", 968, "BADF0F363AB72F719D49DC1FD98F29B5EDD9BAD58D26DE9B2CE8F043258FA514", true),
             new("mathblocks_formula_openmath2.rnc", 1325, "59F98994C52081453EA271697F4364A220EDD80FF58574606DDBB8C6A1EFC31A", true),
-            new("mathblocks_formula_operations2.ocd", 148299, "44C13C24DE1C31AEE9321B30A23EC1688993E2B7CC144BDF5ACDECC39A3C7AA0", true),
+            new("mathblocks_formula_operations2.ocd", 151479, "1A4F380E451E95F1CBDE794C8E03312EB39D3312A2364E5D3FBED0E0F1928FED", true),
             new("mathblocks_formula_profile2.cdg", 2144, "40CCDFDB3219C40F8020F88067276F1EA13406B73B3DF371C6CB27A9A5004037", true),
             new("mathblocks_formula_values2.ocd", 2891, "1B1EDF0AEF7872088D93C6867B8324AA2376D6B151DDF02EC2EB4CCCBDEDDDBD", true),
-            new("README.md", 4670, "7335A127762989B3BB8E8F718B278495D8E005B65ACD2E9318B555B63400D4FD", false)
+            new("README.md", 4670, "790A40E64B8227BDD42947976448530C2C3D9BF6FC5722C3FB56268228980C85", false)
         ];
         var profile = CreateProfile(MathBlockOpenMath.Profile2, CreateArtifacts(2, authority));
         if (profile.Operations.Count != MathBlockInterchangeProfiles.Profile2OperationCount)
