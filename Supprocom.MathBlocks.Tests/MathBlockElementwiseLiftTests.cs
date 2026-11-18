@@ -29,7 +29,7 @@ public sealed class MathBlockElementwiseLiftTests
             Assert.Equal($"elementwise-valid.{source}@1", MathBlockCatalog.Standard.Get("elementwise-valid." + source).Identity);
         }
 
-        Assert.Equal(561, MathBlockCatalog.Standard.Operations.Count);
+        Assert.Equal(573, MathBlockCatalog.Standard.Operations.Count);
         Assert.Equal(MathBlockCatalog.Standard.Operations.Count, MathBlockCudaDeviceModule.Operations.Count);
     }
 

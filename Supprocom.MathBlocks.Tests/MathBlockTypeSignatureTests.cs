@@ -12,7 +12,7 @@ namespace Supprocom.MathBlocks.Tests;
 public sealed class MathBlockTypeSignatureTests
 {
     // The pins move with the operation order of the standard catalog and with any signature; update them with the catalog.
-    private const string StandardTableFingerprint = "95BC6A09B5F747ED1AB354B808D49511C54FB4EEA2BCEDDD93FF7B1781FBF5D5";
+    private const string StandardTableFingerprint = "8482A64DD5CE6E6AEC30DA7FDBF212246CC0472FFF85B924065B7FCB4B12B5C8";
     private const string TypeRuleSourceFingerprint = "8962F39B2728D87760C7CEA3B9FE2AB50B0AD8EFA9D2D96415CD797D0D4B33FE";
 
     private static readonly MathBlockCausality[] RowCausal = [MathBlockCausality.Pointwise, MathBlockCausality.Trailing, MathBlockCausality.Expanding];
@@ -34,7 +34,7 @@ public sealed class MathBlockTypeSignatureTests
         var scope = ReadScope();
         var unsigned = scope.Where(identity => MathBlockCatalog.Standard.Get(identity.Split('@')[0], 1).TypeSignature is null).ToList();
 
-        Assert.Equal(329, scope.Count);
+        Assert.Equal(341, scope.Count);
         Assert.Equal(scope.Count, scope.Distinct(StringComparer.Ordinal).Count());
         Assert.True(unsigned.Count == 0, $"{unsigned.Count} of {scope.Count} scope operations have no signature: {string.Join(", ", unsigned)}");
         Assert.All(scope, identity => Assert.Equal(identity, MathBlockCatalog.Standard.Get(identity.Split('@')[0], 1).TypeSignature!.Identity));

@@ -173,8 +173,14 @@ sequence.difference@1
 sequence.exponential-moving-average@1
 sequence.first-true-offset-valid@1
 sequence.first-true-offset@1
+sequence.lag-valid@1
+sequence.lag@1
+sequence.lead-valid@1
+sequence.lead@1
 sequence.maximum-over-offsets-valid@1
 sequence.maximum-over-offsets@1
+sequence.prefix-difference-over-offsets-valid@1
+sequence.prefix-difference-over-offsets@1
 sequence.rolling-maximum@1
 sequence.rolling-mean@1
 sequence.rolling-median@1
