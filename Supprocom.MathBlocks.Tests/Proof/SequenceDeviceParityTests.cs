@@ -35,6 +35,30 @@ public sealed class SequenceDeviceParityTests
         Compare("maximum-over-offsets");
     }
 
+    /// <summary>
+    /// Verifies maximum-over-offsets and its sibling over the spans of the timing tests and of the CoreCLR safety sweep (which reach 700 either side of a row) and over series of positive and negative zeros, so the bits of a zero
+    /// maximum and the validity of every row are those of CoreCLR for each class, counts class and span the timing bars measure.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "CudaDevice")]
+    public void CUDAMatchesCoreCLRForMaximumOverOffsetsAtTheTimingSpansAndSignedZeros()
+    {
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
+        var sets = ProofSets.ForSequences(Rows, includeReal: true, includeAllFalse: true);
+        var zeros = new double[Rows];
+        var zeroAvailable = new bool[Rows];
+        var random = new Random(20261120);
+        for (var row = 0; row < Rows; row++)
+        {
+            zeros[row] = random.Next(0, 6) switch { 0 => 0d, 1 => -0d, 2 => -0d, 3 => 0d, 4 => -1.5d, _ => 2.5d };
+            zeroAvailable[row] = random.NextDouble() >= 0.05d;
+        }
+
+        ProofSet[] all = [.. sets, new ProofSet("SignedZeros", zeros, [], zeros, zeroAvailable)];
+        ProofParameter[] spans = [.. SequenceOps.SpanTiming, .. SequenceOps.SpanSafety];
+        Compare("maximum-over-offsets", all, spans);
+    }
+
     /// <summary>Verifies the prefix difference over offsets with its sibling.</summary>
     [Fact]
     [Trait("Category", "CudaDevice")]
@@ -44,10 +68,11 @@ public sealed class SequenceDeviceParityTests
         Compare("prefix-difference-over-offsets");
     }
 
-    private static void Compare(string name)
+    private static void Compare(string name) =>
+        Compare(name, ProofSets.ForSequences(Rows, includeReal: true, includeAllFalse: true), SequenceOps.Parameters(name, SequenceOps.ShiftDevice, SequenceOps.SpanDevice));
+
+    private static void Compare(string name, ProofSet[] sets, ProofParameter[] parameters)
     {
-        var sets = ProofSets.ForSequences(Rows, includeReal: true, includeAllFalse: true);
-        var parameters = SequenceOps.Parameters(name, SequenceOps.ShiftDevice, SequenceOps.SpanDevice);
         var failures = new List<string>();
         var worker = new MathBlocksCUDAWorker();
         for (var sibling = 0; sibling < 2; sibling++)
