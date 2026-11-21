@@ -83,7 +83,7 @@ public sealed class MathBlockFusedExpressionSourceTests
         var y = builder.Input("y", MathBlockType.Vector());
         var mask = builder.Input("mask", MathBlockType.BooleanVector());
         var exponent = builder.Input("exponent", MathBlockType.Scalar());
-        var half = builder.Constant(MathBlockValue.Scalar(-0.5));
+        var half = builder.Constant(MathBlockValue.Scalar(-0.5f));
         var sum = builder.Apply("vector.add", 1, x, y);
         var difference = builder.Apply("vector.subtract", 1, x, y);
         var product = builder.Apply("vector.multiply", 1, sum, difference);
@@ -114,7 +114,7 @@ public sealed class MathBlockFusedExpressionSourceTests
 
         // Elementwise forms of both CUDA per-row functions (Scalar and Probability), with broadcast scalars in
         // the second and third masks, a form of a form, and a sibling.
-        var fill = builder.Constant(MathBlockValue.Scalar(-1d));
+        var fill = builder.Constant(MathBlockValue.Scalar(-1f));
         var angle = builder.Apply("elementwise.scalar.arc-tangent-2", 1, total, exponent, fill);
         var cdf = builder.Apply("elementwise.probability.normal-cdf", 1, angle, fill);
         var clamped = builder.Apply("elementwise.scalar.clamp", 1, cdf, half, y, fill);

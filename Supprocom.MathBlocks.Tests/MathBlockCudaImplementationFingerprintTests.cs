@@ -105,11 +105,11 @@ public sealed class MathBlockCudaImplementationFingerprintTests
         // The edge values the codec must keep: both zeros, subnormals, the extremes; spare capacity above and below the count.
         var scalars = values.Where(item => item.Value.IsValid && item.Value.Type.Kind == MathBlockValueKind.Scalar)
             .Select(item => item.Value.AsScalar()).ToArray();
-        Assert.Contains(scalars, value => value == 0d && double.IsNegative(value));
-        Assert.Contains(scalars, value => value == 0d && !double.IsNegative(value));
-        Assert.Contains(scalars, value => double.IsSubnormal(value));
-        Assert.Contains(scalars, value => value == double.MaxValue);
-        Assert.Contains(scalars, value => value == double.MinValue);
+        Assert.Contains(scalars, value => value == 0f && float.IsNegative(value));
+        Assert.Contains(scalars, value => value == 0f && !float.IsNegative(value));
+        Assert.Contains(scalars, value => float.IsSubnormal(value));
+        Assert.Contains(scalars, value => value == float.MaxValue);
+        Assert.Contains(scalars, value => value == float.MinValue);
         Assert.Contains(values, item => item.Spare > 0);
         Assert.Contains(values, item => item.Spare < 0);
         Assert.Contains(headers, item => item.Type.Kind == MathBlockValueKind.Matrix && item.Type.Rows * (long)item.Type.Columns > item.Capacity);
@@ -306,9 +306,9 @@ public sealed class MathBlockCudaImplementationFingerprintTests
             .Select(item => (Read<string>(item, "Name"), Read<MathBlockType>(item, "Type"), Read<int>(item, "Capacity"), Read<bool>(item, "Valid")))
             .ToArray();
 
-    private static (string Name, MathBlockType Type, MathBlockCudaSlotDescriptor Slot, double[] Payload)[] ReadCases() =>
+    private static (string Name, MathBlockType Type, MathBlockCudaSlotDescriptor Slot, float[] Payload)[] ReadCases() =>
         CorpusTable("Reads").Cast<object>()
-            .Select(item => (Read<string>(item, "Name"), Read<MathBlockType>(item, "Type"), Read<MathBlockCudaSlotDescriptor>(item, "Slot"), Read<double[]>(item, "Payload")))
+            .Select(item => (Read<string>(item, "Name"), Read<MathBlockType>(item, "Type"), Read<MathBlockCudaSlotDescriptor>(item, "Slot"), Read<float[]>(item, "Payload")))
             .ToArray();
 
     private static (string Name, byte[] Bytes)[] EncodedEntries() =>

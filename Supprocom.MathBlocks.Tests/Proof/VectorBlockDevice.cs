@@ -65,7 +65,7 @@ internal sealed class VectorBlockDevice : IDisposable
     /// Plans every dispatch of the call for the operand rows, builds the slot arena (the slots, their payloads and the scratch the plans ask for), uploads it once and returns the run.
     /// The outputs start as valid empty slots, which is what PatternResearcher's InitializeOutput writes before the dispatch.
     /// </summary>
-    internal VectorBlockRun Prepare(VectorBlockCall call, double[] first, double[] second)
+    internal VectorBlockRun Prepare(VectorBlockCall call, float[] first, float[] second)
     {
         var inputs = new MathBlockValue[call.Contracts.Length][];
         for (var step = 0; step < inputs.Length; step++)
@@ -74,12 +74,12 @@ internal sealed class VectorBlockDevice : IDisposable
     }
 
     /// <summary>Waits for the launches and returns the elapsed time of the launches since <see cref="Begin"/>, in nanoseconds.</summary>
-    internal double End()
+    internal float End()
     {
         VectorBlockDriver.Require(VectorBlockDriver.cuEventRecord(finished, IntPtr.Zero), "cuEventRecord");
         VectorBlockDriver.Require(VectorBlockDriver.cuEventSynchronize(finished), "cuEventSynchronize");
         VectorBlockDriver.Require(VectorBlockDriver.cuEventElapsedTime(out var milliseconds, started, finished), "cuEventElapsedTime");
-        return milliseconds * 1_000_000d;
+        return milliseconds * 1_000_000f;
     }
 
     /// <summary>Records the start event on the default stream.</summary>

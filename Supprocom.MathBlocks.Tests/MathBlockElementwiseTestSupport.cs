@@ -13,13 +13,13 @@ internal static class MathBlockElementwiseTestSupport
     // Values that sit on the edges of the scalar domains: signed zeros, subnormals, the smallest normal, the unit
     // interval edges and their neighbours, integers around the factorial limit, the exponential overflow and
     // underflow thresholds, and the largest finite magnitudes.
-    private static readonly double[] EdgeValues =
+    private static readonly float[] EdgeValues =
     [
-        0d, double.NegativeZero, double.Epsilon, -double.Epsilon, 1e-310d, -1e-310d, 2.2250738585072014E-308d,
-        -2.2250738585072014E-308d, 1e-300d, 1d, -1d, 0.5d, -0.5d, 1.5d, -1.5d, 2.5d, -2.5d, 2d, -2d, 3d,
-        0.9999999999999999d, 1.0000000000000002d, -0.9999999999999999d, -1.0000000000000002d,
-        Math.PI / 2d, Math.PI, -Math.PI, 10d, 170d, 171d, 709.78d, 710d, -745.2d, -746d, 1e15d,
-        4503599627370495.5d, 1e200d, -1e200d, double.MaxValue, -double.MaxValue
+        0f, float.NegativeZero, float.Epsilon, -float.Epsilon, 5.28e-41f, -5.28e-41f, 1.1754943e-38f,
+        -1.1754943e-38f, 1.03e-37f, 1f, -1f, 0.5f, -0.5f, 1.5f, -1.5f, 2.5f, -2.5f, 2f, -2f, 3f,
+        0.9999999999999999f, 1.0000000000000002f, -0.9999999999999999f, -1.0000000000000002f,
+        MathF.PI / 2f, MathF.PI, -MathF.PI, 10f, 170f, 171f, 709.78f, 710f, -745.2f, -746f, 1e15f,
+        4503599627370495.5f, 1e25f, -1e25f, float.MaxValue, -float.MaxValue
     ];
 
     // The 41 sources of design section 5, in catalog order.
@@ -67,11 +67,11 @@ internal static class MathBlockElementwiseTestSupport
     {
         var random = new Random(seed);
         var arity = SourceArity(source);
-        var rows = new double[arity][];
+        var rows = new float[arity][];
         for (var index = 0; index < arity; index++)
         {
             var length = (mask >> index & 1) != 0 ? count : 1;
-            rows[index] = new double[length];
+            rows[index] = new float[length];
             for (var row = 0; row < length; row++)
                 rows[index][row] = Draw(random);
         }
@@ -90,7 +90,7 @@ internal static class MathBlockElementwiseTestSupport
     // mix. Scalar arguments stay fixed, so unperturbed rows keep their bits.
     public static MathBlockValue[] Perturb(MathBlockValue[] arguments, Func<int, bool> perturbRow, Random random)
     {
-        var rows = new double[arguments.Length][];
+        var rows = new float[arguments.Length][];
         for (var index = 0; index < arguments.Length; index++)
         {
             if (arguments[index].Type.Kind != MathBlockValueKind.Vector)
@@ -111,17 +111,17 @@ internal static class MathBlockElementwiseTestSupport
         return result;
     }
 
-    private static double Draw(Random random)
+    private static float Draw(Random random)
     {
         var category = random.Next(20);
         return category switch
         {
             < 5 => EdgeValues[random.Next(EdgeValues.Length)],
-            < 10 => random.NextDouble() * 6d - 3d,
-            < 13 => random.NextDouble(),
+            < 10 => random.NextSingle() * 6f - 3f,
+            < 13 => random.NextSingle(),
             < 16 => random.Next(-2, 13),
-            < 18 => (random.Next(2) == 0 ? -1d : 1d) * Math.Pow(10d, random.NextDouble() * 600d - 300d),
-            _ => (random.Next(2) == 0 ? -1d : 1d) * random.NextDouble() * 4e-308d
+            < 18 => (random.Next(2) == 0 ? -1f : 1f) * MathF.Pow(10f, random.NextSingle() * 600f - 300f),
+            _ => (random.Next(2) == 0 ? -1f : 1f) * random.NextSingle() * 1.26e-38f
         };
     }
 
@@ -130,12 +130,12 @@ internal static class MathBlockElementwiseTestSupport
 
     // Row i of the reference is the Standard source operation on fresh scalars: row i of each vector argument and
     // each scalar argument as it is. It does not use the elementwise lift.
-    public static (bool[] Valid, double[] Values) Reference(string source, MathBlockValue[] arguments)
+    public static (bool[] Valid, float[] Values) Reference(string source, MathBlockValue[] arguments)
     {
         var operation = MathBlockCatalog.Standard.Get(source);
         var count = Count(arguments);
         var valid = new bool[count];
-        var values = new double[count];
+        var values = new float[count];
         var vectors = arguments.Select(argument =>
             argument.Type.Kind == MathBlockValueKind.Vector ? argument.AsVector().ToArray() : null).ToArray();
         Parallel.For(0, count, new ParallelOptions { MaxDegreeOfParallelism = 4 }, row =>
@@ -158,10 +158,10 @@ internal static class MathBlockElementwiseTestSupport
     // Compares a form and its sibling with the reference row by row, bit for bit, and returns readable failures.
     public static List<string> Compare(
         string label,
-        double fill,
+        float fill,
         MathBlockValue form,
         MathBlockValue validity,
-        (bool[] Valid, double[] Values) reference)
+        (bool[] Valid, float[] Values) reference)
     {
         var failures = new List<string>();
         if (!form.IsValid || !validity.IsValid)
@@ -179,7 +179,7 @@ internal static class MathBlockElementwiseTestSupport
         for (var row = 0; row < reference.Values.Length && failures.Count < 8; row++)
         {
             var expected = reference.Valid[row] ? reference.Values[row] : fill;
-            if (BitConverter.DoubleToInt64Bits(values[row]) != BitConverter.DoubleToInt64Bits(expected))
+            if (BitConverter.SingleToInt32Bits(values[row]) != BitConverter.SingleToInt32Bits(expected))
             {
                 failures.Add($"{label} row {row}: value {values[row]:R}, expected {expected:R} " +
                              $"(source {(reference.Valid[row] ? "valid" : "invalid")}).");

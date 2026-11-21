@@ -16,9 +16,9 @@ public sealed class OffsetValidityEquivalenceTests
 
     private static readonly ProofParameter[] WideSpans =
     [
-        new("[0,0]", 0d, 0d, 1d), new("[2,2]", 2d, 2d, 1d), new("[-1,-1]", -1d, -1d, 1d), new("[0,1000]", 0d, 1000d, 1001d), new("[-1000,1000]", -1000d, 1000d, 2001d),
-        new("[-3,100000]", -3d, 100_000d, 100_004d), new("[5,2000000000]", 5d, 2_000_000_000d, 2_000_000_000d), new("[-2000000000,2000000000]", -2_000_000_000d, 2_000_000_000d, 4_000_000_001d),
-        new("[-7,-2]", -7d, -2d, 6d), new("[3,9]", 3d, 9d, 7d), new("[-63,0]", -63d, 0d, 64d), new("[0,255]", 0d, 255d, 256d)
+        new("[0,0]", 0f, 0f, 1f), new("[2,2]", 2f, 2f, 1f), new("[-1,-1]", -1f, -1f, 1f), new("[0,1000]", 0f, 1000f, 1001f), new("[-1000,1000]", -1000f, 1000f, 2001f),
+        new("[-3,100000]", -3f, 100_000f, 100_004f), new("[5,2000000000]", 5f, 2_000_000_000f, 2_000_000_000f), new("[-2000000000,2000000000]", -2_000_000_000f, 2_000_000_000f, 4_000_000_001f),
+        new("[-7,-2]", -7f, -2f, 6f), new("[3,9]", 3f, 9f, 7f), new("[-63,0]", -63f, 0f, 64f), new("[0,255]", 0f, 255f, 256f)
     ];
 
     /// <summary>Verifies the class matrix at 2,500 rows over the safety spans and the wide spans, for all four counts classes.</summary>
@@ -54,14 +54,14 @@ public sealed class OffsetValidityEquivalenceTests
         for (var round = 0; round < 2400 && failures.Count < MaximumFailures; round++)
         {
             var length = round % 10 == 0 ? random.Next(200, 1200) : random.Next(1, 40);
-            var scale = random.Next(0, 4) switch { 0 => 1d, 1 => 1e5d, 2 => 1e300d, _ => 1.7e308d };
-            var invalidShare = random.Next(0, 3) switch { 0 => 0d, 1 => 0.03d, _ => 0.4d };
-            var series = new double[length];
+            var scale = random.Next(0, 4) switch { 0 => 1f, 1 => 1e5f, 2 => 3.16e37f, _ => 3.38e38f };
+            var invalidShare = random.Next(0, 3) switch { 0 => 0f, 1 => 0.03f, _ => 0.4f };
+            var series = new float[length];
             var available = new bool[length];
             for (var row = 0; row < length; row++)
             {
-                series[row] = (random.NextDouble() * 2d - 1d) * scale;
-                available[row] = random.NextDouble() >= invalidShare;
+                series[row] = (random.NextSingle() * 2f - 1f) * scale;
+                available[row] = random.NextSingle() >= invalidShare;
             }
 
             var counts = RandomCounts(random, length, round % 3);
@@ -89,17 +89,17 @@ public sealed class OffsetValidityEquivalenceTests
             var length = lengths[lengthIndex];
             for (var segmentIndex = 0; segmentIndex < segmentLengths.Length; segmentIndex++)
             {
-                var counts = new double[length];
+                var counts = new float[length];
                 for (var row = 0; row < length; row++)
-                    counts[row] = row % segmentLengths[segmentIndex] == 0 ? 0d : counts[row - 1] + 1d;
+                    counts[row] = row % segmentLengths[segmentIndex] == 0 ? 0f : counts[row - 1] + 1f;
                 for (var shape = 0; shape < 4; shape++)
                 {
-                    var series = new double[length];
+                    var series = new float[length];
                     var available = new bool[length];
                     for (var row = 0; row < length; row++)
                     {
-                        available[row] = shape == 0 || random.NextDouble() >= 0.1d;
-                        series[row] = shape == 3 ? (random.Next(2) == 0 ? 1.5e308d : -1.7e308d) : (random.NextDouble() - 0.4d) * 100d;
+                        available[row] = shape == 0 || random.NextSingle() >= 0.1f;
+                        series[row] = shape == 3 ? (random.Next(2) == 0 ? 3.33e38f : -3.38e38f) : (random.NextSingle() - 0.4f) * 100f;
                     }
 
                     for (var start = -30; start <= 30 && failures.Count < MaximumFailures; start++)
@@ -125,46 +125,47 @@ public sealed class OffsetValidityEquivalenceTests
     public void RunningSumsAtTheLargestDoubleMatchTheDesign()
     {
         var failures = new List<string>();
-        ProofParameter[] spans = [.. SequenceOps.SpanSafety, new("[0,255]", 0d, 255d, 256d), new("[-7,3]", -7d, 3d, 11d), new("[0,63]", 0d, 63d, 64d), new("[-63,0]", -63d, 0d, 64d), new("[1,2]", 1d, 2d, 2d)];
+        ProofParameter[] spans = [.. SequenceOps.SpanSafety, new("[0,255]", 0f, 255f, 256f), new("[-7,3]", -7f, 3f, 11f), new("[0,63]", 0f, 63f, 64f), new("[-63,0]", -63f, 0f, 64f), new("[1,2]", 1f, 2f, 2f)];
         var decidedBefore = ReadCounter("OverflowDecidedRows");
-        var alternating = new double[600];
+        var alternating = new float[600];
         for (var row = 0; row < alternating.Length; row++)
-            alternating[row] = row % 2 == 0 ? 1.7e308d : -1.7e308d;
+            alternating[row] = row % 2 == 0 ? 3.38e38f : -3.38e38f;
         CompareSpans("alternating", alternating, Contiguous(alternating.Length, 0), spans, failures);
 
         var random = new Random(7);
-        foreach (var huge in new[] { 1.7976931348623157e308d, -1.7976931348623157e308d, 1e308d, 8.98846567431158e307d })
+        foreach (var huge in new[] { 3.4028235e38f, -3.4028235e38f, 3.16e38f, 3.12e38f })
         {
             for (var position = 0; position < 300 && failures.Count < MaximumFailures; position++)
             {
-                var series = new double[300];
+                var series = new float[300];
                 for (var row = 0; row < series.Length; row++)
-                    series[row] = (random.NextDouble() - 0.5d) * 1e3d;
+                    series[row] = (random.NextSingle() - 0.5f) * 1e3f;
                 series[position] = huge;
                 CompareSpans(string.Create(CultureInfo.InvariantCulture, $"single {huge:R} at {position}"), series, Contiguous(series.Length, 0), spans, failures);
             }
         }
 
-        var half = Math.Pow(2d, 1023d);
-        var tie = half - Math.Pow(2d, 970d);
-        long tieBits = BitConverter.DoubleToInt64Bits(tie);
+        // Half of 2^128, and the value that brings their sum to the midpoint between the largest single and 2^128.
+        var half = MathF.ScaleB(1f, 127);
+        var tie = half - MathF.ScaleB(1f, 103);
+        var tieBits = BitConverter.SingleToInt32Bits(tie);
         for (var step = -6; step <= 6 && failures.Count < MaximumFailures; step++)
         {
-            var second = BitConverter.Int64BitsToDouble(tieBits + step);
+            var second = BitConverter.Int32BitsToSingle(tieBits + step);
             for (var shape = 0; shape < 4; shape++)
             {
-                var series = new double[64];
+                var series = new float[64];
                 for (var row = 0; row < series.Length; row += 8)
                 {
-                    var sign = shape % 2 == 0 ? 1d : -1d;
+                    var sign = shape % 2 == 0 ? 1f : -1f;
                     series[row] = sign * half;
                     series[row + 1] = sign * second;
-                    series[row + 2] = shape < 2 ? -sign * half : 0.25d;
-                    series[row + 3] = shape < 2 ? -sign * second : 0d;
-                    series[row + 4] = 3d;
-                    series[row + 5] = sign * 1.7976931348623157e308d;
-                    series[row + 6] = shape == 3 ? sign * Math.Pow(2d, 970d) : 0d;
-                    series[row + 7] = -0d;
+                    series[row + 2] = shape < 2 ? -sign * half : 0.25f;
+                    series[row + 3] = shape < 2 ? -sign * second : 0f;
+                    series[row + 4] = 3f;
+                    series[row + 5] = sign * 3.4028235e38f;
+                    series[row + 6] = shape == 3 ? sign * MathF.Pow(2f, 970f) : 0f;
+                    series[row + 7] = -0f;
                 }
 
                 CompareSpans(string.Create(CultureInfo.InvariantCulture, $"near the limit step {step} shape {shape}"), series, Contiguous(series.Length, shape), spans, failures);
@@ -179,16 +180,16 @@ public sealed class OffsetValidityEquivalenceTests
         (long)typeof(MathBlockVectorMath).GetField(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!.GetValue(null)!;
 
     // Contiguity counts that restart every 40 rows (kind 0), or never (kind 1), or every 5 rows (kind 2), or every 3 rows (kind 3).
-    private static double[] Contiguous(int length, int kind)
+    private static float[] Contiguous(int length, int kind)
     {
         var period = kind switch { 0 => 40, 1 => int.MaxValue, 2 => 5, _ => 3 };
-        var counts = new double[length];
+        var counts = new float[length];
         for (var row = 0; row < length; row++)
-            counts[row] = row % period == 0 ? 0d : counts[row - 1] + 1d;
+            counts[row] = row % period == 0 ? 0f : counts[row - 1] + 1f;
         return counts;
     }
 
-    private static void CompareSpans(string label, double[] series, double[] counts, ProofParameter[] spans, List<string> failures)
+    private static void CompareSpans(string label, float[] series, float[] counts, ProofParameter[] spans, List<string> failures)
     {
         var available = new bool[series.Length];
         Array.Fill(available, true);
@@ -207,19 +208,19 @@ public sealed class OffsetValidityEquivalenceTests
     [Fact]
     public void MaximumsOfSignedZerosMatchTheDesignAndAVectorRefusesANaN()
     {
-        Assert.Throws<ArgumentException>(() => MathBlockValue.Vector(new double[] { 0d, double.NaN }));
+        Assert.Throws<ArgumentException>(() => MathBlockValue.Vector(new float[] { 0f, float.NaN }));
         var random = new Random(31);
         var failures = new List<string>();
-        ProofParameter[] spans = [.. SequenceOps.SpanSafety, new("[0,255]", 0d, 255d, 256d), new("[-7,3]", -7d, 3d, 11d), new("[-63,0]", -63d, 0d, 64d), new("[-255,255]", -255d, 255d, 511d), new("[1,2]", 1d, 2d, 2d)];
+        ProofParameter[] spans = [.. SequenceOps.SpanSafety, new("[0,255]", 0f, 255f, 256f), new("[-7,3]", -7f, 3f, 11f), new("[-63,0]", -63f, 0f, 64f), new("[-255,255]", -255f, 255f, 511f), new("[1,2]", 1f, 2f, 2f)];
         for (var round = 0; round < 40 && failures.Count < MaximumFailures; round++)
         {
             var length = round < 30 ? random.Next(1, 60) : 700;
-            var series = new double[length];
+            var series = new float[length];
             var available = new bool[length];
             for (var row = 0; row < length; row++)
             {
-                series[row] = random.Next(0, 6) switch { 0 => 0d, 1 => -0d, 2 => -0d, 3 => 0d, 4 => -1.5d, _ => 2.5d };
-                available[row] = round % 3 == 0 || random.NextDouble() >= (round % 3 == 1 ? 0.02d : 0.2d);
+                series[row] = random.Next(0, 6) switch { 0 => 0f, 1 => -0f, 2 => -0f, 3 => 0f, 4 => -1.5f, _ => 2.5f };
+                available[row] = round % 3 == 0 || random.NextSingle() >= (round % 3 == 1 ? 0.02f : 0.2f);
             }
 
             var counts = Contiguous(length, round % 4);
@@ -231,16 +232,16 @@ public sealed class OffsetValidityEquivalenceTests
     }
 
     // Class 0: contiguity counts with random restarts. Class 1: contiguity counts with a first count above zero. Class 2: arbitrary counts.
-    private static double[] RandomCounts(Random random, int length, int kind)
+    private static float[] RandomCounts(Random random, int length, int kind)
     {
-        var counts = new double[length];
+        var counts = new float[length];
         for (var row = 0; row < length; row++)
         {
-            var previous = row == 0 ? 0d : counts[row - 1];
+            var previous = row == 0 ? 0f : counts[row - 1];
             counts[row] = kind switch
             {
-                0 => row == 0 || random.NextDouble() < 0.1d ? 0d : previous + 1d,
-                1 => row == 0 ? random.Next(1, 5) : (random.NextDouble() < 0.1d ? 0d : previous + 1d),
+                0 => row == 0 || random.NextSingle() < 0.1f ? 0f : previous + 1f,
+                1 => row == 0 ? random.Next(1, 5) : (random.NextSingle() < 0.1f ? 0f : previous + 1f),
                 _ => random.Next(0, 12)
             };
         }
@@ -248,7 +249,7 @@ public sealed class OffsetValidityEquivalenceTests
         return counts;
     }
 
-    private static void Compare(string label, string name, double[] series, bool[] available, double[] counts, double first, double second, List<string> failures)
+    private static void Compare(string label, string name, float[] series, bool[] available, float[] counts, float first, float second, List<string> failures)
     {
         var expected = SequenceOracle.Run(name, series, available, counts, (long)first, (long)second);
         var seriesValue = MathBlockValue.Vector(series);
@@ -266,7 +267,7 @@ public sealed class OffsetValidityEquivalenceTests
         var actualFlags = flags.AsBooleanVector().ToArray();
         for (var row = 0; row < series.Length && failures.Count < MaximumFailures; row++)
         {
-            if (actualFlags[row] != expected.Valid[row] || BitConverter.DoubleToInt64Bits(actualValues[row]) != BitConverter.DoubleToInt64Bits(expected.Values[row]))
+            if (actualFlags[row] != expected.Valid[row] || BitConverter.SingleToInt32Bits(actualValues[row]) != BitConverter.SingleToInt32Bits(expected.Values[row]))
                 failures.Add(string.Create(CultureInfo.InvariantCulture, $"{label} row {row}: expected {expected.Values[row]:R}/{expected.Valid[row]}, actual {actualValues[row]:R}/{actualFlags[row]}"));
         }
     }

@@ -228,7 +228,7 @@ internal static class MathBlockCausalityChecks
                 for (var entry = 0; entry < matrix.Rows * matrix.Columns; entry++)
                 {
                     var entries = matrix.ToArray();
-                    entries[entry] += 0.5d * Math.Max(1d, Math.Abs(entries[entry]));
+                    entries[entry] += 0.5f * Math.Max(1f, Math.Abs(entries[entry]));
                     var variant = template.ToArray();
                     variant[input] = MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, entries), value.Type.Unit);
                     yield return variant;
@@ -241,7 +241,7 @@ internal static class MathBlockCausalityChecks
                 for (var edge = 0; edge < edges.Length; edge++)
                 {
                     var changed = (MathBlockGraphEdge[])edges.Clone();
-                    changed[edge] = changed[edge] with { Weight = changed[edge].Weight * 3d };
+                    changed[edge] = changed[edge] with { Weight = changed[edge].Weight * 3f };
                     var variant = template.ToArray();
                     variant[input] = MathBlockValue.Graph(new MathBlockGraph(graph.VertexCount, changed), value.Type.Unit);
                     yield return variant;
@@ -250,8 +250,8 @@ internal static class MathBlockCausalityChecks
                 {
                     var larger = new List<MathBlockGraphEdge>(edges);
                     for (var vertex = graph.VertexCount - 1; vertex < Lengths[0] - 1; vertex++)
-                        larger.Add(new MathBlockGraphEdge(vertex, vertex + 1, 1d + 0.5d * vertex));
-                    larger.Add(new MathBlockGraphEdge(0, Lengths[0] - 1, 0.75d));
+                        larger.Add(new MathBlockGraphEdge(vertex, vertex + 1, 1f + 0.5f * vertex));
+                    larger.Add(new MathBlockGraphEdge(0, Lengths[0] - 1, 0.75f));
                     var variant = template.ToArray();
                     variant[input] = MathBlockValue.Graph(new MathBlockGraph(Lengths[0], larger), value.Type.Unit);
                     yield return variant;
@@ -276,7 +276,7 @@ internal static class MathBlockCausalityChecks
             if (!seriesOutput)
             {
                 var fresh = context.Evaluate(plan.Generate(random, length), 0);
-                if (fresh.IsValid && !fresh.ApproximatelyEquals(baseline, 0d))
+                if (fresh.IsValid && !fresh.ApproximatelyEquals(baseline, 0f))
                     return true;
             }
             else
@@ -327,7 +327,7 @@ internal static class MathBlockCausalityChecks
                             continue;
                         if (!IsSeriesKind(baseline.Type.Kind))
                         {
-                            if (!result.ApproximatelyEquals(baseline, 0d))
+                            if (!result.ApproximatelyEquals(baseline, 0f))
                                 return true;
                             continue;
                         }
@@ -614,7 +614,7 @@ internal static class MathBlockCausalityChecks
     private static bool Changed(MathBlockValue baseline, MathBlockValue result, int length, int resultLength)
     {
         if (!IsSeriesKind(baseline.Type.Kind))
-            return !result.ApproximatelyEquals(baseline, 0d);
+            return !result.ApproximatelyEquals(baseline, 0f);
         for (var outputRow = 0; outputRow < SeriesLength(baseline); outputRow++)
         {
             var inputRow = InputRow(outputRow, length, SeriesLength(baseline));
@@ -733,8 +733,8 @@ internal static class MathBlockCausalityChecks
             return leftExists == rightExists;
         return left.Type.Kind switch
         {
-            MathBlockValueKind.Vector => BitConverter.DoubleToInt64Bits(left.AsVector()[leftRow]) ==
-                                         BitConverter.DoubleToInt64Bits(right.AsVector()[rightRow]),
+            MathBlockValueKind.Vector => BitConverter.SingleToInt32Bits(left.AsVector()[leftRow]) ==
+                                         BitConverter.SingleToInt32Bits(right.AsVector()[rightRow]),
             MathBlockValueKind.BooleanVector => left.AsBooleanVector()[leftRow] == right.AsBooleanVector()[rightRow],
             MathBlockValueKind.ComplexVector => ComplexBitsEqual(left.AsComplexVector()[leftRow], right.AsComplexVector()[rightRow]),
             _ => throw new InvalidOperationException($"'{left.Type.Kind}' has no rows.")
@@ -742,8 +742,8 @@ internal static class MathBlockCausalityChecks
     }
 
     private static bool ComplexBitsEqual(Complex left, Complex right) =>
-        BitConverter.DoubleToInt64Bits(left.Real) == BitConverter.DoubleToInt64Bits(right.Real) &&
-        BitConverter.DoubleToInt64Bits(left.Imaginary) == BitConverter.DoubleToInt64Bits(right.Imaginary);
+        BitConverter.SingleToInt32Bits(left.Real) == BitConverter.SingleToInt32Bits(right.Real) &&
+        BitConverter.SingleToInt32Bits(left.Imaginary) == BitConverter.SingleToInt32Bits(right.Imaginary);
 
     private static bool IsSeriesKind(MathBlockValueKind kind) =>
         kind is MathBlockValueKind.Vector or MathBlockValueKind.BooleanVector or MathBlockValueKind.ComplexVector;
@@ -878,11 +878,11 @@ internal static class MathBlockCausalityChecks
     /// <summary>One generated vector-kind input.</summary>
     private sealed class Series
     {
-        private readonly double[]? real;
+        private readonly float[]? real;
         private readonly bool[]? boolean;
         private readonly Complex[]? complex;
 
-        private Series(double[]? real, bool[]? boolean, Complex[]? complex)
+        private Series(float[]? real, bool[]? boolean, Complex[]? complex)
         {
             this.real = real;
             this.boolean = boolean;
@@ -906,29 +906,29 @@ internal static class MathBlockCausalityChecks
             {
                 var flags = new bool[length];
                 for (var index = 0; index < length; index++)
-                    flags[index] = domain == Domain.Boolean ? random.Next(2) == 1 : random.NextDouble() < 0.85d;
+                    flags[index] = domain == Domain.Boolean ? random.Next(2) == 1 : random.NextSingle() < 0.85f;
                 return new Series(null, flags, null);
             }
             if (domain is Domain.Complex or Domain.ComplexLarge)
             {
-                var scale = domain == Domain.Complex ? 2d : 1000d;
+                var scale = domain == Domain.Complex ? 2f : 1000f;
                 var numbers = new Complex[length];
                 for (var index = 0; index < length; index++)
                     numbers[index] = new Complex(Uniform(random, -scale, scale), Uniform(random, -scale, scale));
                 return new Series(null, null, numbers);
             }
-            var values = new double[length];
+            var values = new float[length];
             if (domain == Domain.Sorted)
             {
-                var current = -2d;
+                var current = -2f;
                 for (var index = 0; index < length; index++)
-                    values[index] = current += Uniform(random, 0.1d, 1d);
+                    values[index] = current += Uniform(random, 0.1f, 1f);
             }
             else if (domain == Domain.Probability)
             {
-                var total = 0d;
+                var total = 0f;
                 for (var index = 0; index < length; index++)
-                    total += values[index] = Uniform(random, 0.25d, 4d);
+                    total += values[index] = Uniform(random, 0.25f, 4f);
                 for (var index = 0; index < length; index++)
                     values[index] /= total;
             }
@@ -954,7 +954,7 @@ internal static class MathBlockCausalityChecks
                 else if (result.boolean is not null)
                     result.boolean[row] = random.Next(2) == 1;
                 else
-                    result.complex![row] = new Complex(Uniform(random, -2d, 2d), Uniform(random, -2d, 2d));
+                    result.complex![row] = new Complex(Uniform(random, -2f, 2f), Uniform(random, -2f, 2f));
             }
             return result;
         }
@@ -964,14 +964,14 @@ internal static class MathBlockCausalityChecks
         {
             var result = Copy(Length);
             var values = result.real!;
-            var previous = 0d;
-            var drawn = 0d;
+            var previous = 0f;
+            var drawn = 0f;
             for (var row = 0; row < Length; row++)
             {
                 if (!perturbRow(row))
                     continue;
                 previous += values[row];
-                drawn += values[row] = Uniform(random, 0.25d, 4d);
+                drawn += values[row] = Uniform(random, 0.25f, 4f);
             }
             for (var row = 0; row < Length; row++)
                 if (perturbRow(row))
@@ -1001,10 +1001,10 @@ internal static class MathBlockCausalityChecks
         {
             if (real is not null)
             {
-                foreach (var change in new[] { 0.125d, -0.125d, 1d, -0.9d, -3d })
+                foreach (var change in new[] { 0.125f, -0.125f, 1f, -0.9f, -3f })
                 {
-                    var values = (double[])real.Clone();
-                    values[row] += change * Math.Max(1d, Math.Abs(values[row]));
+                    var values = (float[])real.Clone();
+                    values[row] += change * Math.Max(1f, Math.Abs(values[row]));
                     yield return MathBlockValue.Vector(values, unit);
                 }
             }
@@ -1017,7 +1017,7 @@ internal static class MathBlockCausalityChecks
             else
             {
                 var values = (Complex[])complex!.Clone();
-                values[row] = new Complex(values[row].Real + 0.125d, values[row].Imaginary - 0.25d);
+                values[row] = new Complex(values[row].Real + 0.125f, values[row].Imaginary - 0.25f);
                 yield return MathBlockValue.ComplexVector(values, unit);
             }
         }
@@ -1036,35 +1036,35 @@ internal static class MathBlockCausalityChecks
             boolean?[..length],
             complex?[..length]);
 
-        private static double NextReal(Domain domain, Random random, int length) => domain switch
+        private static float NextReal(Domain domain, Random random, int length) => domain switch
         {
-            Domain.Real => Uniform(random, -2d, 2d),
-            Domain.Positive => Uniform(random, 0.25d, 4d),
-            Domain.Unit => Uniform(random, 0.05d, 0.95d),
-            Domain.SmallMass => Uniform(random, 0.2d, 0.8d) / length,
+            Domain.Real => Uniform(random, -2f, 2f),
+            Domain.Positive => Uniform(random, 0.25f, 4f),
+            Domain.Unit => Uniform(random, 0.05f, 0.95f),
+            Domain.SmallMass => Uniform(random, 0.2f, 0.8f) / length,
             Domain.Count => random.Next(4),
             Domain.Index => random.Next(length),
             // Integers on both sides of zero, so an integer-only operation is valid on some rows and invalid on
             // others, and so is its validity sibling.
             Domain.Integer => random.Next(-2, 6),
-            Domain.LargeReal => Uniform(random, -1000d, 1000d),
-            Domain.LargePositive => Uniform(random, 100d, 10000d),
+            Domain.LargeReal => Uniform(random, -1000f, 1000f),
+            Domain.LargePositive => Uniform(random, 100f, 10000f),
             _ => throw new InvalidOperationException($"Domain '{domain}' has no independent rows.")
         };
 
-        private static double NextDifferentReal(Domain domain, Random random, int length, double current)
+        private static float NextDifferentReal(Domain domain, Random random, int length, float current)
         {
             for (var attempt = 0; attempt < 16; attempt++)
             {
                 var value = NextReal(domain, random, length);
-                if (BitConverter.DoubleToInt64Bits(value) != BitConverter.DoubleToInt64Bits(current))
+                if (BitConverter.SingleToInt32Bits(value) != BitConverter.SingleToInt32Bits(current))
                     return value;
             }
             return NextReal(domain, random, length);
         }
 
-        private static double Uniform(Random random, double minimum, double maximum) =>
-            minimum + (maximum - minimum) * random.NextDouble();
+        private static float Uniform(Random random, float minimum, float maximum) =>
+            minimum + (maximum - minimum) * random.NextSingle();
     }
 
     /// <summary>Formats a failure list for an assertion message.</summary>

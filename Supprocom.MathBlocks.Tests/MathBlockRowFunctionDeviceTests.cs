@@ -13,13 +13,13 @@ namespace Supprocom.MathBlocks.Tests;
 /// </summary>
 public sealed class MathBlockRowFunctionDeviceTests
 {
-    private const double Fill = -98_765.25d;
+    private const float Fill = -98_765.25f;
     private const int ScalarFamily = 6;
 
-    private static readonly double[] Grid =
+    private static readonly float[] Grid =
     [
-        0d, -0d, 1d, -1d, 0.5d, -0.5d, 2d, 3d, 10d, -10d, 0.1d, 0.9d, 1e-300d, double.Epsilon, -double.Epsilon, 1e-10d, 1e10d, 1e300d, -1e300d,
-        double.MaxValue, -double.MaxValue, 0.25d, 100d, 7.5d, 1e5d, double.NaN, double.PositiveInfinity, double.NegativeInfinity, BitConverter.Int64BitsToDouble(unchecked((long)0xFFF8000000000000UL))
+        0f, -0f, 1f, -1f, 0.5f, -0.5f, 2f, 3f, 10f, -10f, 0.1f, 0.9f, 1.03e-37f, float.Epsilon, -float.Epsilon, 1e-10f, 1e10f, 3.16e37f, -3.16e37f,
+        float.MaxValue, -float.MaxValue, 0.25f, 100f, 7.5f, 1e5f, float.NaN, float.PositiveInfinity, float.NegativeInfinity, BitConverter.Int32BitsToSingle(unchecked((int)0xFFC00000u))
     ];
 
     // The kernel text is assembled from raw strings; NVRTC ignores their line endings, and the kernel is not a fingerprinted fixture.
@@ -122,9 +122,9 @@ public sealed class MathBlockRowFunctionDeviceTests
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var count = Grid.Length * Grid.Length * Grid.Length;
-        var a = new double[count];
-        var b = new double[count];
-        var c = new double[count];
+        var a = new float[count];
+        var b = new float[count];
+        var c = new float[count];
         for (var row = 0; row < count; row++)
         {
             a[row] = Grid[row % Grid.Length];
@@ -147,11 +147,11 @@ public sealed class MathBlockRowFunctionDeviceTests
             var aDevice = Upload(a, buffers);
             var bDevice = Upload(b, buffers);
             var cDevice = Upload(c, buffers);
-            var dispatchValues = Allocate(count * sizeof(double), buffers);
+            var dispatchValues = Allocate(count * sizeof(float), buffers);
             var dispatchValid = Allocate(count * sizeof(int), buffers);
-            var rowValues = Allocate(count * sizeof(double), buffers);
+            var rowValues = Allocate(count * sizeof(float), buffers);
             var rowValid = Allocate(count * sizeof(int), buffers);
-            var hostValues = Marshal.AllocHGlobal(count * sizeof(double));
+            var hostValues = Marshal.AllocHGlobal(count * sizeof(float));
             var hostValid = Marshal.AllocHGlobal(count * sizeof(int));
             host.Add(hostValues);
             host.Add(hostValid);
@@ -209,15 +209,15 @@ public sealed class MathBlockRowFunctionDeviceTests
         return pointer;
     }
 
-    private static ulong Upload(double[] values, List<ulong> buffers)
+    private static ulong Upload(float[] values, List<ulong> buffers)
     {
-        var pointer = Allocate(values.Length * sizeof(double), buffers);
-        var staging = Marshal.AllocHGlobal(values.Length * sizeof(double));
+        var pointer = Allocate(values.Length * sizeof(float), buffers);
+        var staging = Marshal.AllocHGlobal(values.Length * sizeof(float));
         try
         {
             Marshal.Copy(values, 0, staging, values.Length);
             Driver.Require(
-                Driver.cuMemcpyHtoD(pointer, staging, new UIntPtr((uint)(values.Length * sizeof(double)))),
+                Driver.cuMemcpyHtoD(pointer, staging, new UIntPtr((uint)(values.Length * sizeof(float)))),
                 "cuMemcpyHtoD");
         }
         finally
@@ -252,10 +252,10 @@ public sealed class MathBlockRowFunctionDeviceTests
         return pointer;
     }
 
-    private static IntPtr Box(double value, List<IntPtr> host)
+    private static IntPtr Box(float value, List<IntPtr> host)
     {
-        var pointer = Marshal.AllocHGlobal(sizeof(double));
-        Marshal.WriteInt64(pointer, BitConverter.DoubleToInt64Bits(value));
+        var pointer = Marshal.AllocHGlobal(sizeof(float));
+        Marshal.WriteInt64(pointer, BitConverter.SingleToInt32Bits(value));
         host.Add(pointer);
         return pointer;
     }

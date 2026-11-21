@@ -13,7 +13,7 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 /// <param name="Constant">The scale factor, or zero.</param>
 /// <param name="Contracts">The device contract identities dispatched in order; the last is the validity sibling.</param>
 /// <param name="TimedSteps">How many of the contracts one timed launch dispatches.</param>
-internal sealed record VectorBlockCall(string Identity, string Route, string Parameter, double Width, double Constant, string[] Contracts, int TimedSteps)
+internal sealed record VectorBlockCall(string Identity, string Route, string Parameter, float Width, float Constant, string[] Contracts, int TimedSteps)
 {
     /// <summary>Gets the key shared by the classes of one identity, route and parameter.</summary>
     internal string Name => $"{Identity} {Route}";

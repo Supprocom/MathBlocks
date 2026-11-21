@@ -13,8 +13,8 @@ public sealed class RowFunctionTimingTests
 {
     private const int Rows = 1_000_000;
     private const int Batch = 8;
-    private const double WorstClassFactor = 2d;
-    private const double InlineFactor = 2d;
+    private const float WorstClassFactor = 2f;
+    private const float InlineFactor = 2f;
     private const string SumName = "sum";
 
     /// <summary>
@@ -42,11 +42,11 @@ public sealed class RowFunctionTimingTests
                 {
                     var function = RowFunctionOp.All[functionIndex];
                     var (row, baseline) = rig.Measure(function.Name, rig.OperandArguments);
-                    cells.Add(new ProofCell(function.Name, sets[setIndex].Name, "-", "rows=1000000", 1d, row, baseline, setIndex == 0 ? dispatch[functionIndex] : 0d));
+                    cells.Add(new ProofCell(function.Name, sets[setIndex].Name, "-", "rows=1000000", 1f, row, baseline, setIndex == 0 ? dispatch[functionIndex] : 0f));
                 }
 
                 var (sumRow, sumBaseline) = rig.Measure(SumName, rig.SumArguments);
-                cells.Add(new ProofCell(SumName, sets[setIndex].Name, "-", "rows=1000000", 1d, sumRow, sumBaseline, 0d));
+                cells.Add(new ProofCell(SumName, sets[setIndex].Name, "-", "rows=1000000", 1f, sumRow, sumBaseline, 0f));
             }
         }
 
@@ -80,7 +80,7 @@ public sealed class RowFunctionTimingTests
             var cell = cells[index];
             if (cell.ReferenceRatio > InlineFactor)
                 failures.Add(string.Create(CultureInfo.InvariantCulture, $"{cell.Operation} class {cell.ClassName}: {cell.ReferenceRatio:F2} times the inline arithmetic (limit {InlineFactor:F2})"));
-            if (cell.SecondReferenceNanosecondsPerRow > 0d && cell.SecondReferenceRatio > 1d)
+            if (cell.SecondReferenceNanosecondsPerRow > 0f && cell.SecondReferenceRatio > 1f)
                 failures.Add(string.Create(CultureInfo.InvariantCulture, $"{cell.Operation} class {cell.ClassName}: {cell.SecondReferenceRatio:F2} times the per-node dispatch (limit 1)"));
         }
 
@@ -88,10 +88,10 @@ public sealed class RowFunctionTimingTests
     }
 
     // The main-era route: the elementwise form and its sibling as two graph nodes, run back to back in batches, per function on the typical class.
-    private static double[] DispatchNanoseconds(ProofSet typical)
+    private static float[] DispatchNanoseconds(ProofSet typical)
     {
         var worker = new MathBlocksCUDAWorker();
-        var result = new double[RowFunctionOp.All.Length];
+        var result = new float[RowFunctionOp.All.Length];
         for (var index = 0; index < result.Length; index++)
         {
             var function = RowFunctionOp.All[index];
@@ -130,10 +130,10 @@ public sealed class RowFunctionTimingTests
         internal Rig(ProofDeviceSession session)
         {
             this.session = session;
-            first = session.Allocate(Rows * (long)sizeof(double));
-            second = session.Allocate(Rows * (long)sizeof(double));
-            sumValues = session.Allocate(Rows * (long)RowFunctionKernels.SumCount * sizeof(double));
-            var values = session.Allocate(Rows * (long)sizeof(double));
+            first = session.Allocate(Rows * (long)sizeof(float));
+            second = session.Allocate(Rows * (long)sizeof(float));
+            sumValues = session.Allocate(Rows * (long)RowFunctionKernels.SumCount * sizeof(float));
+            var values = session.Allocate(Rows * (long)sizeof(float));
             var valid = session.Allocate(Rows * (long)sizeof(int));
             OperandArguments = session.Arguments(Rows, RowFunctionHarness.Fill, first, second, values, valid);
             SumArguments = session.Arguments(Rows, RowFunctionKernels.SumCount, RowFunctionHarness.Fill, sumValues, values, valid);
@@ -152,14 +152,14 @@ public sealed class RowFunctionTimingTests
         }
 
         // The time per row of the row function and of the inline baseline, in that order.
-        internal (double Row, double Baseline) Measure(string name, IntPtr arguments)
+        internal (float Row, float Baseline) Measure(string name, IntPtr arguments)
         {
             var row = session.Function("proof_row_" + name);
             var baseline = session.Function("proof_base_" + name);
             return (Time(row, arguments), Time(baseline, arguments));
         }
 
-        private static double Time(IntPtr function, IntPtr arguments) =>
+        private static float Time(IntPtr function, IntPtr arguments) =>
             ProofTiming.NanosecondsPerRow(() => ProofDeviceSession.LaunchBatch(function, arguments, Rows, Batch), (long)Rows * Batch);
     }
 }

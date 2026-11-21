@@ -18,10 +18,10 @@ public sealed class PrefixDifferenceEquivalenceTests
 
     private static readonly ProofParameter[] WideSpans =
     [
-        new("[0,1000]", 0d, 1000d, 1001d), new("[-1000,1000]", -1000d, 1000d, 2001d), new("[-3,100000]", -3d, 100_000d, 100_004d), new("[5,2000000000]", 5d, 2_000_000_000d, 2_000_000_000d),
-        new("[-2000000000,2000000000]", -2_000_000_000d, 2_000_000_000d, 4_000_000_001d), new("[-7,-2]", -7d, -2d, 6d), new("[3,9]", 3d, 9d, 7d), new("[-63,0]", -63d, 0d, 64d),
-        new("[-1e300,0]", -1e300d, 0d, 1d), new("[0,1e300]", 0d, 1e300d, 1d), new("[-1199,0]", -1199d, 0d, 1200d), new("[0,1199]", 0d, 1199d, 1200d), new("[-1200,0]", -1200d, 0d, 1201d),
-        new("[0,1200]", 0d, 1200d, 1201d), new("[-600,599]", -600d, 599d, 1200d), new("[-0,-0]", -0d, -0d, 1d)
+        new("[0,1000]", 0f, 1000f, 1001f), new("[-1000,1000]", -1000f, 1000f, 2001f), new("[-3,100000]", -3f, 100_000f, 100_004f), new("[5,2000000000]", 5f, 2_000_000_000f, 2_000_000_000f),
+        new("[-2000000000,2000000000]", -2_000_000_000f, 2_000_000_000f, 4_000_000_001f), new("[-7,-2]", -7f, -2f, 6f), new("[3,9]", 3f, 9f, 7f), new("[-63,0]", -63f, 0f, 64f),
+        new("[-1e300,0]", -3.16e37f, 0f, 1f), new("[0,1e300]", 0f, 3.16e37f, 1f), new("[-1199,0]", -1199f, 0f, 1200f), new("[0,1199]", 0f, 1199f, 1200f), new("[-1200,0]", -1200f, 0f, 1201f),
+        new("[0,1200]", 0f, 1200f, 1201f), new("[-600,599]", -600f, 599f, 1200f), new("[-0,-0]", -0f, -0f, 1f)
     ];
 
     /// <summary>Verifies the class matrix at 1,200 rows over the safety spans and the wide spans, for all four counts classes.</summary>
@@ -51,25 +51,25 @@ public sealed class PrefixDifferenceEquivalenceTests
     {
         var random = new Random(20261120);
         var failures = new List<string>();
-        double[] scales = [1d, 1e5d, 1e300d, 1.7e308d, 1e-310d, 4.9e-324d, 3e-320d, 8.4e-272d, 8.6e-272d, 1e-300d, 2.2250738585072014e-308d];
+        float[] scales = [1f, 1e5f, 3.16e37f, 3.38e38f, 5.28e-41f, 1.4e-45f, 1.4e-45f, 3.8e-34f, 3.81e-34f, 1.03e-37f, 1.1754943e-38f];
         for (var round = 0; round < 3000 && failures.Count < MaximumFailures; round++)
         {
             var length = round % 10 == 0 ? random.Next(200, 1500) : random.Next(1, 45);
             var scale = scales[random.Next(scales.Length)];
-            var invalidShare = random.Next(0, 3) switch { 0 => 0d, 1 => 0.03d, _ => 0.4d };
-            var series = new double[length];
+            var invalidShare = random.Next(0, 3) switch { 0 => 0f, 1 => 0.03f, _ => 0.4f };
+            var series = new float[length];
             var available = new bool[length];
             for (var row = 0; row < length; row++)
             {
                 series[row] = Value(random, scale, round);
-                available[row] = random.NextDouble() >= invalidShare;
+                available[row] = random.NextSingle() >= invalidShare;
             }
 
             var counts = RandomCounts(random, length, round % 3);
             var spanLength = random.Next(0, 4) switch { 0 => 3, 1 => 12, 2 => 70, _ => 3000 };
             var start = random.Next(-spanLength, spanLength);
             var end = start + random.Next(0, spanLength);
-            var fill = random.Next(4) switch { 0 => SequenceOps.Fill, 1 => 0d, 2 => -0d, _ => 1e-310d };
+            var fill = random.Next(4) switch { 0 => SequenceOps.Fill, 1 => 0f, 2 => -0f, _ => 5.28e-41f };
             var label = string.Create(CultureInfo.InvariantCulture, $"round {round} n={length} scale {scale:R} counts class {round % 3} [{start},{end}] fill {fill:R}");
             Compare(label, series, available, counts, start, end, fill, failures);
         }
@@ -84,22 +84,22 @@ public sealed class PrefixDifferenceEquivalenceTests
         var random = new Random(18112026);
         var failures = new List<string>();
         int[] segmentLengths = [1, 2, 3, 5, 11, 1000];
-        double[] scales = [100d, 3e-320d, 1e300d];
+        float[] scales = [100f, 1.4e-45f, 3.16e37f];
         for (var length = 1; length <= 70 && failures.Count < MaximumFailures; length++)
         {
             for (var segmentIndex = 0; segmentIndex < segmentLengths.Length; segmentIndex++)
             {
-                var counts = new double[length];
+                var counts = new float[length];
                 for (var row = 0; row < length; row++)
-                    counts[row] = row % segmentLengths[segmentIndex] == 0 ? 0d : counts[row - 1] + 1d;
+                    counts[row] = row % segmentLengths[segmentIndex] == 0 ? 0f : counts[row - 1] + 1f;
                 for (var scaleIndex = 0; scaleIndex < scales.Length; scaleIndex++)
                 {
-                    var series = new double[length];
+                    var series = new float[length];
                     var available = new bool[length];
                     for (var row = 0; row < length; row++)
                     {
-                        available[row] = random.NextDouble() >= 0.1d;
-                        series[row] = (random.NextDouble() - 0.4d) * scales[scaleIndex];
+                        available[row] = random.NextSingle() >= 0.1f;
+                        series[row] = (random.NextSingle() - 0.4f) * scales[scaleIndex];
                     }
 
                     for (var start = -9; start <= 9 && failures.Count < MaximumFailures; start++)
@@ -124,27 +124,27 @@ public sealed class PrefixDifferenceEquivalenceTests
         var random = new Random(7);
         var failures = new List<string>();
         var limit = MathBlockSimdLimit();
-        double[] specials = [0d, -0d, double.Epsilon, -double.Epsilon, 2.2250738585072009e-308d, -2.2250738585072009e-308d, 2.2250738585072014e-308d, -2.2250738585072014e-308d, limit, -limit, BitConverter.Int64BitsToDouble(BitConverter.DoubleToInt64Bits(limit) - 1L), -BitConverter.Int64BitsToDouble(BitConverter.DoubleToInt64Bits(limit) - 1L)];
-        ProofParameter[] spans = [.. SequenceOps.SpanTiming, new("[-1,0]", -1d, 0d, 2d), new("[1,1]", 1d, 1d, 1d), new("[0,7]", 0d, 7d, 8d), new("[-8,-1]", -8d, -1d, 8d)];
+        float[] specials = [0f, -0f, float.Epsilon, -float.Epsilon, 1.1754943e-38f, -1.1754943e-38f, 1.1754943e-38f, -1.1754943e-38f, limit, -limit, BitConverter.Int32BitsToSingle(BitConverter.SingleToInt32Bits(limit) - 1), -BitConverter.Int32BitsToSingle(BitConverter.SingleToInt32Bits(limit) - 1)];
+        ProofParameter[] spans = [.. SequenceOps.SpanTiming, new("[-1,0]", -1f, 0f, 2f), new("[1,1]", 1f, 1f, 1f), new("[0,7]", 0f, 7f, 8f), new("[-8,-1]", -8f, -1f, 8f)];
         for (var round = 0; round < 400 && failures.Count < MaximumFailures; round++)
         {
             var length = round < 300 ? random.Next(1, 90) : 1000;
-            var series = new double[length];
+            var series = new float[length];
             var available = new bool[length];
             for (var row = 0; row < length; row++)
             {
                 series[row] = random.Next(0, 4) switch
                 {
                     0 => specials[random.Next(specials.Length)],
-                    1 => (random.Next(2) == 0 ? 1d : -1d) * BitConverter.Int64BitsToDouble(1L + random.NextInt64((1L << 52) - 1L)),
-                    2 => (random.Next(2) == 0 ? 1d : -1d) * BitConverter.Int64BitsToDouble((1L << 52) + random.NextInt64(1L << 52)),
-                    _ => row > 0 && random.Next(2) == 0 ? -series[row - 1] : BitConverter.Int64BitsToDouble(random.NextInt64(1L << 53))
+                    1 => (random.Next(2) == 0 ? 1f : -1f) * BitConverter.Int32BitsToSingle(1 + random.Next((1 << 23) - 1)),
+                    2 => (random.Next(2) == 0 ? 1f : -1f) * BitConverter.Int32BitsToSingle((1 << 23) + random.Next(1 << 23)),
+                    _ => row > 0 && random.Next(2) == 0 ? -series[row - 1] : BitConverter.Int32BitsToSingle(random.Next(1 << 24))
                 };
-                available[row] = round % 4 == 0 || random.NextDouble() >= 0.15d;
+                available[row] = round % 4 == 0 || random.NextSingle() >= 0.15f;
             }
 
             if (round % 5 == 0)
-                series[random.Next(length)] = 1e300d;
+                series[random.Next(length)] = 3.16e37f;
             var counts = RandomCounts(random, length, round % 3);
             for (var index = 0; index < spans.Length && failures.Count < MaximumFailures; index++)
                 Compare(string.Create(CultureInfo.InvariantCulture, $"scaled round {round} n={length} {spans[index].Label}"), series, available, counts, spans[index].First, spans[index].Second, SequenceOps.Fill, failures);
@@ -157,69 +157,69 @@ public sealed class PrefixDifferenceEquivalenceTests
     [Fact]
     public void CallsInvalidAsAWholeStayInvalid()
     {
-        var series = MathBlockValue.Vector([1d, 2d, 3d]);
+        var series = MathBlockValue.Vector([1f, 2f, 3f]);
         var flags = MathBlockValue.BooleanVector([true, true, true]);
-        var counts = MathBlockValue.Vector([0d, 1d, 2d]);
+        var counts = MathBlockValue.Vector([0f, 1f, 2f]);
         var form = MathBlockCudaDeviceModule.GetOperation(Form);
         var valid = MathBlockCudaDeviceModule.GetOperation(Valid);
-        Assert.True(form.EvaluateCoreCLR(series, flags, counts, MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d), MathBlockValue.Scalar(-1d)).IsValid);
+        Assert.True(form.EvaluateCoreCLR(series, flags, counts, MathBlockValue.Scalar(0f), MathBlockValue.Scalar(1f), MathBlockValue.Scalar(-1f)).IsValid);
         MathBlockValue[][] unequal =
         [
-            [series, MathBlockValue.BooleanVector([true, true]), counts, MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d)],
-            [series, flags, MathBlockValue.Vector([0d, 1d]), MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d)]
+            [series, MathBlockValue.BooleanVector([true, true]), counts, MathBlockValue.Scalar(0f), MathBlockValue.Scalar(1f)],
+            [series, flags, MathBlockValue.Vector([0f, 1f]), MathBlockValue.Scalar(0f), MathBlockValue.Scalar(1f)]
         ];
         for (var index = 0; index < unequal.Length; index++)
         {
             var inputs = unequal[index];
             Assert.Throws<InvalidOperationException>(() => valid.EvaluateCoreCLR(inputs));
-            Assert.Throws<InvalidOperationException>(() => form.EvaluateCoreCLR([.. inputs, MathBlockValue.Scalar(-1d)]));
+            Assert.Throws<InvalidOperationException>(() => form.EvaluateCoreCLR([.. inputs, MathBlockValue.Scalar(-1f)]));
         }
 
         MathBlockValue[][] broken =
         [
-            [series, flags, counts, MathBlockValue.Scalar(0.5d), MathBlockValue.Scalar(1d)],
-            [series, flags, counts, MathBlockValue.Scalar(0d), MathBlockValue.Scalar(double.PositiveInfinity)],
-            [series, flags, counts, MathBlockValue.Scalar(2d), MathBlockValue.Scalar(1d)],
-            [series, flags, MathBlockValue.Vector([0d, -1d, 2d]), MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d)],
-            [series, flags, MathBlockValue.Vector([0d, 1.5d, 2d]), MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d)]
+            [series, flags, counts, MathBlockValue.Scalar(0.5f), MathBlockValue.Scalar(1f)],
+            [series, flags, counts, MathBlockValue.Scalar(0f), MathBlockValue.Scalar(float.PositiveInfinity)],
+            [series, flags, counts, MathBlockValue.Scalar(2f), MathBlockValue.Scalar(1f)],
+            [series, flags, MathBlockValue.Vector([0f, -1f, 2f]), MathBlockValue.Scalar(0f), MathBlockValue.Scalar(1f)],
+            [series, flags, MathBlockValue.Vector([0f, 1.5f, 2f]), MathBlockValue.Scalar(0f), MathBlockValue.Scalar(1f)]
         ];
         for (var index = 0; index < broken.Length; index++)
         {
             Assert.False(valid.EvaluateCoreCLR(broken[index]).IsValid, string.Create(CultureInfo.InvariantCulture, $"validity case {index}"));
-            MathBlockValue[] formInputs = [.. broken[index], MathBlockValue.Scalar(-1d)];
+            MathBlockValue[] formInputs = [.. broken[index], MathBlockValue.Scalar(-1f)];
             Assert.False(form.EvaluateCoreCLR(formInputs).IsValid, string.Create(CultureInfo.InvariantCulture, $"form case {index}"));
         }
     }
 
-    private static double MathBlockSimdLimit() => BitConverter.Int64BitsToDouble((long)(1023 - 900) << 52);
+    private static float MathBlockSimdLimit() => BitConverter.Int32BitsToSingle((127 - 100) << 23);
 
     // A value of the scale: ordinary random, or now and then an exact zero, a negative zero, the previous kind of edge, or a value ten magnitudes up (a large one among small ones).
-    private static double Value(Random random, double scale, int round)
+    private static float Value(Random random, float scale, int round)
     {
-        var ordinary = (random.NextDouble() * 2d - 1d) * scale;
+        var ordinary = (random.NextSingle() * 2f - 1f) * scale;
         var value = random.Next(0, 12) switch
         {
-            0 => 0d,
-            1 => -0d,
-            2 => scale * 1e6d * (random.NextDouble() - 0.5d),
-            3 when round % 7 == 0 => scale * 1e30d * (random.NextDouble() - 0.5d),
+            0 => 0f,
+            1 => -0f,
+            2 => scale * 1e6f * (random.NextSingle() - 0.5f),
+            3 when round % 7 == 0 => scale * 1e30f * (random.NextSingle() - 0.5f),
             _ => ordinary
         };
 
         // A vector holds finite values only: at the largest scales the wider kinds overflow, and the ordinary value of the scale stands in.
-        return double.IsFinite(value) ? value : ordinary;
+        return float.IsFinite(value) ? value : ordinary;
     }
 
     // Counts of kind 0: segments cut at random zeros; 1: arbitrary non-negative integers with many zeros; 2: one segment.
-    private static double[] RandomCounts(Random random, int length, int kind)
+    private static float[] RandomCounts(Random random, int length, int kind)
     {
-        var counts = new double[length];
+        var counts = new float[length];
         for (var row = 0; row < length; row++)
         {
             counts[row] = kind switch
             {
-                0 => row == 0 || random.NextDouble() < 0.1d ? 0d : counts[row - 1] + 1d,
-                1 => random.NextDouble() < 0.2d ? 0d : Math.Floor(random.NextDouble() * 50d),
+                0 => row == 0 || random.NextSingle() < 0.1f ? 0f : counts[row - 1] + 1f,
+                1 => random.NextSingle() < 0.2f ? 0f : MathF.Floor(random.NextSingle() * 50f),
                 _ => row
             };
         }
@@ -227,7 +227,7 @@ public sealed class PrefixDifferenceEquivalenceTests
         return counts;
     }
 
-    private static void Compare(string label, double[] series, bool[] available, double[] counts, double start, double end, double fill, List<string> failures)
+    private static void Compare(string label, float[] series, bool[] available, float[] counts, float start, float end, float fill, List<string> failures)
     {
         var expected = PrefixDifferenceOldAlgorithm.Run(series, available, counts, start, end, fill);
         var seriesValue = MathBlockValue.Vector(series);
@@ -243,7 +243,7 @@ public sealed class PrefixDifferenceEquivalenceTests
             return;
         }
 
-        var output = new double[series.Length + 3];
+        var output = new float[series.Length + 3];
         var evaluation = MathBlockCudaDeviceModule.GetOperation(Form).EvaluateCoreCLR(formInputs, output, new MathBlockDomainOptions());
         var actualValues = values.AsVector().ToArray();
         var actualFlags = flags.AsBooleanVector().ToArray();
@@ -255,8 +255,8 @@ public sealed class PrefixDifferenceEquivalenceTests
 
         for (var row = 0; row < series.Length && failures.Count < MaximumFailures; row++)
         {
-            var expectedBits = BitConverter.DoubleToInt64Bits(expected.Values[row]);
-            if (actualFlags[row] != expected.Valid[row] || BitConverter.DoubleToInt64Bits(actualValues[row]) != expectedBits || BitConverter.DoubleToInt64Bits(output[row]) != expectedBits)
+            var expectedBits = BitConverter.SingleToInt32Bits(expected.Values[row]);
+            if (actualFlags[row] != expected.Valid[row] || BitConverter.SingleToInt32Bits(actualValues[row]) != expectedBits || BitConverter.SingleToInt32Bits(output[row]) != expectedBits)
                 failures.Add(string.Create(CultureInfo.InvariantCulture, $"{label} row {row}: expected {expected.Values[row]:R}/{expected.Valid[row]}, actual {actualValues[row]:R}/{actualFlags[row]}, span {output[row]:R}"));
         }
     }

@@ -5,8 +5,8 @@ namespace Supprocom.MathBlocks.Tests;
 /// <summary>Contains tests for the non-allocating span evaluation and the scalar-to-vector twin lookup.</summary>
 public sealed class MathBlockSpanEvaluationTests
 {
-    private static readonly double[] Left = [-2.5d, -1.5d, -0.5d, -0d, 0d, 0.5d, 1.5d, 2.5d, 1e300d, -1e300d, 9007199254740993d, 5e-324d];
-    private static readonly double[] Right = [3d, -3d, 0.5d, 2d, -0d, 7d, -7d, 0d, 1e-300d, 1e300d, 3d, -5e-324d];
+    private static readonly float[] Left = [-2.5f, -1.5f, -0.5f, -0f, 0f, 0.5f, 1.5f, 2.5f, 3.16e37f, -3.16e37f, 9007199254740993f, 1.4e-45f];
+    private static readonly float[] Right = [3f, -3f, 0.5f, 2f, -0f, 7f, -7f, 0f, 1.03e-37f, 3.16e37f, 3f, -1.4e-45f];
     private static readonly bool[] FlagsA = [true, false, true, false, true, false, true, false, true, false, true, false];
     private static readonly bool[] FlagsB = [true, true, false, false, true, true, false, false, true, true, false, false];
 
@@ -65,7 +65,7 @@ public sealed class MathBlockSpanEvaluationTests
     {
         var contract = MathBlockCudaDeviceModule.GetOperation(identity);
         var inputs = CreateInputs(identity);
-        var output = new double[Left.Length];
+        var output = new float[Left.Length];
         contract.EvaluateCoreCLR(inputs, output, MathBlockDomainOptions.Default);
         contract.EvaluateCoreCLR(inputs, output, MathBlockDomainOptions.Default);
 
@@ -84,7 +84,7 @@ public sealed class MathBlockSpanEvaluationTests
     {
         var contract = MathBlockCudaDeviceModule.GetOperation(identity);
         var inputs = CreateInputs(identity);
-        var output = new double[Left.Length + 3];
+        var output = new float[Left.Length + 3];
 
         var evaluation = contract.EvaluateCoreCLR(inputs, output, MathBlockDomainOptions.Default);
         var expected = contract.EvaluateCoreCLR(inputs);
@@ -97,14 +97,14 @@ public sealed class MathBlockSpanEvaluationTests
             var flags = expected.AsBooleanVector();
             Assert.Equal(flags.Count, evaluation.Rows);
             for (var index = 0; index < flags.Count; index++)
-                Assert.Equal(flags[index] ? 1d : 0d, output[index]);
+                Assert.Equal(flags[index] ? 1f : 0f, output[index]);
             return;
         }
 
         var vector = expected.AsVector();
         Assert.Equal(vector.Count, evaluation.Rows);
         for (var index = 0; index < vector.Count; index++)
-            Assert.Equal(BitConverter.DoubleToInt64Bits(vector[index]), BitConverter.DoubleToInt64Bits(output[index]));
+            Assert.Equal(BitConverter.SingleToInt32Bits(vector[index]), BitConverter.SingleToInt32Bits(output[index]));
     }
 
     /// <summary>Verifies an invalid result, a short output and an operation without a span kernel.</summary>
@@ -112,12 +112,12 @@ public sealed class MathBlockSpanEvaluationTests
     public void InvalidResultsShortOutputsAndTheFallback()
     {
         var divide = MathBlockCudaDeviceModule.GetOperation("vector.divide@1");
-        var zeroes = new[] { MathBlockValue.Vector([1d, 2d]), MathBlockValue.Vector([0d, 1d]) };
-        var buffer = new double[2];
+        var zeroes = new[] { MathBlockValue.Vector([1f, 2f]), MathBlockValue.Vector([0f, 1f]) };
+        var buffer = new float[2];
 
         Assert.False(divide.EvaluateCoreCLR(zeroes, buffer, MathBlockDomainOptions.Default).IsValid);
         var tooShort = Assert.Throws<ArgumentException>(() => divide.EvaluateCoreCLR(
-            new[] { MathBlockValue.Vector([1d, 2d, 3d]), MathBlockValue.Vector([1d, 1d, 1d]) },
+            new[] { MathBlockValue.Vector([1f, 2f, 3f]), MathBlockValue.Vector([1f, 1f, 1f]) },
             buffer,
             MathBlockDomainOptions.Default));
         Assert.Contains("needs 3 elements", tooShort.Message, StringComparison.Ordinal);
@@ -125,14 +125,14 @@ public sealed class MathBlockSpanEvaluationTests
         Assert.Throws<ArgumentNullException>(() => divide.EvaluateCoreCLR(zeroes, buffer, null!));
 
         var sort = MathBlockCudaDeviceModule.GetOperation("vector.sort@1");
-        var unsorted = new[] { MathBlockValue.Vector([3d, 1d, 2d]) };
-        var sortBuffer = new double[3];
+        var unsorted = new[] { MathBlockValue.Vector([3f, 1f, 2f]) };
+        var sortBuffer = new float[3];
         var sorted = sort.EvaluateCoreCLR(unsorted, sortBuffer, MathBlockDomainOptions.Default);
 
         Assert.True(sorted.IsValid);
         Assert.Equal(3, sorted.Rows);
-        Assert.Equal([1d, 2d, 3d], sortBuffer);
-        Assert.Throws<ArgumentException>(() => sort.EvaluateCoreCLR(unsorted, new double[1], MathBlockDomainOptions.Default));
+        Assert.Equal([1f, 2f, 3f], sortBuffer);
+        Assert.Throws<ArgumentException>(() => sort.EvaluateCoreCLR(unsorted, new float[1], MathBlockDomainOptions.Default));
     }
 
     /// <summary>Verifies the scalar operations that already have an elementwise form have it with one more argument.</summary>
@@ -195,15 +195,15 @@ public sealed class MathBlockSpanEvaluationTests
     {
         var form = MathBlockCudaDeviceModule.GetOperation($"elementwise.scalar.{name}@1");
         var sibling = MathBlockCudaDeviceModule.GetOperation($"elementwise-valid.scalar.{name}@1");
-        double[] bigLeft = [1e300d, 1e308d, -1e308d, 5d, 5d, 5d, -0d, 0d, 7d, 1d, 2d, -3d];
-        double[] bigRight = [1e300d, 1e308d, 1e308d, 0d, -0d, 2d, 0d, -0d, 3d, 1e-308d, 1e308d, 0.5d];
+        float[] bigLeft = [3.16e37f, 3.16e38f, -3.16e38f, 5f, 5f, 5f, -0f, 0f, 7f, 1f, 2f, -3f];
+        float[] bigRight = [3.16e37f, 3.16e38f, 3.16e38f, 0f, -0f, 2f, 0f, -0f, 3f, 5.28e-39f, 3.16e38f, 0.5f];
         var left = MathBlockValue.Vector(bigLeft);
         var right = MathBlockValue.Vector(bigRight);
-        var fill = MathBlockValue.Scalar(-12345d);
+        var fill = MathBlockValue.Scalar(-12345f);
         var unary = Array.Exists(new[] { "negate", "floor", "round", "absolute" }, candidate => string.Equals(candidate, name, StringComparison.Ordinal));
         MathBlockValue[] inputs = unary ? [left, fill] : [left, right, fill];
         MathBlockValue[] siblingInputs = unary ? [left] : [left, right];
-        var output = new double[bigLeft.Length];
+        var output = new float[bigLeft.Length];
         var rowValid = new bool[bigLeft.Length];
 
         var evaluation = form.EvaluateCoreCLR(inputs, output, rowValid, MathBlockDomainOptions.Default);
@@ -219,10 +219,10 @@ public sealed class MathBlockSpanEvaluationTests
         Assert.Equal(0L, allocated);
         for (var index = 0; index < bigLeft.Length; index++)
         {
-            Assert.Equal(BitConverter.DoubleToInt64Bits(expected[index]), BitConverter.DoubleToInt64Bits(output[index]));
+            Assert.Equal(BitConverter.SingleToInt32Bits(expected[index]), BitConverter.SingleToInt32Bits(output[index]));
             Assert.Equal(flags[index], rowValid[index]);
             if (!rowValid[index])
-                Assert.Equal(-12345d, output[index]);
+                Assert.Equal(-12345f, output[index]);
         }
 
         if (string.Equals(name, "divide", StringComparison.Ordinal))
@@ -234,18 +234,18 @@ public sealed class MathBlockSpanEvaluationTests
     public void PerRowOverloadChecksItsArguments()
     {
         var add = MathBlockCudaDeviceModule.GetOperation("elementwise.scalar.modulo@1");
-        var inputs = new[] { MathBlockValue.Vector([1d, 2d, 3d]), MathBlockValue.Vector([1d, 0d, 3d]), MathBlockValue.Scalar(0d) };
+        var inputs = new[] { MathBlockValue.Vector([1f, 2f, 3f]), MathBlockValue.Vector([1f, 0f, 3f]), MathBlockValue.Scalar(0f) };
 
         Assert.Throws<InvalidOperationException>(() => MathBlockCudaDeviceModule.GetOperation("vector.add@1")
-            .EvaluateCoreCLR(inputs, new double[3], new bool[3], MathBlockDomainOptions.Default));
-        Assert.Contains("needs 3 elements", Assert.Throws<ArgumentException>(() => add.EvaluateCoreCLR(inputs, new double[2], new bool[3], MathBlockDomainOptions.Default)).Message, StringComparison.Ordinal);
-        Assert.Equal("rowValid", Assert.Throws<ArgumentException>(() => add.EvaluateCoreCLR(inputs, new double[3], new bool[2], MathBlockDomainOptions.Default)).ParamName);
-        var empty = new[] { MathBlockValue.Vector([]), MathBlockValue.Vector([]), MathBlockValue.Scalar(0d) };
-        var result = add.EvaluateCoreCLR(empty, new double[1], new bool[1], MathBlockDomainOptions.Default);
+            .EvaluateCoreCLR(inputs, new float[3], new bool[3], MathBlockDomainOptions.Default));
+        Assert.Contains("needs 3 elements", Assert.Throws<ArgumentException>(() => add.EvaluateCoreCLR(inputs, new float[2], new bool[3], MathBlockDomainOptions.Default)).Message, StringComparison.Ordinal);
+        Assert.Equal("rowValid", Assert.Throws<ArgumentException>(() => add.EvaluateCoreCLR(inputs, new float[3], new bool[2], MathBlockDomainOptions.Default)).ParamName);
+        var empty = new[] { MathBlockValue.Vector([]), MathBlockValue.Vector([]), MathBlockValue.Scalar(0f) };
+        var result = add.EvaluateCoreCLR(empty, new float[1], new bool[1], MathBlockDomainOptions.Default);
         Assert.True(result.IsValid);
         Assert.Equal(0, result.Rows);
-        var wrongKind = new[] { MathBlockValue.Scalar(1d), MathBlockValue.Scalar(2d), MathBlockValue.Scalar(0d) };
-        Assert.Throws<InvalidOperationException>(() => add.EvaluateCoreCLR(wrongKind, new double[1], new bool[1], MathBlockDomainOptions.Default));
+        var wrongKind = new[] { MathBlockValue.Scalar(1f), MathBlockValue.Scalar(2f), MathBlockValue.Scalar(0f) };
+        Assert.Throws<InvalidOperationException>(() => add.EvaluateCoreCLR(wrongKind, new float[1], new bool[1], MathBlockDomainOptions.Default));
     }
 
     /// <summary>Verifies the documented elementwise device layout against the generated source and the limit records.</summary>
@@ -258,7 +258,7 @@ public sealed class MathBlockSpanEvaluationTests
         var end = source.IndexOf("\n__device__ ", start + 10, StringComparison.Ordinal);
         var body = end < 0 ? source[start..] : source[start..end];
 
-        Assert.Equal(sizeof(double), MathBlockCudaDeviceModule.ElementwiseValueElementBytes);
+        Assert.Equal(sizeof(float), MathBlockCudaDeviceModule.ElementwiseValueElementBytes);
         Assert.Equal(sizeof(int), MathBlockCudaDeviceModule.ElementwiseValidityElementBytes);
         Assert.Contains("double* result = ((double*)", body, StringComparison.Ordinal);
         Assert.Contains("int* boolean_result = ((int*)", body, StringComparison.Ordinal);
@@ -286,7 +286,7 @@ public sealed class MathBlockSpanEvaluationTests
     {
         var left = MathBlockValue.Vector(Left);
         var right = MathBlockValue.Vector(Right);
-        var fill = MathBlockValue.Scalar(-12345d);
+        var fill = MathBlockValue.Scalar(-12345f);
         return identity switch
         {
             "vector.absolute@1" => [left],

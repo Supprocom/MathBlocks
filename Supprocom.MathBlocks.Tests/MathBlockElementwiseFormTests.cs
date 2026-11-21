@@ -6,7 +6,7 @@ namespace Supprocom.MathBlocks.Tests;
 /// <summary>Verifies the CoreCLR elementwise forms and their validity siblings.</summary>
 public sealed class MathBlockElementwiseFormTests
 {
-    private const double Sentinel = 12_345.5d;
+    private const float Sentinel = 12_345.5f;
 
     /// <summary>Gets every source identifier of the elementwise forms.</summary>
     public static TheoryData<string> Sources => [.. SourceIdentifiers];
@@ -86,7 +86,7 @@ public sealed class MathBlockElementwiseFormTests
         Assert.Equal(identity, operation.Identity);
         Assert.NotEmpty(operation.RegressionCases);
         Assert.Equal(operation.Arity, operation.PerformanceCase.Inputs.Count);
-        Assert.InRange(operation.PerformanceCase.MaximumWarmLatencyMicroseconds, double.Epsilon, 1_000d);
+        Assert.InRange(operation.PerformanceCase.MaximumWarmLatencyMicroseconds, float.Epsilon, 1_000f);
         foreach (var regression in operation.RegressionCases)
         {
             var actual = operation.Evaluate(regression.Inputs);
@@ -101,7 +101,7 @@ public sealed class MathBlockElementwiseFormTests
             : [input.AsScalar()]).ToArray();
         var first = operation.Evaluate(inputs);
         var second = operation.Evaluate(inputs);
-        Assert.True(first.ApproximatelyEquals(second, 0d), $"{identity}: repeated outputs differ.");
+        Assert.True(first.ApproximatelyEquals(second, 0f), $"{identity}: repeated outputs differ.");
         for (var index = 0; index < inputs.Length; index++)
         {
             var after = inputs[index].Type.Kind == MathBlockValueKind.Vector
@@ -113,13 +113,13 @@ public sealed class MathBlockElementwiseFormTests
         for (var warmup = 0; warmup < 64; warmup++)
             _ = operation.Evaluate(operation.PerformanceCase.Inputs);
         const int batchCount = 101;
-        var samples = new double[batchCount];
+        var samples = new float[batchCount];
         for (var batch = 0; batch < batchCount; batch++)
         {
             var started = Stopwatch.GetTimestamp();
             for (var iteration = 0; iteration < operation.PerformanceCase.Iterations; iteration++)
                 _ = operation.Evaluate(operation.PerformanceCase.Inputs);
-            samples[batch] = Stopwatch.GetElapsedTime(started).TotalMilliseconds * 1_000d /
+            samples[batch] = (float)Stopwatch.GetElapsedTime(started).TotalMilliseconds * 1_000f /
                              operation.PerformanceCase.Iterations;
         }
         Array.Sort(samples);
@@ -224,7 +224,7 @@ public sealed class MathBlockElementwiseFormTests
                     var others = Perturb(arguments, other => other != row, random);
                     var otherForm = Form(source).Evaluate([.. others, MathBlockValue.Scalar(Sentinel)]).AsVector();
                     var otherFlags = Validity(source).Evaluate(others).AsBooleanVector();
-                    if (BitConverter.DoubleToInt64Bits(otherForm[row]) != BitConverter.DoubleToInt64Bits(form[row]) ||
+                    if (BitConverter.SingleToInt32Bits(otherForm[row]) != BitConverter.SingleToInt32Bits(form[row]) ||
                         otherFlags[row] != flags[row])
                     {
                         failures.Add($"{source} [{DescribeMask(source, mask)}] row {row} changed when every other row was perturbed: " +
@@ -232,7 +232,7 @@ public sealed class MathBlockElementwiseFormTests
                     }
                     var own = Perturb(arguments, other => other == row, random);
                     var ownForm = Form(source).Evaluate([.. own, MathBlockValue.Scalar(Sentinel)]).AsVector();
-                    if (BitConverter.DoubleToInt64Bits(ownForm[row]) != BitConverter.DoubleToInt64Bits(form[row]))
+                    if (BitConverter.SingleToInt32Bits(ownForm[row]) != BitConverter.SingleToInt32Bits(form[row]))
                         ownRowChanges++;
                 }
             }
@@ -246,16 +246,16 @@ public sealed class MathBlockElementwiseFormTests
     [Fact]
     public void SourceInvalidRowsHoldTheFillAndTheSiblingTellsThemApart()
     {
-        var values = MathBlockValue.Vector([0.25d, 0d, 0.5d, 1d, 2d, -1d]);
+        var values = MathBlockValue.Vector([0.25f, 0f, 0.5f, 1f, 2f, -1f]);
         var form = Form("scalar.logit");
         var validity = Validity("scalar.logit");
         var logit = MathBlockCatalog.Standard.Get("scalar.logit");
 
-        Assert.False(logit.Evaluate(MathBlockValue.Scalar(1d)).IsValid);
-        Assert.Equal(0d, logit.Evaluate(MathBlockValue.Scalar(0.5d)).AsScalar());
-        var result = form.Evaluate(values, MathBlockValue.Scalar(0d)).AsVector().ToArray();
-        Assert.Equal(logit.Evaluate(MathBlockValue.Scalar(0.25d)).AsScalar(), result[0]);
-        Assert.Equal([0d, 0d, 0d, 0d, 0d], result[1..]);
+        Assert.False(logit.Evaluate(MathBlockValue.Scalar(1f)).IsValid);
+        Assert.Equal(0f, logit.Evaluate(MathBlockValue.Scalar(0.5f)).AsScalar());
+        var result = form.Evaluate(values, MathBlockValue.Scalar(0f)).AsVector().ToArray();
+        Assert.Equal(logit.Evaluate(MathBlockValue.Scalar(0.25f)).AsScalar(), result[0]);
+        Assert.Equal([0f, 0f, 0f, 0f, 0f], result[1..]);
         Assert.Equal([true, false, true, false, false, false], validity.Evaluate(values).AsBooleanVector().ToArray());
     }
 
@@ -263,27 +263,27 @@ public sealed class MathBlockElementwiseFormTests
     [Fact]
     public void SignedZerosAndSubnormalsKeepTheSourceBits()
     {
-        var fill = MathBlockValue.Scalar(7d);
+        var fill = MathBlockValue.Scalar(7f);
         var negated = Form("scalar.negate")
-            .Evaluate(MathBlockValue.Vector([0d, double.NegativeZero, double.Epsilon, -1e-310d]), fill)
+            .Evaluate(MathBlockValue.Vector([0f, float.NegativeZero, float.Epsilon, -5.28e-41f]), fill)
             .AsVector().ToArray();
         Assert.Equal(
-            new[] { double.NegativeZero, 0d, -double.Epsilon, 1e-310d }.Select(BitConverter.DoubleToInt64Bits),
-            negated.Select(BitConverter.DoubleToInt64Bits));
+            new[] { float.NegativeZero, 0f, -float.Epsilon, 5.28e-41f }.Select(BitConverter.SingleToInt32Bits),
+            negated.Select(BitConverter.SingleToInt32Bits));
 
         var rounded = Form("scalar.round")
-            .Evaluate(MathBlockValue.Vector([-0.5d, 0.5d, -1e-310d]), fill)
+            .Evaluate(MathBlockValue.Vector([-0.5f, 0.5f, -5.28e-41f]), fill)
             .AsVector().ToArray();
         Assert.Equal(
-            new[] { double.NegativeZero, 0d, double.NegativeZero }.Select(BitConverter.DoubleToInt64Bits),
-            rounded.Select(BitConverter.DoubleToInt64Bits));
+            new[] { float.NegativeZero, 0f, float.NegativeZero }.Select(BitConverter.SingleToInt32Bits),
+            rounded.Select(BitConverter.SingleToInt32Bits));
 
-        var sine = Form("scalar.sine").Evaluate(MathBlockValue.Vector([double.NegativeZero, -double.Epsilon]), fill);
+        var sine = Form("scalar.sine").Evaluate(MathBlockValue.Vector([float.NegativeZero, -float.Epsilon]), fill);
         var source = MathBlockCatalog.Standard.Get("scalar.sine");
         Assert.Equal(
-            new[] { double.NegativeZero, -double.Epsilon }
-                .Select(value => BitConverter.DoubleToInt64Bits(source.Evaluate(MathBlockValue.Scalar(value)).AsScalar())),
-            sine.AsVector().ToArray().Select(BitConverter.DoubleToInt64Bits));
+            new[] { float.NegativeZero, -float.Epsilon }
+                .Select(value => BitConverter.SingleToInt32Bits(source.Evaluate(MathBlockValue.Scalar(value)).AsScalar())),
+            sine.AsVector().ToArray().Select(BitConverter.SingleToInt32Bits));
     }
 
     /// <summary>Verifies empty vectors give valid empty outputs.</summary>
@@ -291,7 +291,7 @@ public sealed class MathBlockElementwiseFormTests
     public void EmptyVectorsGiveValidEmptyOutputs()
     {
         var empty = MathBlockValue.Vector([]);
-        var fill = MathBlockValue.Scalar(0d);
+        var fill = MathBlockValue.Scalar(0f);
 
         var unary = Form("scalar.sine").Evaluate(empty, fill);
         Assert.True(unary.IsValid);
@@ -301,31 +301,31 @@ public sealed class MathBlockElementwiseFormTests
         Assert.True(flags.IsValid);
         Assert.Empty(flags.AsBooleanVector());
 
-        var binary = Form("scalar.arc-tangent-2").Evaluate(empty, MathBlockValue.Scalar(1d), fill);
+        var binary = Form("scalar.arc-tangent-2").Evaluate(empty, MathBlockValue.Scalar(1f), fill);
         Assert.True(binary.IsValid);
         Assert.Empty(binary.AsVector());
         Assert.True(Form("scalar.arc-tangent-2").Evaluate(empty, empty, fill).IsValid);
-        Assert.False(Form("scalar.arc-tangent-2").Evaluate(empty, MathBlockValue.Vector([1d]), fill).IsValid);
+        Assert.False(Form("scalar.arc-tangent-2").Evaluate(empty, MathBlockValue.Vector([1f]), fill).IsValid);
     }
 
     /// <summary>Verifies unequal vector lengths, invalid inputs and nonfinite fills give an invalid output.</summary>
     [Fact]
     public void UnequalLengthsInvalidInputsAndNonfiniteFillsAreInvalid()
     {
-        var x = MathBlockValue.Vector([1d, 2d, 4d, 3d]);
-        var shorter = MathBlockValue.Vector([1d, 2d, 4d]);
-        var fill = MathBlockValue.Scalar(0d);
+        var x = MathBlockValue.Vector([1f, 2f, 4f, 3f]);
+        var shorter = MathBlockValue.Vector([1f, 2f, 4f]);
+        var fill = MathBlockValue.Scalar(0f);
 
         var unequal = Form("scalar.arc-tangent-2").Evaluate(x, shorter, fill);
         Assert.False(unequal.IsValid);
         Assert.Equal("The elementwise vector lengths differ.", unequal.InvalidReason);
         Assert.False(Validity("scalar.arc-tangent-2").Evaluate(x, shorter).IsValid);
-        Assert.False(Form("scalar.clamp").Evaluate(x, MathBlockValue.Scalar(0d), shorter, fill).IsValid);
+        Assert.False(Form("scalar.clamp").Evaluate(x, MathBlockValue.Scalar(0f), shorter, fill).IsValid);
         Assert.False(Validity("special.regularized-incomplete-beta").Evaluate(shorter, x, x).IsValid);
-        foreach (var nonfinite in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+        foreach (var nonfinite in new[] { float.NaN, float.PositiveInfinity, float.NegativeInfinity })
         {
             Assert.False(Form("scalar.sine").Evaluate(x, MathBlockValue.Scalar(nonfinite)).IsValid);
-            Assert.False(Form("scalar.maximum").Evaluate(x, MathBlockValue.Scalar(1d), MathBlockValue.Scalar(nonfinite)).IsValid);
+            Assert.False(Form("scalar.maximum").Evaluate(x, MathBlockValue.Scalar(1f), MathBlockValue.Scalar(nonfinite)).IsValid);
         }
         var invalidVector = MathBlockValue.Invalid(MathBlockType.Vector(), "upstream");
         var invalidScalar = MathBlockValue.Invalid(MathBlockType.Scalar(), "upstream");
@@ -346,9 +346,9 @@ public sealed class MathBlockElementwiseFormTests
         Assert.Throws<InvalidOperationException>(() =>
             Form("scalar.clamp").ResolveOutputType([scalar, scalar, scalar, scalar]));
         Assert.Throws<InvalidOperationException>(() =>
-            Form("scalar.sine").Evaluate(MathBlockValue.Scalar(1d), MathBlockValue.Scalar(0d)));
+            Form("scalar.sine").Evaluate(MathBlockValue.Scalar(1f), MathBlockValue.Scalar(0f)));
         Assert.Throws<InvalidOperationException>(() =>
-            Validity("scalar.arc-tangent-2").Evaluate(MathBlockValue.Scalar(1d), MathBlockValue.Scalar(1d)));
+            Validity("scalar.arc-tangent-2").Evaluate(MathBlockValue.Scalar(1f), MathBlockValue.Scalar(1f)));
         Assert.Throws<InvalidOperationException>(() =>
             Form("scalar.sine").ResolveOutputType([MathBlockType.BooleanVector(3), scalar]));
         Assert.Throws<InvalidOperationException>(() =>
@@ -386,10 +386,10 @@ public sealed class MathBlockElementwiseFormTests
         Assert.Throws<InvalidOperationException>(() =>
             Form("scalar.sine").ResolveOutputType([series, MathBlockType.Scalar(unit)]));
 
-        var meters = MathBlockValue.Vector([1d, -2d, 4d], unit);
-        var result = Form("scalar.maximum").Evaluate(meters, MathBlockValue.Scalar(0d, unit), MathBlockValue.Scalar(-1d, unit));
+        var meters = MathBlockValue.Vector([1f, -2f, 4f], unit);
+        var result = Form("scalar.maximum").Evaluate(meters, MathBlockValue.Scalar(0f, unit), MathBlockValue.Scalar(-1f, unit));
         Assert.Equal(MathBlockType.Vector(unit, 3), result.Type);
-        Assert.Equal([1d, 0d, 4d], result.AsVector().ToArray());
+        Assert.Equal([1f, 0f, 4f], result.AsVector().ToArray());
     }
 
     /// <summary>
@@ -400,14 +400,14 @@ public sealed class MathBlockElementwiseFormTests
     public void ClampWithLowerAboveUpperFillsTheRow()
     {
         var clamp = MathBlockCatalog.Standard.Get("scalar.clamp");
-        Assert.False(clamp.Evaluate(MathBlockValue.Scalar(1d), MathBlockValue.Scalar(3d), MathBlockValue.Scalar(2d)).IsValid);
-        MathBlockValue[] arguments = [MathBlockValue.Vector([1d, 2d, -1d]), MathBlockValue.Vector([0d, 3d, -0d]), MathBlockValue.Scalar(2d)];
+        Assert.False(clamp.Evaluate(MathBlockValue.Scalar(1f), MathBlockValue.Scalar(3f), MathBlockValue.Scalar(2f)).IsValid);
+        MathBlockValue[] arguments = [MathBlockValue.Vector([1f, 2f, -1f]), MathBlockValue.Vector([0f, 3f, -0f]), MathBlockValue.Scalar(2f)];
 
-        var form = Form("scalar.clamp").Evaluate([.. arguments, MathBlockValue.Scalar(-7d)]);
+        var form = Form("scalar.clamp").Evaluate([.. arguments, MathBlockValue.Scalar(-7f)]);
         var validity = Validity("scalar.clamp").Evaluate(arguments);
 
-        Assert.Equal([1d, -7d, -0d], form.AsVector().ToArray());
-        Assert.Equal(long.MinValue, BitConverter.DoubleToInt64Bits(form.AsVector()[2]));
+        Assert.Equal([1f, -7f, -0f], form.AsVector().ToArray());
+        Assert.Equal(long.MinValue, BitConverter.SingleToInt32Bits(form.AsVector()[2]));
         Assert.Equal([true, false, true], validity.AsBooleanVector().ToArray());
     }
 
@@ -423,7 +423,7 @@ public sealed class MathBlockElementwiseFormTests
             MathBlockValue[] inputs = [.. arguments, MathBlockValue.Scalar(Sentinel)];
             var expected = Form(source).Evaluate(inputs).AsVector().ToArray();
             var expectedFlags = Validity(source).Evaluate(arguments).AsBooleanVector().ToArray();
-            var results = new double[8][];
+            var results = new float[8][];
             var flags = new bool[8][];
             Parallel.For(0, results.Length, new ParallelOptions { MaxDegreeOfParallelism = 4 }, index =>
             {
@@ -431,7 +431,7 @@ public sealed class MathBlockElementwiseFormTests
                 flags[index] = Validity(source).Evaluate(arguments).AsBooleanVector().ToArray();
             });
             foreach (var result in results)
-                Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits), result.Select(BitConverter.DoubleToInt64Bits));
+                Assert.Equal(expected.Select(BitConverter.SingleToInt32Bits), result.Select(BitConverter.SingleToInt32Bits));
             foreach (var flag in flags)
                 Assert.Equal(expectedFlags, flag);
         }

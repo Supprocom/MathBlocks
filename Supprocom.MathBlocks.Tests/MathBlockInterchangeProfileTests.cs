@@ -553,9 +553,9 @@ public sealed class MathBlockInterchangeProfileTests
             inputs => inputs[0],
             [new MathBlockRegressionCase(
                 "identity",
-                [MathBlockValue.Scalar(1d)],
-                MathBlockValue.Scalar(1d))],
-            new MathBlockPerformanceCase([MathBlockValue.Scalar(1d)]));
+                [MathBlockValue.Scalar(1f)],
+                MathBlockValue.Scalar(1f))],
+            new MathBlockPerformanceCase([MathBlockValue.Scalar(1f)]));
         return new MathBlockRegistry(MathBlockCatalog.Standard.Operations.Append(identity));
     }
 

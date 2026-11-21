@@ -6,10 +6,10 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 internal static class SequenceOps
 {
     /// <summary>The fill that unavailable rows get.</summary>
-    internal const double Fill = -98_765.25d;
+    internal const float Fill = -98_765.25f;
 
     /// <summary>The offset that first-true-offset gives when nothing matched.</summary>
-    internal const double NoMatch = 77d;
+    internal const float NoMatch = 77f;
 
     /// <summary>The name of the operation that reads the predicate series.</summary>
     internal const string FirstTrue = "first-true-offset";
@@ -44,7 +44,7 @@ internal static class SequenceOps
 
     internal static readonly ProofParameter[] ShiftDevice = Shifts([1, 3, 20, 96, 1300, 0]);
 
-    internal static readonly ProofParameter[] SpanDevice = [.. Spans([(0, 0), (1, 4), (-3, 3), (0, 11), (-11, 0), (0, 255), (5, 9), (-9, -5), (2, 1)]), new("0.5..1", 0.5d, 1d, 1d)];
+    internal static readonly ProofParameter[] SpanDevice = [.. Spans([(0, 0), (1, 4), (-3, 3), (0, 11), (-11, 0), (0, 255), (5, 9), (-9, -5), (2, 1)]), new("0.5..1", 0.5f, 1f, 1f)];
 
     /// <summary>Gets whether the operation takes k instead of start and end.</summary>
     internal static bool IsShift(string name) => string.Equals(name, "lead", StringComparison.Ordinal) || string.Equals(name, Lag, StringComparison.Ordinal);
@@ -57,13 +57,13 @@ internal static class SequenceOps
     internal static ProofParameter[] Parameters(string name, ProofParameter[] shifts, ProofParameter[] spans) => IsShift(name) ? shifts : spans;
 
     /// <summary>Gets the series that the operation reads: the predicate for first-true-offset, the values for the others.</summary>
-    internal static double[] Series(string name, ProofSet set) => string.Equals(name, FirstTrue, StringComparison.Ordinal) ? set.Predicate : set.First;
+    internal static float[] Series(string name, ProofSet set) => string.Equals(name, FirstTrue, StringComparison.Ordinal) ? set.Predicate : set.First;
 
     /// <summary>
     /// Builds the inputs of the operation: the series, its availability, the counts, k or start and end, and for a value operation the fill (first-true-offset takes
     /// the no-match offset before it). The series, availability and counts arrive as built values so a timing loop builds them once.
     /// </summary>
-    internal static MathBlockValue[] Inputs(string name, bool sibling, MathBlockValue series, MathBlockValue availability, MathBlockValue counts, double first, double second)
+    internal static MathBlockValue[] Inputs(string name, bool sibling, MathBlockValue series, MathBlockValue availability, MathBlockValue counts, float first, float second)
     {
         var inputs = new List<MathBlockValue> { series, availability, counts, MathBlockValue.Scalar(first) };
         if (!IsShift(name))
@@ -84,7 +84,7 @@ internal static class SequenceOps
         for (var index = 0; index < values.Length; index++)
         {
             var label = string.Create(CultureInfo.InvariantCulture, $"k={values[index]}");
-            parameters[index] = new ProofParameter(label, values[index], values[index], Math.Max(1d, values[index]));
+            parameters[index] = new ProofParameter(label, values[index], values[index], Math.Max(1f, values[index]));
         }
 
         return parameters;
@@ -97,7 +97,7 @@ internal static class SequenceOps
         {
             var (start, end) = values[index];
             var label = string.Create(CultureInfo.InvariantCulture, $"[{start},{end}]");
-            parameters[index] = new ProofParameter(label, start, end, Math.Max(1d, (double)end - start + 1d));
+            parameters[index] = new ProofParameter(label, start, end, Math.Max(1f, (float)end - start + 1f));
         }
 
         return parameters;

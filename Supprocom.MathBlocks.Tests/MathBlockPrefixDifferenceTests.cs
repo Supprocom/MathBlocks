@@ -3,7 +3,7 @@ namespace Supprocom.MathBlocks.Tests;
 /// <summary>Verifies <c>sequence.prefix-difference-over-offsets@1</c> and its validity sibling against the contract of the design.</summary>
 public sealed class MathBlockPrefixDifferenceTests
 {
-    private static (double[] Values, bool[] Valid) Run(MathBlockValue[] formInputs)
+    private static (float[] Values, bool[] Valid) Run(MathBlockValue[] formInputs)
     {
         var form = PrefixDifferenceCases.Operation(PrefixDifferenceCases.Form).Evaluate(formInputs);
         var validity = PrefixDifferenceCases.Operation(PrefixDifferenceCases.Validity).Evaluate(PrefixDifferenceCases.ValidityInputs(formInputs));
@@ -18,7 +18,7 @@ public sealed class MathBlockPrefixDifferenceTests
         return (values, valid);
     }
 
-    private static void AssertRows(MathBlockValue[] inputs, double?[] expected)
+    private static void AssertRows(MathBlockValue[] inputs, float?[] expected)
     {
         var (values, valid) = Run(inputs);
         Assert.Equal(expected.Length, values.Length);
@@ -33,29 +33,29 @@ public sealed class MathBlockPrefixDifferenceTests
     [Fact]
     [Trait("Category", "PrefixDifference")]
     public void AnUnavailableRowInsideTheWindowInvalidatesTheRow() => AssertRows(
-        PrefixDifferenceCases.FormInputs(PrefixDifferenceCases.Sequence(5), [true, true, false, true, true], PrefixDifferenceCases.Sequence(5, 0d), -1d, 0d),
-        [null, 3d, null, null, 9d]);
+        PrefixDifferenceCases.FormInputs(PrefixDifferenceCases.Sequence(5), [true, true, false, true, true], PrefixDifferenceCases.Sequence(5, 0f), -1f, 0f),
+        [null, 3f, null, null, 9f]);
 
     /// <summary>Verifies an unavailable row before the window is ignored by every later window.</summary>
     [Fact]
     [Trait("Category", "PrefixDifference")]
     public void AnUnavailableRowBeforeTheWindowIsIgnored() => AssertRows(
-        PrefixDifferenceCases.FormInputs(PrefixDifferenceCases.Sequence(5), [false, true, true, true, true], PrefixDifferenceCases.Sequence(5, 0d), 0d, 1d),
-        [null, 5d, 7d, 9d, null]);
+        PrefixDifferenceCases.FormInputs(PrefixDifferenceCases.Sequence(5), [false, true, true, true, true], PrefixDifferenceCases.Sequence(5, 0f), 0f, 1f),
+        [null, 5f, 7f, 9f, null]);
 
     /// <summary>Verifies the prefix restarts at every row whose count is 0, and a window never crosses a segment.</summary>
     [Fact]
     [Trait("Category", "PrefixDifference")]
     public void SegmentsStartAtZeroCountsAndWindowsStayInsideOne()
     {
-        double[] values = [1d, 2d, 3d, 10d, 20d, 30d];
-        double[] counts = [0d, 1d, 2d, 0d, 1d, 2d];
-        AssertRows(PrefixDifferenceCases.FormInputs(values, PrefixDifferenceCases.All(6), counts, 0d, 1d), [3d, 5d, null, 30d, 50d, null]);
-        AssertRows(PrefixDifferenceCases.FormInputs(values, PrefixDifferenceCases.All(6), counts, -1d, 0d), [null, 3d, 5d, null, 30d, 50d]);
+        float[] values = [1f, 2f, 3f, 10f, 20f, 30f];
+        float[] counts = [0f, 1f, 2f, 0f, 1f, 2f];
+        AssertRows(PrefixDifferenceCases.FormInputs(values, PrefixDifferenceCases.All(6), counts, 0f, 1f), [3f, 5f, null, 30f, 50f, null]);
+        AssertRows(PrefixDifferenceCases.FormInputs(values, PrefixDifferenceCases.All(6), counts, -1f, 0f), [null, 3f, 5f, null, 30f, 50f]);
         // Row 0 starts a segment whatever its count is.
         AssertRows(
-            PrefixDifferenceCases.FormInputs(PrefixDifferenceCases.Sequence(4), PrefixDifferenceCases.All(4), [3d, 4d, 0d, 1d], 0d, 1d),
-            [3d, null, 7d, null]);
+            PrefixDifferenceCases.FormInputs(PrefixDifferenceCases.Sequence(4), PrefixDifferenceCases.All(4), [3f, 4f, 0f, 1f], 0f, 1f),
+            [3f, null, 7f, null]);
     }
 
     /// <summary>Verifies a window that reaches both before and after the row, and the rows near the start and the tail.</summary>
@@ -64,13 +64,13 @@ public sealed class MathBlockPrefixDifferenceTests
     public void WindowsBeforeAndAfterTheRowAndTheTailAreValidOnlyInsideTheSeries()
     {
         AssertRows(
-            PrefixDifferenceCases.FormInputs(PrefixDifferenceCases.Sequence(7), PrefixDifferenceCases.All(7), PrefixDifferenceCases.Sequence(7, 0d), -2d, 1d),
-            [null, null, 10d, 14d, 18d, 22d, null]);
+            PrefixDifferenceCases.FormInputs(PrefixDifferenceCases.Sequence(7), PrefixDifferenceCases.All(7), PrefixDifferenceCases.Sequence(7, 0f), -2f, 1f),
+            [null, null, 10f, 14f, 18f, 22f, null]);
         AssertRows(
-            PrefixDifferenceCases.FormInputs(PrefixDifferenceCases.Sequence(5), PrefixDifferenceCases.All(5), PrefixDifferenceCases.Sequence(5, 0d), 1d, 2d),
-            [5d, 7d, 9d, null, null]);
+            PrefixDifferenceCases.FormInputs(PrefixDifferenceCases.Sequence(5), PrefixDifferenceCases.All(5), PrefixDifferenceCases.Sequence(5, 0f), 1f, 2f),
+            [5f, 7f, 9f, null, null]);
         AssertRows(
-            PrefixDifferenceCases.FormInputs(PrefixDifferenceCases.Sequence(4), PrefixDifferenceCases.All(4), PrefixDifferenceCases.Sequence(4, 0d), 100d, 200d),
+            PrefixDifferenceCases.FormInputs(PrefixDifferenceCases.Sequence(4), PrefixDifferenceCases.All(4), PrefixDifferenceCases.Sequence(4, 0f), 100f, 200f),
             [null, null, null, null]);
     }
 
@@ -79,13 +79,13 @@ public sealed class MathBlockPrefixDifferenceTests
     [Trait("Category", "PrefixDifference")]
     public void AnOverflowingPrefixKeepsTheEarlierRows()
     {
-        double[] values = [1.5e308, 1.5e308, 1d, 2d, 3d];
+        float[] values = [3.33e38f, 3.33e38f, 1f, 2f, 3f];
         AssertRows(
-            PrefixDifferenceCases.FormInputs(values, PrefixDifferenceCases.All(5), PrefixDifferenceCases.Sequence(5, 0d), 0d, 0d),
-            [1.5e308, null, null, null, null]);
+            PrefixDifferenceCases.FormInputs(values, PrefixDifferenceCases.All(5), PrefixDifferenceCases.Sequence(5, 0f), 0f, 0f),
+            [3.33e38f, null, null, null, null]);
         Assert.False(PrefixDifferenceCases.Operation("vector.cumulative-sum@1").Evaluate(MathBlockValue.Vector(values)).IsValid);
         AssertRows(
-            PrefixDifferenceCases.FormInputs([-1.7e308, 1.7e308, 1.7e308], PrefixDifferenceCases.All(3), PrefixDifferenceCases.Sequence(3, 0d), 1d, 2d),
+            PrefixDifferenceCases.FormInputs([-3.38e38f, 3.38e38f, 3.38e38f], PrefixDifferenceCases.All(3), PrefixDifferenceCases.Sequence(3, 0f), 1f, 2f),
             [null, null, null]);
     }
 
@@ -93,8 +93,8 @@ public sealed class MathBlockPrefixDifferenceTests
     [Fact]
     [Trait("Category", "PrefixDifference")]
     public void ThePrefixDifferenceKeepsTheBitsOfTheRunningSum() => AssertRows(
-        PrefixDifferenceCases.FormInputs([1e16, 1d, 1d, 1d], PrefixDifferenceCases.All(4), PrefixDifferenceCases.Sequence(4, 0d), 0d, 0d),
-        [1e16, 0d, 0d, 0d]);
+        PrefixDifferenceCases.FormInputs([1e16f, 1f, 1f, 1f], PrefixDifferenceCases.All(4), PrefixDifferenceCases.Sequence(4, 0f), 0f, 0f),
+        [1e16f, 0f, 0f, 0f]);
 
     /// <summary>Verifies every call that is invalid as a whole gives an invalid value of the declared type in both operations.</summary>
     [Fact]
@@ -156,8 +156,8 @@ public sealed class MathBlockPrefixDifferenceTests
     [Trait("Category", "PrefixDifference")]
     public void ACleanWindowAgreesWithTheDirectSumToWithinRounding()
     {
-        var values = PrefixDifferenceCases.Sequence(20, 0.1d);
-        var counts = PrefixDifferenceCases.Sequence(20, 0d);
+        var values = PrefixDifferenceCases.Sequence(20, 0.1f);
+        var counts = PrefixDifferenceCases.Sequence(20, 0f);
         var available = PrefixDifferenceCases.All(20);
         foreach (var (start, end) in new[] { (-3, 5), (0, 0), (-1, 1), (2, 4) })
         {
@@ -176,7 +176,7 @@ public sealed class MathBlockPrefixDifferenceTests
                 var direct = PrefixDifferenceCases.DirectWindowSum(values, available, row, start, end);
                 Assert.Equal(direct.HasValue, valid[row]);
                 if (direct is { } expected)
-                    Assert.True(Math.Abs(expected - result[row]) <= 1e-12 * Math.Max(1d, Math.Abs(expected)), $"row {row}: {result[row]:R} against {expected:R}");
+                    Assert.True(Math.Abs(expected - result[row]) <= 1e-12f * Math.Max(1f, Math.Abs(expected)), $"row {row}: {result[row]:R} against {expected:R}");
             }
 
             // When sum-over-offsets is in the catalog, it reads the same rows: its values may differ in the last bits.
@@ -185,7 +185,7 @@ public sealed class MathBlockPrefixDifferenceTests
                 var sumValues = sums.AsVector();
                 for (var row = 0; row < values.Length; row++)
                     if (valid[row])
-                        Assert.True(Math.Abs(sumValues[row] - result[row]) <= 1e-12 * Math.Max(1d, Math.Abs(sumValues[row])));
+                        Assert.True(Math.Abs(sumValues[row] - result[row]) <= 1e-12f * Math.Max(1f, Math.Abs(sumValues[row])));
             }
         }
     }

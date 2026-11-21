@@ -11,77 +11,77 @@ public sealed partial class MathBlockCudaWorkerTests
     {
         ["complex-vector.magnitude"] = Single(
             "complex-vector.magnitude",
-            [ComplexValues(new Complex(3d, 4d), new Complex(1d, 2d))],
-            [ComplexValues(new Complex(1.7e308d, 1.7e308d), new Complex(1d, 2d))]),
+            [ComplexValues(new Complex(3f, 4f), new Complex(1f, 2f))],
+            [ComplexValues(new Complex(3.38e38f, 3.38e38f), new Complex(1f, 2f))]),
         ["vector.linspace"] = new(
             builder =>
             {
                 var start = builder.Input("input-0", MathBlockType.Scalar());
                 var end = builder.Input("input-1", MathBlockType.Scalar());
-                return builder.Apply("vector.linspace", 1, start, end, builder.Constant(MathBlockValue.Scalar(3d)));
+                return builder.Apply("vector.linspace", 1, start, end, builder.Constant(MathBlockValue.Scalar(3f)));
             },
-            [MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d)],
-            [MathBlockValue.Scalar(-1.7e308d), MathBlockValue.Scalar(1.7e308d)]),
+            [MathBlockValue.Scalar(0f), MathBlockValue.Scalar(1f)],
+            [MathBlockValue.Scalar(-3.38e38f), MathBlockValue.Scalar(3.38e38f)]),
         ["matrix.maximal-minors"] = Single(
             "matrix.maximal-minors",
-            [MatrixValue(2, 3, 1d, 2d, 3d, 4d, 5d, 6d)],
-            [MatrixValue(2, 3, 1e200d, 0d, 1d, 0d, 1e200d, 1d)]),
+            [MatrixValue(2, 3, 1f, 2f, 3f, 4f, 5f, 6f)],
+            [MatrixValue(2, 3, 1e25f, 0f, 1f, 0f, 1e25f, 1f)]),
         ["matrix.perron-vector"] = Single(
             "matrix.perron-vector",
-            [MatrixValue(2, 2, 0.5d, 0.5d, 0.2d, 0.8d), MathBlockValue.Scalar(3d)],
-            [MatrixValue(2, 2, 1.7e308d, 1.7e308d, 1.7e308d, 1.7e308d), MathBlockValue.Scalar(3d)]),
+            [MatrixValue(2, 2, 0.5f, 0.5f, 0.2f, 0.8f), MathBlockValue.Scalar(3f)],
+            [MatrixValue(2, 2, 3.38e38f, 3.38e38f, 3.38e38f, 3.38e38f), MathBlockValue.Scalar(3f)]),
         ["matrix.principal-minors"] = Single(
             "matrix.principal-minors",
-            [MatrixValue(2, 2, 2d, 1d, 1d, 2d)],
-            [MatrixValue(2, 2, 1e200d, 0d, 0d, 1e200d)]),
+            [MatrixValue(2, 2, 2f, 1f, 1f, 2f)],
+            [MatrixValue(2, 2, 1e25f, 0f, 0f, 1e25f)]),
         ["statistics.covariance-matrix"] = Single(
             "statistics.covariance-matrix",
-            [MatrixValue(2, 2, 1d, 2d, 3d, 5d)],
-            [MatrixValue(2, 2, 1.7e308d, 0d, -1.7e308d, 0d)]),
-        ["sequence.difference"] = WithConstant("sequence.difference", 1d, [1d, 2d, 4d], [1.7e308d, -1.7e308d, 1d]),
-        ["sequence.rolling-sum"] = WithConstant("sequence.rolling-sum", 2d, [1d, 2d, 3d], [1.7e308d, 1.7e308d, 1d]),
-        ["sequence.rolling-mean"] = WithConstant("sequence.rolling-mean", 2d, [1d, 2d, 3d], [1.7e308d, 1.7e308d, 1d]),
-        ["transform.haar"] = Single("transform.haar", [MathBlockValue.Vector([1d, 2d])], [MathBlockValue.Vector([1.7e308d, 1.7e308d])]),
+            [MatrixValue(2, 2, 1f, 2f, 3f, 5f)],
+            [MatrixValue(2, 2, 3.38e38f, 0f, -3.38e38f, 0f)]),
+        ["sequence.difference"] = WithConstant("sequence.difference", 1f, [1f, 2f, 4f], [3.38e38f, -3.38e38f, 1f]),
+        ["sequence.rolling-sum"] = WithConstant("sequence.rolling-sum", 2f, [1f, 2f, 3f], [3.38e38f, 3.38e38f, 1f]),
+        ["sequence.rolling-mean"] = WithConstant("sequence.rolling-mean", 2f, [1f, 2f, 3f], [3.38e38f, 3.38e38f, 1f]),
+        ["transform.haar"] = Single("transform.haar", [MathBlockValue.Vector([1f, 2f])], [MathBlockValue.Vector([3.38e38f, 3.38e38f])]),
         ["transform.walsh-hadamard"] = Single(
             "transform.walsh-hadamard",
-            [MathBlockValue.Vector([1d, 2d])],
-            [MathBlockValue.Vector([1.7e308d, 1.7e308d])]),
+            [MathBlockValue.Vector([1f, 2f])],
+            [MathBlockValue.Vector([3.38e38f, 3.38e38f])]),
         ["path.signature-level-one"] = Single(
             "path.signature-level-one",
-            [MatrixValue(2, 1, 1d, 2d)],
-            [MatrixValue(2, 1, -1.7e308d, 1.7e308d)]),
+            [MatrixValue(2, 1, 1f, 2f)],
+            [MatrixValue(2, 1, -3.38e38f, 3.38e38f)]),
         ["path.signature-level-two"] = Single(
             "path.signature-level-two",
-            [MatrixValue(2, 1, 1d, 2d)],
-            [MatrixValue(2, 1, -1.7e308d, 1.7e308d)]),
+            [MatrixValue(2, 1, 1f, 2f)],
+            [MatrixValue(2, 1, -3.38e38f, 3.38e38f)]),
         ["path.signature-level-three"] = Single(
             "path.signature-level-three",
-            [MatrixValue(2, 1, 1d, 2d)],
-            [MatrixValue(2, 1, -1.7e308d, 1.7e308d)]),
+            [MatrixValue(2, 1, 1f, 2f)],
+            [MatrixValue(2, 1, -3.38e38f, 3.38e38f)]),
         ["geometry.centroid"] = Single(
             "geometry.centroid",
-            [PointValues((0d, 0d), (1d, 1d))],
-            [PointValues((1.7e308d, 0d), (1.7e308d, 0d))]),
+            [PointValues((0f, 0f), (1f, 1f))],
+            [PointValues((3.38e38f, 0f), (3.38e38f, 0f))]),
         ["geometry.delaunay-graph"] = Single(
             "geometry.delaunay-graph",
-            [PointValues((0d, 0d), (1d, 0d), (0d, 1d))],
-            [PointValues((0d, 0d), (1e200d, 0d), (0d, 1e200d))]),
+            [PointValues((0f, 0f), (1f, 0f), (0f, 1f))],
+            [PointValues((0f, 0f), (1e25f, 0f), (0f, 1e25f))]),
         ["geometry.gabriel-graph"] = Single(
             "geometry.gabriel-graph",
-            [PointValues((0d, 0d), (1d, 0d), (0d, 1d))],
-            [PointValues((0d, 0d), (1e200d, 0d), (0d, 1e200d))]),
+            [PointValues((0f, 0f), (1f, 0f), (0f, 1f))],
+            [PointValues((0f, 0f), (1e25f, 0f), (0f, 1e25f))]),
         ["topology.zero-dimensional-persistence"] = Single(
             "topology.zero-dimensional-persistence",
-            [PointValues((0d, 0d), (1d, 0d), (0d, 1d))],
-            [PointValues((0d, 0d), (1e200d, 0d), (0d, 1e200d))]),
+            [PointValues((0f, 0f), (1f, 0f), (0f, 1f))],
+            [PointValues((0f, 0f), (1e25f, 0f), (0f, 1e25f))]),
         ["combinatorics.nonempty-subset-sums"] = Single(
             "combinatorics.nonempty-subset-sums",
-            [MathBlockValue.Vector([1d, 2d])],
-            [MathBlockValue.Vector([1.7e308d, 1.7e308d])]),
+            [MathBlockValue.Vector([1f, 2f])],
+            [MathBlockValue.Vector([3.38e38f, 3.38e38f])]),
         ["polynomial.derivative"] = Single(
             "polynomial.derivative",
-            [MathBlockValue.Vector([1d, 2d, 3d])],
-            [MathBlockValue.Vector([1d, 1.7e308d, 1.7e308d])]),
+            [MathBlockValue.Vector([1f, 2f, 3f])],
+            [MathBlockValue.Vector([1f, 3.38e38f, 3.38e38f])]),
         // A scalar result, which the host read invalidates; a device consumer saw a valid infinity.
         ["polynomial.elementary-symmetric/consumed"] = new(
             builder =>
@@ -89,20 +89,20 @@ public sealed partial class MathBlockCudaWorkerTests
                 var values = builder.Input("input-0", MathBlockType.Vector(length: 2));
                 var order = builder.Input("input-1", MathBlockType.Scalar());
                 var symmetric = builder.Apply("polynomial.elementary-symmetric", 1, values, order);
-                return builder.Apply("scalar.greater-than", 1, symmetric, builder.Constant(MathBlockValue.Scalar(1d)));
+                return builder.Apply("scalar.greater-than", 1, symmetric, builder.Constant(MathBlockValue.Scalar(1f)));
             },
-            [MathBlockValue.Vector([1d, 2d]), MathBlockValue.Scalar(2d)],
-            [MathBlockValue.Vector([1e200d, 1e200d]), MathBlockValue.Scalar(2d)]),
+            [MathBlockValue.Vector([1f, 2f]), MathBlockValue.Scalar(2f)],
+            [MathBlockValue.Vector([1e25f, 1e25f]), MathBlockValue.Scalar(2f)]),
         // complex.magnitude is a scalar, which the host read invalidates; a device consumer saw a valid infinity.
         ["complex.magnitude/consumed"] = new(
             builder =>
             {
                 var value = builder.Input("input-0", MathBlockType.Complex());
                 var magnitude = builder.Apply("complex.magnitude", 1, value);
-                return builder.Apply("scalar.greater-than", 1, magnitude, builder.Constant(MathBlockValue.Scalar(1d)));
+                return builder.Apply("scalar.greater-than", 1, magnitude, builder.Constant(MathBlockValue.Scalar(1f)));
             },
-            [MathBlockValue.Complex(new Complex(3d, 4d))],
-            [MathBlockValue.Complex(new Complex(1.7e308d, 1.7e308d))])
+            [MathBlockValue.Complex(new Complex(3f, 4f))],
+            [MathBlockValue.Complex(new Complex(3.38e38f, 3.38e38f))])
     };
 
     /// <summary>Gets the overflow case names.</summary>
@@ -135,8 +135,8 @@ public sealed partial class MathBlockCudaWorkerTests
             "matrix.exponential",
             Single(
                 "matrix.exponential",
-                [MatrixValue(2, 2, 0d, 0d, 0d, Math.Log(2d))],
-                [MatrixValue(2, 2, 1.7e308d, 1.7e308d, 0d, 0d)]));
+                [MatrixValue(2, 2, 0f, 0f, 0f, MathF.Log(2f))],
+                [MatrixValue(2, 2, 3.38e38f, 3.38e38f, 0f, 0f)]));
     }
 
     /// <summary>Gets the point-set operations with a non-scalar result, whose invalid result carries a shape.</summary>
@@ -237,7 +237,7 @@ public sealed partial class MathBlockCudaWorkerTests
     // Boolean vectors and point sets of the same shape with other entries.
     private static IEnumerable<MathBlockValue[]> SameTypeVariants(MathBlockValue[] sample)
     {
-        double[] scalars = [21d, 0d, -1d, 0.5d, 1_000_001d, 4097d, 1e308d, -0.5d, 3d];
+        float[] scalars = [21f, 0f, -1f, 0.5f, 1_000_001f, 4097f, 3.16e38f, -0.5f, 3f];
         for (var input = 0; input < sample.Length; input++)
         {
             var value = sample[input];
@@ -250,25 +250,25 @@ public sealed partial class MathBlockCudaWorkerTests
                     break;
                 case MathBlockValueKind.Vector:
                     var count = value.AsVector().Count;
-                    alternatives.Add(MathBlockValue.Vector(Enumerable.Range(0, count).Select(index => index % 2 == 0 ? 1.7e308d : -1.7e308d), unit));
-                    alternatives.Add(MathBlockValue.Vector(Enumerable.Repeat(1e200d, count), unit));
-                    alternatives.Add(MathBlockValue.Vector(Enumerable.Repeat(1.7e308d, count), unit));
-                    alternatives.Add(MathBlockValue.Vector(Enumerable.Range(0, count).Select(index => -1d - index), unit));
-                    alternatives.Add(MathBlockValue.Vector(Enumerable.Range(0, count).Select(index => 0.5d + index), unit));
-                    alternatives.Add(MathBlockValue.Vector(new double[count], unit));
+                    alternatives.Add(MathBlockValue.Vector(Enumerable.Range(0, count).Select(index => index % 2 == 0 ? 3.38e38f : -3.38e38f), unit));
+                    alternatives.Add(MathBlockValue.Vector(Enumerable.Repeat(1e25f, count), unit));
+                    alternatives.Add(MathBlockValue.Vector(Enumerable.Repeat(3.38e38f, count), unit));
+                    alternatives.Add(MathBlockValue.Vector(Enumerable.Range(0, count).Select(index => -1f - index), unit));
+                    alternatives.Add(MathBlockValue.Vector(Enumerable.Range(0, count).Select(index => 0.5f + index), unit));
+                    alternatives.Add(MathBlockValue.Vector(new float[count], unit));
                     break;
                 case MathBlockValueKind.Matrix:
                     var matrix = value.AsMatrix();
-                    alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Repeat(1e200d, matrix.Rows * matrix.Columns)), unit));
-                    alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Range(0, matrix.Rows * matrix.Columns).Select(index => (index * 7 % 3 - 1) * 1e200d + index)), unit));
-                    alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Range(0, matrix.Rows * matrix.Columns).Select(index => index / matrix.Columns == index % matrix.Columns ? 1e200d : 0d)), unit));
-                    alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Range(0, matrix.Rows * matrix.Columns).Select(index => -1d - index)), unit));
-                    alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Range(0, matrix.Rows * matrix.Columns).Select(index => 0.5d + index)), unit));
+                    alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Repeat(1e25f, matrix.Rows * matrix.Columns)), unit));
+                    alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Range(0, matrix.Rows * matrix.Columns).Select(index => (index * 7 % 3 - 1) * 1e25f + index)), unit));
+                    alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Range(0, matrix.Rows * matrix.Columns).Select(index => index / matrix.Columns == index % matrix.Columns ? 1e25f : 0f)), unit));
+                    alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Range(0, matrix.Rows * matrix.Columns).Select(index => -1f - index)), unit));
+                    alternatives.Add(MathBlockValue.Matrix(new MathBlockMatrix(matrix.Rows, matrix.Columns, Enumerable.Range(0, matrix.Rows * matrix.Columns).Select(index => 0.5f + index)), unit));
                     break;
                 case MathBlockValueKind.PointSet:
                     var points = value.AsPointSet().Count;
-                    alternatives.Add(MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Range(0, points).Select(index => new MathBlockPoint(index % 2 == 0 ? 1.7e308d : -1.7e308d, index * 1e200d))), unit));
-                    alternatives.Add(MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Repeat(new MathBlockPoint(1.7e308d, 1.7e308d), points)), unit));
+                    alternatives.Add(MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Range(0, points).Select(index => new MathBlockPoint(index % 2 == 0 ? 3.38e38f : -3.38e38f, index * 1e25f))), unit));
+                    alternatives.Add(MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Repeat(new MathBlockPoint(3.38e38f, 3.38e38f), points)), unit));
                     break;
             }
             for (var variant = 0; variant < alternatives.Count; variant++)
@@ -296,8 +296,8 @@ public sealed partial class MathBlockCudaWorkerTests
         var inputs = MathBlockProgramTests.RollingLogarithmInputs();
         var prototype = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["values"] = MathBlockValue.Vector([1d, 2d, 3d, 4d]),
-            ["width"] = MathBlockValue.Scalar(2d)
+            ["values"] = MathBlockValue.Vector([1f, 2f, 3f, 4f]),
+            ["width"] = MathBlockValue.Scalar(2f)
         };
         var coreclr = program.Evaluate(inputs)["logarithm"];
         using var compiled = new MathBlocksCUDAWorker().Compile(program, prototype);
@@ -314,124 +314,124 @@ public sealed partial class MathBlockCudaWorkerTests
     internal static readonly Dictionary<string, Func<(MathBlockProgram Program, MathBlockValue[] Inputs)>> SelfCompiledCases =
         new(StringComparer.Ordinal)
         {
-            ["transform.haar/length-3"] = () => Standalone("transform.haar", Values(1d, 2d, 3d)),
+            ["transform.haar/length-3"] = () => Standalone("transform.haar", Values(1f, 2f, 3f)),
             ["transport.assignment-cost/non-integer-index"] = () => Standalone(
-                "transport.assignment-cost", MatrixValue(2, 2, 3d, 1d, 1d, 3d), Values(0.5d, 1d)),
+                "transport.assignment-cost", MatrixValue(2, 2, 3f, 1f, 1f, 3f), Values(0.5f, 1f)),
             ["geometry.fisher-rao-distance/not-distributions"] = () => Standalone(
-                "geometry.fisher-rao-distance", Values(-0.5d, -0.5d), Values(-0d, -1d)),
+                "geometry.fisher-rao-distance", Values(-0.5f, -0.5f), Values(-0f, -1f)),
             // A running peak of 0 followed by 0 is 0 / 0, which the owned maximum now propagates: invalid on both sides.
-            ["path.maximum-relative-decline/zero-peak-then-zero"] = () => Standalone("path.maximum-relative-decline", Values(0d, -0d, 0.5d)),
-            ["path.maximum-relative-decline/zero-peak-then-later-decline"] = () => Standalone("path.maximum-relative-decline", Values(0d, 0d, 3d, 1d)),
+            ["path.maximum-relative-decline/zero-peak-then-zero"] = () => Standalone("path.maximum-relative-decline", Values(0f, -0f, 0.5f)),
+            ["path.maximum-relative-decline/zero-peak-then-later-decline"] = () => Standalone("path.maximum-relative-decline", Values(0f, 0f, 3f, 1f)),
             // A zero Lipschitz constant times an overflowing distance is 0 * infinity, a NaN term: invalid on both sides.
             ["extension.mcshane/zero-lipschitz-overflowing-distance"] = () => Standalone(
-                "extension.mcshane", Values(-1.7e308d, 0d), Values(-5d, 3d), Values(1.7e308d), MathBlockValue.Scalar(0d)),
+                "extension.mcshane", Values(-3.38e38f, 0f), Values(-5f, 3f), Values(3.38e38f), MathBlockValue.Scalar(0f)),
             ["extension.whitney/zero-lipschitz-overflowing-distance"] = () => Standalone(
-                "extension.whitney", Values(-1.7e308d, 0d), Values(5d, -3d), Values(1.7e308d), MathBlockValue.Scalar(0d)),
+                "extension.whitney", Values(-3.38e38f, 0f), Values(5f, -3f), Values(3.38e38f), MathBlockValue.Scalar(0f)),
             // The remaining overflow victims, invalid on both sides.
             ["complex.divide/divisor-overflow"] = () => Standalone(
-                "complex.divide", MathBlockValue.Complex(new Complex(1d, 1d)), MathBlockValue.Complex(new Complex(1e200d, 1e200d))),
+                "complex.divide", MathBlockValue.Complex(new Complex(1f, 1f)), MathBlockValue.Complex(new Complex(1e25f, 1e25f))),
             ["geometry.contains-point/crossing-overflow"] = () => Standalone(
                 "geometry.contains-point",
-                PointValues((-1e200d, -1e200d), (1e200d, -1e200d), (1e200d, 1e200d)), PointValues((2e199d, 1e199d))),
+                PointValues((-1e25f, -1e25f), (1e25f, -1e25f), (1e25f, 1e25f)), PointValues((8.18e24f, 7.5e24f))),
             ["geometry.convex-hull/nan-cross-product"] = () => Standalone(
-                "geometry.convex-hull", PointValues((0d, 0d), (1e200d, 1e200d), (2e200d, 2e200d))),
+                "geometry.convex-hull", PointValues((0f, 0f), (1e25f, 1e25f), (1.09e25f, 1.09e25f))),
             ["statistics.theil-sen-slope/difference-overflow"] = () => Standalone(
-                "statistics.theil-sen-slope", Values(-1.7e308d, 1.7e308d), Values(1d, 2d)),
+                "statistics.theil-sen-slope", Values(-3.38e38f, 3.38e38f), Values(1f, 2f)),
             ["matrix.exponential/trace-overflow"] = () => Standalone(
                 "matrix.exponential",
-                MatrixValue(2, 2, 3.4292183174601395e201d, -2.799680927722256e101d, 8.572068857490139e301d, -1.0737128770591469d)),
+                MatrixValue(2, 2, 1.56e25f, -4.8e12f, 5.52e37f, -1.0737128770591469f)),
             // A NaN inside the owned maximum (inf - inf from overflowing pairwise means) is invalid on both sides, and the sign of a zero tie
             // in a max-plus or min-plus product is the owned maximum's and minimum's.
             ["transport.energy-distance/nan-squared"] = () => Standalone(
-                "transport.energy-distance", Values(-1.7e308d, 1.7e308d), Values(0d, 0d)),
+                "transport.energy-distance", Values(-3.38e38f, 3.38e38f), Values(0f, 0f)),
             ["tropical.max-plus-multiply/zero-tie-sign"] = () => Standalone(
-                "tropical.max-plus-multiply", MatrixValue(1, 2, 0d, -0d), MatrixValue(2, 1, 0d, -0d)),
+                "tropical.max-plus-multiply", MatrixValue(1, 2, 0f, -0f), MatrixValue(2, 1, 0f, -0f)),
             ["tropical.min-plus-multiply/zero-tie-sign"] = () => Standalone(
-                "tropical.min-plus-multiply", MatrixValue(1, 2, -0d, 0d), MatrixValue(2, 1, -0d, 0d)),
-            ["path.maximum-relative-decline/signed-zero"] = () => Standalone("path.maximum-relative-decline", Values(-1d, -1d, -2d)),
+                "tropical.min-plus-multiply", MatrixValue(1, 2, -0f, 0f), MatrixValue(2, 1, -0f, 0f)),
+            ["path.maximum-relative-decline/signed-zero"] = () => Standalone("path.maximum-relative-decline", Values(-1f, -1f, -2f)),
             // The windows whose running peak is 0 followed by 0 (rows 4 and 5) are invalid on both sides.
             ["window-valid.path.maximum-relative-decline/zero-maximum"] = () => WindowFormCase(
-                "window-valid.path.maximum-relative-decline", Values(-0d, 2d, 0d, -0d, 0d, 1.25d)),
+                "window-valid.path.maximum-relative-decline", Values(-0f, 2f, 0f, -0f, 0f, 1.25f)),
             ["window.path.maximum-relative-decline/zero-maximum"] = () => WindowFormCase(
-                "window.path.maximum-relative-decline", Values(-0d, 2d, 0d, -0d, 0d, 1.25d)),
+                "window.path.maximum-relative-decline", Values(-0f, 2f, 0f, -0f, 0f, 1.25f)),
             // An intermediate that overflows makes the result invalid on both sides (a variance, a standard-deviation product or a
             // distance moment that is an infinity used to divide a finite value and give a valid zero on both).
             ["statistics.pearson-correlation/variance-overflow"] = () => Standalone(
-                "statistics.pearson-correlation", Values(1d, 2d, 3d, 4d),
-                Values(-7.143571252424402d, 1.791250087206395e308d, 7.274205695928337d, -9.877113669855383d)),
+                "statistics.pearson-correlation", Values(1f, 2f, 3f, 4f),
+                Values(-7.143571252424402f, 3.4e38f, 7.274205695928337f, -9.877113669855383f)),
             ["statistics.distance-correlation/moment-overflow"] = () => Standalone(
                 "statistics.distance-correlation",
-                Values(-2.2078367837649733e302d, -6.343768537094183d, -5.8364683556946435d),
-                Values(-1.0680179441064644e-294d, 36.84280271658108d, 0.9048608060071095d)),
+                Values(-6.21e37f, -6.343768537094183f, -5.8364683556946435f),
+                Values(-5.71e-37f, 36.84280271658108f, 0.9048608060071095f)),
             ["statistics.linear-slope/variance-overflow"] = () => Standalone(
                 "statistics.linear-slope",
-                Values(7.114245152862294d, -2.2078367837649733e302d, -728.0038665276926d, 4.224291341469105d),
-                Values(0.4953195529423522d, 0.7783700051634825d, 118d, -720.3804674671959d)),
+                Values(7.114245152862294f, -6.21e37f, -728.0038665276926f, 4.224291341469105f),
+                Values(0.4953195529423522f, 0.7783700051634825f, 118f, -720.3804674671959f)),
             ["statistics.linear-intercept/variance-overflow"] = () => Standalone(
                 "statistics.linear-intercept",
-                Values(7.114245152862294d, -2.2078367837649733e302d, -728.0038665276926d, 4.224291341469105d),
-                Values(0.4953195529423522d, 0.7783700051634825d, 118d, -720.3804674671959d)),
+                Values(7.114245152862294f, -6.21e37f, -728.0038665276926f, 4.224291341469105f),
+                Values(0.4953195529423522f, 0.7783700051634825f, 118f, -720.3804674671959f)),
             ["statistics.linear-r-squared/variance-overflow"] = () => Standalone(
                 "statistics.linear-r-squared",
-                Values(1.337705117e-315d, -3.22983270795382e-299d, -17.27875959474386d, -0.8325065752238905d),
-                Values(-3.496470870518605d, -11.96980468906019d, 5.458565798214325e303d, -729.5969940812662d)),
+                Values(1.4e-45f, -1.58e-37f, -17.27875959474386f, -0.8325065752238905f),
+                Values(-3.496470870518605f, -11.96980468906019f, 9.27e37f, -729.5969940812662f)),
             ["statistics.autocorrelation/variance-overflow"] = () => Standalone(
                 "statistics.autocorrelation",
-                Values(4.388899255034951e304d, -4.440892098500626e-16d, -22.450293565523026d, 0.0037950201825623286d),
-                MathBlockValue.Scalar(2d)),
+                Values(1.2e38f, -4.440892098500626e-16f, -22.450293565523026f, 0.0037950201825623286f),
+                MathBlockValue.Scalar(2f)),
             ["vector.standardize/variance-overflow"] = () => Standalone(
-                "vector.standardize", Values(1.7954044555660155e308d, -4.507602767758473e239d, 710.0904103212077d)),
+                "vector.standardize", Values(3.4e38f, -9.05e29f, 710.0904103212077f)),
             ["geometry.simplicial-depth/coordinate-overflow"] = () => Standalone(
                 "geometry.simplicial-depth",
-                PointValues((698.0421626654253d, 0.7817012842080717d), (-22.194671885609296d, 1.7972928048203887e308d), (-3.80572792044629d, -708.0863943344233d)),
-                PointValues((-0.9999999999999934d, 7.274205695928337d))),
+                PointValues((698.0421626654253f, 0.7817012842080717f), (-22.194671885609296f, 3.4e38f), (-3.80572792044629f, -708.0863943344233f)),
+                PointValues((-0.9999999999999934f, 7.274205695928337f))),
             ["geometry.barycentric-coordinates/denominator-overflow"] = () => Standalone(
                 "geometry.barycentric-coordinates",
-                PointValues((1d, 1d)), PointValues((1e200d, 0d), (0d, 1e200d), (0d, 0d))),
+                PointValues((1f, 1f)), PointValues((1e25f, 0f), (0f, 1e25f), (0f, 0f))),
             ["geometry.halfspace-depth/nan-cross-product"] = () => Standalone(
-                "geometry.halfspace-depth", PointValues((1e200d, 1e200d), (2e200d, 2e200d)), PointValues((0d, 0d))),
+                "geometry.halfspace-depth", PointValues((1e25f, 1e25f), (1.09e25f, 1.09e25f)), PointValues((0f, 0f))),
             // The window forms apply the same rule to every window (the first window with an overflowing variance is invalid).
             ["window.statistics.pearson-correlation/variance-overflow"] = () => WindowSeriesCase(
                 "window.statistics.pearson-correlation",
-                Values(1d, 2d, 3d, 4d, 5d, 6d), Values(-7.143571252424402d, 1.791250087206395e308d, 7.274205695928337d, -9.877113669855383d, 2d, 3d)),
+                Values(1f, 2f, 3f, 4f, 5f, 6f), Values(-7.143571252424402f, 3.4e38f, 7.274205695928337f, -9.877113669855383f, 2f, 3f)),
             ["window-valid.statistics.distance-correlation/moment-overflow"] = () => WindowSeriesCase(
                 "window-valid.statistics.distance-correlation",
-                Values(-2.2078367837649733e302d, -6.343768537094183d, -5.8364683556946435d, 1d, 2d, 3d),
-                Values(-1.0680179441064644e-294d, 36.84280271658108d, 0.9048608060071095d, 5d, 6d, 8d)),
+                Values(-6.21e37f, -6.343768537094183f, -5.8364683556946435f, 1f, 2f, 3f),
+                Values(-5.71e-37f, 36.84280271658108f, 0.9048608060071095f, 5f, 6f, 8f)),
             ["window.statistics.linear-slope/variance-overflow"] = () => WindowSeriesCase(
                 "window.statistics.linear-slope",
-                Values(7.114245152862294d, -2.2078367837649733e302d, -728.0038665276926d, 4.224291341469105d, 1d, 2d),
-                Values(0.4953195529423522d, 0.7783700051634825d, 118d, -720.3804674671959d, 3d, 4d)),
+                Values(7.114245152862294f, -6.21e37f, -728.0038665276926f, 4.224291341469105f, 1f, 2f),
+                Values(0.4953195529423522f, 0.7783700051634825f, 118f, -720.3804674671959f, 3f, 4f)),
             ["window-valid.statistics.linear-r-squared/variance-overflow"] = () => WindowSeriesCase(
                 "window-valid.statistics.linear-r-squared",
-                Values(1.337705117e-315d, -3.22983270795382e-299d, -17.27875959474386d, -0.8325065752238905d, 1d, 2d),
-                Values(-3.496470870518605d, -11.96980468906019d, 5.458565798214325e303d, -729.5969940812662d, 3d, 4d)),
+                Values(1.4e-45f, -1.58e-37f, -17.27875959474386f, -0.8325065752238905f, 1f, 2f),
+                Values(-3.496470870518605f, -11.96980468906019f, 9.27e37f, -729.5969940812662f, 3f, 4f)),
             ["window.statistics.autocorrelation/variance-overflow"] = () => WindowSeriesCase(
                 "window.statistics.autocorrelation",
-                Values(4.388899255034951e304d, -4.440892098500626e-16d, -22.450293565523026d, 0.0037950201825623286d, 1d, 2d)),
+                Values(1.2e38f, -4.440892098500626e-16f, -22.450293565523026f, 0.0037950201825623286f, 1f, 2f)),
             ["window.vector.standardize/variance-overflow"] = () => WindowSeriesCase(
-                "window.vector.standardize", Values(1.7954044555660155e308d, -4.507602767758473e239d, 710.0904103212077d, 1d, 2d, 4d)),
+                "window.vector.standardize", Values(3.4e38f, -9.05e29f, 710.0904103212077f, 1f, 2f, 4f)),
             ["combinatorics.nonempty-subset-sums/21-values"] = () => Standalone(
-                "combinatorics.nonempty-subset-sums", Values([.. Enumerable.Range(1, 21).Select(value => (double)value)])),
-            ["cooperative.shapley-values/length-3"] = () => Standalone("cooperative.shapley-values", Values(1d, 2d, 3d)),
+                "combinatorics.nonempty-subset-sums", Values([.. Enumerable.Range(1, 21).Select(value => (float)value)])),
+            ["cooperative.shapley-values/length-3"] = () => Standalone("cooperative.shapley-values", Values(1f, 2f, 3f)),
             ["information.conditional-mutual-information/state-counts"] = () => SampleWithScalarIncremented("information.conditional-mutual-information", 1),
             ["matrix.reshape/shape"] = () => SampleWithScalarIncremented("matrix.reshape", 1),
             ["matrix.principal-minors/21-rows"] = () => Standalone("matrix.principal-minors", Diagonal(21)),
             ["transport.minimum-assignment/21-rows"] = () => Standalone("transport.minimum-assignment", Diagonal(21)),
             // An iteration count is capped at 10,000, as for graph.page-rank and transport.sinkhorn-coupling.
-            ["markov.stationary-distribution/10000-iterations"] = () => SampleWithIterations("markov.stationary-distribution", 10_000d),
-            ["markov.stationary-distribution/10001-iterations"] = () => SampleWithIterations("markov.stationary-distribution", 10_001d),
-            ["matrix.perron-value/10000-iterations"] = () => SampleWithIterations("matrix.perron-value", 10_000d),
-            ["matrix.perron-value/10001-iterations"] = () => SampleWithIterations("matrix.perron-value", 10_001d),
-            ["matrix.perron-vector/10000-iterations"] = () => SampleWithIterations("matrix.perron-vector", 10_000d),
-            ["matrix.perron-vector/10001-iterations"] = () => SampleWithIterations("matrix.perron-vector", 10_001d),
-            ["matrix.spectral-norm/10000-iterations"] = () => SampleWithIterations("matrix.spectral-norm", 10_000d),
-            ["matrix.spectral-norm/10001-iterations"] = () => SampleWithIterations("matrix.spectral-norm", 10_001d),
+            ["markov.stationary-distribution/10000-iterations"] = () => SampleWithIterations("markov.stationary-distribution", 10_000f),
+            ["markov.stationary-distribution/10001-iterations"] = () => SampleWithIterations("markov.stationary-distribution", 10_001f),
+            ["matrix.perron-value/10000-iterations"] = () => SampleWithIterations("matrix.perron-value", 10_000f),
+            ["matrix.perron-value/10001-iterations"] = () => SampleWithIterations("matrix.perron-value", 10_001f),
+            ["matrix.perron-vector/10000-iterations"] = () => SampleWithIterations("matrix.perron-vector", 10_000f),
+            ["matrix.perron-vector/10001-iterations"] = () => SampleWithIterations("matrix.perron-vector", 10_001f),
+            ["matrix.spectral-norm/10000-iterations"] = () => SampleWithIterations("matrix.spectral-norm", 10_000f),
+            ["matrix.spectral-norm/10001-iterations"] = () => SampleWithIterations("matrix.spectral-norm", 10_001f),
             // A square in the Gram matrix overflows, so both sides give an invalid scalar (CoreCLR gave a valid 0).
             ["matrix.spectral-norm/gram-overflow-2x2"] = () => Standalone(
-                "matrix.spectral-norm", MatrixValue(2, 2, 21.808109993025802d, -1E-16d, 2.0261677264706863d, 1.7920054269081442E+308d), MathBlockValue.Scalar(32d)),
+                "matrix.spectral-norm", MatrixValue(2, 2, 21.808109993025802f, -1E-16f, 2.0261677264706863f, 3.4e38f), MathBlockValue.Scalar(32f)),
             ["matrix.spectral-norm/gram-overflow-5x5"] = () => Standalone(
-                "matrix.spectral-norm", MatrixValue(5, 5, -1.4934540366773823d, -724.1384810885675d, -110d, -2.863890391847497E+250d, -736.1104387680798d, -4.29484363142549d, 2.313432234973772E+223d, 4.722841828411625d, 0.09556606759165165d, -39d, 0.04059996335593041d, -0.5318688056945957d, 3.7223115856823336E+175d, -740.769435392698d, -20.097659664810053d, -739.8147664805746d, 0.9999956274522844d, 2.7099982004438914d, 4.192299232855897d, -1.3907820097623635E+181d, 3.6241968239171687d, 4.518422333933148E+220d, -750.0798031522245d, 59.5d, -5.7572465458520234d), MathBlockValue.Scalar(32d)),
+                "matrix.spectral-norm", MatrixValue(5, 5, -1.4934540366773823f, -724.1384810885675f, -110f, -2.03e31f, -736.1104387680798f, -4.29484363142549f, 8.33e27f, 4.722841828411625f, 0.09556606759165165f, -39f, 0.04059996335593041f, -0.5318688056945957f, 8.84e21f, -740.769435392698f, -20.097659664810053f, -739.8147664805746f, 0.9999956274522844f, 2.7099982004438914f, 4.192299232855897f, -4.39e22f, 3.6241968239171687f, 3.82e27f, -750.0798031522245f, 59.5f, -5.7572465458520234f), MathBlockValue.Scalar(32f)),
             // An operation that consumes an always-invalid node is invalid too.
             ["combinatorics.nonempty-subset-sums/consumed"] = () =>
             {
@@ -439,7 +439,7 @@ public sealed partial class MathBlockCudaWorkerTests
                 var values = builder.Input("input-0", MathBlockType.Vector(length: 21));
                 var sums = builder.Apply("combinatorics.nonempty-subset-sums", 1, values);
                 var program = builder.Output("result", builder.Apply("vector.sum", 1, sums)).Build();
-                return (program, [Values([.. Enumerable.Range(1, 21).Select(value => (double)value)])]);
+                return (program, [Values([.. Enumerable.Range(1, 21).Select(value => (float)value)])]);
             }
         };
 
@@ -478,7 +478,7 @@ public sealed partial class MathBlockCudaWorkerTests
         var operation = MathBlockWindowTestSupport.Windowed.Get(identifier);
         var inputs = operation.RegressionCases[0].Inputs.ToArray();
         inputs[0] = vector;
-        inputs[1] = MathBlockValue.Scalar(3d, inputs[1].Type.Unit);
+        inputs[1] = MathBlockValue.Scalar(3f, inputs[1].Type.Unit);
         return Single(MathBlockWindowTestSupport.Windowed, identifier, inputs);
     }
 
@@ -496,12 +496,12 @@ public sealed partial class MathBlockCudaWorkerTests
     private static (MathBlockProgram Program, MathBlockValue[] Inputs) SampleWithScalarIncremented(string identifier, int input)
     {
         var inputs = MathBlockCatalog.Standard.Get(identifier).RegressionCases[0].Inputs.ToArray();
-        inputs[input] = MathBlockValue.Scalar(inputs[input].AsScalar() + 1d, inputs[input].Type.Unit);
+        inputs[input] = MathBlockValue.Scalar(inputs[input].AsScalar() + 1f, inputs[input].Type.Unit);
         return Standalone(identifier, inputs);
     }
 
     // The operation's sample with its iteration count (the second input) replaced.
-    private static (MathBlockProgram Program, MathBlockValue[] Inputs) SampleWithIterations(string identifier, double iterations)
+    private static (MathBlockProgram Program, MathBlockValue[] Inputs) SampleWithIterations(string identifier, float iterations)
     {
         var inputs = MathBlockCatalog.Standard.Get(identifier).RegressionCases[0].Inputs.ToArray();
         inputs[1] = MathBlockValue.Scalar(iterations, inputs[1].Type.Unit);
@@ -515,10 +515,10 @@ public sealed partial class MathBlockCudaWorkerTests
         return (builder.Output("result", builder.Apply(identifier, 1, nodes)).Build(), inputs);
     }
 
-    private static MathBlockValue Values(params double[] values) => MathBlockValue.Vector(values);
+    private static MathBlockValue Values(params float[] values) => MathBlockValue.Vector(values);
 
     private static MathBlockValue Diagonal(int size) =>
-        MathBlockValue.Matrix(new MathBlockMatrix(size, size, Enumerable.Range(0, size * size).Select(index => index % (size + 1) == 0 ? 2d : 1d / size)));
+        MathBlockValue.Matrix(new MathBlockMatrix(size, size, Enumerable.Range(0, size * size).Select(index => index % (size + 1) == 0 ? 2f : 1f / size)));
 
     private static void VerifyOverflowCase(string name, OverflowCase overflow)
     {
@@ -554,7 +554,7 @@ public sealed partial class MathBlockCudaWorkerTests
             overflowing);
 
     // The width or lag is a program constant, so CUDA sizes the output from it.
-    private static OverflowCase WithConstant(string identifier, double parameter, double[] finite, double[] overflowing) =>
+    private static OverflowCase WithConstant(string identifier, float parameter, float[] finite, float[] overflowing) =>
         new(
             builder => builder.Apply(
                 identifier,
@@ -566,10 +566,10 @@ public sealed partial class MathBlockCudaWorkerTests
 
     private static MathBlockValue ComplexValues(params Complex[] values) => MathBlockValue.ComplexVector(values);
 
-    private static MathBlockValue MatrixValue(int rows, int columns, params double[] values) =>
+    private static MathBlockValue MatrixValue(int rows, int columns, params float[] values) =>
         MathBlockValue.Matrix(new MathBlockMatrix(rows, columns, values));
 
-    private static MathBlockValue PointValues(params (double X, double Y)[] points) =>
+    private static MathBlockValue PointValues(params (float X, float Y)[] points) =>
         MathBlockValue.PointSet(new MathBlockPointSet(points.Select(point => new MathBlockPoint(point.X, point.Y))));
 
     private sealed record OverflowCase(

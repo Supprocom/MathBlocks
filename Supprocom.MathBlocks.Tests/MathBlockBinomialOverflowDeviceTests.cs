@@ -18,10 +18,10 @@ public sealed class MathBlockBinomialOverflowDeviceTests
         (1023, 450), (1000000, 66), (2147483647, 33), (2147483647, 600)
     ];
 
-    private static (double[] First, double[] Second) Rows(bool ballot)
+    private static (float[] First, float[] Second) Rows(bool ballot)
     {
-        var first = new List<double>();
-        var second = new List<double>();
+        var first = new List<float>();
+        var second = new List<float>();
         for (var pair = 0; pair < Pairs.Length; pair++)
         {
             var (n, k) = Pairs[pair];
@@ -48,7 +48,7 @@ public sealed class MathBlockBinomialOverflowDeviceTests
         ArgumentException.ThrowIfNullOrEmpty(identity);
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var (first, second) = Rows(string.Equals(identity, BallotCount, StringComparison.Ordinal));
-        var (program, inputs) = MathBlockCudaDomainDeviceTests.Build(identity, [MathBlockValue.Vector(first), MathBlockValue.Vector(second), MathBlockValue.Scalar(-1d)]);
+        var (program, inputs) = MathBlockCudaDomainDeviceTests.Build(identity, [MathBlockValue.Vector(first), MathBlockValue.Vector(second), MathBlockValue.Scalar(-1f)]);
 
         var coreclr = MathBlocksCoreCLRWorker.Shared.Execute(program, inputs)["result"];
         using var compiled = new MathBlocksCUDAWorker().CompileWithOptions(program, MathBlocksCudaOptions.Default, inputs);
@@ -57,7 +57,7 @@ public sealed class MathBlockBinomialOverflowDeviceTests
         Assert.True(MathBlockDomainWiringTests.Same(coreclr, cuda), $"{identity}: the device differs from CoreCLR.");
         Assert.True(coreclr.IsValid);
         var values = coreclr.AsVector();
-        Assert.True(values[0] > 1e300, "The row of (1023, 511) is not the finite coefficient.");
-        Assert.True(values[6] > 1e300, "The row of (1000000, 67) is not the finite coefficient.");
+        Assert.True(values[0] > 3.16e37f, "The row of (1023, 511) is not the finite coefficient.");
+        Assert.True(values[6] > 3.16e37f, "The row of (1000000, 67) is not the finite coefficient.");
     }
 }

@@ -11,53 +11,53 @@ internal static class CombinatoricsCostGuardReference
     ];
 
     /// <summary>Returns the binomial coefficient as the loop of the released 0.6.1 computed it, in int arithmetic.</summary>
-    public static double Today(int n, int k)
+    public static float Today(int n, int k)
     {
         if (k < 0 || k > n)
-            return 0d;
+            return 0f;
         k = Math.Min(k, n - k);
-        var result = 1d;
+        var result = 1f;
         for (var index = 1; index <= k; index++)
             result = result * (n - k + index) / index;
         return result;
     }
 
     /// <summary>Returns the binomial coefficient as the loop gives it when the old product loop reached +Infinity: the same value, or the ordered-product value when the coefficient fits.</summary>
-    public static double TodayOrFallback(int n, int k)
+    public static float TodayOrFallback(int n, int k)
     {
         var today = Today(n, k);
-        if (!double.IsPositiveInfinity(today))
+        if (!float.IsPositiveInfinity(today))
             return today;
         k = Math.Min(k, n - k);
-        var result = 1d;
+        var result = 1f;
         for (var index = 1; index <= k; index++)
-            result = result * ((double)(n - k + index) / index);
+            result = result * ((float)(n - k + index) / index);
         return result;
     }
 
     /// <summary>Returns the ballot count as the 0.6.1 expression computed it, with the sum in int arithmetic.</summary>
-    public static double TodayBallot(int leading, int trailing) =>
-        (double)(leading - trailing) / (leading + trailing) * Today(leading + trailing, trailing);
+    public static float TodayBallot(int leading, int trailing) =>
+        (float)(leading - trailing) / (leading + trailing) * Today(leading + trailing, trailing);
 
     /// <summary>Returns the binomial coefficient with n in 64 bits and the loop unguarded, or null where the loop would run over 20000 steps.</summary>
-    public static double? Wide(long n, int k)
+    public static float? Wide(long n, int k)
     {
         if (k < 0 || k > n)
-            return 0d;
+            return 0f;
         k = (int)Math.Min(k, n - k);
         if (k > 20_000)
             return null;
-        var result = 1d;
+        var result = 1f;
         for (var index = 1; index <= k; index++)
-            result = result * (double)(n - k + index) / index;
+            result = result * (float)(n - k + index) / index;
         return result;
     }
 
     /// <summary>Returns the ballot count with the sum in 64 bits and the loop unguarded, or null where the loop would be long.</summary>
-    public static double? WideBallot(int leading, int trailing)
+    public static float? WideBallot(int leading, int trailing)
     {
         var total = (long)leading + trailing;
-        return Wide(total, trailing) is { } coefficient ? (double)(leading - trailing) / (double)total * coefficient : null;
+        return Wide(total, trailing) is { } coefficient ? (float)(leading - trailing) / (float)total * coefficient : null;
     }
 
     /// <summary>Returns every ordered pair of the values.</summary>

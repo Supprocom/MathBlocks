@@ -8,14 +8,14 @@ namespace Supprocom.MathBlocks.Tests;
 public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper output)
 {
     // Signed zeros, subnormals and the smallest normal of both signs, and values on the common domain edges.
-    internal static readonly double[] SignedEdgeValues =
+    internal static readonly float[] SignedEdgeValues =
     [
-        0d, -0d, double.Epsilon, -double.Epsilon, 1e-310d, -1e-310d, 2.2250738585072014E-308d,
-        -2.2250738585072014E-308d, 1d, -1d, 0.5d, 2d, 3d
+        0f, -0f, float.Epsilon, -float.Epsilon, 5.28e-41f, -5.28e-41f, 1.1754943e-38f,
+        -1.1754943e-38f, 1f, -1f, 0.5f, 2f, 3f
     ];
 
     // The broadcast scalars of the edge grid, and the fills: negative zero, a subnormal and an ordinary value.
-    internal static readonly double[] GridScalars = [-0d, 1e-310d, 2d];
+    internal static readonly float[] GridScalars = [-0f, 5.28e-41f, 2f];
 
     /// <summary>
     /// Random programs within the limits that mix elementwise forms and siblings with the other pointwise operations
@@ -171,8 +171,8 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
         var fused = MathBlockFusedExpression.Create(program);
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["x"] = MathBlockValue.Vector([0.25d, 0d, 1d, 2d, -0d, 0.75d]),
-            ["fill"] = MathBlockValue.Scalar(-0d)
+            ["x"] = MathBlockValue.Vector([0.25f, 0f, 1f, 2f, -0f, 0.75f]),
+            ["fill"] = MathBlockValue.Scalar(-0f)
         };
         var validity = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
@@ -182,7 +182,7 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
         AssertMatchesUnfused(program, inputs, validity, result, "filled rows");
         var values = result.Outputs["logit"].AsVector();
         foreach (var row in new[] { 1, 2, 3, 4 })
-            Assert.Equal(0x8000000000000000ul, BitConverter.DoubleToUInt64Bits(values[row]));
+            Assert.Equal(0x8000000000000000ul, BitConverter.SingleToUInt32Bits(values[row]));
         Assert.Equal([true, false, false, false, false, true], result.Outputs["computed"].AsBooleanVector());
         Assert.Equal([true, false, false, false, false, false], result.Validity["logit"].AsBooleanVector());
         Assert.Equal([true, false, false, false, false, false], result.Validity["absolute"].AsBooleanVector());
@@ -208,10 +208,10 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
             .Output("valid", builder.Apply("elementwise-valid.scalar.clamp", 1, larger, lower, upper)).Build();
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["x"] = MathBlockValue.Vector([1.5d, -2d, -0d, 4d, 0d], metre),
-            ["lower"] = MathBlockValue.Scalar(-0d, metre),
-            ["upper"] = MathBlockValue.Vector([3d, 1d, 0d, -1d, 0d], metre),
-            ["fill"] = MathBlockValue.Scalar(-7.25d, metre)
+            ["x"] = MathBlockValue.Vector([1.5f, -2f, -0f, 4f, 0f], metre),
+            ["lower"] = MathBlockValue.Scalar(-0f, metre),
+            ["upper"] = MathBlockValue.Vector([3f, 1f, 0f, -1f, 0f], metre),
+            ["fill"] = MathBlockValue.Scalar(-7.25f, metre)
         };
         var result = MathBlockFusedExpression.Create(program).EvaluateCoreCLR(inputs);
         AssertMatchesUnfused(program, inputs, new Dictionary<string, MathBlockValue>(StringComparer.Ordinal), result, "units");
@@ -233,7 +233,7 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
             var arguments = Enumerable.Range(0, SourceArity(source))
                 .Select(index => builder.Input($"x{index}", MathBlockType.Vector())).ToList();
             if (!sibling)
-                arguments.Add(builder.Constant(MathBlockValue.Scalar(-1d)));
+                arguments.Add(builder.Constant(MathBlockValue.Scalar(-1f)));
             var program = builder.Output("y", builder.Apply(operation.Identifier, 1, [.. arguments])).Build();
             var fused = MathBlockFusedExpression.Create(program);
             Assert.Single(fused.MaskNodeIndexes);
@@ -258,7 +258,7 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
             MathBlockCausalityInfo.Pointwise);
         var builder = new MathBlockProgramBuilder(new MathBlockRegistry([impostor]));
         var x = builder.Input("x", MathBlockType.Vector());
-        builder.Output("y", builder.Apply(registered.Identifier, 1, x, builder.Constant(MathBlockValue.Scalar(0d))));
+        builder.Output("y", builder.Apply(registered.Identifier, 1, x, builder.Constant(MathBlockValue.Scalar(0f))));
         var exception = Assert.Throws<ArgumentException>(() => MathBlockFusedExpression.Create(builder.Build()));
         Assert.Contains(
             "Operation node 2 (elementwise.scalar.cosine@1) is not the MathBlockCatalog.Standard operation",
@@ -294,10 +294,10 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
         var label = $"{source} mask {DescribeMask(source, mask)}";
 
         var seeded = CreateArguments(source, 2_000, mask, 52_000 + mask);
-        yield return ($"{label} seeded", program, Bind(seeded, -0d, 2_000), RowValidity(2_000, mask));
+        yield return ($"{label} seeded", program, Bind(seeded, -0f, 2_000), RowValidity(2_000, mask));
 
         var vectors = Enumerable.Range(0, arity).Count(index => (mask >> index & 1) != 0);
-        var rows = (int)Math.Pow(SignedEdgeValues.Length, vectors);
+        var rows = (int)MathF.Pow(SignedEdgeValues.Length, vectors);
         foreach (var scalar in GridScalars)
         {
             var grid = new MathBlockValue[arity];
@@ -309,18 +309,18 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
                     grid[index] = MathBlockValue.Scalar(scalar);
                     continue;
                 }
-                var stride = (int)Math.Pow(SignedEdgeValues.Length, ordinal++);
+                var stride = (int)MathF.Pow(SignedEdgeValues.Length, ordinal++);
                 grid[index] = MathBlockValue.Vector(Enumerable.Range(0, rows)
                     .Select(row => SignedEdgeValues[row / stride % SignedEdgeValues.Length]).ToArray());
             }
             yield return ($"{label} grid scalar {scalar:R}", program, Bind(grid, scalar, rows), RowValidity(rows, mask));
         }
 
-        Dictionary<string, MathBlockValue> Bind(MathBlockValue[] values, double fillValue, int count)
+        Dictionary<string, MathBlockValue> Bind(MathBlockValue[] values, float fillValue, int count)
         {
             var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
             {
-                ["other"] = MathBlockValue.Vector(Enumerable.Range(0, count).Select(row => row * 0.25d - 3d).ToArray()),
+                ["other"] = MathBlockValue.Vector(Enumerable.Range(0, count).Select(row => row * 0.25f - 3f).ToArray()),
                 ["fill"] = MathBlockValue.Scalar(fillValue)
             };
             for (var index = 0; index < values.Length; index++)
@@ -362,12 +362,12 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
         static Dictionary<string, MathBlockValue> Inputs(MathBlockValue x, MathBlockValue y, MathBlockValue s, MathBlockValue fill) =>
             new(StringComparer.Ordinal) { ["x"] = x, ["y"] = y, ["s"] = s, ["fill"] = fill };
 
-        var x = MathBlockValue.Vector([0.25d, -0.5d, 2d, 0.75d]);
-        var y = MathBlockValue.Vector([1d, 2d, -1d, 0.5d]);
-        var s = MathBlockValue.Scalar(0d);
-        var fill = MathBlockValue.Scalar(-0.5d);
+        var x = MathBlockValue.Vector([0.25f, -0.5f, 2f, 0.75f]);
+        var y = MathBlockValue.Vector([1f, 2f, -1f, 0.5f]);
+        var s = MathBlockValue.Scalar(0f);
+        var fill = MathBlockValue.Scalar(-0.5f);
         yield return ("valid", Inputs(x, y, s, fill));
-        yield return ("zero divisor", Inputs(x, MathBlockValue.Vector([1d, 0d, -1d, 0.5d]), s, fill));
+        yield return ("zero divisor", Inputs(x, MathBlockValue.Vector([1f, 0f, -1f, 0.5f]), s, fill));
         yield return ("invalid x", Inputs(MathBlockValue.Invalid(MathBlockType.Vector(), "x is missing."), y, s, fill));
         yield return ("invalid y", Inputs(x, MathBlockValue.Invalid(MathBlockType.Vector(), "y is missing."), s, fill));
         yield return ("invalid s", Inputs(x, y, MathBlockValue.Invalid(MathBlockType.Scalar(), "s is missing."), fill));
@@ -376,7 +376,7 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
             MathBlockValue.Invalid(MathBlockType.Vector(), "x is missing."), y, s,
             MathBlockValue.Invalid(MathBlockType.Scalar(), "fill is missing.")));
         yield return ("zero divisor and invalid fill", Inputs(
-            x, MathBlockValue.Vector([0d, 0d, -1d, 0.5d]), s,
+            x, MathBlockValue.Vector([0f, 0f, -1f, 0.5f]), s,
             MathBlockValue.Invalid(MathBlockType.Scalar(), "fill is missing.")));
     }
 

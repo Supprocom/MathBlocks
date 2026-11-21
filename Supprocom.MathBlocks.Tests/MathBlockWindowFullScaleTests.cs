@@ -6,7 +6,7 @@ namespace Supprocom.MathBlocks.Tests;
 public sealed class MathBlockWindowFullScaleTests
 {
     private const int FullLength = 302_893;
-    private const double Sentinel = -98_765.25d;
+    private const float Sentinel = -98_765.25f;
 
     // These sources cost O(w^2) or more per row; at width 96 the reference checks every 97th row and the last row.
     private static readonly string[] QuadraticSources =

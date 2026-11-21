@@ -190,7 +190,7 @@ public sealed class MathBlockNotationLimitOptionsTests
     public void OpenMathCeilingsReachTheNetLimits()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
-        var constant = builder.Constant(MathBlockValue.Scalar(1d));
+        var constant = builder.Constant(MathBlockValue.Scalar(1f));
         var document = MathBlockOpenMath.Export(builder.Output("value", constant).Build());
 
         var raised = new MathBlockOpenMathImportOptions
@@ -216,7 +216,7 @@ public sealed class MathBlockNotationLimitOptionsTests
     public void RaisedOpenMathCeilingPassesTheOldCeiling()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
-        var constant = builder.Constant(MathBlockValue.Scalar(1d));
+        var constant = builder.Constant(MathBlockValue.Scalar(1f));
         var document = MathBlockOpenMath.Export(builder.Output("value", constant).Build());
         var padded = document + new string(' ', MathBlockOpenMath.MaximumDocumentCharacters);
 

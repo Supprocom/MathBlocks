@@ -5,4 +5,4 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 /// <param name="ClassName">The input class name.</param>
 /// <param name="Rows">The row count.</param>
 /// <param name="NanosecondsPerRow">The median time per row of seven launches, measured with CUDA events.</param>
-internal sealed record VectorBlockCell(VectorBlockCall Call, string ClassName, int Rows, double NanosecondsPerRow);
+internal sealed record VectorBlockCell(VectorBlockCall Call, string ClassName, int Rows, float NanosecondsPerRow);

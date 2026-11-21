@@ -17,10 +17,10 @@ internal sealed class ProofCell(
     string className,
     string counts,
     string parameter,
-    double width,
-    double nanosecondsPerRow,
-    double referenceNanosecondsPerRow,
-    double secondReferenceNanosecondsPerRow)
+    float width,
+    float nanosecondsPerRow,
+    float referenceNanosecondsPerRow,
+    float secondReferenceNanosecondsPerRow)
 {
     /// <summary>Gets the operation name.</summary>
     internal string Operation { get; } = operation;
@@ -35,34 +35,34 @@ internal sealed class ProofCell(
     internal string Parameter { get; } = parameter;
 
     /// <summary>Gets the size of the parameter.</summary>
-    internal double Width { get; } = width;
+    internal float Width { get; } = width;
 
     /// <summary>Gets the measured time per row.</summary>
-    internal double NanosecondsPerRow { get; } = nanosecondsPerRow;
+    internal float NanosecondsPerRow { get; } = nanosecondsPerRow;
 
     /// <summary>Gets the reference time per row.</summary>
-    internal double ReferenceNanosecondsPerRow { get; } = referenceNanosecondsPerRow;
+    internal float ReferenceNanosecondsPerRow { get; } = referenceNanosecondsPerRow;
 
     /// <summary>Gets the second reference time per row.</summary>
-    internal double SecondReferenceNanosecondsPerRow { get; } = secondReferenceNanosecondsPerRow;
+    internal float SecondReferenceNanosecondsPerRow { get; } = secondReferenceNanosecondsPerRow;
 
     /// <summary>Gets or sets the time per row of the all-false full scan timed back to back with this cell, or zero when there is none.</summary>
-    internal double FullScanNanosecondsPerRow { get; set; }
+    internal float FullScanNanosecondsPerRow { get; set; }
 
     /// <summary>Gets or sets the time per row of the reference operation on this cell's own input class, timed back to back with the cell, or zero when the cell has none.</summary>
-    internal double SameClassReferenceNanosecondsPerRow { get; set; }
+    internal float SameClassReferenceNanosecondsPerRow { get; set; }
 
     /// <summary>Gets or sets the median over the classes of this operation, counts class and parameter.</summary>
-    internal double MedianNanosecondsPerRow { get; set; }
+    internal float MedianNanosecondsPerRow { get; set; }
 
     /// <summary>Gets or sets the time relative to the median class.</summary>
-    internal double MedianRatio { get; set; }
+    internal float MedianRatio { get; set; }
 
     /// <summary>Gets or sets the time relative to the reference.</summary>
-    internal double ReferenceRatio { get; set; }
+    internal float ReferenceRatio { get; set; }
 
     /// <summary>Gets or sets the time relative to the second reference.</summary>
-    internal double SecondReferenceRatio { get; set; }
+    internal float SecondReferenceRatio { get; set; }
 
     /// <summary>Gets the key shared by the classes of one operation, counts class and parameter.</summary>
     internal string GroupKey => string.Concat(Operation, "|", Counts, "|", Parameter);

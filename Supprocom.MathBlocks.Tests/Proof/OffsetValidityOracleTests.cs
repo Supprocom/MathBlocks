@@ -10,7 +10,7 @@ public sealed class OffsetValidityOracleTests
 {
     private const int Rows = 1500;
     private const int MaximumFailures = 20;
-    private const double Largest = double.MaxValue;
+    private const float Largest = float.MaxValue;
     private const int Spans = 64;
 
     private static readonly (int Start, int End)[] Widths =
@@ -46,16 +46,16 @@ public sealed class OffsetValidityOracleTests
         var random = new Random(20261120);
         for (var series = 0; series < 12; series++)
         {
-            var values = new double[Rows];
+            var values = new float[Rows];
             var flags = new bool[Rows];
             // Series 0-3: every value large, so sums overflow at once; 4-7: large values of alternating sign, whose sums come back; 8-11: a few large values among small ones.
             for (var row = 0; row < Rows; row++)
             {
                 values[row] = series switch
                 {
-                    < 4 => (0.4d + 0.6d * random.NextDouble()) * Largest * (random.Next(4) == 0 ? -1d : 1d),
-                    < 8 => (row & 1) == 0 ? Largest * (0.8d + 0.2d * random.NextDouble()) : -Largest * (0.8d + 0.2d * random.NextDouble()),
-                    _ => random.Next(9) == 0 ? Largest * (random.NextDouble() - 0.5d) : (random.NextDouble() - 0.5d) * 1e6d
+                    < 4 => (0.4f + 0.6f * random.NextSingle()) * Largest * (random.Next(4) == 0 ? -1f : 1f),
+                    < 8 => (row & 1) == 0 ? Largest * (0.8f + 0.2f * random.NextSingle()) : -Largest * (0.8f + 0.2f * random.NextSingle()),
+                    _ => random.Next(9) == 0 ? Largest * (random.NextSingle() - 0.5f) : (random.NextSingle() - 0.5f) * 1e6f
                 };
                 flags[row] = series % 2 == 0 || random.Next(40) != 0;
             }
@@ -80,12 +80,12 @@ public sealed class OffsetValidityOracleTests
         for (var trial = 0; trial < 400; trial++)
         {
             var length = trial < 80 ? 1 + trial : 1 + random.Next(Rows);
-            var values = new double[length];
+            var values = new float[length];
             var flags = new bool[length];
             var largeShare = random.Next(6);
             for (var row = 0; row < length; row++)
             {
-                values[row] = random.Next(6) < largeShare ? Largest * (random.NextDouble() - 0.5d) * 2d : (random.NextDouble() - 0.5d) * Math.Pow(10d, random.Next(-300, 300));
+                values[row] = random.Next(6) < largeShare ? Largest * (random.NextSingle() - 0.5f) * 2f : (random.NextSingle() - 0.5f) * MathF.Pow(10f, random.Next(-300, 300));
                 flags[row] = random.Next(30) != 0;
             }
 
@@ -98,7 +98,7 @@ public sealed class OffsetValidityOracleTests
         ProofBar.Fail("Offset validity over random series", failures);
     }
 
-    private static void Compare(double[] x, bool[] xValid, double[] counts, (int Start, int End) span, string label, List<string> failures)
+    private static void Compare(float[] x, bool[] xValid, float[] counts, (int Start, int End) span, string label, List<string> failures)
     {
         var plain = OffsetValidityOracle.Plain(x, xValid, counts, span.Start, span.End);
         var prior = OffsetValidityOracle.Prior(x, xValid, counts, span.Start, span.End);

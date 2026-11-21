@@ -11,7 +11,7 @@ internal static class ProofCounts
     /// <summary>The number of counts classes of the safety tests, which add random gaps.</summary>
     internal const int SafetyKinds = 4;
 
-    private const double RandomGapShare = 0.05d;
+    private const float RandomGapShare = 0.05f;
 
     /// <summary>Gets the name of a counts class for the report.</summary>
     internal static string Name(int kind, int gapPeriod, int seriesPeriod) =>
@@ -27,9 +27,9 @@ internal static class ProofCounts
     /// Builds counts[t], the number of contiguous steps before row t: t when contiguous, t modulo the gap period, t modulo the series period, or a count that restarts at
     /// zero in about 5 percent of the rows. Row 0 always has the count 0.
     /// </summary>
-    internal static double[] Build(int kind, int count, int gapPeriod, int seriesPeriod)
+    internal static float[] Build(int kind, int count, int gapPeriod, int seriesPeriod)
     {
-        var counts = new double[count];
+        var counts = new float[count];
         var random = new Random(7);
         for (var row = 0; row < count; row++)
         {
@@ -38,7 +38,7 @@ internal static class ProofCounts
                 0 => row,
                 1 => row % gapPeriod,
                 2 => row % seriesPeriod,
-                _ => row == 0 || random.NextDouble() < RandomGapShare ? 0d : counts[row - 1] + 1d
+                _ => row == 0 || random.NextSingle() < RandomGapShare ? 0f : counts[row - 1] + 1f
             };
         }
 

@@ -12,7 +12,7 @@ internal static class MathBlockElementwiseRowReference
     private static readonly Assembly Library = typeof(MathBlockOperation).Assembly;
 
     /// <summary>Gets whether the row is computed and its value, for the source arguments of one row.</summary>
-    internal static (bool Computed, double Value) Row(string sourceIdentifier, params double[] arguments)
+    internal static (bool Computed, float Value) Row(string sourceIdentifier, params float[] arguments)
     {
         var source = MathBlockCatalog.Standard.Get(sourceIdentifier);
         var elementwise = Library.GetType("Supprocom.MathBlocks.ElementwiseMathBlocks", throwOnError: true)!;
@@ -23,11 +23,11 @@ internal static class MathBlockElementwiseRowReference
         Assert.True(found, sourceIdentifier);
         var rowInputs = arguments.Select(argument => MathBlockValue.Scalar(argument)).ToArray();
         Assert.Equal(source.Arity, rowInputs.Length);
-        object?[] call = [rowInputs, 0d];
+        object?[] call = [rowInputs, 0f];
         var computed = (bool)form.GetMethod(
             "EvaluateRow",
             BindingFlags.Instance | BindingFlags.NonPublic,
-            [typeof(MathBlockValue[]), typeof(double).MakeByRefType()])!.Invoke(lookup[1], call)!;
-        return (computed, (double)call[1]!);
+            [typeof(MathBlockValue[]), typeof(float).MakeByRefType()])!.Invoke(lookup[1], call)!;
+        return (computed, (float)call[1]!);
     }
 }

@@ -127,7 +127,7 @@ public sealed class MathBlockOpenMathInputTests
                 })).Message);
 
         var values = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
-        var vector = values.Constant(MathBlockValue.Vector([1d, 2d, 3d]));
+        var vector = values.Constant(MathBlockValue.Vector([1f, 2f, 3f]));
         var valueSource = MathBlockOpenMath.Export(values.Output("value", vector).Build());
         Assert.Equal(
             "The OpenMath source exceeds the value-element limit.",

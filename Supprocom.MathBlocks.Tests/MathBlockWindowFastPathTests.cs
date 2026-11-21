@@ -9,11 +9,11 @@ namespace Supprocom.MathBlocks.Tests;
 /// </summary>
 public sealed class MathBlockWindowFastPathTests
 {
-    private const double Sentinel = 4_321.75d;
+    private const float Sentinel = 4_321.75f;
 
     private static readonly int[] Widths = [1, 2, 3, 4, 5, 7, 17, 96];
 
-    private static readonly double[] Probabilities = [0d, -0d, 0.1d, 0.25d, 0.3d, 0.5d, 0.75d, 0.9d, 1d, 1.5d];
+    private static readonly float[] Probabilities = [0f, -0f, 0.1f, 0.25f, 0.3f, 0.5f, 0.75f, 0.9f, 1f, 1.5f];
 
     /// <summary>Gets the sources whose window forms have an M2 kernel.</summary>
     public static TheoryData<string> Sources => [.. KernelSources];
@@ -45,8 +45,8 @@ public sealed class MathBlockWindowFastPathTests
     [Fact]
     public void SignedZerosAndTiesFollowTheSourceRules()
     {
-        var x = MathBlockValue.Vector([0d, -0d, 0d, 1d, -0d, 1d, 1d, -1d, -1d]);
-        var width = MathBlockValue.Scalar(3d);
+        var x = MathBlockValue.Vector([0f, -0f, 0f, 1f, -0f, 1f, 1f, -1f, -1f]);
+        var width = MathBlockValue.Scalar(3f);
         var fill = MathBlockValue.Scalar(Sentinel);
 
         var minimum = Form("vector.minimum").Evaluate(x, width, fill).AsVector().ToArray();
@@ -57,18 +57,18 @@ public sealed class MathBlockWindowFastPathTests
 
         // Math.Min prefers -0 and Math.Max +0 among equal zeros.
         Assert.Equal(
-            new[] { Sentinel, Sentinel, -0d, -0d, -0d, -0d, -0d, -1d, -1d }.Select(BitConverter.DoubleToInt64Bits),
-            minimum.Select(BitConverter.DoubleToInt64Bits));
+            new[] { Sentinel, Sentinel, -0f, -0f, -0f, -0f, -0f, -1f, -1f }.Select(BitConverter.SingleToInt32Bits),
+            minimum.Select(BitConverter.SingleToInt32Bits));
         Assert.Equal(
-            new[] { Sentinel, Sentinel, 0d, 1d, 1d, 1d, 1d, 1d, 1d }.Select(BitConverter.DoubleToInt64Bits),
-            maximum.Select(BitConverter.DoubleToInt64Bits));
+            new[] { Sentinel, Sentinel, 0f, 1f, 1f, 1f, 1f, 1f, 1f }.Select(BitConverter.SingleToInt32Bits),
+            maximum.Select(BitConverter.SingleToInt32Bits));
         // The first strictly lower (higher) value wins; -0 and +0 compare equal.
-        Assert.Equal([Sentinel, Sentinel, 0d, 0d, 0d, 1d, 0d, 2d, 1d], argMinimum);
-        Assert.Equal([Sentinel, Sentinel, 0d, 2d, 1d, 0d, 1d, 0d, 0d], argMaximum);
+        Assert.Equal([Sentinel, Sentinel, 0f, 0f, 0f, 1f, 0f, 2f, 1f], argMinimum);
+        Assert.Equal([Sentinel, Sentinel, 0f, 2f, 1f, 0f, 1f, 0f, 0f], argMaximum);
         // The stable sort keeps equal zeros in window order, so the middle element's sign is the later zero's.
         Assert.Equal(
-            new[] { Sentinel, Sentinel, -0d, 0d, -0d, 1d, 1d, 1d, -1d }.Select(BitConverter.DoubleToInt64Bits),
-            median.Select(BitConverter.DoubleToInt64Bits));
+            new[] { Sentinel, Sentinel, -0f, 0f, -0f, 1f, 1f, 1f, -1f }.Select(BitConverter.SingleToInt32Bits),
+            median.Select(BitConverter.SingleToInt32Bits));
         foreach (var source in new[] { "vector.minimum", "vector.maximum", "vector.arg-minimum", "vector.arg-maximum", "vector.median" })
         {
             var difference = Difference(DirectForm(source).Evaluate(x, width, fill), Form(source).Evaluate(x, width, fill));
@@ -80,26 +80,26 @@ public sealed class MathBlockWindowFastPathTests
     [Fact]
     public void OutOfDomainProbabilitiesFillEveryRow()
     {
-        var x = MathBlockValue.Vector([3d, 1d, 2d, 5d]);
-        foreach (var probability in new[] { -0.25d, 1.5d })
+        var x = MathBlockValue.Vector([3f, 1f, 2f, 5f]);
+        foreach (var probability in new[] { -0.25f, 1.5f })
         {
             var p = MathBlockValue.Scalar(probability);
-            var form = Form("vector.quantile").Evaluate(x, p, MathBlockValue.Scalar(2d), MathBlockValue.Scalar(Sentinel));
-            var validity = Validity("vector.quantile").Evaluate(x, p, MathBlockValue.Scalar(2d));
+            var form = Form("vector.quantile").Evaluate(x, p, MathBlockValue.Scalar(2f), MathBlockValue.Scalar(Sentinel));
+            var validity = Validity("vector.quantile").Evaluate(x, p, MathBlockValue.Scalar(2f));
 
             Assert.Equal([Sentinel, Sentinel, Sentinel, Sentinel], form.AsVector().ToArray());
             Assert.Equal([false, false, false, false], validity.AsBooleanVector().ToArray());
         }
     }
 
-    internal static IEnumerable<double[]> Parameters(string source) =>
+    internal static IEnumerable<float[]> Parameters(string source) =>
         string.Equals(source, "vector.quantile", StringComparison.Ordinal)
             ? Probabilities.Select(probability => new[] { probability })
             : [[]];
 
     // Compares the kernel form and sibling with the direct-lift form and sibling, with a sentinel fill and with a fill
     // that also occurs as a computed value.
-    internal static List<string> Compare(string source, string name, double[] series, int width, double[] parameters)
+    internal static List<string> Compare(string source, string name, float[] series, int width, float[] parameters)
     {
         var failures = new List<string>();
         var x = MathBlockValue.Vector(series);
@@ -121,40 +121,40 @@ public sealed class MathBlockWindowFastPathTests
 
     // Series that exercise the deque and heap tie rules: signed zeros, values from a small set, constant runs,
     // increasing and decreasing runs, and plain random values.
-    internal static IEnumerable<(string Name, double[] Series)> CreateSeries(int count, int seed)
+    internal static IEnumerable<(string Name, float[] Series)> CreateSeries(int count, int seed)
     {
         var random = new Random(seed);
-        double[] small = [-2d, -1d, -0d, 0d, 1d, 2d];
-        var ties = new double[count];
+        float[] small = [-2f, -1f, -0f, 0f, 1f, 2f];
+        var ties = new float[count];
         for (var row = 0; row < count; row++)
             ties[row] = small[random.Next(small.Length)];
         yield return ("ties", ties);
 
-        var zeros = new double[count];
+        var zeros = new float[count];
         for (var row = 0; row < count; row++)
-            zeros[row] = random.Next(2) == 0 ? -0d : 0d;
+            zeros[row] = random.Next(2) == 0 ? -0f : 0f;
         yield return ("signed-zeros", zeros);
 
-        var constant = new double[count];
-        Array.Fill(constant, 1.25d);
+        var constant = new float[count];
+        Array.Fill(constant, 1.25f);
         yield return ("constant", constant);
 
-        var mixed = new double[count];
+        var mixed = new float[count];
         for (var row = 0; row < count; row++)
         {
             mixed[row] = (row / 150 % 4) switch
             {
-                0 => random.NextDouble() * 2d - 1d,
+                0 => random.NextSingle() * 2f - 1f,
                 1 => row % 150,
                 2 => -(row % 150),
-                _ => row % 7 == 0 ? -0d : 0.5d
+                _ => row % 7 == 0 ? -0f : 0.5f
             };
         }
         yield return ("runs", mixed);
 
-        var plain = new double[count];
+        var plain = new float[count];
         for (var row = 0; row < count; row++)
-            plain[row] = random.NextDouble() * 200d - 100d;
+            plain[row] = random.NextSingle() * 200f - 100f;
         yield return ("random", plain);
     }
 }

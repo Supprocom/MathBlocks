@@ -43,7 +43,7 @@ public sealed class MathBlockBinomialTableTests
 
         Assert.Equal(262_656, entries);
         Assert.Equal(MathBlockCudaDeviceModule.BinomialTableEntryCount, entries);
-        Assert.Equal(2_101_248L, (long)entries * sizeof(double));
+        Assert.Equal(2_101_248L, (long)entries * sizeof(float));
     }
 
     /// <summary>Verifies the offset formula gives every entry of the table once: each pair 0 &lt;= k &lt;= n &lt;= 1023 lands on the entry of its symmetric pair, and no entry is left over.</summary>

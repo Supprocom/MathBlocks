@@ -22,10 +22,10 @@ public sealed class MathBlockFusedDomainTests
             .Build();
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["x"] = MathBlockValue.Vector(Enumerable.Repeat(0.5d, Rows)),
-            ["left"] = MathBlockValue.Scalar(1e6d),
-            ["right"] = MathBlockValue.Scalar(1e6d),
-            ["fill"] = MathBlockValue.Scalar(-1d)
+            ["x"] = MathBlockValue.Vector(Enumerable.Repeat(0.5f, Rows)),
+            ["left"] = MathBlockValue.Scalar(1e6f),
+            ["right"] = MathBlockValue.Scalar(1e6f),
+            ["fill"] = MathBlockValue.Scalar(-1f)
         };
         return (MathBlockFusedExpression.Create(program), inputs);
     }
@@ -37,7 +37,7 @@ public sealed class MathBlockFusedDomainTests
     {
         "invalid" => new() { IncompleteBetaNonConvergence = MathBlockNonConvergencePolicy.Invalid },
         "converging" => new() { IncompleteBetaMaximumIterations = 513 },
-        "tolerance" => new() { IncompleteBetaTolerance = 1d },
+        "tolerance" => new() { IncompleteBetaTolerance = 1f },
         _ => MathBlockDomainOptions.Default
     };
 
@@ -56,7 +56,7 @@ public sealed class MathBlockFusedDomainTests
         Assert.All(defaults.Outputs["valid"].AsBooleanVector().ToArray(), flag => Assert.True(flag));
         Assert.Equal((long)Rows, invalid.NonConvergedEvaluations[Form]);
         Assert.All(invalid.Outputs["valid"].AsBooleanVector().ToArray(), flag => Assert.False(flag));
-        Assert.Equal(Enumerable.Repeat(-1d, Rows), invalid.Outputs["values"].AsVector().ToArray());
+        Assert.Equal(Enumerable.Repeat(-1f, Rows), invalid.Outputs["values"].AsVector().ToArray());
         Assert.Empty(converging.NonConvergedEvaluations);
         Assert.All(converging.Outputs["valid"].AsBooleanVector().ToArray(), flag => Assert.True(flag));
         Assert.Throws<ArgumentOutOfRangeException>(() => expression.EvaluateCoreCLR(inputs, null, new MathBlockDomainOptions { IncompleteBetaMaximumIterations = 0 }, MathBlocksCudaOptions.Default));

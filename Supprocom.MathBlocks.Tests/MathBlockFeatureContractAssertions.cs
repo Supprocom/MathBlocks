@@ -15,7 +15,7 @@ internal static class MathBlockFeatureContractAssertions
         Assert.Equal(identity, operation.Identity);
         Assert.NotEmpty(operation.RegressionCases);
         Assert.NotEmpty(operation.PerformanceCase.Inputs);
-        Assert.InRange(operation.PerformanceCase.MaximumWarmLatencyMicroseconds, double.Epsilon, 1_000d);
+        Assert.InRange(operation.PerformanceCase.MaximumWarmLatencyMicroseconds, float.Epsilon, 1_000f);
         Assert.Equal(operation.Arity, operation.PerformanceCase.Inputs.Count);
         Assert.Contains(identity, Cuda.MathBlocksCUDAWorker.SupportedBlockIdentities, StringComparer.Ordinal);
 
@@ -31,13 +31,13 @@ internal static class MathBlockFeatureContractAssertions
             _ = operation.Evaluate(operation.PerformanceCase.Inputs);
 
         const int batchCount = 101;
-        var samples = new double[batchCount];
+        var samples = new float[batchCount];
         for (var batch = 0; batch < batchCount; batch++)
         {
             var started = Stopwatch.GetTimestamp();
             for (var iteration = 0; iteration < operation.PerformanceCase.Iterations; iteration++)
                 _ = operation.Evaluate(operation.PerformanceCase.Inputs);
-            samples[batch] = Stopwatch.GetElapsedTime(started).TotalMilliseconds * 1_000d /
+            samples[batch] = (float)Stopwatch.GetElapsedTime(started).TotalMilliseconds * 1_000f /
                              operation.PerformanceCase.Iterations;
         }
         Array.Sort(samples);

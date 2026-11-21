@@ -13,8 +13,8 @@ public sealed class MathBlockElementwiseLiftTests
     ];
 
     // Zeros of both signs, infinities, NaN, negatives, an overflowing square, and values inside and outside each domain.
-    private static readonly double[] Probes =
-        [0d, -0d, 1d, -1d, 0.5d, -2.5d, 3d, 400d, 1e200d, 1e308d, -1e308d, double.PositiveInfinity, double.NegativeInfinity, double.NaN];
+    private static readonly float[] Probes =
+        [0f, -0f, 1f, -1f, 0.5f, -2.5f, 3f, 400f, 1e25f, 3.16e38f, -3.16e38f, float.PositiveInfinity, float.NegativeInfinity, float.NaN];
 
     /// <summary>Gets the lifted source names.</summary>
     public static TheoryData<string> SourceNames() => [.. LiftedSources];
@@ -48,13 +48,13 @@ public sealed class MathBlockElementwiseLiftTests
             var reference = scalar.Evaluate(inputs);
             Assert.Equal(reference.IsValid, computed);
             if (computed)
-                Assert.Equal(BitConverter.DoubleToInt64Bits(reference.AsScalar()), BitConverter.DoubleToInt64Bits(value));
-            if (!arguments.All(double.IsFinite))
+                Assert.Equal(BitConverter.SingleToInt32Bits(reference.AsScalar()), BitConverter.SingleToInt32Bits(value));
+            if (!arguments.All(float.IsFinite))
                 Assert.False(computed, string.Join(',', arguments));
             rows++;
         }
 
-        Assert.Equal((int)Math.Pow(Probes.Length, scalar.Arity), rows);
+        Assert.Equal((int)MathF.Pow(Probes.Length, scalar.Arity), rows);
     }
 
     /// <summary>Verifies the rows the lifts exist for: divide by 0, a logarithm and a square root out of domain, and overflow, each invalid on its own row only.</summary>
@@ -62,20 +62,20 @@ public sealed class MathBlockElementwiseLiftTests
     public void TheLiftsGiveEachRowItsOwnValidity()
     {
         var divide = MathBlockCatalog.Standard.Get("elementwise.scalar.divide");
-        var result = divide.Evaluate(MathBlockValue.Vector([6d, 1d, -3d, 1e308d]), MathBlockValue.Vector([3d, 0d, 2d, 1e-10d]), MathBlockValue.Scalar(-1d));
-        Assert.Equal([2d, -1d, -1.5d, -1d], result.AsVector().ToArray());
+        var result = divide.Evaluate(MathBlockValue.Vector([6f, 1f, -3f, 3.16e38f]), MathBlockValue.Vector([3f, 0f, 2f, 1e-10f]), MathBlockValue.Scalar(-1f));
+        Assert.Equal([2f, -1f, -1.5f, -1f], result.AsVector().ToArray());
         var valid = MathBlockCatalog.Standard.Get("elementwise-valid.scalar.divide")
-            .Evaluate(MathBlockValue.Vector([6d, 1d, -3d, 1e308d]), MathBlockValue.Vector([3d, 0d, 2d, 1e-10d]));
+            .Evaluate(MathBlockValue.Vector([6f, 1f, -3f, 3.16e38f]), MathBlockValue.Vector([3f, 0f, 2f, 1e-10f]));
         Assert.Equal([true, false, true, false], valid.AsBooleanVector().ToArray());
 
         var logarithm = MathBlockCatalog.Standard.Get("elementwise.scalar.natural-logarithm")
-            .Evaluate(MathBlockValue.Vector([1d, 0d, -1d, Math.E]), MathBlockValue.Scalar(-9d));
-        Assert.Equal([0d, -9d, -9d, 1d], logarithm.AsVector().ToArray());
-        var root = MathBlockCatalog.Standard.Get("elementwise-valid.scalar.square-root").Evaluate(MathBlockValue.Vector([4d, -4d, 0d]));
+            .Evaluate(MathBlockValue.Vector([1f, 0f, -1f, MathF.E]), MathBlockValue.Scalar(-9f));
+        Assert.Equal([0f, -9f, -9f, 1f], logarithm.AsVector().ToArray());
+        var root = MathBlockCatalog.Standard.Get("elementwise-valid.scalar.square-root").Evaluate(MathBlockValue.Vector([4f, -4f, 0f]));
         Assert.Equal([true, false, true], root.AsBooleanVector().ToArray());
-        var square = MathBlockCatalog.Standard.Get("elementwise-valid.scalar.square").Evaluate(MathBlockValue.Vector([3d, 1e200d]));
+        var square = MathBlockCatalog.Standard.Get("elementwise-valid.scalar.square").Evaluate(MathBlockValue.Vector([3f, 1e25f]));
         Assert.Equal([true, false], square.AsBooleanVector().ToArray());
-        var vectorTwin = MathBlockCatalog.Standard.Get("vector.divide", 1).Evaluate(MathBlockValue.Vector([6d, 1d]), MathBlockValue.Vector([3d, 0d]));
+        var vectorTwin = MathBlockCatalog.Standard.Get("vector.divide", 1).Evaluate(MathBlockValue.Vector([6f, 1f]), MathBlockValue.Vector([3f, 0f]));
         Assert.False(vectorTwin.IsValid);
     }
 
@@ -174,7 +174,7 @@ public sealed class MathBlockElementwiseLiftTests
         }
     }
 
-    private static IEnumerable<double[]> Combinations(int arity) => arity == 1
+    private static IEnumerable<float[]> Combinations(int arity) => arity == 1
         ? Probes.Select(first => new[] { first })
         : Probes.SelectMany(first => Probes.Select(second => new[] { first, second }));
 

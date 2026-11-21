@@ -14,7 +14,7 @@ public sealed class MathBlockCatalogTests
             Assert.NotEmpty(operation.RegressionCases);
             Assert.NotEmpty(operation.PerformanceCase.Inputs);
             Assert.True(operation.PerformanceCase.Iterations > 0);
-            Assert.InRange(operation.PerformanceCase.MaximumWarmLatencyMicroseconds, double.Epsilon, 1_000d);
+            Assert.InRange(operation.PerformanceCase.MaximumWarmLatencyMicroseconds, float.Epsilon, 1_000f);
             Assert.Equal(operation.Arity, operation.PerformanceCase.Inputs.Count);
         });
         Assert.Equal(
@@ -35,10 +35,10 @@ public sealed class MathBlockCatalogTests
             {
                 var first = operation.Evaluate(inputs);
                 var second = operation.Evaluate(inputs);
-                if (!first.ApproximatelyEquals(second, 1e-12))
+                if (!first.ApproximatelyEquals(second, 1e-12f))
                     failures.Add($"{operation.Identity}: repeated outputs differ");
                 for (var index = 0; index < inputs.Length; index++)
-                    if (!inputs[index].ApproximatelyEquals(copies[index], 0d))
+                    if (!inputs[index].ApproximatelyEquals(copies[index], 0f))
                         failures.Add($"{operation.Identity}: input {index} changed");
             }
             // Keep evaluating the remaining operations and report all failures.

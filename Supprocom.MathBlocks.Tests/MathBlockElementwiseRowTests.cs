@@ -69,7 +69,7 @@ public sealed class MathBlockElementwiseRowTests
     private static MathBlockDomainOptions Configured() => new()
     {
         IncompleteBetaMaximumIterations = 1024,
-        IncompleteBetaTolerance = 1e-10,
+        IncompleteBetaTolerance = 1e-10f,
         MaximumMatrixSize = 5000,
         CubeRootNewtonSteps = 5
     };

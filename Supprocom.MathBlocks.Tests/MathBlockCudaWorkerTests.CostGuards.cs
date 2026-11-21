@@ -22,8 +22,8 @@ public sealed partial class MathBlockCudaWorkerTests
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         const string source = "combinatorics.ballot-count";
         var random = new Random(61_000);
-        var leading = new double[CostGuardRows];
-        var trailing = new double[CostGuardRows];
+        var leading = new float[CostGuardRows];
+        var trailing = new float[CostGuardRows];
         for (var row = 0; row < CostGuardRows; row++)
         {
             leading[row] = 1_000 + random.Next(0, 999_000);

@@ -36,7 +36,7 @@ public sealed class MathBlockCudaLargeShapePlanTests
         ArgumentException.ThrowIfNullOrEmpty(identity);
         MathBlockValue[] values = identity.StartsWith("matrix.", StringComparison.Ordinal)
             ? [MathBlockValue.Scalar(size)]
-            : [MathBlockValue.Vector([0d, 1d, 2d, 1d]), MathBlockValue.Scalar(size)];
+            : [MathBlockValue.Vector([0f, 1f, 2f, 1f]), MathBlockValue.Scalar(size)];
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var nodes = values.Select((value, index) => builder.Input($"input{index}", value.Type)).ToArray();
         var program = builder.Output("result", builder.Apply(identity[..identity.LastIndexOf('@')], 1, nodes)).Build();
@@ -52,7 +52,7 @@ public sealed class MathBlockCudaLargeShapePlanTests
         var output = program.OutputNodeIndexes["result"];
 
         Assert.Equal((long)size * size, capacities[output]);
-        Assert.True(arenaSize >= checked(size * size * sizeof(double)), $"{identity} {size}: arena {arenaSize}");
+        Assert.True(arenaSize >= checked(size * size * sizeof(float)), $"{identity} {size}: arena {arenaSize}");
         var buffer = Marshal.AllocHGlobal(slotOffsets.Max() + 4096);
         try
         {

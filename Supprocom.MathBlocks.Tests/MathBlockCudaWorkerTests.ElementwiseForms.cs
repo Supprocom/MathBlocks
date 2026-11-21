@@ -8,13 +8,13 @@ namespace Supprocom.MathBlocks.Tests;
 public sealed partial class MathBlockCudaWorkerTests
 {
     private const int ElementwiseFullLength = 302_893;
-    private const double ElementwiseSentinel = -98_765.25d;
+    private const float ElementwiseSentinel = -98_765.25f;
 
     // Signed zeros, subnormals and the smallest normal of both signs, and values on the common domain edges.
-    private static readonly double[] ElementwiseSignedZeroValues =
+    private static readonly float[] ElementwiseSignedZeroValues =
     [
-        0d, -0d, double.Epsilon, -double.Epsilon, 1e-310d, -1e-310d, 2.2250738585072014E-308d,
-        -2.2250738585072014E-308d, 1d, -1d, 0.5d, 2d, 3d
+        0f, -0f, float.Epsilon, -float.Epsilon, 5.28e-41f, -5.28e-41f, 1.1754943e-38f,
+        -1.1754943e-38f, 1f, -1f, 0.5f, 2f, 3f
     ];
 
     /// <summary>Gets every source identifier of the elementwise forms.</summary>
@@ -112,17 +112,17 @@ public sealed partial class MathBlockCudaWorkerTests
     public void CUDAClampFollowsTheMathClampRuleAtSignedZerosAndInvalidLimits()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
-        double[][] cases =
+        float[][] cases =
         [
-            [-0d, 0d, 0d], [-0d, 0d, 1d], [-0d, 0d, 0.5d], [0d, 0d, -0d], [0d, -0d, -0d], [0d, -1d, -0d],
-            [-1d, 0d, -0d], [-0d, -0d, 0d], [0d, -0d, 0d], [-1d, -0d, 0d], [1d, -0d, 0d], [-0d, -1d, 1d],
-            [1d, 3d, 2d], [0d, 0d, -1d], [-0d, 1d, 0d], [5d, 2d, 2d]
+            [-0f, 0f, 0f], [-0f, 0f, 1f], [-0f, 0f, 0.5f], [0f, 0f, -0f], [0f, -0f, -0f], [0f, -1f, -0f],
+            [-1f, 0f, -0f], [-0f, -0f, 0f], [0f, -0f, 0f], [-1f, -0f, 0f], [1f, -0f, 0f], [-0f, -1f, 1f],
+            [1f, 3f, 2f], [0f, 0f, -1f], [-0f, 1f, 0f], [5f, 2f, 2f]
         ];
         var clamp = MathBlockCatalog.Standard.Get("scalar.clamp");
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var nodes = Enumerable.Range(0, 3).Select(index => builder.Input($"input-{index}", MathBlockType.Scalar())).ToArray();
         var program = builder.Output("result", builder.Apply("scalar.clamp", 1, nodes)).Build();
-        MathBlockValue[] prototype = [MathBlockValue.Scalar(5d), MathBlockValue.Scalar(0d), MathBlockValue.Scalar(3d)];
+        MathBlockValue[] prototype = [MathBlockValue.Scalar(5f), MathBlockValue.Scalar(0f), MathBlockValue.Scalar(3f)];
         using var compiled = new MathBlocksCUDAWorker().Compile(program, NameWindowInputs(prototype));
         var failures = new List<string>();
         var invalid = 0;
@@ -160,31 +160,31 @@ public sealed partial class MathBlockCudaWorkerTests
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var operation = MathBlockCatalog.Standard.Get(identifier, 1);
         var cases = new List<MathBlockValue[]>();
-        static MathBlockValue Scalar(double value) => MathBlockValue.Scalar(value);
+        static MathBlockValue Scalar(float value) => MathBlockValue.Scalar(value);
         switch (operation.Arity)
         {
             case 1:
                 for (var index = 0; index < 640; index++)
-                    cases.Add([Scalar((index + 0.1d) / 64d)]);
+                    cases.Add([Scalar((index + 0.1f) / 64f)]);
                 for (var index = 0; index < 224; index++)
-                    cases.Add([Scalar(-3d + (index + 0.3d) / 64d)]);
+                    cases.Add([Scalar(-3f + (index + 0.3f) / 64f)]);
                 break;
             case 2:
                 for (var left = 0; left < 40; left++)
                     for (var right = 0; right < 40; right++)
-                        cases.Add([Scalar((left + 0.1d) / 4d), Scalar((right + 0.3d) / 4d)]);
+                        cases.Add([Scalar((left + 0.1f) / 4f), Scalar((right + 0.3f) / 4f)]);
                 for (var index = 0; index < 224; index++)
-                    cases.Add([Scalar(-3d + (index + 0.3d) / 64d), Scalar(1.7d + index / 32d)]);
+                    cases.Add([Scalar(-3f + (index + 0.3f) / 64f), Scalar(1.7f + index / 32f)]);
                 break;
             default:
                 for (var x = 0; x < 10; x++)
                     for (var left = 0; left < 15; left++)
                         for (var right = 0; right < 15; right++)
-                            cases.Add([Scalar((x + 0.5d) / 10d), Scalar((left + 0.5d) / 1.5d), Scalar((right + 0.3d) / 1.5d)]);
-                foreach (var tiny in new[] { 5.86594004457162E-309d, 5.996723829767073E-309d, 1e-310d, 1.5e-308d })
+                            cases.Add([Scalar((x + 0.5f) / 10f), Scalar((left + 0.5f) / 1.5f), Scalar((right + 0.3f) / 1.5f)]);
+                foreach (var tiny in new[] { 3.1e-39f, 3.17e-39f, 5.28e-41f, 7.92e-39f })
                     for (var x = 0; x < 40; x++)
                         for (var left = 0; left < 5; left++)
-                            cases.Add([Scalar((x + 0.5d) / 40d), Scalar((left + 0.3d) / 2d), Scalar(tiny)]);
+                            cases.Add([Scalar((x + 0.5f) / 40f), Scalar((left + 0.3f) / 2f), Scalar(tiny)]);
                 break;
         }
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
@@ -230,12 +230,12 @@ public sealed partial class MathBlockCudaWorkerTests
         var cases = new List<MathBlockValue[]>();
         for (var index = 0; index < 4_000; index++)
         {
-            var fraction = (index + 0.1d) / 4_000d;
+            var fraction = (index + 0.1f) / 4_000f;
             cases.Add(identifier switch
             {
-                "scalar.power" => [MathBlockValue.Scalar(0.5d), MathBlockValue.Scalar(1022d + 53d * fraction)],
-                "probability.poisson-pmf" => [MathBlockValue.Scalar(708d + 37d * fraction), MathBlockValue.Scalar(index % 4)],
-                _ => [MathBlockValue.Scalar(-745.1d + 37.5d * fraction)]
+                "scalar.power" => [MathBlockValue.Scalar(0.5f), MathBlockValue.Scalar(1022f + 53f * fraction)],
+                "probability.poisson-pmf" => [MathBlockValue.Scalar(708f + 37f * fraction), MathBlockValue.Scalar(index % 4)],
+                _ => [MathBlockValue.Scalar(-745.1f + 37.5f * fraction)]
             });
         }
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
@@ -251,7 +251,7 @@ public sealed partial class MathBlockCudaWorkerTests
             compiled.UploadInputs(NameWindowInputs(inputs));
             compiled.ExecuteResident();
             var cuda = compiled.ReadOutputs()["result"];
-            if (coreclr.IsValid && coreclr.AsScalar() != 0d && Math.Abs(coreclr.AsScalar()) < 2.2250738585072014E-308d)
+            if (coreclr.IsValid && coreclr.AsScalar() != 0f && Math.Abs(coreclr.AsScalar()) < 1.1754943e-38f)
                 subnormal++;
             if (!IsExact(coreclr, cuda))
                 failures.Add($"({string.Join(", ", inputs.Select(DescribeBits))}): CoreCLR={DescribeBits(coreclr)}, CUDA={DescribeBits(cuda)}");
@@ -282,8 +282,8 @@ public sealed partial class MathBlockCudaWorkerTests
             var seeded = CreateArguments(source, 257, mask, 9_500 + mask);
             var computed = form.Evaluate(ElementwiseFormInputs(source, seeded, ElementwiseSentinel));
             var realValue = computed.IsValid
-                ? computed.AsVector().FirstOrDefault(value => value != ElementwiseSentinel, 0.25d)
-                : 0.25d;
+                ? computed.AsVector().FirstOrDefault(value => value != ElementwiseSentinel, 0.25f)
+                : 0.25f;
             yield return new ElementwiseCase($"[{label}] fill equal to a computed value", form, ElementwiseFormInputs(source, seeded, realValue));
 
             var signedZeros = CreateSignedZeroArguments(source, mask);
@@ -338,7 +338,7 @@ public sealed partial class MathBlockCudaWorkerTests
                 arguments[index] = MathBlockValue.Scalar(ElementwiseSignedZeroValues[scalarOrdinal++ % 2]);
                 continue;
             }
-            var values = new double[count];
+            var values = new float[count];
             var stride = 1;
             for (var previous = 0; previous < position; previous++)
                 stride *= ElementwiseSignedZeroValues.Length;
@@ -349,7 +349,7 @@ public sealed partial class MathBlockCudaWorkerTests
         return arguments;
     }
 
-    private static MathBlockValue[] ReplaceVectors(MathBlockValue[] arguments, Func<int, double[], double[]> replace)
+    private static MathBlockValue[] ReplaceVectors(MathBlockValue[] arguments, Func<int, float[], float[]> replace)
     {
         var result = new MathBlockValue[arguments.Length];
         for (var index = 0; index < arguments.Length; index++)
@@ -361,7 +361,7 @@ public sealed partial class MathBlockCudaWorkerTests
         return result;
     }
 
-    private static MathBlockValue[] ElementwiseFormInputs(string source, MathBlockValue[] arguments, double fill)
+    private static MathBlockValue[] ElementwiseFormInputs(string source, MathBlockValue[] arguments, float fill)
     {
         var unit = Form(source).ResolveOutputType([.. arguments.Select(argument => argument.Type), MathBlockType.Scalar()]).Unit;
         return [.. arguments, MathBlockValue.Scalar(fill, unit)];

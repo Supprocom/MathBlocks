@@ -12,9 +12,9 @@ public sealed class MathBlockCudaDomainDeviceTests
     // MathBlockCudaDomainLargeDeviceTests, which needs more memory than the 4 GB cap.
     private static IEnumerable<MathBlockDomainWiringTests.Case> LargeCases()
     {
-        yield return new("combinatorics.nonempty-subset-sums@1", [MathBlockValue.Vector(Enumerable.Range(1, 24).Select(value => (double)value))], new() { MaximumExplicitSubsetSize = 24 });
-        yield return new("vector.repeat@1", [MathBlockValue.Scalar(1.25d), MathBlockValue.Scalar(2_000_000d)], new() { MaximumGeneratedVectorLength = 2_000_000 });
-        yield return new("vector.linspace@1", [MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d), MathBlockValue.Scalar(2_000_000d)], new() { MaximumGeneratedVectorLength = 2_000_000 });
+        yield return new("combinatorics.nonempty-subset-sums@1", [MathBlockValue.Vector(Enumerable.Range(1, 24).Select(value => (float)value))], new() { MaximumExplicitSubsetSize = 24 });
+        yield return new("vector.repeat@1", [MathBlockValue.Scalar(1.25f), MathBlockValue.Scalar(2_000_000f)], new() { MaximumGeneratedVectorLength = 2_000_000 });
+        yield return new("vector.linspace@1", [MathBlockValue.Scalar(0f), MathBlockValue.Scalar(1f), MathBlockValue.Scalar(2_000_000f)], new() { MaximumGeneratedVectorLength = 2_000_000 });
     }
 
     /// <summary>Gets the names of the cases of each direction, as <c>direction:identity</c>.</summary>
@@ -106,7 +106,7 @@ public sealed class MathBlockCudaDomainDeviceTests
 
         var counts = Counts(
             "special.regularized-incomplete-beta@1",
-            [MathBlockValue.Scalar(0.5d), MathBlockValue.Scalar(1e6d), MathBlockValue.Scalar(1e6d)],
+            [MathBlockValue.Scalar(0.5f), MathBlockValue.Scalar(1e6f), MathBlockValue.Scalar(1e6f)],
             domain,
             "special.regularized-incomplete-beta@1");
 
@@ -129,17 +129,17 @@ public sealed class MathBlockCudaDomainDeviceTests
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var size = 6;
-        var entries = new double[size * size];
+        var entries = new float[size * size];
         for (var row = 0; row < size; row++)
         {
             for (var column = row; column < size; column++)
             {
-                entries[row * size + column] = entries[column * size + row] = Math.Sin(1d + row * 7 + column * 3) + 2d;
+                entries[row * size + column] = entries[column * size + row] = MathF.Sin(1f + row * 7 + column * 3) + 2f;
             }
         }
 
         MathBlockValue[] values = string.Equals(identity, "matrix.spectral-norm@1", StringComparison.Ordinal)
-            ? [MathBlockValue.Matrix(new MathBlockMatrix(size, size, entries)), MathBlockValue.Scalar(10d)]
+            ? [MathBlockValue.Matrix(new MathBlockMatrix(size, size, entries)), MathBlockValue.Scalar(10f)]
             : [MathBlockValue.Matrix(new MathBlockMatrix(size, size, entries))];
         var domain = new MathBlockDomainOptions { JacobiRotationMultiplier = 1, JacobiNonConvergence = policy };
 
@@ -160,7 +160,7 @@ public sealed class MathBlockCudaDomainDeviceTests
 
         var counts = Counts(
             form,
-            [MathBlockValue.Vector([0.5d, 0.5d, 0.5d]), MathBlockValue.Scalar(1e6d), MathBlockValue.Scalar(1e6d), MathBlockValue.Scalar(-1d)],
+            [MathBlockValue.Vector([0.5f, 0.5f, 0.5f]), MathBlockValue.Scalar(1e6f), MathBlockValue.Scalar(1e6f), MathBlockValue.Scalar(-1f)],
             MathBlockDomainOptions.Default,
             form);
 
@@ -174,8 +174,8 @@ public sealed class MathBlockCudaDomainDeviceTests
     public void ACudaExecutionZeroesTheCountersFirst()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
-        MathBlockValue[] hard = [MathBlockValue.Scalar(0.5d), MathBlockValue.Scalar(1e6d), MathBlockValue.Scalar(1e6d)];
-        MathBlockValue[] easy = [MathBlockValue.Scalar(0.5d), MathBlockValue.Scalar(2d), MathBlockValue.Scalar(3d)];
+        MathBlockValue[] hard = [MathBlockValue.Scalar(0.5f), MathBlockValue.Scalar(1e6f), MathBlockValue.Scalar(1e6f)];
+        MathBlockValue[] easy = [MathBlockValue.Scalar(0.5f), MathBlockValue.Scalar(2f), MathBlockValue.Scalar(3f)];
         var (program, inputs) = Build("special.regularized-incomplete-beta@1", hard);
         using var compiled = new MathBlocksCUDAWorker().CompileWithOptions(program, MathBlocksCudaOptions.Default, inputs, MathBlockDomainOptions.Default);
 
@@ -206,7 +206,7 @@ public sealed class MathBlockCudaDomainDeviceTests
     public void ADeviceOrdinalPastTheDeviceCountNamesTheCount()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
-        var (program, inputs) = Build("special.regularized-incomplete-beta@1", [MathBlockValue.Scalar(0.5d), MathBlockValue.Scalar(2d), MathBlockValue.Scalar(3d)]);
+        var (program, inputs) = Build("special.regularized-incomplete-beta@1", [MathBlockValue.Scalar(0.5f), MathBlockValue.Scalar(2f), MathBlockValue.Scalar(3f)]);
 
         using var first = new MathBlocksCUDAWorker().CompileWithOptions(program, new MathBlocksCudaOptions { DeviceOrdinal = 0 }, inputs);
         var thrown = Assert.Throws<ArgumentOutOfRangeException>(() => new MathBlocksCUDAWorker().CompileWithOptions(

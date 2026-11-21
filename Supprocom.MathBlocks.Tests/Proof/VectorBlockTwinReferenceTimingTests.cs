@@ -10,7 +10,7 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 /// </summary>
 public sealed class VectorBlockTwinReferenceTimingTests
 {
-    private const double GrowthFactor = 5d;
+    private const float GrowthFactor = 5f;
     private const string TableName = "vector-twin-reference.tsv";
     private const string TableHeader = "identity\tclass\tparameter\trows\ttwin_ns_per_row\treference_ns_per_row\tratio";
 
@@ -36,7 +36,7 @@ public sealed class VectorBlockTwinReferenceTimingTests
         {
             var item = measured[index];
             var operation = string.Create(CultureInfo.InvariantCulture, $"{item.Call.Name} rows={item.Rows}");
-            cells.Add(new ProofCell(operation, item.ClassName, "-", item.Call.Parameter, item.Call.Width, item.TwinNanosecondsPerRow, 0d, 0d)
+            cells.Add(new ProofCell(operation, item.ClassName, "-", item.Call.Parameter, item.Call.Width, item.TwinNanosecondsPerRow, 0f, 0f)
             {
                 SameClassReferenceNanosecondsPerRow = item.ReferenceNanosecondsPerRow
             });
@@ -81,7 +81,7 @@ public sealed class VectorBlockTwinReferenceTimingTests
             for (var callIndex = 0; callIndex < calls.Count; callIndex++)
             {
                 var call = calls[callIndex];
-                var constant = new double[rows];
+                var constant = new float[rows];
                 Array.Fill(constant, call.Constant);
                 for (var setIndex = 0; setIndex < sets.Length; setIndex++)
                 {
@@ -102,7 +102,7 @@ public sealed class VectorBlockTwinReferenceTimingTests
     }
 
     // The per-row elementwise binary operation with the operand as a column: the form with the fill, then its validity sibling.
-    private static MathBlockValue[][] ReferenceInputs(double[] first, double[] column) =>
+    private static MathBlockValue[][] ReferenceInputs(float[] first, float[] column) =>
     [
         [MathBlockValue.Vector(first, MathBlockUnit.Dimensionless), MathBlockValue.Vector(column, MathBlockUnit.Dimensionless), MathBlockValue.Scalar(VectorBlockCalls.Fill)],
         [MathBlockValue.Vector(first, MathBlockUnit.Dimensionless), MathBlockValue.Vector(column, MathBlockUnit.Dimensionless)]
@@ -112,7 +112,7 @@ public sealed class VectorBlockTwinReferenceTimingTests
     private static List<string> Growth(List<Measurement> measured)
     {
         var failures = new List<string>();
-        var small = new Dictionary<string, double>(StringComparer.Ordinal);
+        var small = new Dictionary<string, float>(StringComparer.Ordinal);
         for (var index = 0; index < measured.Count; index++)
         {
             if (measured[index].Rows == VectorBlockCalls.TimingRows[0])
@@ -147,5 +147,5 @@ public sealed class VectorBlockTwinReferenceTimingTests
             CultureInfo.InvariantCulture,
             $"{item.Call.Identity}\t{item.ClassName}\t{item.Call.Parameter}\t{item.Rows}\t{item.TwinNanosecondsPerRow:F3}\t{item.ReferenceNanosecondsPerRow:F3}\t{item.TwinNanosecondsPerRow / item.ReferenceNanosecondsPerRow:F3}");
 
-    private sealed record Measurement(VectorBlockCall Call, string ClassName, int Rows, double TwinNanosecondsPerRow, double ReferenceNanosecondsPerRow);
+    private sealed record Measurement(VectorBlockCall Call, string ClassName, int Rows, float TwinNanosecondsPerRow, float ReferenceNanosecondsPerRow);
 }

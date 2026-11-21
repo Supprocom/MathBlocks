@@ -6,7 +6,7 @@ namespace Supprocom.MathBlocks.Tests;
 public sealed class MathBlockElementwiseFullScaleTests
 {
     private const int FullLength = 302_893;
-    private const double Sentinel = -98_765.25d;
+    private const float Sentinel = -98_765.25f;
 
     /// <summary>Gets every source identifier of the elementwise forms.</summary>
     public static TheoryData<string> Sources => [.. SourceIdentifiers];

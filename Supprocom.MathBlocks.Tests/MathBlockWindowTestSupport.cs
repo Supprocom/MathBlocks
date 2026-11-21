@@ -76,56 +76,56 @@ internal static class MathBlockWindowTestSupport
         return inputs;
     }
 
-    private static double[] CreateSeries(string source, int seriesIndex, int count, int width, Random random)
+    private static float[] CreateSeries(string source, int seriesIndex, int count, int width, Random random)
     {
-        var values = new double[count];
+        var values = new float[count];
         if (source.StartsWith("information.", StringComparison.Ordinal))
         {
-            var cell = new double[width];
-            var total = 0d;
+            var cell = new float[width];
+            var total = 0f;
             for (var index = 0; index < width; index++)
-                total += cell[index] = 0.1d + random.NextDouble();
+                total += cell[index] = 0.1f + random.NextSingle();
             for (var row = 0; row < count; row++)
                 values[row] = cell[row % width] / total;
             for (var row = count / 2; row < Math.Min(count, count / 2 + 3); row++)
-                values[row] *= 1.5d;
+                values[row] *= 1.5f;
             return values;
         }
         if (string.Equals(source, "path.zero-crossing-count", StringComparison.Ordinal) ||
             string.Equals(source, "path.turning-point-count", StringComparison.Ordinal))
         {
             for (var row = 0; row < count; row++)
-                values[row] = random.Next(8) == 0 ? 0d : random.NextDouble() * 2d - 1d;
+                values[row] = random.Next(8) == 0 ? 0f : random.NextSingle() * 2f - 1f;
             return values;
         }
         if (string.Equals(source, "path.first-passage-index", StringComparison.Ordinal))
         {
             // The sample threshold is 4, so the series crosses it in some windows and not in others.
             for (var row = 0; row < count; row++)
-                values[row] = 1d + random.NextDouble() * 3.5d;
+                values[row] = 1f + random.NextSingle() * 3.5f;
             return values;
         }
         if (seriesIndex == 1 && source.StartsWith("statistics.weighted-", StringComparison.Ordinal))
         {
             for (var row = 0; row < count; row++)
-                values[row] = random.Next(10) == 0 ? 0d : random.NextDouble();
+                values[row] = random.Next(10) == 0 ? 0f : random.NextSingle();
             return values;
         }
         for (var row = 0; row < count; row++)
         {
-            var value = 0.5d + random.NextDouble() * 1.5d;
-            values[row] = random.Next(4) == 0 ? Math.Round(value * 4d, MidpointRounding.ToEven) / 4d : value;
+            var value = 0.5f + random.NextSingle() * 1.5f;
+            values[row] = random.Next(4) == 0 ? MathF.Round(value * 4f, MidpointRounding.ToEven) / 4f : value;
         }
         var flatStart = seriesIndex == 0 ? count / 3 : (2 * count) / 3;
         var flatLength = Math.Min(count - flatStart, width + 3);
         for (var row = flatStart; row < flatStart + flatLength; row++)
-            values[row] = 1.25d;
+            values[row] = 1.25f;
         return values;
     }
 
     // Row t of the reference is the Standard source operation on freshly copied slices t - width + 1 .. t. It does
     // not use the window lift. Rows not in the stride are left unchecked.
-    public static (bool[] Checked, bool[] Valid, double[] Values) Reference(
+    public static (bool[] Checked, bool[] Valid, float[] Values) Reference(
         string source,
         MathBlockValue[] sourceInputs,
         int count,
@@ -135,9 +135,9 @@ internal static class MathBlockWindowTestSupport
         var operation = MathBlockCatalog.Standard.Get(source);
         var isChecked = new bool[count];
         var valid = new bool[count];
-        var values = new double[count];
+        var values = new float[count];
         var rows = count - width + 1;
-        var vectors = new double[]?[sourceInputs.Length];
+        var vectors = new float[]?[sourceInputs.Length];
         var booleanVectors = new bool[]?[sourceInputs.Length];
         for (var index = 0; index < sourceInputs.Length; index++)
         {
@@ -190,10 +190,10 @@ internal static class MathBlockWindowTestSupport
     public static List<string> Compare(
         string source,
         int width,
-        double fill,
+        float fill,
         MathBlockValue form,
         MathBlockValue validity,
-        (bool[] Checked, bool[] Valid, double[] Values) reference)
+        (bool[] Checked, bool[] Valid, float[] Values) reference)
     {
         var failures = new List<string>();
         if (!form.IsValid || !validity.IsValid)
@@ -213,7 +213,7 @@ internal static class MathBlockWindowTestSupport
             if (!reference.Checked[row])
                 continue;
             var expected = reference.Valid[row] ? reference.Values[row] : fill;
-            if (BitConverter.DoubleToInt64Bits(values[row]) != BitConverter.DoubleToInt64Bits(expected))
+            if (BitConverter.SingleToInt32Bits(values[row]) != BitConverter.SingleToInt32Bits(expected))
             {
                 failures.Add($"{source} w={width} row {row}: value {values[row]:R}, expected {expected:R} " +
                              $"(source {(reference.Valid[row] ? "valid" : "invalid or warm-up")}).");

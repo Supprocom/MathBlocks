@@ -18,11 +18,11 @@ public sealed class MathBlockProgramTests
 
         var output = program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["left"] = MathBlockValue.Scalar(12d, unit),
-            ["right"] = MathBlockValue.Scalar(10d, unit)
+            ["left"] = MathBlockValue.Scalar(12f, unit),
+            ["right"] = MathBlockValue.Scalar(10f, unit)
         });
 
-        Assert.Equal(0.2d, output["result"].AsScalar(), 12);
+        Assert.Equal(0.2f, output["result"].AsScalar(), 12);
         Assert.True(output["result"].Type.Unit.IsDimensionless);
     }
 
@@ -30,9 +30,9 @@ public sealed class MathBlockProgramTests
     [Fact]
     public void FingerprintIsStableAndCoversConstantsAndTopology()
     {
-        var first = BuildAffineProgram(2d);
-        var same = BuildAffineProgram(2d);
-        var changed = BuildAffineProgram(3d);
+        var first = BuildAffineProgram(2f);
+        var same = BuildAffineProgram(2f);
+        var changed = BuildAffineProgram(3f);
 
         Assert.Equal(first.Fingerprint, same.Fingerprint);
         Assert.NotEqual(first.Fingerprint, changed.Fingerprint, StringComparer.Ordinal);
@@ -51,8 +51,8 @@ public sealed class MathBlockProgramTests
 
         var result = program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["numerator"] = MathBlockValue.Scalar(1d),
-            ["denominator"] = MathBlockValue.Scalar(0d)
+            ["numerator"] = MathBlockValue.Scalar(1f),
+            ["denominator"] = MathBlockValue.Scalar(0f)
         })["quotient"];
 
         Assert.False(result.IsValid);
@@ -95,13 +95,13 @@ public sealed class MathBlockProgramTests
 
         var result = new MathBlocksCoreCLRWorker().Execute(formula, new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["first"] = MathBlockValue.Scalar(6d),
-            ["second"] = MathBlockValue.Scalar(2d),
-            ["third"] = MathBlockValue.Scalar(1d),
-            ["fourth"] = MathBlockValue.Scalar(4d)
+            ["first"] = MathBlockValue.Scalar(6f),
+            ["second"] = MathBlockValue.Scalar(2f),
+            ["third"] = MathBlockValue.Scalar(1f),
+            ["fourth"] = MathBlockValue.Scalar(4f)
         });
 
-        Assert.Equal(8d, result["result"].AsScalar());
+        Assert.Equal(8f, result["result"].AsScalar());
     }
 
     /// <summary>Verifies the CoreCLR worker runs independent formula branches in parallel async.</summary>
@@ -121,8 +121,8 @@ public sealed class MathBlockProgramTests
                 release.Wait(TimeSpan.FromSeconds(5));
                 return inputs[0];
             },
-            [new MathBlockRegressionCase("reference", [MathBlockValue.Scalar(1d)], MathBlockValue.Scalar(1d))],
-            new MathBlockPerformanceCase([MathBlockValue.Scalar(1d)]));
+            [new MathBlockRegressionCase("reference", [MathBlockValue.Scalar(1f)], MathBlockValue.Scalar(1f))],
+            new MathBlockPerformanceCase([MathBlockValue.Scalar(1f)]));
 
         var registry = new MathBlockRegistry(
         [
@@ -140,19 +140,19 @@ public sealed class MathBlockProgramTests
 
         var execution = System.Threading.Tasks.Task.Run(() => worker.Execute(
             program,
-            new Dictionary<string, MathBlockValue>(StringComparer.Ordinal) { ["input"] = MathBlockValue.Scalar(3d) }));
+            new Dictionary<string, MathBlockValue>(StringComparer.Ordinal) { ["input"] = MathBlockValue.Scalar(3f) }));
 
         var branchesEntered = entered.Wait(TimeSpan.FromSeconds(5));
         release.Set();
         Assert.True(branchesEntered, "Both branches did not start in parallel.");
-        Assert.Equal(6d, (await execution)["sum"].AsScalar());
+        Assert.Equal(6f, (await execution)["sum"].AsScalar());
     }
 
     /// <summary>Verifies the CoreCLR worker is safe for concurrent executions.</summary>
     [Fact]
     public void CoreCLRWorkerIsSafeForConcurrentExecutions()
     {
-        var program = BuildAffineProgram(2d);
+        var program = BuildAffineProgram(2f);
         var worker = new MathBlocksCoreCLRWorker();
 
         Parallel.For(0, 1_000, index =>
@@ -161,7 +161,7 @@ public sealed class MathBlockProgramTests
             {
                 ["input"] = MathBlockValue.Scalar(index)
             });
-            Assert.Equal(index * 2d, result["output"].AsScalar());
+            Assert.Equal(index * 2f, result["output"].AsScalar());
         });
     }
 
@@ -171,9 +171,9 @@ public sealed class MathBlockProgramTests
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var input = builder.Input("input", MathBlockType.Vector());
-        var doubled = builder.Apply("vector.scale", inputs: [input, builder.Constant(MathBlockValue.Scalar(2d))]);
-        var tripled = builder.Apply("vector.scale", inputs: [input, builder.Constant(MathBlockValue.Scalar(3d))]);
-        var quintupled = builder.Apply("vector.scale", inputs: [input, builder.Constant(MathBlockValue.Scalar(5d))]);
+        var doubled = builder.Apply("vector.scale", inputs: [input, builder.Constant(MathBlockValue.Scalar(2f))]);
+        var tripled = builder.Apply("vector.scale", inputs: [input, builder.Constant(MathBlockValue.Scalar(3f))]);
+        var quintupled = builder.Apply("vector.scale", inputs: [input, builder.Constant(MathBlockValue.Scalar(5f))]);
         var partial = builder.Apply("vector.add", inputs: [doubled, tripled]);
         var total = builder.Apply("vector.add", inputs: [partial, quintupled]);
         var program = builder
@@ -184,18 +184,18 @@ public sealed class MathBlockProgramTests
             .Build();
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["input"] = MathBlockValue.Vector([1d, 2d, 3d, 4d])
+            ["input"] = MathBlockValue.Vector([1f, 2f, 3f, 4f])
         };
 
         var serial = new MathBlocksCoreCLRWorker(1).Execute(program, inputs);
         var parallel = new MathBlocksCoreCLRWorker(2).Execute(program, inputs);
 
-        var expected = new Dictionary<string, double[]>(StringComparer.Ordinal)
+        var expected = new Dictionary<string, float[]>(StringComparer.Ordinal)
         {
-            ["doubled"] = [2d, 4d, 6d, 8d],
-            ["tripled"] = [3d, 6d, 9d, 12d],
-            ["quintupled"] = [5d, 10d, 15d, 20d],
-            ["total"] = [10d, 20d, 30d, 40d]
+            ["doubled"] = [2f, 4f, 6f, 8f],
+            ["tripled"] = [3f, 6f, 9f, 12f],
+            ["quintupled"] = [5f, 10f, 15f, 20f],
+            ["total"] = [10f, 20f, 30f, 40f]
         };
         foreach (var (name, values) in expected)
         {
@@ -210,21 +210,21 @@ public sealed class MathBlockProgramTests
     /// length, so a binary vector operation with the input rejects the mismatch at build time.
     /// </summary>
     [Theory]
-    [InlineData("sequence.rolling-sum", 3d, 8)]
-    [InlineData("sequence.rolling-mean", 3d, 8)]
-    [InlineData("sequence.rolling-maximum", 3d, 8)]
-    [InlineData("sequence.rolling-minimum", 3d, 8)]
-    [InlineData("sequence.rolling-median", 3d, 8)]
-    [InlineData("sequence.rolling-standard-deviation", 3d, 8)]
-    [InlineData("sequence.rolling-variance", 3d, 8)]
-    [InlineData("sequence.rolling-quantile", 3d, 8)]
-    [InlineData("sequence.difference", 3d, 7)]
-    public void ConstantWidthDeclaresTheOutputLength(string identifier, double width, int expectedRows)
+    [InlineData("sequence.rolling-sum", 3f, 8)]
+    [InlineData("sequence.rolling-mean", 3f, 8)]
+    [InlineData("sequence.rolling-maximum", 3f, 8)]
+    [InlineData("sequence.rolling-minimum", 3f, 8)]
+    [InlineData("sequence.rolling-median", 3f, 8)]
+    [InlineData("sequence.rolling-standard-deviation", 3f, 8)]
+    [InlineData("sequence.rolling-variance", 3f, 8)]
+    [InlineData("sequence.rolling-quantile", 3f, 8)]
+    [InlineData("sequence.difference", 3f, 7)]
+    public void ConstantWidthDeclaresTheOutputLength(string identifier, float width, int expectedRows)
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var values = builder.Input("values", MathBlockType.Vector(length: 10));
         int[] arguments = string.Equals(identifier, "sequence.rolling-quantile", StringComparison.Ordinal)
-            ? [values, builder.Constant(MathBlockValue.Scalar(width)), builder.Constant(MathBlockValue.Scalar(0.5d))]
+            ? [values, builder.Constant(MathBlockValue.Scalar(width)), builder.Constant(MathBlockValue.Scalar(0.5f))]
             : [values, builder.Constant(MathBlockValue.Scalar(width))];
         var rolled = builder.Apply(identifier, inputs: arguments);
         var program = builder.Output("rolled", rolled).Build();
@@ -233,7 +233,7 @@ public sealed class MathBlockProgramTests
         var output = program.Evaluate(
             new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
             {
-                ["values"] = MathBlockValue.Vector([1d, 4d, 2d, 8d, 5d, 7d, 3d, 6d, 9d, 0d])
+                ["values"] = MathBlockValue.Vector([1f, 4f, 2f, 8f, 5f, 7f, 3f, 6f, 9f, 0f])
             })["rolled"];
         Assert.True(output.IsValid);
         Assert.Equal(expectedRows, output.AsVector().Count);
@@ -253,12 +253,12 @@ public sealed class MathBlockProgramTests
         var values = builder.Input("values", MathBlockType.Vector(length: 4));
         var width = builder.Input("width", MathBlockType.Scalar());
         Assert.Equal(0, ApplyRows(builder, values, width));
-        Assert.Equal(0, ApplyRows(builder, values, builder.Constant(MathBlockValue.Scalar(5d))));
-        Assert.Equal(0, ApplyRows(builder, values, builder.Constant(MathBlockValue.Scalar(0d))));
-        Assert.Equal(0, ApplyRows(builder, values, builder.Constant(MathBlockValue.Scalar(1.5d))));
-        Assert.Equal(1, ApplyRows(builder, values, builder.Constant(MathBlockValue.Scalar(4d))));
+        Assert.Equal(0, ApplyRows(builder, values, builder.Constant(MathBlockValue.Scalar(5f))));
+        Assert.Equal(0, ApplyRows(builder, values, builder.Constant(MathBlockValue.Scalar(0f))));
+        Assert.Equal(0, ApplyRows(builder, values, builder.Constant(MathBlockValue.Scalar(1.5f))));
+        Assert.Equal(1, ApplyRows(builder, values, builder.Constant(MathBlockValue.Scalar(4f))));
         var unknown = builder.Input("unknown", MathBlockType.Vector());
-        Assert.Equal(0, ApplyRows(builder, unknown, builder.Constant(MathBlockValue.Scalar(2d))));
+        Assert.Equal(0, ApplyRows(builder, unknown, builder.Constant(MathBlockValue.Scalar(2f))));
 
         static int ApplyRows(MathBlockProgramBuilder builder, int values, int width)
         {
@@ -296,11 +296,11 @@ public sealed class MathBlockProgramTests
     internal static Dictionary<string, MathBlockValue> RollingLogarithmInputs() =>
         new(StringComparer.Ordinal)
         {
-            ["values"] = MathBlockValue.Vector([1d, -5d, 1d, 1d]),
-            ["width"] = MathBlockValue.Scalar(2d)
+            ["values"] = MathBlockValue.Vector([1f, -5f, 1f, 1f]),
+            ["width"] = MathBlockValue.Scalar(2f)
         };
 
-    private static MathBlockProgram BuildAffineProgram(double constant)
+    private static MathBlockProgram BuildAffineProgram(float constant)
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var input = builder.Input("input", MathBlockType.Scalar());

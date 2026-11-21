@@ -13,13 +13,13 @@ internal sealed class MathBlockWindowExactReference
     private readonly BigInteger[] shiftedAbsoluteSum;
     private readonly BigInteger[] shiftedSquareSum;
 
-    public MathBlockWindowExactReference(double[] x)
+    public MathBlockWindowExactReference(float[] x)
     {
         Count = x.Length;
         Scale = 0;
         foreach (var value in x)
         {
-            if (value == 0d)
+            if (value == 0f)
                 continue;
             Decompose(value, out _, out var exponent);
             Scale = Math.Max(Scale, -exponent);
@@ -49,42 +49,42 @@ internal sealed class MathBlockWindowExactReference
     // The series times 2^Scale is an integer series.
     public int Scale { get; }
 
-    public static double Unit => Math.ScaleB(1d, -53);
+    public static float Unit => MathF.ScaleB(1f, -53);
 
-    public static double Gamma(double k) => k * Unit / (1d - k * Unit);
+    public static float Gamma(float k) => k * Unit / (1f - k * Unit);
 
     // Row t's window is rows t - width + 1 .. t.
-    public double Sum(int row, int width) => ToDouble(WindowSum(sum, row, width), BigInteger.One, Scale);
+    public float Sum(int row, int width) => ToDouble(WindowSum(sum, row, width), BigInteger.One, Scale);
 
     // Sum over i <= row of |x_i|.
-    public double AbsoluteHistory(int row) => ToDouble(absoluteSum[row + 1], BigInteger.One, Scale);
+    public float AbsoluteHistory(int row) => ToDouble(absoluteSum[row + 1], BigInteger.One, Scale);
 
     // Sum over i <= row of |x_i - x_0| and of (x_i - x_0)^2.
-    public double ShiftedAbsoluteHistory(int row) => ToDouble(shiftedAbsoluteSum[row + 1], BigInteger.One, Scale);
+    public float ShiftedAbsoluteHistory(int row) => ToDouble(shiftedAbsoluteSum[row + 1], BigInteger.One, Scale);
 
-    public double ShiftedSquareHistory(int row) => ToDouble(shiftedSquareSum[row + 1], BigInteger.One, 2 * Scale);
+    public float ShiftedSquareHistory(int row) => ToDouble(shiftedSquareSum[row + 1], BigInteger.One, 2 * Scale);
 
     // |S1| = |sum over the window of x_i - x_0|.
-    public double ShiftedWindowAbsoluteSum(int row, int width) =>
+    public float ShiftedWindowAbsoluteSum(int row, int width) =>
         ToDouble(BigInteger.Abs(WindowSum(shiftedSum, row, width)), BigInteger.One, Scale);
 
     // The window sum and mean rounded to the nearest double, ties to even.
-    public double RoundedSum(int row, int width) => Round(WindowSum(sum, row, width), BigInteger.One, Scale);
+    public float RoundedSum(int row, int width) => Round(WindowSum(sum, row, width), BigInteger.One, Scale);
 
-    public double RoundedMean(int row, int width) => Round(WindowSum(sum, row, width), width, Scale);
+    public float RoundedMean(int row, int width) => Round(WindowSum(sum, row, width), width, Scale);
 
     // mean^2 for the window.
-    public double MeanSquare(int row, int width)
+    public float MeanSquare(int row, int width)
     {
         var s = WindowSum(sum, row, width);
         return ToDouble(s * s, (BigInteger)width * width, 2 * Scale);
     }
 
     // numerator / (denominator 2^binaryScale) rounded to the nearest double, ties to even, including subnormals.
-    public static double Round(BigInteger numerator, BigInteger denominator, int binaryScale)
+    public static float Round(BigInteger numerator, BigInteger denominator, int binaryScale)
     {
         if (numerator.IsZero)
-            return 0d;
+            return 0f;
         var negative = numerator.Sign < 0;
         var magnitude = BigInteger.Abs(numerator);
         // quotient = floor(magnitude 2^k / denominator) has 61 or 62 bits; value = (quotient + fraction) 2^(-k - scale).
@@ -113,35 +113,35 @@ internal sealed class MathBlockWindowExactReference
         }
         if (round && (sticky || !significand.IsEven))
             significand += 1;
-        var result = Math.ScaleB((double)significand, least);
+        var result = MathF.ScaleB((float)significand, least);
         return negative ? -result : result;
     }
 
     // (mean - x_0)^2 for the window.
-    public double ShiftedMeanSquare(int row, int width)
+    public float ShiftedMeanSquare(int row, int width)
     {
         var s1 = WindowSum(shiftedSum, row, width);
         return ToDouble(s1 * s1, (BigInteger)width * width, 2 * Scale);
     }
 
-    public double SumError(double computed, int row, int width) =>
+    public float SumError(float computed, int row, int width) =>
         AbsoluteError(computed, WindowSum(sum, row, width), BigInteger.One, Scale);
 
-    public double MeanError(double computed, int row, int width) =>
+    public float MeanError(float computed, int row, int width) =>
         AbsoluteError(computed, WindowSum(sum, row, width), width, Scale);
 
     // The window's variance is (w S2 - S1^2) / (w q) / 2^(2 Scale), with q = w or w - 1.
-    public double Variance(int row, int width, bool sample) =>
+    public float Variance(int row, int width, bool sample) =>
         ToDouble(VarianceNumerator(row, width), VarianceDenominator(width, sample), 2 * Scale);
 
-    public double VarianceError(double computed, int row, int width, bool sample) =>
+    public float VarianceError(float computed, int row, int width, bool sample) =>
         AbsoluteError(computed, VarianceNumerator(row, width), VarianceDenominator(width, sample), 2 * Scale);
 
     public bool VarianceIsZero(int row, int width) => VarianceNumerator(row, width).IsZero;
 
     // |computed - sqrt(v)|, from the exact square: |c - sqrt(v)| = |c^2 - v| / (c + sqrt(v)), and the denominator
     // is evaluated in double from c and sqrt(v), each correct to about 1e-16 relative.
-    public double StandardDeviationError(double computed, int row, int width, bool sample)
+    public float StandardDeviationError(float computed, int row, int width, bool sample)
     {
         var numerator = VarianceNumerator(row, width);
         var denominator = VarianceDenominator(width, sample);
@@ -164,27 +164,27 @@ internal sealed class MathBlockWindowExactReference
             binaryScale = -2 * exponent;
         }
         var squareError = ToDouble(BigInteger.Abs(difference), scaleDenominator, binaryScale);
-        var root = Math.Sqrt(ToDouble(numerator, denominator, 2 * Scale));
+        var root = MathF.Sqrt(ToDouble(numerator, denominator, 2 * Scale));
         var rootSum = computed + root;
-        return rootSum == 0d ? 0d : squareError / rootSum;
+        return rootSum == 0f ? 0f : squareError / rootSum;
     }
 
     // value = numerator / (denominator 2^binaryScale), converted with about 60 significant bits before rounding.
-    public static double ToDouble(BigInteger numerator, BigInteger denominator, int binaryScale)
+    public static float ToDouble(BigInteger numerator, BigInteger denominator, int binaryScale)
     {
         if (numerator.IsZero)
-            return 0d;
+            return 0f;
         var negative = numerator.Sign < 0;
         numerator = BigInteger.Abs(numerator);
         var shift = 64 - (int)(numerator.GetBitLength() - denominator.GetBitLength());
         var quotient = shift >= 0 ? (numerator << shift) / denominator : numerator / (denominator << -shift);
-        var result = Math.ScaleB((double)quotient, -shift - binaryScale);
+        var result = MathF.ScaleB((float)quotient, -shift - binaryScale);
         return negative ? -result : result;
     }
 
-    public static void Decompose(double value, out BigInteger mantissa, out int exponent)
+    public static void Decompose(float value, out BigInteger mantissa, out int exponent)
     {
-        var bits = BitConverter.DoubleToInt64Bits(value);
+        var bits = BitConverter.SingleToInt32Bits(value);
         var negative = bits < 0;
         var biased = (int)((bits >> 52) & 0x7FF);
         var fraction = bits & 0xF_FFFF_FFFF_FFFFL;
@@ -205,16 +205,16 @@ internal sealed class MathBlockWindowExactReference
         mantissa = negative ? -(BigInteger)fraction : fraction;
     }
 
-    private static BigInteger ToScaledInteger(double value, int scale)
+    private static BigInteger ToScaledInteger(float value, int scale)
     {
-        if (value == 0d)
+        if (value == 0f)
             return BigInteger.Zero;
         Decompose(value, out var mantissa, out var exponent);
         return mantissa << (exponent + scale);
     }
 
     // |computed - numerator / (denominator 2^binaryScale)| without rounding until the final conversion.
-    private static double AbsoluteError(double computed, BigInteger numerator, BigInteger denominator, int binaryScale)
+    private static float AbsoluteError(float computed, BigInteger numerator, BigInteger denominator, int binaryScale)
     {
         Decompose(computed, out var mantissa, out var exponent);
         var total = exponent + binaryScale;

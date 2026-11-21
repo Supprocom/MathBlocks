@@ -32,12 +32,12 @@ public sealed class MathBlockSignedZeroTests
     {
         var operation = MathBlockCatalog.Standard.Get(identifier);
         var unit = operation.RegressionCases[0].Inputs[0].Type.Unit;
-        foreach (var zero in new[] { 0d, -0d })
+        foreach (var zero in new[] { 0f, -0f })
         {
             var result = operation.Evaluate([MathBlockValue.Scalar(zero, unit)]);
             Assert.True(result.IsValid, $"{identifier}({zero:R}) is invalid.");
             Assert.True(
-                BitConverter.DoubleToInt64Bits(result.AsScalar()) == BitConverter.DoubleToInt64Bits(zero),
+                BitConverter.SingleToInt32Bits(result.AsScalar()) == BitConverter.SingleToInt32Bits(zero),
                 $"{identifier}(0x{BitConverter.DoubleToInt64Bits(zero):X16}) gave " +
                 $"0x{BitConverter.DoubleToInt64Bits(result.AsScalar()):X16}.");
         }
@@ -62,7 +62,7 @@ public sealed class MathBlockSignedZeroTests
             [MathBlockValue.Scalar(y, inputs[0].Type.Unit), MathBlockValue.Scalar(x, inputs[1].Type.Unit)]);
         Assert.True(result.IsValid);
         Assert.True(
-            BitConverter.DoubleToInt64Bits(result.AsScalar()) == BitConverter.DoubleToInt64Bits(expected),
+            BitConverter.SingleToInt32Bits(result.AsScalar()) == BitConverter.SingleToInt32Bits(expected),
             $"atan2(0x{BitConverter.DoubleToInt64Bits(y):X16}, 0x{BitConverter.DoubleToInt64Bits(x):X16}) gave " +
             $"0x{BitConverter.DoubleToInt64Bits(result.AsScalar()):X16}, expected 0x{BitConverter.DoubleToInt64Bits(expected):X16}.");
     }
@@ -116,21 +116,21 @@ public sealed class MathBlockSignedZeroTests
         AssertBits(expectedImaginary, result.AsComplex().Imaginary, label + " imaginary");
     }
 
-    private static MathBlockValue ComplexInput(MathBlockOperation operation, double real, double imaginary) =>
+    private static MathBlockValue ComplexInput(MathBlockOperation operation, float real, float imaginary) =>
         MathBlockValue.Complex(new Complex(real, imaginary), operation.RegressionCases[0].Inputs[0].Type.Unit);
 
-    private static void AssertBits(double expected, double actual, string label) =>
+    private static void AssertBits(float expected, float actual, string label) =>
         Assert.True(
-            BitConverter.DoubleToInt64Bits(actual) == BitConverter.DoubleToInt64Bits(expected),
+            BitConverter.SingleToInt32Bits(actual) == BitConverter.SingleToInt32Bits(expected),
             $"{label} gave 0x{BitConverter.DoubleToInt64Bits(actual):X16}, expected 0x{BitConverter.DoubleToInt64Bits(expected):X16}.");
 
     // InlineData cannot hold both zeros (xUnit treats 0d and -0d as duplicates), so cases use text.
-    private static double Parse(string text) => text switch
+    private static float Parse(string text) => text switch
     {
-        "+0" => 0d,
-        "-0" => -0d,
-        "pi" => Math.PI,
-        "-pi" => -Math.PI,
-        _ => double.Parse(text, System.Globalization.CultureInfo.InvariantCulture)
+        "+0" => 0f,
+        "-0" => -0f,
+        "pi" => MathF.PI,
+        "-pi" => -MathF.PI,
+        _ => float.Parse(text, System.Globalization.CultureInfo.InvariantCulture)
     };
 }

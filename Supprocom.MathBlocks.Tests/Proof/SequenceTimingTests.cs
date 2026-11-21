@@ -69,7 +69,7 @@ public sealed class SequenceTimingTests
             (ProofBar.GrowthBar, ProofBar.CollectLinearGrowth(cells)),
             (ProofBar.ReferenceBar, ProofBar.CollectMedianClassWithinTwiceReference(cells, cell => !IsWideFixedOrderSum(cell)))
         ];
-        if (cells.Exists(cell => cell.SameClassReferenceNanosecondsPerRow > 0d))
+        if (cells.Exists(cell => cell.SameClassReferenceNanosecondsPerRow > 0f))
             bars.Add((ProofBar.SameClassBar, ProofBar.CollectWithinTwiceSameClassReference(cells)));
         if (firstTrue)
         {
@@ -111,16 +111,16 @@ public sealed class SequenceTimingTests
                     var parameter = parameters[parameterIndex];
                     var inputs = SequenceOps.Inputs(name, sibling, series, availability, counts[kind], parameter.First, parameter.Second);
                     var reference = SequenceReference.Measure(name, parameter, typical, Samples);
-                    var scan = 0d;
+                    var scan = 0f;
                     if (scanned)
                         scan = TimeOperation(operation, SequenceOps.Inputs(name, sibling, scanSeries, scanAvailability, counts[kind], parameter.First, parameter.Second), set.Name, kind, parameter);
                     var sameClass = sibling && string.Equals(name, SumOverOffsets, StringComparison.Ordinal) && string.Equals(set.Name, MixedClass, StringComparison.Ordinal)
                         ? SequenceReference.Measure(name, parameter, set.First, Samples)
-                        : 0d;
+                        : 0f;
                     var nanoseconds = TimeOperation(operation, inputs, set.Name, kind, parameter);
                     if (sibling && string.Equals(name, "sum-over-offsets", StringComparison.Ordinal))
                         RecordBand(bands, operation, inputs, set.Name, ProofCounts.Name(kind, GapPeriod, SeriesPeriod), parameter.Label);
-                    cells.Add(new ProofCell(operation.Identifier, set.Name, ProofCounts.Name(kind, GapPeriod, SeriesPeriod), parameter.Label, parameter.Width, nanoseconds, reference, 0d) { FullScanNanosecondsPerRow = scan, SameClassReferenceNanosecondsPerRow = sameClass });
+                    cells.Add(new ProofCell(operation.Identifier, set.Name, ProofCounts.Name(kind, GapPeriod, SeriesPeriod), parameter.Label, parameter.Width, nanoseconds, reference, 0f) { FullScanNanosecondsPerRow = scan, SameClassReferenceNanosecondsPerRow = sameClass });
                 }
             }
         }
@@ -136,7 +136,7 @@ public sealed class SequenceTimingTests
     private static bool IsWideFixedOrderSum(ProofCell cell) =>
         cell.Width > SequenceOps.FixedOrderSumSpanLimit && cell.Operation.EndsWith(SumOverOffsets, StringComparison.Ordinal);
 
-    private static double TimeOperation(MathBlockOperation operation, MathBlockValue[] inputs, string className, int kind, ProofParameter parameter)
+    private static float TimeOperation(MathBlockOperation operation, MathBlockValue[] inputs, string className, int kind, ProofParameter parameter)
     {
         var valid = false;
         var nanoseconds = ProofTiming.NanosecondsPerRow(

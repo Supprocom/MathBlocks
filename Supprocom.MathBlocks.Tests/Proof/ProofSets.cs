@@ -3,7 +3,7 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 /// <summary>Builds the input sets of the proof matrix at a given size: the seven base classes, Mixed, the real market columns when they exist, and for sequences the all-false predicate.</summary>
 internal static class ProofSets
 {
-    private const double UnavailableShare = 0.3d;
+    private const float UnavailableShare = 0.3f;
 
     private static readonly ProofClass[] Kinds =
     [
@@ -55,7 +55,7 @@ internal static class ProofSets
     }
 
     // The availability of each row; an unavailable row also gets the value zero.
-    private static bool[] Availability(ProofClass kind, int count, int seed, double[] values)
+    private static bool[] Availability(ProofClass kind, int count, int seed, float[] values)
     {
         var flags = AllTrue(count);
         if (kind != ProofClass.Invalid && kind != ProofClass.Mixed)
@@ -64,10 +64,10 @@ internal static class ProofSets
         for (var row = 0; row < count; row++)
         {
             var applies = kind == ProofClass.Invalid || row % ProofData.BaseClasses.Length == ProofData.InvalidIndex;
-            if (applies && random.NextDouble() < UnavailableShare)
+            if (applies && random.NextSingle() < UnavailableShare)
             {
                 flags[row] = false;
-                values[row] = 0d;
+                values[row] = 0f;
             }
         }
 
@@ -75,19 +75,19 @@ internal static class ProofSets
     }
 
     // One where the close price differs from the previous row's, zero where it does not.
-    private static double[] PriceChanged(double[] close, int count)
+    private static float[] PriceChanged(float[] close, int count)
     {
         var tiled = Tile(close, count, 0);
-        var changed = new double[count];
+        var changed = new float[count];
         for (var row = 1; row < count; row++)
-            changed[row] = tiled[row] != tiled[row - 1] ? 1d : 0d;
+            changed[row] = tiled[row] != tiled[row - 1] ? 1f : 0f;
         return changed;
     }
 
     /// <summary>Repeats a source column to <paramref name="count"/> rows, starting <paramref name="shift"/> rows into it.</summary>
-    internal static double[] Tile(double[] source, int count, int shift)
+    internal static float[] Tile(float[] source, int count, int shift)
     {
-        var tiled = new double[count];
+        var tiled = new float[count];
         for (var row = 0; row < count; row++)
             tiled[row] = source[(row + shift) % source.Length];
         return tiled;

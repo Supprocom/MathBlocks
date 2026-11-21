@@ -91,12 +91,12 @@ public sealed class SequenceSafetyTests
             var bad = BadParameters(SequenceOps.IsShift(name));
             for (var parameterIndex = 0; parameterIndex < bad.Length; parameterIndex++)
                 CheckInvalid(name, set, good, bad[parameterIndex], failures);
-            var one = SequenceOps.IsShift(name) ? new ProofParameter("k=1", 1d, 1d, 1d) : new ProofParameter("[0,1]", 0d, 1d, 2d);
-            double[] fractional = [.. good];
-            fractional[5] = 1.5d;
+            var one = SequenceOps.IsShift(name) ? new ProofParameter("k=1", 1f, 1f, 1f) : new ProofParameter("[0,1]", 0f, 1f, 2f);
+            float[] fractional = [.. good];
+            fractional[5] = 1.5f;
             CheckInvalid(name, set, fractional, one, failures);
-            double[] negative = [.. good];
-            negative[5] = -1d;
+            float[] negative = [.. good];
+            negative[5] = -1f;
             CheckInvalid(name, set, negative, one, failures);
             CheckMismatch(name, set, good, one, failures);
         }
@@ -108,8 +108,8 @@ public sealed class SequenceSafetyTests
     private static ProofParameter[] BadParameters(bool shift)
     {
         if (shift)
-            return [new("k=0", 0d, 0d, 1d), new("k=-1", -1d, -1d, 1d), new("k=0.5", 0.5d, 0.5d, 1d), new("k=1.5", 1.5d, 1.5d, 1d)];
-        return [new("start>end", 2d, 1d, 1d), new("start=0.5", 0.5d, 1d, 1d), new("end=1.5", 0d, 1.5d, 1d), new("start=-0.25", -0.25d, 0d, 1d)];
+            return [new("k=0", 0f, 0f, 1f), new("k=-1", -1f, -1f, 1f), new("k=0.5", 0.5f, 0.5f, 1f), new("k=1.5", 1.5f, 1.5f, 1f)];
+        return [new("start>end", 2f, 1f, 1f), new("start=0.5", 0.5f, 1f, 1f), new("end=1.5", 0f, 1.5f, 1f), new("start=-0.25", -0.25f, 0f, 1f)];
     }
 
     private static void Sweep(string name)
@@ -146,7 +146,7 @@ public sealed class SequenceSafetyTests
         ProofBar.Fail(name, failures);
     }
 
-    private static void CompareRows(string label, MathBlockValue values, MathBlockValue flags, (double[] Values, bool[] Valid) expected, List<string> failures)
+    private static void CompareRows(string label, MathBlockValue values, MathBlockValue flags, (float[] Values, bool[] Valid) expected, List<string> failures)
     {
         if (!values.IsValid || !flags.IsValid)
         {
@@ -164,12 +164,12 @@ public sealed class SequenceSafetyTests
 
         for (var row = 0; row < actualValues.Length && failures.Count < MaximumFailures; row++)
         {
-            if (actualFlags[row] != expected.Valid[row] || BitConverter.DoubleToInt64Bits(actualValues[row]) != BitConverter.DoubleToInt64Bits(expected.Values[row]))
+            if (actualFlags[row] != expected.Valid[row] || BitConverter.SingleToInt32Bits(actualValues[row]) != BitConverter.SingleToInt32Bits(expected.Values[row]))
                 failures.Add(string.Create(CultureInfo.InvariantCulture, $"{label} row {row}: expected {expected.Values[row]:R}/{expected.Valid[row]}, actual {actualValues[row]:R}/{actualFlags[row]}"));
         }
     }
 
-    private static void CheckLength(string name, ProofSet set, double[] counts, ProofParameter parameter, List<string> failures)
+    private static void CheckLength(string name, ProofSet set, float[] counts, ProofParameter parameter, List<string> failures)
     {
         var series = MathBlockValue.Vector(SequenceOps.Series(name, set));
         var availability = MathBlockValue.BooleanVector(set.Available);
@@ -183,7 +183,7 @@ public sealed class SequenceSafetyTests
             failures.Add(label + ": the output length is not n.");
     }
 
-    private static void CheckInvalid(string name, ProofSet set, double[] counts, ProofParameter parameter, List<string> failures)
+    private static void CheckInvalid(string name, ProofSet set, float[] counts, ProofParameter parameter, List<string> failures)
     {
         var series = MathBlockValue.Vector(SequenceOps.Series(name, set));
         var availability = MathBlockValue.BooleanVector(set.Available);
@@ -197,7 +197,7 @@ public sealed class SequenceSafetyTests
             failures.Add(label + ": the invalid value has the wrong type.");
     }
 
-    private static void CheckMismatch(string name, ProofSet set, double[] counts, ProofParameter parameter, List<string> failures)
+    private static void CheckMismatch(string name, ProofSet set, float[] counts, ProofParameter parameter, List<string> failures)
     {
         var series = MathBlockValue.Vector(SequenceOps.Series(name, set));
         var availability = MathBlockValue.BooleanVector(set.Available);

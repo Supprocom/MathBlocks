@@ -157,7 +157,7 @@ public sealed class MathBlockCudaOperationContractTests
 
         var changedInputs = performance.Inputs.ToArray();
         var first = changedInputs[0];
-        changedInputs[0] = MathBlockValue.Scalar(first.AsScalar() + 0.125d, first.Type.Unit);
+        changedInputs[0] = MathBlockValue.Scalar(first.AsScalar() + 0.125f, first.Type.Unit);
         var inputChange = CreateContract(
             operation,
             contract,
@@ -172,9 +172,9 @@ public sealed class MathBlockCudaOperationContractTests
                 performance.Inputs,
                 checked(performance.Iterations + 1),
                 performance.MaximumWarmLatencyMicroseconds));
-        var changedLatency = performance.MaximumWarmLatencyMicroseconds == 1_000d
-            ? 999d
-            : performance.MaximumWarmLatencyMicroseconds + 0.125d;
+        var changedLatency = performance.MaximumWarmLatencyMicroseconds == 1_000f
+            ? 999f
+            : performance.MaximumWarmLatencyMicroseconds + 0.125f;
         var latencyChange = CreateContract(
             operation,
             contract,
@@ -309,7 +309,7 @@ public sealed class MathBlockCudaOperationContractTests
                     payloadBytes == 0 ? -1 : MathBlockCudaSlotLayout.Size,
                     value.Type);
                 Assert.True(
-                    value.ApproximatelyEquals(decoded, 0d),
+                    value.ApproximatelyEquals(decoded, 0f),
                     $"The CUDA value codec changed '{value.Type.Kind}'.");
             }
             finally

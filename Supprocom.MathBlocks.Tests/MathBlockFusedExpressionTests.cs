@@ -63,8 +63,8 @@ public sealed class MathBlockFusedExpressionTests
     {
         var values = AdversarialValues;
         var rows = values.Length * values.Length;
-        var left = new double[rows];
-        var right = new double[rows];
+        var left = new float[rows];
+        var right = new float[rows];
         var flags = new bool[rows];
         for (var row = 0; row < rows; row++)
         {
@@ -76,8 +76,8 @@ public sealed class MathBlockFusedExpressionTests
         foreach (var (identity, arguments, _) in Operations)
         {
             var scalars = arguments.Contains('S', StringComparison.Ordinal)
-                ? new[] { 2d, -0d, 0.5, 1d / 3d, -1d, 1e-310, 1e300 }
-                : [2d];
+                ? new[] { 2f, -0f, 0.5f, 1f / 3f, -1f, 5.28e-41f, 3.16e37f }
+                : [2f];
             foreach (var scalar in scalars)
             {
                 // Each operation runs on every pair of adversarial values in one vector, so a single bad row makes
@@ -118,17 +118,17 @@ public sealed class MathBlockFusedExpressionTests
 
         var cases = new[]
         {
-            (MathBlockValue.Vector([1d, 2d, 0d]), MathBlockValue.Vector([1d, 2d, 3d]), MathBlockValue.Scalar(2d)),
-            (MathBlockValue.Vector([1d, 2d, 3d]), MathBlockValue.Vector([0d, 2d, 3d]), MathBlockValue.Scalar(-1d)),
-            (MathBlockValue.Invalid(MathBlockType.Vector(), "x is missing."), MathBlockValue.Vector([1d, 2d, 3d]),
-                MathBlockValue.Scalar(2d)),
-            (MathBlockValue.Vector([1d, 2d, 3d]), MathBlockValue.Vector([1d, 2d, 3d]),
+            (MathBlockValue.Vector([1f, 2f, 0f]), MathBlockValue.Vector([1f, 2f, 3f]), MathBlockValue.Scalar(2f)),
+            (MathBlockValue.Vector([1f, 2f, 3f]), MathBlockValue.Vector([0f, 2f, 3f]), MathBlockValue.Scalar(-1f)),
+            (MathBlockValue.Invalid(MathBlockType.Vector(), "x is missing."), MathBlockValue.Vector([1f, 2f, 3f]),
+                MathBlockValue.Scalar(2f)),
+            (MathBlockValue.Vector([1f, 2f, 3f]), MathBlockValue.Vector([1f, 2f, 3f]),
                 MathBlockValue.Invalid(MathBlockType.Scalar(), "p is missing.")),
             (MathBlockValue.Invalid(MathBlockType.Vector(), "x is missing."),
-                MathBlockValue.Invalid(MathBlockType.Vector(), "y is missing."), MathBlockValue.Scalar(2d)),
-            (MathBlockValue.Vector([1d, 0d, 3d]), MathBlockValue.Invalid(MathBlockType.Vector(), "y is missing."),
-                MathBlockValue.Scalar(2d)),
-            (MathBlockValue.Vector([1d, 2d, 3d]), MathBlockValue.Vector([1e300, 2d, 3d]), MathBlockValue.Scalar(2d))
+                MathBlockValue.Invalid(MathBlockType.Vector(), "y is missing."), MathBlockValue.Scalar(2f)),
+            (MathBlockValue.Vector([1f, 0f, 3f]), MathBlockValue.Invalid(MathBlockType.Vector(), "y is missing."),
+                MathBlockValue.Scalar(2f)),
+            (MathBlockValue.Vector([1f, 2f, 3f]), MathBlockValue.Vector([3.16e37f, 2f, 3f]), MathBlockValue.Scalar(2f))
         };
         foreach (var (first, second, exponent) in cases)
         {
@@ -145,16 +145,16 @@ public sealed class MathBlockFusedExpressionTests
         {
             ["x"] = MathBlockValue.Invalid(MathBlockType.Vector(), "x is missing."),
             ["y"] = MathBlockValue.Invalid(MathBlockType.Vector(), "y is missing."),
-            ["p"] = MathBlockValue.Scalar(2d)
+            ["p"] = MathBlockValue.Scalar(2f)
         });
         Assert.Equal("x is missing.", bothInvalid.Outputs["sum"].InvalidReason);
         Assert.Equal("y is missing.", bothInvalid.Outputs["scaled"].InvalidReason);
         Assert.Equal("x is missing.", bothInvalid.Outputs["less"].InvalidReason);
         var nonfinite = fused.EvaluateCoreCLR(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["x"] = MathBlockValue.Vector([1d, 2d, 0d]),
-            ["y"] = MathBlockValue.Vector([1d, 2d, 3d]),
-            ["p"] = MathBlockValue.Scalar(2d)
+            ["x"] = MathBlockValue.Vector([1f, 2f, 0f]),
+            ["y"] = MathBlockValue.Vector([1f, 2f, 3f]),
+            ["p"] = MathBlockValue.Scalar(2f)
         });
         Assert.Equal("The vector result contains a nonfinite value.", nonfinite.Outputs["sum"].InvalidReason);
         Assert.Equal(0b0011ul, nonfinite.InvalidMask);
@@ -180,13 +180,13 @@ public sealed class MathBlockFusedExpressionTests
             .Output("sign", sign).Build();
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["x"] = MathBlockValue.Vector([1d, -2d, 3.5d, -0d], metre),
-            ["y"] = MathBlockValue.Vector([4d, -2d, 0.25d, 5d], metre),
-            ["s"] = MathBlockValue.Scalar(-1.5d, metre)
+            ["x"] = MathBlockValue.Vector([1f, -2f, 3.5f, -0f], metre),
+            ["y"] = MathBlockValue.Vector([4f, -2f, 0.25f, 5f], metre),
+            ["s"] = MathBlockValue.Scalar(-1.5f, metre)
         };
         var fused = MathBlockFusedExpression.Create(program);
         AssertMatchesUnfused(program, inputs, None(), fused.EvaluateCoreCLR(inputs), "units");
-        inputs["x"] = MathBlockValue.Vector([1d, 2d, 3.5d, 1d], metre);
+        inputs["x"] = MathBlockValue.Vector([1f, 2f, 3.5f, 1f], metre);
         AssertMatchesUnfused(program, inputs, None(), fused.EvaluateCoreCLR(inputs), "units valid");
     }
 
@@ -198,24 +198,24 @@ public sealed class MathBlockFusedExpressionTests
     {
         const int rows = 2_000;
         var random = new Random(17);
-        var close = new double[rows];
-        var volume = new double[rows];
+        var close = new float[rows];
+        var volume = new float[rows];
         for (var row = 0; row < rows; row++)
         {
-            close[row] = row % 97 < 20 ? 100d : 100d + random.NextDouble();
-            volume[row] = 1d + random.NextDouble();
+            close[row] = row % 97 < 20 ? 100f : 100f + random.NextSingle();
+            volume[row] = 1f + random.NextSingle();
         }
         var closeValue = MathBlockValue.Vector(close);
         var volumeValue = MathBlockValue.Vector(volume);
-        var width = MathBlockValue.Scalar(17d);
-        var fill = MathBlockValue.Scalar(0d);
+        var width = MathBlockValue.Scalar(17f);
+        var fill = MathBlockValue.Scalar(0f);
         var slope = MathBlockWindowTestSupport.Form("statistics.population-skewness")
             .Evaluate(closeValue, width, fill);
         var slopeValid = MathBlockWindowTestSupport.Validity("statistics.population-skewness").Evaluate(closeValue, width);
         var deviation = MathBlockWindowTestSupport.Form("statistics.population-standard-deviation")
-            .Evaluate(volumeValue, MathBlockValue.Scalar(5d), fill);
+            .Evaluate(volumeValue, MathBlockValue.Scalar(5f), fill);
         var deviationValid = MathBlockWindowTestSupport.Validity("statistics.population-standard-deviation")
-            .Evaluate(volumeValue, MathBlockValue.Scalar(5d));
+            .Evaluate(volumeValue, MathBlockValue.Scalar(5f));
         var correlation = MathBlockWindowTestSupport.Form("statistics.pearson-correlation")
             .Evaluate(closeValue, volumeValue, width, fill);
         var correlationValid = MathBlockWindowTestSupport.Validity("statistics.pearson-correlation")
@@ -229,7 +229,7 @@ public sealed class MathBlockFusedExpressionTests
         var c = builder.Input("correlation", MathBlockType.Vector());
         var d = builder.Input("close", MathBlockType.Vector());
         var ratio = builder.Apply("vector.divide", 1, a, builder.Apply("vector.add-scalar", 1, b,
-            builder.Constant(MathBlockValue.Scalar(1d))));
+            builder.Constant(MathBlockValue.Scalar(1f))));
         var product = builder.Apply("vector.multiply", 1, ratio, c);
         var positive = builder.Apply("vector.greater-than", 1, product, a);
         var program = builder.Output("ratio", ratio).Output("product", product).Output("positive", positive)
@@ -268,8 +268,8 @@ public sealed class MathBlockFusedExpressionTests
             .Output("square", builder.Apply("vector.square", 1, y)).Build();
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["x"] = MathBlockValue.Vector([1d, 2d]),
-            ["y"] = MathBlockValue.Vector([3d, 4d])
+            ["x"] = MathBlockValue.Vector([1f, 2f]),
+            ["y"] = MathBlockValue.Vector([3f, 4f])
         };
         var validity = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
@@ -328,7 +328,7 @@ public sealed class MathBlockFusedExpressionTests
         var program = builder.Output("a", node).Output("b", inputs[3]).Output("c", inputs[5])
             .Output("d", builder.Apply("vector.square", 1, node)).Build();
         var fused = MathBlockFusedExpression.Create(program);
-        var values = inputs.Select((_, index) => ($"x{index}", MathBlockValue.Vector([index, -index, 0.5])))
+        var values = inputs.Select((_, index) => ($"x{index}", MathBlockValue.Vector([index, -index, 0.5f])))
             .ToDictionary(pair => pair.Item1, pair => pair.Item2, StringComparer.Ordinal);
         var validity = inputs.Select((_, index) => ($"x{index}", MathBlockValue.BooleanVector([index != 3, true, index % 2 == 0])))
             .ToDictionary(pair => pair.Item1, pair => pair.Item2, StringComparer.Ordinal);
@@ -359,7 +359,7 @@ public sealed class MathBlockFusedExpressionTests
             StringComparison.Ordinal);
         Assert.Contains(
             "Operation node 2 (vector.append@1) is Pointwise, but its output has one more row than its input",
-            Reject((builder, x) => builder.Apply("vector.append", 1, x, builder.Constant(MathBlockValue.Scalar(1d)))).Message,
+            Reject((builder, x) => builder.Apply("vector.append", 1, x, builder.Constant(MathBlockValue.Scalar(1f)))).Message,
             StringComparison.Ordinal);
         Assert.Contains(
             "Operation node 1 (polynomial.derivative@1) is Pointwise, but its output has one row fewer",
@@ -379,7 +379,7 @@ public sealed class MathBlockFusedExpressionTests
             StringComparison.Ordinal);
         Assert.Contains(
             "Constant node 1 has kind Vector",
-            Reject((builder, x) => builder.Apply("vector.add", 1, x, builder.Constant(MathBlockValue.Vector([1d])))).Message,
+            Reject((builder, x) => builder.Apply("vector.add", 1, x, builder.Constant(MathBlockValue.Vector([1f])))).Message,
             StringComparison.Ordinal);
         Assert.Contains(
             "Output 'y' (node 1) has kind ComplexVector",
@@ -393,7 +393,7 @@ public sealed class MathBlockFusedExpressionTests
         var windowBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var series = windowBuilder.Input("x", MathBlockType.Vector());
         windowBuilder.Output("y", windowBuilder.Apply("window.vector.sum", 1, series,
-            windowBuilder.Constant(MathBlockValue.Scalar(3d)), windowBuilder.Constant(MathBlockValue.Scalar(0d))));
+            windowBuilder.Constant(MathBlockValue.Scalar(3f)), windowBuilder.Constant(MathBlockValue.Scalar(0f))));
         var trailing = Assert.Throws<ArgumentException>(() => MathBlockFusedExpression.Create(windowBuilder.Build()));
         Assert.Contains("Operation node 3 (window.vector.sum@1) is Trailing", trailing.Message, StringComparison.Ordinal);
     }
@@ -457,15 +457,15 @@ public sealed class MathBlockFusedExpressionTests
             builder.Output("z", builder.Apply("vector.scale", 1, builder.Apply("vector.add", 1, x, y), s)).Build());
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["x"] = MathBlockValue.Vector([1d, 2d]),
-            ["y"] = MathBlockValue.Vector([1d, 2d, 3d]),
-            ["s"] = MathBlockValue.Scalar(1d)
+            ["x"] = MathBlockValue.Vector([1f, 2f]),
+            ["y"] = MathBlockValue.Vector([1f, 2f, 3f]),
+            ["s"] = MathBlockValue.Scalar(1f)
         };
         Assert.Contains(
             "Vector input 'y' has 3 rows; the fused expression's vector inputs have 2.",
             Assert.Throws<ArgumentException>(() => fused.EvaluateCoreCLR(inputs)).Message,
             StringComparison.Ordinal);
-        inputs["y"] = MathBlockValue.Vector([3d, 4d]);
+        inputs["y"] = MathBlockValue.Vector([3f, 4f]);
         Assert.Contains(
             "The validity input 's' does not name a vector input",
             Assert.Throws<ArgumentException>(() => fused.EvaluateCoreCLR(
@@ -479,7 +479,7 @@ public sealed class MathBlockFusedExpressionTests
         Assert.Contains(
             "The validity input of 'x' has kind Vector",
             Assert.Throws<ArgumentException>(() => fused.EvaluateCoreCLR(
-                inputs, Values(("x", MathBlockValue.Vector([1d, 1d]))))).Message,
+                inputs, Values(("x", MathBlockValue.Vector([1f, 1f]))))).Message,
             StringComparison.Ordinal);
         Assert.Throws<KeyNotFoundException>(() => fused.EvaluateCoreCLR(None()));
     }
@@ -522,10 +522,10 @@ public sealed class MathBlockFusedExpressionTests
     private static (MathBlockProgram Program, Dictionary<string, MathBlockValue> Inputs) CreateSingleOperation(
         string identity,
         string arguments,
-        ReadOnlySpan<double> left,
-        ReadOnlySpan<double> right,
+        ReadOnlySpan<float> left,
+        ReadOnlySpan<float> right,
         ReadOnlySpan<bool> flags,
-        double scalar)
+        float scalar)
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal);

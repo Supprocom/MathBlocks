@@ -32,16 +32,16 @@ public sealed class MathBlockFusedExpressionTimingTests(ITestOutputHelper output
             program.Evaluate(inputs);
             // Fused and unfused alternate per repeat, so host load affects both sides alike.
             const int repeats = 5;
-            var fusedTimes = new double[repeats];
-            var unfusedTimes = new double[repeats];
+            var fusedTimes = new float[repeats];
+            var unfusedTimes = new float[repeats];
             for (var repeat = 0; repeat < repeats; repeat++)
             {
                 var watch = Stopwatch.StartNew();
                 fused.EvaluateCoreCLR(inputs);
-                fusedTimes[repeat] = watch.Elapsed.TotalMilliseconds;
+                fusedTimes[repeat] = (float)watch.Elapsed.TotalMilliseconds;
                 watch.Restart();
                 program.Evaluate(inputs);
-                unfusedTimes[repeat] = watch.Elapsed.TotalMilliseconds;
+                unfusedTimes[repeat] = (float)watch.Elapsed.TotalMilliseconds;
             }
             var ratios = fusedTimes.Zip(unfusedTimes, (left, right) => left / right).ToArray();
             var elementwise = program.PlanNodes.Count(node =>
@@ -53,10 +53,10 @@ public sealed class MathBlockFusedExpressionTimingTests(ITestOutputHelper output
         }
     }
 
-    private static string Spread(double[] values)
+    private static string Spread(float[] values)
     {
         var sorted = values.Order().ToArray();
-        var median = (sorted[(sorted.Length - 1) / 2] + sorted[sorted.Length / 2]) / 2d;
+        var median = (sorted[(sorted.Length - 1) / 2] + sorted[sorted.Length / 2]) / 2f;
         return string.Create(
             System.Globalization.CultureInfo.InvariantCulture,
             $"min {sorted[0]:F3}, median {median:F3}, max {sorted[^1]:F3}");

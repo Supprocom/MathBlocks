@@ -99,9 +99,9 @@ public sealed partial class MathBlockCudaWorkerTests
         var failures = new List<string>();
         int[] widths = [1, 2, 3, 17, 96, 400];
         var random = new Random(47);
-        var values = new double[400];
+        var values = new float[400];
         for (var row = 0; row < values.Length; row++)
-            values[row] = row is >= 100 and < 220 ? 7d : random.Next(5) == 0 ? -0d : random.NextDouble() * 50d;
+            values[row] = row is >= 100 and < 220 ? 7f : random.Next(5) == 0 ? -0f : random.NextSingle() * 50f;
         var series = MathBlockValue.Vector(values);
         var checkedResults = 0;
         var expectedResults = 0;
@@ -126,7 +126,7 @@ public sealed partial class MathBlockCudaWorkerTests
                         failures.Add($"{identity} w={widths[index]} batch against CUDA alone: {cudaDifference}");
                     checkedResults++;
                 }
-                MathBlockValue[] paired = [series, .. parameters, MathBlockValue.Scalar(17d), MathBlockValue.Scalar(WindowSentinel)];
+                MathBlockValue[] paired = [series, .. parameters, MathBlockValue.Scalar(17f), MathBlockValue.Scalar(WindowSentinel)];
                 var result = MathBlocksWindowBatch.EvaluateWithValidityCUDA(worker, identity, paired);
                 if (DescribeWindowDifference(operation.Evaluate(paired), result.Values) is { } valuesDifference)
                     failures.Add($"{identity} paired values: {valuesDifference}");
@@ -145,45 +145,45 @@ public sealed partial class MathBlockCudaWorkerTests
     // The families of MathBlockWindowAccurateTests, runs of 60 equal full-significand values (and of signed zeros)
     // between varied rows, and segments outside the double-double range (tiny, large, huge, overflowing values
     // between normal ones).
-    private static double[] CreateAccurateFamily(string family, int count, int seed)
+    private static float[] CreateAccurateFamily(string family, int count, int seed)
     {
         if (family is not ("equal-runs" or "out-of-range"))
             return MathBlockWindowAccurateTests.CreateFamily(family, count, seed);
         var random = new Random(seed);
-        var values = new double[count];
-        var constant = 0d;
+        var values = new float[count];
+        var constant = 0f;
         for (var row = 0; row < count; row++)
         {
             if (row % 80 == 0)
-                constant = (random.NextDouble() * 2d - 1d) * Math.Pow(10d, random.Next(-50, 51));
+                constant = (random.NextSingle() * 2f - 1f) * MathF.Pow(10f, random.Next(-50, 51));
             values[row] = string.Equals(family, "equal-runs", StringComparison.Ordinal)
-                ? row % 80 < 60 ? constant : row % 160 < 80 ? -0d : 1_000d + random.NextDouble() * 3d
+                ? row % 80 < 60 ? constant : row % 160 < 80 ? -0f : 1_000f + random.NextSingle() * 3f
                 : (row / 300 % 6) switch
                 {
-                    0 => 1e-160d * (1d + random.NextDouble()),
-                    1 => 1e150d * (1d + 0.1d * random.NextDouble()),
-                    2 => 5e153d * (1d + 0.02d * random.NextDouble()),
-                    3 => random.Next(5) == 0 ? 0d : random.NextDouble() * 2d - 1d,
-                    4 => random.Next(2) == 0 ? 1e-100d * (1d + random.NextDouble()) : 1e149d * (1d + random.NextDouble()),
-                    _ => random.Next(3) == 0 ? 1e308d : -1e308d
+                    0 => 1.88e-20f * (1f + random.NextSingle()),
+                    1 => 5.62e18f * (1f + 0.1f * random.NextSingle()),
+                    2 => 1.63e19f * (1f + 0.02f * random.NextSingle()),
+                    3 => random.Next(5) == 0 ? 0f : random.NextSingle() * 2f - 1f,
+                    4 => random.Next(2) == 0 ? 4.69e-13f * (1f + random.NextSingle()) : 4.22e18f * (1f + random.NextSingle()),
+                    _ => random.Next(3) == 0 ? 3.16e38f : -3.16e38f
                 };
         }
         return values;
     }
 
     // Max(4w, 1024) rows of -0.0 and +0.0 (seven in eight rows), with 1 and -1 as the remaining rows.
-    private static double[] CreateMixedZeroSeries(int width)
+    private static float[] CreateMixedZeroSeries(int width)
     {
         var random = new Random(4100 + width);
-        var values = new double[Math.Max(4 * width, 8 * 128)];
+        var values = new float[Math.Max(4 * width, 8 * 128)];
         for (var row = 0; row < values.Length; row++)
-            values[row] = random.Next(16) switch { 0 => 1d, 1 => -1d, var pick => pick % 2 == 0 ? -0d : 0d };
+            values[row] = random.Next(16) switch { 0 => 1f, 1 => -1f, var pick => pick % 2 == 0 ? -0f : 0f };
         return values;
     }
 
     // Each window-accurate form and sibling, the median form and sibling, and the quantile form and sibling at
     // probabilities 0, 0.25, 0.9 and 1, on one series and width.
-    private static IEnumerable<WindowCase> AccurateSeriesCases(string name, double[] values, int width)
+    private static IEnumerable<WindowCase> AccurateSeriesCases(string name, float[] values, int width)
     {
         var x = MathBlockValue.Vector(values);
         var w = MathBlockValue.Scalar(width);
@@ -200,7 +200,7 @@ public sealed partial class MathBlockCudaWorkerTests
         MathBlockValue[] medianValidity = [x, w];
         yield return new WindowCase(name, Form("vector.median"), median, median);
         yield return new WindowCase(name, Validity("vector.median"), medianValidity, medianValidity);
-        foreach (var probability in new[] { 0d, 0.25d, 0.9d, 1d })
+        foreach (var probability in new[] { 0f, 0.25f, 0.9f, 1f })
         {
             var p = MathBlockValue.Scalar(probability);
             MathBlockValue[] quantile = [x, p, w, MathBlockValue.Scalar(WindowSentinel)];
@@ -230,17 +230,17 @@ public sealed partial class MathBlockCudaWorkerTests
                     yield return item;
         }
 
-        var edges = new (string Name, double[] Values, int[] Widths)[]
+        var edges = new (string Name, float[] Values, int[] Widths)[]
         {
-            ("overflow", [1e308d, 1e308d, -1e308d, 2d, 3d], [1, 2, 3]),
-            ("tiny", [1e-160d, 2e-160d, 3e-160d, 4e-160d], [1, 2]),
-            ("huge", [5e153d, 5.1e153d, 5e153d, 5.1e153d], [2, 3]),
-            ("large", [1e150d, 1.1e150d, 1e150d, 1.1e150d], [2]),
-            ("inside", [1e-100d, 2e-100d, 1e149d, 1.1e149d], [2]),
-            ("subnormal", [5e-324d, -5e-324d, 1e-310d, 2.5e-308d, -1e-320d, 0d, double.Epsilon, 3e-320d, -2.2e-308d, 7e-315d], [1, 2, 3, 10]),
-            ("square underflow", [5e-324d, -5e-324d, 1e-140d, -1e-140d, 1e-170d, 0d, 0d, -0d], [2, 3]),
-            ("constant", [.. Enumerable.Repeat(-1.0101787042252373e+32d, 20), 1d, 2d], [2, 7, 20]),
-            ("extremes", [double.MaxValue, double.Epsilon, -double.MaxValue, 1d, -double.Epsilon, 1e-300d, 1e300d], [1, 2, 3, 7])
+            ("overflow", [3.16e38f, 3.16e38f, -3.16e38f, 2f, 3f], [1, 2, 3]),
+            ("tiny", [1.88e-20f, 2.05e-20f, 2.15e-20f, 2.23e-20f], [1, 2]),
+            ("huge", [1.63e19f, 1.63e19f, 1.63e19f, 1.63e19f], [2, 3]),
+            ("large", [5.62e18f, 5.69e18f, 5.62e18f, 5.69e18f], [2]),
+            ("inside", [4.69e-13f, 5.11e-13f, 4.22e18f, 4.27e18f], [2]),
+            ("subnormal", [1.4e-45f, -1.4e-45f, 5.28e-41f, 1.19e-38f, -1.4e-45f, 0f, float.Epsilon, 1.4e-45f, -1.16e-38f, 3.7e-45f], [1, 2, 3, 10]),
+            ("square underflow", [1.4e-45f, -1.4e-45f, 5.49e-18f, -5.49e-18f, 1.1e-21f, 0f, 0f, -0f], [2, 3]),
+            ("constant", [.. Enumerable.Repeat(-1.0101787042252373e+32f, 20), 1f, 2f], [2, 7, 20]),
+            ("extremes", [float.MaxValue, float.Epsilon, -float.MaxValue, 1f, -float.Epsilon, 1.03e-37f, 3.16e37f], [1, 2, 3, 7])
         };
         foreach (var (name, values, widths) in edges)
             foreach (var width in widths)
@@ -263,12 +263,12 @@ public sealed partial class MathBlockCudaWorkerTests
             var form = AccurateForm(accurate);
             var validity = AccurateValidity(accurate);
             var unit = form.ResolveOutputType([series.Type, MathBlockType.Scalar(), MathBlockType.Scalar()]).Unit;
-            var computed = form.Evaluate(series, MathBlockValue.Scalar(17d), MathBlockValue.Scalar(WindowSentinel, unit)).AsVector()[20];
-            MathBlockValue[] realFill = [series, MathBlockValue.Scalar(17d), MathBlockValue.Scalar(computed, unit)];
+            var computed = form.Evaluate(series, MathBlockValue.Scalar(17f), MathBlockValue.Scalar(WindowSentinel, unit)).AsVector()[20];
+            MathBlockValue[] realFill = [series, MathBlockValue.Scalar(17f), MathBlockValue.Scalar(computed, unit)];
             yield return new WindowCase("fill equal to a computed value", form, realFill, realFill);
-            MathBlockValue[] plannedForm = [series, MathBlockValue.Scalar(17d), MathBlockValue.Scalar(WindowSentinel, unit)];
-            MathBlockValue[] plannedValidity = [series, MathBlockValue.Scalar(17d)];
-            foreach (var runtimeWidth in new[] { 301d, 2.5d, 2d, 96d, 300d })
+            MathBlockValue[] plannedForm = [series, MathBlockValue.Scalar(17f), MathBlockValue.Scalar(WindowSentinel, unit)];
+            MathBlockValue[] plannedValidity = [series, MathBlockValue.Scalar(17f)];
+            foreach (var runtimeWidth in new[] { 301f, 2.5f, 2f, 96f, 300f })
             {
                 var formInputs = (MathBlockValue[])plannedForm.Clone();
                 formInputs[1] = MathBlockValue.Scalar(runtimeWidth);

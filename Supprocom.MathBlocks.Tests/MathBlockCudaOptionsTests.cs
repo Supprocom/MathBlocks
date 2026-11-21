@@ -13,7 +13,7 @@ namespace Supprocom.MathBlocks.Tests;
 /// </summary>
 public sealed class MathBlockCudaOptionsTests
 {
-    private const double Fill = -1d;
+    private const float Fill = -1f;
     private const string SlidingSource = "statistics.theil-sen-slope";
 
     private static readonly Assembly Library = typeof(MathBlockCudaDeviceModule).Assembly;
@@ -284,8 +284,8 @@ public sealed class MathBlockCudaOptionsTests
     public void FamilyKernelsLaunchOneBlockOfTheBlockSizeAndScalarsOneThread(int blockSize)
     {
         var options = new MathBlocksCudaOptions { BlockSize = blockSize };
-        var (sumProgram, sumInputs) = SimpleProgram("vector.sum", [MathBlockValue.Vector(Enumerable.Range(0, 50).Select(value => value * 0.25d).ToArray())]);
-        var (addProgram, addInputs) = SimpleProgram("scalar.add", [MathBlockValue.Scalar(1d), MathBlockValue.Scalar(2d)]);
+        var (sumProgram, sumInputs) = SimpleProgram("vector.sum", [MathBlockValue.Vector(Enumerable.Range(0, 50).Select(value => value * 0.25f).ToArray())]);
+        var (addProgram, addInputs) = SimpleProgram("scalar.add", [MathBlockValue.Scalar(1f), MathBlockValue.Scalar(2f)]);
 
         var vector = Assert.Single(Plan(sumProgram, sumInputs, options, enforce: true).Launches);
         var scalar = Assert.Single(Plan(addProgram, addInputs, options, enforce: true).Launches);
@@ -302,8 +302,8 @@ public sealed class MathBlockCudaOptionsTests
     [InlineData(1_024)]
     public void TheRollingOrderStatisticScratchDoesNotDependOnTheBlockSize(int blockSize)
     {
-        var x = MathBlockValue.Vector(Enumerable.Range(0, 300).Select(index => (index * 37 % 101) * 0.5d).ToArray());
-        var (program, inputs) = SimpleProgram("sequence.rolling-median", [x, MathBlockValue.Scalar(17d)]);
+        var x = MathBlockValue.Vector(Enumerable.Range(0, 300).Select(index => (index * 37 % 101) * 0.5f).ToArray());
+        var (program, inputs) = SimpleProgram("sequence.rolling-median", [x, MathBlockValue.Scalar(17f)]);
 
         var reference = Assert.Single(Plan(program, inputs, MathBlocksCudaOptions.Default, enforce: true).Launches);
         var launch = Assert.Single(Plan(program, inputs, new MathBlocksCudaOptions { BlockSize = blockSize }, enforce: true).Launches);
@@ -383,9 +383,9 @@ public sealed class MathBlockCudaOptionsTests
         Assert.Equal(perThreadBytes * 256 * 4, plan256.ScratchBytes);
         Assert.Equal(perThreadBytes * 1 * 1_000, plan1.ScratchBytes);
 
-        var x = MathBlockValue.Vector(Enumerable.Range(0, 300).Select(index => (index * 37 % 101) * 0.5d).ToArray());
+        var x = MathBlockValue.Vector(Enumerable.Range(0, 300).Select(index => (index * 37 % 101) * 0.5f).ToArray());
         var median = MathBlockCudaDeviceModule.GetOperation("sequence.rolling-median@1");
-        MathBlockValue[] medianInputs = [x, MathBlockValue.Scalar(17d)];
+        MathBlockValue[] medianInputs = [x, MathBlockValue.Scalar(17f)];
         var baseline = median.PlanCUDA(medianInputs);
         foreach (var blockSize in new[] { 1, 33, 1_024 })
             Assert.Equal(baseline, median.PlanCUDA(medianInputs, MathBlockDomainOptions.Default, blockSize));
@@ -426,7 +426,7 @@ public sealed class MathBlockCudaOptionsTests
     {
         var values = new MathBlockValue[]
         {
-            MathBlockValue.Vector(Enumerable.Range(0, count).Select(index => index * 0.5d - 3d).ToArray()),
+            MathBlockValue.Vector(Enumerable.Range(0, count).Select(index => index * 0.5f - 3f).ToArray()),
             MathBlockValue.Scalar(Fill),
         };
         return SimpleProgram("elementwise.scalar.negate", values);
@@ -503,7 +503,7 @@ public sealed class MathBlockCudaOptionsTests
         var resolve = catalog.GetMethod("Resolve", BindingFlags.Static | BindingFlags.NonPublic)!;
         var opcode = Opcode(resolve.Invoke(null, [$"window.{source}@1"])!);
         var doubles = (long)catalog.GetMethod("ScratchDoubles", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, [opcode / 2, width])!;
-        return doubles * sizeof(double);
+        return doubles * sizeof(float);
     }
 
     private static int Opcode(object feature) => (int)feature.GetType().GetProperty("Opcode")!.GetValue(feature)!;

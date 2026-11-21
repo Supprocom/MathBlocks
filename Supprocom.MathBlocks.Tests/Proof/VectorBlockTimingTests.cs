@@ -9,8 +9,8 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 /// </summary>
 public sealed class VectorBlockTimingTests
 {
-    private const double WorstClassFactor = 2d;
-    private const double GrowthFactor = 5d;
+    private const float WorstClassFactor = 2f;
+    private const float GrowthFactor = 5f;
 
     /// <summary>
     /// Verifies bar (i): per identity, route and parameter, the worst class costs at most twice the median class (every class, subnormal included); bar (ii): the mixed warp costs at most twice
@@ -33,7 +33,7 @@ public sealed class VectorBlockTimingTests
         {
             var cell = measured[index];
             var operation = string.Create(CultureInfo.InvariantCulture, $"{cell.Call.Name} rows={cell.Rows}");
-            cells.Add(new ProofCell(operation, cell.ClassName, "-", cell.Call.Parameter, cell.Call.Width, cell.NanosecondsPerRow, 0d, 0d));
+            cells.Add(new ProofCell(operation, cell.ClassName, "-", cell.Call.Parameter, cell.Call.Width, cell.NanosecondsPerRow, 0f, 0f));
         }
 
         ProofBar.Annotate(cells);
@@ -63,7 +63,7 @@ public sealed class VectorBlockTimingTests
     private static List<string> Growth(List<VectorBlockCell> measured)
     {
         var failures = new List<string>();
-        var small = new Dictionary<string, double>(StringComparer.Ordinal);
+        var small = new Dictionary<string, float>(StringComparer.Ordinal);
         for (var index = 0; index < measured.Count; index++)
         {
             if (measured[index].Rows == VectorBlockCalls.TimingRows[0])

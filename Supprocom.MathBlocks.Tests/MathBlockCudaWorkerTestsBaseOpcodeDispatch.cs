@@ -22,34 +22,34 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch : IClassFixture<M
         modules = fixture.Modules;
     }
 
-    private const double Fill = -98_765.25d;
+    private const float Fill = -98_765.25f;
     private const int Alignment = 16;
 
     private static readonly Dictionary<string, (string Identity, Func<MathBlockValue[]> Inputs)> Cases = new(StringComparer.Ordinal)
     {
-        ["base-opcode/unary-vector"] = ("elementwise.scalar.negate@1", () => [Vector(-1.5d, 2d, -0d, 4d), Scalar(Fill)]),
-        ["base-opcode/vector-scalar"] = ("elementwise.scalar.maximum@1", () => [Vector(1d, 2d, 3d), Scalar(0.5d), Scalar(Fill)]),
-        ["base-opcode/scalar-vector"] = ("elementwise.scalar.minimum@1", () => [Scalar(0.5d), Vector(1d, 2d, 3d), Scalar(Fill)]),
-        ["base-opcode/vector-vector"] = ("elementwise.scalar.maximum@1", () => [Vector(1d, 2d, 3d), Vector(0.25d, -4d, 8d), Scalar(Fill)]),
-        ["base-opcode/sibling-vector-vector"] = ("elementwise-valid.scalar.maximum@1", () => [Vector(1d, 2d, 3d), Vector(0.25d, -4d, 8d)]),
+        ["base-opcode/unary-vector"] = ("elementwise.scalar.negate@1", () => [Vector(-1.5f, 2f, -0f, 4f), Scalar(Fill)]),
+        ["base-opcode/vector-scalar"] = ("elementwise.scalar.maximum@1", () => [Vector(1f, 2f, 3f), Scalar(0.5f), Scalar(Fill)]),
+        ["base-opcode/scalar-vector"] = ("elementwise.scalar.minimum@1", () => [Scalar(0.5f), Vector(1f, 2f, 3f), Scalar(Fill)]),
+        ["base-opcode/vector-vector"] = ("elementwise.scalar.maximum@1", () => [Vector(1f, 2f, 3f), Vector(0.25f, -4f, 8f), Scalar(Fill)]),
+        ["base-opcode/sibling-vector-vector"] = ("elementwise-valid.scalar.maximum@1", () => [Vector(1f, 2f, 3f), Vector(0.25f, -4f, 8f)]),
         // Rows outside the domain of logit: invalid on CoreCLR, so the fill path of the dispatcher is checked too.
-        ["base-opcode/unary-vector-invalid-rows"] = ("elementwise.scalar.logit@1", () => [Vector(0.25d, 2d, 0.5d, -1d), Scalar(Fill)]),
+        ["base-opcode/unary-vector-invalid-rows"] = ("elementwise.scalar.logit@1", () => [Vector(0.25f, 2f, 0.5f, -1f), Scalar(Fill)]),
         // The scalar operations whose vector twin has whole-value validity: one bad row (divide by 0, a logarithm or root out of domain, overflow) is invalid alone.
-        ["lift/absolute"] = ("elementwise.scalar.absolute@1", () => [Vector(-2d, -0.5d, 0d, 3d, -1e300d), Scalar(Fill)]),
-        ["lift/add"] = ("elementwise.scalar.add@1", () => [Vector(1d, 2d, 1e308d, -1d), Vector(2d, -2d, 1e308d, 1d), Scalar(Fill)]),
-        ["lift/subtract"] = ("elementwise.scalar.subtract@1", () => [Vector(5d, 2d, -1e308d, 1d), Vector(2d, 2d, 1e308d, -1d), Scalar(Fill)]),
-        ["lift/multiply"] = ("elementwise.scalar.multiply@1", () => [Vector(2d, -3d, 1e200d, 0d), Vector(3d, 3d, 1e200d, 5d), Scalar(Fill)]),
-        ["lift/divide"] = ("elementwise.scalar.divide@1", () => [Vector(6d, 1d, -3d, 1d, 0d, 1e308d), Vector(3d, 0d, 2d, 4d, 5d, 1e-10d), Scalar(Fill)]),
-        ["lift/divide-scalar-divisor"] = ("elementwise.scalar.divide@1", () => [Vector(6d, 1d, -3d), Scalar(0d), Scalar(Fill)]),
-        ["lift/power"] = ("elementwise.scalar.power@1", () => [Vector(2d, 9d, -8d, 2d, 0d, 10d), Vector(3d, 0.5d, 0.5d, -1d, -1d, 400d), Scalar(Fill)]),
-        ["lift/natural-logarithm"] = ("elementwise.scalar.natural-logarithm@1", () => [Vector(1d, 2d, 0.5d, 0d, -1d, 10d), Scalar(Fill)]),
-        ["lift/square-root"] = ("elementwise.scalar.square-root@1", () => [Vector(0d, 1d, 4d, 2d, -1d, 0.25d), Scalar(Fill)]),
-        ["lift/square"] = ("elementwise.scalar.square@1", () => [Vector(-2d, -0.5d, 0d, 1.5d, 1e200d, 3d), Scalar(Fill)]),
-        ["lift/exponential"] = ("elementwise.scalar.exponential@1", () => [Vector(0d, 1d, -1d, 0.5d, 800d, -800d), Scalar(Fill)]),
-        ["lift/positive-part"] = ("elementwise.scalar.positive-part@1", () => [Vector(-2d, -0.5d, 0d, 0.5d, 3d), Scalar(Fill)]),
-        ["lift/sign"] = ("elementwise.scalar.sign@1", () => [Vector(-2d, -0.5d, 0d, 0.5d, 3d), Scalar(Fill)]),
-        ["lift/sibling-divide"] = ("elementwise-valid.scalar.divide@1", () => [Vector(6d, 1d, -3d, 1e308d), Vector(3d, 0d, 2d, 1e-10d)]),
-        ["lift/sibling-natural-logarithm"] = ("elementwise-valid.scalar.natural-logarithm@1", () => [Vector(1d, 0d, -1d, 5d)])
+        ["lift/absolute"] = ("elementwise.scalar.absolute@1", () => [Vector(-2f, -0.5f, 0f, 3f, -3.16e37f), Scalar(Fill)]),
+        ["lift/add"] = ("elementwise.scalar.add@1", () => [Vector(1f, 2f, 3.16e38f, -1f), Vector(2f, -2f, 3.16e38f, 1f), Scalar(Fill)]),
+        ["lift/subtract"] = ("elementwise.scalar.subtract@1", () => [Vector(5f, 2f, -3.16e38f, 1f), Vector(2f, 2f, 3.16e38f, -1f), Scalar(Fill)]),
+        ["lift/multiply"] = ("elementwise.scalar.multiply@1", () => [Vector(2f, -3f, 1e25f, 0f), Vector(3f, 3f, 1e25f, 5f), Scalar(Fill)]),
+        ["lift/divide"] = ("elementwise.scalar.divide@1", () => [Vector(6f, 1f, -3f, 1f, 0f, 3.16e38f), Vector(3f, 0f, 2f, 4f, 5f, 1e-10f), Scalar(Fill)]),
+        ["lift/divide-scalar-divisor"] = ("elementwise.scalar.divide@1", () => [Vector(6f, 1f, -3f), Scalar(0f), Scalar(Fill)]),
+        ["lift/power"] = ("elementwise.scalar.power@1", () => [Vector(2f, 9f, -8f, 2f, 0f, 10f), Vector(3f, 0.5f, 0.5f, -1f, -1f, 400f), Scalar(Fill)]),
+        ["lift/natural-logarithm"] = ("elementwise.scalar.natural-logarithm@1", () => [Vector(1f, 2f, 0.5f, 0f, -1f, 10f), Scalar(Fill)]),
+        ["lift/square-root"] = ("elementwise.scalar.square-root@1", () => [Vector(0f, 1f, 4f, 2f, -1f, 0.25f), Scalar(Fill)]),
+        ["lift/square"] = ("elementwise.scalar.square@1", () => [Vector(-2f, -0.5f, 0f, 1.5f, 1e25f, 3f), Scalar(Fill)]),
+        ["lift/exponential"] = ("elementwise.scalar.exponential@1", () => [Vector(0f, 1f, -1f, 0.5f, 800f, -800f), Scalar(Fill)]),
+        ["lift/positive-part"] = ("elementwise.scalar.positive-part@1", () => [Vector(-2f, -0.5f, 0f, 0.5f, 3f), Scalar(Fill)]),
+        ["lift/sign"] = ("elementwise.scalar.sign@1", () => [Vector(-2f, -0.5f, 0f, 0.5f, 3f), Scalar(Fill)]),
+        ["lift/sibling-divide"] = ("elementwise-valid.scalar.divide@1", () => [Vector(6f, 1f, -3f, 3.16e38f), Vector(3f, 0f, 2f, 1e-10f)]),
+        ["lift/sibling-natural-logarithm"] = ("elementwise-valid.scalar.natural-logarithm@1", () => [Vector(1f, 0f, -1f, 5f)])
     };
 
     /// <summary>Gets the case names.</summary>
@@ -83,38 +83,38 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch : IClassFixture<M
     }
 
     // Argument rows a MathBlockValue cannot hold: (input index, row) is the patched vector row, and row -1 patches a scalar slot.
-    private static readonly Dictionary<string, (string Identity, Func<MathBlockValue[]> Inputs, (int Input, int Row, double Value)[] Patches)> NonFiniteCases = new(StringComparer.Ordinal)
+    private static readonly Dictionary<string, (string Identity, Func<MathBlockValue[]> Inputs, (int Input, int Row, float Value)[] Patches)> NonFiniteCases = new(StringComparer.Ordinal)
     {
         // maximum(1, -Inf) is finite, so only the input check makes these rows invalid.
         ["non-finite/vector-vector"] = (
             "elementwise.scalar.maximum@1",
-            () => [Vector(1d, 2d, 3d, 4d, 5d, 6d, 7d), Vector(0d, 0d, 0d, 0d, 0d, 0d, 0d), Scalar(Fill)],
-            [(0, 1, double.PositiveInfinity), (0, 2, double.NegativeInfinity), (0, 3, double.NaN), (1, 4, double.NegativeInfinity), (1, 5, double.NaN), (1, 6, double.PositiveInfinity)]),
+            () => [Vector(1f, 2f, 3f, 4f, 5f, 6f, 7f), Vector(0f, 0f, 0f, 0f, 0f, 0f, 0f), Scalar(Fill)],
+            [(0, 1, float.PositiveInfinity), (0, 2, float.NegativeInfinity), (0, 3, float.NaN), (1, 4, float.NegativeInfinity), (1, 5, float.NaN), (1, 6, float.PositiveInfinity)]),
         ["non-finite/vector-scalar-broadcast"] = (
             "elementwise.scalar.maximum@1",
-            () => [Vector(1d, 2d, 3d), Scalar(0.5d), Scalar(Fill)],
-            [(1, -1, double.NegativeInfinity)]),
+            () => [Vector(1f, 2f, 3f), Scalar(0.5f), Scalar(Fill)],
+            [(1, -1, float.NegativeInfinity)]),
         ["non-finite/scalar-vector-broadcast"] = (
             "elementwise.scalar.maximum@1",
-            () => [Scalar(0.5d), Vector(1d, 2d, 3d), Scalar(Fill)],
-            [(0, -1, double.NaN)]),
+            () => [Scalar(0.5f), Vector(1f, 2f, 3f), Scalar(Fill)],
+            [(0, -1, float.NaN)]),
         ["non-finite/unary"] = (
             "elementwise.scalar.negate@1",
-            () => [Vector(1d, 2d, 3d, 4d), Scalar(Fill)],
-            [(0, 0, double.PositiveInfinity), (0, 2, double.NaN)]),
+            () => [Vector(1f, 2f, 3f, 4f), Scalar(Fill)],
+            [(0, 0, float.PositiveInfinity), (0, 2, float.NaN)]),
         // divide(1, +-Inf) is 0 and valid without the input check; with it the row is invalid.
         ["non-finite/divide"] = (
             "elementwise.scalar.divide@1",
-            () => [Vector(1d, 1d, 1d, 4d, 6d), Vector(2d, 2d, 2d, 2d, 3d), Scalar(Fill)],
-            [(1, 0, double.PositiveInfinity), (1, 1, double.NegativeInfinity), (1, 2, double.NaN), (0, 3, double.PositiveInfinity)]),
+            () => [Vector(1f, 1f, 1f, 4f, 6f), Vector(2f, 2f, 2f, 2f, 3f), Scalar(Fill)],
+            [(1, 0, float.PositiveInfinity), (1, 1, float.NegativeInfinity), (1, 2, float.NaN), (0, 3, float.PositiveInfinity)]),
         ["non-finite/square-root"] = (
             "elementwise.scalar.square-root@1",
-            () => [Vector(4d, 9d, 16d), Scalar(Fill)],
-            [(0, 0, double.PositiveInfinity), (0, 2, double.NaN)]),
+            () => [Vector(4f, 9f, 16f), Scalar(Fill)],
+            [(0, 0, float.PositiveInfinity), (0, 2, float.NaN)]),
         ["non-finite/sibling"] = (
             "elementwise-valid.scalar.maximum@1",
-            () => [Vector(1d, 2d, 3d, 4d), Vector(0d, 0d, 0d, 0d)],
-            [(0, 1, double.NegativeInfinity), (1, 3, double.NaN)])
+            () => [Vector(1f, 2f, 3f, 4f), Vector(0f, 0f, 0f, 0f)],
+            [(0, 1, float.NegativeInfinity), (1, 3, float.NaN)])
     };
 
     /// <summary>Gets the non-finite case names.</summary>
@@ -146,9 +146,9 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch : IClassFixture<M
 
     private static readonly Dictionary<string, (string Identity, Func<MathBlockValue[]> Inputs)> BlockSizedCases = new(StringComparer.Ordinal)
     {
-        ["block-sized/unary-vector"] = ("elementwise.scalar.negate@1", () => [Vector(Enumerable.Range(0, 300).Select(index => index * 0.5d - 20d).ToArray()), Scalar(Fill)]),
-        ["block-sized/rolling-median"] = ("sequence.rolling-median@1", () => [Vector(Enumerable.Range(0, 300).Select(index => (index * 37 % 101) * 0.5d - (index % 2 == 0 ? 0d : 0.25d)).ToArray()), Scalar(17d)]),
-        ["block-sized/rolling-quantile"] = ("sequence.rolling-quantile@1", () => [Vector(Enumerable.Range(0, 300).Select(index => (index * 53 % 97) * 0.5d).ToArray()), Scalar(33d), Scalar(0.9d)]),
+        ["block-sized/unary-vector"] = ("elementwise.scalar.negate@1", () => [Vector(Enumerable.Range(0, 300).Select(index => index * 0.5f - 20f).ToArray()), Scalar(Fill)]),
+        ["block-sized/rolling-median"] = ("sequence.rolling-median@1", () => [Vector(Enumerable.Range(0, 300).Select(index => (index * 37 % 101) * 0.5f - (index % 2 == 0 ? 0f : 0.25f)).ToArray()), Scalar(17f)]),
+        ["block-sized/rolling-quantile"] = ("sequence.rolling-quantile@1", () => [Vector(Enumerable.Range(0, 300).Select(index => (index * 53 % 97) * 0.5f).ToArray()), Scalar(33f), Scalar(0.9f)]),
         ["block-sized/window-theil-sen"] = ("window.statistics.theil-sen-slope@1", () => WindowInputs("statistics.theil-sen-slope", 300, 17)),
         ["block-sized/window-median"] = ("window.vector.median@1", () => WindowInputs("vector.median", 300, 17)),
         ["block-sized/window-distance-correlation"] = ("window.statistics.distance-correlation@1", () => WindowInputs("statistics.distance-correlation", 300, 17)),
@@ -189,7 +189,7 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch : IClassFixture<M
 
     // The launch and the resource lifetime stay in one visible path, as in the package-only consumer.
 #pragma warning disable MA0051
-    private static void RunDispatch(MathBlockCudaTestModuleCache modules, string identity, MathBlockValue[] inputs, int blockSize, (int Input, int Row, double Value)[]? patches = null)
+    private static void RunDispatch(MathBlockCudaTestModuleCache modules, string identity, MathBlockValue[] inputs, int blockSize, (int Input, int Row, float Value)[]? patches = null)
     {
         var contract = MathBlockCudaDeviceModule.GetOperation(identity);
         Assert.True(contract.Opcode < 128, "The public opcode carries no mask.");
@@ -235,9 +235,9 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch : IClassFixture<M
             foreach (var (input, row, value) in patches ?? [])
             {
                 if (row < 0)
-                    Marshal.WriteInt64(host, input * MathBlockCudaSlotLayout.Size + MathBlockCudaSlotLayout.ScalarValueOffset, BitConverter.DoubleToInt64Bits(value));
+                    Marshal.WriteInt64(host, input * MathBlockCudaSlotLayout.Size + MathBlockCudaSlotLayout.ScalarValueOffset, BitConverter.SingleToInt32Bits(value));
                 else
-                    Marshal.WriteInt64(host, inputOffsets[input] + row * sizeof(double), BitConverter.DoubleToInt64Bits(value));
+                    Marshal.WriteInt64(host, inputOffsets[input] + row * sizeof(float), BitConverter.SingleToInt32Bits(value));
             }
 
             MathBlockCudaValueCodec.WriteHeader(
@@ -280,8 +280,8 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch : IClassFixture<M
             else
             {
                 Assert.Equal(
-                    expected.AsVector().Select(BitConverter.DoubleToInt64Bits).ToArray(),
-                    actual.AsVector().Select(BitConverter.DoubleToInt64Bits).ToArray());
+                    expected.AsVector().Select(BitConverter.SingleToInt32Bits).ToArray(),
+                    actual.AsVector().Select(BitConverter.SingleToInt32Bits).ToArray());
             }
         }
         finally
@@ -315,12 +315,12 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch : IClassFixture<M
 
     // CoreCLR's result for the inputs with the patched rows: each row through the elementwise form's own row function. A form holds the fill
     // where the row is invalid and its sibling holds whether the row was computed.
-    private static MathBlockValue PatchedExpected(string identity, MathBlockValue[] inputs, (int Input, int Row, double Value)[] patches)
+    private static MathBlockValue PatchedExpected(string identity, MathBlockValue[] inputs, (int Input, int Row, float Value)[] patches)
     {
         var sibling = identity.StartsWith("elementwise-valid.", StringComparison.Ordinal);
         var source = identity[(identity.IndexOf('.', StringComparison.Ordinal) + 1)..identity.LastIndexOf('@')];
         var arity = MathBlockCatalog.Standard.Get(source).Arity;
-        var columns = new double[arity][];
+        var columns = new float[arity][];
         for (var index = 0; index < arity; index++)
         {
             columns[index] = inputs[index].Type.Kind == MathBlockValueKind.Vector
@@ -331,22 +331,22 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch : IClassFixture<M
         foreach (var (input, row, value) in patches)
             columns[input][row < 0 ? 0 : row] = value;
         var rows = columns.Where((_, index) => inputs[index].Type.Kind == MathBlockValueKind.Vector).First().Length;
-        var values = new double[rows];
+        var values = new float[rows];
         var computed = new bool[rows];
         for (var row = 0; row < rows; row++)
         {
             var arguments = columns.Select((column, index) => column[inputs[index].Type.Kind == MathBlockValueKind.Vector ? row : 0]).ToArray();
             var (isComputed, value) = MathBlockElementwiseRowReference.Row(source, arguments);
             computed[row] = isComputed;
-            values[row] = isComputed ? value : sibling ? 0d : inputs[arity].AsScalar();
+            values[row] = isComputed ? value : sibling ? 0f : inputs[arity].AsScalar();
         }
 
         return sibling ? MathBlockValue.BooleanVector(computed) : MathBlockValue.Vector(values);
     }
 
-    private static MathBlockValue Vector(params double[] values) => MathBlockValue.Vector(values);
+    private static MathBlockValue Vector(params float[] values) => MathBlockValue.Vector(values);
 
-    private static MathBlockValue Scalar(double value) => MathBlockValue.Scalar(value);
+    private static MathBlockValue Scalar(float value) => MathBlockValue.Scalar(value);
 
     private static int Align(int value) => (value + Alignment - 1) & -Alignment;
 

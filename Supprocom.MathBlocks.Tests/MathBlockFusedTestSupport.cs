@@ -25,11 +25,11 @@ internal static class MathBlockFusedTestSupport
 
     // Adversarial values: signed zeros, subnormals, the edges of exp and log, huge values that overflow under
     // add, multiply and square, and exact ties.
-    public static readonly double[] AdversarialValues =
+    public static readonly float[] AdversarialValues =
     [
-        0d, -0d, double.Epsilon, -double.Epsilon, 2.2250738585072014e-308, -2.2250738585072014e-308,
-        1e-310, -1e-310, 1d, -1d, 0.5, 2d, 709.782712893384, 709.79, -745.13, -745.2, 1e154, 1.4e154,
-        1e300, -1e300, double.MaxValue, -double.MaxValue, 3d, -8d, 1e-300, 4.9e-324 * 3
+        0f, -0f, float.Epsilon, -float.Epsilon, 1.1754943e-38f, -1.1754943e-38f,
+        5.28e-41f, -5.28e-41f, 1f, -1f, 0.5f, 2f, 709.782712893384f, 709.79f, -745.13f, -745.2f, 1.78e19f, 1.85e19f,
+        3.16e37f, -3.16e37f, float.MaxValue, -float.MaxValue, 3f, -8f, 1.03e-37f, 1.4e-45f * 3
     ];
 
     public enum Regime
@@ -132,7 +132,7 @@ internal static class MathBlockFusedTestSupport
             switch (type.Kind)
             {
                 case MathBlockValueKind.Vector:
-                    var values = new double[rows];
+                    var values = new float[rows];
                     for (var row = 0; row < rows; row++)
                         values[row] = random.Next(4) == 0 ? pool[random.Next(pool.Length)] : PickValue(random, regime);
                     inputs[name] = MathBlockValue.Vector(values);
@@ -268,7 +268,7 @@ internal static class MathBlockFusedTestSupport
             var right = actual.AsVector();
             Assert.True(left.Count == right.Count, $"{context}: {right.Count} rows, expected {left.Count}.");
             for (var row = 0; row < left.Count; row++)
-                if (BitConverter.DoubleToUInt64Bits(left[row]) != BitConverter.DoubleToUInt64Bits(right[row]))
+                if (BitConverter.SingleToUInt32Bits(left[row]) != BitConverter.SingleToUInt32Bits(right[row]))
                     Assert.Fail($"{context} row {row}: {right[row]:R} (0x{BitConverter.DoubleToUInt64Bits(right[row]):x16}), expected {left[row]:R} (0x{BitConverter.DoubleToUInt64Bits(left[row]):x16}).");
         }
         else
@@ -395,21 +395,21 @@ internal static class MathBlockFusedTestSupport
     private static int PickNode(Random random, List<int> nodes) =>
         random.Next(3) == 0 ? nodes[random.Next(nodes.Count)] : nodes[Math.Max(0, nodes.Count - 1 - random.Next(3))];
 
-    private static double PickScalar(Random random) =>
-        new[] { 2d, 0.5, -1d, 3d, 0d, -0d, 1e-310, 2.5, 1d / 3d, -0.75 }[random.Next(10)];
+    private static float PickScalar(Random random) =>
+        new[] { 2f, 0.5f, -1f, 3f, 0f, -0f, 5.28e-41f, 2.5f, 1f / 3f, -0.75f }[random.Next(10)];
 
-    private static double PickValue(Random random, Regime regime) => regime switch
+    private static float PickValue(Random random, Regime regime) => regime switch
     {
-        Regime.Benign => 0.5 + random.NextDouble() * 1.5,
+        Regime.Benign => 0.5f + random.NextSingle() * 1.5f,
         Regime.Signed => random.Next(6) switch
         {
-            0 => random.Next(2) == 0 ? 0d : -0d,
-            1 => (random.Next(2) == 0 ? 1 : -1) * double.Epsilon * random.Next(1, 1000),
-            2 => (random.Next(2) == 0 ? 1 : -1) * 2.2250738585072014e-308 * random.NextDouble(),
-            _ => random.NextDouble() * 6d - 3d
+            0 => random.Next(2) == 0 ? 0f : -0f,
+            1 => (random.Next(2) == 0 ? 1 : -1) * float.Epsilon * random.Next(1, 1000),
+            2 => (random.Next(2) == 0 ? 1 : -1) * 1.1754943e-38f * random.NextSingle(),
+            _ => random.NextSingle() * 6f - 3f
         },
         _ => random.Next(3) == 0
             ? AdversarialValues[random.Next(AdversarialValues.Length)]
-            : random.NextDouble() * 4d - 2d
+            : random.NextSingle() * 4f - 2f
     };
 }

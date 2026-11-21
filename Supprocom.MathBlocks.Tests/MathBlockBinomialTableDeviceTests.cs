@@ -15,10 +15,10 @@ public sealed class MathBlockBinomialTableDeviceTests
 
     // Pairs (a, b) for the first operand and the second: trade-count-like rows with a + b in 100..1000 and a > b, the edges of the table (a + b from 1020 to 1026
     // with every b), and rows outside the table or the domain.
-    private static (double[] First, double[] Second) Rows(int tradeLikeRows)
+    private static (float[] First, float[] Second) Rows(int tradeLikeRows)
     {
-        var first = new List<double>(tradeLikeRows + 8_000);
-        var second = new List<double>(tradeLikeRows + 8_000);
+        var first = new List<float>(tradeLikeRows + 8_000);
+        var second = new List<float>(tradeLikeRows + 8_000);
         var state = 0x2545F4914F6CDD1DUL;
         for (var row = 0; row < tradeLikeRows; row++)
         {
@@ -39,7 +39,7 @@ public sealed class MathBlockBinomialTableDeviceTests
             }
         }
 
-        double[] specials = [0.5, -1d, 2147483647d, 1e10, 3000d, 1500d, 1023d, 1024d, 0d, 7d];
+        float[] specials = [0.5f, -1f, 2147483647f, 1e10f, 3000f, 1500f, 1023f, 1024f, 0f, 7f];
         for (var left = 0; left < specials.Length; left++)
         {
             for (var right = 0; right < specials.Length; right++)
@@ -52,8 +52,8 @@ public sealed class MathBlockBinomialTableDeviceTests
         return (first.ToArray(), second.ToArray());
     }
 
-    private static (MathBlockProgram Program, Dictionary<string, MathBlockValue> Inputs) Build(string identity, double[] first, double[] second) =>
-        MathBlockCudaDomainDeviceTests.Build(identity, [MathBlockValue.Vector(first), MathBlockValue.Vector(second), MathBlockValue.Scalar(-1d)]);
+    private static (MathBlockProgram Program, Dictionary<string, MathBlockValue> Inputs) Build(string identity, float[] first, float[] second) =>
+        MathBlockCudaDomainDeviceTests.Build(identity, [MathBlockValue.Vector(first), MathBlockValue.Vector(second), MathBlockValue.Scalar(-1f)]);
 
     /// <summary>Verifies the ballot count and the binomial coefficient give the CoreCLR bits on the first execution, with the table empty, and on the executions after it, with the table filled.</summary>
     [Theory]
@@ -91,14 +91,14 @@ public sealed class MathBlockBinomialTableDeviceTests
 
         var started = Stopwatch.GetTimestamp();
         var cold = compiled.Execute(inputs)["result"];
-        var coldMilliseconds = Stopwatch.GetElapsedTime(started).TotalMilliseconds;
-        var warmMilliseconds = double.MaxValue;
+        var coldMilliseconds = (float)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+        var warmMilliseconds = float.MaxValue;
         var warm = cold;
         for (var pass = 0; pass < 3; pass++)
         {
             started = Stopwatch.GetTimestamp();
             warm = compiled.Execute(inputs)["result"];
-            warmMilliseconds = Math.Min(warmMilliseconds, Stopwatch.GetElapsedTime(started).TotalMilliseconds);
+            warmMilliseconds = Math.Min(warmMilliseconds, (float)Stopwatch.GetElapsedTime(started).TotalMilliseconds);
         }
 
         Assert.True(MathBlockDomainWiringTests.Same(coreclr, cold));

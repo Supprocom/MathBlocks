@@ -7,24 +7,24 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 internal static class PrefixDifferenceOldAlgorithm
 {
     /// <summary>Evaluates the old algorithm over valid inputs (the counts are non-negative integers, start is an integer not above end).</summary>
-    internal static (double[] Values, bool[] Valid) Run(double[] values, bool[] available, double[] counts, double start, double end, double fill)
+    internal static (float[] Values, bool[] Valid) Run(float[] values, bool[] available, float[] counts, float start, float end, float fill)
     {
         var count = values.Length;
         var segmentStart = new int[count];
         var segmentEnd = new int[count];
-        var before = new double[count];
-        var after = new double[count];
+        var before = new float[count];
+        var after = new float[count];
         var missingBefore = new int[count];
         var missingAfter = new int[count];
-        var sum = 0d;
+        var sum = 0f;
         var missing = 0;
         var first = 0;
         for (var row = 0; row < count; row++)
         {
-            if (row == 0 || counts[row] == 0d)
+            if (row == 0 || counts[row] == 0f)
             {
                 first = row;
-                sum = 0d;
+                sum = 0f;
                 missing = 0;
             }
 
@@ -47,7 +47,7 @@ internal static class PrefixDifferenceOldAlgorithm
                 last = row;
         }
 
-        var result = new double[count];
+        var result = new float[count];
         var valid = new bool[count];
         for (var row = 0; row < count; row++)
         {
@@ -61,7 +61,7 @@ internal static class PrefixDifferenceOldAlgorithm
             if (missingBefore[lowRow] != missingAfter[highRow])
                 continue;
             var difference = after[highRow] - before[lowRow];
-            if (!double.IsFinite(difference))
+            if (!float.IsFinite(difference))
                 continue;
             result[row] = difference;
             valid[row] = true;

@@ -7,7 +7,7 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 internal static class SequenceOracle
 {
     /// <summary>Runs the named operation with integer parameters: k as <paramref name="first"/> for lead and lag, start and end for the others.</summary>
-    internal static (double[] Values, bool[] Valid) Run(string name, double[] series, bool[] availability, double[] counts, long first, long second) =>
+    internal static (float[] Values, bool[] Valid) Run(string name, float[] series, bool[] availability, float[] counts, long first, long second) =>
         name switch
         {
             "lead" => Lead(series, availability, counts, first),
@@ -20,9 +20,9 @@ internal static class SequenceOracle
         };
 
     // Rows t..t+k are chained when t+k exists and counts[t+k] >= k.
-    private static (double[] Values, bool[] Valid) Lead(double[] x, bool[] availability, double[] counts, long k)
+    private static (float[] Values, bool[] Valid) Lead(float[] x, bool[] availability, float[] counts, long k)
     {
-        var values = new double[x.Length];
+        var values = new float[x.Length];
         var valid = new bool[x.Length];
         for (var row = 0; row < x.Length; row++)
         {
@@ -36,9 +36,9 @@ internal static class SequenceOracle
     }
 
     // Rows t-k..t are chained when counts[t] >= k.
-    private static (double[] Values, bool[] Valid) Lag(double[] x, bool[] availability, double[] counts, long k)
+    private static (float[] Values, bool[] Valid) Lag(float[] x, bool[] availability, float[] counts, long k)
     {
-        var values = new double[x.Length];
+        var values = new float[x.Length];
         var valid = new bool[x.Length];
         for (var row = 0; row < x.Length; row++)
         {
@@ -51,9 +51,9 @@ internal static class SequenceOracle
     }
 
     // Offsets are tried in order; an offset that is not reachable or reads an unavailable row invalidates the row, and the first non-zero predicate (negative zero is false) ends the scan.
-    private static (double[] Values, bool[] Valid) FirstTrue(double[] p, bool[] availability, double[] counts, long start, long end)
+    private static (float[] Values, bool[] Valid) FirstTrue(float[] p, bool[] availability, float[] counts, long start, long end)
     {
-        var values = new double[p.Length];
+        var values = new float[p.Length];
         var valid = new bool[p.Length];
         for (var row = 0; row < p.Length; row++)
         {
@@ -69,7 +69,7 @@ internal static class SequenceOracle
                     break;
                 }
 
-                if (p[(int)target] != 0d)
+                if (p[(int)target] != 0f)
                 {
                     result = offset;
                     break;
@@ -85,9 +85,9 @@ internal static class SequenceOracle
 
     // The span start..end must lie in the series and be chained, every row in it must be available, and a sum must stay finite at every step. The sum starts at positive zero;
     // the maximum starts at negative infinity and uses Math.Max, which orders negative zero below positive zero.
-    private static (double[] Values, bool[] Valid) Reduce(double[] x, bool[] availability, double[] counts, long start, long end, bool sum)
+    private static (float[] Values, bool[] Valid) Reduce(float[] x, bool[] availability, float[] counts, long start, long end, bool sum)
     {
-        var values = new double[x.Length];
+        var values = new float[x.Length];
         var valid = new bool[x.Length];
         var before = start < 0 ? -start : 0L;
         var after = end > 0 ? end : 0L;
@@ -95,7 +95,7 @@ internal static class SequenceOracle
         {
             var last = row + after;
             var ok = row + start >= 0 && counts[row] >= before && last < x.Length && counts[(int)last] >= after;
-            var result = sum ? 0d : double.NegativeInfinity;
+            var result = sum ? 0f : float.NegativeInfinity;
             for (var offset = start; ok && offset <= end; offset++)
             {
                 var index = (int)(row + offset);
@@ -106,7 +106,7 @@ internal static class SequenceOracle
                 else if (sum)
                 {
                     result += x[index];
-                    ok = double.IsFinite(result);
+                    ok = float.IsFinite(result);
                 }
                 else
                 {
@@ -123,39 +123,39 @@ internal static class SequenceOracle
 
     // A segment starts at row 0 and at every row with a zero count. Inside a segment the prefix starts at zero and adds zero for an unavailable row. The window start..end is valid
     // when both ends lie in the row's segment, no unavailable row lies between them, and the difference of the two prefixes is finite.
-    private static (double[] Values, bool[] Valid) PrefixDifference(double[] x, bool[] availability, double[] counts, long start, long end)
+    private static (float[] Values, bool[] Valid) PrefixDifference(float[] x, bool[] availability, float[] counts, long start, long end)
     {
         var n = x.Length;
         var segmentStart = new int[n];
         var segmentEnd = new int[n];
-        var prefixBefore = new double[n];
-        var prefixThrough = new double[n];
+        var prefixBefore = new float[n];
+        var prefixThrough = new float[n];
         var missingBefore = new int[n];
         var missingThrough = new int[n];
         for (var row = 0; row < n; row++)
         {
-            var begins = row == 0 || counts[row] == 0d;
+            var begins = row == 0 || counts[row] == 0f;
             segmentStart[row] = begins ? row : segmentStart[row - 1];
-            prefixBefore[row] = begins ? 0d : prefixThrough[row - 1];
+            prefixBefore[row] = begins ? 0f : prefixThrough[row - 1];
             missingBefore[row] = begins ? 0 : missingThrough[row - 1];
-            prefixThrough[row] = prefixBefore[row] + (availability[row] ? x[row] : 0d);
+            prefixThrough[row] = prefixBefore[row] + (availability[row] ? x[row] : 0f);
             missingThrough[row] = missingBefore[row] + (availability[row] ? 0 : 1);
         }
 
         for (var row = n - 1; row >= 0; row--)
-            segmentEnd[row] = row + 1 < n && counts[row + 1] != 0d ? segmentEnd[row + 1] : row;
-        var values = new double[n];
+            segmentEnd[row] = row + 1 < n && counts[row + 1] != 0f ? segmentEnd[row + 1] : row;
+        var values = new float[n];
         var valid = new bool[n];
         for (var row = 0; row < n; row++)
         {
             var low = row + start;
             var high = row + end;
             var ok = low >= segmentStart[row] && high <= segmentEnd[row];
-            var difference = 0d;
+            var difference = 0f;
             if (ok)
             {
                 difference = prefixThrough[(int)high] - prefixBefore[(int)low];
-                ok = missingBefore[(int)low] == missingThrough[(int)high] && double.IsFinite(difference);
+                ok = missingBefore[(int)low] == missingThrough[(int)high] && float.IsFinite(difference);
             }
 
             valid[row] = ok;

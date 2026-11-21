@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 internal sealed class RowFunctionHarness : IDisposable
 {
     /// <summary>The fill that every row function is given.</summary>
-    internal const double Fill = -98_765.25d;
+    internal const float Fill = -98_765.25f;
 
     /// <summary>The largest number of values per row that <see cref="RunSum"/> accepts.</summary>
     internal const int MaximumSumCount = 33;
@@ -26,19 +26,19 @@ internal sealed class RowFunctionHarness : IDisposable
     {
         this.rows = rows;
         session = new ProofDeviceSession(RowFunctionKernels.Source(), "proof-row-functions.cu");
-        first = session.Allocate(rows * (long)sizeof(double));
-        second = session.Allocate(rows * (long)sizeof(double));
-        sumValues = session.Allocate(rows * (long)MaximumSumCount * sizeof(double));
-        rowValues = session.Allocate(rows * (long)sizeof(double));
+        first = session.Allocate(rows * (long)sizeof(float));
+        second = session.Allocate(rows * (long)sizeof(float));
+        sumValues = session.Allocate(rows * (long)MaximumSumCount * sizeof(float));
+        rowValues = session.Allocate(rows * (long)sizeof(float));
         rowValid = session.Allocate(rows * (long)sizeof(int));
-        narrowValues = session.Allocate(rows * (long)sizeof(double));
+        narrowValues = session.Allocate(rows * (long)sizeof(float));
         narrowValid = session.Allocate(rows * (long)sizeof(int));
-        wideValues = session.Allocate(rows * (long)sizeof(double));
+        wideValues = session.Allocate(rows * (long)sizeof(float));
         wideValid = session.Allocate(rows * (long)sizeof(int));
     }
 
     /// <summary>Runs one row function and the elementwise row function for its source, in both encodings, over the operands.</summary>
-    internal ParityResult Run(RowFunctionOp function, double[] a, double[] b)
+    internal ParityResult Run(RowFunctionOp function, float[] a, float[] b)
     {
         ProofDeviceSession.Upload(first, a);
         ProofDeviceSession.Upload(second, b);
@@ -56,7 +56,7 @@ internal sealed class RowFunctionHarness : IDisposable
     }
 
     /// <summary>Runs the row sum over <paramref name="count"/> consecutive values per row and returns the bits and the validity of each row.</summary>
-    internal (long[] Bits, int[] Valid) RunSum(double[] values, int count)
+    internal (long[] Bits, int[] Valid) RunSum(float[] values, int count)
     {
         ProofDeviceSession.Upload(sumValues, values);
         var kernel = session.Function("proof_row_sum");

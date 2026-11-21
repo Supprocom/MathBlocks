@@ -101,8 +101,8 @@ public sealed class VectorBlockSafetyTests
     public void ALengthMismatchIsRefused()
     {
         var failures = new List<string>();
-        var first = MathBlockValue.Vector([1d, 2d, 3d, 4d, 5d], MathBlockUnit.Dimensionless);
-        var second = MathBlockValue.Vector([1d, 2d, 3d, 4d], MathBlockUnit.Dimensionless);
+        var first = MathBlockValue.Vector([1f, 2f, 3f, 4f, 5f], MathBlockUnit.Dimensionless);
+        var second = MathBlockValue.Vector([1f, 2f, 3f, 4f], MathBlockUnit.Dimensionless);
         string[] identities = [VectorBlockCalls.Subtract, "elementwise.scalar.subtract@1", "elementwise-valid.scalar.subtract@1"];
         for (var index = 0; index < identities.Length; index++)
         {
@@ -156,7 +156,7 @@ public sealed class VectorBlockSafetyTests
     {
         var failures = new List<string>();
         var raw = ProofSets.ForRows(LongRows, includeReal: false)[(int)ProofClass.Invalid].First;
-        Assert.Contains(raw, value => !double.IsFinite(value));
+        Assert.Contains(raw, value => !float.IsFinite(value));
         var calls = VectorBlockCalls.All(includeLifted: true);
         for (var callIndex = 0; callIndex < calls.Count; callIndex++)
         {
@@ -186,7 +186,7 @@ public sealed class VectorBlockSafetyTests
             for (var row = 0; row < series.Length; row++)
             {
                 var warm = row < width - 1;
-                if (valid[row] == warm || (warm && BitConverter.DoubleToInt64Bits(values[row]) != BitConverter.DoubleToInt64Bits(VectorBlockCalls.Fill)))
+                if (valid[row] == warm || (warm && BitConverter.SingleToInt32Bits(values[row]) != BitConverter.SingleToInt32Bits(VectorBlockCalls.Fill)))
                     failures.Add(string.Create(CultureInfo.InvariantCulture, $"window {width} row {row}: valid {valid[row]}, value {values[row]:R}"));
             }
         }
@@ -202,17 +202,17 @@ public sealed class VectorBlockSafetyTests
         for (var index = 0; index < VectorBlockCalls.Windows.Length; index++)
         {
             var width = VectorBlockCalls.Windows[index];
-            var constant = new double[width + 5];
-            Array.Fill(constant, 5d);
-            var alternating = new double[width + 5];
+            var constant = new float[width + 5];
+            Array.Fill(constant, 5f);
+            var alternating = new float[width + 5];
             for (var row = 0; row < alternating.Length; row++)
-                alternating[row] = row % 2 == 0 ? 1e200d : -1e200d;
+                alternating[row] = row % 2 == 0 ? 1e25f : -1e25f;
             foreach (var (name, series) in new[] { ("constant", constant), ("alternating 1e200", alternating) })
             {
                 var (values, valid) = Window(series, width);
                 for (var row = 0; row < series.Length; row++)
                 {
-                    if (valid[row] || BitConverter.DoubleToInt64Bits(values[row]) != BitConverter.DoubleToInt64Bits(VectorBlockCalls.Fill))
+                    if (valid[row] || BitConverter.SingleToInt32Bits(values[row]) != BitConverter.SingleToInt32Bits(VectorBlockCalls.Fill))
                         failures.Add(string.Create(CultureInfo.InvariantCulture, $"{name} window {width} row {row}: valid {valid[row]}, value {values[row]:R}"));
                 }
             }
@@ -236,12 +236,12 @@ public sealed class VectorBlockSafetyTests
             var (baseValues, baseValid) = Window(series, width);
             for (var later = 1; later < series.Length && failures.Count < MaximumFailures; later++)
             {
-                var changed = (double[])series.Clone();
-                changed[later] = (changed[later] * 3d) + 7d;
+                var changed = (float[])series.Clone();
+                changed[later] = (changed[later] * 3f) + 7f;
                 var (values, valid) = Window(changed, width);
                 for (var row = 0; row < later; row++)
                 {
-                    if (valid[row] != baseValid[row] || BitConverter.DoubleToInt64Bits(values[row]) != BitConverter.DoubleToInt64Bits(baseValues[row]))
+                    if (valid[row] != baseValid[row] || BitConverter.SingleToInt32Bits(values[row]) != BitConverter.SingleToInt32Bits(baseValues[row]))
                         failures.Add(string.Create(CultureInfo.InvariantCulture, $"window {width}: changing row {later} changed row {row}"));
                 }
             }
@@ -251,7 +251,7 @@ public sealed class VectorBlockSafetyTests
     }
 
     // The window form and its validity sibling over the series, with the fill, as the route calls them.
-    private static (double[] Values, bool[] Valid) Window(double[] series, int width)
+    private static (float[] Values, bool[] Valid) Window(float[] series, int width)
     {
         var vector = MathBlockValue.Vector(series, MathBlockUnit.Dimensionless);
         var form = MathBlockCudaDeviceModule.GetOperation(VectorBlockCalls.Standardize).EvaluateCoreCLR(vector, MathBlockValue.Scalar(width), MathBlockValue.Scalar(VectorBlockCalls.Fill));
@@ -300,7 +300,7 @@ public sealed class VectorBlockSafetyTests
         var flags = validity.AsBooleanVector().ToArray();
         for (var row = 0; row < values.Length && failures.Count < MaximumFailures; row++)
         {
-            var ok = flags[row] ? double.IsFinite(values[row]) : BitConverter.DoubleToInt64Bits(values[row]) == BitConverter.DoubleToInt64Bits(VectorBlockCalls.Fill);
+            var ok = flags[row] ? float.IsFinite(values[row]) : BitConverter.SingleToInt32Bits(values[row]) == BitConverter.SingleToInt32Bits(VectorBlockCalls.Fill);
             if (!ok)
                 failures.Add(string.Create(CultureInfo.InvariantCulture, $"{call.Contracts[0]} {call.Parameter} class {className} rows {rows} row {row}: valid {flags[row]}, value {values[row]:R}"));
         }

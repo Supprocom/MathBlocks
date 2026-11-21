@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks.Tests;
 public sealed class MathBlockNonConvergenceTests
 {
     private const string Beta = "special.regularized-incomplete-beta@1";
-    private const double Large = 1e6;
+    private const float Large = 1e6f;
 
     private static MathBlockProgram Program(string identifier, params MathBlockType[] inputTypes)
     {
@@ -16,7 +16,7 @@ public sealed class MathBlockNonConvergenceTests
     private static Dictionary<string, MathBlockValue> Named(params MathBlockValue[] values) =>
         values.Select((value, index) => (Name: $"input{index}", Value: value)).ToDictionary(item => item.Name, item => item.Value, StringComparer.Ordinal);
 
-    private static MathBlockExecutionResult Beta1(MathBlockDomainOptions options, double x = 0.5d, double left = Large, double right = Large)
+    private static MathBlockExecutionResult Beta1(MathBlockDomainOptions options, float x = 0.5f, float left = Large, float right = Large)
     {
         var program = Program("special.regularized-incomplete-beta", MathBlockType.Scalar(), MathBlockType.Scalar(), MathBlockType.Scalar());
         return MathBlocksCoreCLRWorker.Create(options).ExecuteWithDiagnostics(
@@ -49,11 +49,11 @@ public sealed class MathBlockNonConvergenceTests
         Assert.Equal(1L, Assert.Single(result.NonConvergedEvaluations).Value);
         Assert.Equal(Beta, Assert.Single(result.NonConvergedEvaluations).Key);
         Assert.Equal(
-            BitConverter.DoubleToInt64Bits(MathBlockProbability.RegularizedIncompleteBeta(0.5d, Large, Large)),
-            BitConverter.DoubleToInt64Bits(result.Outputs["result"].AsScalar()));
+            BitConverter.SingleToInt32Bits(MathBlockProbability.RegularizedIncompleteBeta(0.5f, Large, Large)),
+            BitConverter.SingleToInt32Bits(result.Outputs["result"].AsScalar()));
         Assert.Equal(
-            BitConverter.DoubleToInt64Bits(result.Outputs["result"].AsScalar()),
-            BitConverter.DoubleToInt64Bits(Operation(Beta).Evaluate(MathBlockValue.Scalar(0.5d), MathBlockValue.Scalar(Large), MathBlockValue.Scalar(Large)).AsScalar()));
+            BitConverter.SingleToInt32Bits(result.Outputs["result"].AsScalar()),
+            BitConverter.SingleToInt32Bits(Operation(Beta).Evaluate(MathBlockValue.Scalar(0.5f), MathBlockValue.Scalar(Large), MathBlockValue.Scalar(Large)).AsScalar()));
     }
 
     /// <summary>Verifies under Invalid the non-converged row is invalid, and still counted.</summary>
@@ -70,7 +70,7 @@ public sealed class MathBlockNonConvergenceTests
     [Fact]
     public void TheToleranceDecidesConvergence()
     {
-        var loose = Beta1(new MathBlockDomainOptions { IncompleteBetaTolerance = 1d });
+        var loose = Beta1(new MathBlockDomainOptions { IncompleteBetaTolerance = 1f });
 
         Assert.Empty(loose.NonConvergedEvaluations);
         Assert.True(loose.Outputs["result"].IsValid);
@@ -95,10 +95,10 @@ public sealed class MathBlockNonConvergenceTests
             .Build();
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["x"] = MathBlockValue.Vector([0.5d, 0.5d, 0.5d]),
+            ["x"] = MathBlockValue.Vector([0.5f, 0.5f, 0.5f]),
             ["left"] = MathBlockValue.Scalar(Large),
             ["right"] = MathBlockValue.Scalar(Large),
-            ["fill"] = MathBlockValue.Scalar(-1d)
+            ["fill"] = MathBlockValue.Scalar(-1f)
         };
 
         var result = MathBlocksCoreCLRWorker.Create(new MathBlockDomainOptions { IncompleteBetaNonConvergence = policy })
@@ -112,19 +112,19 @@ public sealed class MathBlockNonConvergenceTests
             Enumerable.Range(0, 3),
             row => Assert.Equal(
                 policy == MathBlockNonConvergencePolicy.Estimate
-                    ? MathBlockProbability.RegularizedIncompleteBeta(0.5d, Large, Large)
-                    : -1d,
+                    ? MathBlockProbability.RegularizedIncompleteBeta(0.5f, Large, Large)
+                    : -1f,
                 result.Outputs["values"].AsVector()[row]));
     }
 
     private static MathBlockMatrix Dense(int size)
     {
-        var values = new double[size * size];
+        var values = new float[size * size];
         for (var row = 0; row < size; row++)
         {
             for (var column = row; column < size; column++)
             {
-                var value = Math.Sin(1d + row * 7 + column * 3) + 2d;
+                var value = MathF.Sin(1f + row * 7 + column * 3) + 2f;
                 values[row * size + column] = value;
                 values[column * size + row] = value;
             }
@@ -140,7 +140,7 @@ public sealed class MathBlockNonConvergenceTests
             ? Program(identifier, MathBlockType.Matrix(rows: matrix.Rows, columns: matrix.Columns), MathBlockType.Scalar())
             : Program(identifier, MathBlockType.Matrix(rows: matrix.Rows, columns: matrix.Columns));
         var inputs = scalar
-            ? Named(MathBlockValue.Matrix(matrix), MathBlockValue.Scalar(10d))
+            ? Named(MathBlockValue.Matrix(matrix), MathBlockValue.Scalar(10f))
             : Named(MathBlockValue.Matrix(matrix));
         return MathBlocksCoreCLRWorker.Create(options).ExecuteWithDiagnostics(program, inputs);
     }
@@ -169,10 +169,10 @@ public sealed class MathBlockNonConvergenceTests
     [Fact]
     public void JacobiDoesNotCountAnEvaluationThatConverges()
     {
-        var result = Jacobi("matrix.symmetric-eigenvalues", new MathBlockMatrix(2, 2, [2d, 1d, 1d, 2d]), new MathBlockDomainOptions { JacobiRotationMultiplier = 1 });
+        var result = Jacobi("matrix.symmetric-eigenvalues", new MathBlockMatrix(2, 2, [2f, 1f, 1f, 2f]), new MathBlockDomainOptions { JacobiRotationMultiplier = 1 });
 
         Assert.Empty(result.NonConvergedEvaluations);
-        Assert.Equal([1d, 3d], result.Outputs["result"].AsVector().Select(value => Math.Round(value, 12, MidpointRounding.ToEven)).ToArray());
+        Assert.Equal([1f, 3f], result.Outputs["result"].AsVector().Select(value => MathF.Round(value, 12, MidpointRounding.ToEven)).ToArray());
     }
 
     /// <summary>Verifies the rotation budget is the multiplier times n times n, in 64 bits: a larger multiplier converges the matrix a small one does not.</summary>
@@ -195,7 +195,7 @@ public sealed class MathBlockNonConvergenceTests
         for (var from = 0; from < 6; from++)
         {
             for (var to = from + 1; to < 6; to++)
-                edges.Add(new(from, to, 1d + (from * 7 + to * 3) % 5));
+                edges.Add(new(from, to, 1f + (from * 7 + to * 3) % 5));
         }
 
         var program = Program("graph.algebraic-connectivity", MathBlockType.Graph());
@@ -217,7 +217,7 @@ public sealed class MathBlockNonConvergenceTests
 
         var result = MathBlocksCoreCLRWorker.Shared.ExecuteWithDiagnostics(
             program,
-            Named(MathBlockValue.Scalar(0.5d), MathBlockValue.Scalar(2d), MathBlockValue.Scalar(3d)));
+            Named(MathBlockValue.Scalar(0.5f), MathBlockValue.Scalar(2f), MathBlockValue.Scalar(3f)));
 
         Assert.Empty(result.NonConvergedEvaluations);
         Assert.True(result.Outputs["result"].IsValid);

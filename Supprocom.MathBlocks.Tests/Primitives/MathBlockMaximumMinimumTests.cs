@@ -4,41 +4,41 @@ namespace Supprocom.MathBlocks.Tests;
 public sealed class MathBlockMaximumMinimumTests
 {
     /// <summary>Gets operand pairs with a NaN on either side.</summary>
-    public static TheoryData<double, double> NaNPairs => new()
+    public static TheoryData<float, float> NaNPairs => new()
     {
-        { double.NaN, 1d },
-        { 1d, double.NaN },
-        { double.NaN, double.NaN },
-        { double.NaN, 0d },
-        { 0d, double.NaN },
-        { -0d, double.NaN },
-        { double.NaN, -0d },
-        { double.NaN, double.PositiveInfinity },
-        { double.NegativeInfinity, double.NaN }
+        { float.NaN, 1f },
+        { 1f, float.NaN },
+        { float.NaN, float.NaN },
+        { float.NaN, 0f },
+        { 0f, float.NaN },
+        { -0f, float.NaN },
+        { float.NaN, -0f },
+        { float.NaN, float.PositiveInfinity },
+        { float.NegativeInfinity, float.NaN }
     };
 
     /// <summary>Verifies a NaN operand on either side gives NaN.</summary>
     [Theory]
     [MemberData(nameof(NaNPairs))]
-    public void ANaNOperandGivesNaN(double left, double right)
+    public void ANaNOperandGivesNaN(float left, float right)
     {
-        Assert.True(double.IsNaN(MathBlockScalar.Maximum(left, right)), $"Maximum({left}, {right})");
-        Assert.True(double.IsNaN(MathBlockScalar.Minimum(left, right)), $"Minimum({left}, {right})");
+        Assert.True(float.IsNaN(MathBlockScalar.Maximum(left, right)), $"Maximum({left}, {right})");
+        Assert.True(float.IsNaN(MathBlockScalar.Minimum(left, right)), $"Minimum({left}, {right})");
     }
 
     /// <summary>Verifies the order, the equal operands and the signed zeros are unchanged.</summary>
     [Fact]
     public void OrderAndSignedZerosAreUnchanged()
     {
-        Assert.Equal(2d, MathBlockScalar.Maximum(1d, 2d));
-        Assert.Equal(2d, MathBlockScalar.Maximum(2d, 1d));
-        Assert.Equal(1d, MathBlockScalar.Minimum(1d, 2d));
-        Assert.Equal(1d, MathBlockScalar.Minimum(2d, 1d));
-        Assert.Equal(double.PositiveInfinity, MathBlockScalar.Maximum(double.PositiveInfinity, 1d));
-        Assert.Equal(double.NegativeInfinity, MathBlockScalar.Minimum(1d, double.NegativeInfinity));
-        Assert.Equal(0L, BitConverter.DoubleToInt64Bits(MathBlockScalar.Maximum(-0d, 0d)));
-        Assert.Equal(0L, BitConverter.DoubleToInt64Bits(MathBlockScalar.Maximum(0d, -0d)));
-        Assert.Equal(long.MinValue, BitConverter.DoubleToInt64Bits(MathBlockScalar.Minimum(-0d, 0d)));
-        Assert.Equal(long.MinValue, BitConverter.DoubleToInt64Bits(MathBlockScalar.Minimum(0d, -0d)));
+        Assert.Equal(2f, MathBlockScalar.Maximum(1f, 2f));
+        Assert.Equal(2f, MathBlockScalar.Maximum(2f, 1f));
+        Assert.Equal(1f, MathBlockScalar.Minimum(1f, 2f));
+        Assert.Equal(1f, MathBlockScalar.Minimum(2f, 1f));
+        Assert.Equal(float.PositiveInfinity, MathBlockScalar.Maximum(float.PositiveInfinity, 1f));
+        Assert.Equal(float.NegativeInfinity, MathBlockScalar.Minimum(1f, float.NegativeInfinity));
+        Assert.Equal(0L, BitConverter.SingleToInt32Bits(MathBlockScalar.Maximum(-0f, 0f)));
+        Assert.Equal(0L, BitConverter.SingleToInt32Bits(MathBlockScalar.Maximum(0f, -0f)));
+        Assert.Equal(long.MinValue, BitConverter.SingleToInt32Bits(MathBlockScalar.Minimum(-0f, 0f)));
+        Assert.Equal(long.MinValue, BitConverter.SingleToInt32Bits(MathBlockScalar.Minimum(0f, -0f)));
     }
 }

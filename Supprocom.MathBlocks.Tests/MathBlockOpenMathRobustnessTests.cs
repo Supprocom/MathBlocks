@@ -218,7 +218,7 @@ public sealed class MathBlockOpenMathRobustnessTests
             MathBlockOpenMathDiagnosticCode.OutputLimitExceeded);
 
         var values = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
-        var vector = values.Constant(MathBlockValue.Vector([1d, 2d, 3d]));
+        var vector = values.Constant(MathBlockValue.Vector([1f, 2f, 3f]));
         var valueText = MathBlockOpenMath.Export(values.Output("value", vector).Build());
         Assert.True(MathBlockOpenMath.TryImport(
             valueText,

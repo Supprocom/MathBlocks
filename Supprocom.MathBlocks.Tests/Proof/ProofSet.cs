@@ -9,19 +9,19 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 /// <param name="second">The second operand, empty for a sequence set.</param>
 /// <param name="predicate">The predicate series, empty for a row-function set.</param>
 /// <param name="available">The per-row availability, empty for a row-function set.</param>
-internal sealed class ProofSet(string name, double[] first, double[] second, double[] predicate, bool[] available)
+internal sealed class ProofSet(string name, float[] first, float[] second, float[] predicate, bool[] available)
 {
     /// <summary>Gets the class name.</summary>
     internal string Name { get; } = name;
 
     /// <summary>Gets the first operand or the series.</summary>
-    internal double[] First { get; } = first;
+    internal float[] First { get; } = first;
 
     /// <summary>Gets the second operand.</summary>
-    internal double[] Second { get; } = second;
+    internal float[] Second { get; } = second;
 
     /// <summary>Gets the predicate series.</summary>
-    internal double[] Predicate { get; } = predicate;
+    internal float[] Predicate { get; } = predicate;
 
     /// <summary>Gets the per-row availability.</summary>
     internal bool[] Available { get; } = available;

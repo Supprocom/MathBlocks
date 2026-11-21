@@ -13,8 +13,8 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 public sealed class SumOverOffsetsKernelTests
 {
     private const int MaximumFailures = 20;
-    private const double Fill = 123.5d;
-    private const double StaleValue = -9876.5d;
+    private const float Fill = 123.5f;
+    private const float StaleValue = -9876.5f;
 
     private static readonly ValuesKernel Values = Bind<ValuesKernel>("SumOverOffsetsValues");
     private static readonly ValidityKernel Validity = Bind<ValidityKernel>("SumOverOffsetsValidity");
@@ -25,9 +25,9 @@ public sealed class SumOverOffsetsKernelTests
         (-128, 127), (-300, 300), (0, 100_000), (-2_000_000_000, 2_000_000_000), (5, 2_000_000_000), (-2_000_000_000, 0)
     ];
 
-    private delegate void ValuesKernel(ReadOnlySpan<double> x, ReadOnlySpan<bool> xValid, ReadOnlySpan<double> counts, int start, int end, double fill, Span<double> values, Span<bool> rowValid);
+    private delegate void ValuesKernel(ReadOnlySpan<float> x, ReadOnlySpan<bool> xValid, ReadOnlySpan<float> counts, int start, int end, float fill, Span<float> values, Span<bool> rowValid);
 
-    private delegate void ValidityKernel(ReadOnlySpan<double> x, ReadOnlySpan<bool> xValid, ReadOnlySpan<double> counts, int start, int end, Span<bool> rowValid);
+    private delegate void ValidityKernel(ReadOnlySpan<float> x, ReadOnlySpan<bool> xValid, ReadOnlySpan<float> counts, int start, int end, Span<bool> rowValid);
 
     /// <summary>Verifies every series length from 0 to 80 rows, and a few longer ones, for every span, with finite random values, unavailable rows and the three kinds of counts.</summary>
     [Fact]
@@ -44,12 +44,12 @@ public sealed class SumOverOffsetsKernelTests
             var length = lengths[lengthIndex];
             for (var kind = 0; kind < 3; kind++)
             {
-                var series = new double[length];
+                var series = new float[length];
                 var available = new bool[length];
                 for (var row = 0; row < length; row++)
                 {
                     series[row] = Finite(random);
-                    available[row] = kind == 0 || random.NextDouble() >= 0.08d;
+                    available[row] = kind == 0 || random.NextSingle() >= 0.08f;
                 }
 
                 var counts = Counts(random, length, kind);
@@ -65,23 +65,23 @@ public sealed class SumOverOffsetsKernelTests
     [Fact]
     public void ARunningSumThatOverflowsInTheMiddleOfASpanIsInvalid()
     {
-        const double Large = 1.2e308d;
+        const float Large = 3.23e38f;
         var failures = new List<string>();
         // Each pattern repeats along the series, so every lane of a block and every row past the blocks sees every alignment of it.
-        double[][] patterns =
+        float[][] patterns =
         [
             [Large, Large, -Large, -Large],
             [Large, -Large, Large, -Large],
-            [-Large, -Large, Large, Large, 1d],
-            [Large, 1d, Large, -Large, -Large, 2d],
-            [double.MaxValue, double.MaxValue * 0.5d, -double.MaxValue, 3d]
+            [-Large, -Large, Large, Large, 1f],
+            [Large, 1f, Large, -Large, -Large, 2f],
+            [float.MaxValue, float.MaxValue * 0.5f, -float.MaxValue, 3f]
         ];
         for (var patternIndex = 0; patternIndex < patterns.Length; patternIndex++)
         {
             var pattern = patterns[patternIndex];
             for (var length = 1; length <= 75; length++)
             {
-                var series = new double[length];
+                var series = new float[length];
                 for (var row = 0; row < length; row++)
                     series[row] = pattern[row % pattern.Length];
                 for (var start = -4; start <= 4; start++)
@@ -94,7 +94,7 @@ public sealed class SumOverOffsetsKernelTests
 
         // The first row's span overflows on its second value and the same four values add up to zero in pairs.
         var four = new[] { Large, Large, -Large, -Large };
-        var values = new double[4];
+        var values = new float[4];
         var valid = new bool[4];
         Values(four, AllTrue(4), Contiguous(4), 0, 3, Fill, values, valid);
         Assert.False(valid[0]);
@@ -107,15 +107,15 @@ public sealed class SumOverOffsetsKernelTests
     public void SignedZerosAndSubnormalValuesKeepTheirBits()
     {
         var failures = new List<string>();
-        double[] alphabet = [0d, -0d, double.Epsilon, -double.Epsilon, 2.5e-310d, -1e-308d, 1d];
+        float[] alphabet = [0f, -0f, float.Epsilon, -float.Epsilon, 1.32e-40f, -5.28e-39f, 1f];
         var random = new Random(5);
         for (var length = 1; length <= 70 && failures.Count < MaximumFailures; length++)
         {
             for (var repeat = 0; repeat < 6; repeat++)
             {
-                var series = new double[length];
+                var series = new float[length];
                 for (var row = 0; row < length; row++)
-                    series[row] = repeat == 0 ? -0d : alphabet[random.Next(0, alphabet.Length)];
+                    series[row] = repeat == 0 ? -0f : alphabet[random.Next(0, alphabet.Length)];
                 for (var start = -3; start <= 3; start++)
                 {
                     for (var end = start; end <= start + 9; end++)
@@ -124,13 +124,13 @@ public sealed class SumOverOffsetsKernelTests
             }
         }
 
-        var zeros = new double[40];
-        Array.Fill(zeros, -0d);
-        var sums = new double[40];
+        var zeros = new float[40];
+        Array.Fill(zeros, -0f);
+        var sums = new float[40];
         var valid = new bool[40];
         Values(zeros, AllTrue(40), Contiguous(40), 0, 2, Fill, sums, valid);
         Assert.True(valid[0]);
-        Assert.Equal(0L, BitConverter.DoubleToInt64Bits(sums[0]));
+        Assert.Equal(0L, BitConverter.SingleToInt32Bits(sums[0]));
         ProofBar.Fail("Signed zeros and subnormal values", failures);
     }
 
@@ -144,12 +144,12 @@ public sealed class SumOverOffsetsKernelTests
         {
             for (var kind = 0; kind < 3; kind++)
             {
-                var series = new double[length];
+                var series = new float[length];
                 var available = new bool[length];
                 for (var row = 0; row < length; row++)
                 {
-                    series[row] = random.Next(0, 12) switch { 0 => double.PositiveInfinity, 1 => double.NegativeInfinity, 2 => double.NaN, 3 => 1.7e308d, 4 => -1.7e308d, _ => Finite(random) };
-                    available[row] = random.NextDouble() >= 0.1d;
+                    series[row] = random.Next(0, 12) switch { 0 => float.PositiveInfinity, 1 => float.NegativeInfinity, 2 => float.NaN, 3 => 3.38e38f, 4 => -3.38e38f, _ => Finite(random) };
+                    available[row] = random.NextSingle() >= 0.1f;
                 }
 
                 var counts = Counts(random, length, kind);
@@ -186,19 +186,19 @@ public sealed class SumOverOffsetsKernelTests
     }
 
     // The definition, written out: 0.0 plus the values of the span, left to right; invalid when the span is unreachable, a row of it is unavailable or a running sum is not finite.
-    private static void SequentialSum(double[] x, bool[] available, double[] counts, int start, int end, double[] values, bool[] valid)
+    private static void SequentialSum(float[] x, bool[] available, float[] counts, int start, int end, float[] values, bool[] valid)
     {
         for (var row = 0; row < x.Length; row++)
         {
             var ok = Reachable(counts, row, start, end);
-            var sum = 0d;
+            var sum = 0f;
             for (var index = row + (long)start; ok && index <= row + (long)end; index++)
             {
                 ok = available[index];
                 if (ok)
                 {
                     sum += x[index];
-                    ok = double.IsFinite(sum);
+                    ok = float.IsFinite(sum);
                 }
             }
 
@@ -207,7 +207,7 @@ public sealed class SumOverOffsetsKernelTests
         }
     }
 
-    private static bool Reachable(double[] counts, int row, int start, int end)
+    private static bool Reachable(float[] counts, int row, int start, int end)
     {
         var before = start < 0 ? -(long)start : 0L;
         var after = end > 0 ? (long)end : 0L;
@@ -217,17 +217,17 @@ public sealed class SumOverOffsetsKernelTests
         return last < counts.Length && counts[last] >= after;
     }
 
-    private static void Check(string label, double[] x, bool[] available, double[] counts, int start, int end, bool sibling, List<string> failures)
+    private static void Check(string label, float[] x, bool[] available, float[] counts, int start, int end, bool sibling, List<string> failures)
     {
         if (failures.Count >= MaximumFailures)
             return;
         var length = x.Length;
-        var expectedValues = new double[length];
+        var expectedValues = new float[length];
         var expectedValid = new bool[length];
         SequentialSum(x, available, counts, start, end, expectedValues, expectedValid);
 
         // The kernel writes every row: start from values that no row would hold.
-        var actualValues = new double[length];
+        var actualValues = new float[length];
         var actualValid = new bool[length];
         Array.Fill(actualValues, StaleValue);
         Array.Fill(actualValid, true);
@@ -242,35 +242,35 @@ public sealed class SumOverOffsetsKernelTests
                 failures.Add(string.Create(CultureInfo.InvariantCulture, $"{label} row {row}: validity {actualValid[row]}, sequential sum {expectedValid[row]}"));
             else if (sibling && siblingValid[row] != expectedValid[row])
                 failures.Add(string.Create(CultureInfo.InvariantCulture, $"{label} row {row}: the -valid form gives {siblingValid[row]}, sequential sum {expectedValid[row]}"));
-            else if (BitConverter.DoubleToInt64Bits(actualValues[row]) != BitConverter.DoubleToInt64Bits(expectedValues[row]))
+            else if (BitConverter.SingleToInt32Bits(actualValues[row]) != BitConverter.SingleToInt32Bits(expectedValues[row]))
                 failures.Add(string.Create(CultureInfo.InvariantCulture, $"{label} row {row}: bits {BitConverter.DoubleToInt64Bits(actualValues[row]):X16} ({actualValues[row]:R}), sequential sum {BitConverter.DoubleToInt64Bits(expectedValues[row]):X16} ({expectedValues[row]:R})"));
         }
     }
 
     // A finite value: mostly ordinary magnitudes, with signed zeros, values near the largest double and values near the smallest.
-    private static double Finite(Random random) =>
+    private static float Finite(Random random) =>
         random.Next(0, 12) switch
         {
-            0 => 0d,
-            1 => -0d,
-            2 => 1.7e308d,
-            3 => -1.7e308d,
-            4 => 3e-310d,
-            5 => (random.NextDouble() - 0.5d) * 1e300d,
-            _ => Math.Round((random.NextDouble() - 0.5d) * 6d, 1, MidpointRounding.ToEven)
+            0 => 0f,
+            1 => -0f,
+            2 => 3.38e38f,
+            3 => -3.38e38f,
+            4 => 1.58e-40f,
+            5 => (random.NextSingle() - 0.5f) * 3.16e37f,
+            _ => MathF.Round((random.NextSingle() - 0.5f) * 6f, 1, MidpointRounding.ToEven)
         };
 
     // Kind 0: contiguous. Kind 1: contiguity counts with random restarts. Kind 2: arbitrary counts.
-    private static double[] Counts(Random random, int length, int kind)
+    private static float[] Counts(Random random, int length, int kind)
     {
-        var counts = new double[length];
+        var counts = new float[length];
         for (var row = 0; row < length; row++)
         {
-            var previous = row == 0 ? 0d : counts[row - 1];
+            var previous = row == 0 ? 0f : counts[row - 1];
             counts[row] = kind switch
             {
                 0 => row,
-                1 => row == 0 || random.NextDouble() < 0.1d ? 0d : previous + 1d,
+                1 => row == 0 || random.NextSingle() < 0.1f ? 0f : previous + 1f,
                 _ => random.Next(0, 12)
             };
         }
@@ -278,9 +278,9 @@ public sealed class SumOverOffsetsKernelTests
         return counts;
     }
 
-    private static double[] Contiguous(int length)
+    private static float[] Contiguous(int length)
     {
-        var counts = new double[length];
+        var counts = new float[length];
         for (var row = 0; row < length; row++)
             counts[row] = row;
         return counts;

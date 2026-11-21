@@ -111,35 +111,35 @@ internal static class ProofRealData
         return true;
     }
 
-    private static bool TryNumber(JsonElement root, string name, out double value)
+    private static bool TryNumber(JsonElement root, string name, out float value)
     {
-        value = 0d;
-        return root.TryGetProperty(name, out var element) && element.ValueKind == JsonValueKind.Number && element.TryGetDouble(out value) && double.IsFinite(value);
+        value = 0f;
+        return root.TryGetProperty(name, out var element) && element.ValueKind == JsonValueKind.Number && element.TryGetSingle(out value) && float.IsFinite(value);
     }
 
     /// <summary>The real close prices, base volumes and trade counts, one entry per accepted row.</summary>
     /// <param name="close">The USDT spot close prices.</param>
     /// <param name="volume">The USDT spot base volumes.</param>
     /// <param name="trades">The USDT spot trade counts.</param>
-    internal sealed class Columns(double[] close, double[] volume, double[] trades)
+    internal sealed class Columns(float[] close, float[] volume, float[] trades)
     {
         /// <summary>Gets the close prices.</summary>
-        internal double[] Close { get; } = close;
+        internal float[] Close { get; } = close;
 
         /// <summary>Gets the base volumes.</summary>
-        internal double[] Volume { get; } = volume;
+        internal float[] Volume { get; } = volume;
 
         /// <summary>Gets the trade counts.</summary>
-        internal double[] Trades { get; } = trades;
+        internal float[] Trades { get; } = trades;
     }
 
     private sealed class Accumulator
     {
-        internal List<double> Close { get; } = [];
+        internal List<float> Close { get; } = [];
 
-        internal List<double> Volume { get; } = [];
+        internal List<float> Volume { get; } = [];
 
-        internal List<double> Trades { get; } = [];
+        internal List<float> Trades { get; } = [];
 
         internal string First { get; set; } = string.Empty;
 

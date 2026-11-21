@@ -41,7 +41,7 @@ public sealed class MathBlockDomainOptionsTests
         Assert.Equal(4_096, options.MaximumMatrixSize);
         Assert.Equal(10_000, options.MaximumIterationCount);
         Assert.Equal(256, options.IncompleteBetaMaximumIterations);
-        Assert.Equal(3e-14, options.IncompleteBetaTolerance);
+        Assert.Equal(3e-14f, options.IncompleteBetaTolerance);
         Assert.Equal(MathBlockNonConvergencePolicy.Estimate, options.IncompleteBetaNonConvergence);
         Assert.Equal(64, options.JacobiRotationMultiplier);
         Assert.Equal(MathBlockNonConvergencePolicy.Estimate, options.JacobiNonConvergence);
@@ -82,9 +82,9 @@ public sealed class MathBlockDomainOptionsTests
     [Fact]
     public void ToleranceAndPoliciesRejectValuesOutsideTheirRange()
     {
-        Assert.NotEmpty(MathBlockLimits.Resolve(domain: new MathBlockDomainOptions { IncompleteBetaTolerance = 0d }));
-        Assert.NotEmpty(MathBlockLimits.Resolve(domain: new MathBlockDomainOptions { IncompleteBetaTolerance = 1d }));
-        foreach (var tolerance in new[] { -1e-300, 1.0000001d, double.NaN, double.PositiveInfinity })
+        Assert.NotEmpty(MathBlockLimits.Resolve(domain: new MathBlockDomainOptions { IncompleteBetaTolerance = 0f }));
+        Assert.NotEmpty(MathBlockLimits.Resolve(domain: new MathBlockDomainOptions { IncompleteBetaTolerance = 1f }));
+        foreach (var tolerance in new[] { -1.03e-37f, 1.0000001f, float.NaN, float.PositiveInfinity })
         {
             var options = new MathBlockDomainOptions { IncompleteBetaTolerance = tolerance };
             Assert.Equal(

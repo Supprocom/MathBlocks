@@ -8,7 +8,7 @@ internal static class SequenceReference
     /// against sequence.rolling-sum@1 of the same width, maximum-over-offsets against sequence.rolling-maximum@1 and the prefix difference against vector.cumulative-sum@1.
     /// The results are cached by operation and parameter.
     /// </summary>
-    internal static double Nanoseconds(string name, ProofParameter parameter, double[] typical, Dictionary<string, double> cache)
+    internal static float Nanoseconds(string name, ProofParameter parameter, float[] typical, Dictionary<string, float> cache)
     {
         var key = string.Concat(name, "|", parameter.Label);
         if (cache.TryGetValue(key, out var known))
@@ -19,7 +19,7 @@ internal static class SequenceReference
     }
 
     /// <summary>Times the main-era operation once, as the median of <paramref name="samples"/> evaluations, without the cache.</summary>
-    internal static double Measure(string name, ProofParameter parameter, double[] typical, int samples)
+    internal static float Measure(string name, ProofParameter parameter, float[] typical, int samples)
     {
         var series = MathBlockValue.Vector(typical);
         MathBlockOperation operation;
@@ -60,7 +60,7 @@ internal static class SequenceReference
     // The indices row + shift, held inside the series, as the gather of a shifted copy reads them.
     private static MathBlockValue Indices(int rows, int shift)
     {
-        var indices = new double[rows];
+        var indices = new float[rows];
         for (var row = 0; row < rows; row++)
             indices[row] = Math.Clamp(row + shift, 0, rows - 1);
         return MathBlockValue.Vector(indices);

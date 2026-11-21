@@ -8,7 +8,7 @@ namespace Supprocom.MathBlocks.Tests;
 public sealed partial class MathBlockCudaWorkerTests
 {
     private const int WindowFullLength = 302_893;
-    private const double WindowSentinel = -98_765.25d;
+    private const float WindowSentinel = -98_765.25f;
 
     /// <summary>Gets every source identifier of the window forms.</summary>
     public static TheoryData<string> WindowSources => [.. SourceIdentifiers];
@@ -79,8 +79,8 @@ public sealed partial class MathBlockCudaWorkerTests
                 string.Equals(source, "statistics.interquartile-range", StringComparison.Ordinal) ||
                 !coreclr.IsValid)
                 continue;
-            var negativeZeros = coreclr.AsVector().Count(value => BitConverter.DoubleToInt64Bits(value) == long.MinValue);
-            var positiveZeros = coreclr.AsVector().Count(value => BitConverter.DoubleToInt64Bits(value) == 0L);
+            var negativeZeros = coreclr.AsVector().Count(value => BitConverter.SingleToInt32Bits(value) == long.MinValue);
+            var positiveZeros = coreclr.AsVector().Count(value => BitConverter.SingleToInt32Bits(value) == 0L);
             if (negativeZeros == 0 || positiveZeros == 0)
                 failures.Add($"{source}: the data gave {negativeZeros} rows of -0.0 and {positiveZeros} of +0.0.");
         }
@@ -150,15 +150,15 @@ public sealed partial class MathBlockCudaWorkerTests
         var seeded = CreateSourceInputs(source, count, 17, 7_017);
         var computed = form.Evaluate(FormInputs(seeded, 17, MathBlockValue.Scalar(WindowSentinel, FillUnit(source, seeded))));
         var realValue = computed.IsValid
-            ? computed.AsVector().Skip(16).FirstOrDefault(value => value != WindowSentinel, 0.25d)
-            : 0.25d;
+            ? computed.AsVector().Skip(16).FirstOrDefault(value => value != WindowSentinel, 0.25f)
+            : 0.25f;
         var realFill = FormInputs(seeded, 17, MathBlockValue.Scalar(realValue, FillUnit(source, seeded)));
         yield return new WindowCase("fill equal to a computed value", form, realFill, realFill);
 
         var planned = CreateSourceInputs(source, count, 2, 7_002);
         var plannedForm = FormInputs(planned, 2, MathBlockValue.Scalar(WindowSentinel, FillUnit(source, planned)));
         var plannedValidity = ValidityInputs(planned, 2);
-        foreach (var runtimeWidth in new[] { count + 1d, 2.5d })
+        foreach (var runtimeWidth in new[] { count + 1f, 2.5f })
         {
             var formInputs = (MathBlockValue[])plannedForm.Clone();
             formInputs[^2] = MathBlockValue.Scalar(runtimeWidth);
@@ -183,23 +183,23 @@ public sealed partial class MathBlockCudaWorkerTests
     // signed zero; the other sources get values from {-0.0, +0.0, -1, 1}, mostly zeros.
     private static MathBlockValue[] CreateSignedZeroSeries(string source, int count, Random random)
     {
-        double SignedZero() => random.Next(2) == 0 ? -0d : 0d;
+        float SignedZero() => random.Next(2) == 0 ? -0f : 0f;
         if (string.Equals(source, "statistics.theil-sen-slope", StringComparison.Ordinal))
         {
-            var x = new double[count];
-            var y = new double[count];
+            var x = new float[count];
+            var y = new float[count];
             for (var row = 0; row < count; row++)
             {
-                x[row] = row + random.NextDouble() * 0.5d;
+                x[row] = row + random.NextSingle() * 0.5f;
                 y[row] = SignedZero();
             }
             return [MathBlockValue.Vector(x), MathBlockValue.Vector(y)];
         }
-        var values = new double[count];
+        var values = new float[count];
         for (var row = 0; row < count; row++)
-            values[row] = random.Next(5) switch { 0 => -1d, 1 => 1d, _ => SignedZero() };
+            values[row] = random.Next(5) switch { 0 => -1f, 1 => 1f, _ => SignedZero() };
         if (string.Equals(source, "vector.quantile", StringComparison.Ordinal))
-            return [MathBlockValue.Vector(values), MathBlockValue.Scalar(0.25d)];
+            return [MathBlockValue.Vector(values), MathBlockValue.Scalar(0.25f)];
         if (string.Equals(source, "statistics.pseudomedian", StringComparison.Ordinal))
         {
             for (var row = 0; row < count; row++)
@@ -258,7 +258,7 @@ public sealed partial class MathBlockCudaWorkerTests
         var first = -1;
         for (var row = 0; row < expectedValues.Count; row++)
         {
-            if (BitConverter.DoubleToInt64Bits(expectedValues[row]) == BitConverter.DoubleToInt64Bits(actualValues[row]))
+            if (BitConverter.SingleToInt32Bits(expectedValues[row]) == BitConverter.SingleToInt32Bits(actualValues[row]))
                 continue;
             mismatches++;
             if (first < 0)

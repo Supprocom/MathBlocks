@@ -9,10 +9,10 @@ internal static class ProofScalarReference
     private static readonly Dictionary<string, MathBlockOperation> Operations = new(StringComparer.Ordinal);
 
     /// <summary>Evaluates one row; <paramref name="value"/> is meaningful only when the row is valid.</summary>
-    internal static bool Apply(RowFunctionOp function, double a, double b, out double value)
+    internal static bool Apply(RowFunctionOp function, float a, float b, out float value)
     {
-        value = 0d;
-        if (!double.IsFinite(a) || (function.Arity == 2 && !double.IsFinite(b)))
+        value = 0f;
+        if (!float.IsFinite(a) || (function.Arity == 2 && !float.IsFinite(b)))
             return false;
         if (!Operations.TryGetValue(function.ScalarIdentifier, out var operation))
         {
@@ -34,10 +34,10 @@ internal static class ProofScalarReference
     /// <summary>
     /// Evaluates a row sum as a CoreCLR left-to-right chain of the add operation from 0.0: the first step with a non-finite term, or a non-finite partial sum, ends the row as invalid.
     /// </summary>
-    internal static bool Sum(double[] values, int offset, int count, out double value)
+    internal static bool Sum(float[] values, int offset, int count, out float value)
     {
-        value = 0d;
-        var sum = 0d;
+        value = 0f;
+        var sum = 0f;
         for (var index = 0; index < count; index++)
         {
             if (!Apply(RowFunctionOp.Add, sum, values[offset + index], out sum))

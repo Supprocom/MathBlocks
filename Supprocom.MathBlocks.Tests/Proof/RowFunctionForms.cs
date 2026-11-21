@@ -21,9 +21,9 @@ internal static class RowFunctionForms
     }
 
     /// <summary>The values of the row sum: row r adds <paramref name="count"/> values, alternating between the two operands and starting at row r of the set.</summary>
-    internal static double[] SumValues(ProofSet set, int count)
+    internal static float[] SumValues(ProofSet set, int count)
     {
-        var values = new double[set.First.Length * count];
+        var values = new float[set.First.Length * count];
         for (var row = 0; row < set.First.Length; row++)
         {
             for (var index = 0; index < count; index++)

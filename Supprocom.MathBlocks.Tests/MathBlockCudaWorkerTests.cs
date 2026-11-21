@@ -89,10 +89,10 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         using var compiled = new MathBlocksCUDAWorker().Compile(program);
         compiled.UploadInputs(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["first"] = MathBlockValue.Scalar(6d),
-            ["second"] = MathBlockValue.Scalar(2d),
-            ["third"] = MathBlockValue.Scalar(1d),
-            ["fourth"] = MathBlockValue.Scalar(4d)
+            ["first"] = MathBlockValue.Scalar(6f),
+            ["second"] = MathBlockValue.Scalar(2f),
+            ["third"] = MathBlockValue.Scalar(1f),
+            ["fourth"] = MathBlockValue.Scalar(4f)
         });
 
         compiled.ExecuteResident();
@@ -111,10 +111,10 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         var cuda = compiled.ReadOutputs()["result"];
         var cpu = program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["first"] = MathBlockValue.Scalar(6d),
-            ["second"] = MathBlockValue.Scalar(2d),
-            ["third"] = MathBlockValue.Scalar(1d),
-            ["fourth"] = MathBlockValue.Scalar(4d)
+            ["first"] = MathBlockValue.Scalar(6f),
+            ["second"] = MathBlockValue.Scalar(2f),
+            ["third"] = MathBlockValue.Scalar(1f),
+            ["fourth"] = MathBlockValue.Scalar(4f)
         })["result"];
 
         AssertExact(cpu, cuda);
@@ -129,10 +129,10 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         using var compiled = new MathBlocksCUDAWorker().Compile(CreateParallelFormula());
         compiled.UploadInputs(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["first"] = MathBlockValue.Scalar(6d),
-            ["second"] = MathBlockValue.Scalar(2d),
-            ["third"] = MathBlockValue.Scalar(1d),
-            ["fourth"] = MathBlockValue.Scalar(4d)
+            ["first"] = MathBlockValue.Scalar(6f),
+            ["second"] = MathBlockValue.Scalar(2f),
+            ["third"] = MathBlockValue.Scalar(1f),
+            ["fourth"] = MathBlockValue.Scalar(4f)
         });
 
         compiled.ExecuteResident();
@@ -143,7 +143,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         Assert.Equal(2, compiled.HostToDeviceTransferCount);
         Assert.Equal(2, compiled.DeviceToHostTransferCount);
         Assert.Equal(1, compiled.SynchronizationCount);
-        AssertExact(MathBlockValue.Scalar(8d), compiled.ReadOutputs()["result"]);
+        AssertExact(MathBlockValue.Scalar(8f), compiled.ReadOutputs()["result"]);
     }
 
     /// <summary>Verifies cudaworker exposes only one graph upload and one graph download path.</summary>
@@ -229,43 +229,43 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         var unit = MathBlockUnit.Basis0;
         var values = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["scalar"] = MathBlockValue.Scalar(-0d, unit),
+            ["scalar"] = MathBlockValue.Scalar(-0f, unit),
             ["boolean"] = MathBlockValue.Boolean(true),
-            ["complex"] = MathBlockValue.Complex(new Complex(-0d, 2.75d), unit),
-            ["vector"] = MathBlockValue.Vector([1.25d, -0d, -7.5d], unit),
+            ["complex"] = MathBlockValue.Complex(new Complex(-0f, 2.75f), unit),
+            ["vector"] = MathBlockValue.Vector([1.25f, -0f, -7.5f], unit),
             ["matrix"] = MathBlockValue.Matrix(
-                new MathBlockMatrix(2, 2, [1.5d, -2.25d, -0d, 8d]),
+                new MathBlockMatrix(2, 2, [1.5f, -2.25f, -0f, 8f]),
                 unit),
             ["complex-vector"] = MathBlockValue.ComplexVector(
-                [new Complex(1.25d, -2.5d), new Complex(-0d, 7.75d)],
+                [new Complex(1.25f, -2.5f), new Complex(-0f, 7.75f)],
                 unit),
             ["complex-matrix"] = MathBlockValue.ComplexMatrix(
                 new MathBlockComplexMatrix(
                     2,
                     2,
                     [
-                        new Complex(1d, 2d),
-                        new Complex(-3d, 4d),
-                        new Complex(-0d, -5d),
-                        new Complex(6d, -7d)
+                        new Complex(1f, 2f),
+                        new Complex(-3f, 4f),
+                        new Complex(-0f, -5f),
+                        new Complex(6f, -7f)
                     ]),
                 unit),
             ["point-set"] = MathBlockValue.PointSet(
                 new MathBlockPointSet([
-                    new MathBlockPoint(-0d, 2.5d),
-                    new MathBlockPoint(-4.25d, 8.5d)
+                    new MathBlockPoint(-0f, 2.5f),
+                    new MathBlockPoint(-4.25f, 8.5f)
                 ]),
                 unit),
             ["graph"] = MathBlockValue.Graph(
                 new MathBlockGraph(5, [
-                    new MathBlockGraphEdge(0, 4, -0d),
-                    new MathBlockGraphEdge(3, 1, 9.25d)
+                    new MathBlockGraphEdge(0, 4, -0f),
+                    new MathBlockGraphEdge(3, 1, 9.25f)
                 ]),
                 unit),
             ["run-set"] = MathBlockValue.RunSet(
                 new MathBlockRunSet([
-                    new MathBlockRun(0, 3, -0d),
-                    new MathBlockRun(3, 7, 4.5d)
+                    new MathBlockRun(0, 3, -0f),
+                    new MathBlockRun(3, 7, 4.5f)
                 ]),
                 unit),
             ["boolean-vector"] = MathBlockValue.BooleanVector([true, false, true, true])
@@ -301,7 +301,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     public void CUDAScalarReductionScratchRemainsOutsideTheDownloadRegion()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
-        var values = MathBlockValue.Vector([4d, 1d, 3d, 2d]);
+        var values = MathBlockValue.Vector([4f, 1f, 3f, 2f]);
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var input = builder.Input("values", values.Type);
         var median = builder.Apply("vector.median", inputs: [input]);
@@ -314,7 +314,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         compiled.ExecuteResident();
         var output = compiled.ReadOutputs()["median"];
 
-        AssertExact(MathBlockValue.Scalar(2.5d), output);
+        AssertExact(MathBlockValue.Scalar(2.5f), output);
         Assert.Equal(48, compiled.DeviceToHostBytesPerExecution);
         Assert.Equal(1, compiled.HostToDeviceTransferCount);
         Assert.Equal(1, compiled.DeviceToHostTransferCount);
@@ -329,11 +329,11 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["guard"] = MathBlockValue.Scalar(123_456.75d),
-            ["joint"] = MathBlockValue.Vector([0.5d, 0d, 0d, 0.5d]),
-            ["first-count"] = MathBlockValue.Scalar(2d),
-            ["second-count"] = MathBlockValue.Scalar(2d),
-            ["condition-count"] = MathBlockValue.Scalar(1d)
+            ["guard"] = MathBlockValue.Scalar(123_456.75f),
+            ["joint"] = MathBlockValue.Vector([0.5f, 0f, 0f, 0.5f]),
+            ["first-count"] = MathBlockValue.Scalar(2f),
+            ["second-count"] = MathBlockValue.Scalar(2f),
+            ["condition-count"] = MathBlockValue.Scalar(1f)
         };
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var guard = builder.Input("guard", inputs["guard"].Type);
@@ -355,7 +355,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         compiled.ExecuteResident();
         var cuda = compiled.ReadOutputs();
 
-        Assert.True(cpu["information"].AsScalar() > 0d);
+        Assert.True(cpu["information"].AsScalar() > 0f);
         AssertExact(cpu["guard"], cuda["guard"]);
         AssertExact(cpu["information"], cuda["information"]);
         AssertResidentExecutionContract(compiled);
@@ -369,8 +369,8 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["value"] = MathBlockValue.Scalar(2d),
-            ["count"] = MathBlockValue.Scalar(4d)
+            ["value"] = MathBlockValue.Scalar(2f),
+            ["count"] = MathBlockValue.Scalar(4f)
         };
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var value = builder.Input("value", inputs["value"].Type);
@@ -394,7 +394,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
         AssertExact(MathBlockValue.BooleanVector([true, true, true, true]), cpu["equal"]);
         AssertExact(MathBlockValue.BooleanVector([false, false, false, false]), cpu["mask"]);
-        AssertExact(MathBlockValue.Scalar(0d), cpu["true-count"]);
+        AssertExact(MathBlockValue.Scalar(0f), cpu["true-count"]);
         Assert.All(cpu.Values, output => Assert.True(output.IsValid));
         Assert.All(cuda.Values, output => Assert.True(output.IsValid));
         AssertExact(cpu["equal"], cuda["equal"]);
@@ -411,13 +411,13 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["values"] = MathBlockValue.Vector([1d, 2d, 3d, 4d, 5d, 6d]),
-            ["start"] = MathBlockValue.Scalar(1d),
-            ["length"] = MathBlockValue.Scalar(3d),
-            ["tail-value"] = MathBlockValue.Scalar(7d),
-            ["tail-count"] = MathBlockValue.Scalar(1d),
-            ["offset"] = MathBlockValue.Scalar(10d),
-            ["threshold"] = MathBlockValue.Vector([11d, 13d, 13d, 20d])
+            ["values"] = MathBlockValue.Vector([1f, 2f, 3f, 4f, 5f, 6f]),
+            ["start"] = MathBlockValue.Scalar(1f),
+            ["length"] = MathBlockValue.Scalar(3f),
+            ["tail-value"] = MathBlockValue.Scalar(7f),
+            ["tail-count"] = MathBlockValue.Scalar(1f),
+            ["offset"] = MathBlockValue.Scalar(10f),
+            ["threshold"] = MathBlockValue.Vector([11f, 13f, 13f, 20f])
         };
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var values = builder.Input("values", inputs["values"].Type);
@@ -452,14 +452,14 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         compiled.ExecuteResident();
         var cuda = compiled.ReadOutputs();
 
-        AssertExact(MathBlockValue.Vector([2d, 3d, 4d]), cpu["sliced"]);
-        AssertExact(MathBlockValue.Vector([7d]), cpu["tail"]);
-        AssertExact(MathBlockValue.Vector([2d, 3d, 4d, 7d]), cpu["concatenated"]);
-        AssertExact(MathBlockValue.Vector([12d, 13d, 14d, 17d]), cpu["arithmetic"]);
+        AssertExact(MathBlockValue.Vector([2f, 3f, 4f]), cpu["sliced"]);
+        AssertExact(MathBlockValue.Vector([7f]), cpu["tail"]);
+        AssertExact(MathBlockValue.Vector([2f, 3f, 4f, 7f]), cpu["concatenated"]);
+        AssertExact(MathBlockValue.Vector([12f, 13f, 14f, 17f]), cpu["arithmetic"]);
         AssertExact(MathBlockValue.BooleanVector([true, false, true, false]), cpu["comparison"]);
-        AssertExact(MathBlockValue.Vector([0d, 2d]), cpu["indices"]);
-        AssertExact(MathBlockValue.Vector([12d, 14d]), cpu["gathered"]);
-        AssertExact(MathBlockValue.Scalar(26d), cpu["sum"]);
+        AssertExact(MathBlockValue.Vector([0f, 2f]), cpu["indices"]);
+        AssertExact(MathBlockValue.Vector([12f, 14f]), cpu["gathered"]);
+        AssertExact(MathBlockValue.Scalar(26f), cpu["sum"]);
         Assert.All(cpu.Values, output => Assert.True(output.IsValid));
         Assert.All(cuda.Values, output => Assert.True(output.IsValid));
         foreach (var output in cpu)
@@ -473,7 +473,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     public void CUDARollingOrderStatisticsPreserveSignedZeroBits()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
-        var negativeZero = BitConverter.Int64BitsToDouble(long.MinValue);
+        var negativeZero = BitConverter.Int32BitsToSingle(int.MinValue);
         Verify(
             [negativeZero, negativeZero, negativeZero, negativeZero, negativeZero],
             5,
@@ -481,24 +481,24 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
             [negativeZero],
             [negativeZero]);
         Verify(
-            [negativeZero, 0d, 0d, negativeZero, 0d],
+            [negativeZero, 0f, 0f, negativeZero, 0f],
             3,
-            [negativeZero, 0d, 0d],
-            [0d, 0d, negativeZero],
-            [negativeZero, 0d, 0d]);
+            [negativeZero, 0f, 0f],
+            [0f, 0f, negativeZero],
+            [negativeZero, 0f, 0f]);
 
         void Verify(
-            IReadOnlyList<double> source,
+            IReadOnlyList<float> source,
             int widthValue,
-            IReadOnlyList<double> expectedMinimum,
-            IReadOnlyList<double> expectedMedian,
-            IReadOnlyList<double> expectedMaximum)
+            IReadOnlyList<float> expectedMinimum,
+            IReadOnlyList<float> expectedMedian,
+            IReadOnlyList<float> expectedMaximum)
         {
             var values = MathBlockValue.Vector(source);
             var width = MathBlockValue.Scalar(widthValue);
-            var zero = MathBlockValue.Scalar(0d);
-            var half = MathBlockValue.Scalar(0.5d);
-            var one = MathBlockValue.Scalar(1d);
+            var zero = MathBlockValue.Scalar(0f);
+            var half = MathBlockValue.Scalar(0.5f);
+            var one = MathBlockValue.Scalar(1f);
             var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
             {
                 ["values"] = values,
@@ -548,14 +548,14 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     public void CUDARollingOrderStatisticsAreExactAndScaleSubquadratically()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
-        var measurements = new List<double>();
+        var measurements = new List<float>();
         foreach (var count in new[] { 2_048, 4_096, 8_192 })
         {
             var values = MathBlockValue.Vector(
                 Enumerable.Range(0, count).Select(index =>
-                    (double)((index * 104_729 + 17) % 65_521)));
+                    (float)((index * 104_729 + 17) % 65_521)));
             var width = MathBlockValue.Scalar(count);
-            var probability = MathBlockValue.Scalar(0.375d);
+            var probability = MathBlockValue.Scalar(0.375f);
             var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
             {
                 ["values"] = values,
@@ -584,13 +584,13 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
                 compiled.ExecuteResident();
                 compiled.Synchronize();
             }
-            var samples = new double[7];
+            var samples = new float[7];
             for (var sample = 0; sample < samples.Length; sample++)
             {
                 var started = Stopwatch.GetTimestamp();
                 compiled.ExecuteResident();
                 compiled.Synchronize();
-                samples[sample] = Stopwatch.GetElapsedTime(started).TotalMicroseconds;
+                samples[sample] = (float)Stopwatch.GetElapsedTime(started).TotalMicroseconds;
             }
             Array.Sort(samples);
             measurements.Add(samples[samples.Length / 2]);
@@ -603,10 +603,10 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         }
 
         Assert.True(
-            measurements[1] < measurements[0] * 3.5d,
+            measurements[1] < measurements[0] * 3.5f,
             $"The 2x rolling-size latency ratio was {measurements[1] / measurements[0]:F3}.");
         Assert.True(
-            measurements[2] < measurements[1] * 3.5d,
+            measurements[2] < measurements[1] * 3.5f,
             $"The 2x rolling-size latency ratio was {measurements[2] / measurements[1]:F3}.");
         Console.WriteLine(
             $"Rolling CUDA median latency: 2048={measurements[0]:F3} us, " +
@@ -621,29 +621,29 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         const int count = 305_581;
         var values = MathBlockValue.Vector(
             Enumerable.Range(0, count).Select(index =>
-                (double)((index * 104_729L + 17) % 1_000_003)));
+                (float)((index * 104_729L + 17) % 1_000_003)));
         var width = MathBlockValue.Scalar(count);
         var worker = new MathBlocksCUDAWorker();
         var median = Measure("sequence.rolling-median", null);
-        var quantile = Measure("sequence.rolling-quantile", 0.375d);
-        var work = worker.PlanRollingOrderStatisticWork(count, count, 0.375d);
+        var quantile = Measure("sequence.rolling-quantile", 0.375f);
+        var work = worker.PlanRollingOrderStatisticWork(count, count, 0.375f);
         Assert.True(work.UsesParallelRadixPreparation);
         Assert.False(work.UsesLinearExtremeDeque);
         Assert.Equal(64, work.RadixPassCount);
         Assert.Equal((long)count * 64, work.ParallelKeyVisitCount);
         Assert.Equal(0, work.HeapOperationBound);
         Assert.Equal(2, work.SelectionOperationBound);
-        Assert.True(median.WorstMilliseconds < 1_000d, $"Median worst time was {median.WorstMilliseconds:F3} ms.");
-        Assert.True(quantile.WorstMilliseconds < 1_000d, $"Quantile worst time was {quantile.WorstMilliseconds:F3} ms.");
+        Assert.True(median.WorstMilliseconds < 1_000f, $"Median worst time was {median.WorstMilliseconds:F3} ms.");
+        Assert.True(quantile.WorstMilliseconds < 1_000f, $"Quantile worst time was {quantile.WorstMilliseconds:F3} ms.");
         Console.WriteLine(
             $"Full-history CUDA order statistics at {count} values: " +
             $"median median={median.MedianMilliseconds:F3} ms worst={median.WorstMilliseconds:F3} ms; " +
             $"quantile median={quantile.MedianMilliseconds:F3} ms worst={quantile.WorstMilliseconds:F3} ms; " +
             $"radix-passes={work.RadixPassCount}; key-visits={work.ParallelKeyVisitCount}.");
 
-        (double MedianMilliseconds, double WorstMilliseconds) Measure(
+        (float MedianMilliseconds, float WorstMilliseconds) Measure(
             string identity,
-            double? probability)
+            float? probability)
         {
             var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
             {
@@ -674,13 +674,13 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
                 compiled.ExecuteResident();
                 compiled.Synchronize();
             }
-            var samples = new double[5];
+            var samples = new float[5];
             for (var sample = 0; sample < samples.Length; sample++)
             {
                 var started = Stopwatch.GetTimestamp();
                 compiled.ExecuteResident();
                 compiled.Synchronize();
-                samples[sample] = Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+                samples[sample] = (float)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
             }
             var cuda = compiled.ReadOutputs()["result"];
             AssertExact(cpu, cuda);
@@ -700,25 +700,25 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         var worker = new MathBlocksCUDAWorker();
         foreach (var pattern in new[] { "ordered", "reverse", "equal", "alternating", "pseudorandom" })
         {
-            var raw = new double[count];
+            var raw = new float[count];
             for (var index = 0; index < raw.Length; index++)
             {
                 raw[index] = pattern switch
                 {
-                    "ordered" => index - count / 2d,
-                    "reverse" => count / 2d - index,
-                    "equal" => 17d,
-                    "alternating" => (index & 1) == 0 ? -1e100 : 1e100,
-                    _ => (index * 104_729L + 17) % 1_000_003 - 500_001d
+                    "ordered" => index - count / 2f,
+                    "reverse" => count / 2f - index,
+                    "equal" => 17f,
+                    "alternating" => (index & 1) == 0 ? -3.16e12f : 3.16e12f,
+                    _ => (index * 104_729L + 17) % 1_000_003 - 500_001f
                 };
             }
             var values = MathBlockValue.Vector(raw);
             foreach (var widthValue in widths)
             {
                 var width = MathBlockValue.Scalar(widthValue);
-                var zero = MathBlockValue.Scalar(0d);
-                var half = MathBlockValue.Scalar(0.5d);
-                var one = MathBlockValue.Scalar(1d);
+                var zero = MathBlockValue.Scalar(0f);
+                var half = MathBlockValue.Scalar(0.5f);
+                var one = MathBlockValue.Scalar(1f);
                 var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
                 {
                     ["values"] = values,
@@ -760,9 +760,9 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
                 AssertExact(cpu["maximum"], cuda["maximum"]);
                 AssertExact(cpu["median"], cpu["quantile"]);
 
-                var minimumWork = worker.PlanRollingOrderStatisticWork(count, widthValue, 0d);
-                var medianWork = worker.PlanRollingOrderStatisticWork(count, widthValue, 0.5d);
-                var maximumWork = worker.PlanRollingOrderStatisticWork(count, widthValue, 1d);
+                var minimumWork = worker.PlanRollingOrderStatisticWork(count, widthValue, 0f);
+                var medianWork = worker.PlanRollingOrderStatisticWork(count, widthValue, 0.5f);
+                var maximumWork = worker.PlanRollingOrderStatisticWork(count, widthValue, 1f);
                 Assert.Equal(0, minimumWork.RadixPassCount);
                 Assert.Equal(0, maximumWork.RadixPassCount);
                 Assert.True(widthValue == 1 || minimumWork.UsesLinearExtremeDeque);
@@ -792,20 +792,20 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
             .Output("result", "sum")
             .Build();
         using var compiled = new MathBlocksCUDAWorker().Compile(program);
-        var results = new double[128];
+        var results = new float[128];
 
         Parallel.For(0, results.Length, index =>
         {
             var outputs = compiled.Execute(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
             {
-                ["left"] = MathBlockValue.Scalar(index + 0.25d),
-                ["right"] = MathBlockValue.Scalar(index * 2d + 0.5d)
+                ["left"] = MathBlockValue.Scalar(index + 0.25f),
+                ["right"] = MathBlockValue.Scalar(index * 2f + 0.5f)
             });
             results[index] = outputs["result"].AsScalar();
         });
 
         for (var index = 0; index < results.Length; index++)
-            Assert.Equal(index * 3d + 0.75d, results[index]);
+            Assert.Equal(index * 3f + 0.75f, results[index]);
         Assert.Equal(results.Length, compiled.GraphLaunchCount);
         Assert.Equal(results.Length, compiled.HostToDeviceTransferCount);
         Assert.Equal(results.Length, compiled.DeviceToHostTransferCount);
@@ -872,11 +872,11 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         var unit = operation.RegressionCases[0].Inputs[0].Type.Unit;
         var values = CreateUnitIntervalInputs();
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
-        var input = builder.Input("input-0", MathBlockValue.Scalar(0d, unit).Type);
+        var input = builder.Input("input-0", MathBlockValue.Scalar(0f, unit).Type);
         var program = builder.Output("result", builder.Apply(operation.Identifier, operation.Version, input)).Build();
         using var compiled = new MathBlocksCUDAWorker().Compile(
             program,
-            new Dictionary<string, MathBlockValue>(StringComparer.Ordinal) { ["input-0"] = MathBlockValue.Scalar(0d, unit) });
+            new Dictionary<string, MathBlockValue>(StringComparer.Ordinal) { ["input-0"] = MathBlockValue.Scalar(0f, unit) });
         var failures = new List<string>();
         foreach (var value in values)
         {
@@ -986,7 +986,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     {
         if (!value.IsValid)
             return "invalid";
-        static string Bits(double number) => $"0x{BitConverter.DoubleToInt64Bits(number):X16}";
+        static string Bits(float number) => $"0x{BitConverter.DoubleToInt64Bits(number):X16}";
         return value.Type.Kind switch
         {
             MathBlockValueKind.Scalar => Bits(value.AsScalar()),
@@ -999,14 +999,14 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     private static MathBlockValue[][] CreateSignedZeroCases(MathBlockOperation operation)
     {
         // 0.5 gives operations such as logit a finite case to compile from.
-        double[] scalars = [0d, -0d, 1d, -1d, 0.5d];
+        float[] scalars = [0f, -0f, 1f, -1f, 0.5f];
         // The first vector has no negative nonzero, so square-root stays finite; divide gets nonzero divisors.
-        double[][] vectors =
+        float[][] vectors =
         [
-            [0d, 0d, -0d, -0d, 1d, 2d, 0d, -0d],
+            [0f, 0f, -0f, -0f, 1f, 2f, 0f, -0f],
             string.Equals(operation.Identifier, "vector.divide", StringComparison.Ordinal)
-                ? [1d, -1d, 1d, -1d, 2d, -2d, 0.5d, -0.5d]
-                : [0d, -0d, 0d, -0d, 0d, 0d, 1d, -1d]
+                ? [1f, -1f, 1f, -1f, 2f, -2f, 0.5f, -0.5f]
+                : [0f, -0f, 0f, -0f, 0f, 0f, 1f, -1f]
         ];
         var reference = operation.RegressionCases[0].Inputs;
         var cases = new List<MathBlockValue[]>();
@@ -1048,11 +1048,11 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         return [.. cases];
     }
 
-    private static double[] CreateUnitIntervalInputs()
+    private static float[] CreateUnitIntervalInputs()
     {
-        var values = new List<double> { 0d, -0d, 1d, -1d };
+        var values = new List<float> { 0f, -0f, 1f, -1f };
         for (var index = 0; index <= 16_384; index++)
-            values.Add(-1d + (index / 8_192d));
+            values.Add(-1f + (index / 8_192f));
         // SplitMix64 with a fixed seed, mapped to [-1, 1).
         var state = 0x9E37_79B9_7F4A_7C15ul;
         for (var index = 0; index < 4_096; index++)
@@ -1062,27 +1062,27 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
             bits = (bits ^ (bits >> 30)) * 0xBF58_476D_1CE4_E5B9ul;
             bits = (bits ^ (bits >> 27)) * 0x94D0_49BB_1331_11EBul;
             bits ^= bits >> 31;
-            values.Add(((bits >> 11) * (1d / (1ul << 53)) * 2d) - 1d);
+            values.Add(((bits >> 11) * (1f / (1ul << 53)) * 2f) - 1f);
         }
-        var nearOne = 1d;
+        var nearOne = 1f;
         for (var step = 0; step < 512; step++)
         {
-            nearOne = Math.BitDecrement(nearOne);
+            nearOne = MathF.BitDecrement(nearOne);
             values.Add(nearOne);
             values.Add(-nearOne);
         }
         for (var exponent = 1; exponent <= 1_074; exponent++)
         {
-            var power = Math.ScaleB(1d, -exponent);
+            var power = MathF.ScaleB(1f, -exponent);
             values.Add(power);
             values.Add(-power);
-            values.Add(1d - power);
-            values.Add(power - 1d);
+            values.Add(1f - power);
+            values.Add(power - 1f);
         }
-        values.Add(double.Epsilon * 3d);
-        values.Add(-double.Epsilon * 3d);
-        values.Add(BitConverter.Int64BitsToDouble(0x000F_FFFF_FFFF_FFFFL));
-        values.Add(-BitConverter.Int64BitsToDouble(0x000F_FFFF_FFFF_FFFFL));
+        values.Add(float.Epsilon * 3f);
+        values.Add(-float.Epsilon * 3f);
+        values.Add(BitConverter.Int32BitsToSingle(0x007F_FFFF));
+        values.Add(-BitConverter.Int32BitsToSingle(0x007F_FFFF));
         return [.. values];
     }
 
@@ -1119,14 +1119,14 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
                 compiled.ExecuteResident();
             compiled.Synchronize();
 
-            var samples = new double[batchCount];
+            var samples = new float[batchCount];
             for (var batch = 0; batch < batchCount; batch++)
             {
                 var started = Stopwatch.GetTimestamp();
                 for (var iteration = 0; iteration < iterations; iteration++)
                     compiled.ExecuteResident();
                 compiled.Synchronize();
-                samples[batch] = Stopwatch.GetElapsedTime(started).TotalMilliseconds * 1_000d / iterations;
+                samples[batch] = (float)Stopwatch.GetElapsedTime(started).TotalMilliseconds * 1_000f / iterations;
             }
             Array.Sort(samples);
             var warmMedian = samples[10];
@@ -1150,10 +1150,10 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         using var compiled = new MathBlocksCUDAWorker().Compile(CreateParallelFormula());
         compiled.UploadInputs(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["first"] = MathBlockValue.Scalar(6d),
-            ["second"] = MathBlockValue.Scalar(2d),
-            ["third"] = MathBlockValue.Scalar(1d),
-            ["fourth"] = MathBlockValue.Scalar(4d)
+            ["first"] = MathBlockValue.Scalar(6f),
+            ["second"] = MathBlockValue.Scalar(2f),
+            ["third"] = MathBlockValue.Scalar(1f),
+            ["fourth"] = MathBlockValue.Scalar(4f)
         });
         for (var warmup = 0; warmup < 64; warmup++)
         {
@@ -1163,7 +1163,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
 
         const int batchCount = 101;
         const int iterations = 64;
-        var samples = new double[batchCount];
+        var samples = new float[batchCount];
         for (var batch = 0; batch < batchCount; batch++)
         {
             var started = Stopwatch.GetTimestamp();
@@ -1172,12 +1172,12 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
                 compiled.ExecuteResident();
                 compiled.Synchronize();
             }
-            samples[batch] = Stopwatch.GetElapsedTime(started).TotalMilliseconds * 1_000d / iterations;
+            samples[batch] = (float)Stopwatch.GetElapsedTime(started).TotalMilliseconds * 1_000f / iterations;
         }
         Array.Sort(samples);
-        var warmP99 = samples[(int)Math.Ceiling(batchCount * 0.99d) - 1];
+        var warmP99 = samples[(int)MathF.Ceiling(batchCount * 0.99f) - 1];
 
-        Assert.True(warmP99 < 1_000d, $"CUDA warm p99 was {warmP99:F3} microseconds.");
+        Assert.True(warmP99 < 1_000f, $"CUDA warm p99 was {warmP99:F3} microseconds.");
     }
 
     private static MathBlockProgram CreateParallelFormula() =>
@@ -1221,7 +1221,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         }
 
         var reference = operation.RegressionCases[0].Inputs;
-        MathBlockValue Scalar(int index, double value) => MathBlockValue.Scalar(value, reference[index].Type.Unit);
+        MathBlockValue Scalar(int index, float value) => MathBlockValue.Scalar(value, reference[index].Type.Unit);
         if (operation.Identifier.StartsWith("boolean.", StringComparison.Ordinal))
         {
             yield return Case("boolean-a", operation.Arity == 1
@@ -1234,43 +1234,43 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         }
         if (string.Equals(operation.Identifier, "scalar.select", StringComparison.Ordinal))
         {
-            yield return Case("select-false", [MathBlockValue.Boolean(false), Scalar(1, 1.25d), Scalar(2, -2.5d)]);
-            yield return Case("select-true", [MathBlockValue.Boolean(true), Scalar(1, -0.75d), Scalar(2, 2.5d)]);
+            yield return Case("select-false", [MathBlockValue.Boolean(false), Scalar(1, 1.25f), Scalar(2, -2.5f)]);
+            yield return Case("select-true", [MathBlockValue.Boolean(true), Scalar(1, -0.75f), Scalar(2, 2.5f)]);
             yield break;
         }
         if (string.Equals(operation.Identifier, "scalar.clamp", StringComparison.Ordinal))
         {
-            yield return Case("clamp-middle", [Scalar(0, 0.375d), Scalar(1, -1.25d), Scalar(2, 0.875d)]);
-            yield return Case("clamp-low", [Scalar(0, -2.5d), Scalar(1, -1.25d), Scalar(2, 0.875d)]);
-            yield return Case("clamp-high", [Scalar(0, 2.5d), Scalar(1, -1.25d), Scalar(2, 0.875d)]);
+            yield return Case("clamp-middle", [Scalar(0, 0.375f), Scalar(1, -1.25f), Scalar(2, 0.875f)]);
+            yield return Case("clamp-low", [Scalar(0, -2.5f), Scalar(1, -1.25f), Scalar(2, 0.875f)]);
+            yield return Case("clamp-high", [Scalar(0, 2.5f), Scalar(1, -1.25f), Scalar(2, 0.875f)]);
             yield break;
         }
         if (operation.Arity == 2)
         {
             var pairs = operation.Identifier switch
             {
-                "scalar.power" => new[] { (1.25d, 2.5d), (2.5d, -0.75d), (0.375d, 1.25d) },
+                "scalar.power" => new[] { (1.25f, 2.5f), (2.5f, -0.75f), (0.375f, 1.25f) },
                 "scalar.divide" or "scalar.modulo" =>
-                    new[] { (0.375d, -1.25d), (-2.5d, 0.75d), (7.25d, 2.5d) },
+                    new[] { (0.375f, -1.25f), (-2.5f, 0.75f), (7.25f, 2.5f) },
                 "scalar.arc-tangent-2" =>
-                    new[] { (0.375d, -1.25d), (-2.5d, 0.75d), (-0.75d, -1.25d) },
-                _ => new[] { (0.375d, -1.25d), (-2.5d, 0.75d), (1.25d, 1.25d) }
+                    new[] { (0.375f, -1.25f), (-2.5f, 0.75f), (-0.75f, -1.25f) },
+                _ => new[] { (0.375f, -1.25f), (-2.5f, 0.75f), (1.25f, 1.25f) }
             };
             for (var index = 0; index < pairs.Length; index++)
                 yield return Case($"binary-{index}", [Scalar(0, pairs[index].Item1), Scalar(1, pairs[index].Item2)]);
             yield break;
         }
 
-        double[] values = operation.Identifier switch
+        float[] values = operation.Identifier switch
         {
             "scalar.square-root" or "scalar.natural-logarithm" or "scalar.binary-logarithm" or
-                "scalar.common-logarithm" => [0.125d, 0.5d, 1.25d, 2.5d],
+                "scalar.common-logarithm" => [0.125f, 0.5f, 1.25f, 2.5f],
             "scalar.arc-sine" or "scalar.arc-cosine" or "scalar.inverse-hyperbolic-tangent" or
-                "scalar.logit" => [0.125d, 0.25d, 0.75d, 0.875d],
-            "scalar.inverse-hyperbolic-cosine" => [1d, 1.25d, 2.5d, 8d],
-            "scalar.log-one-plus" => [-0.75d, -0.125d, 0.125d, 1.25d],
-            "scalar.reciprocal" => [-2.5d, -0.75d, 0.125d, 1.25d],
-            _ => [-2.5d, -0.75d, -0.125d, 0d, 0.125d, 0.75d, 2.5d]
+                "scalar.logit" => [0.125f, 0.25f, 0.75f, 0.875f],
+            "scalar.inverse-hyperbolic-cosine" => [1f, 1.25f, 2.5f, 8f],
+            "scalar.log-one-plus" => [-0.75f, -0.125f, 0.125f, 1.25f],
+            "scalar.reciprocal" => [-2.5f, -0.75f, 0.125f, 1.25f],
+            _ => [-2.5f, -0.75f, -0.125f, 0f, 0.125f, 0.75f, 2.5f]
         };
         for (var index = 0; index < values.Length; index++)
             yield return Case($"unary-{index}", [Scalar(0, values[index])]);
@@ -1291,8 +1291,8 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         return expected.Type.Kind switch
         {
             MathBlockValueKind.Scalar =>
-                BitConverter.DoubleToInt64Bits(expected.AsScalar()) ==
-                BitConverter.DoubleToInt64Bits(actual.AsScalar()),
+                BitConverter.SingleToInt32Bits(expected.AsScalar()) ==
+                BitConverter.SingleToInt32Bits(actual.AsScalar()),
             MathBlockValueKind.Boolean => expected.AsBoolean() == actual.AsBoolean(),
             MathBlockValueKind.Complex => ExactComplex(expected.AsComplex(), actual.AsComplex()),
             MathBlockValueKind.Vector => ExactDoubles(expected.AsVector(), actual.AsVector()),
@@ -1319,9 +1319,9 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         };
     }
 
-    private static bool ExactDoubles(IReadOnlyList<double> expected, IReadOnlyList<double> actual) =>
+    private static bool ExactDoubles(IReadOnlyList<float> expected, IReadOnlyList<float> actual) =>
         expected.Count == actual.Count && Enumerable.Range(0, expected.Count).All(index =>
-            BitConverter.DoubleToInt64Bits(expected[index]) == BitConverter.DoubleToInt64Bits(actual[index]));
+            BitConverter.SingleToInt32Bits(expected[index]) == BitConverter.SingleToInt32Bits(actual[index]));
 
     private static bool ExactBooleans(MathBlockBooleanVector expected, MathBlockBooleanVector actual) =>
         expected.Count == actual.Count && Enumerable.Range(0, expected.Count).All(index =>
@@ -1353,8 +1353,8 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
             expected[index].Length == actual[index].Length &&
             ExactDouble(expected[index].Value, actual[index].Value));
 
-    private static bool ExactDouble(double expected, double actual) =>
-        BitConverter.DoubleToInt64Bits(expected) == BitConverter.DoubleToInt64Bits(actual);
+    private static bool ExactDouble(float expected, float actual) =>
+        BitConverter.SingleToInt32Bits(expected) == BitConverter.SingleToInt32Bits(actual);
 
     private static string Describe(MathBlockValue value)
     {

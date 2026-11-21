@@ -12,7 +12,7 @@ internal sealed class VectorBlockRun : IDisposable
 
     private readonly Action<IntPtr> launch;
     private readonly Action begin;
-    private readonly Func<double> end;
+    private readonly Func<float> end;
     private readonly VectorBlockCall call;
     private readonly MathBlockCudaOperationPlan[] plans;
     private readonly int[] outputSlotOffsets;
@@ -128,11 +128,11 @@ internal sealed class VectorBlockRun : IDisposable
     /// <summary>
     /// Times the first <see cref="VectorBlockCall.TimedSteps"/> dispatches with CUDA events: one warm-up launch, then the median of seven launches, in nanoseconds per row.
     /// </summary>
-    internal double NanosecondsPerRow(int rows)
+    internal float NanosecondsPerRow(int rows)
     {
         Launch(call.TimedSteps);
         VectorBlockDevice.Synchronize();
-        var samples = new double[LaunchesPerCell];
+        var samples = new float[LaunchesPerCell];
         for (var index = 0; index < samples.Length; index++)
         {
             begin();

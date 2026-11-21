@@ -200,9 +200,9 @@ public sealed class MathBlockFormulaInterchangeTests
         {
             var result = imported.Program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
             {
-                ["x"] = MathBlockValue.Scalar(3d)
+                ["x"] = MathBlockValue.Scalar(3f)
             });
-            Assert.Equal(5d, result["result"].AsScalar());
+            Assert.Equal(5f, result["result"].AsScalar());
             Assert.Equal("scalar.add@1", Assert.Single(imported.Operations).Identity);
         }
     }
@@ -227,9 +227,9 @@ public sealed class MathBlockFormulaInterchangeTests
             imported.Operations.Select(operation => operation.Identity), StringComparer.Ordinal);
         var result = imported.Program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["x"] = MathBlockValue.Scalar(3d)
+            ["x"] = MathBlockValue.Scalar(3f)
         });
-        Assert.Equal(9d, result["result"].AsScalar());
+        Assert.Equal(9f, result["result"].AsScalar());
     }
 
     /// <summary>Verifies visible expression import accepts extensions sharing and encoded names.</summary>
@@ -260,10 +260,10 @@ public sealed class MathBlockFormulaInterchangeTests
                 ["scalar.softplus@1", "scalar.add@1"],
                 imported.Operations.Select(operation => operation.Identity), StringComparer.Ordinal);
             Assert.Equal(3, imported.Program.PlanNodes.Count);
-            var expected = 2d * Math.Log(2d);
+            var expected = 2f * MathF.Log(2f);
             var result = imported.Program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
             {
-                ["input value"] = MathBlockValue.Scalar(0d)
+                ["input value"] = MathBlockValue.Scalar(0f)
             });
             Assert.Equal(expected, result["external result"].AsScalar(), 12);
         }
@@ -297,7 +297,7 @@ public sealed class MathBlockFormulaInterchangeTests
             "result"));
 
         var extensionBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
-        var value = extensionBuilder.Constant(MathBlockValue.Scalar(0d));
+        var value = extensionBuilder.Constant(MathBlockValue.Scalar(0f));
         var extension = extensionBuilder.Apply("scalar.softplus", inputs: [value]);
         var extensionProgram = extensionBuilder.Output("result", extension).Build();
         var extensionSource = MathBlockFormulaInterchange.Export(
@@ -329,7 +329,7 @@ public sealed class MathBlockFormulaInterchangeTests
             "result");
 
         Assert.Equal(
-            3d,
+            3f,
             imported.Program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal))["result"]
                 .AsScalar());
     }
@@ -375,7 +375,7 @@ public sealed class MathBlockFormulaInterchangeTests
                 new Dictionary<string, MathBlockType>(StringComparer.Ordinal),
                 "result");
             Assert.Equal(
-                3d,
+                3f,
                 imported.Program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal))["result"]
                     .AsScalar());
         }
@@ -456,7 +456,7 @@ public sealed class MathBlockFormulaInterchangeTests
     public void SelectedOutputExcludesUnreachableNodesAndPreservesSharing()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
-        _ = builder.Constant(MathBlockValue.Scalar(99d));
+        _ = builder.Constant(MathBlockValue.Scalar(99f));
         var left = builder.Input("left", MathBlockType.Scalar());
         var right = builder.Input("right", MathBlockType.Scalar());
         var sum = builder.Apply("scalar.add", inputs: [left, right]);
@@ -496,30 +496,30 @@ public sealed class MathBlockFormulaInterchangeTests
             new MathRational(-7, 11));
         MathBlockValue[] values =
         [
-            MathBlockValue.Scalar(-0d, unit),
+            MathBlockValue.Scalar(-0f, unit),
             MathBlockValue.Boolean(true),
-            MathBlockValue.Complex(new MathBlockComplexValue(-0d, double.Epsilon), unit),
-            MathBlockValue.Vector([1.5d, -0d, double.MaxValue], unit),
-            MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1d, -2d, 3d, -0d]), unit),
+            MathBlockValue.Complex(new MathBlockComplexValue(-0f, float.Epsilon), unit),
+            MathBlockValue.Vector([1.5f, -0f, float.MaxValue], unit),
+            MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1f, -2f, 3f, -0f]), unit),
             MathBlockValue.ComplexVector(
-                [new MathBlockComplexValue(1d, -2d), new MathBlockComplexValue(-0d, 4d)],
+                [new MathBlockComplexValue(1f, -2f), new MathBlockComplexValue(-0f, 4f)],
                 unit),
             MathBlockValue.ComplexMatrix(
                 new MathBlockComplexMatrix(
                     1,
                     2,
-                    [new MathBlockComplexValue(1d, 2d), new MathBlockComplexValue(-3d, -0d)]),
+                    [new MathBlockComplexValue(1f, 2f), new MathBlockComplexValue(-3f, -0f)]),
                 unit),
             MathBlockValue.PointSet(
-                new MathBlockPointSet([new MathBlockPoint(-0d, 2d), new MathBlockPoint(3d, -4d)]),
+                new MathBlockPointSet([new MathBlockPoint(-0f, 2f), new MathBlockPoint(3f, -4f)]),
                 unit),
             MathBlockValue.Graph(
                 new MathBlockGraph(
                     3,
-                    [new MathBlockGraphEdge(0, 1, -0d), new MathBlockGraphEdge(2, 0, 3.5d)]),
+                    [new MathBlockGraphEdge(0, 1, -0f), new MathBlockGraphEdge(2, 0, 3.5f)]),
                 unit),
             MathBlockValue.RunSet(
-                new MathBlockRunSet([new MathBlockRun(0, 2, -0d), new MathBlockRun(4, 3, 7.25d)]),
+                new MathBlockRunSet([new MathBlockRun(0, 2, -0f), new MathBlockRun(4, 3, 7.25f)]),
                 unit),
             MathBlockValue.BooleanVector([true, false, true])
         ];
@@ -540,7 +540,7 @@ public sealed class MathBlockFormulaInterchangeTests
         }
 
         var negativeZeroBuilder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
-        var negativeZero = negativeZeroBuilder.Constant(MathBlockValue.Scalar(-0d, unit));
+        var negativeZero = negativeZeroBuilder.Constant(MathBlockValue.Scalar(-0f, unit));
         var negativeZeroProgram = negativeZeroBuilder.Output("value", negativeZero).Build();
         var mathMl = MathBlockFormulaInterchange.Export(
             negativeZeroProgram,
@@ -658,9 +658,9 @@ public sealed class MathBlockFormulaInterchangeTests
             inputs => inputs[0],
             [new MathBlockRegressionCase(
                 "copied",
-                [MathBlockValue.Scalar(1d), MathBlockValue.Scalar(2d)],
-                MathBlockValue.Scalar(1d))],
-            new MathBlockPerformanceCase([MathBlockValue.Scalar(1d), MathBlockValue.Scalar(2d)]));
+                [MathBlockValue.Scalar(1f), MathBlockValue.Scalar(2f)],
+                MathBlockValue.Scalar(1f))],
+            new MathBlockPerformanceCase([MathBlockValue.Scalar(1f), MathBlockValue.Scalar(2f)]));
         var registry = new MathBlockRegistry([operation]);
         var builder = new MathBlockProgramBuilder(registry);
         var left = builder.Input("left", MathBlockType.Scalar());

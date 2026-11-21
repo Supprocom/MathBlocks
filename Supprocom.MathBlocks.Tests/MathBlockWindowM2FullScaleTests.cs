@@ -33,7 +33,7 @@ public sealed class MathBlockWindowM2FullScaleTests(ITestOutputHelper output)
                 continue;
             foreach (var width in Widths)
             {
-                foreach (var parameters in MathBlockWindowFastPathTests.Parameters(source).Where(p => p.Length == 0 || p[0] is 0.3d or 0.5d or 1d))
+                foreach (var parameters in MathBlockWindowFastPathTests.Parameters(source).Where(p => p.Length == 0 || p[0] is 0.3f or 0.5f or 1f))
                     failures.AddRange(MathBlockWindowFastPathTests.Compare(source, name, series, width, parameters));
             }
         }
@@ -71,10 +71,10 @@ public sealed class MathBlockWindowM2FullScaleTests(ITestOutputHelper output)
             var operation = MathBlocksWindowBatchTests.Resolve(identity);
             foreach (var parameters in MathBlocksWindowBatchTests.Parameters(identity).Take(1))
             {
-                var results = MathBlocksWindowBatch.Evaluate(x, identity, parameters, Widths, 0d);
+                var results = MathBlocksWindowBatch.Evaluate(x, identity, parameters, Widths, 0f);
                 for (var index = 0; index < Widths.Length; index++)
                 {
-                    var alone = operation.Evaluate([x, .. parameters, MathBlockValue.Scalar(Widths[index]), MathBlockValue.Scalar(0d)]);
+                    var alone = operation.Evaluate([x, .. parameters, MathBlockValue.Scalar(Widths[index]), MathBlockValue.Scalar(0f)]);
                     var difference = Difference(alone, results[index]);
                     Assert.True(difference is null, $"{identity} w={Widths[index]}: {difference}");
                 }

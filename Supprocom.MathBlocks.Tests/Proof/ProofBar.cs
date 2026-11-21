@@ -27,15 +27,15 @@ internal static class ProofBar
     /// <summary>The title of the bar of the cells that are judged against the reference on their own class.</summary>
     internal const string SameClassBar = "Bar (iv), class against the reference timed on the same data";
 
-    private const double WorstClassFactor = 2d;
-    private const double ReferenceFactor = 2d;
-    private const double LinearFactor = 2d;
-    private const double FullScanFactor = 1.25d;
+    private const float WorstClassFactor = 2f;
+    private const float ReferenceFactor = 2f;
+    private const float LinearFactor = 2f;
+    private const float FullScanFactor = 1.25f;
 
     /// <summary>Fills in the median over the classes (the all-false class excluded) and the three ratios of every cell.</summary>
     internal static void Annotate(List<ProofCell> cells)
     {
-        var groups = new Dictionary<string, List<double>>(StringComparer.Ordinal);
+        var groups = new Dictionary<string, List<float>>(StringComparer.Ordinal);
         for (var index = 0; index < cells.Count; index++)
         {
             var cell = cells[index];
@@ -50,7 +50,7 @@ internal static class ProofBar
             list.Add(cell.NanosecondsPerRow);
         }
 
-        var medians = new Dictionary<string, double>(StringComparer.Ordinal);
+        var medians = new Dictionary<string, float>(StringComparer.Ordinal);
         foreach (var pair in groups)
             medians[pair.Key] = ProofTiming.Median(pair.Value.ToArray());
         for (var index = 0; index < cells.Count; index++)
@@ -58,8 +58,8 @@ internal static class ProofBar
             var cell = cells[index];
             cell.MedianNanosecondsPerRow = medians[cell.GroupKey];
             cell.MedianRatio = cell.NanosecondsPerRow / cell.MedianNanosecondsPerRow;
-            cell.ReferenceRatio = cell.ReferenceNanosecondsPerRow > 0d ? cell.NanosecondsPerRow / cell.ReferenceNanosecondsPerRow : 0d;
-            cell.SecondReferenceRatio = cell.SecondReferenceNanosecondsPerRow > 0d ? cell.NanosecondsPerRow / cell.SecondReferenceNanosecondsPerRow : 0d;
+            cell.ReferenceRatio = cell.ReferenceNanosecondsPerRow > 0f ? cell.NanosecondsPerRow / cell.ReferenceNanosecondsPerRow : 0f;
+            cell.SecondReferenceRatio = cell.SecondReferenceNanosecondsPerRow > 0f ? cell.NanosecondsPerRow / cell.SecondReferenceNanosecondsPerRow : 0f;
         }
     }
 
@@ -76,7 +76,7 @@ internal static class ProofBar
             var cell = cells[index];
             var tail = string.Empty;
             if (samples > 0)
-                tail = cell.SameClassReferenceNanosecondsPerRow > 0d ? string.Create(CultureInfo.InvariantCulture, $"\t{cell.SameClassReferenceNanosecondsPerRow:F3}") : "\t";
+                tail = cell.SameClassReferenceNanosecondsPerRow > 0f ? string.Create(CultureInfo.InvariantCulture, $"\t{cell.SameClassReferenceNanosecondsPerRow:F3}") : "\t";
             text.Append(
                 CultureInfo.InvariantCulture,
                 $"{cell.Operation}\t{cell.ClassName}\t{cell.Counts}\t{cell.Parameter}\t{cell.Width:R}\t{cell.NanosecondsPerRow:F3}\t{cell.MedianRatio:F3}\t{cell.ReferenceNanosecondsPerRow:F3}\t{cell.ReferenceRatio:F3}\t{cell.SecondReferenceNanosecondsPerRow:F3}\t{cell.SecondReferenceRatio:F3}{tail}\n");
@@ -110,7 +110,7 @@ internal static class ProofBar
         for (var index = 0; index < cells.Count; index++)
         {
             var cell = cells[index];
-            if (!applies(cell) || cell.ReferenceNanosecondsPerRow <= 0d || !seen.Add(cell.GroupKey))
+            if (!applies(cell) || cell.ReferenceNanosecondsPerRow <= 0f || !seen.Add(cell.GroupKey))
                 continue;
             var ratio = cell.MedianNanosecondsPerRow / cell.ReferenceNanosecondsPerRow;
             if (ratio > ReferenceFactor)
@@ -159,7 +159,7 @@ internal static class ProofBar
     internal static List<string> CollectWithinFullScan(List<ProofCell> cells, Func<ProofCell, bool> applies)
     {
         var failures = new List<string>();
-        var classes = new Dictionary<string, List<double>>(StringComparer.Ordinal);
+        var classes = new Dictionary<string, List<float>>(StringComparer.Ordinal);
         var first = new Dictionary<string, ProofCell>(StringComparer.Ordinal);
         foreach (var (cell, ratio) in FullScanRatios(cells, applies))
         {
@@ -204,10 +204,10 @@ internal static class ProofBar
         return text.ToString();
     }
 
-    private static List<(ProofCell Cell, double Ratio)> FullScanRatios(List<ProofCell> cells, Func<ProofCell, bool> applies)
+    private static List<(ProofCell Cell, float Ratio)> FullScanRatios(List<ProofCell> cells, Func<ProofCell, bool> applies)
     {
-        var ratios = new List<(ProofCell Cell, double Ratio)>();
-        var scans = new Dictionary<string, double>(StringComparer.Ordinal);
+        var ratios = new List<(ProofCell Cell, float Ratio)>();
+        var scans = new Dictionary<string, float>(StringComparer.Ordinal);
         for (var index = 0; index < cells.Count; index++)
         {
             var cell = cells[index];
@@ -221,7 +221,7 @@ internal static class ProofBar
             if (!applies(cell) || string.Equals(cell.ClassName, AllFalse, StringComparison.Ordinal))
                 continue;
             var scan = cell.FullScanNanosecondsPerRow;
-            if (scan <= 0d && !scans.TryGetValue(cell.GroupKey, out scan))
+            if (scan <= 0f && !scans.TryGetValue(cell.GroupKey, out scan))
                 continue;
             ratios.Add((cell, cell.NanosecondsPerRow / scan));
         }
@@ -239,7 +239,7 @@ internal static class ProofBar
         for (var index = 0; index < cells.Count; index++)
         {
             var cell = cells[index];
-            if (cell.SameClassReferenceNanosecondsPerRow <= 0d)
+            if (cell.SameClassReferenceNanosecondsPerRow <= 0f)
                 continue;
             var ratio = cell.NanosecondsPerRow / cell.SameClassReferenceNanosecondsPerRow;
             if (ratio > ReferenceFactor)
@@ -270,7 +270,7 @@ internal static class ProofBar
     internal static void Fail(string bar, List<string> failures) =>
         Assert.True(failures.Count == 0, bar + ": " + failures.Count.ToString(CultureInfo.InvariantCulture) + " cell(s) over the limit:\n" + string.Join('\n', failures));
 
-    private static string Describe(ProofCell cell, string against, double ratio, double limit) =>
+    private static string Describe(ProofCell cell, string against, float ratio, float limit) =>
         string.Create(
             CultureInfo.InvariantCulture,
             $"{cell.Operation} class {cell.ClassName} counts {cell.Counts} parameter {cell.Parameter}: {cell.NanosecondsPerRow:F3} ns/row is {ratio:F2} times the {against} (limit {limit:F2})");
@@ -281,9 +281,9 @@ internal static class ProofBar
         var count = items.Count;
         if (count < 3)
             return;
-        var widths = new double[count];
-        var costs = new double[count];
-        var floor = double.MaxValue;
+        var widths = new float[count];
+        var costs = new float[count];
+        var floor = float.MaxValue;
         for (var index = 0; index < count; index++)
         {
             widths[index] = items[index].Width;
@@ -303,26 +303,26 @@ internal static class ProofBar
     }
 
     // The ordinary least-squares line through the points.
-    private static (double Intercept, double Slope) Fit(double[] widths, double[] costs)
+    private static (float Intercept, float Slope) Fit(float[] widths, float[] costs)
     {
         var count = widths.Length;
-        var meanWidth = 0d;
-        var meanCost = 0d;
+        var meanWidth = 0f;
+        var meanCost = 0f;
         for (var index = 0; index < count; index++)
         {
             meanWidth += widths[index] / count;
             meanCost += costs[index] / count;
         }
 
-        var covariance = 0d;
-        var variance = 0d;
+        var covariance = 0f;
+        var variance = 0f;
         for (var index = 0; index < count; index++)
         {
             covariance += (widths[index] - meanWidth) * (costs[index] - meanCost);
             variance += (widths[index] - meanWidth) * (widths[index] - meanWidth);
         }
 
-        var slope = variance > 0d ? covariance / variance : 0d;
+        var slope = variance > 0f ? covariance / variance : 0f;
         return (meanCost - slope * meanWidth, slope);
     }
 }

@@ -5,8 +5,8 @@ namespace Supprocom.MathBlocks.Tests;
 /// <summary>Compares the offset operations on CUDA with CoreCLR, bit for bit, on cases that cover the reachability, validity and zero rules.</summary>
 public sealed class SequenceOffsetCudaTests
 {
-    private static readonly double[] Counts8 = [0d, 1d, 2d, 3d, 4d, 5d, 6d, 7d];
-    private static readonly double[] GapCounts8 = [0d, 1d, 2d, 0d, 1d, 2d, 3d, 0d];
+    private static readonly float[] Counts8 = [0f, 1f, 2f, 3f, 4f, 5f, 6f, 7f];
+    private static readonly float[] GapCounts8 = [0f, 1f, 2f, 0f, 1f, 2f, 3f, 0f];
     private static readonly bool[] AllValid8 = [true, true, true, true, true, true, true, true];
     private static readonly bool[] SomeInvalid8 = [true, true, false, true, true, true, false, true];
 
@@ -26,16 +26,16 @@ public sealed class SequenceOffsetCudaTests
     {
         ArgumentException.ThrowIfNullOrEmpty(identifier);
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
-        var series = new double[][]
+        var series = new float[][]
         {
-            [0d, 0d, 1d, 0d, 0d, 1d, 0d, 0d],
-            [-0d, 0d, -0d, 0d, -0d, -0d, 0d, -0d],
-            [1d, -2d, 3.5d, 1.7e308d, 1.7e308d, -4d, 0.25d, 8d],
-            [-0d, -0d, -0d, -0d, -0d, -0d, -0d, -0d]
+            [0f, 0f, 1f, 0f, 0f, 1f, 0f, 0f],
+            [-0f, 0f, -0f, 0f, -0f, -0f, 0f, -0f],
+            [1f, -2f, 3.5f, 3.38e38f, 3.38e38f, -4f, 0.25f, 8f],
+            [-0f, -0f, -0f, -0f, -0f, -0f, -0f, -0f]
         };
-        double[][] counts = [Counts8, GapCounts8, [0d, 1d, 2d, 3d, 4d, 5d, 6d, 0.5d], [0d, 1d, 2d, 3d, 4d, 5d, 6d, -1d]];
+        float[][] counts = [Counts8, GapCounts8, [0f, 1f, 2f, 3f, 4f, 5f, 6f, 0.5f], [0f, 1f, 2f, 3f, 4f, 5f, 6f, -1f]];
         bool[][] flags = [AllValid8, SomeInvalid8];
-        (double Start, double End)[] ranges = [(0d, 0d), (0d, 2d), (-1d, 1d), (-2d, -1d), (1d, 3d), (2d, 1d), (0.5d, 1d), (-3d, 3d)];
+        (float Start, float End)[] ranges = [(0f, 0f), (0f, 2f), (-1f, 1f), (-2f, -1f), (1f, 3f), (2f, 1f), (0.5f, 1f), (-3f, 3f)];
         foreach (var rowSeries in series)
             foreach (var rowCounts in counts)
                 foreach (var rowFlags in flags)
@@ -43,7 +43,7 @@ public sealed class SequenceOffsetCudaTests
                         AssertSame(identifier, rowSeries, rowFlags, rowCounts, start, end);
     }
 
-    private static void AssertSame(string identifier, double[] series, bool[] flags, double[] counts, double start, double end)
+    private static void AssertSame(string identifier, float[] series, bool[] flags, float[] counts, float start, float end)
     {
         var operation = MathBlockCatalog.Standard.Get(identifier);
         var firstTrue = identifier.StartsWith("sequence.first-true-offset", StringComparison.Ordinal);
@@ -56,8 +56,8 @@ public sealed class SequenceOffsetCudaTests
         if (!validity)
         {
             if (firstTrue)
-                inputs.Add(MathBlockValue.Scalar(77d));
-            inputs.Add(MathBlockValue.Scalar(-9d));
+                inputs.Add(MathBlockValue.Scalar(77f));
+            inputs.Add(MathBlockValue.Scalar(-9f));
         }
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var nodes = new int[inputs.Count];
@@ -91,7 +91,7 @@ public sealed class SequenceOffsetCudaTests
         for (var row = 0; row < expected.Count; row++)
         {
             Assert.True(
-                BitConverter.DoubleToInt64Bits(expected[row]) == BitConverter.DoubleToInt64Bits(actual[row]),
+                BitConverter.SingleToInt32Bits(expected[row]) == BitConverter.SingleToInt32Bits(actual[row]),
                 $"{description}: row {row} CoreCLR {expected[row]}, CUDA {actual[row]}");
         }
     }

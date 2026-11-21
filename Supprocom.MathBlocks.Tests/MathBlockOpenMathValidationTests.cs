@@ -132,9 +132,9 @@ public sealed class MathBlockOpenMathValidationTests
             inputs => inputs[0],
             [new MathBlockRegressionCase(
                 "identity",
-                [MathBlockValue.Scalar(1d)],
-                MathBlockValue.Scalar(1d))],
-            new MathBlockPerformanceCase([MathBlockValue.Scalar(1d)]));
+                [MathBlockValue.Scalar(1f)],
+                MathBlockValue.Scalar(1f))],
+            new MathBlockPerformanceCase([MathBlockValue.Scalar(1f)]));
         var builder = new MathBlockProgramBuilder(new MathBlockRegistry([operation]));
         var input = builder.Input("input", MathBlockType.Scalar());
         var output = builder.Apply(operation.Identifier, operation.Version, input);

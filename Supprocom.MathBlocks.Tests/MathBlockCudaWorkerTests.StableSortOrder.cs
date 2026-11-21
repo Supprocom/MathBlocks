@@ -59,17 +59,17 @@ public sealed partial class MathBlockCudaWorkerTests
     {
         var random = new Random(302_893);
         // Few distinct values, so most pairs tie, plus both signed zeros.
-        double Tied() => random.Next(12) switch { 0 => -0d, 1 => 0d, var pick => (pick - 6) * 0.5d };
+        float Tied() => random.Next(12) switch { 0 => -0f, 1 => 0f, var pick => (pick - 6) * 0.5f };
         MathBlockValue Weights(int count)
         {
-            var raw = Enumerable.Range(0, count).Select(_ => 1d + random.Next(7)).ToArray();
+            var raw = Enumerable.Range(0, count).Select(_ => 1f + random.Next(7)).ToArray();
             var total = raw.Sum();
             return MathBlockValue.Vector(raw.Select(value => value / total).ToArray());
         }
 
         // One point in ten from the tied pool (duplicates, signed zeros, collinear points), the rest distinct: the old sorted
         // insertion of the points costs a move for every smaller point already inserted.
-        double HullCoordinate(int index) => index % 10 == 0 ? Tied() : (random.NextDouble() * 2d - 1d) * 4d;
+        float HullCoordinate(int index) => index % 10 == 0 ? Tied() : (random.NextSingle() * 2f - 1f) * 4f;
 
         switch (source)
         {
@@ -84,7 +84,7 @@ public sealed partial class MathBlockCudaWorkerTests
             case "geometry.convex-hull":
                 return [MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Range(0, BitcoinRows).Select(index => new MathBlockPoint(HullCoordinate(index), HullCoordinate(index))).ToArray()))];
             case "topology.zero-dimensional-persistence":
-                return [MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Range(0, 2_000).Select(_ => new MathBlockPoint(Tied() + random.NextDouble() * 1e-3d, Tied())).ToArray()))];
+                return [MathBlockValue.PointSet(new MathBlockPointSet(Enumerable.Range(0, 2_000).Select(_ => new MathBlockPoint(Tied() + random.NextSingle() * 1e-3f, Tied())).ToArray()))];
             case "graph.minimum-spanning-forest":
                 const int vertices = 5_000;
                 return

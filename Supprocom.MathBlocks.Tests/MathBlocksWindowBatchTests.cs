@@ -5,7 +5,7 @@ namespace Supprocom.MathBlocks.Tests;
 /// <summary>Verifies the window batch against each form evaluated alone.</summary>
 public sealed class MathBlocksWindowBatchTests
 {
-    private const double Sentinel = 31.5d;
+    private const float Sentinel = 31.5f;
 
     private static readonly int[] Widths = [1, 2, 3, 17, 96, 0, -1, 400, 401];
 
@@ -27,9 +27,9 @@ public sealed class MathBlocksWindowBatchTests
         ArgumentException.ThrowIfNullOrEmpty(identity);
         var operation = Resolve(identity);
         var random = new Random(41);
-        var values = new double[400];
+        var values = new float[400];
         for (var row = 0; row < values.Length; row++)
-            values[row] = row is >= 100 and < 220 ? 7d : random.Next(5) == 0 ? -0d : random.NextDouble() * 50d;
+            values[row] = row is >= 100 and < 220 ? 7f : random.Next(5) == 0 ? -0f : random.NextSingle() * 50f;
         var series = MathBlockValue.Vector(values);
         foreach (var parameters in Parameters(identity))
         {
@@ -56,15 +56,15 @@ public sealed class MathBlocksWindowBatchTests
         var operation = Resolve(identity);
         var sibling = MathBlockWindowTestSupport.Windowed.Get(SiblingIdentifier(identity));
         var random = new Random(43);
-        var values = new double[300];
+        var values = new float[300];
         for (var row = 0; row < values.Length; row++)
-            values[row] = row is >= 50 and < 80 ? 3d : random.NextDouble() * 4d;
+            values[row] = row is >= 50 and < 80 ? 3f : random.NextSingle() * 4f;
         var series = MathBlockValue.Vector(values);
         foreach (var parameters in Parameters(identity))
         {
             foreach (var width in new[] { 1, 2, 9, 300, 301, 0 })
             {
-                foreach (var fill in new[] { Sentinel, double.NaN })
+                foreach (var fill in new[] { Sentinel, float.NaN })
                 {
                     MathBlockValue[] inputs = [series, .. parameters, MathBlockValue.Scalar(width), MathBlockValue.Scalar(fill)];
                     var result = MathBlocksWindowBatch.EvaluateWithValidity(identity, inputs);
@@ -99,24 +99,24 @@ public sealed class MathBlocksWindowBatchTests
     [Fact]
     public void UnsupportedFormsAreRejectedByName()
     {
-        var series = MathBlockValue.Vector([1d, 2d, 3d]);
+        var series = MathBlockValue.Vector([1f, 2f, 3f]);
         foreach (var identity in new[]
                  {
                      "window.vector.sum@1", "window.statistics.population-variance@1", "window-valid.vector.minimum@1",
                      "window-accurate-valid.sum@1", "vector.minimum@1", "window-accurate.sum", "window-accurate.sum@2"
                  })
         {
-            var exception = Assert.Throws<ArgumentException>(() => MathBlocksWindowBatch.Evaluate(series, identity, [2], 0d));
+            var exception = Assert.Throws<ArgumentException>(() => MathBlocksWindowBatch.Evaluate(series, identity, [2], 0f));
             Assert.Contains($"'{identity}'", exception.Message, StringComparison.Ordinal);
             var paired = Assert.Throws<ArgumentException>(
-                () => MathBlocksWindowBatch.EvaluateWithValidity(identity, [series, MathBlockValue.Scalar(2d), MathBlockValue.Scalar(0d)]));
+                () => MathBlocksWindowBatch.EvaluateWithValidity(identity, [series, MathBlockValue.Scalar(2f), MathBlockValue.Scalar(0f)]));
             Assert.Contains($"'{identity}'", paired.Message, StringComparison.Ordinal);
         }
 
-        var quantile = Assert.Throws<ArgumentException>(() => MathBlocksWindowBatch.Evaluate(series, "window.vector.quantile@1", [2], 0d));
+        var quantile = Assert.Throws<ArgumentException>(() => MathBlocksWindowBatch.Evaluate(series, "window.vector.quantile@1", [2], 0f));
         Assert.Contains("'window.vector.quantile@1'", quantile.Message, StringComparison.Ordinal);
         Assert.Throws<ArgumentException>(
-            () => MathBlocksWindowBatch.Evaluate(series, "window-accurate.mean@1", [MathBlockValue.Scalar(0.5d)], [2], 0d));
+            () => MathBlocksWindowBatch.Evaluate(series, "window-accurate.mean@1", [MathBlockValue.Scalar(0.5f)], [2], 0f));
     }
 
     /// <summary>
@@ -127,23 +127,23 @@ public sealed class MathBlocksWindowBatchTests
     public void CUDAEntryPointsRejectInvalidRequestsBeforeCompiling()
     {
         var worker = new Supprocom.MathBlocks.Cuda.MathBlocksCUDAWorker();
-        var series = MathBlockValue.Vector([1d, 2d, 3d]);
+        var series = MathBlockValue.Vector([1f, 2f, 3f]);
         foreach (var identity in new[] { "window.vector.sum@1", "window-accurate-valid.sum@1", "vector.minimum@1", "window-accurate.sum" })
         {
-            var exception = Assert.Throws<ArgumentException>(() => MathBlocksWindowBatch.EvaluateCUDA(worker, series, identity, [2], 0d));
+            var exception = Assert.Throws<ArgumentException>(() => MathBlocksWindowBatch.EvaluateCUDA(worker, series, identity, [2], 0f));
             Assert.Contains($"'{identity}'", exception.Message, StringComparison.Ordinal);
             var paired = Assert.Throws<ArgumentException>(
-                () => MathBlocksWindowBatch.EvaluateWithValidityCUDA(worker, identity, [series, MathBlockValue.Scalar(2d), MathBlockValue.Scalar(0d)]));
+                () => MathBlocksWindowBatch.EvaluateWithValidityCUDA(worker, identity, [series, MathBlockValue.Scalar(2f), MathBlockValue.Scalar(0f)]));
             Assert.Contains($"'{identity}'", paired.Message, StringComparison.Ordinal);
         }
 
-        Assert.Throws<ArgumentException>(() => MathBlocksWindowBatch.EvaluateCUDA(worker, series, "window.vector.quantile@1", [2], 0d));
+        Assert.Throws<ArgumentException>(() => MathBlocksWindowBatch.EvaluateCUDA(worker, series, "window.vector.quantile@1", [2], 0f));
         Assert.Throws<ArgumentException>(
-            () => MathBlocksWindowBatch.EvaluateCUDA(worker, series, "window-accurate.mean@1", [MathBlockValue.Scalar(0.5d)], [2], 0d));
+            () => MathBlocksWindowBatch.EvaluateCUDA(worker, series, "window-accurate.mean@1", [MathBlockValue.Scalar(0.5f)], [2], 0f));
         Assert.Throws<ArgumentException>(
-            () => MathBlocksWindowBatch.EvaluateWithValidityCUDA(worker, "window-accurate.mean@1", [series, MathBlockValue.Scalar(2d)]));
-        Assert.Throws<ArgumentNullException>(() => MathBlocksWindowBatch.EvaluateCUDA(null!, series, "window-accurate.mean@1", [2], 0d));
-        Assert.Empty(MathBlocksWindowBatch.EvaluateCUDA(worker, series, "window-accurate.mean@1", [], 0d));
+            () => MathBlocksWindowBatch.EvaluateWithValidityCUDA(worker, "window-accurate.mean@1", [series, MathBlockValue.Scalar(2f)]));
+        Assert.Throws<ArgumentNullException>(() => MathBlocksWindowBatch.EvaluateCUDA(null!, series, "window-accurate.mean@1", [2], 0f));
+        Assert.Empty(MathBlocksWindowBatch.EvaluateCUDA(worker, series, "window-accurate.mean@1", [], 0f));
     }
 
     internal static MathBlockOperation Resolve(string identity) =>
@@ -159,6 +159,6 @@ public sealed class MathBlocksWindowBatchTests
 
     internal static MathBlockValue[][] Parameters(string identity) =>
         identity.StartsWith("window.vector.quantile", StringComparison.Ordinal)
-            ? [[MathBlockValue.Scalar(0.3d)], [MathBlockValue.Scalar(1d)], [MathBlockValue.Scalar(1.5d)]]
+            ? [[MathBlockValue.Scalar(0.3f)], [MathBlockValue.Scalar(1f)], [MathBlockValue.Scalar(1.5f)]]
             : [[]];
 }

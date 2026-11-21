@@ -6,8 +6,8 @@ namespace Supprocom.MathBlocks.Tests;
 /// <summary>Compares the CUDA kernels of the lead and lag forms with their CoreCLR evaluation, bit for bit.</summary>
 public sealed class MathBlockSequenceShiftDeviceTests
 {
-    private static readonly double[] Series = [1d, 2d, -0d, 4d, 5d, 6d, 7d, 8d, 9d];
-    private static readonly double[] Counts = [0d, 1d, 2d, 0d, 1d, 0d, 1d, 2d, 3d];
+    private static readonly float[] Series = [1f, 2f, -0f, 4f, 5f, 6f, 7f, 8f, 9f];
+    private static readonly float[] Counts = [0f, 1f, 2f, 0f, 1f, 0f, 1f, 2f, 3f];
     private static readonly bool[] Available = [true, true, true, true, true, true, true, false, true];
 
     /// <summary>Gets the case names, one per input combination.</summary>
@@ -47,38 +47,38 @@ public sealed class MathBlockSequenceShiftDeviceTests
     private static Dictionary<string, MathBlockValue[]> Cases()
     {
         var cases = new Dictionary<string, MathBlockValue[]>(StringComparer.Ordinal);
-        foreach (var offset in new[] { 1d, 2d, 3d, 8d, 9d, 10d, 1e300d, 0d, -1d, 0.5d, 1.5d })
+        foreach (var offset in new[] { 1f, 2f, 3f, 8f, 9f, 10f, 3.16e37f, 0f, -1f, 0.5f, 1.5f })
             cases["offset-" + offset.ToString("R", CultureInfo.InvariantCulture)] = Make(Series, Available, Counts, offset);
-        cases["bad-count-negative"] = Make(Series, Available, [0d, 1d, 2d, 0d, 1d, 0d, 1d, 2d, -1d], 1d);
-        cases["bad-count-fraction"] = Make(Series, Available, [0d, 1d, 2d, 0d, 1d, 0.5d, 1d, 2d, 3d], 1d);
-        cases["short-counts"] = Make(Series, Available, Counts[..8], 1d);
-        cases["short-availability"] = Make(Series, Available[..8], Counts, 1d);
-        cases["inconsistent-counts"] = Make(Series, Available, [5d, 5d, 5d, 0d, 5d, 5d, 0d, 5d, 5d], 2d);
+        cases["bad-count-negative"] = Make(Series, Available, [0f, 1f, 2f, 0f, 1f, 0f, 1f, 2f, -1f], 1f);
+        cases["bad-count-fraction"] = Make(Series, Available, [0f, 1f, 2f, 0f, 1f, 0.5f, 1f, 2f, 3f], 1f);
+        cases["short-counts"] = Make(Series, Available, Counts[..8], 1f);
+        cases["short-availability"] = Make(Series, Available[..8], Counts, 1f);
+        cases["inconsistent-counts"] = Make(Series, Available, [5f, 5f, 5f, 0f, 5f, 5f, 0f, 5f, 5f], 2f);
         var random = new Random(0x1ead);
         for (var trial = 0; trial < 12; trial++)
         {
             var length = random.Next(1, 300);
-            var values = new double[length];
+            var values = new float[length];
             var flags = new bool[length];
-            var counts = new double[length];
+            var counts = new float[length];
             for (var index = 0; index < length; index++)
             {
-                values[index] = random.Next(-50, 50) * 0.25d;
+                values[index] = random.Next(-50, 50) * 0.25f;
                 flags[index] = random.Next(5) != 0;
-                counts[index] = index > 0 && random.Next(6) != 0 ? counts[index - 1] + 1d : 0d;
+                counts[index] = index > 0 && random.Next(6) != 0 ? counts[index - 1] + 1f : 0f;
             }
             cases[$"random-{trial}"] = Make(values, flags, counts, random.Next(1, 6));
         }
         return cases;
     }
 
-    private static MathBlockValue[] Make(double[] x, bool[] available, double[] counts, double offset) =>
+    private static MathBlockValue[] Make(float[] x, bool[] available, float[] counts, float offset) =>
     [
         MathBlockValue.Vector(x),
         MathBlockValue.BooleanVector(available),
         MathBlockValue.Vector(counts),
         MathBlockValue.Scalar(offset),
-        MathBlockValue.Scalar(-99d)
+        MathBlockValue.Scalar(-99f)
     ];
 
     private static bool IsExact(MathBlockValue expected, MathBlockValue actual)
@@ -89,7 +89,7 @@ public sealed class MathBlockSequenceShiftDeviceTests
             return true;
         if (expected.Type.Kind == MathBlockValueKind.BooleanVector)
             return expected.AsBooleanVector().SequenceEqual(actual.AsBooleanVector());
-        return expected.AsVector().Select(BitConverter.DoubleToInt64Bits)
-            .SequenceEqual(actual.AsVector().Select(BitConverter.DoubleToInt64Bits));
+        return expected.AsVector().Select(BitConverter.SingleToInt32Bits)
+            .SequenceEqual(actual.AsVector().Select(BitConverter.SingleToInt32Bits));
     }
 }

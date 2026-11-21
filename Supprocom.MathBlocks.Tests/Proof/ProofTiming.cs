@@ -22,25 +22,25 @@ internal static class ProofTiming
     private const int TriesPerSample = 8;
 
     /// <summary>Runs the delegate once to warm up, then five times with timing, and returns the median time per row in nanoseconds.</summary>
-    internal static double NanosecondsPerRow(Action run, long rows) => NanosecondsPerRow(run, rows, Samples);
+    internal static float NanosecondsPerRow(Action run, long rows) => NanosecondsPerRow(run, rows, Samples);
 
     /// <summary>
     /// Runs the delegate once to warm up, then with timing until <paramref name="samples"/> calls took neither page faults for newly mapped memory nor a collection, and returns their
     /// median time per row in nanoseconds; after eight times that many calls without enough of them, the median of all the calls.
     /// </summary>
-    internal static double NanosecondsPerRow(Action run, long rows, int samples)
+    internal static float NanosecondsPerRow(Action run, long rows, int samples)
     {
         run();
         var allowed = rows / RowsPerAllowedFault;
-        var settled = new List<double>(samples);
-        var all = new List<double>(samples);
+        var settled = new List<float>(samples);
+        var all = new List<float>(samples);
         while (settled.Count < samples && all.Count < TriesPerSample * samples)
         {
             var faults = MinorPageFaults();
             var collections = GC.CollectionCount(0);
             var started = Stopwatch.GetTimestamp();
             run();
-            var elapsed = Stopwatch.GetElapsedTime(started).TotalNanoseconds;
+            var elapsed = (float)Stopwatch.GetElapsedTime(started).TotalNanoseconds;
             all.Add(elapsed);
             // A collection of any generation counts as one of generation 0.
             if (GC.CollectionCount(0) == collections && MinorPageFaults() - faults <= allowed)
@@ -51,12 +51,12 @@ internal static class ProofTiming
     }
 
     /// <summary>Returns the median of the values; the mean of the two middle values when their count is even.</summary>
-    internal static double Median(double[] values)
+    internal static float Median(float[] values)
     {
-        var sorted = new double[values.Length];
+        var sorted = new float[values.Length];
         Array.Copy(values, sorted, values.Length);
         Array.Sort(sorted);
-        return (sorted[(sorted.Length - 1) / 2] + sorted[sorted.Length / 2]) / 2d;
+        return (sorted[(sorted.Length - 1) / 2] + sorted[sorted.Length / 2]) / 2f;
     }
 
     // The minor page faults of the process so far (the tenth field of /proc/self/stat, the eighth after the command name), or zero where the system has no such file.

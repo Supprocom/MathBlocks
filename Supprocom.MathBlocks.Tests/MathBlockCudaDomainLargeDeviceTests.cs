@@ -21,7 +21,7 @@ public sealed class MathBlockCudaDomainLargeDeviceTests
         {
             yield return (
                 $"{label}:state.transition-counts@1",
-                new("state.transition-counts@1", [MathBlockValue.Vector([0d, 1d, size - 1d, 1d, 2d, 0d]), MathBlockValue.Scalar(size)], new() { MaximumStateCount = size }));
+                new("state.transition-counts@1", [MathBlockValue.Vector([0f, 1f, size - 1f, 1f, 2f, 0f]), MathBlockValue.Scalar(size)], new() { MaximumStateCount = size }));
             yield return (
                 $"{label}:matrix.identity@1",
                 new("matrix.identity@1", [MathBlockValue.Scalar(size)], new() { MaximumMatrixSize = size }));
@@ -38,21 +38,21 @@ public sealed class MathBlockCudaDomainLargeDeviceTests
     }
 
     // The checksum of every element, the element sum, and the bits of the sampled rows.
-    private sealed record Summary(bool Valid, int Rows, int Columns, ulong Checksum, double Sum, ulong[][] SampledRows);
+    private sealed record Summary(bool Valid, int Rows, int Columns, ulong Checksum, float Sum, ulong[][] SampledRows);
 
     private static Summary Summarize(MathBlockValue value, int[] sampledRows)
     {
         if (!value.IsValid)
-            return new Summary(false, 0, 0, 0ul, 0d, []);
+            return new Summary(false, 0, 0, 0ul, 0f, []);
         var matrix = value.AsMatrix();
         var checksum = 14695981039346656037ul;
-        var sum = 0d;
+        var sum = 0f;
         for (var row = 0; row < matrix.Rows; row++)
         {
             for (var column = 0; column < matrix.Columns; column++)
             {
                 var element = matrix[row, column];
-                checksum = (checksum ^ BitConverter.DoubleToUInt64Bits(element)) * 1099511628211ul;
+                checksum = (checksum ^ BitConverter.SingleToUInt32Bits(element)) * 1099511628211ul;
                 sum += element;
             }
         }
@@ -62,7 +62,7 @@ public sealed class MathBlockCudaDomainLargeDeviceTests
         {
             sampled[index] = new ulong[matrix.Columns];
             for (var column = 0; column < matrix.Columns; column++)
-                sampled[index][column] = BitConverter.DoubleToUInt64Bits(matrix[sampledRows[index], column]);
+                sampled[index][column] = BitConverter.SingleToUInt32Bits(matrix[sampledRows[index], column]);
         }
 
         return new Summary(true, matrix.Rows, matrix.Columns, checksum, sum, sampled);
@@ -98,7 +98,7 @@ public sealed class MathBlockCudaDomainLargeDeviceTests
         Assert.Equal(reference.Rows, actual.Rows);
         Assert.Equal(reference.Columns, actual.Columns);
         Assert.Equal(reference.Checksum, actual.Checksum);
-        Assert.Equal(BitConverter.DoubleToUInt64Bits(reference.Sum), BitConverter.DoubleToUInt64Bits(actual.Sum));
+        Assert.Equal(BitConverter.SingleToUInt32Bits(reference.Sum), BitConverter.SingleToUInt32Bits(actual.Sum));
         for (var index = 0; index < sampledRows.Length; index++)
             Assert.True(reference.SampledRows[index].AsSpan().SequenceEqual(actual.SampledRows[index]), $"{name}: row {sampledRows[index]} differs.");
     }

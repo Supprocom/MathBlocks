@@ -61,16 +61,16 @@ public sealed partial class MathBlockCudaWorkerTests
     {
         var random = new Random(1031);
         var pair = string.Equals(source, "statistics.theil-sen-slope", StringComparison.Ordinal);
-        MathBlockValue[] Make(Func<int, double> x, Func<int, double> y) =>
+        MathBlockValue[] Make(Func<int, float> x, Func<int, float> y) =>
             pair
                 ? [MathBlockValue.Vector(Enumerable.Range(0, rows).Select(x).ToArray()), MathBlockValue.Vector(Enumerable.Range(0, rows).Select(y).ToArray())]
                 : [MathBlockValue.Vector(Enumerable.Range(0, rows).Select(y).ToArray())];
         // Seeded values with no short binary expansion; x strictly increasing so no slope divides by zero.
-        yield return ("random", Make(row => row + random.NextDouble() * 0.5d, _ => (random.NextDouble() * 2d - 1d) * 3.7d));
+        yield return ("random", Make(row => row + random.NextSingle() * 0.5f, _ => (random.NextSingle() * 2f - 1f) * 3.7f));
         // Mostly signed zeros and a few ones: pair averages and slopes are +0 and -0 in the thousands, so the stable order
         // of equal values decides the bits of the median.
-        yield return ("signed zeros", Make(row => row, _ => random.Next(16) switch { 0 => 1d, 1 => -1d, var pick => pick % 2 == 0 ? -0d : 0d }));
+        yield return ("signed zeros", Make(row => row, _ => random.Next(16) switch { 0 => 1f, 1 => -1f, var pick => pick % 2 == 0 ? -0f : 0f }));
         // Ties among non-zero values.
-        yield return ("ties", Make(row => row * 0.25d, _ => random.Next(5) - 2d));
+        yield return ("ties", Make(row => row * 0.25f, _ => random.Next(5) - 2f));
     }
 }

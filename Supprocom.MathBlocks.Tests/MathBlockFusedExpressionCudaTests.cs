@@ -229,9 +229,9 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
         foreach (var (name, value) in inputs)
             prototype[name] = value.IsValid ? value : value.Type.Kind switch
             {
-                MathBlockValueKind.Vector => MathBlockValue.Vector(new double[rows], value.Type.Unit),
+                MathBlockValueKind.Vector => MathBlockValue.Vector(new float[rows], value.Type.Unit),
                 MathBlockValueKind.BooleanVector => MathBlockValue.BooleanVector(new bool[rows]),
-                _ => MathBlockValue.Scalar(0d, value.Type.Unit)
+                _ => MathBlockValue.Scalar(0f, value.Type.Unit)
             };
         return prototype;
     }
@@ -282,19 +282,19 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
             Enumerable.Repeat((IReadOnlyDictionary<string, MathBlockValue>)inputs, repeats + 1).ToArray(),
             Enumerable.Repeat((IReadOnlyDictionary<string, MathBlockValue>?)null, repeats + 1).ToArray());
         var runner = typeof(MathBlocksCUDAWorker).Assembly.GetType("Supprocom.MathBlocks.Cuda.MathBlockFusedCudaRunner", true)!;
-        var fused = ((IReadOnlyList<double>)runner.GetProperty("LaunchMilliseconds")!.GetValue(null)!).Skip(1).ToArray();
+        var fused = ((IReadOnlyList<float>)runner.GetProperty("LaunchMilliseconds")!.GetValue(null)!).Skip(1).ToArray();
 
         using var generic = new MathBlocksCUDAWorker().Compile(program, inputs);
         generic.UploadInputs(inputs);
         generic.ExecuteResident();
         generic.Synchronize();
-        var dispatched = new double[repeats];
+        var dispatched = new float[repeats];
         for (var repeat = 0; repeat < repeats; repeat++)
         {
             var watch = Stopwatch.StartNew();
             generic.ExecuteResident();
             generic.Synchronize();
-            dispatched[repeat] = watch.Elapsed.TotalMilliseconds;
+            dispatched[repeat] = (float)watch.Elapsed.TotalMilliseconds;
         }
         var ratios = fused.Zip(dispatched, (left, right) => left / right).ToArray();
         var elementwise = program.PlanNodes.Count(node =>
@@ -307,10 +307,10 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
         output.WriteLine($"generic ms, each: {string.Join(' ', dispatched.Select(value => value.ToString("F3", System.Globalization.CultureInfo.InvariantCulture)))}");
     }
 
-    private static string Spread(double[] values)
+    private static string Spread(float[] values)
     {
         var sorted = values.Order().ToArray();
-        var median = (sorted[(sorted.Length - 1) / 2] + sorted[sorted.Length / 2]) / 2d;
+        var median = (sorted[(sorted.Length - 1) / 2] + sorted[sorted.Length / 2]) / 2f;
         return string.Create(
             System.Globalization.CultureInfo.InvariantCulture,
             $"min {sorted[0]:F4}, median {median:F4}, max {sorted[^1]:F4}");
@@ -395,8 +395,8 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
             var arguments = MathBlockElementwiseTestSupport.CreateArguments(source, FullRows, vectors, 61_000 + source.Length);
             var full = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
             {
-                ["other"] = MathBlockValue.Vector(Enumerable.Range(0, FullRows).Select(row => row % 1_000 * 0.25d).ToArray()),
-                ["fill"] = MathBlockValue.Scalar(-0d)
+                ["other"] = MathBlockValue.Vector(Enumerable.Range(0, FullRows).Select(row => row % 1_000 * 0.25f).ToArray()),
+                ["fill"] = MathBlockValue.Scalar(-0f)
             };
             for (var index = 0; index < arguments.Length; index++)
                 full[$"a{index}"] = arguments[index];
@@ -449,11 +449,11 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
         string arguments)
     {
         var values = AdversarialValues;
-        var pairs = new List<(double Left, double Right)>();
+        var pairs = new List<(float Left, float Right)>();
         foreach (var left in values)
             foreach (var right in values)
                 pairs.Add((left, right));
-        var scalars = arguments.Contains('S', StringComparison.Ordinal) ? new[] { 2d, -0d, 0.5, 1d / 3d, -1d } : [2d];
+        var scalars = arguments.Contains('S', StringComparison.Ordinal) ? new[] { 2f, -0f, 0.5f, 1f / 3f, -1f } : [2f];
         foreach (var scalar in scalars)
         {
             var (program, all) = CreatePairProgram(identity, arguments, pairs, scalar);
@@ -473,8 +473,8 @@ public sealed class MathBlockFusedExpressionCudaTests(ITestOutputHelper output)
     private static (MathBlockProgram Program, Dictionary<string, MathBlockValue> Inputs) CreatePairProgram(
         string identity,
         string arguments,
-        List<(double Left, double Right)> pairs,
-        double scalar)
+        List<(float Left, float Right)> pairs,
+        float scalar)
     {
         var left = pairs.Select(pair => pair.Left).ToArray();
         var right = pairs.Select(pair => pair.Right).ToArray();

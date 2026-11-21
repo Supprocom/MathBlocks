@@ -62,7 +62,7 @@ internal static class MathBlockWindowM2TestSupport
         var others = actual.AsVector().ToArray();
         for (var row = 0; row < values.Length; row++)
         {
-            if (BitConverter.DoubleToInt64Bits(values[row]) != BitConverter.DoubleToInt64Bits(others[row]))
+            if (BitConverter.SingleToInt32Bits(values[row]) != BitConverter.SingleToInt32Bits(others[row]))
             {
                 return string.Create(
                     System.Globalization.CultureInfo.InvariantCulture,

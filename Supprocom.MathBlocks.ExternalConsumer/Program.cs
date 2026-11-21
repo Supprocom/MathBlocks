@@ -185,8 +185,8 @@ internal static class Program
                 "Every formula operation must have a direct mapping.");
 
             var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
-            var left = builder.Constant(MathBlockValue.Scalar(1d));
-            var right = builder.Constant(MathBlockValue.Scalar(2d));
+            var left = builder.Constant(MathBlockValue.Scalar(1f));
+            var right = builder.Constant(MathBlockValue.Scalar(2f));
             var sum = builder.Apply("scalar.add", inputs: [left, right]);
             var program = builder.Output("result", sum).Build();
             var emptyInputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal);
@@ -208,7 +208,7 @@ internal static class Program
                     string.Equals(exact.Program.Fingerprint, program.Fingerprint, StringComparison.Ordinal),
                     "The exact formula package round trip changed the program.");
                 Require(
-                    visible.Program.Evaluate(emptyInputs)["result"].AsScalar() == 3d,
+                    visible.Program.Evaluate(emptyInputs)["result"].AsScalar() == 3f,
                     "The visible formula package round trip changed the result.");
             }
 
@@ -339,8 +339,8 @@ internal static class Program
         }
 
         Require(nextSlot == nested.FirstInputSlot, "The nested slot boundary differs.");
-        WriteScalar(arena, deviceArena, slotBaseOffset, nested.FirstInputSlot, 6d);
-        WriteScalar(arena, deviceArena, slotBaseOffset, nested.SecondInputSlot, 2d);
+        WriteScalar(arena, deviceArena, slotBaseOffset, nested.FirstInputSlot, 6f);
+        WriteScalar(arena, deviceArena, slotBaseOffset, nested.SecondInputSlot, 2f);
         MathBlockCudaValueCodec.WriteHeader(
             arena,
             SlotOffset(slotBaseOffset, nested.AddOutputSlot),
@@ -349,7 +349,7 @@ internal static class Program
             0,
             MathBlockType.Scalar(),
             valid: false);
-        WriteScalar(arena, deviceArena, slotBaseOffset, nested.MultiplierSlot, 4d);
+        WriteScalar(arena, deviceArena, slotBaseOffset, nested.MultiplierSlot, 4f);
         MathBlockCudaValueCodec.WriteHeader(
             arena,
             SlotOffset(slotBaseOffset, nested.OutputSlot),
@@ -365,7 +365,7 @@ internal static class Program
         ulong deviceArena,
         int slotBaseOffset,
         int slot,
-        double value)
+        float value)
     {
         _ = deviceArena;
         MathBlockCudaValueCodec.WriteValue(
@@ -503,8 +503,8 @@ internal static class Program
             -1,
             MathBlockType.Scalar());
         if (!nestedOutput.IsValid ||
-            BitConverter.DoubleToInt64Bits(nestedOutput.AsScalar()) !=
-            BitConverter.DoubleToInt64Bits(32d))
+            BitConverter.SingleToInt32Bits(nestedOutput.AsScalar()) !=
+            BitConverter.SingleToInt32Bits(32f))
         {
             failures.Add($"nested-scalar-DAG: CUDA={Describe(nestedOutput)}");
         }
@@ -542,7 +542,7 @@ internal static class Program
         };
     }
 
-    private static bool ExactDoubles(IReadOnlyList<double> expected, IReadOnlyList<double> actual) =>
+    private static bool ExactDoubles(IReadOnlyList<float> expected, IReadOnlyList<float> actual) =>
         expected.Count == actual.Count &&
         Enumerable.Range(0, expected.Count).All(index => ExactDouble(expected[index], actual[index]));
 
@@ -579,8 +579,8 @@ internal static class Program
             expected[index].Length == actual[index].Length &&
             ExactDouble(expected[index].Value, actual[index].Value));
 
-    private static bool ExactDouble(double expected, double actual) =>
-        BitConverter.DoubleToInt64Bits(expected) == BitConverter.DoubleToInt64Bits(actual);
+    private static bool ExactDouble(float expected, float actual) =>
+        BitConverter.SingleToInt32Bits(expected) == BitConverter.SingleToInt32Bits(actual);
 
     private static string Describe(MathBlockValue value)
     {

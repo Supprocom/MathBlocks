@@ -21,25 +21,25 @@ public sealed class MathBlockDomainWiringTests
         return MathBlockCatalog.Standard.Get(identity[..separator], int.Parse(identity[(separator + 1)..], CultureInfo.InvariantCulture));
     }
 
-    private static MathBlockValue[] Ones(int count) => [MathBlockValue.Vector(Enumerable.Repeat(1d, count))];
+    private static MathBlockValue[] Ones(int count) => [MathBlockValue.Vector(Enumerable.Repeat(1f, count))];
 
-    private static MathBlockMatrix Square(int size, double value) =>
+    private static MathBlockMatrix Square(int size, float value) =>
         new(size, size, Enumerable.Repeat(value, size * size).ToArray());
 
-    private static MathBlockValue[] Iterations(string identity, double iterations) => identity switch
+    private static MathBlockValue[] Iterations(string identity, float iterations) => identity switch
     {
         "matrix.perron-vector@1" or "matrix.perron-value@1" or "matrix.spectral-norm@1" =>
-            [MathBlockValue.Matrix(Square(2, 1d)), MathBlockValue.Scalar(iterations)],
+            [MathBlockValue.Matrix(Square(2, 1f)), MathBlockValue.Scalar(iterations)],
         "markov.stationary-distribution@1" =>
-            [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0.9d, 0.1d, 0.2d, 0.8d])), MathBlockValue.Scalar(iterations)],
+            [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0.9f, 0.1f, 0.2f, 0.8f])), MathBlockValue.Scalar(iterations)],
         "graph.page-rank@1" =>
-            [MathBlockValue.Graph(new MathBlockGraph(2, [new(0, 1, 1d), new(1, 0, 1d)])), MathBlockValue.Scalar(0.85d), MathBlockValue.Scalar(iterations)],
+            [MathBlockValue.Graph(new MathBlockGraph(2, [new(0, 1, 1f), new(1, 0, 1f)])), MathBlockValue.Scalar(0.85f), MathBlockValue.Scalar(iterations)],
         "transport.sinkhorn-coupling@1" =>
             [
-                MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0d, 1d, 1d, 0d])),
-                MathBlockValue.Vector([0.5d, 0.5d]),
-                MathBlockValue.Vector([0.5d, 0.5d]),
-                MathBlockValue.Scalar(1d),
+                MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0f, 1f, 1f, 0f])),
+                MathBlockValue.Vector([0.5f, 0.5f]),
+                MathBlockValue.Vector([0.5f, 0.5f]),
+                MathBlockValue.Scalar(1f),
                 MathBlockValue.Scalar(iterations)
             ],
         _ => throw new ArgumentOutOfRangeException(nameof(identity))
@@ -58,36 +58,36 @@ public sealed class MathBlockDomainWiringTests
     // Inputs outside the default domain and the options that accept them: the default evaluation is invalid, the raised one is valid.
     internal static IEnumerable<Case> RaisedCases()
     {
-        yield return new("vector.repeat@1", [MathBlockValue.Scalar(1.5d), MathBlockValue.Scalar(1_000_001d)], new() { MaximumGeneratedVectorLength = 2_000_000 });
-        yield return new("vector.linspace@1", [MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d), MathBlockValue.Scalar(1_000_001d)], new() { MaximumGeneratedVectorLength = 2_000_000 });
-        yield return new("combinatorics.nonempty-subset-sums@1", [MathBlockValue.Vector(Enumerable.Range(1, 21).Select(value => (double)value))], new() { MaximumExplicitSubsetSize = 21 });
-        yield return new("capacity.is-submodular@1", [MathBlockValue.Vector(Enumerable.Range(0, 1 << 13).Select(mask => Math.Sqrt(int.PopCount(mask))))], new() { MaximumSubmodularSetFunctionValues = 1 << 13 });
-        yield return new("cooperative.shapley-values@1", [MathBlockValue.Vector(Enumerable.Range(0, 1 << 21).Select(mask => (double)int.PopCount(mask)))], new() { MaximumShapleyCoalitionValues = 1 << 21 });
-        yield return new("matrix.maximal-minors@1", [MathBlockValue.Matrix(new MathBlockMatrix(1, 21, Enumerable.Range(1, 21).Select(value => (double)value).ToArray()))], new() { MaximumMaximalMinorColumns = 21 });
-        yield return new("matrix.is-totally-nonnegative@1", [MathBlockValue.Matrix(Square(9, 1d))], new() { MaximumTotallyNonnegativeSize = 9 });
-        yield return new("matrix.identity@1", [MathBlockValue.Scalar(4_097d)], new() { MaximumMatrixSize = 4_097 });
-        yield return new("state.transition-counts@1", [MathBlockValue.Vector([0d, 1d, 2d, 1d]), MathBlockValue.Scalar(4_097d)], new() { MaximumStateCount = 4_097 });
+        yield return new("vector.repeat@1", [MathBlockValue.Scalar(1.5f), MathBlockValue.Scalar(1_000_001f)], new() { MaximumGeneratedVectorLength = 2_000_000 });
+        yield return new("vector.linspace@1", [MathBlockValue.Scalar(0f), MathBlockValue.Scalar(1f), MathBlockValue.Scalar(1_000_001f)], new() { MaximumGeneratedVectorLength = 2_000_000 });
+        yield return new("combinatorics.nonempty-subset-sums@1", [MathBlockValue.Vector(Enumerable.Range(1, 21).Select(value => (float)value))], new() { MaximumExplicitSubsetSize = 21 });
+        yield return new("capacity.is-submodular@1", [MathBlockValue.Vector(Enumerable.Range(0, 1 << 13).Select(mask => MathF.Sqrt(int.PopCount(mask))))], new() { MaximumSubmodularSetFunctionValues = 1 << 13 });
+        yield return new("cooperative.shapley-values@1", [MathBlockValue.Vector(Enumerable.Range(0, 1 << 21).Select(mask => (float)int.PopCount(mask)))], new() { MaximumShapleyCoalitionValues = 1 << 21 });
+        yield return new("matrix.maximal-minors@1", [MathBlockValue.Matrix(new MathBlockMatrix(1, 21, Enumerable.Range(1, 21).Select(value => (float)value).ToArray()))], new() { MaximumMaximalMinorColumns = 21 });
+        yield return new("matrix.is-totally-nonnegative@1", [MathBlockValue.Matrix(Square(9, 1f))], new() { MaximumTotallyNonnegativeSize = 9 });
+        yield return new("matrix.identity@1", [MathBlockValue.Scalar(4_097f)], new() { MaximumMatrixSize = 4_097 });
+        yield return new("state.transition-counts@1", [MathBlockValue.Vector([0f, 1f, 2f, 1f]), MathBlockValue.Scalar(4_097f)], new() { MaximumStateCount = 4_097 });
         foreach (var identity in IterationIdentities)
-            yield return new(identity, Iterations(identity, 10_001d), new() { MaximumIterationCount = 20_000 });
+            yield return new(identity, Iterations(identity, 10_001f), new() { MaximumIterationCount = 20_000 });
     }
 
     // Inputs inside the default domain and the options that reject them: the default evaluation is valid, the lowered one is invalid.
     internal static IEnumerable<Case> LoweredCases()
     {
-        yield return new("vector.repeat@1", [MathBlockValue.Scalar(1.5d), MathBlockValue.Scalar(11d)], new() { MaximumGeneratedVectorLength = 10 });
-        yield return new("vector.linspace@1", [MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d), MathBlockValue.Scalar(11d)], new() { MaximumGeneratedVectorLength = 10 });
+        yield return new("vector.repeat@1", [MathBlockValue.Scalar(1.5f), MathBlockValue.Scalar(11f)], new() { MaximumGeneratedVectorLength = 10 });
+        yield return new("vector.linspace@1", [MathBlockValue.Scalar(0f), MathBlockValue.Scalar(1f), MathBlockValue.Scalar(11f)], new() { MaximumGeneratedVectorLength = 10 });
         yield return new("combinatorics.nonempty-subset-sums@1", Ones(5), new() { MaximumExplicitSubsetSize = 4 });
-        yield return new("matrix.principal-minors@1", [MathBlockValue.Matrix(Square(4, 1d))], new() { MaximumExplicitSubsetSize = 3 });
-        yield return new("transport.minimum-assignment@1", [MathBlockValue.Matrix(Square(4, 1d))], new() { MaximumExplicitSubsetSize = 3 });
-        yield return new("capacity.is-submodular@1", [MathBlockValue.Vector(Enumerable.Range(0, 16).Select(mask => Math.Sqrt(int.PopCount(mask))))], new() { MaximumSubmodularSetFunctionValues = 8 });
-        yield return new("cooperative.shapley-values@1", [MathBlockValue.Vector(Enumerable.Range(0, 16).Select(mask => (double)int.PopCount(mask)))], new() { MaximumShapleyCoalitionValues = 8 });
-        yield return new("capacity.choquet-integral@1", [MathBlockValue.Vector([1d, 2d, 3d]), MathBlockValue.Vector(Enumerable.Range(0, 8).Select(mask => int.PopCount(mask) / 3d))], new() { MaximumChoquetPlayerCount = 2 });
-        yield return new("matrix.maximal-minors@1", [MathBlockValue.Matrix(new MathBlockMatrix(1, 3, [1d, 2d, 3d]))], new() { MaximumMaximalMinorColumns = 2 });
-        yield return new("matrix.is-totally-nonnegative@1", [MathBlockValue.Matrix(Square(3, 1d))], new() { MaximumTotallyNonnegativeSize = 2 });
-        yield return new("matrix.identity@1", [MathBlockValue.Scalar(5d)], new() { MaximumMatrixSize = 4 });
-        yield return new("state.transition-counts@1", [MathBlockValue.Vector([0d, 1d, 2d, 1d]), MathBlockValue.Scalar(4d)], new() { MaximumStateCount = 3 });
+        yield return new("matrix.principal-minors@1", [MathBlockValue.Matrix(Square(4, 1f))], new() { MaximumExplicitSubsetSize = 3 });
+        yield return new("transport.minimum-assignment@1", [MathBlockValue.Matrix(Square(4, 1f))], new() { MaximumExplicitSubsetSize = 3 });
+        yield return new("capacity.is-submodular@1", [MathBlockValue.Vector(Enumerable.Range(0, 16).Select(mask => MathF.Sqrt(int.PopCount(mask))))], new() { MaximumSubmodularSetFunctionValues = 8 });
+        yield return new("cooperative.shapley-values@1", [MathBlockValue.Vector(Enumerable.Range(0, 16).Select(mask => (float)int.PopCount(mask)))], new() { MaximumShapleyCoalitionValues = 8 });
+        yield return new("capacity.choquet-integral@1", [MathBlockValue.Vector([1f, 2f, 3f]), MathBlockValue.Vector(Enumerable.Range(0, 8).Select(mask => int.PopCount(mask) / 3f))], new() { MaximumChoquetPlayerCount = 2 });
+        yield return new("matrix.maximal-minors@1", [MathBlockValue.Matrix(new MathBlockMatrix(1, 3, [1f, 2f, 3f]))], new() { MaximumMaximalMinorColumns = 2 });
+        yield return new("matrix.is-totally-nonnegative@1", [MathBlockValue.Matrix(Square(3, 1f))], new() { MaximumTotallyNonnegativeSize = 2 });
+        yield return new("matrix.identity@1", [MathBlockValue.Scalar(5f)], new() { MaximumMatrixSize = 4 });
+        yield return new("state.transition-counts@1", [MathBlockValue.Vector([0f, 1f, 2f, 1f]), MathBlockValue.Scalar(4f)], new() { MaximumStateCount = 3 });
         foreach (var identity in IterationIdentities)
-            yield return new(identity, Iterations(identity, 11d), new() { MaximumIterationCount = 10 });
+            yield return new(identity, Iterations(identity, 11f), new() { MaximumIterationCount = 10 });
     }
 
     /// <summary>Gets the names of the cases that an option raises.</summary>
@@ -160,7 +160,7 @@ public sealed class MathBlockDomainWiringTests
     public void AnOptionOutsideItsRangeThrowsNamingTheLimit()
     {
         var operation = Operation("vector.repeat@1");
-        MathBlockValue[] inputs = [MathBlockValue.Scalar(1d), MathBlockValue.Scalar(3d)];
+        MathBlockValue[] inputs = [MathBlockValue.Scalar(1f), MathBlockValue.Scalar(3f)];
 
         var thrown = Assert.Throws<ArgumentOutOfRangeException>(() => operation.Evaluate(inputs, new MathBlockDomainOptions { MaximumGeneratedVectorLength = 268_435_456 }));
         Assert.Contains("MaximumGeneratedVectorLength", thrown.Message, StringComparison.Ordinal);
@@ -179,8 +179,8 @@ public sealed class MathBlockDomainWiringTests
             builder.Apply("vector.repeat", 1, builder.Input("value", MathBlockType.Scalar()), builder.Input("count", MathBlockType.Scalar()))).Build();
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["value"] = MathBlockValue.Scalar(2d),
-            ["count"] = MathBlockValue.Scalar(1_500_000d)
+            ["value"] = MathBlockValue.Scalar(2f),
+            ["count"] = MathBlockValue.Scalar(1_500_000f)
         };
         var worker = MathBlocksCoreCLRWorker.Create(new MathBlockDomainOptions { MaximumGeneratedVectorLength = 2_000_000 });
 
@@ -195,7 +195,7 @@ public sealed class MathBlockDomainWiringTests
     public void TheTaylorTermsAndTheNewtonStepsReachTheOperations()
     {
         var exponential = Operation("matrix.exponential@1");
-        MathBlockValue[] matrix = [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0.5d, 0.3d, 0.2d, 0.1d]))];
+        MathBlockValue[] matrix = [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0.5f, 0.3f, 0.2f, 0.1f]))];
         var defaults = exponential.Evaluate(matrix);
 
         Assert.True(Same(defaults, exponential.Evaluate(matrix, MathBlockDomainOptions.Default)));
@@ -203,23 +203,23 @@ public sealed class MathBlockDomainWiringTests
         Assert.False(Same(defaults, exponential.Evaluate(matrix, new MathBlockDomainOptions { MatrixExponentialTaylorTerms = 2 })));
 
         var cube = Operation("scalar.cube-root@1");
-        MathBlockValue[] number = [MathBlockValue.Scalar(10d)];
+        MathBlockValue[] number = [MathBlockValue.Scalar(10f)];
         var noSteps = new MathBlockDomainOptions { CubeRootNewtonSteps = 0 };
         Assert.True(Same(cube.Evaluate(number), cube.Evaluate(number, new MathBlockDomainOptions { CubeRootNewtonSteps = 3 })));
         // The start alone is within about 3e-14 of the root, so only some arguments differ from the refined value.
         Assert.Contains(
-            new[] { 2d, 3d, 5d, 7d, 10d, 100d, 1e10d, 0.3d, 12345.678d },
+            new[] { 2f, 3f, 5f, 7f, 10f, 100f, 1e10f, 0.3f, 12345.678f },
             value => !Same(cube.Evaluate([MathBlockValue.Scalar(value)]), cube.Evaluate([MathBlockValue.Scalar(value)], noSteps)));
 
         // The elementwise form runs the same evaluation, not the default kernel, under non-default options.
         var form = Operation("elementwise.scalar.cube-root@1");
-        MathBlockValue[] rows = [MathBlockValue.Vector([10d, 20d]), MathBlockValue.Scalar(-1d)];
+        MathBlockValue[] rows = [MathBlockValue.Vector([10f, 20f]), MathBlockValue.Scalar(-1f)];
         Assert.True(Same(form.Evaluate(rows), form.Evaluate(rows, new MathBlockDomainOptions())));
-        foreach (var value in new[] { 2d, 3d, 5d, 7d, 10d, 100d, 1e10d, 0.3d, 12345.678d })
+        foreach (var value in new[] { 2f, 3f, 5f, 7f, 10f, 100f, 1e10f, 0.3f, 12345.678f })
         {
             Assert.Equal(
-                BitConverter.DoubleToInt64Bits(cube.Evaluate([MathBlockValue.Scalar(value)], noSteps).AsScalar()),
-                BitConverter.DoubleToInt64Bits(form.Evaluate([MathBlockValue.Vector([value, value]), MathBlockValue.Scalar(-1d)], noSteps).AsVector()[0]));
+                BitConverter.SingleToInt32Bits(cube.Evaluate([MathBlockValue.Scalar(value)], noSteps).AsScalar()),
+                BitConverter.SingleToInt32Bits(form.Evaluate([MathBlockValue.Vector([value, value]), MathBlockValue.Scalar(-1f)], noSteps).AsVector()[0]));
         }
 
         var thrown = Assert.Throws<ArgumentOutOfRangeException>(() => cube.Evaluate(number, new MathBlockDomainOptions { CubeRootNewtonSteps = -1 }));
@@ -252,7 +252,7 @@ public sealed class MathBlockDomainWiringTests
             ("mathblocks_limit_matrix_size() { return 5000; }", new() { MaximumMatrixSize = 5000 }),
             ("mathblocks_limit_iteration_count() { return 20000; }", new() { MaximumIterationCount = 20_000 }),
             ("mathblocks_limit_incomplete_beta_maximum_iterations() { return 1024; }", new() { IncompleteBetaMaximumIterations = 1024 }),
-            ("mathblocks_limit_incomplete_beta_tolerance() { return 1E-10; }", new() { IncompleteBetaTolerance = 1e-10 }),
+            ("mathblocks_limit_incomplete_beta_tolerance() { return 1E-10; }", new() { IncompleteBetaTolerance = 1e-10f }),
             ("mathblocks_limit_incomplete_beta_policy() { return 1; }", new() { IncompleteBetaNonConvergence = MathBlockNonConvergencePolicy.Invalid }),
             ("mathblocks_limit_jacobi_policy() { return 1; }", new() { JacobiNonConvergence = MathBlockNonConvergencePolicy.Invalid }),
             ("mathblocks_limit_matrix_exponential_taylor_terms() { return 12; }", new() { MatrixExponentialTaylorTerms = 12 }),
@@ -316,28 +316,28 @@ public sealed class MathBlockDomainWiringTests
     public void ThePlanAppliesTheDomainOptionsWithoutADevice()
     {
         var subsets = MathBlockCudaDeviceModule.GetOperation("combinatorics.nonempty-subset-sums@1");
-        MathBlockValue[] elements = [MathBlockValue.Vector(Enumerable.Repeat(1d, 24))];
+        MathBlockValue[] elements = [MathBlockValue.Vector(Enumerable.Repeat(1f, 24))];
         var raisedSubsets = new MathBlockDomainOptions { MaximumExplicitSubsetSize = 24 };
         var plan = subsets.PlanCUDA(elements, raisedSubsets, 128);
         Assert.Equal((1 << 24) - 1, plan.OutputCapacity);
         Assert.Equal(0, subsets.PlanCUDA(elements, MathBlockDomainOptions.Default, 128).OutputCapacity);
 
         var states = MathBlockCudaDeviceModule.GetOperation("state.transition-counts@1");
-        MathBlockValue[] transitions = [MathBlockValue.Vector([0d, 1d, 8191d]), MathBlockValue.Scalar(8192d)];
+        MathBlockValue[] transitions = [MathBlockValue.Vector([0f, 1f, 8191f]), MathBlockValue.Scalar(8192f)];
         Assert.Equal(8192 * 8192, states.PlanCUDA(transitions, new MathBlockDomainOptions { MaximumStateCount = 8192 }, 128).OutputCapacity);
 
         var repeat = MathBlockCudaDeviceModule.GetOperation("vector.repeat@1");
-        MathBlockValue[] repeated = [MathBlockValue.Scalar(1d), MathBlockValue.Scalar(2_000_000d)];
+        MathBlockValue[] repeated = [MathBlockValue.Scalar(1f), MathBlockValue.Scalar(2_000_000f)];
         Assert.Equal(2_000_000, repeat.PlanCUDA(repeated, new MathBlockDomainOptions { MaximumGeneratedVectorLength = 2_000_000 }, 128).OutputCapacity);
         Assert.Equal(0, repeat.PlanCUDA(repeated, MathBlockDomainOptions.Default, 128).OutputCapacity);
 
         var identity = MathBlockCudaDeviceModule.GetOperation("matrix.identity@1");
-        MathBlockValue[] size = [MathBlockValue.Scalar(5000d)];
+        MathBlockValue[] size = [MathBlockValue.Scalar(5000f)];
         Assert.Equal(5000 * 5000, identity.PlanCUDA(size, new MathBlockDomainOptions { MaximumMatrixSize = 5000 }, 128).OutputCapacity);
 
         var assignment = MathBlockCudaDeviceModule.GetOperation("transport.minimum-assignment@1");
-        MathBlockValue[] costs = [MathBlockValue.Matrix(Square(21, 1d))];
-        Assert.Equal(2 * (1 << 21) * sizeof(double), assignment.PlanCUDA(costs, new MathBlockDomainOptions { MaximumExplicitSubsetSize = 21 }, 128).ScratchBytes);
+        MathBlockValue[] costs = [MathBlockValue.Matrix(Square(21, 1f))];
+        Assert.Equal(2 * (1 << 21) * sizeof(float), assignment.PlanCUDA(costs, new MathBlockDomainOptions { MaximumExplicitSubsetSize = 21 }, 128).ScratchBytes);
         Assert.Equal(0, assignment.PlanCUDA(costs, MathBlockDomainOptions.Default, 128).ScratchBytes);
     }
 
@@ -346,7 +346,7 @@ public sealed class MathBlockDomainWiringTests
     public void TheContractEvaluatesUnderTheDomainOptions()
     {
         var repeat = MathBlockCudaDeviceModule.GetOperation("vector.repeat@1");
-        MathBlockValue[] inputs = [MathBlockValue.Scalar(1d), MathBlockValue.Scalar(1_500_000d)];
+        MathBlockValue[] inputs = [MathBlockValue.Scalar(1f), MathBlockValue.Scalar(1_500_000f)];
 
         Assert.False(repeat.EvaluateCoreCLR(inputs).IsValid);
         Assert.True(repeat.EvaluateCoreCLR(inputs, new MathBlockDomainOptions { MaximumGeneratedVectorLength = 2_000_000 }).IsValid);
@@ -356,22 +356,22 @@ public sealed class MathBlockDomainWiringTests
     [Fact]
     public void AnElementwiseRowWithANonFiniteArgumentIsInvalid()
     {
-        var infinity = double.PositiveInfinity;
-        var finiteRow = MathBlockElementwiseRowReference.Row("scalar.maximum", 1d, 2d);
-        Assert.Equal((true, 2d), finiteRow);
+        var infinity = float.PositiveInfinity;
+        var finiteRow = MathBlockElementwiseRowReference.Row("scalar.maximum", 1f, 2f);
+        Assert.Equal((true, 2f), finiteRow);
         // maximum(1, -Inf) is the finite 1, so only the input check can make this row invalid.
         foreach (var arguments in new[]
                  {
-                     new[] { 1d, -infinity }, new[] { 1d, infinity }, new[] { -infinity, 1d }, new[] { infinity, 1d },
-                     new[] { 1d, double.NaN }, new[] { double.NaN, 1d }, new[] { infinity, double.NaN }
+                     new[] { 1f, -infinity }, new[] { 1f, infinity }, new[] { -infinity, 1f }, new[] { infinity, 1f },
+                     new[] { 1f, float.NaN }, new[] { float.NaN, 1f }, new[] { infinity, float.NaN }
                  })
         {
             Assert.False(MathBlockElementwiseRowReference.Row("scalar.maximum", arguments).Computed, string.Join(',', arguments));
         }
 
         Assert.False(MathBlockElementwiseRowReference.Row("scalar.negate", infinity).Computed);
-        Assert.False(MathBlockElementwiseRowReference.Row("scalar.negate", double.NaN).Computed);
-        Assert.True(MathBlockElementwiseRowReference.Row("scalar.negate", 3d).Computed);
+        Assert.False(MathBlockElementwiseRowReference.Row("scalar.negate", float.NaN).Computed);
+        Assert.True(MathBlockElementwiseRowReference.Row("scalar.negate", 3f).Computed);
     }
 
     internal static bool Same(MathBlockValue left, MathBlockValue right)
@@ -382,7 +382,7 @@ public sealed class MathBlockDomainWiringTests
             return true;
         return left.Type.Kind switch
         {
-            MathBlockValueKind.Scalar => BitConverter.DoubleToInt64Bits(left.AsScalar()) == BitConverter.DoubleToInt64Bits(right.AsScalar()),
+            MathBlockValueKind.Scalar => BitConverter.SingleToInt32Bits(left.AsScalar()) == BitConverter.SingleToInt32Bits(right.AsScalar()),
             MathBlockValueKind.Boolean => left.AsBoolean() == right.AsBoolean(),
             MathBlockValueKind.Vector => Bits(left.AsVector()).SequenceEqual(Bits(right.AsVector())),
             MathBlockValueKind.Matrix => Bits(left.AsMatrix().ToArray()).SequenceEqual(Bits(right.AsMatrix().ToArray())),
@@ -390,5 +390,5 @@ public sealed class MathBlockDomainWiringTests
         };
     }
 
-    private static IEnumerable<long> Bits(IReadOnlyList<double> values) => values.Select(BitConverter.DoubleToInt64Bits);
+    private static IEnumerable<int> Bits(IReadOnlyList<float> values) => values.Select(BitConverter.SingleToInt32Bits);
 }

@@ -85,14 +85,14 @@ public sealed class MathBlockScaleInvarianceTests
 
     private static MathBlockValue[] Single(Random random) => [Draw(random)];
 
-    private static MathBlockValue[] Series(Random random) => [Draw(random, 6), MathBlockValue.Scalar(1d + random.Next(2))];
+    private static MathBlockValue[] Series(Random random) => [Draw(random, 6), MathBlockValue.Scalar(1f + random.Next(2))];
 
     private static MathBlockValue Draw(Random random, int length = -1)
     {
         var count = length > 0 ? length : 4 + random.Next(6);
-        var values = new double[count];
+        var values = new float[count];
         for (var index = 0; index < count; index++)
-            values[index] = random.Next(5) == 0 ? Math.Round((random.NextDouble() - 0.5) * 10d, MidpointRounding.ToEven) : (random.NextDouble() - 0.5) * 8d;
+            values[index] = random.Next(5) == 0 ? MathF.Round((random.NextSingle() - 0.5f) * 10f, MidpointRounding.ToEven) : (random.NextSingle() - 0.5f) * 8f;
         return MathBlockValue.Vector(values);
     }
 
@@ -102,7 +102,7 @@ public sealed class MathBlockScaleInvarianceTests
         foreach (var index in scaled)
         {
             var source = inputs[index].AsVector().ToArray();
-            var values = new double[source.Length];
+            var values = new float[source.Length];
             for (var item = 0; item < source.Length; item++)
             {
                 if (!TryScaleOne(source[item], k, out values[item]))
@@ -115,12 +115,12 @@ public sealed class MathBlockScaleInvarianceTests
         return true;
     }
 
-    private static bool TryScaleScalar(double[] values, double exponent, out double[] result)
+    private static bool TryScaleScalar(float[] values, float exponent, out float[] result)
     {
-        result = new double[values.Length];
+        result = new float[values.Length];
         for (var index = 0; index < values.Length; index++)
         {
-            if (exponent != Math.Round(exponent, MidpointRounding.ToEven) || !TryScaleOne(values[index], (int)exponent, out result[index]))
+            if (exponent != MathF.Round(exponent, MidpointRounding.ToEven) || !TryScaleOne(values[index], (int)exponent, out result[index]))
                 return false;
         }
 
@@ -128,27 +128,27 @@ public sealed class MathBlockScaleInvarianceTests
     }
 
     // x * 2^exponent when that is exact (no overflow, no subnormal result, no lost bits).
-    private static bool TryScaleOne(double value, int exponent, out double result)
+    private static bool TryScaleOne(float value, int exponent, out float result)
     {
         result = value;
-        if (value == 0d)
+        if (value == 0f)
             return true;
-        result = Math.ScaleB(value, exponent);
-        return double.IsFinite(result) && Math.Abs(result) >= double.Epsilon * 4.5035996273704960e15 && Math.ScaleB(result, -exponent) == value;
+        result = MathF.ScaleB(value, exponent);
+        return float.IsFinite(result) && Math.Abs(result) >= float.Epsilon * 4.5035996273704960e15f && MathF.ScaleB(result, -exponent) == value;
     }
 
-    private static bool Same(double[] expected, MathBlockValue actual)
+    private static bool Same(float[] expected, MathBlockValue actual)
     {
         if (!actual.IsValid)
             return false;
         var values = ToNumbers(actual);
         return values.Length == expected.Length &&
-            values.Zip(expected).All(pair => BitConverter.DoubleToInt64Bits(pair.First) == BitConverter.DoubleToInt64Bits(pair.Second));
+            values.Zip(expected).All(pair => BitConverter.SingleToInt32Bits(pair.First) == BitConverter.SingleToInt32Bits(pair.Second));
     }
 
     private static string Describe(MathBlockValue value) =>
         value.IsValid ? string.Join(',', ToNumbers(value)) : "invalid";
 
-    private static double[] ToNumbers(MathBlockValue value) =>
+    private static float[] ToNumbers(MathBlockValue value) =>
         value.Type.Kind == MathBlockValueKind.Scalar ? [value.AsScalar()] : [.. value.AsVector()];
 }

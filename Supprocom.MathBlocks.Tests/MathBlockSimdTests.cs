@@ -3,10 +3,10 @@ namespace Supprocom.MathBlocks.Tests;
 /// <summary>Verifies that the block loops give the bits of the scalar functions.</summary>
 public sealed class MathBlockSimdTests
 {
-    private static readonly double[] Pool =
+    private static readonly float[] Pool =
     [
-        0d, -0d, double.Epsilon, -double.Epsilon, 2.2250738585072009e-308, -2.2250738585072009e-308,
-        1d, -1d, 0.5d, -0.5d, double.MaxValue, -double.MaxValue, 1e-300, -1e-300, 3d, 3d, 1.5d,
+        0f, -0f, float.Epsilon, -float.Epsilon, 1.1754943e-38f, -1.1754943e-38f,
+        1f, -1f, 0.5f, -0.5f, float.MaxValue, -float.MaxValue, 1.03e-37f, -1.03e-37f, 3f, 3f, 1.5f,
     ];
 
     /// <summary>Verifies the elementwise minimum and maximum equal the per-row operation for signed zeros and ties.</summary>
@@ -24,7 +24,7 @@ public sealed class MathBlockSimdTests
             {
                 var left = Enumerable.Range(0, length).Select(_ => Pool[random.Next(Pool.Length)]).ToArray();
                 var right = Enumerable.Range(0, length).Select(_ => Pool[random.Next(Pool.Length)]).ToArray();
-                var fill = MathBlockValue.Scalar(-77d);
+                var fill = MathBlockValue.Scalar(-77f);
                 var leftValue = shape == 1 ? MathBlockValue.Scalar(Pool[random.Next(Pool.Length)]) : MathBlockValue.Vector(left);
                 var rightValue = shape == 2 ? MathBlockValue.Scalar(Pool[random.Next(Pool.Length)]) : MathBlockValue.Vector(right);
                 if (shape == 1)
@@ -38,8 +38,8 @@ public sealed class MathBlockSimdTests
                     var expected = source.Evaluate(
                         leftValue.Type.Kind == MathBlockValueKind.Vector ? MathBlockValue.Scalar(leftValue.AsVector()[row]) : leftValue,
                         rightValue.Type.Kind == MathBlockValueKind.Vector ? MathBlockValue.Scalar(rightValue.AsVector()[row]) : rightValue);
-                    var expectedBits = expected.IsValid ? expected.AsScalar() : -77d;
-                    Assert.Equal(BitConverter.DoubleToInt64Bits(expectedBits), BitConverter.DoubleToInt64Bits(actual[row]));
+                    var expectedBits = expected.IsValid ? expected.AsScalar() : -77f;
+                    Assert.Equal(BitConverter.SingleToInt32Bits(expectedBits), BitConverter.SingleToInt32Bits(actual[row]));
                 }
             }
         }
@@ -52,10 +52,10 @@ public sealed class MathBlockSimdTests
         var random = new Random(11);
         for (var length = 0; length <= 37; length++)
         {
-            var left = new MathBlockVector(Enumerable.Range(0, length).Select(_ => Pool[random.Next(Pool.Length)] * (0.5d + 0.5d * random.NextDouble())));
-            var right = new MathBlockVector(Enumerable.Range(0, length).Select(_ => Pool[random.Next(Pool.Length)] * (0.5d + 0.5d * random.NextDouble())));
+            var left = new MathBlockVector(Enumerable.Range(0, length).Select(_ => Pool[random.Next(Pool.Length)] * (0.5f + 0.5f * random.NextSingle())));
+            var right = new MathBlockVector(Enumerable.Range(0, length).Select(_ => Pool[random.Next(Pool.Length)] * (0.5f + 0.5f * random.NextSingle())));
             var scalar = Pool[random.Next(Pool.Length)];
-            var cases = new (double[] Actual, Func<double, double, double> Function)[]
+            var cases = new (float[] Actual, Func<float, float, float> Function)[]
             {
                 (MathBlockVectorMath.Add(left, right), (a, b) => a + b),
                 (MathBlockVectorMath.Subtract(left, right), (a, b) => a - b),
@@ -78,10 +78,10 @@ public sealed class MathBlockSimdTests
     [Fact]
     public void ShortRightVectorStillThrowsIndexOutOfRange()
     {
-        var left = new MathBlockVector([1d, 2d, 3d, 4d, 5d]);
-        var right = new MathBlockVector([1d, 2d]);
+        var left = new MathBlockVector([1f, 2f, 3f, 4f, 5f]);
+        var right = new MathBlockVector([1f, 2f]);
         Assert.Throws<IndexOutOfRangeException>(() => MathBlockVectorMath.Add(left, right));
-        Assert.Equal([2d, 4d], MathBlockVectorMath.Add(new MathBlockVector([1d, 2d]), new MathBlockVector([1d, 2d, 3d])));
+        Assert.Equal([2f, 4f], MathBlockVectorMath.Add(new MathBlockVector([1f, 2f]), new MathBlockVector([1f, 2f, 3f])));
     }
 
     /// <summary>Verifies the finiteness pass of a vector result finds a nonfinite value at every position and length.</summary>
@@ -89,27 +89,27 @@ public sealed class MathBlockSimdTests
     public void VectorResultFinitenessFindsEveryNonfiniteValue()
     {
         var divide = MathBlockCatalog.Standard.Get("vector.divide", 1);
-        double[] numerators = [1d, -1d, 0d];
+        float[] numerators = [1f, -1f, 0f];
         for (var length = 1; length <= 37; length++)
         {
-            var ones = Enumerable.Repeat(1d, length).ToArray();
+            var ones = Enumerable.Repeat(1f, length).ToArray();
             Assert.True(divide.Evaluate(MathBlockValue.Vector(ones), MathBlockValue.Vector(ones)).IsValid);
             for (var position = 0; position < length; position++)
                 foreach (var numerator in numerators)
                 {
-                    var top = (double[])ones.Clone();
+                    var top = (float[])ones.Clone();
                     top[position] = numerator;
-                    var bottom = (double[])ones.Clone();
-                    bottom[position] = 0d;
+                    var bottom = (float[])ones.Clone();
+                    bottom[position] = 0f;
                     Assert.False(divide.Evaluate(MathBlockValue.Vector(top), MathBlockValue.Vector(bottom)).IsValid);
                 }
-            var huge = Enumerable.Repeat(double.MaxValue, length).ToArray();
+            var huge = Enumerable.Repeat(float.MaxValue, length).ToArray();
             var scale = MathBlockCatalog.Standard.Get("vector.scale", 1);
-            Assert.False(scale.Evaluate(MathBlockValue.Vector(huge), MathBlockValue.Scalar(2d)).IsValid);
+            Assert.False(scale.Evaluate(MathBlockValue.Vector(huge), MathBlockValue.Scalar(2f)).IsValid);
         }
     }
 
     // Equal bits, or both NaN: a NaN result is an invalid row and its payload is never read.
-    private static bool IsSameResult(double expected, double actual) =>
-        double.IsNaN(expected) ? double.IsNaN(actual) : BitConverter.DoubleToInt64Bits(expected) == BitConverter.DoubleToInt64Bits(actual);
+    private static bool IsSameResult(float expected, float actual) =>
+        float.IsNaN(expected) ? float.IsNaN(actual) : BitConverter.SingleToInt32Bits(expected) == BitConverter.SingleToInt32Bits(actual);
 }

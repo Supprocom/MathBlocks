@@ -5,34 +5,34 @@ public sealed class MathBlockPrimitiveTests
 {
     /// <summary>Verifies square root has the correctly rounded bits.</summary>
     [Theory]
-    [InlineData(0.125d, 0x3fd6a09e667f3bcdL)]
-    [InlineData(0.5d, 0x3fe6a09e667f3bcdL)]
-    [InlineData(1d, 0x3ff0000000000000L)]
-    [InlineData(2.5d, 0x3ff94c583ada5b53L)]
-    public void SquareRootHasStableOwnedBits(double input, long expectedBits) =>
-        Assert.Equal(expectedBits, BitConverter.DoubleToInt64Bits(MathBlockScalar.SquareRoot(input)));
+    [InlineData(0.125f, 0x3fd6a09e667f3bcdL)]
+    [InlineData(0.5f, 0x3fe6a09e667f3bcdL)]
+    [InlineData(1f, 0x3ff0000000000000L)]
+    [InlineData(2.5f, 0x3ff94c583ada5b53L)]
+    public void SquareRootHasStableOwnedBits(float input, long expectedBits) =>
+        Assert.Equal(expectedBits, BitConverter.SingleToInt32Bits(MathBlockScalar.SquareRoot(input)));
 
     /// <summary>Verifies round uses stable ties to even.</summary>
     [Theory]
-    [InlineData(2.5d, 2d)]
-    [InlineData(3.5d, 4d)]
-    [InlineData(-2.5d, -2d)]
-    [InlineData(-3.5d, -4d)]
-    public void RoundUsesStableTiesToEven(double input, double expected) =>
+    [InlineData(2.5f, 2f)]
+    [InlineData(3.5f, 4f)]
+    [InlineData(-2.5f, -2f)]
+    [InlineData(-3.5f, -4f)]
+    public void RoundUsesStableTiesToEven(float input, float expected) =>
         Assert.Equal(
-            BitConverter.DoubleToInt64Bits(expected),
-            BitConverter.DoubleToInt64Bits(MathBlockScalar.Round(input)));
+            BitConverter.SingleToInt32Bits(expected),
+            BitConverter.SingleToInt32Bits(MathBlockScalar.Round(input)));
 
     /// <summary>Verifies signed zero behavior is stable.</summary>
     [Fact]
     public void SignedZeroBehaviorIsStable()
     {
-        var negativeZero = BitConverter.Int64BitsToDouble(unchecked((long)0x8000000000000000ul));
+        var negativeZero = BitConverter.Int32BitsToSingle(unchecked((int)0x80000000u));
 
         Assert.Equal(unchecked((long)0x8000000000000000ul),
-            BitConverter.DoubleToInt64Bits(MathBlockScalar.Minimum(0d, negativeZero)));
-        Assert.Equal(0L, BitConverter.DoubleToInt64Bits(MathBlockScalar.Maximum(0d, negativeZero)));
+            BitConverter.SingleToInt32Bits(MathBlockScalar.Minimum(0f, negativeZero)));
+        Assert.Equal(0L, BitConverter.SingleToInt32Bits(MathBlockScalar.Maximum(0f, negativeZero)));
         Assert.Equal(unchecked((long)0x8000000000000000ul),
-            BitConverter.DoubleToInt64Bits(MathBlockScalar.Truncate(-0.75d)));
+            BitConverter.SingleToInt32Bits(MathBlockScalar.Truncate(-0.75f)));
     }
 }

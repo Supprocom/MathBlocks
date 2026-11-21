@@ -45,13 +45,13 @@ public sealed class SequenceDeviceParityTests
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var sets = ProofSets.ForSequences(Rows, includeReal: true, includeAllFalse: true);
-        var zeros = new double[Rows];
+        var zeros = new float[Rows];
         var zeroAvailable = new bool[Rows];
         var random = new Random(20261120);
         for (var row = 0; row < Rows; row++)
         {
-            zeros[row] = random.Next(0, 6) switch { 0 => 0d, 1 => -0d, 2 => -0d, 3 => 0d, 4 => -1.5d, _ => 2.5d };
-            zeroAvailable[row] = random.NextDouble() >= 0.05d;
+            zeros[row] = random.Next(0, 6) switch { 0 => 0f, 1 => -0f, 2 => -0f, 3 => 0f, 4 => -1.5f, _ => 2.5f };
+            zeroAvailable[row] = random.NextSingle() >= 0.05f;
         }
 
         ProofSet[] all = [.. sets, new ProofSet("SignedZeros", zeros, [], zeros, zeroAvailable)];
@@ -132,7 +132,7 @@ public sealed class SequenceDeviceParityTests
         var right = actual.AsVector().ToArray();
         for (var row = 0; row < left.Length && failures.Count < MaximumFailures; row++)
         {
-            if (BitConverter.DoubleToInt64Bits(left[row]) != BitConverter.DoubleToInt64Bits(right[row]))
+            if (BitConverter.SingleToInt32Bits(left[row]) != BitConverter.SingleToInt32Bits(right[row]))
                 failures.Add(string.Create(CultureInfo.InvariantCulture, $"{label} row {row}: CoreCLR {left[row]:R}, CUDA {right[row]:R}"));
         }
     }

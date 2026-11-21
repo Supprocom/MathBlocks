@@ -28,7 +28,7 @@ public sealed partial class MathBlockDomainPreludeTests
         MaximumMatrixSize = 5000,
         MaximumIterationCount = 20_000,
         IncompleteBetaMaximumIterations = 1024,
-        IncompleteBetaTolerance = 1e-10,
+        IncompleteBetaTolerance = 1e-10f,
         IncompleteBetaNonConvergence = MathBlockNonConvergencePolicy.Invalid,
         JacobiRotationMultiplier = 512,
         JacobiNonConvergence = MathBlockNonConvergencePolicy.Invalid,

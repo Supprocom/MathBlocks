@@ -57,7 +57,7 @@ internal static class VectorBlockReference
             return string.Create(CultureInfo.InvariantCulture, $"{expectedRows.Length} rows against {actualRows.Length}");
         for (var row = 0; row < expectedRows.Length; row++)
         {
-            if (BitConverter.DoubleToInt64Bits(expectedRows[row]) != BitConverter.DoubleToInt64Bits(actualRows[row]))
+            if (BitConverter.SingleToInt32Bits(expectedRows[row]) != BitConverter.SingleToInt32Bits(actualRows[row]))
                 return string.Create(CultureInfo.InvariantCulture, $"row {row}: expected {expectedRows[row]:R}, actual {actualRows[row]:R}");
         }
 
@@ -87,7 +87,7 @@ internal static class VectorBlockReference
     // The span overload writes rows into a caller-owned span; an elementwise form also fills the validity span, which is the validity sibling.
     private static MathBlockValue SpanResult(MathBlockCudaOperationContract contract, string identity, MathBlockValue[] inputs, int rows, MathBlockDomainOptions domain)
     {
-        var output = new double[rows];
+        var output = new float[rows];
         if (identity.StartsWith("elementwise.", StringComparison.Ordinal))
         {
             var rowValid = new bool[rows];
@@ -102,7 +102,7 @@ internal static class VectorBlockReference
             return MathBlockValue.Vector(output, MathBlockUnit.Dimensionless);
         var flags = new bool[rows];
         for (var row = 0; row < rows; row++)
-            flags[row] = output[row] != 0d;
+            flags[row] = output[row] != 0f;
         return MathBlockValue.BooleanVector(flags);
     }
 }

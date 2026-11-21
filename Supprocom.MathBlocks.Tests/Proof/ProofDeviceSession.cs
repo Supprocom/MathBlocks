@@ -44,9 +44,9 @@ internal sealed class ProofDeviceSession : IDisposable
     }
 
     /// <summary>Copies the values to the device buffer.</summary>
-    internal static void Upload(ulong device, double[] values)
+    internal static void Upload(ulong device, float[] values)
     {
-        var bytes = (long)values.Length * sizeof(double);
+        var bytes = (long)values.Length * sizeof(float);
         var staging = Marshal.AllocHGlobal(new IntPtr(bytes));
         try
         {
@@ -107,8 +107,8 @@ internal sealed class ProofDeviceSession : IDisposable
                 case int integer:
                     Marshal.WriteInt32(box, integer);
                     break;
-                case double number:
-                    Marshal.WriteInt64(box, BitConverter.DoubleToInt64Bits(number));
+                case float number:
+                    Marshal.WriteInt64(box, BitConverter.SingleToInt32Bits(number));
                     break;
                 case ulong pointer:
                     Marshal.WriteInt64(box, unchecked((long)pointer));

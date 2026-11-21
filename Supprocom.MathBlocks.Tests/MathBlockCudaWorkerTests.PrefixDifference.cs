@@ -49,15 +49,15 @@ public sealed partial class MathBlockCudaWorkerTests
     private static MathBlockValue[] SeededInputs(int length, int seed)
     {
         var random = new Random(7_100 + length * 31 + seed);
-        var values = new double[length];
+        var values = new float[length];
         var available = new bool[length];
-        var counts = new double[length];
-        var run = 0d;
+        var counts = new float[length];
+        var run = 0f;
         for (var row = 0; row < length; row++)
         {
-            values[row] = (random.NextDouble() - 0.5d) * Math.Pow(10d, random.Next(-3, 6));
+            values[row] = (random.NextSingle() - 0.5f) * MathF.Pow(10f, random.Next(-3, 6));
             available[row] = random.Next(6) != 0;
-            run = row == 0 || random.Next(20) == 0 ? 0d : run + 1d;
+            run = row == 0 || random.Next(20) == 0 ? 0f : run + 1f;
             counts[row] = run;
         }
 

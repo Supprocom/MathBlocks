@@ -21,7 +21,7 @@ internal static class VectorBlockCalls
     internal const string Lifted = "lifted";
 
     /// <summary>The fill of an elementwise twin and of a window form (GenericOperationBinding.Fill, the grammar's zero fill slot).</summary>
-    internal const double Fill = 0d;
+    internal const float Fill = 0f;
 
     /// <summary>The device row counts of the timing and of the long parity runs.</summary>
     internal static readonly int[] TimingRows = [262_144, 1_048_576];
@@ -34,27 +34,27 @@ internal static class VectorBlockCalls
     internal static readonly int[] Windows = [2, 3, 21, 89, 96, 256];
 
     // The tuples of the two vector.scale grammar entries (ResearchGrammarCatalog): 0.5, 2 and 10 (positive), -1 and -2 (negative).
-    internal static readonly double[] Factors = [0.5d, 2d, 10d, -1d, -2d];
+    internal static readonly float[] Factors = [0.5f, 2f, 10f, -1f, -2f];
 
     /// <summary>Builds every call of the proof; the lifted routes are left out for the 0.6.1 baseline, which has no elementwise twins.</summary>
     internal static List<VectorBlockCall> All(bool includeLifted)
     {
         var calls = new List<VectorBlockCall>();
-        calls.Add(new VectorBlockCall(Subtract, Whole, "-", 1d, 0d, [Subtract], 1));
+        calls.Add(new VectorBlockCall(Subtract, Whole, "-", 1f, 0f, [Subtract], 1));
         if (includeLifted)
-            calls.Add(new VectorBlockCall(Subtract, Lifted, "-", 1d, 0d, ["elementwise.scalar.subtract@1", "elementwise-valid.scalar.subtract@1"], 2));
+            calls.Add(new VectorBlockCall(Subtract, Lifted, "-", 1f, 0f, ["elementwise.scalar.subtract@1", "elementwise-valid.scalar.subtract@1"], 2));
         for (var index = 0; index < Factors.Length; index++)
         {
             var label = string.Create(CultureInfo.InvariantCulture, $"k={Factors[index]:R}");
-            calls.Add(new VectorBlockCall(Scale, Whole, label, 1d, Factors[index], [Scale], 1));
+            calls.Add(new VectorBlockCall(Scale, Whole, label, 1f, Factors[index], [Scale], 1));
             if (includeLifted)
-                calls.Add(new VectorBlockCall(Scale, Lifted, label, 1d, Factors[index], ["elementwise.scalar.multiply@1", "elementwise-valid.scalar.multiply@1"], 2));
+                calls.Add(new VectorBlockCall(Scale, Lifted, label, 1f, Factors[index], ["elementwise.scalar.multiply@1", "elementwise-valid.scalar.multiply@1"], 2));
         }
 
         for (var index = 0; index < Windows.Length; index++)
         {
             var label = string.Create(CultureInfo.InvariantCulture, $"w={Windows[index]}");
-            calls.Add(new VectorBlockCall(Standardize, Whole, label, Windows[index], 0d, [Standardize, "window-valid.vector.standardize@1"], 1));
+            calls.Add(new VectorBlockCall(Standardize, Whole, label, Windows[index], 0f, [Standardize, "window-valid.vector.standardize@1"], 1));
         }
 
         return calls;
@@ -73,16 +73,16 @@ internal static class VectorBlockCalls
     /// Replaces every value that is not finite by zero, which is what the host does before the call (GenericCandidateBlockEvaluator.Value reads such a row as 0 and marks the row invalid, so
     /// the node's row is NaN). A MathBlocks vector never holds a value that is not finite.
     /// </summary>
-    internal static double[] Clean(double[] values)
+    internal static float[] Clean(float[] values)
     {
-        var cleaned = new double[values.Length];
+        var cleaned = new float[values.Length];
         for (var row = 0; row < values.Length; row++)
-            cleaned[row] = double.IsFinite(values[row]) ? values[row] : 0d;
+            cleaned[row] = float.IsFinite(values[row]) ? values[row] : 0f;
         return cleaned;
     }
 
     /// <summary>Builds the inputs of one dispatch of a call from the cleaned operand rows.</summary>
-    internal static MathBlockValue[] Inputs(VectorBlockCall call, int step, double[] first, double[] second)
+    internal static MathBlockValue[] Inputs(VectorBlockCall call, int step, float[] first, float[] second)
     {
         var inputs = new List<MathBlockValue> { MathBlockValue.Vector(first, MathBlockUnit.Dimensionless) };
         var withFill = step == 0 && (call.IsLifted || call.IsWindow);

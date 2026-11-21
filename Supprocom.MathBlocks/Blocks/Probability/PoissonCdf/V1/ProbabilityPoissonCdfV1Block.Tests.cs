@@ -50,7 +50,7 @@ public sealed class ProbabilityPoissonCdfV1BlockTests
         for (var index = 0; index < rates.Length; index++)
         {
             var rate = rates[index];
-            var floor = (int)Math.Floor(rate);
+            var floor = (int)MathF.Floor(rate);
             foreach (var count in new[] { 0, 1, Math.Max(0, floor - 1), floor, floor + 1, (int)(rate * 1.5f) + 5, (int)Math.Min(int.MaxValue, 2f * floor + 10), (int)Math.Min(int.MaxValue, 10f * floor + 1000) })
             {
                 compared++;

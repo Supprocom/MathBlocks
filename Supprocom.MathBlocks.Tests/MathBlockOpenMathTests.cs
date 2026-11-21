@@ -16,7 +16,7 @@ public sealed class MathBlockOpenMathTests
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
         var width = builder.Input("width", MathBlockType.Scalar(MathBlockUnit.Basis0));
         var height = builder.Input("height", MathBlockType.Scalar(MathBlockUnit.Basis0));
-        var offset = builder.Constant(MathBlockValue.Scalar(2d, MathBlockUnit.Basis0));
+        var offset = builder.Constant(MathBlockValue.Scalar(2f, MathBlockUnit.Basis0));
         var adjustedWidth = builder.Apply("scalar.add", inputs: [width, offset]);
         var area = builder.Apply("scalar.multiply", inputs: [adjustedWidth, height]);
         var program = builder
@@ -28,8 +28,8 @@ public sealed class MathBlockOpenMathTests
         var imported = MathBlockOpenMath.Import(source);
         var output = imported.Program.Evaluate(new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["width"] = MathBlockValue.Scalar(6d, MathBlockUnit.Basis0),
-            ["height"] = MathBlockValue.Scalar(4d, MathBlockUnit.Basis0)
+            ["width"] = MathBlockValue.Scalar(6f, MathBlockUnit.Basis0),
+            ["height"] = MathBlockValue.Scalar(4f, MathBlockUnit.Basis0)
         });
 
         Assert.Equal("2.0", MathBlockOpenMath.StandardVersion);
@@ -43,8 +43,8 @@ public sealed class MathBlockOpenMathTests
         Assert.Equal(
             ["scalar.add@1", "scalar.multiply@1"],
             imported.Operations.Select(operation => operation.Identity), StringComparer.Ordinal);
-        Assert.Equal(8d, output["adjusted width"].AsScalar());
-        Assert.Equal(32d, output["area"].AsScalar());
+        Assert.Equal(8f, output["adjusted width"].AsScalar());
+        Assert.Equal(32f, output["area"].AsScalar());
     }
 
     /// <summary>Verifies export and import cover every standard operation async.</summary>
@@ -88,30 +88,30 @@ public sealed class MathBlockOpenMathTests
             new MathRational(-7, 11));
         MathBlockValue[] values =
         [
-            MathBlockValue.Scalar(-0d, unit),
+            MathBlockValue.Scalar(-0f, unit),
             MathBlockValue.Boolean(true),
-            MathBlockValue.Complex(new MathBlockComplexValue(-0d, double.Epsilon), unit),
-            MathBlockValue.Vector([1.5d, -0d, double.MaxValue], unit),
-            MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1d, -2d, 3d, -0d]), unit),
+            MathBlockValue.Complex(new MathBlockComplexValue(-0f, float.Epsilon), unit),
+            MathBlockValue.Vector([1.5f, -0f, float.MaxValue], unit),
+            MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1f, -2f, 3f, -0f]), unit),
             MathBlockValue.ComplexVector(
-                [new MathBlockComplexValue(1d, -2d), new MathBlockComplexValue(-0d, 4d)],
+                [new MathBlockComplexValue(1f, -2f), new MathBlockComplexValue(-0f, 4f)],
                 unit),
             MathBlockValue.ComplexMatrix(
                 new MathBlockComplexMatrix(
                     1,
                     2,
-                    [new MathBlockComplexValue(1d, 2d), new MathBlockComplexValue(-3d, -0d)]),
+                    [new MathBlockComplexValue(1f, 2f), new MathBlockComplexValue(-3f, -0f)]),
                 unit),
             MathBlockValue.PointSet(
-                new MathBlockPointSet([new MathBlockPoint(-0d, 2d), new MathBlockPoint(3d, -4d)]),
+                new MathBlockPointSet([new MathBlockPoint(-0f, 2f), new MathBlockPoint(3f, -4f)]),
                 unit),
             MathBlockValue.Graph(
                 new MathBlockGraph(
                     3,
-                    [new MathBlockGraphEdge(0, 1, -0d), new MathBlockGraphEdge(2, 0, 3.5d)]),
+                    [new MathBlockGraphEdge(0, 1, -0f), new MathBlockGraphEdge(2, 0, 3.5f)]),
                 unit),
             MathBlockValue.RunSet(
-                new MathBlockRunSet([new MathBlockRun(0, 2, -0d), new MathBlockRun(4, 3, 7.25d)]),
+                new MathBlockRunSet([new MathBlockRun(0, 2, -0f), new MathBlockRun(4, 3, 7.25f)]),
                 unit),
             MathBlockValue.BooleanVector([true, false, true])
         ];
@@ -148,9 +148,9 @@ public sealed class MathBlockOpenMathTests
             inputs => inputs[0],
             [new MathBlockRegressionCase(
                 "identity",
-                [MathBlockValue.Scalar(1d)],
-                MathBlockValue.Scalar(1d))],
-            new MathBlockPerformanceCase([MathBlockValue.Scalar(1d)]));
+                [MathBlockValue.Scalar(1f)],
+                MathBlockValue.Scalar(1f))],
+            new MathBlockPerformanceCase([MathBlockValue.Scalar(1f)]));
         var registry = new MathBlockRegistry([operation]);
         var builder = new MathBlockProgramBuilder(registry);
         var input = builder.Input("input", MathBlockType.Scalar());
@@ -181,9 +181,9 @@ public sealed class MathBlockOpenMathTests
             inputs => inputs[0],
             [new MathBlockRegressionCase(
                 "left",
-                [MathBlockValue.Scalar(1d), MathBlockValue.Scalar(2d)],
-                MathBlockValue.Scalar(1d))],
-            new MathBlockPerformanceCase([MathBlockValue.Scalar(1d), MathBlockValue.Scalar(2d)]));
+                [MathBlockValue.Scalar(1f), MathBlockValue.Scalar(2f)],
+                MathBlockValue.Scalar(1f))],
+            new MathBlockPerformanceCase([MathBlockValue.Scalar(1f), MathBlockValue.Scalar(2f)]));
         var registry = new MathBlockRegistry([operation]);
         var builder = new MathBlockProgramBuilder(registry);
         var left = builder.Input("left", MathBlockType.Scalar());
@@ -225,7 +225,7 @@ public sealed class MathBlockOpenMathTests
     public void ImportRejectsDTDsCommentsProcessingInstructionsAndNoncanonicalFloats()
     {
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);
-        var value = builder.Constant(MathBlockValue.Scalar(1.5d));
+        var value = builder.Constant(MathBlockValue.Scalar(1.5f));
         var source = MathBlockOpenMath.Export(builder.Output("value", value).Build());
         var dtd = string.Concat(
             "<!DOCTYPE OMOBJ [<!ENTITY external SYSTEM \"file:///not-read\">]>",

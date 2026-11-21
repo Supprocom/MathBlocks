@@ -102,11 +102,11 @@ public sealed class RowFunctionParityTests
             Console.WriteLine($"Real market class skipped: {ProofRealData.SkipReason}");
     }
 
-    private static bool IsFinite(double[] values)
+    private static bool IsFinite(float[] values)
     {
         for (var index = 0; index < values.Length; index++)
         {
-            if (!double.IsFinite(values[index]))
+            if (!float.IsFinite(values[index]))
                 return false;
         }
 
@@ -115,11 +115,11 @@ public sealed class RowFunctionParityTests
 
     private static void CompareRows(RowFunctionOp function, ProofSet set, ParityResult result, List<string> failures)
     {
-        var fillBits = BitConverter.DoubleToInt64Bits(RowFunctionHarness.Fill);
+        var fillBits = BitConverter.SingleToInt32Bits(RowFunctionHarness.Fill);
         for (var row = 0; row < set.First.Length && failures.Count < MaximumFailures; row++)
         {
             var valid = ProofScalarReference.Apply(function, set.First[row], set.Second[row], out var value);
-            var expectedBits = valid ? BitConverter.DoubleToInt64Bits(value) : fillBits;
+            var expectedBits = valid ? BitConverter.SingleToInt32Bits(value) : fillBits;
             var expectedFlag = valid ? 1 : 0;
             if (result.RowValid[row] != expectedFlag || result.RowBits[row] != expectedBits ||
                 result.NarrowValid[row] != expectedFlag || result.NarrowBits[row] != expectedBits ||
@@ -132,13 +132,13 @@ public sealed class RowFunctionParityTests
         }
     }
 
-    private static void CompareSums(string setName, int count, double[] values, (long[] Bits, int[] Valid) result, List<string> failures)
+    private static void CompareSums(string setName, int count, float[] values, (long[] Bits, int[] Valid) result, List<string> failures)
     {
-        var fillBits = BitConverter.DoubleToInt64Bits(RowFunctionHarness.Fill);
+        var fillBits = BitConverter.SingleToInt32Bits(RowFunctionHarness.Fill);
         for (var row = 0; row < result.Bits.Length && failures.Count < MaximumFailures; row++)
         {
             var valid = ProofScalarReference.Sum(values, row * count, count, out var sum);
-            var expectedBits = valid ? BitConverter.DoubleToInt64Bits(sum) : fillBits;
+            var expectedBits = valid ? BitConverter.SingleToInt32Bits(sum) : fillBits;
             if (result.Valid[row] != (valid ? 1 : 0) || result.Bits[row] != expectedBits)
             {
                 failures.Add(string.Create(
@@ -148,11 +148,11 @@ public sealed class RowFunctionParityTests
         }
     }
 
-    private static void CompareWorker(string label, ParityResult device, double[] formValues, bool[] validity, List<string> failures)
+    private static void CompareWorker(string label, ParityResult device, float[] formValues, bool[] validity, List<string> failures)
     {
         for (var row = 0; row < formValues.Length && failures.Count < MaximumFailures; row++)
         {
-            if (BitConverter.DoubleToInt64Bits(formValues[row]) != device.RowBits[row] || validity[row] != (device.RowValid[row] != 0))
+            if (BitConverter.SingleToInt32Bits(formValues[row]) != device.RowBits[row] || validity[row] != (device.RowValid[row] != 0))
             {
                 failures.Add(string.Create(
                     CultureInfo.InvariantCulture,

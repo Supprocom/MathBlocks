@@ -81,7 +81,7 @@ public sealed class MathBlockElementwiseCudaPlanTests
             {
                 var arguments = CreateArguments(source, count, mask, 17);
                 var formPlan = MathBlockCudaDeviceModule.GetOperation($"elementwise.{source}@1")
-                    .PlanCUDA([.. arguments, MathBlockValue.Scalar(-1d)]);
+                    .PlanCUDA([.. arguments, MathBlockValue.Scalar(-1f)]);
                 var siblingPlan = MathBlockCudaDeviceModule.GetOperation($"elementwise-valid.{source}@1")
                     .PlanCUDA(arguments);
 
@@ -104,11 +104,11 @@ public sealed class MathBlockElementwiseCudaPlanTests
     [Fact]
     public void ElementwiseCUDAPlanFollowsTheCoreCLRRowAuthorityForUnequalLengths()
     {
-        MathBlockValue[] unequal = [MathBlockValue.Vector([1d, 2d, 3d]), MathBlockValue.Vector([1d, 2d])];
-        MathBlockValue[] emptyFirst = [MathBlockValue.Vector([]), MathBlockValue.Vector([1d, 2d])];
+        MathBlockValue[] unequal = [MathBlockValue.Vector([1f, 2f, 3f]), MathBlockValue.Vector([1f, 2f])];
+        MathBlockValue[] emptyFirst = [MathBlockValue.Vector([]), MathBlockValue.Vector([1f, 2f])];
         foreach (var arguments in new[] { unequal, emptyFirst })
         {
-            MathBlockValue[] inputs = [.. arguments, MathBlockValue.Scalar(-1d)];
+            MathBlockValue[] inputs = [.. arguments, MathBlockValue.Scalar(-1f)];
             var plan = MathBlockCudaDeviceModule.GetOperation("elementwise.scalar.arc-tangent-2@1").PlanCUDA(inputs);
             var coreclr = Form("scalar.arc-tangent-2").Evaluate(inputs);
 

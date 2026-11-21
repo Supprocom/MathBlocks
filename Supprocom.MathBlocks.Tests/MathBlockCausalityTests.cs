@@ -191,11 +191,11 @@ public sealed class MathBlockCausalityTests
         var builder = new MathBlockProgramBuilder(registry);
         var values = builder.Input("values", MathBlockType.Vector());
         var scale = builder.Input("scale", MathBlockType.Scalar());
-        var doubled = builder.Apply("scalar.multiply", 1, scale, builder.Constant(MathBlockValue.Scalar(2d)));
+        var doubled = builder.Apply("scalar.multiply", 1, scale, builder.Constant(MathBlockValue.Scalar(2f)));
         var scaled = builder.Apply("vector.scale", 1, values, doubled);
         Assert.Equal(MathBlockCausality.Pointwise, builder.Output("scaled", scaled).Build().Causality);
 
-        var width = builder.Constant(MathBlockValue.Scalar(2d));
+        var width = builder.Constant(MathBlockValue.Scalar(2f));
         var rolling = builder.Apply("sequence.rolling-maximum", 1, scaled, width);
         Assert.Equal(MathBlockCausality.Trailing, builder.Output("rolling", rolling).Build().Causality);
 
@@ -210,7 +210,7 @@ public sealed class MathBlockCausalityTests
 
         var scalarBuilder = new MathBlockProgramBuilder(registry);
         var left = scalarBuilder.Input("left", MathBlockType.Scalar());
-        var sum = scalarBuilder.Apply("scalar.add", 1, left, scalarBuilder.Constant(MathBlockValue.Scalar(1d)));
+        var sum = scalarBuilder.Apply("scalar.add", 1, left, scalarBuilder.Constant(MathBlockValue.Scalar(1f)));
         Assert.Equal(MathBlockCausality.NotSeries, scalarBuilder.Output("sum", sum).Build().Causality);
 
         var passThrough = new MathBlockProgramBuilder(registry);
@@ -261,9 +261,9 @@ public sealed class MathBlockCausalityTests
         Assert.Throws<ArgumentOutOfRangeException>(() => trailing.WarmUpRows(0));
 
         var rolling = MathBlockCatalog.Standard.Get("sequence.rolling-maximum");
-        var output = rolling.Evaluate(MathBlockValue.Vector([5d, 1d, 4d, 2d, 3d]), MathBlockValue.Scalar(3d));
+        var output = rolling.Evaluate(MathBlockValue.Vector([5f, 1f, 4f, 2f, 3f]), MathBlockValue.Scalar(3f));
         Assert.Equal(5 - rolling.Causality.WarmUpRows(3), output.AsVector().Count);
-        Assert.Equal(new[] { 5d, 4d, 4d }, output.AsVector().ToArray());
+        Assert.Equal(new[] { 5f, 4f, 4f }, output.AsVector().ToArray());
     }
 
     internal static List<string> CheckLabels(MathBlockRegistry registry, bool causal, out int checkedCount)

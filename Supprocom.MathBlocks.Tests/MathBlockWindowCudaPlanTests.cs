@@ -6,7 +6,7 @@ namespace Supprocom.MathBlocks.Tests;
 /// <summary>Verifies the CUDA contracts and plans of the window forms without a CUDA device.</summary>
 public sealed class MathBlockWindowCudaPlanTests
 {
-    private const double Fill = -1d;
+    private const float Fill = -1f;
 
     /// <summary>
     /// Verifies each window form and sibling has a family 11 contract with opcode 2 * source + sibling, the six
@@ -110,7 +110,7 @@ public sealed class MathBlockWindowCudaPlanTests
         int width,
         int expectedScratchBytes)
     {
-        var x = MathBlockValue.Vector(Enumerable.Range(0, count).Select(row => (row % 7) * 0.5d).ToArray());
+        var x = MathBlockValue.Vector(Enumerable.Range(0, count).Select(row => (row % 7) * 0.5f).ToArray());
         var form = MathBlockWindowM2TestSupport.AccurateForm(name);
         var unit = form.ResolveOutputType([x.Type, MathBlockType.Scalar(), MathBlockType.Scalar()]).Unit;
         MathBlockValue[] formInputs = [x, MathBlockValue.Scalar(width), MathBlockValue.Scalar(Fill, unit)];

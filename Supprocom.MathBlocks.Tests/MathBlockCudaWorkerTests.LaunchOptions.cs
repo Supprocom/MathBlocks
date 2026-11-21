@@ -100,13 +100,13 @@ public sealed partial class MathBlockCudaWorkerTests
             var x = MathBlockValue.Vector(CreateRadixSeries(count));
             foreach (var width in new[] { 2, 3, 17, 100 }.Where(width => width <= count))
             {
-                foreach (var (identity, extra) in new (string, double[])[]
+                foreach (var (identity, extra) in new (string, float[])[]
                          {
                              ("sequence.rolling-median", []),
-                             ("sequence.rolling-quantile", [0.25d]),
-                             ("sequence.rolling-quantile", [0.9d]),
-                             ("sequence.rolling-quantile", [0d]),
-                             ("sequence.rolling-quantile", [1d]),
+                             ("sequence.rolling-quantile", [0.25f]),
+                             ("sequence.rolling-quantile", [0.9f]),
+                             ("sequence.rolling-quantile", [0f]),
+                             ("sequence.rolling-quantile", [1f]),
                          })
                 {
                     MathBlockValue[] inputs = [x, MathBlockValue.Scalar(width), .. extra.Select(value => MathBlockValue.Scalar(value))];
@@ -136,8 +136,8 @@ public sealed partial class MathBlockCudaWorkerTests
         foreach (var count in new[] { 1, 2, 3, 4, 31, 129, 200 })
         {
             var random = new Random(5_000 + count);
-            var x = MathBlockValue.Vector(Enumerable.Range(0, count).Select(_ => Math.Round(random.NextDouble() * 20d - 10d, 2, MidpointRounding.ToEven)).ToArray());
-            var y = MathBlockValue.Vector(Enumerable.Range(0, count).Select(_ => random.NextDouble() * 4d).ToArray());
+            var x = MathBlockValue.Vector(Enumerable.Range(0, count).Select(_ => MathF.Round(random.NextSingle() * 20f - 10f, 2, MidpointRounding.ToEven)).ToArray());
+            var y = MathBlockValue.Vector(Enumerable.Range(0, count).Select(_ => random.NextSingle() * 4f).ToArray());
             MathBlockValue[] inputs = [x, y];
             var coreclr = operation.Evaluate(inputs);
             var cuda = ExecuteWithLaunchOptions(MathBlockCatalog.Standard, operation, inputs, inputs, optionSet);
@@ -164,8 +164,8 @@ public sealed partial class MathBlockCudaWorkerTests
         var program = builder.Output("result", builder.Apply("elementwise.scalar.negate", 1, [input, fill])).Build();
         var prototype = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
-            ["input-0"] = MathBlockValue.Vector(Enumerable.Range(0, 1_000).Select(index => index * 0.5d).ToArray()),
-            ["input-1"] = MathBlockValue.Scalar(-1d),
+            ["input-0"] = MathBlockValue.Vector(Enumerable.Range(0, 1_000).Select(index => index * 0.5f).ToArray()),
+            ["input-1"] = MathBlockValue.Scalar(-1f),
         };
         var options = new MathBlocksCudaOptions { BlockSize = blockSize, MaximumGridX = maximumGridX };
 
@@ -177,20 +177,20 @@ public sealed partial class MathBlockCudaWorkerTests
     }
 
     // Keys with duplicates, both zeros and a wide range: ties and signed zeros exercise the radix sort's stability.
-    private static double[] CreateRadixSeries(int count)
+    private static float[] CreateRadixSeries(int count)
     {
         var random = new Random(900 + count);
-        var values = new double[count];
+        var values = new float[count];
         for (var index = 0; index < count; index++)
         {
             values[index] = random.Next(6) switch
             {
-                0 => -0d,
-                1 => 0d,
+                0 => -0f,
+                1 => 0f,
                 2 => random.Next(-3, 4),
-                3 => Math.Round(random.NextDouble() * 10d, 1, MidpointRounding.ToEven),
-                4 => -1e-300 * random.Next(1, 5),
-                _ => random.NextDouble() * 1e6 - 5e5,
+                3 => MathF.Round(random.NextSingle() * 10f, 1, MidpointRounding.ToEven),
+                4 => -1.03e-37f * random.Next(1, 5),
+                _ => random.NextSingle() * 1e6f - 5e5f,
             };
         }
         return values;

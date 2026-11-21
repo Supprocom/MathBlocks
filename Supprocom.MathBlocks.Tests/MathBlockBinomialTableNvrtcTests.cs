@@ -70,7 +70,7 @@ public sealed partial class MathBlockBinomialTableNvrtcTests
         Assert.Single(declarations);
         var size = int.Parse(declarations[0].Groups["size"].Value, System.Globalization.CultureInfo.InvariantCulture);
         Assert.True(
-            size == MathBlockCudaDeviceModule.BinomialTableEntryCount * sizeof(double) || size == MathBlockCudaDeviceModule.BinomialTableEntryCount,
+            size == MathBlockCudaDeviceModule.BinomialTableEntryCount * sizeof(float) || size == MathBlockCudaDeviceModule.BinomialTableEntryCount,
             $"The table is declared with {size} elements.");
     }
 }

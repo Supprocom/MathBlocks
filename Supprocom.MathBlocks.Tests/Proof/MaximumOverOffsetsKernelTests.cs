@@ -13,16 +13,16 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 public sealed class MaximumOverOffsetsKernelTests
 {
     private const int MaximumFailures = 20;
-    private const double Fill = 123.5d;
-    private const double StaleValue = -9876.5d;
+    private const float Fill = 123.5f;
+    private const float StaleValue = -9876.5f;
 
     private static readonly ValuesKernel Values = Bind<ValuesKernel>("MaximumOverOffsetsValues");
     private static readonly ValidityKernel Validity = Bind<ValidityKernel>("MaximumOverOffsetsValidity");
 
     // Quiet and signaling NaNs of both signs with different payloads.
-    private static readonly double[] Nans =
+    private static readonly float[] Nans =
     [
-        Bits(0x7FF8000000000000UL), Bits(0x7FF8000000000001UL), Bits(0x7FF800000000ABCDUL), Bits(0xFFF8000000000000UL), Bits(0xFFF8000000000042UL), Bits(0x7FF0000000000001UL), Bits(0x7FF4000000000000UL)
+        Bits(0x7FC00000u), Bits(0x7FC00001u), Bits(0x7FC0ABCDu), Bits(0xFFC00000u), Bits(0xFFC00042u), Bits(0x7F800001u), Bits(0x7FA00000u)
     ];
 
     private static readonly (int Start, int End)[] WideRanges =
@@ -30,17 +30,17 @@ public sealed class MaximumOverOffsetsKernelTests
         (0, 1000), (-1000, 1000), (-3, 100_000), (5, 2_000_000_000), (-2_000_000_000, 2_000_000_000), (-7, -2), (3, 9), (-63, 0), (0, 255), (-2_000_000_000, 0), (-5, 2_000_000_000)
     ];
 
-    private delegate void ValuesKernel(ReadOnlySpan<double> x, ReadOnlySpan<bool> xValid, ReadOnlySpan<double> counts, int start, int end, double fill, Span<double> values, Span<bool> rowValid);
+    private delegate void ValuesKernel(ReadOnlySpan<float> x, ReadOnlySpan<bool> xValid, ReadOnlySpan<float> counts, int start, int end, float fill, Span<float> values, Span<bool> rowValid);
 
-    private delegate void ValidityKernel(ReadOnlySpan<double> x, ReadOnlySpan<bool> xValid, ReadOnlySpan<double> counts, int start, int end, Span<bool> rowValid);
+    private delegate void ValidityKernel(ReadOnlySpan<float> x, ReadOnlySpan<bool> xValid, ReadOnlySpan<float> counts, int start, int end, Span<bool> rowValid);
 
     /// <summary>Verifies that a vector refuses a NaN and both infinities, so the public operation never sees one.</summary>
     [Fact]
     public void AVectorRefusesANaNAndAnInfinity()
     {
-        Assert.Throws<ArgumentException>(() => MathBlockValue.Vector(new double[] { 0d, double.NaN }));
-        Assert.Throws<ArgumentException>(() => MathBlockValue.Vector(new double[] { 0d, double.PositiveInfinity }));
-        Assert.Throws<ArgumentException>(() => MathBlockValue.Vector(new double[] { double.NegativeInfinity, 0d }));
+        Assert.Throws<ArgumentException>(() => MathBlockValue.Vector(new float[] { 0f, float.NaN }));
+        Assert.Throws<ArgumentException>(() => MathBlockValue.Vector(new float[] { 0f, float.PositiveInfinity }));
+        Assert.Throws<ArgumentException>(() => MathBlockValue.Vector(new float[] { float.NegativeInfinity, 0f }));
     }
 
     /// <summary>Verifies a single NaN with every payload at every position of every window, for spans of widths 1 to 64 that start before, at and after the row.</summary>
@@ -54,9 +54,9 @@ public sealed class MaximumOverOffsetsKernelTests
         {
             var width = widths[widthIndex];
             var length = 3 * width + 4;
-            var background = new double[length];
+            var background = new float[length];
             for (var row = 0; row < length; row++)
-                background[row] = random.Next(0, 9) switch { 0 => double.PositiveInfinity, 1 => double.NegativeInfinity, 2 => 0d, 3 => -0d, _ => Tenth((random.NextDouble() - 0.5d) * 8d) };
+                background[row] = random.Next(0, 9) switch { 0 => float.PositiveInfinity, 1 => float.NegativeInfinity, 2 => 0f, 3 => -0f, _ => Tenth((random.NextSingle() - 0.5f) * 8f) };
             var available = AllTrue(length);
             var counts = Contiguous(length);
             (int Start, int End)[] spans = [(0, width - 1), (-(width - 1), 0), (-(width / 2), width - 1 - (width / 2)), (1, width), (-width, -1)];
@@ -64,7 +64,7 @@ public sealed class MaximumOverOffsetsKernelTests
             {
                 for (var payload = 0; payload < Nans.Length; payload++)
                 {
-                    var series = (double[])background.Clone();
+                    var series = (float[])background.Clone();
                     series[position] = Nans[payload];
                     for (var index = 0; index < spans.Length; index++)
                         Check(Label(string.Create(CultureInfo.InvariantCulture, $"one NaN {payload} at {position}, width {width}"), spans[index]), series, available, counts, spans[index].Start, spans[index].End, failures);
@@ -96,9 +96,9 @@ public sealed class MaximumOverOffsetsKernelTests
                 {
                     for (var pair = 0; pair < payloads.Length; pair++)
                     {
-                        var series = new double[length];
+                        var series = new float[length];
                         for (var row = 0; row < length; row++)
-                            series[row] = Tenth(random.NextDouble() * 4d);
+                            series[row] = Tenth(random.NextSingle() * 4f);
                         series[first] = Nans[payloads[pair].First];
                         series[second] = Nans[payloads[pair].Second];
                         for (var index = 0; index < spans.Length; index++)
@@ -110,9 +110,9 @@ public sealed class MaximumOverOffsetsKernelTests
 
         for (var round = 0; round < 4000 && failures.Count < MaximumFailures; round++)
         {
-            var series = new double[length];
+            var series = new float[length];
             for (var row = 0; row < length; row++)
-                series[row] = random.Next(0, 5) == 0 ? Nans[random.Next(Nans.Length)] : Tenth(random.NextDouble() * 4d);
+                series[row] = random.Next(0, 5) == 0 ? Nans[random.Next(Nans.Length)] : Tenth(random.NextSingle() * 4f);
             var start = random.Next(-12, 12);
             var end = start + random.Next(0, 14);
             Check(string.Create(CultureInfo.InvariantCulture, $"NaN triples round {round} [{start},{end}]"), series, available, counts, start, end, failures);
@@ -128,12 +128,12 @@ public sealed class MaximumOverOffsetsKernelTests
         var failures = new List<string>();
         for (var length = 0; length <= 40 && failures.Count < MaximumFailures; length++)
         {
-            var nans = new double[length];
-            var finite = new double[length];
+            var nans = new float[length];
+            var finite = new float[length];
             for (var row = 0; row < length; row++)
             {
-                nans[row] = Bits(0x7FF8000000000000UL | (ulong)(uint)(row + 1));
-                finite[row] = (row * 7 % 11) - 5d;
+                nans[row] = Bits(0x7FC00000u | (uint)(row + 1));
+                finite[row] = (row * 7 % 11) - 5f;
             }
 
             var available = AllTrue(length);
@@ -162,9 +162,9 @@ public sealed class MaximumOverOffsetsKernelTests
     public void SignedZerosInEveryOrderAndInfinitiesMatch()
     {
         var failures = new List<string>();
-        Exhaustive("zeros", [0d, -0d], 10, 3, failures);
-        Exhaustive("zeros and a negative", [0d, -0d, -1.5d], 7, 3, failures);
-        Exhaustive("zeros and infinities", [0d, -0d, double.NegativeInfinity, double.PositiveInfinity, 2.5d], 6, 2, failures);
+        Exhaustive("zeros", [0f, -0f], 10, 3, failures);
+        Exhaustive("zeros and a negative", [0f, -0f, -1.5f], 7, 3, failures);
+        Exhaustive("zeros and infinities", [0f, -0f, float.NegativeInfinity, float.PositiveInfinity, 2.5f], 6, 2, failures);
         ProofBar.Fail("Signed zeros and infinities", failures);
     }
 
@@ -177,14 +177,14 @@ public sealed class MaximumOverOffsetsKernelTests
         for (var round = 0; round < 6000 && failures.Count < MaximumFailures; round++)
         {
             var length = round % 25 == 0 ? random.Next(200, 600) : random.Next(0, 70);
-            var nanShare = random.Next(0, 4) switch { 0 => 0d, 1 => 0.02d, 2 => 0.1d, _ => 0.5d };
-            var invalidShare = random.Next(0, 3) switch { 0 => 0d, 1 => 0.03d, _ => 0.4d };
-            var series = new double[length];
+            var nanShare = random.Next(0, 4) switch { 0 => 0f, 1 => 0.02f, 2 => 0.1f, _ => 0.5f };
+            var invalidShare = random.Next(0, 3) switch { 0 => 0f, 1 => 0.03f, _ => 0.4f };
+            var series = new float[length];
             var available = new bool[length];
             for (var row = 0; row < length; row++)
             {
-                series[row] = random.NextDouble() < nanShare ? Nans[random.Next(Nans.Length)] : Special(random);
-                available[row] = random.NextDouble() >= invalidShare;
+                series[row] = random.NextSingle() < nanShare ? Nans[random.Next(Nans.Length)] : Special(random);
+                available[row] = random.NextSingle() >= invalidShare;
             }
 
             var counts = Counts(random, length, round % 3);
@@ -214,10 +214,10 @@ public sealed class MaximumOverOffsetsKernelTests
             (int Start, int End)[] spans = [(0, width - 1), (-(width - 1), 0), (-(width / 2), width - 1 - (width / 2)), (2, 1 + width)];
             for (var position = 0; position < length; position++)
             {
-                var series = new double[length];
+                var series = new float[length];
                 var available = AllTrue(length);
                 for (var row = 0; row < length; row++)
-                    series[row] = (row * 5 % 9) - 4d;
+                    series[row] = (row * 5 % 9) - 4f;
                 series[position] = Nans[position % Nans.Length];
                 available[position] = false;
                 for (var index = 0; index < spans.Length; index++)
@@ -238,11 +238,11 @@ public sealed class MaximumOverOffsetsKernelTests
         for (var setIndex = 0; setIndex < sets.Length && failures.Count < MaximumFailures; setIndex++)
         {
             var set = sets[setIndex];
-            var withNans = (double[])set.First.Clone();
+            var withNans = (float[])set.First.Clone();
             for (var row = 0; row < rows; row++)
             {
                 if (!set.Available[row])
-                    withNans[row] = Bits(0x7FF8000000000000UL | (ulong)(uint)(row + 1));
+                    withNans[row] = Bits(0x7FC00000u | (uint)(row + 1));
             }
 
             for (var kind = 0; kind < ProofCounts.SafetyKinds && failures.Count < MaximumFailures; kind++)
@@ -260,12 +260,12 @@ public sealed class MaximumOverOffsetsKernelTests
 
     // The scan that the van Herk kernel replaced: the maximum of the span of each reachable row from negative infinity by Math.Max, the row invalid at the first unavailable row.
     // The first NaN of a span keeps its bits (Larger): Math.Max leaves the bits of the NaN it returns to the runtime, so the scan's rule is written out.
-    private static void OldScan(double[] x, bool[] available, double[] counts, int start, int end, double[] values, bool[] valid)
+    private static void OldScan(float[] x, bool[] available, float[] counts, int start, int end, float[] values, bool[] valid)
     {
         for (var row = 0; row < x.Length; row++)
         {
             var ok = Reachable(counts, row, start, end);
-            var maximum = double.NegativeInfinity;
+            var maximum = float.NegativeInfinity;
             for (long index = row + (long)start; ok && index <= row + (long)end; index++)
             {
                 if (!available[(int)index])
@@ -279,9 +279,9 @@ public sealed class MaximumOverOffsetsKernelTests
         }
     }
 
-    private static double Larger(double maximum, double value) => double.IsNaN(maximum) ? maximum : double.IsNaN(value) ? value : Math.Max(maximum, value);
+    private static float Larger(float maximum, float value) => float.IsNaN(maximum) ? maximum : float.IsNaN(value) ? value : Math.Max(maximum, value);
 
-    private static bool Reachable(double[] counts, int row, int start, int end)
+    private static bool Reachable(float[] counts, int row, int start, int end)
     {
         long before = start < 0 ? -(long)start : 0L;
         long after = end > 0 ? end : 0L;
@@ -291,24 +291,24 @@ public sealed class MaximumOverOffsetsKernelTests
         return last < counts.Length && counts[(int)last] >= after;
     }
 
-    private static void CheckBoth(ProofSet set, double[] withNans, double[] counts, int kind, (int Start, int End) span, List<string> failures)
+    private static void CheckBoth(ProofSet set, float[] withNans, float[] counts, int kind, (int Start, int End) span, List<string> failures)
     {
         var label = string.Create(CultureInfo.InvariantCulture, $"class {set.Name} counts {kind} [{span.Start},{span.End}]");
         Check(label, set.First, set.Available, counts, span.Start, span.End, failures);
         Check(label + " NaNs in the unavailable rows", withNans, set.Available, counts, span.Start, span.End, failures);
     }
 
-    private static void Check(string label, double[] x, bool[] available, double[] counts, int start, int end, List<string> failures)
+    private static void Check(string label, float[] x, bool[] available, float[] counts, int start, int end, List<string> failures)
     {
         if (failures.Count >= MaximumFailures)
             return;
         var length = x.Length;
-        var expectedValues = new double[length];
+        var expectedValues = new float[length];
         var expectedValid = new bool[length];
         OldScan(x, available, counts, start, end, expectedValues, expectedValid);
 
         // The kernel writes every row: start from values that no row would hold.
-        var actualValues = new double[length];
+        var actualValues = new float[length];
         var actualValid = new bool[length];
         Array.Fill(actualValues, StaleValue);
         Array.Fill(actualValid, true);
@@ -322,18 +322,18 @@ public sealed class MaximumOverOffsetsKernelTests
                 failures.Add(string.Create(CultureInfo.InvariantCulture, $"{label} row {row}: validity {actualValid[row]}, scan {expectedValid[row]}"));
             else if (siblingValid[row] != expectedValid[row])
                 failures.Add(string.Create(CultureInfo.InvariantCulture, $"{label} row {row}: the -valid form gives {siblingValid[row]}, scan {expectedValid[row]}"));
-            else if (BitConverter.DoubleToInt64Bits(actualValues[row]) != BitConverter.DoubleToInt64Bits(expectedValues[row]))
+            else if (BitConverter.SingleToInt32Bits(actualValues[row]) != BitConverter.SingleToInt32Bits(expectedValues[row]))
                 failures.Add(string.Create(CultureInfo.InvariantCulture, $"{label} row {row}: bits {BitConverter.DoubleToInt64Bits(actualValues[row]):X16} ({actualValues[row]:R}), scan {BitConverter.DoubleToInt64Bits(expectedValues[row]):X16} ({expectedValues[row]:R})"));
         }
     }
 
-    private static void Exhaustive(string name, double[] alphabet, int maximumLength, int reach, List<string> failures)
+    private static void Exhaustive(string name, float[] alphabet, int maximumLength, int reach, List<string> failures)
     {
         for (var length = 1; length <= maximumLength && failures.Count < MaximumFailures; length++)
         {
             var available = AllTrue(length);
             var counts = Contiguous(length);
-            var series = new double[length];
+            var series = new float[length];
             var total = 1L;
             for (var row = 0; row < length; row++)
                 total *= alphabet.Length;
@@ -355,29 +355,29 @@ public sealed class MaximumOverOffsetsKernelTests
         }
     }
 
-    private static double Special(Random random) =>
+    private static float Special(Random random) =>
         random.Next(0, 10) switch
         {
-            0 => 0d,
-            1 => -0d,
-            2 => double.PositiveInfinity,
-            3 => double.NegativeInfinity,
-            4 => 1.7e308d,
-            5 => -1.7e308d,
-            _ => Tenth((random.NextDouble() - 0.5d) * 6d)
+            0 => 0f,
+            1 => -0f,
+            2 => float.PositiveInfinity,
+            3 => float.NegativeInfinity,
+            4 => 3.38e38f,
+            5 => -3.38e38f,
+            _ => Tenth((random.NextSingle() - 0.5f) * 6f)
         };
 
     // Class 0: contiguity counts with random restarts. Class 1: contiguity counts with a first count above zero. Class 2: arbitrary counts.
-    private static double[] Counts(Random random, int length, int kind)
+    private static float[] Counts(Random random, int length, int kind)
     {
-        var counts = new double[length];
+        var counts = new float[length];
         for (var row = 0; row < length; row++)
         {
-            var previous = row == 0 ? 0d : counts[row - 1];
+            var previous = row == 0 ? 0f : counts[row - 1];
             counts[row] = kind switch
             {
-                0 => row == 0 || random.NextDouble() < 0.1d ? 0d : previous + 1d,
-                1 => row == 0 ? random.Next(1, 5) : (random.NextDouble() < 0.1d ? 0d : previous + 1d),
+                0 => row == 0 || random.NextSingle() < 0.1f ? 0f : previous + 1f,
+                1 => row == 0 ? random.Next(1, 5) : (random.NextSingle() < 0.1f ? 0f : previous + 1f),
                 _ => random.Next(0, 12)
             };
         }
@@ -385,9 +385,9 @@ public sealed class MaximumOverOffsetsKernelTests
         return counts;
     }
 
-    private static double[] Contiguous(int length)
+    private static float[] Contiguous(int length)
     {
-        var counts = new double[length];
+        var counts = new float[length];
         for (var row = 0; row < length; row++)
             counts[row] = row;
         return counts;
@@ -402,9 +402,9 @@ public sealed class MaximumOverOffsetsKernelTests
 
     private static string Label(string text, (int Start, int End) span) => string.Create(CultureInfo.InvariantCulture, $"{text} [{span.Start},{span.End}]");
 
-    private static double Tenth(double value) => Math.Round(value, 1, MidpointRounding.ToEven);
+    private static float Tenth(float value) => MathF.Round(value, 1, MidpointRounding.ToEven);
 
-    private static double Bits(ulong bits) => BitConverter.UInt64BitsToDouble(bits);
+    private static float Bits(uint bits) => BitConverter.UInt32BitsToSingle(bits);
 
     private static T Bind<T>(string name)
         where T : Delegate =>

@@ -6,7 +6,7 @@ namespace Supprocom.MathBlocks.Tests;
 /// <summary>Verifies the CoreCLR window forms and their validity siblings.</summary>
 public sealed class MathBlockWindowFormTests
 {
-    private const double Sentinel = 12_345.5d;
+    private const float Sentinel = 12_345.5f;
 
     /// <summary>Gets every source identifier of the window forms.</summary>
     public static TheoryData<string> Sources => [.. SourceIdentifiers];
@@ -54,7 +54,7 @@ public sealed class MathBlockWindowFormTests
         Assert.Equal(identity, operation.Identity);
         Assert.NotEmpty(operation.RegressionCases);
         Assert.Equal(operation.Arity, operation.PerformanceCase.Inputs.Count);
-        Assert.InRange(operation.PerformanceCase.MaximumWarmLatencyMicroseconds, double.Epsilon, 1_000d);
+        Assert.InRange(operation.PerformanceCase.MaximumWarmLatencyMicroseconds, float.Epsilon, 1_000f);
         foreach (var regression in operation.RegressionCases)
         {
             var actual = operation.Evaluate(regression.Inputs);
@@ -67,20 +67,20 @@ public sealed class MathBlockWindowFormTests
         var copies = inputs.Select(input => input.Type.Kind switch
         {
             MathBlockValueKind.Vector => input.AsVector().ToArray(),
-            MathBlockValueKind.BooleanVector => input.AsBooleanVector().ToArray().Select(flag => flag ? 1d : 0d).ToArray(),
-            MathBlockValueKind.Boolean => [input.AsBoolean() ? 1d : 0d],
+            MathBlockValueKind.BooleanVector => input.AsBooleanVector().ToArray().Select(flag => flag ? 1f : 0f).ToArray(),
+            MathBlockValueKind.Boolean => [input.AsBoolean() ? 1f : 0f],
             _ => [input.AsScalar()]
         }).ToArray();
         var first = operation.Evaluate(inputs);
         var second = operation.Evaluate(inputs);
-        Assert.True(first.ApproximatelyEquals(second, 0d), $"{identity}: repeated outputs differ.");
+        Assert.True(first.ApproximatelyEquals(second, 0f), $"{identity}: repeated outputs differ.");
         for (var index = 0; index < inputs.Length; index++)
         {
             var after = inputs[index].Type.Kind switch
             {
                 MathBlockValueKind.Vector => inputs[index].AsVector().ToArray(),
-                MathBlockValueKind.BooleanVector => inputs[index].AsBooleanVector().ToArray().Select(flag => flag ? 1d : 0d).ToArray(),
-                MathBlockValueKind.Boolean => [inputs[index].AsBoolean() ? 1d : 0d],
+                MathBlockValueKind.BooleanVector => inputs[index].AsBooleanVector().ToArray().Select(flag => flag ? 1f : 0f).ToArray(),
+                MathBlockValueKind.Boolean => [inputs[index].AsBoolean() ? 1f : 0f],
                 _ => [inputs[index].AsScalar()]
             };
             Assert.Equal(copies[index], after);
@@ -89,13 +89,13 @@ public sealed class MathBlockWindowFormTests
         for (var warmup = 0; warmup < 64; warmup++)
             _ = operation.Evaluate(operation.PerformanceCase.Inputs);
         const int batchCount = 101;
-        var samples = new double[batchCount];
+        var samples = new float[batchCount];
         for (var batch = 0; batch < batchCount; batch++)
         {
             var started = Stopwatch.GetTimestamp();
             for (var iteration = 0; iteration < operation.PerformanceCase.Iterations; iteration++)
                 _ = operation.Evaluate(operation.PerformanceCase.Inputs);
-            samples[batch] = Stopwatch.GetElapsedTime(started).TotalMilliseconds * 1_000d /
+            samples[batch] = (float)Stopwatch.GetElapsedTime(started).TotalMilliseconds * 1_000f /
                              operation.PerformanceCase.Iterations;
         }
         Array.Sort(samples);
@@ -145,23 +145,23 @@ public sealed class MathBlockWindowFormTests
     [Fact]
     public void WarmUpRowsAndSourceInvalidWindowsHoldTheFillAndAreMarkedFalse()
     {
-        var x = MathBlockValue.Vector([1d, 1d, 1d, 2d, 4d]);
-        var y = MathBlockValue.Vector([1d, 2d, 3d, 4d, 6d]);
+        var x = MathBlockValue.Vector([1f, 1f, 1f, 2f, 4f]);
+        var y = MathBlockValue.Vector([1f, 2f, 3f, 4f, 6f]);
         var pearson = MathBlockCatalog.Standard.Get("statistics.pearson-correlation");
 
-        var form = Form("statistics.pearson-correlation").Evaluate(x, y, MathBlockValue.Scalar(3d), MathBlockValue.Scalar(9d));
-        var validity = Validity("statistics.pearson-correlation").Evaluate(x, y, MathBlockValue.Scalar(3d));
+        var form = Form("statistics.pearson-correlation").Evaluate(x, y, MathBlockValue.Scalar(3f), MathBlockValue.Scalar(9f));
+        var validity = Validity("statistics.pearson-correlation").Evaluate(x, y, MathBlockValue.Scalar(3f));
 
-        Assert.False(pearson.Evaluate(MathBlockValue.Vector([1d, 1d, 1d]), MathBlockValue.Vector([1d, 2d, 3d])).IsValid);
+        Assert.False(pearson.Evaluate(MathBlockValue.Vector([1f, 1f, 1f]), MathBlockValue.Vector([1f, 2f, 3f])).IsValid);
         var values = form.AsVector();
-        Assert.Equal(9d, values[0]);
-        Assert.Equal(9d, values[1]);
-        Assert.Equal(9d, values[2]);
+        Assert.Equal(9f, values[0]);
+        Assert.Equal(9f, values[1]);
+        Assert.Equal(9f, values[2]);
         Assert.Equal(
-            pearson.Evaluate(MathBlockValue.Vector([1d, 1d, 2d]), MathBlockValue.Vector([2d, 3d, 4d])).AsScalar(),
+            pearson.Evaluate(MathBlockValue.Vector([1f, 1f, 2f]), MathBlockValue.Vector([2f, 3f, 4f])).AsScalar(),
             values[3]);
         Assert.Equal(
-            pearson.Evaluate(MathBlockValue.Vector([1d, 2d, 4d]), MathBlockValue.Vector([3d, 4d, 6d])).AsScalar(),
+            pearson.Evaluate(MathBlockValue.Vector([1f, 2f, 4f]), MathBlockValue.Vector([3f, 4f, 6f])).AsScalar(),
             values[4]);
         Assert.Equal([false, false, false, true, true], validity.AsBooleanVector().ToArray());
     }
@@ -170,15 +170,15 @@ public sealed class MathBlockWindowFormTests
     [Fact]
     public void ArgumentFormsReturnTheInWindowPositionWithTheSourceTieRule()
     {
-        var values = MathBlockValue.Vector([3d, 1d, 3d, 2d, 1d, 5d]);
-        var width = MathBlockValue.Scalar(3d);
-        var fill = MathBlockValue.Scalar(-1d);
+        var values = MathBlockValue.Vector([3f, 1f, 3f, 2f, 1f, 5f]);
+        var width = MathBlockValue.Scalar(3f);
+        var fill = MathBlockValue.Scalar(-1f);
 
         Assert.Equal(
-            [-1d, -1d, 0d, 1d, 0d, 2d],
+            [-1f, -1f, 0f, 1f, 0f, 2f],
             Form("vector.arg-maximum").Evaluate(values, width, fill).AsVector().ToArray());
         Assert.Equal(
-            [-1d, -1d, 1d, 0d, 2d, 1d],
+            [-1f, -1f, 1f, 0f, 2f, 1f],
             Form("vector.arg-minimum").Evaluate(values, width, fill).AsVector().ToArray());
     }
 
@@ -186,39 +186,39 @@ public sealed class MathBlockWindowFormTests
     [Fact]
     public void WidthBoundsAndNonIntegerWidthsFollowTheSeriesDomain()
     {
-        var values = MathBlockValue.Vector([4d, 1d, 3d, 2d]);
-        var fill = MathBlockValue.Scalar(0d);
+        var values = MathBlockValue.Vector([4f, 1f, 3f, 2f]);
+        var fill = MathBlockValue.Scalar(0f);
         var mean = Form("vector.mean");
         var meanValidity = Validity("vector.mean");
 
-        Assert.Equal([4d, 1d, 3d, 2d], mean.Evaluate(values, MathBlockValue.Scalar(1d), fill).AsVector().ToArray());
-        Assert.Equal([0d, 0d, 0d, 2.5d], mean.Evaluate(values, MathBlockValue.Scalar(4d), fill).AsVector().ToArray());
+        Assert.Equal([4f, 1f, 3f, 2f], mean.Evaluate(values, MathBlockValue.Scalar(1f), fill).AsVector().ToArray());
+        Assert.Equal([0f, 0f, 0f, 2.5f], mean.Evaluate(values, MathBlockValue.Scalar(4f), fill).AsVector().ToArray());
         Assert.Equal(
             [false, false, false, true],
-            meanValidity.Evaluate(values, MathBlockValue.Scalar(4d)).AsBooleanVector().ToArray());
-        foreach (var width in new[] { 5d, 0d, -1d, 2.5d, 1e12d })
+            meanValidity.Evaluate(values, MathBlockValue.Scalar(4f)).AsBooleanVector().ToArray());
+        foreach (var width in new[] { 5f, 0f, -1f, 2.5f, 1e12f })
         {
             Assert.False(mean.Evaluate(values, MathBlockValue.Scalar(width), fill).IsValid, $"width {width}");
             Assert.False(meanValidity.Evaluate(values, MathBlockValue.Scalar(width)).IsValid, $"width {width}");
         }
-        Assert.False(mean.Evaluate(MathBlockValue.Vector([]), MathBlockValue.Scalar(1d), fill).IsValid);
+        Assert.False(mean.Evaluate(MathBlockValue.Vector([]), MathBlockValue.Scalar(1f), fill).IsValid);
     }
 
     /// <summary>Verifies unequal series lengths, invalid inputs and nonfinite fills give an invalid output.</summary>
     [Fact]
     public void UnequalLengthsInvalidInputsAndNonfiniteFillsAreInvalid()
     {
-        var x = MathBlockValue.Vector([1d, 2d, 4d, 3d]);
-        var shorter = MathBlockValue.Vector([1d, 2d, 4d]);
-        var width = MathBlockValue.Scalar(2d);
-        var fill = MathBlockValue.Scalar(0d);
+        var x = MathBlockValue.Vector([1f, 2f, 4f, 3f]);
+        var shorter = MathBlockValue.Vector([1f, 2f, 4f]);
+        var width = MathBlockValue.Scalar(2f);
+        var fill = MathBlockValue.Scalar(0f);
 
         var unequal = Form("statistics.pearson-correlation").Evaluate(x, shorter, width, fill);
         Assert.False(unequal.IsValid);
         Assert.Equal("The window series lengths differ.", unequal.InvalidReason);
         Assert.False(Validity("statistics.pearson-correlation").Evaluate(x, shorter, width).IsValid);
         Assert.False(Form("statistics.weighted-mean").Evaluate(x, shorter, width, fill).IsValid);
-        foreach (var nonfinite in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+        foreach (var nonfinite in new[] { float.NaN, float.PositiveInfinity, float.NegativeInfinity })
             Assert.False(Form("vector.sum").Evaluate(x, width, MathBlockValue.Scalar(nonfinite)).IsValid);
         var invalidInput = MathBlockValue.Invalid(MathBlockType.Vector(), "upstream");
         Assert.False(Form("vector.sum").Evaluate(invalidInput, width, fill).IsValid);
@@ -254,10 +254,10 @@ public sealed class MathBlockWindowFormTests
         Assert.Throws<InvalidOperationException>(() =>
             Form("vector.mean").ResolveOutputType([MathBlockType.Scalar(unit), width, MathBlockType.Scalar(unit)]));
 
-        var meters = MathBlockValue.Vector([1d, 2d, 4d], unit);
-        var result = Form("vector.mean").Evaluate(meters, MathBlockValue.Scalar(2d), MathBlockValue.Scalar(0d, unit));
+        var meters = MathBlockValue.Vector([1f, 2f, 4f], unit);
+        var result = Form("vector.mean").Evaluate(meters, MathBlockValue.Scalar(2f), MathBlockValue.Scalar(0f, unit));
         Assert.Equal(MathBlockType.Vector(unit, 3), result.Type);
-        Assert.Equal([0d, 1.5d, 3d], result.AsVector().ToArray());
+        Assert.Equal([0f, 1.5f, 3f], result.AsVector().ToArray());
     }
 
     /// <summary>Verifies concurrent evaluations of one form are independent and identical.</summary>
@@ -271,11 +271,11 @@ public sealed class MathBlockWindowFormTests
             var sourceInputs = CreateSourceInputs(source, count, 24, 99);
             var inputs = FormInputs(sourceInputs, 24, MathBlockValue.Scalar(Sentinel));
             var expected = Form(source).Evaluate(inputs).AsVector().ToArray();
-            var results = new double[8][];
+            var results = new float[8][];
             Parallel.For(0, results.Length, new ParallelOptions { MaxDegreeOfParallelism = 4 }, index =>
                 results[index] = Form(source).Evaluate(inputs).AsVector().ToArray());
             foreach (var result in results)
-                Assert.Equal(expected.Select(BitConverter.DoubleToInt64Bits), result.Select(BitConverter.DoubleToInt64Bits));
+                Assert.Equal(expected.Select(BitConverter.SingleToInt32Bits), result.Select(BitConverter.SingleToInt32Bits));
         }
     }
 }
