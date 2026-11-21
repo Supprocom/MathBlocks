@@ -168,7 +168,8 @@ internal static class ElementwiseMathBlocks
             form.EvaluateForm,
             sample,
             MathBlockValue.Vector(expected, outputUnit),
-            2e-6f,
+            // The rows are the source's own values, so the sample is held to the source's own tolerance where that is wider.
+            Math.Max(2e-6f, form.Source.RegressionCases[0].Tolerance),
             64,
             MathBlockCausalityInfo.Pointwise);
         if (form.Source.DomainEvaluator is not null)

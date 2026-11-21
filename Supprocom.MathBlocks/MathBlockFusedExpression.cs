@@ -324,7 +324,7 @@ public sealed class MathBlockFusedExpression
             columns[index] = kinds[outputNodes[index]] == MathBlockFusedKind.Number
                 ? outputs[index] is float[] numbers && numbers.Length == rows
                     ? MathBlockCollectionPrimitives.Copy(numbers)
-                    : throw new ArgumentException($"Output '{name}' requires {rows} double values.", nameof(outputs))
+                    : throw new ArgumentException($"Output '{name}' requires {rows} single-precision values.", nameof(outputs))
                 : outputs[index] is int[] flags && flags.Length == rows
                     ? MathBlockCollectionPrimitives.Map(flags, flag => flag != 0)
                     : throw new ArgumentException($"Output '{name}' requires {rows} int values.", nameof(outputs));

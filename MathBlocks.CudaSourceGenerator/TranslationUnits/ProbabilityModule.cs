@@ -254,6 +254,9 @@ internal static unsafe class ProbabilityModule
     [CudaDevice]
     private static float mathblocks_probability_log_gamma(float value)
     {
+        // The poles: a whole number at or below zero has no value.
+        if (value <= 0.0f && value == MathF.Floor(value))
+            return BitConverter.Int32BitsToSingle(0x7fc00000);
         if (value < 0.5f)
         {
             return mathblocks_natural_logarithm(3.141592653589793238462643383279502884f) -
