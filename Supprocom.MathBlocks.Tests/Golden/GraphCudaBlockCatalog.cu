@@ -645,7 +645,7 @@ struct MathBlockGraphKernelEdge
 {
     int from;
     int to;
-    double weight;
+    float weight;
 };
 
 #line 99 "GraphModule.cs"
@@ -909,8 +909,8 @@ __device__ void mathblocks_graph_dispatch(
     {
 #line 179 "GraphModule.cs"
 #line 179 "GraphModule.cs"
-        double* csharp2cuda_temp_3 = &((output)->scalar_value);
-        (*(csharp2cuda_temp_3) = 0.0);
+        float* csharp2cuda_temp_3 = &((output)->scalar_value);
+        (*(csharp2cuda_temp_3) = 0.0f);
 #line 180 "GraphModule.cs"
 #line 180 "GraphModule.cs"
         int* csharp2cuda_temp_4 = &((output)->boolean_value);
@@ -1019,22 +1019,22 @@ __device__ void mathblocks_graph_dispatch(
 #line 194 "GraphModule.cs"
     const MathBlockGraphKernelEdge* edges = csharp2cuda_temp_17;
 #line 196 "GraphModule.cs"
-    double* csharp2cuda_temp_19;
+    float* csharp2cuda_temp_19;
 #line 196 "GraphModule.cs"
     if (((((void*)(first))) == (((void*)(nullptr)))))
     {
 #line 196 "GraphModule.cs"
-        csharp2cuda_temp_19 = ((double*)(nullptr));
+        csharp2cuda_temp_19 = ((float*)(nullptr));
     }
     else
     {
 #line 196 "GraphModule.cs"
         unsigned long long csharp2cuda_temp_20 = (first)->data_pointer;
 #line 196 "GraphModule.cs"
-        csharp2cuda_temp_19 = ((double*)(csharp2cuda_temp_20));
+        csharp2cuda_temp_19 = ((float*)(csharp2cuda_temp_20));
     }
 #line 196 "GraphModule.cs"
-    const double* matrix = csharp2cuda_temp_19;
+    const float* matrix = csharp2cuda_temp_19;
 #line 197 "GraphModule.cs"
     int* csharp2cuda_temp_21;
 #line 197 "GraphModule.cs"
@@ -1053,30 +1053,30 @@ __device__ void mathblocks_graph_dispatch(
 #line 197 "GraphModule.cs"
     const int* boolean_values = csharp2cuda_temp_21;
 #line 198 "GraphModule.cs"
-    double* csharp2cuda_temp_23;
+    float* csharp2cuda_temp_23;
 #line 198 "GraphModule.cs"
     if (((((void*)(second))) == (((void*)(nullptr)))))
     {
 #line 198 "GraphModule.cs"
-        csharp2cuda_temp_23 = ((double*)(nullptr));
+        csharp2cuda_temp_23 = ((float*)(nullptr));
     }
     else
     {
 #line 198 "GraphModule.cs"
         unsigned long long csharp2cuda_temp_24 = (second)->data_pointer;
 #line 198 "GraphModule.cs"
-        csharp2cuda_temp_23 = ((double*)(csharp2cuda_temp_24));
+        csharp2cuda_temp_23 = ((float*)(csharp2cuda_temp_24));
     }
 #line 198 "GraphModule.cs"
-    const double* vector = csharp2cuda_temp_23;
+    const float* vector = csharp2cuda_temp_23;
 #line 199 "GraphModule.cs"
     unsigned long long csharp2cuda_temp_25 = (output)->data_pointer;
 #line 199 "GraphModule.cs"
-    double* result = ((double*)(csharp2cuda_temp_25));
+    float* result = ((float*)(csharp2cuda_temp_25));
 #line 200 "GraphModule.cs"
     unsigned long long csharp2cuda_temp_26 = (output)->scratch_pointer;
 #line 200 "GraphModule.cs"
-    double* scratch = ((double*)(csharp2cuda_temp_26));
+    float* scratch = ((float*)(csharp2cuda_temp_26));
 #line 202 "GraphModule.cs"
     if (((thread) == (0)))
 #line 203 "GraphModule.cs"
@@ -1094,8 +1094,8 @@ __device__ void mathblocks_graph_dispatch(
                 {
 #line 210 "GraphModule.cs"
 #line 210 "GraphModule.cs"
-                    double* csharp2cuda_temp_27 = &((output)->scalar_value);
-                    (*(csharp2cuda_temp_27) = 0.0);
+                    float* csharp2cuda_temp_27 = &((output)->scalar_value);
+                    (*(csharp2cuda_temp_27) = 0.0f);
 #line 211 "GraphModule.cs"
                     break;
                 }
@@ -1113,11 +1113,11 @@ __device__ void mathblocks_graph_dispatch(
 #line 218 "GraphModule.cs"
                 {
 #line 219 "GraphModule.cs"
-                    double* laplacian = scratch;
+                    float* laplacian = scratch;
 #line 220 "GraphModule.cs"
-                    double* work = csharp2cuda_pointer_add(laplacian, csharp2cuda_i32_mul(vertex_count, vertex_count));
+                    float* work = csharp2cuda_pointer_add(laplacian, csharp2cuda_i32_mul(vertex_count, vertex_count));
 #line 221 "GraphModule.cs"
-                    double* eigenvalues = csharp2cuda_pointer_add(work, csharp2cuda_i32_mul(vertex_count, vertex_count));
+                    float* eigenvalues = csharp2cuda_pointer_add(work, csharp2cuda_i32_mul(vertex_count, vertex_count));
 #line 222 "GraphModule.cs"
                     {
 #line 222 "GraphModule.cs"
@@ -1128,8 +1128,8 @@ __device__ void mathblocks_graph_dispatch(
                                 break;
 #line 223 "GraphModule.cs"
 #line 223 "GraphModule.cs"
-                            double* csharp2cuda_temp_30 = &((laplacian)[index]);
-                            (*(csharp2cuda_temp_30) = 0.0);
+                            float* csharp2cuda_temp_30 = &((laplacian)[index]);
+                            (*(csharp2cuda_temp_30) = 0.0f);
 #line 222 "GraphModule.cs"
                             int* csharp2cuda_temp_29 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_29));
@@ -1152,31 +1152,31 @@ __device__ void mathblocks_graph_dispatch(
 #line 227 "GraphModule.cs"
                                 int to = ((edges)[index]).to;
 #line 228 "GraphModule.cs"
-                                double weight = ((edges)[index]).weight;
+                                float weight = ((edges)[index]).weight;
 #line 229 "GraphModule.cs"
 #line 229 "GraphModule.cs"
-                                double* csharp2cuda_temp_33 = &((laplacian)[csharp2cuda_i32_add(csharp2cuda_i32_mul(from, vertex_count), from)]);
+                                float* csharp2cuda_temp_33 = &((laplacian)[csharp2cuda_i32_add(csharp2cuda_i32_mul(from, vertex_count), from)]);
 #line 229 "GraphModule.cs"
-                                double csharp2cuda_temp_34 = *(csharp2cuda_temp_33);
-                                (*(csharp2cuda_temp_33) = __dadd_rn(csharp2cuda_temp_34, weight));
+                                float csharp2cuda_temp_34 = *(csharp2cuda_temp_33);
+                                (*(csharp2cuda_temp_33) = __fadd_rn(csharp2cuda_temp_34, weight));
 #line 230 "GraphModule.cs"
 #line 230 "GraphModule.cs"
-                                double* csharp2cuda_temp_35 = &((laplacian)[csharp2cuda_i32_add(csharp2cuda_i32_mul(to, vertex_count), to)]);
+                                float* csharp2cuda_temp_35 = &((laplacian)[csharp2cuda_i32_add(csharp2cuda_i32_mul(to, vertex_count), to)]);
 #line 230 "GraphModule.cs"
-                                double csharp2cuda_temp_36 = *(csharp2cuda_temp_35);
-                                (*(csharp2cuda_temp_35) = __dadd_rn(csharp2cuda_temp_36, weight));
+                                float csharp2cuda_temp_36 = *(csharp2cuda_temp_35);
+                                (*(csharp2cuda_temp_35) = __fadd_rn(csharp2cuda_temp_36, weight));
 #line 231 "GraphModule.cs"
 #line 231 "GraphModule.cs"
-                                double* csharp2cuda_temp_37 = &((laplacian)[csharp2cuda_i32_add(csharp2cuda_i32_mul(from, vertex_count), to)]);
+                                float* csharp2cuda_temp_37 = &((laplacian)[csharp2cuda_i32_add(csharp2cuda_i32_mul(from, vertex_count), to)]);
 #line 231 "GraphModule.cs"
-                                double csharp2cuda_temp_38 = *(csharp2cuda_temp_37);
-                                (*(csharp2cuda_temp_37) = __dsub_rn(csharp2cuda_temp_38, weight));
+                                float csharp2cuda_temp_38 = *(csharp2cuda_temp_37);
+                                (*(csharp2cuda_temp_37) = __fsub_rn(csharp2cuda_temp_38, weight));
 #line 232 "GraphModule.cs"
 #line 232 "GraphModule.cs"
-                                double* csharp2cuda_temp_39 = &((laplacian)[csharp2cuda_i32_add(csharp2cuda_i32_mul(to, vertex_count), from)]);
+                                float* csharp2cuda_temp_39 = &((laplacian)[csharp2cuda_i32_add(csharp2cuda_i32_mul(to, vertex_count), from)]);
 #line 232 "GraphModule.cs"
-                                double csharp2cuda_temp_40 = *(csharp2cuda_temp_39);
-                                (*(csharp2cuda_temp_39) = __dsub_rn(csharp2cuda_temp_40, weight));
+                                float csharp2cuda_temp_40 = *(csharp2cuda_temp_39);
+                                (*(csharp2cuda_temp_39) = __fsub_rn(csharp2cuda_temp_40, weight));
                             }
 #line 224 "GraphModule.cs"
                             int* csharp2cuda_temp_31 = &(index);
@@ -1205,9 +1205,9 @@ __device__ void mathblocks_graph_dispatch(
                     }
 #line 249 "GraphModule.cs"
 #line 249 "GraphModule.cs"
-                    double* csharp2cuda_temp_42 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_42 = &((output)->scalar_value);
 #line 249 "GraphModule.cs"
-                    double csharp2cuda_temp_43 = (eigenvalues)[1];
+                    float csharp2cuda_temp_43 = (eigenvalues)[1];
                     (*(csharp2cuda_temp_42) = csharp2cuda_temp_43);
 #line 250 "GraphModule.cs"
                     break;
@@ -1290,11 +1290,11 @@ __device__ void mathblocks_graph_dispatch(
                         }
                     }
 #line 266 "GraphModule.cs"
-                    double cut = 0.0;
+                    float cut = 0.0f;
 #line 267 "GraphModule.cs"
-                    double left_volume = 0.0;
+                    float left_volume = 0.0f;
 #line 268 "GraphModule.cs"
-                    double right_volume = 0.0;
+                    float right_volume = 0.0f;
 #line 269 "GraphModule.cs"
                     {
 #line 269 "GraphModule.cs"
@@ -1309,8 +1309,8 @@ __device__ void mathblocks_graph_dispatch(
                             {
 #line 271 "GraphModule.cs"
 #line 271 "GraphModule.cs"
-                                double csharp2cuda_temp_56 = ((edges)[index]).weight;
-                                if (((csharp2cuda_temp_56) < (0.0)))
+                                float csharp2cuda_temp_56 = ((edges)[index]).weight;
+                                if (((csharp2cuda_temp_56) < (0.0f)))
 #line 272 "GraphModule.cs"
                                 {
 #line 273 "GraphModule.cs"
@@ -1329,23 +1329,23 @@ __device__ void mathblocks_graph_dispatch(
                                 {
 #line 277 "GraphModule.cs"
 #line 277 "GraphModule.cs"
-                                    double* csharp2cuda_temp_60 = &(left_volume);
+                                    float* csharp2cuda_temp_60 = &(left_volume);
 #line 277 "GraphModule.cs"
-                                    double csharp2cuda_temp_61 = *(csharp2cuda_temp_60);
+                                    float csharp2cuda_temp_61 = *(csharp2cuda_temp_60);
 #line 277 "GraphModule.cs"
-                                    double csharp2cuda_temp_62 = ((edges)[index]).weight;
-                                    (*(csharp2cuda_temp_60) = __dadd_rn(csharp2cuda_temp_61, csharp2cuda_temp_62));
+                                    float csharp2cuda_temp_62 = ((edges)[index]).weight;
+                                    (*(csharp2cuda_temp_60) = __fadd_rn(csharp2cuda_temp_61, csharp2cuda_temp_62));
                                 }
                                 else
                                 {
 #line 279 "GraphModule.cs"
 #line 279 "GraphModule.cs"
-                                    double* csharp2cuda_temp_63 = &(right_volume);
+                                    float* csharp2cuda_temp_63 = &(right_volume);
 #line 279 "GraphModule.cs"
-                                    double csharp2cuda_temp_64 = *(csharp2cuda_temp_63);
+                                    float csharp2cuda_temp_64 = *(csharp2cuda_temp_63);
 #line 279 "GraphModule.cs"
-                                    double csharp2cuda_temp_65 = ((edges)[index]).weight;
-                                    (*(csharp2cuda_temp_63) = __dadd_rn(csharp2cuda_temp_64, csharp2cuda_temp_65));
+                                    float csharp2cuda_temp_65 = ((edges)[index]).weight;
+                                    (*(csharp2cuda_temp_63) = __fadd_rn(csharp2cuda_temp_64, csharp2cuda_temp_65));
                                 }
 #line 280 "GraphModule.cs"
 #line 280 "GraphModule.cs"
@@ -1356,23 +1356,23 @@ __device__ void mathblocks_graph_dispatch(
                                 {
 #line 281 "GraphModule.cs"
 #line 281 "GraphModule.cs"
-                                    double* csharp2cuda_temp_68 = &(left_volume);
+                                    float* csharp2cuda_temp_68 = &(left_volume);
 #line 281 "GraphModule.cs"
-                                    double csharp2cuda_temp_69 = *(csharp2cuda_temp_68);
+                                    float csharp2cuda_temp_69 = *(csharp2cuda_temp_68);
 #line 281 "GraphModule.cs"
-                                    double csharp2cuda_temp_70 = ((edges)[index]).weight;
-                                    (*(csharp2cuda_temp_68) = __dadd_rn(csharp2cuda_temp_69, csharp2cuda_temp_70));
+                                    float csharp2cuda_temp_70 = ((edges)[index]).weight;
+                                    (*(csharp2cuda_temp_68) = __fadd_rn(csharp2cuda_temp_69, csharp2cuda_temp_70));
                                 }
                                 else
                                 {
 #line 283 "GraphModule.cs"
 #line 283 "GraphModule.cs"
-                                    double* csharp2cuda_temp_71 = &(right_volume);
+                                    float* csharp2cuda_temp_71 = &(right_volume);
 #line 283 "GraphModule.cs"
-                                    double csharp2cuda_temp_72 = *(csharp2cuda_temp_71);
+                                    float csharp2cuda_temp_72 = *(csharp2cuda_temp_71);
 #line 283 "GraphModule.cs"
-                                    double csharp2cuda_temp_73 = ((edges)[index]).weight;
-                                    (*(csharp2cuda_temp_71) = __dadd_rn(csharp2cuda_temp_72, csharp2cuda_temp_73));
+                                    float csharp2cuda_temp_73 = ((edges)[index]).weight;
+                                    (*(csharp2cuda_temp_71) = __fadd_rn(csharp2cuda_temp_72, csharp2cuda_temp_73));
                                 }
 #line 284 "GraphModule.cs"
 #line 284 "GraphModule.cs"
@@ -1387,12 +1387,12 @@ __device__ void mathblocks_graph_dispatch(
                                 {
 #line 285 "GraphModule.cs"
 #line 285 "GraphModule.cs"
-                                    double* csharp2cuda_temp_78 = &(cut);
+                                    float* csharp2cuda_temp_78 = &(cut);
 #line 285 "GraphModule.cs"
-                                    double csharp2cuda_temp_79 = *(csharp2cuda_temp_78);
+                                    float csharp2cuda_temp_79 = *(csharp2cuda_temp_78);
 #line 285 "GraphModule.cs"
-                                    double csharp2cuda_temp_80 = ((edges)[index]).weight;
-                                    (*(csharp2cuda_temp_78) = __dadd_rn(csharp2cuda_temp_79, csharp2cuda_temp_80));
+                                    float csharp2cuda_temp_80 = ((edges)[index]).weight;
+                                    (*(csharp2cuda_temp_78) = __fadd_rn(csharp2cuda_temp_79, csharp2cuda_temp_80));
                                 }
                             }
 #line 269 "GraphModule.cs"
@@ -1425,9 +1425,9 @@ __device__ void mathblocks_graph_dispatch(
                     {
 #line 290 "GraphModule.cs"
 #line 290 "GraphModule.cs"
-                        double* csharp2cuda_temp_83 = &((output)->scalar_value);
+                        float* csharp2cuda_temp_83 = &((output)->scalar_value);
 #line 291 "GraphModule.cs"
-                        double csharp2cuda_temp_84;
+                        float csharp2cuda_temp_84;
 #line 291 "GraphModule.cs"
                         if (((left_volume) < (right_volume)))
                         {
@@ -1440,7 +1440,7 @@ __device__ void mathblocks_graph_dispatch(
                             csharp2cuda_temp_84 = right_volume;
                         }
 #line 290 "GraphModule.cs"
-                        double csharp2cuda_temp_85 = __ddiv_rn(cut, csharp2cuda_temp_84);
+                        float csharp2cuda_temp_85 = __fdiv_rn(cut, csharp2cuda_temp_84);
                         (*(csharp2cuda_temp_83) = csharp2cuda_temp_85);
                     }
 #line 292 "GraphModule.cs"
@@ -1475,8 +1475,8 @@ __device__ void mathblocks_graph_dispatch(
                     {
 #line 311 "GraphModule.cs"
 #line 311 "GraphModule.cs"
-                        double* csharp2cuda_temp_88 = &((output)->scalar_value);
-                        (*(csharp2cuda_temp_88) = ((double)(components)));
+                        float* csharp2cuda_temp_88 = &((output)->scalar_value);
+                        (*(csharp2cuda_temp_88) = ((float)(components)));
                     }
                     else
                     {
@@ -1516,8 +1516,8 @@ __device__ void mathblocks_graph_dispatch(
                             break;
 #line 320 "GraphModule.cs"
 #line 320 "GraphModule.cs"
-                        double* csharp2cuda_temp_92 = &((result)[index]);
-                        (*(csharp2cuda_temp_92) = 0.0);
+                        float* csharp2cuda_temp_92 = &((result)[index]);
+                        (*(csharp2cuda_temp_92) = 0.0f);
 #line 319 "GraphModule.cs"
                         int* csharp2cuda_temp_91 = &(index);
                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_91));
@@ -1536,12 +1536,12 @@ __device__ void mathblocks_graph_dispatch(
 #line 322 "GraphModule.cs"
                         {
 #line 323 "GraphModule.cs"
-                            double csharp2cuda_temp_95;
+                            float csharp2cuda_temp_95;
 #line 323 "GraphModule.cs"
                             if (((opcode) == (3)))
                             {
 #line 323 "GraphModule.cs"
-                                csharp2cuda_temp_95 = 1.0;
+                                csharp2cuda_temp_95 = 1.0f;
                             }
                             else
                             {
@@ -1549,23 +1549,23 @@ __device__ void mathblocks_graph_dispatch(
                                 csharp2cuda_temp_95 = ((edges)[index]).weight;
                             }
 #line 323 "GraphModule.cs"
-                            double amount = csharp2cuda_temp_95;
+                            float amount = csharp2cuda_temp_95;
 #line 324 "GraphModule.cs"
 #line 324 "GraphModule.cs"
                             int csharp2cuda_temp_96 = ((edges)[index]).from;
 #line 324 "GraphModule.cs"
-                            double* csharp2cuda_temp_97 = &((result)[csharp2cuda_temp_96]);
+                            float* csharp2cuda_temp_97 = &((result)[csharp2cuda_temp_96]);
 #line 324 "GraphModule.cs"
-                            double csharp2cuda_temp_98 = *(csharp2cuda_temp_97);
-                            (*(csharp2cuda_temp_97) = __dadd_rn(csharp2cuda_temp_98, amount));
+                            float csharp2cuda_temp_98 = *(csharp2cuda_temp_97);
+                            (*(csharp2cuda_temp_97) = __fadd_rn(csharp2cuda_temp_98, amount));
 #line 325 "GraphModule.cs"
 #line 325 "GraphModule.cs"
                             int csharp2cuda_temp_99 = ((edges)[index]).to;
 #line 325 "GraphModule.cs"
-                            double* csharp2cuda_temp_100 = &((result)[csharp2cuda_temp_99]);
+                            float* csharp2cuda_temp_100 = &((result)[csharp2cuda_temp_99]);
 #line 325 "GraphModule.cs"
-                            double csharp2cuda_temp_101 = *(csharp2cuda_temp_100);
-                            (*(csharp2cuda_temp_100) = __dadd_rn(csharp2cuda_temp_101, amount));
+                            float csharp2cuda_temp_101 = *(csharp2cuda_temp_100);
+                            (*(csharp2cuda_temp_100) = __fadd_rn(csharp2cuda_temp_101, amount));
                         }
 #line 321 "GraphModule.cs"
                         int* csharp2cuda_temp_93 = &(index);
@@ -1628,9 +1628,9 @@ __device__ void mathblocks_graph_dispatch(
 #line 340 "GraphModule.cs"
                                         int csharp2cuda_temp_111 = (first)->columns;
 #line 340 "GraphModule.cs"
-                                        double csharp2cuda_temp_112 = (matrix)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_111), column)];
+                                        float csharp2cuda_temp_112 = (matrix)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_111), column)];
 #line 340 "GraphModule.cs"
-                                        csharp2cuda_temp_110 = ((csharp2cuda_temp_112) != (0.0));
+                                        csharp2cuda_temp_110 = ((csharp2cuda_temp_112) != (0.0f));
                                     }
                                     else
                                     {
@@ -1684,11 +1684,11 @@ __device__ void mathblocks_graph_dispatch(
                                         (*(csharp2cuda_temp_120) = column);
 #line 352 "GraphModule.cs"
 #line 352 "GraphModule.cs"
-                                        double* csharp2cuda_temp_121 = &(((graph)[edge_count]).weight);
+                                        float* csharp2cuda_temp_121 = &(((graph)[edge_count]).weight);
 #line 352 "GraphModule.cs"
                                         int csharp2cuda_temp_122 = (first)->columns;
 #line 352 "GraphModule.cs"
-                                        double csharp2cuda_temp_123 = (matrix)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_122), column)];
+                                        float csharp2cuda_temp_123 = (matrix)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_122), column)];
                                         (*(csharp2cuda_temp_121) = csharp2cuda_temp_123);
 #line 353 "GraphModule.cs"
 #line 353 "GraphModule.cs"
@@ -1752,8 +1752,8 @@ __device__ void mathblocks_graph_dispatch(
                 }
 #line 367 "GraphModule.cs"
 #line 367 "GraphModule.cs"
-                double* csharp2cuda_temp_130 = &((result)[0]);
-                (*(csharp2cuda_temp_130) = 0.0);
+                float* csharp2cuda_temp_130 = &((result)[0]);
+                (*(csharp2cuda_temp_130) = 0.0f);
 #line 368 "GraphModule.cs"
                 if (((vertex_count) == (1)))
                 {
@@ -1765,11 +1765,11 @@ __device__ void mathblocks_graph_dispatch(
 #line 371 "GraphModule.cs"
                     int size = csharp2cuda_i32_sub(vertex_count, 1);
 #line 372 "GraphModule.cs"
-                    double* reduced_matrix = scratch;
+                    float* reduced_matrix = scratch;
 #line 373 "GraphModule.cs"
-                    double* right = csharp2cuda_pointer_add(reduced_matrix, csharp2cuda_i32_mul(size, size));
+                    float* right = csharp2cuda_pointer_add(reduced_matrix, csharp2cuda_i32_mul(size, size));
 #line 374 "GraphModule.cs"
-                    double* augmented = csharp2cuda_pointer_add(right, size);
+                    float* augmented = csharp2cuda_pointer_add(right, size);
 #line 375 "GraphModule.cs"
                     {
 #line 375 "GraphModule.cs"
@@ -1780,8 +1780,8 @@ __device__ void mathblocks_graph_dispatch(
                                 break;
 #line 376 "GraphModule.cs"
 #line 376 "GraphModule.cs"
-                            double* csharp2cuda_temp_132 = &((reduced_matrix)[index]);
-                            (*(csharp2cuda_temp_132) = 0.0);
+                            float* csharp2cuda_temp_132 = &((reduced_matrix)[index]);
+                            (*(csharp2cuda_temp_132) = 0.0f);
 #line 375 "GraphModule.cs"
                             int* csharp2cuda_temp_131 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_131));
@@ -1797,8 +1797,8 @@ __device__ void mathblocks_graph_dispatch(
                                 break;
 #line 378 "GraphModule.cs"
 #line 378 "GraphModule.cs"
-                            double* csharp2cuda_temp_134 = &((right)[index]);
-                            (*(csharp2cuda_temp_134) = 0.0);
+                            float* csharp2cuda_temp_134 = &((right)[index]);
+                            (*(csharp2cuda_temp_134) = 0.0f);
 #line 377 "GraphModule.cs"
                             int* csharp2cuda_temp_133 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_133));
@@ -1826,18 +1826,18 @@ __device__ void mathblocks_graph_dispatch(
                                 {
 #line 385 "GraphModule.cs"
 #line 385 "GraphModule.cs"
-                                    double* csharp2cuda_temp_137 = &((reduced_matrix)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(from, 1), size), from), 1)]);
+                                    float* csharp2cuda_temp_137 = &((reduced_matrix)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(from, 1), size), from), 1)]);
 #line 385 "GraphModule.cs"
-                                    double csharp2cuda_temp_138 = *(csharp2cuda_temp_137);
-                                    (*(csharp2cuda_temp_137) = __dadd_rn(csharp2cuda_temp_138, 1.0));
+                                    float csharp2cuda_temp_138 = *(csharp2cuda_temp_137);
+                                    (*(csharp2cuda_temp_137) = __fadd_rn(csharp2cuda_temp_138, 1.0f));
 #line 386 "GraphModule.cs"
 #line 386 "GraphModule.cs"
-                                    double* csharp2cuda_temp_139 = &((right)[csharp2cuda_i32_sub(from, 1)]);
+                                    float* csharp2cuda_temp_139 = &((right)[csharp2cuda_i32_sub(from, 1)]);
 #line 386 "GraphModule.cs"
-                                    double csharp2cuda_temp_140 = *(csharp2cuda_temp_139);
+                                    float csharp2cuda_temp_140 = *(csharp2cuda_temp_139);
 #line 386 "GraphModule.cs"
-                                    double csharp2cuda_temp_141 = ((edges)[index]).weight;
-                                    (*(csharp2cuda_temp_139) = __dsub_rn(csharp2cuda_temp_140, csharp2cuda_temp_141));
+                                    float csharp2cuda_temp_141 = ((edges)[index]).weight;
+                                    (*(csharp2cuda_temp_139) = __fsub_rn(csharp2cuda_temp_140, csharp2cuda_temp_141));
                                 }
 #line 388 "GraphModule.cs"
                                 if (((to) != (0)))
@@ -1845,18 +1845,18 @@ __device__ void mathblocks_graph_dispatch(
                                 {
 #line 390 "GraphModule.cs"
 #line 390 "GraphModule.cs"
-                                    double* csharp2cuda_temp_142 = &((reduced_matrix)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(to, 1), size), to), 1)]);
+                                    float* csharp2cuda_temp_142 = &((reduced_matrix)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(to, 1), size), to), 1)]);
 #line 390 "GraphModule.cs"
-                                    double csharp2cuda_temp_143 = *(csharp2cuda_temp_142);
-                                    (*(csharp2cuda_temp_142) = __dadd_rn(csharp2cuda_temp_143, 1.0));
+                                    float csharp2cuda_temp_143 = *(csharp2cuda_temp_142);
+                                    (*(csharp2cuda_temp_142) = __fadd_rn(csharp2cuda_temp_143, 1.0f));
 #line 391 "GraphModule.cs"
 #line 391 "GraphModule.cs"
-                                    double* csharp2cuda_temp_144 = &((right)[csharp2cuda_i32_sub(to, 1)]);
+                                    float* csharp2cuda_temp_144 = &((right)[csharp2cuda_i32_sub(to, 1)]);
 #line 391 "GraphModule.cs"
-                                    double csharp2cuda_temp_145 = *(csharp2cuda_temp_144);
+                                    float csharp2cuda_temp_145 = *(csharp2cuda_temp_144);
 #line 391 "GraphModule.cs"
-                                    double csharp2cuda_temp_146 = ((edges)[index]).weight;
-                                    (*(csharp2cuda_temp_144) = __dadd_rn(csharp2cuda_temp_145, csharp2cuda_temp_146));
+                                    float csharp2cuda_temp_146 = ((edges)[index]).weight;
+                                    (*(csharp2cuda_temp_144) = __fadd_rn(csharp2cuda_temp_145, csharp2cuda_temp_146));
                                 }
 #line 393 "GraphModule.cs"
 #line 393 "GraphModule.cs"
@@ -1877,16 +1877,16 @@ __device__ void mathblocks_graph_dispatch(
                                 {
 #line 395 "GraphModule.cs"
 #line 395 "GraphModule.cs"
-                                    double* csharp2cuda_temp_148 = &((reduced_matrix)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(from, 1), size), to), 1)]);
+                                    float* csharp2cuda_temp_148 = &((reduced_matrix)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(from, 1), size), to), 1)]);
 #line 395 "GraphModule.cs"
-                                    double csharp2cuda_temp_149 = *(csharp2cuda_temp_148);
-                                    (*(csharp2cuda_temp_148) = __dsub_rn(csharp2cuda_temp_149, 1.0));
+                                    float csharp2cuda_temp_149 = *(csharp2cuda_temp_148);
+                                    (*(csharp2cuda_temp_148) = __fsub_rn(csharp2cuda_temp_149, 1.0f));
 #line 396 "GraphModule.cs"
 #line 396 "GraphModule.cs"
-                                    double* csharp2cuda_temp_150 = &((reduced_matrix)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(to, 1), size), from), 1)]);
+                                    float* csharp2cuda_temp_150 = &((reduced_matrix)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(to, 1), size), from), 1)]);
 #line 396 "GraphModule.cs"
-                                    double csharp2cuda_temp_151 = *(csharp2cuda_temp_150);
-                                    (*(csharp2cuda_temp_150) = __dsub_rn(csharp2cuda_temp_151, 1.0));
+                                    float csharp2cuda_temp_151 = *(csharp2cuda_temp_150);
+                                    (*(csharp2cuda_temp_150) = __fsub_rn(csharp2cuda_temp_151, 1.0f));
                                 }
                             }
 #line 379 "GraphModule.cs"
@@ -1926,7 +1926,7 @@ __device__ void mathblocks_graph_dispatch(
 #line 416 "GraphModule.cs"
                 {
 #line 417 "GraphModule.cs"
-                    double sum_squares = 0.0;
+                    float sum_squares = 0.0f;
 #line 418 "GraphModule.cs"
                     {
 #line 418 "GraphModule.cs"
@@ -1942,21 +1942,21 @@ __device__ void mathblocks_graph_dispatch(
 #line 420 "GraphModule.cs"
                                 int csharp2cuda_temp_158 = ((edges)[index]).to;
 #line 420 "GraphModule.cs"
-                                double csharp2cuda_temp_159 = (vector)[csharp2cuda_temp_158];
+                                float csharp2cuda_temp_159 = (vector)[csharp2cuda_temp_158];
 #line 421 "GraphModule.cs"
                                 int csharp2cuda_temp_160 = ((edges)[index]).from;
 #line 421 "GraphModule.cs"
-                                double csharp2cuda_temp_161 = (vector)[csharp2cuda_temp_160];
+                                float csharp2cuda_temp_161 = (vector)[csharp2cuda_temp_160];
 #line 422 "GraphModule.cs"
-                                double csharp2cuda_temp_162 = ((edges)[index]).weight;
+                                float csharp2cuda_temp_162 = ((edges)[index]).weight;
 #line 420 "GraphModule.cs"
-                                double residual = __dsub_rn(__dsub_rn(csharp2cuda_temp_159, csharp2cuda_temp_161), csharp2cuda_temp_162);
+                                float residual = __fsub_rn(__fsub_rn(csharp2cuda_temp_159, csharp2cuda_temp_161), csharp2cuda_temp_162);
 #line 423 "GraphModule.cs"
 #line 423 "GraphModule.cs"
-                                double* csharp2cuda_temp_163 = &(sum_squares);
+                                float* csharp2cuda_temp_163 = &(sum_squares);
 #line 423 "GraphModule.cs"
-                                double csharp2cuda_temp_164 = *(csharp2cuda_temp_163);
-                                (*(csharp2cuda_temp_163) = __dadd_rn(csharp2cuda_temp_164, __dmul_rn(residual, residual)));
+                                float csharp2cuda_temp_164 = *(csharp2cuda_temp_163);
+                                (*(csharp2cuda_temp_163) = __fadd_rn(csharp2cuda_temp_164, __fmul_rn(residual, residual)));
                             }
 #line 418 "GraphModule.cs"
                             int* csharp2cuda_temp_156 = &(index);
@@ -1965,7 +1965,7 @@ __device__ void mathblocks_graph_dispatch(
                     }
 #line 425 "GraphModule.cs"
 #line 425 "GraphModule.cs"
-                    double* csharp2cuda_temp_165 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_165 = &((output)->scalar_value);
                     (*(csharp2cuda_temp_165) = mathblocks_square_root(sum_squares));
 #line 426 "GraphModule.cs"
                     break;
@@ -2174,17 +2174,17 @@ __device__ void mathblocks_graph_dispatch(
 #line 477 "GraphModule.cs"
                 {
 #line 478 "GraphModule.cs"
-                    double damping = (second)->scalar_value;
+                    float damping = (second)->scalar_value;
 #line 479 "GraphModule.cs"
                     int iterations = 0;
 #line 480 "GraphModule.cs"
 #line 480 "GraphModule.cs"
                     bool csharp2cuda_temp_198;
 #line 480 "GraphModule.cs"
-                    if (!(((damping) < (0.0))))
+                    if (!(((damping) < (0.0f))))
                     {
 #line 480 "GraphModule.cs"
-                        csharp2cuda_temp_198 = ((damping) > (1.0));
+                        csharp2cuda_temp_198 = ((damping) > (1.0f));
                     }
                     else
                     {
@@ -2197,7 +2197,7 @@ __device__ void mathblocks_graph_dispatch(
                     if (!(csharp2cuda_temp_198))
                     {
 #line 481 "GraphModule.cs"
-                        double csharp2cuda_temp_200 = (third)->scalar_value;
+                        float csharp2cuda_temp_200 = (third)->scalar_value;
 #line 481 "GraphModule.cs"
                         int* csharp2cuda_temp_201 = &(iterations);
 #line 481 "GraphModule.cs"
@@ -2234,9 +2234,9 @@ __device__ void mathblocks_graph_dispatch(
                         break;
                     }
 #line 487 "GraphModule.cs"
-                    double* outgoing = scratch;
+                    float* outgoing = scratch;
 #line 488 "GraphModule.cs"
-                    double* next = csharp2cuda_pointer_add(scratch, vertex_count);
+                    float* next = csharp2cuda_pointer_add(scratch, vertex_count);
 #line 489 "GraphModule.cs"
                     {
 #line 489 "GraphModule.cs"
@@ -2249,14 +2249,14 @@ __device__ void mathblocks_graph_dispatch(
                             {
 #line 491 "GraphModule.cs"
 #line 491 "GraphModule.cs"
-                                double* csharp2cuda_temp_206 = &((result)[vertex]);
+                                float* csharp2cuda_temp_206 = &((result)[vertex]);
 #line 491 "GraphModule.cs"
-                                double csharp2cuda_temp_207 = __ddiv_rn(1.0, ((double)(vertex_count)));
+                                float csharp2cuda_temp_207 = __fdiv_rn(1.0f, ((float)(vertex_count)));
                                 (*(csharp2cuda_temp_206) = csharp2cuda_temp_207);
 #line 492 "GraphModule.cs"
 #line 492 "GraphModule.cs"
-                                double* csharp2cuda_temp_208 = &((outgoing)[vertex]);
-                                (*(csharp2cuda_temp_208) = 0.0);
+                                float* csharp2cuda_temp_208 = &((outgoing)[vertex]);
+                                (*(csharp2cuda_temp_208) = 0.0f);
                             }
 #line 489 "GraphModule.cs"
                             int* csharp2cuda_temp_205 = &(vertex);
@@ -2277,8 +2277,8 @@ __device__ void mathblocks_graph_dispatch(
                             {
 #line 496 "GraphModule.cs"
 #line 496 "GraphModule.cs"
-                                double csharp2cuda_temp_211 = ((edges)[index]).weight;
-                                if (((csharp2cuda_temp_211) < (0.0)))
+                                float csharp2cuda_temp_211 = ((edges)[index]).weight;
+                                if (((csharp2cuda_temp_211) < (0.0f)))
 #line 497 "GraphModule.cs"
                                 {
 #line 498 "GraphModule.cs"
@@ -2292,12 +2292,12 @@ __device__ void mathblocks_graph_dispatch(
 #line 501 "GraphModule.cs"
                                 int csharp2cuda_temp_213 = ((edges)[index]).from;
 #line 501 "GraphModule.cs"
-                                double* csharp2cuda_temp_214 = &((outgoing)[csharp2cuda_temp_213]);
+                                float* csharp2cuda_temp_214 = &((outgoing)[csharp2cuda_temp_213]);
 #line 501 "GraphModule.cs"
-                                double csharp2cuda_temp_215 = *(csharp2cuda_temp_214);
+                                float csharp2cuda_temp_215 = *(csharp2cuda_temp_214);
 #line 501 "GraphModule.cs"
-                                double csharp2cuda_temp_216 = ((edges)[index]).weight;
-                                (*(csharp2cuda_temp_214) = __dadd_rn(csharp2cuda_temp_215, csharp2cuda_temp_216));
+                                float csharp2cuda_temp_216 = ((edges)[index]).weight;
+                                (*(csharp2cuda_temp_214) = __fadd_rn(csharp2cuda_temp_215, csharp2cuda_temp_216));
                             }
 #line 494 "GraphModule.cs"
                             int* csharp2cuda_temp_209 = &(index);
@@ -2339,9 +2339,9 @@ __device__ void mathblocks_graph_dispatch(
                                             break;
 #line 506 "GraphModule.cs"
 #line 506 "GraphModule.cs"
-                                        double* csharp2cuda_temp_221 = &((next)[vertex]);
+                                        float* csharp2cuda_temp_221 = &((next)[vertex]);
 #line 506 "GraphModule.cs"
-                                        double csharp2cuda_temp_222 = __ddiv_rn(__dsub_rn(1.0, damping), ((double)(vertex_count)));
+                                        float csharp2cuda_temp_222 = __fdiv_rn(__fsub_rn(1.0f, damping), ((float)(vertex_count)));
                                         (*(csharp2cuda_temp_221) = csharp2cuda_temp_222);
 #line 505 "GraphModule.cs"
                                         int* csharp2cuda_temp_220 = &(vertex);
@@ -2349,7 +2349,7 @@ __device__ void mathblocks_graph_dispatch(
                                     }
                                 }
 #line 507 "GraphModule.cs"
-                                double dangling = 0.0;
+                                float dangling = 0.0f;
 #line 508 "GraphModule.cs"
                                 {
 #line 508 "GraphModule.cs"
@@ -2360,17 +2360,17 @@ __device__ void mathblocks_graph_dispatch(
                                             break;
 #line 509 "GraphModule.cs"
 #line 509 "GraphModule.cs"
-                                        double csharp2cuda_temp_224 = (outgoing)[vertex];
-                                        if (((csharp2cuda_temp_224) == (0.0)))
+                                        float csharp2cuda_temp_224 = (outgoing)[vertex];
+                                        if (((csharp2cuda_temp_224) == (0.0f)))
                                         {
 #line 510 "GraphModule.cs"
 #line 510 "GraphModule.cs"
-                                            double* csharp2cuda_temp_225 = &(dangling);
+                                            float* csharp2cuda_temp_225 = &(dangling);
 #line 510 "GraphModule.cs"
-                                            double csharp2cuda_temp_226 = *(csharp2cuda_temp_225);
+                                            float csharp2cuda_temp_226 = *(csharp2cuda_temp_225);
 #line 510 "GraphModule.cs"
-                                            double csharp2cuda_temp_227 = (result)[vertex];
-                                            (*(csharp2cuda_temp_225) = __dadd_rn(csharp2cuda_temp_226, csharp2cuda_temp_227));
+                                            float csharp2cuda_temp_227 = (result)[vertex];
+                                            (*(csharp2cuda_temp_225) = __fadd_rn(csharp2cuda_temp_226, csharp2cuda_temp_227));
                                         }
 #line 508 "GraphModule.cs"
                                         int* csharp2cuda_temp_223 = &(vertex);
@@ -2378,7 +2378,7 @@ __device__ void mathblocks_graph_dispatch(
                                     }
                                 }
 #line 511 "GraphModule.cs"
-                                double dangling_share = __ddiv_rn(__dmul_rn(damping, dangling), ((double)(vertex_count)));
+                                float dangling_share = __fdiv_rn(__fmul_rn(damping, dangling), ((float)(vertex_count)));
 #line 512 "GraphModule.cs"
                                 {
 #line 512 "GraphModule.cs"
@@ -2389,10 +2389,10 @@ __device__ void mathblocks_graph_dispatch(
                                             break;
 #line 513 "GraphModule.cs"
 #line 513 "GraphModule.cs"
-                                        double* csharp2cuda_temp_229 = &((next)[vertex]);
+                                        float* csharp2cuda_temp_229 = &((next)[vertex]);
 #line 513 "GraphModule.cs"
-                                        double csharp2cuda_temp_230 = *(csharp2cuda_temp_229);
-                                        (*(csharp2cuda_temp_229) = __dadd_rn(csharp2cuda_temp_230, dangling_share));
+                                        float csharp2cuda_temp_230 = *(csharp2cuda_temp_229);
+                                        (*(csharp2cuda_temp_229) = __fadd_rn(csharp2cuda_temp_230, dangling_share));
 #line 512 "GraphModule.cs"
                                         int* csharp2cuda_temp_228 = &(vertex);
                                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_228));
@@ -2412,22 +2412,22 @@ __device__ void mathblocks_graph_dispatch(
 #line 515 "GraphModule.cs"
                                         int csharp2cuda_temp_233 = ((edges)[index]).to;
 #line 515 "GraphModule.cs"
-                                        double* csharp2cuda_temp_234 = &((next)[csharp2cuda_temp_233]);
+                                        float* csharp2cuda_temp_234 = &((next)[csharp2cuda_temp_233]);
 #line 515 "GraphModule.cs"
-                                        double csharp2cuda_temp_235 = *(csharp2cuda_temp_234);
+                                        float csharp2cuda_temp_235 = *(csharp2cuda_temp_234);
 #line 515 "GraphModule.cs"
                                         int csharp2cuda_temp_236 = ((edges)[index]).from;
 #line 515 "GraphModule.cs"
-                                        double csharp2cuda_temp_237 = (result)[csharp2cuda_temp_236];
+                                        float csharp2cuda_temp_237 = (result)[csharp2cuda_temp_236];
 #line 516 "GraphModule.cs"
-                                        double csharp2cuda_temp_238 = ((edges)[index]).weight;
+                                        float csharp2cuda_temp_238 = ((edges)[index]).weight;
 #line 516 "GraphModule.cs"
                                         int csharp2cuda_temp_239 = ((edges)[index]).from;
 #line 516 "GraphModule.cs"
-                                        double csharp2cuda_temp_240 = (outgoing)[csharp2cuda_temp_239];
+                                        float csharp2cuda_temp_240 = (outgoing)[csharp2cuda_temp_239];
 #line 515 "GraphModule.cs"
-                                        double csharp2cuda_temp_241 = __ddiv_rn(__dmul_rn(__dmul_rn(damping, csharp2cuda_temp_237), csharp2cuda_temp_238), csharp2cuda_temp_240);
-                                        (*(csharp2cuda_temp_234) = __dadd_rn(csharp2cuda_temp_235, csharp2cuda_temp_241));
+                                        float csharp2cuda_temp_241 = __fdiv_rn(__fmul_rn(__fmul_rn(damping, csharp2cuda_temp_237), csharp2cuda_temp_238), csharp2cuda_temp_240);
+                                        (*(csharp2cuda_temp_234) = __fadd_rn(csharp2cuda_temp_235, csharp2cuda_temp_241));
 #line 514 "GraphModule.cs"
                                         int* csharp2cuda_temp_231 = &(index);
                                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_231));
@@ -2443,9 +2443,9 @@ __device__ void mathblocks_graph_dispatch(
                                             break;
 #line 518 "GraphModule.cs"
 #line 518 "GraphModule.cs"
-                                        double* csharp2cuda_temp_243 = &((result)[vertex]);
+                                        float* csharp2cuda_temp_243 = &((result)[vertex]);
 #line 518 "GraphModule.cs"
-                                        double csharp2cuda_temp_244 = (next)[vertex];
+                                        float csharp2cuda_temp_244 = (next)[vertex];
                                         (*(csharp2cuda_temp_243) = csharp2cuda_temp_244);
 #line 517 "GraphModule.cs"
                                         int* csharp2cuda_temp_242 = &(vertex);
@@ -2477,8 +2477,8 @@ __device__ void mathblocks_graph_dispatch(
                             break;
 #line 527 "GraphModule.cs"
 #line 527 "GraphModule.cs"
-                        double* csharp2cuda_temp_246 = &((result)[index]);
-                        (*(csharp2cuda_temp_246) = 0.0);
+                        float* csharp2cuda_temp_246 = &((result)[index]);
+                        (*(csharp2cuda_temp_246) = 0.0f);
 #line 526 "GraphModule.cs"
                         int* csharp2cuda_temp_245 = &(index);
                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_245));
@@ -2501,17 +2501,17 @@ __device__ void mathblocks_graph_dispatch(
 #line 531 "GraphModule.cs"
                             int to = ((edges)[index]).to;
 #line 532 "GraphModule.cs"
-                            double weight = ((edges)[index]).weight;
+                            float weight = ((edges)[index]).weight;
 #line 533 "GraphModule.cs"
                             if (((opcode) == (10)))
 #line 534 "GraphModule.cs"
                             {
 #line 535 "GraphModule.cs"
 #line 535 "GraphModule.cs"
-                                double* csharp2cuda_temp_249 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(from, vertex_count), to)]);
+                                float* csharp2cuda_temp_249 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(from, vertex_count), to)]);
 #line 535 "GraphModule.cs"
-                                double csharp2cuda_temp_250 = *(csharp2cuda_temp_249);
-                                (*(csharp2cuda_temp_249) = __dadd_rn(csharp2cuda_temp_250, weight));
+                                float csharp2cuda_temp_250 = *(csharp2cuda_temp_249);
+                                (*(csharp2cuda_temp_249) = __fadd_rn(csharp2cuda_temp_250, weight));
                             }
                             else
                             {
@@ -2521,44 +2521,44 @@ __device__ void mathblocks_graph_dispatch(
                                 {
 #line 539 "GraphModule.cs"
 #line 539 "GraphModule.cs"
-                                    double* csharp2cuda_temp_251 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(from, vertex_count), to)]);
+                                    float* csharp2cuda_temp_251 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(from, vertex_count), to)]);
 #line 539 "GraphModule.cs"
-                                    double csharp2cuda_temp_252 = *(csharp2cuda_temp_251);
-                                    (*(csharp2cuda_temp_251) = __dadd_rn(csharp2cuda_temp_252, weight));
+                                    float csharp2cuda_temp_252 = *(csharp2cuda_temp_251);
+                                    (*(csharp2cuda_temp_251) = __fadd_rn(csharp2cuda_temp_252, weight));
 #line 540 "GraphModule.cs"
 #line 540 "GraphModule.cs"
-                                    double* csharp2cuda_temp_253 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(to, vertex_count), from)]);
+                                    float* csharp2cuda_temp_253 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(to, vertex_count), from)]);
 #line 540 "GraphModule.cs"
-                                    double csharp2cuda_temp_254 = *(csharp2cuda_temp_253);
-                                    (*(csharp2cuda_temp_253) = __dadd_rn(csharp2cuda_temp_254, weight));
+                                    float csharp2cuda_temp_254 = *(csharp2cuda_temp_253);
+                                    (*(csharp2cuda_temp_253) = __fadd_rn(csharp2cuda_temp_254, weight));
                                 }
                                 else
 #line 543 "GraphModule.cs"
                                 {
 #line 544 "GraphModule.cs"
 #line 544 "GraphModule.cs"
-                                    double* csharp2cuda_temp_255 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(from, vertex_count), from)]);
+                                    float* csharp2cuda_temp_255 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(from, vertex_count), from)]);
 #line 544 "GraphModule.cs"
-                                    double csharp2cuda_temp_256 = *(csharp2cuda_temp_255);
-                                    (*(csharp2cuda_temp_255) = __dadd_rn(csharp2cuda_temp_256, weight));
+                                    float csharp2cuda_temp_256 = *(csharp2cuda_temp_255);
+                                    (*(csharp2cuda_temp_255) = __fadd_rn(csharp2cuda_temp_256, weight));
 #line 545 "GraphModule.cs"
 #line 545 "GraphModule.cs"
-                                    double* csharp2cuda_temp_257 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(to, vertex_count), to)]);
+                                    float* csharp2cuda_temp_257 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(to, vertex_count), to)]);
 #line 545 "GraphModule.cs"
-                                    double csharp2cuda_temp_258 = *(csharp2cuda_temp_257);
-                                    (*(csharp2cuda_temp_257) = __dadd_rn(csharp2cuda_temp_258, weight));
+                                    float csharp2cuda_temp_258 = *(csharp2cuda_temp_257);
+                                    (*(csharp2cuda_temp_257) = __fadd_rn(csharp2cuda_temp_258, weight));
 #line 546 "GraphModule.cs"
 #line 546 "GraphModule.cs"
-                                    double* csharp2cuda_temp_259 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(from, vertex_count), to)]);
+                                    float* csharp2cuda_temp_259 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(from, vertex_count), to)]);
 #line 546 "GraphModule.cs"
-                                    double csharp2cuda_temp_260 = *(csharp2cuda_temp_259);
-                                    (*(csharp2cuda_temp_259) = __dsub_rn(csharp2cuda_temp_260, weight));
+                                    float csharp2cuda_temp_260 = *(csharp2cuda_temp_259);
+                                    (*(csharp2cuda_temp_259) = __fsub_rn(csharp2cuda_temp_260, weight));
 #line 547 "GraphModule.cs"
 #line 547 "GraphModule.cs"
-                                    double* csharp2cuda_temp_261 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(to, vertex_count), from)]);
+                                    float* csharp2cuda_temp_261 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(to, vertex_count), from)]);
 #line 547 "GraphModule.cs"
-                                    double csharp2cuda_temp_262 = *(csharp2cuda_temp_261);
-                                    (*(csharp2cuda_temp_261) = __dsub_rn(csharp2cuda_temp_262, weight));
+                                    float csharp2cuda_temp_262 = *(csharp2cuda_temp_261);
+                                    (*(csharp2cuda_temp_261) = __fsub_rn(csharp2cuda_temp_262, weight));
                                 }
                             }
                         }
@@ -2721,8 +2721,8 @@ __device__ void mathblocks_graph_dispatch(
                     }
 #line 576 "GraphModule.cs"
 #line 576 "GraphModule.cs"
-                    double* csharp2cuda_temp_283 = &((output)->scalar_value);
-                    (*(csharp2cuda_temp_283) = ((double)(count)));
+                    float* csharp2cuda_temp_283 = &((output)->scalar_value);
+                    (*(csharp2cuda_temp_283) = ((float)(count)));
 #line 577 "GraphModule.cs"
                     break;
                 }
@@ -2747,7 +2747,7 @@ __device__ void mathblocks_graph_dispatch(
                     int source = 0;
 #line 588 "GraphModule.cs"
 #line 588 "GraphModule.cs"
-                    double csharp2cuda_temp_285 = (second)->scalar_value;
+                    float csharp2cuda_temp_285 = (second)->scalar_value;
 #line 588 "GraphModule.cs"
                     int* csharp2cuda_temp_286 = &(source);
 #line 588 "GraphModule.cs"
@@ -2789,7 +2789,7 @@ __device__ void mathblocks_graph_dispatch(
                             {
 #line 596 "GraphModule.cs"
 #line 596 "GraphModule.cs"
-                                double* csharp2cuda_temp_291 = &((result)[vertex]);
+                                float* csharp2cuda_temp_291 = &((result)[vertex]);
                                 (*(csharp2cuda_temp_291) = mathblocks_positive_infinity());
 #line 597 "GraphModule.cs"
 #line 597 "GraphModule.cs"
@@ -2803,8 +2803,8 @@ __device__ void mathblocks_graph_dispatch(
                     }
 #line 599 "GraphModule.cs"
 #line 599 "GraphModule.cs"
-                    double* csharp2cuda_temp_293 = &((result)[source]);
-                    (*(csharp2cuda_temp_293) = 0.0);
+                    float* csharp2cuda_temp_293 = &((result)[source]);
+                    (*(csharp2cuda_temp_293) = 0.0f);
 #line 600 "GraphModule.cs"
                     {
 #line 600 "GraphModule.cs"
@@ -2818,7 +2818,7 @@ __device__ void mathblocks_graph_dispatch(
 #line 602 "GraphModule.cs"
                                 int vertex = -1;
 #line 603 "GraphModule.cs"
-                                double best = mathblocks_positive_infinity();
+                                float best = mathblocks_positive_infinity();
 #line 604 "GraphModule.cs"
                                 {
 #line 604 "GraphModule.cs"
@@ -2836,7 +2836,7 @@ __device__ void mathblocks_graph_dispatch(
                                         if ((!(((csharp2cuda_temp_296) != 0))))
                                         {
 #line 605 "GraphModule.cs"
-                                            double csharp2cuda_temp_298 = (result)[candidate];
+                                            float csharp2cuda_temp_298 = (result)[candidate];
 #line 605 "GraphModule.cs"
                                             csharp2cuda_temp_297 = ((csharp2cuda_temp_298) < (best));
                                         }
@@ -2850,9 +2850,9 @@ __device__ void mathblocks_graph_dispatch(
                                         {
 #line 607 "GraphModule.cs"
 #line 607 "GraphModule.cs"
-                                            double* csharp2cuda_temp_299 = &(best);
+                                            float* csharp2cuda_temp_299 = &(best);
 #line 607 "GraphModule.cs"
-                                            double csharp2cuda_temp_300 = (result)[candidate];
+                                            float csharp2cuda_temp_300 = (result)[candidate];
                                             (*(csharp2cuda_temp_299) = csharp2cuda_temp_300);
 #line 608 "GraphModule.cs"
 #line 608 "GraphModule.cs"
@@ -2888,8 +2888,8 @@ __device__ void mathblocks_graph_dispatch(
                                         {
 #line 615 "GraphModule.cs"
 #line 615 "GraphModule.cs"
-                                            double csharp2cuda_temp_305 = ((edges)[index]).weight;
-                                            if (((csharp2cuda_temp_305) < (0.0)))
+                                            float csharp2cuda_temp_305 = ((edges)[index]).weight;
+                                            if (((csharp2cuda_temp_305) < (0.0f)))
 #line 616 "GraphModule.cs"
                                             {
 #line 617 "GraphModule.cs"
@@ -2938,18 +2938,18 @@ __device__ void mathblocks_graph_dispatch(
                                                 goto csharp2cuda_for_continue_32;
                                             }
 #line 627 "GraphModule.cs"
-                                            double csharp2cuda_temp_311 = (result)[vertex];
+                                            float csharp2cuda_temp_311 = (result)[vertex];
 #line 627 "GraphModule.cs"
-                                            double csharp2cuda_temp_312 = ((edges)[index]).weight;
+                                            float csharp2cuda_temp_312 = ((edges)[index]).weight;
 #line 627 "GraphModule.cs"
-                                            double candidate = __dadd_rn(csharp2cuda_temp_311, csharp2cuda_temp_312);
+                                            float candidate = __fadd_rn(csharp2cuda_temp_311, csharp2cuda_temp_312);
 #line 628 "GraphModule.cs"
 #line 628 "GraphModule.cs"
-                                            double* csharp2cuda_temp_313 = &((result)[neighbor]);
+                                            float* csharp2cuda_temp_313 = &((result)[neighbor]);
 #line 628 "GraphModule.cs"
-                                            double csharp2cuda_temp_314 = (result)[neighbor];
+                                            float csharp2cuda_temp_314 = (result)[neighbor];
 #line 628 "GraphModule.cs"
-                                            double csharp2cuda_temp_315;
+                                            float csharp2cuda_temp_315;
 #line 628 "GraphModule.cs"
                                             if (((csharp2cuda_temp_314) < (candidate)))
                                             {
@@ -3131,7 +3131,7 @@ __device__ void mathblocks_graph_dispatch(
         if (csharp2cuda_temp_327)
         {
 #line 640 "GraphModule.cs"
-            double csharp2cuda_temp_329 = (output)->scalar_value;
+            float csharp2cuda_temp_329 = (output)->scalar_value;
 #line 637 "GraphModule.cs"
             csharp2cuda_temp_328 = (!(isfinite(csharp2cuda_temp_329)));
         }
@@ -3270,7 +3270,7 @@ __device__ void mathblocks_graph_dispatch(
                         break;
 #line 649 "GraphModule.cs"
 #line 649 "GraphModule.cs"
-                    double csharp2cuda_temp_342 = (result)[index];
+                    float csharp2cuda_temp_342 = (result)[index];
                     if ((!(isfinite(csharp2cuda_temp_342))))
                     {
 #line 649 "GraphModule.cs"
@@ -3295,9 +3295,9 @@ __device__ bool mathblocks_graph_edge_less(
 {
 #line 144 "GraphModule.cs"
 #line 144 "GraphModule.cs"
-    double csharp2cuda_temp_0 = (*(left)).weight;
+    float csharp2cuda_temp_0 = (*(left)).weight;
 #line 144 "GraphModule.cs"
-    double csharp2cuda_temp_1 = (*(right)).weight;
+    float csharp2cuda_temp_1 = (*(right)).weight;
     if (((csharp2cuda_temp_0) < (csharp2cuda_temp_1)))
     {
 #line 145 "GraphModule.cs"
@@ -3305,9 +3305,9 @@ __device__ bool mathblocks_graph_edge_less(
     }
 #line 146 "GraphModule.cs"
 #line 146 "GraphModule.cs"
-    double csharp2cuda_temp_2 = (*(right)).weight;
+    float csharp2cuda_temp_2 = (*(right)).weight;
 #line 146 "GraphModule.cs"
-    double csharp2cuda_temp_3 = (*(left)).weight;
+    float csharp2cuda_temp_3 = (*(left)).weight;
     if (((csharp2cuda_temp_2) < (csharp2cuda_temp_3)))
     {
 #line 147 "GraphModule.cs"

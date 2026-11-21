@@ -643,8 +643,8 @@ struct MathBlockComplexValue;
 #line 44 "ComplexModule.cs"
 struct MathBlockComplexValue
 {
-    double real;
-    double imaginary;
+    float real;
+    float imaginary;
 };
 
 #line 59 "ComplexModule.cs"
@@ -674,16 +674,16 @@ __device__ MathBlockComplexValue mathblocks_complex_exponential(MathBlockComplex
 __device__ bool mathblocks_complex_finite(MathBlockComplexValue value);
 
 #line 165 "ComplexModule.cs"
-__device__ MathBlockComplexValue mathblocks_complex_from_polar(double magnitude, double phase);
+__device__ MathBlockComplexValue mathblocks_complex_from_polar(float magnitude, float phase);
 
 #line 137 "ComplexModule.cs"
 __device__ MathBlockComplexValue mathblocks_complex_logarithm(MathBlockComplexValue value);
 
 #line 105 "ComplexModule.cs"
-__device__ double mathblocks_complex_magnitude(MathBlockComplexValue value);
+__device__ float mathblocks_complex_magnitude(MathBlockComplexValue value);
 
 #line 50 "ComplexModule.cs"
-__device__ MathBlockComplexValue mathblocks_complex_make(double real, double imaginary);
+__device__ MathBlockComplexValue mathblocks_complex_make(float real, float imaginary);
 
 #line 75 "ComplexModule.cs"
 __device__ MathBlockComplexValue mathblocks_complex_multiply(
@@ -691,7 +691,7 @@ __device__ MathBlockComplexValue mathblocks_complex_multiply(
     MathBlockComplexValue right);
 
 #line 122 "ComplexModule.cs"
-__device__ double mathblocks_complex_phase(MathBlockComplexValue value);
+__device__ float mathblocks_complex_phase(MathBlockComplexValue value);
 
 #line 156 "ComplexModule.cs"
 __device__ MathBlockComplexValue mathblocks_complex_power(
@@ -717,14 +717,14 @@ __device__ MathBlockComplexValue mathblocks_complex_add(
 {
 #line 64 "ComplexModule.cs"
 #line 64 "ComplexModule.cs"
-    double csharp2cuda_temp_0 = (left).real;
+    float csharp2cuda_temp_0 = (left).real;
 #line 64 "ComplexModule.cs"
-    double csharp2cuda_temp_1 = (right).real;
+    float csharp2cuda_temp_1 = (right).real;
 #line 64 "ComplexModule.cs"
-    double csharp2cuda_temp_2 = (left).imaginary;
+    float csharp2cuda_temp_2 = (left).imaginary;
 #line 64 "ComplexModule.cs"
-    double csharp2cuda_temp_3 = (right).imaginary;
-    return mathblocks_complex_make(__dadd_rn(csharp2cuda_temp_0, csharp2cuda_temp_1), __dadd_rn(csharp2cuda_temp_2, csharp2cuda_temp_3));
+    float csharp2cuda_temp_3 = (right).imaginary;
+    return mathblocks_complex_make(__fadd_rn(csharp2cuda_temp_0, csharp2cuda_temp_1), __fadd_rn(csharp2cuda_temp_2, csharp2cuda_temp_3));
 }
 
 #line 99 "ComplexModule.cs"
@@ -733,9 +733,9 @@ __device__ MathBlockComplexValue mathblocks_complex_conjugate(MathBlockComplexVa
 {
 #line 102 "ComplexModule.cs"
 #line 102 "ComplexModule.cs"
-    double csharp2cuda_temp_0 = (value).real;
+    float csharp2cuda_temp_0 = (value).real;
 #line 102 "ComplexModule.cs"
-    double csharp2cuda_temp_1 = (value).imaginary;
+    float csharp2cuda_temp_1 = (value).imaginary;
     return mathblocks_complex_make(csharp2cuda_temp_0, (-(csharp2cuda_temp_1)));
 }
 
@@ -785,8 +785,8 @@ __device__ void mathblocks_complex_dispatch(
     {
 #line 201 "ComplexModule.cs"
 #line 201 "ComplexModule.cs"
-        double* csharp2cuda_temp_2 = &((output)->scalar_value);
-        (*(csharp2cuda_temp_2) = 0.0);
+        float* csharp2cuda_temp_2 = &((output)->scalar_value);
+        (*(csharp2cuda_temp_2) = 0.0f);
 #line 202 "ComplexModule.cs"
 #line 202 "ComplexModule.cs"
         int* csharp2cuda_temp_3 = &((output)->boolean_value);
@@ -895,7 +895,7 @@ __device__ void mathblocks_complex_dispatch(
             return;
         }
 #line 221 "ComplexModule.cs"
-        MathBlockComplexValue value = mathblocks_complex_make(0.0, 0.0);
+        MathBlockComplexValue value = mathblocks_complex_make(0.0f, 0.0f);
 #line 222 "ComplexModule.cs"
         switch (opcode)
         {
@@ -927,9 +927,9 @@ __device__ void mathblocks_complex_dispatch(
 #line 231 "ComplexModule.cs"
                 MathBlockComplexValue* csharp2cuda_temp_22 = &(value);
 #line 231 "ComplexModule.cs"
-                double csharp2cuda_temp_23 = (first)->scalar_value;
+                float csharp2cuda_temp_23 = (first)->scalar_value;
 #line 231 "ComplexModule.cs"
-                double csharp2cuda_temp_24 = (second)->scalar_value;
+                float csharp2cuda_temp_24 = (second)->scalar_value;
                 (*(csharp2cuda_temp_22) = mathblocks_complex_make(csharp2cuda_temp_23, csharp2cuda_temp_24));
 #line 232 "ComplexModule.cs"
                 break;
@@ -961,9 +961,9 @@ __device__ void mathblocks_complex_dispatch(
 #line 240 "ComplexModule.cs"
                 MathBlockComplexValue* csharp2cuda_temp_30 = &(value);
 #line 240 "ComplexModule.cs"
-                double csharp2cuda_temp_31 = (first)->scalar_value;
+                float csharp2cuda_temp_31 = (first)->scalar_value;
 #line 240 "ComplexModule.cs"
-                double csharp2cuda_temp_32 = (second)->scalar_value;
+                float csharp2cuda_temp_32 = (second)->scalar_value;
                 (*(csharp2cuda_temp_30) = mathblocks_complex_from_polar(csharp2cuda_temp_31, csharp2cuda_temp_32));
 #line 241 "ComplexModule.cs"
                 break;
@@ -971,13 +971,13 @@ __device__ void mathblocks_complex_dispatch(
             case 6:
 #line 243 "ComplexModule.cs"
 #line 243 "ComplexModule.cs"
-                double* csharp2cuda_temp_33 = &((output)->scalar_value);
+                float* csharp2cuda_temp_33 = &((output)->scalar_value);
 #line 243 "ComplexModule.cs"
                 MathBlockComplexValue csharp2cuda_temp_34 = (complex_first)[0];
                 (*(csharp2cuda_temp_33) = mathblocks_complex_magnitude(csharp2cuda_temp_34));
 #line 244 "ComplexModule.cs"
 #line 244 "ComplexModule.cs"
-                double csharp2cuda_temp_35 = (output)->scalar_value;
+                float csharp2cuda_temp_35 = (output)->scalar_value;
                 if ((!(isfinite(csharp2cuda_temp_35))))
                 {
 #line 244 "ComplexModule.cs"
@@ -1019,9 +1019,9 @@ __device__ void mathblocks_complex_dispatch(
 #line 254 "ComplexModule.cs"
                 MathBlockComplexValue* csharp2cuda_temp_43 = &(value);
 #line 254 "ComplexModule.cs"
-                double csharp2cuda_temp_44 = ((complex_first)[0]).real;
+                float csharp2cuda_temp_44 = ((complex_first)[0]).real;
 #line 254 "ComplexModule.cs"
-                double csharp2cuda_temp_45 = ((complex_first)[0]).imaginary;
+                float csharp2cuda_temp_45 = ((complex_first)[0]).imaginary;
                 (*(csharp2cuda_temp_43) = mathblocks_complex_make((-(csharp2cuda_temp_44)), (-(csharp2cuda_temp_45))));
 #line 255 "ComplexModule.cs"
                 break;
@@ -1029,7 +1029,7 @@ __device__ void mathblocks_complex_dispatch(
             case 10:
 #line 257 "ComplexModule.cs"
 #line 257 "ComplexModule.cs"
-                double* csharp2cuda_temp_46 = &((output)->scalar_value);
+                float* csharp2cuda_temp_46 = &((output)->scalar_value);
 #line 257 "ComplexModule.cs"
                 MathBlockComplexValue csharp2cuda_temp_47 = (complex_first)[0];
                 (*(csharp2cuda_temp_46) = mathblocks_complex_phase(csharp2cuda_temp_47));
@@ -1131,11 +1131,11 @@ __device__ void mathblocks_complex_dispatch(
 #line 286 "ComplexModule.cs"
         unsigned long long csharp2cuda_temp_66 = (first)->data_pointer;
 #line 286 "ComplexModule.cs"
-        const double* real = ((double*)(csharp2cuda_temp_66));
+        const float* real = ((float*)(csharp2cuda_temp_66));
 #line 287 "ComplexModule.cs"
         unsigned long long csharp2cuda_temp_67 = (second)->data_pointer;
 #line 287 "ComplexModule.cs"
-        const double* imaginary = ((double*)(csharp2cuda_temp_67));
+        const float* imaginary = ((float*)(csharp2cuda_temp_67));
 #line 288 "ComplexModule.cs"
         {
 #line 288 "ComplexModule.cs"
@@ -1165,9 +1165,9 @@ __device__ void mathblocks_complex_dispatch(
 #line 289 "ComplexModule.cs"
                 MathBlockComplexValue* csharp2cuda_temp_73 = &((result)[index]);
 #line 289 "ComplexModule.cs"
-                double csharp2cuda_temp_74 = (real)[index];
+                float csharp2cuda_temp_74 = (real)[index];
 #line 289 "ComplexModule.cs"
-                double csharp2cuda_temp_75 = (imaginary)[index];
+                float csharp2cuda_temp_75 = (imaginary)[index];
                 (*(csharp2cuda_temp_73) = mathblocks_complex_make(csharp2cuda_temp_74, csharp2cuda_temp_75));
 #line 288 "ComplexModule.cs"
                 int* csharp2cuda_temp_68 = &(index);
@@ -1209,7 +1209,7 @@ __device__ void mathblocks_complex_dispatch(
 #line 297 "ComplexModule.cs"
         unsigned long long csharp2cuda_temp_78 = (output)->data_pointer;
 #line 297 "ComplexModule.cs"
-        double* projected = ((double*)(csharp2cuda_temp_78));
+        float* projected = ((float*)(csharp2cuda_temp_78));
 #line 298 "ComplexModule.cs"
         {
 #line 298 "ComplexModule.cs"
@@ -1242,9 +1242,9 @@ __device__ void mathblocks_complex_dispatch(
                     {
 #line 300 "ComplexModule.cs"
 #line 300 "ComplexModule.cs"
-                        double* csharp2cuda_temp_84 = &((projected)[index]);
+                        float* csharp2cuda_temp_84 = &((projected)[index]);
 #line 300 "ComplexModule.cs"
-                        double csharp2cuda_temp_85 = ((complex_first)[index]).imaginary;
+                        float csharp2cuda_temp_85 = ((complex_first)[index]).imaginary;
                         (*(csharp2cuda_temp_84) = csharp2cuda_temp_85);
                     }
                     else
@@ -1254,7 +1254,7 @@ __device__ void mathblocks_complex_dispatch(
                         {
 #line 301 "ComplexModule.cs"
 #line 301 "ComplexModule.cs"
-                            double* csharp2cuda_temp_86 = &((projected)[index]);
+                            float* csharp2cuda_temp_86 = &((projected)[index]);
 #line 301 "ComplexModule.cs"
                             MathBlockComplexValue csharp2cuda_temp_87 = (complex_first)[index];
                             (*(csharp2cuda_temp_86) = mathblocks_complex_magnitude(csharp2cuda_temp_87));
@@ -1263,15 +1263,15 @@ __device__ void mathblocks_complex_dispatch(
                         {
 #line 302 "ComplexModule.cs"
 #line 302 "ComplexModule.cs"
-                            double* csharp2cuda_temp_88 = &((projected)[index]);
+                            float* csharp2cuda_temp_88 = &((projected)[index]);
 #line 302 "ComplexModule.cs"
-                            double csharp2cuda_temp_89 = ((complex_first)[index]).real;
+                            float csharp2cuda_temp_89 = ((complex_first)[index]).real;
                             (*(csharp2cuda_temp_88) = csharp2cuda_temp_89);
                         }
                     }
 #line 303 "ComplexModule.cs"
 #line 303 "ComplexModule.cs"
-                    double csharp2cuda_temp_90 = (projected)[index];
+                    float csharp2cuda_temp_90 = (projected)[index];
                     if ((!(isfinite(csharp2cuda_temp_90))))
                     {
 #line 303 "ComplexModule.cs"
@@ -1367,12 +1367,12 @@ __device__ void mathblocks_complex_dispatch(
 #line 321 "ComplexModule.cs"
                     bool csharp2cuda_temp_103;
 #line 321 "ComplexModule.cs"
-                    if (!(((mathblocks_complex_magnitude(csharp2cuda_temp_102)) >= (1.0))))
+                    if (!(((mathblocks_complex_magnitude(csharp2cuda_temp_102)) >= (1.0f))))
                     {
 #line 322 "ComplexModule.cs"
                         MathBlockComplexValue csharp2cuda_temp_104 = (complex_second)[index];
 #line 321 "ComplexModule.cs"
-                        csharp2cuda_temp_103 = ((mathblocks_complex_magnitude(csharp2cuda_temp_104)) > (1.0));
+                        csharp2cuda_temp_103 = ((mathblocks_complex_magnitude(csharp2cuda_temp_104)) > (1.0f));
                     }
                     else
                     {
@@ -1425,7 +1425,7 @@ __device__ void mathblocks_complex_dispatch(
 #line 331 "ComplexModule.cs"
                     int column = csharp2cuda_i32_sub(flat, csharp2cuda_i32_mul(row, count));
 #line 332 "ComplexModule.cs"
-                    MathBlockComplexValue one = mathblocks_complex_make(1.0, 0.0);
+                    MathBlockComplexValue one = mathblocks_complex_make(1.0f, 0.0f);
 #line 336 "ComplexModule.cs"
                     MathBlockComplexValue csharp2cuda_temp_109 = (complex_second)[row];
 #line 337 "ComplexModule.cs"
@@ -1489,7 +1489,7 @@ __device__ void mathblocks_complex_dispatch(
 #line 357 "ComplexModule.cs"
         unsigned long long csharp2cuda_temp_118 = (first)->data_pointer;
 #line 357 "ComplexModule.cs"
-        const double* source = ((double*)(csharp2cuda_temp_118));
+        const float* source = ((float*)(csharp2cuda_temp_118));
 #line 358 "ComplexModule.cs"
         {
 #line 358 "ComplexModule.cs"
@@ -1518,7 +1518,7 @@ __device__ void mathblocks_complex_dispatch(
 #line 359 "ComplexModule.cs"
                 {
 #line 360 "ComplexModule.cs"
-                    MathBlockComplexValue sum = mathblocks_complex_make(0.0, 0.0);
+                    MathBlockComplexValue sum = mathblocks_complex_make(0.0f, 0.0f);
 #line 361 "ComplexModule.cs"
                     {
 #line 361 "ComplexModule.cs"
@@ -1534,13 +1534,13 @@ __device__ void mathblocks_complex_dispatch(
 #line 364 "ComplexModule.cs"
                                 int csharp2cuda_temp_126 = (first)->count;
 #line 363 "ComplexModule.cs"
-                                double angle = __ddiv_rn(__dmul_rn(__dmul_rn(__dmul_rn((-(2.0)), 3.141592653589793), ((double)(frequency))), ((double)(index))), ((double)(csharp2cuda_temp_126)));
+                                float angle = __fdiv_rn(__fmul_rn(__fmul_rn(__fmul_rn((-(2.0f)), 3.1415927f), ((float)(frequency))), ((float)(index))), ((float)(csharp2cuda_temp_126)));
 #line 365 "ComplexModule.cs"
 #line 365 "ComplexModule.cs"
                                 MathBlockComplexValue* csharp2cuda_temp_127 = &(sum);
 #line 368 "ComplexModule.cs"
-                                double csharp2cuda_temp_128 = (source)[index];
-                                (*(csharp2cuda_temp_127) = mathblocks_complex_add(sum, mathblocks_complex_multiply(mathblocks_complex_make(csharp2cuda_temp_128, 0.0), mathblocks_complex_from_polar(1.0, angle))));
+                                float csharp2cuda_temp_128 = (source)[index];
+                                (*(csharp2cuda_temp_127) = mathblocks_complex_add(sum, mathblocks_complex_multiply(mathblocks_complex_make(csharp2cuda_temp_128, 0.0f), mathblocks_complex_from_polar(1.0f, angle))));
                             }
 #line 361 "ComplexModule.cs"
                             int* csharp2cuda_temp_124 = &(index);
@@ -1621,7 +1621,7 @@ __device__ void mathblocks_complex_dispatch(
 #line 386 "ComplexModule.cs"
                 {
 #line 387 "ComplexModule.cs"
-                    MathBlockComplexValue sum = mathblocks_complex_make(0.0, 0.0);
+                    MathBlockComplexValue sum = mathblocks_complex_make(0.0f, 0.0f);
 #line 388 "ComplexModule.cs"
                     {
 #line 388 "ComplexModule.cs"
@@ -1637,13 +1637,13 @@ __device__ void mathblocks_complex_dispatch(
 #line 391 "ComplexModule.cs"
                                 int csharp2cuda_temp_140 = (first)->count;
 #line 390 "ComplexModule.cs"
-                                double angle = __ddiv_rn(__dmul_rn(__dmul_rn(__dmul_rn(2.0, 3.141592653589793), ((double)(frequency))), ((double)(index))), ((double)(csharp2cuda_temp_140)));
+                                float angle = __fdiv_rn(__fmul_rn(__fmul_rn(__fmul_rn(2.0f, 3.1415927f), ((float)(frequency))), ((float)(index))), ((float)(csharp2cuda_temp_140)));
 #line 392 "ComplexModule.cs"
 #line 392 "ComplexModule.cs"
                                 MathBlockComplexValue* csharp2cuda_temp_141 = &(sum);
 #line 395 "ComplexModule.cs"
                                 MathBlockComplexValue csharp2cuda_temp_142 = (complex_first)[frequency];
-                                (*(csharp2cuda_temp_141) = mathblocks_complex_add(sum, mathblocks_complex_multiply(csharp2cuda_temp_142, mathblocks_complex_from_polar(1.0, angle))));
+                                (*(csharp2cuda_temp_141) = mathblocks_complex_add(sum, mathblocks_complex_multiply(csharp2cuda_temp_142, mathblocks_complex_from_polar(1.0f, angle))));
                             }
 #line 388 "ComplexModule.cs"
                             int* csharp2cuda_temp_138 = &(frequency);
@@ -1655,7 +1655,7 @@ __device__ void mathblocks_complex_dispatch(
                     MathBlockComplexValue* csharp2cuda_temp_143 = &((result)[index]);
 #line 400 "ComplexModule.cs"
                     int csharp2cuda_temp_144 = (first)->count;
-                    (*(csharp2cuda_temp_143) = mathblocks_complex_divide(sum, mathblocks_complex_make(((double)(csharp2cuda_temp_144)), 0.0)));
+                    (*(csharp2cuda_temp_143) = mathblocks_complex_divide(sum, mathblocks_complex_make(((float)(csharp2cuda_temp_144)), 0.0f)));
 #line 401 "ComplexModule.cs"
 #line 401 "ComplexModule.cs"
                     MathBlockComplexValue csharp2cuda_temp_145 = (result)[index];
@@ -1682,15 +1682,15 @@ __device__ MathBlockComplexValue mathblocks_complex_divide(
 #line 89 "ComplexModule.cs"
 {
 #line 90 "ComplexModule.cs"
-    double csharp2cuda_temp_0 = (right).real;
+    float csharp2cuda_temp_0 = (right).real;
 #line 90 "ComplexModule.cs"
-    double csharp2cuda_temp_1 = (right).real;
+    float csharp2cuda_temp_1 = (right).real;
 #line 90 "ComplexModule.cs"
-    double csharp2cuda_temp_2 = (right).imaginary;
+    float csharp2cuda_temp_2 = (right).imaginary;
 #line 90 "ComplexModule.cs"
-    double csharp2cuda_temp_3 = (right).imaginary;
+    float csharp2cuda_temp_3 = (right).imaginary;
 #line 90 "ComplexModule.cs"
-    double denominator = __dadd_rn(__dmul_rn(csharp2cuda_temp_0, csharp2cuda_temp_1), __dmul_rn(csharp2cuda_temp_2, csharp2cuda_temp_3));
+    float denominator = __fadd_rn(__fmul_rn(csharp2cuda_temp_0, csharp2cuda_temp_1), __fmul_rn(csharp2cuda_temp_2, csharp2cuda_temp_3));
 #line 92 "ComplexModule.cs"
     if ((!(isfinite(denominator))))
     {
@@ -1699,25 +1699,25 @@ __device__ MathBlockComplexValue mathblocks_complex_divide(
     }
 #line 94 "ComplexModule.cs"
 #line 95 "ComplexModule.cs"
-    double csharp2cuda_temp_4 = (left).real;
+    float csharp2cuda_temp_4 = (left).real;
 #line 95 "ComplexModule.cs"
-    double csharp2cuda_temp_5 = (right).real;
+    float csharp2cuda_temp_5 = (right).real;
 #line 95 "ComplexModule.cs"
-    double csharp2cuda_temp_6 = (left).imaginary;
+    float csharp2cuda_temp_6 = (left).imaginary;
 #line 95 "ComplexModule.cs"
-    double csharp2cuda_temp_7 = (right).imaginary;
+    float csharp2cuda_temp_7 = (right).imaginary;
 #line 95 "ComplexModule.cs"
-    double csharp2cuda_temp_8 = __ddiv_rn(__dadd_rn(__dmul_rn(csharp2cuda_temp_4, csharp2cuda_temp_5), __dmul_rn(csharp2cuda_temp_6, csharp2cuda_temp_7)), denominator);
+    float csharp2cuda_temp_8 = __fdiv_rn(__fadd_rn(__fmul_rn(csharp2cuda_temp_4, csharp2cuda_temp_5), __fmul_rn(csharp2cuda_temp_6, csharp2cuda_temp_7)), denominator);
 #line 96 "ComplexModule.cs"
-    double csharp2cuda_temp_9 = (left).imaginary;
+    float csharp2cuda_temp_9 = (left).imaginary;
 #line 96 "ComplexModule.cs"
-    double csharp2cuda_temp_10 = (right).real;
+    float csharp2cuda_temp_10 = (right).real;
 #line 96 "ComplexModule.cs"
-    double csharp2cuda_temp_11 = (left).real;
+    float csharp2cuda_temp_11 = (left).real;
 #line 96 "ComplexModule.cs"
-    double csharp2cuda_temp_12 = (right).imaginary;
+    float csharp2cuda_temp_12 = (right).imaginary;
 #line 96 "ComplexModule.cs"
-    double csharp2cuda_temp_13 = __ddiv_rn(__dsub_rn(__dmul_rn(csharp2cuda_temp_9, csharp2cuda_temp_10), __dmul_rn(csharp2cuda_temp_11, csharp2cuda_temp_12)), denominator);
+    float csharp2cuda_temp_13 = __fdiv_rn(__fsub_rn(__fmul_rn(csharp2cuda_temp_9, csharp2cuda_temp_10), __fmul_rn(csharp2cuda_temp_11, csharp2cuda_temp_12)), denominator);
     return mathblocks_complex_make(csharp2cuda_temp_8, csharp2cuda_temp_13);
 }
 
@@ -1726,15 +1726,15 @@ __device__ MathBlockComplexValue mathblocks_complex_exponential(MathBlockComplex
 #line 130 "ComplexModule.cs"
 {
 #line 131 "ComplexModule.cs"
-    double csharp2cuda_temp_0 = (value).real;
+    float csharp2cuda_temp_0 = (value).real;
 #line 131 "ComplexModule.cs"
-    double scale = mathblocks_exponential(csharp2cuda_temp_0);
+    float scale = mathblocks_exponential(csharp2cuda_temp_0);
 #line 132 "ComplexModule.cs"
 #line 133 "ComplexModule.cs"
-    double csharp2cuda_temp_1 = (value).imaginary;
+    float csharp2cuda_temp_1 = (value).imaginary;
 #line 134 "ComplexModule.cs"
-    double csharp2cuda_temp_2 = (value).imaginary;
-    return mathblocks_complex_make(__dmul_rn(scale, mathblocks_cosine(csharp2cuda_temp_1)), __dmul_rn(scale, mathblocks_sine(csharp2cuda_temp_2)));
+    float csharp2cuda_temp_2 = (value).imaginary;
+    return mathblocks_complex_make(__fmul_rn(scale, mathblocks_cosine(csharp2cuda_temp_1)), __fmul_rn(scale, mathblocks_sine(csharp2cuda_temp_2)));
 }
 
 #line 173 "ComplexModule.cs"
@@ -1743,14 +1743,14 @@ __device__ bool mathblocks_complex_finite(MathBlockComplexValue value)
 {
 #line 176 "ComplexModule.cs"
 #line 176 "ComplexModule.cs"
-    double csharp2cuda_temp_0 = (value).real;
+    float csharp2cuda_temp_0 = (value).real;
 #line 176 "ComplexModule.cs"
     bool csharp2cuda_temp_1;
 #line 176 "ComplexModule.cs"
     if (isfinite(csharp2cuda_temp_0))
     {
 #line 176 "ComplexModule.cs"
-        double csharp2cuda_temp_2 = (value).imaginary;
+        float csharp2cuda_temp_2 = (value).imaginary;
 #line 176 "ComplexModule.cs"
         csharp2cuda_temp_1 = isfinite(csharp2cuda_temp_2);
     }
@@ -1763,11 +1763,11 @@ __device__ bool mathblocks_complex_finite(MathBlockComplexValue value)
 }
 
 #line 165 "ComplexModule.cs"
-__device__ MathBlockComplexValue mathblocks_complex_from_polar(double magnitude, double phase)
+__device__ MathBlockComplexValue mathblocks_complex_from_polar(float magnitude, float phase)
 #line 167 "ComplexModule.cs"
 {
 #line 168 "ComplexModule.cs"
-    return mathblocks_complex_make(__dmul_rn(magnitude, mathblocks_cosine(phase)), __dmul_rn(magnitude, mathblocks_sine(phase)));
+    return mathblocks_complex_make(__fmul_rn(magnitude, mathblocks_cosine(phase)), __fmul_rn(magnitude, mathblocks_sine(phase)));
 }
 
 #line 137 "ComplexModule.cs"
@@ -1779,57 +1779,57 @@ __device__ MathBlockComplexValue mathblocks_complex_logarithm(MathBlockComplexVa
 }
 
 #line 105 "ComplexModule.cs"
-__device__ double mathblocks_complex_magnitude(MathBlockComplexValue value)
+__device__ float mathblocks_complex_magnitude(MathBlockComplexValue value)
 #line 107 "ComplexModule.cs"
 {
 #line 108 "ComplexModule.cs"
-    double csharp2cuda_temp_0 = (value).real;
+    float csharp2cuda_temp_0 = (value).real;
 #line 108 "ComplexModule.cs"
-    double real = fabs(csharp2cuda_temp_0);
+    float real = fabsf(csharp2cuda_temp_0);
 #line 109 "ComplexModule.cs"
-    double csharp2cuda_temp_1 = (value).imaginary;
+    float csharp2cuda_temp_1 = (value).imaginary;
 #line 109 "ComplexModule.cs"
-    double imaginary = fabs(csharp2cuda_temp_1);
+    float imaginary = fabsf(csharp2cuda_temp_1);
 #line 110 "ComplexModule.cs"
     if (((real) < (imaginary)))
 #line 111 "ComplexModule.cs"
     {
 #line 112 "ComplexModule.cs"
-        double temporary = real;
+        float temporary = real;
 #line 113 "ComplexModule.cs"
 #line 113 "ComplexModule.cs"
-        double* csharp2cuda_temp_2 = &(real);
+        float* csharp2cuda_temp_2 = &(real);
         (*(csharp2cuda_temp_2) = imaginary);
 #line 114 "ComplexModule.cs"
 #line 114 "ComplexModule.cs"
-        double* csharp2cuda_temp_3 = &(imaginary);
+        float* csharp2cuda_temp_3 = &(imaginary);
         (*(csharp2cuda_temp_3) = temporary);
     }
 #line 116 "ComplexModule.cs"
-    if (((real) == (0.0)))
+    if (((real) == (0.0f)))
     {
 #line 117 "ComplexModule.cs"
-        return 0.0;
+        return 0.0f;
     }
 #line 118 "ComplexModule.cs"
-    double ratio = __ddiv_rn(imaginary, real);
+    float ratio = __fdiv_rn(imaginary, real);
 #line 119 "ComplexModule.cs"
-    return __dmul_rn(real, mathblocks_square_root(__dadd_rn(1.0, __dmul_rn(ratio, ratio))));
+    return __fmul_rn(real, mathblocks_square_root(__fadd_rn(1.0f, __fmul_rn(ratio, ratio))));
 }
 
 #line 50 "ComplexModule.cs"
-__device__ MathBlockComplexValue mathblocks_complex_make(double real, double imaginary)
+__device__ MathBlockComplexValue mathblocks_complex_make(float real, float imaginary)
 #line 52 "ComplexModule.cs"
 {
 #line 53 "ComplexModule.cs"
     MathBlockComplexValue result;
 #line 54 "ComplexModule.cs"
 #line 54 "ComplexModule.cs"
-    double* csharp2cuda_temp_0 = &((result).real);
+    float* csharp2cuda_temp_0 = &((result).real);
     (*(csharp2cuda_temp_0) = real);
 #line 55 "ComplexModule.cs"
 #line 55 "ComplexModule.cs"
-    double* csharp2cuda_temp_1 = &((result).imaginary);
+    float* csharp2cuda_temp_1 = &((result).imaginary);
     (*(csharp2cuda_temp_1) = imaginary);
 #line 56 "ComplexModule.cs"
     return result;
@@ -1843,33 +1843,33 @@ __device__ MathBlockComplexValue mathblocks_complex_multiply(
 {
 #line 80 "ComplexModule.cs"
 #line 81 "ComplexModule.cs"
-    double csharp2cuda_temp_0 = (left).real;
+    float csharp2cuda_temp_0 = (left).real;
 #line 81 "ComplexModule.cs"
-    double csharp2cuda_temp_1 = (right).real;
+    float csharp2cuda_temp_1 = (right).real;
 #line 81 "ComplexModule.cs"
-    double csharp2cuda_temp_2 = (left).imaginary;
+    float csharp2cuda_temp_2 = (left).imaginary;
 #line 81 "ComplexModule.cs"
-    double csharp2cuda_temp_3 = (right).imaginary;
+    float csharp2cuda_temp_3 = (right).imaginary;
 #line 82 "ComplexModule.cs"
-    double csharp2cuda_temp_4 = (left).real;
+    float csharp2cuda_temp_4 = (left).real;
 #line 82 "ComplexModule.cs"
-    double csharp2cuda_temp_5 = (right).imaginary;
+    float csharp2cuda_temp_5 = (right).imaginary;
 #line 82 "ComplexModule.cs"
-    double csharp2cuda_temp_6 = (left).imaginary;
+    float csharp2cuda_temp_6 = (left).imaginary;
 #line 82 "ComplexModule.cs"
-    double csharp2cuda_temp_7 = (right).real;
-    return mathblocks_complex_make(__dsub_rn(__dmul_rn(csharp2cuda_temp_0, csharp2cuda_temp_1), __dmul_rn(csharp2cuda_temp_2, csharp2cuda_temp_3)), __dadd_rn(__dmul_rn(csharp2cuda_temp_4, csharp2cuda_temp_5), __dmul_rn(csharp2cuda_temp_6, csharp2cuda_temp_7)));
+    float csharp2cuda_temp_7 = (right).real;
+    return mathblocks_complex_make(__fsub_rn(__fmul_rn(csharp2cuda_temp_0, csharp2cuda_temp_1), __fmul_rn(csharp2cuda_temp_2, csharp2cuda_temp_3)), __fadd_rn(__fmul_rn(csharp2cuda_temp_4, csharp2cuda_temp_5), __fmul_rn(csharp2cuda_temp_6, csharp2cuda_temp_7)));
 }
 
 #line 122 "ComplexModule.cs"
-__device__ double mathblocks_complex_phase(MathBlockComplexValue value)
+__device__ float mathblocks_complex_phase(MathBlockComplexValue value)
 #line 124 "ComplexModule.cs"
 {
 #line 125 "ComplexModule.cs"
 #line 125 "ComplexModule.cs"
-    double csharp2cuda_temp_0 = (value).imaginary;
+    float csharp2cuda_temp_0 = (value).imaginary;
 #line 125 "ComplexModule.cs"
-    double csharp2cuda_temp_1 = (value).real;
+    float csharp2cuda_temp_1 = (value).real;
     return mathblocks_arc_tangent_2(csharp2cuda_temp_0, csharp2cuda_temp_1);
 }
 
@@ -1930,16 +1930,16 @@ __device__ MathBlockComplexValue mathblocks_complex_square_root(MathBlockComplex
 {
 #line 148 "ComplexModule.cs"
 #line 148 "ComplexModule.cs"
-    double csharp2cuda_temp_0 = (value).real;
+    float csharp2cuda_temp_0 = (value).real;
 #line 148 "ComplexModule.cs"
     bool csharp2cuda_temp_1;
 #line 148 "ComplexModule.cs"
-    if (((csharp2cuda_temp_0) == (0.0)))
+    if (((csharp2cuda_temp_0) == (0.0f)))
     {
 #line 148 "ComplexModule.cs"
-        double csharp2cuda_temp_2 = (value).imaginary;
+        float csharp2cuda_temp_2 = (value).imaginary;
 #line 148 "ComplexModule.cs"
-        csharp2cuda_temp_1 = ((csharp2cuda_temp_2) == (0.0));
+        csharp2cuda_temp_1 = ((csharp2cuda_temp_2) == (0.0f));
     }
     else
     {
@@ -1950,23 +1950,23 @@ __device__ MathBlockComplexValue mathblocks_complex_square_root(MathBlockComplex
     {
 #line 149 "ComplexModule.cs"
 #line 149 "ComplexModule.cs"
-        double csharp2cuda_temp_3 = (value).imaginary;
-        return mathblocks_complex_make(0.0, csharp2cuda_temp_3);
+        float csharp2cuda_temp_3 = (value).imaginary;
+        return mathblocks_complex_make(0.0f, csharp2cuda_temp_3);
     }
 #line 150 "ComplexModule.cs"
-    double magnitude = mathblocks_complex_magnitude(value);
+    float magnitude = mathblocks_complex_magnitude(value);
 #line 151 "ComplexModule.cs"
 #line 152 "ComplexModule.cs"
-    double csharp2cuda_temp_4 = (value).real;
+    float csharp2cuda_temp_4 = (value).real;
 #line 152 "ComplexModule.cs"
-    double csharp2cuda_temp_5 = __ddiv_rn(__dadd_rn(magnitude, csharp2cuda_temp_4), 2.0);
+    float csharp2cuda_temp_5 = __fdiv_rn(__fadd_rn(magnitude, csharp2cuda_temp_4), 2.0f);
 #line 153 "ComplexModule.cs"
-    double csharp2cuda_temp_6 = (value).real;
+    float csharp2cuda_temp_6 = (value).real;
 #line 153 "ComplexModule.cs"
-    double csharp2cuda_temp_7 = __ddiv_rn(__dsub_rn(magnitude, csharp2cuda_temp_6), 2.0);
+    float csharp2cuda_temp_7 = __fdiv_rn(__fsub_rn(magnitude, csharp2cuda_temp_6), 2.0f);
 #line 153 "ComplexModule.cs"
-    double csharp2cuda_temp_8 = (value).imaginary;
-    return mathblocks_complex_make(mathblocks_square_root(csharp2cuda_temp_5), copysign(mathblocks_square_root(csharp2cuda_temp_7), csharp2cuda_temp_8));
+    float csharp2cuda_temp_8 = (value).imaginary;
+    return mathblocks_complex_make(mathblocks_square_root(csharp2cuda_temp_5), copysignf(mathblocks_square_root(csharp2cuda_temp_7), csharp2cuda_temp_8));
 }
 
 #line 67 "ComplexModule.cs"
@@ -1977,12 +1977,12 @@ __device__ MathBlockComplexValue mathblocks_complex_subtract(
 {
 #line 72 "ComplexModule.cs"
 #line 72 "ComplexModule.cs"
-    double csharp2cuda_temp_0 = (left).real;
+    float csharp2cuda_temp_0 = (left).real;
 #line 72 "ComplexModule.cs"
-    double csharp2cuda_temp_1 = (right).real;
+    float csharp2cuda_temp_1 = (right).real;
 #line 72 "ComplexModule.cs"
-    double csharp2cuda_temp_2 = (left).imaginary;
+    float csharp2cuda_temp_2 = (left).imaginary;
 #line 72 "ComplexModule.cs"
-    double csharp2cuda_temp_3 = (right).imaginary;
-    return mathblocks_complex_make(__dsub_rn(csharp2cuda_temp_0, csharp2cuda_temp_1), __dsub_rn(csharp2cuda_temp_2, csharp2cuda_temp_3));
+    float csharp2cuda_temp_3 = (right).imaginary;
+    return mathblocks_complex_make(__fsub_rn(csharp2cuda_temp_0, csharp2cuda_temp_1), __fsub_rn(csharp2cuda_temp_2, csharp2cuda_temp_3));
 }

@@ -645,21 +645,21 @@ struct MathBlockSequencePathRun
 {
     int start;
     int length;
-    double value;
+    float value;
 };
 
 #line 481 "SequencePathModule.cs"
 __device__ bool mathblocks_sequence_decline_value(
-    const double* values,
+    const float* values,
     int count,
     bool relative,
-    double* value);
+    float* value);
 
 #line 447 "SequencePathModule.cs"
-__device__ double mathblocks_sequence_first_passage_value(
-    const double* values,
+__device__ float mathblocks_sequence_first_passage_value(
+    const float* values,
     int count,
-    double threshold,
+    float threshold,
     bool at_or_above);
 
 #line 281 "SequencePathModule.cs"
@@ -718,16 +718,16 @@ __device__ void mathblocks_sequence_heap_swap(
 __device__ bool mathblocks_sequence_is_power_of_two(int value);
 
 #line 466 "SequencePathModule.cs"
-__device__ double mathblocks_sequence_longest_run_value(
+__device__ float mathblocks_sequence_longest_run_value(
     const int* values,
     int count);
 
 #line 571 "SequencePathModule.cs"
-__device__ bool mathblocks_sequence_offset(double value, int* result);
+__device__ bool mathblocks_sequence_offset(float value, int* result);
 
 #line 581 "SequencePathModule.cs"
 __device__ bool mathblocks_sequence_offset_reachable(
-    const double* counts,
+    const float* counts,
     int count,
     int row,
     long long offset);
@@ -735,15 +735,15 @@ __device__ bool mathblocks_sequence_offset_reachable(
 #line 599 "SequencePathModule.cs"
 __device__ bool mathblocks_sequence_offset_row(
     int kind,
-    const double* values,
+    const float* values,
     const int* values_valid,
-    const double* counts,
+    const float* counts,
     int count,
     int row,
     int start,
     int end,
-    double no_match,
-    double* result);
+    float no_match,
+    float* result);
 
 #line 672 "SequencePathModule.cs"
 __device__ void mathblocks_sequence_offsets(
@@ -753,7 +753,7 @@ __device__ void mathblocks_sequence_offsets(
     MathBlockSlot* output);
 
 #line 84 "SequencePathModule.cs"
-__device__ unsigned long long mathblocks_sequence_order_key(double value);
+__device__ unsigned long long mathblocks_sequence_order_key(float value);
 
 #line 745 "SequencePathModule.cs"
 __device__ void mathblocks_sequence_path_dispatch(
@@ -763,11 +763,11 @@ __device__ void mathblocks_sequence_path_dispatch(
     MathBlockSlot* output);
 
 #line 48 "SequencePathModule.cs"
-__device__ bool mathblocks_sequence_positive_integer(double value, int* result);
+__device__ bool mathblocks_sequence_positive_integer(float value, int* result);
 
 #line 101 "SequencePathModule.cs"
 __device__ void mathblocks_sequence_prepare_order_ranks(
-    const double* values,
+    const float* values,
     int count,
     unsigned char* scratch,
     MathBlockSlot* output);
@@ -785,26 +785,26 @@ __device__ void mathblocks_sequence_rebalance_heaps(
 
 #line 528 "SequencePathModule.cs"
 __device__ bool mathblocks_sequence_recurrence_value(
-    const double* values,
+    const float* values,
     int count,
-    double threshold,
-    double* value);
+    float threshold,
+    float* value);
 
 #line 402 "SequencePathModule.cs"
 __device__ void mathblocks_sequence_rolling_extreme(
-    const double* values,
+    const float* values,
     int count,
     int width,
-    double* result,
+    float* result,
     int* deque,
     bool minimum);
 
 #line 429 "SequencePathModule.cs"
 __device__ void mathblocks_sequence_rolling_sum(
-    const double* values,
+    const float* values,
     int count,
     int width,
-    double* result);
+    float* result);
 
 #line 67 "SequencePathModule.cs"
 __device__ void mathblocks_sequence_set_matrix_shape(
@@ -816,25 +816,25 @@ __device__ void mathblocks_sequence_set_matrix_shape(
 __device__ void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count);
 
 #line 548 "SequencePathModule.cs"
-__device__ double mathblocks_sequence_sign_change_value(
-    const double* values,
+__device__ float mathblocks_sequence_sign_change_value(
+    const float* values,
     int count,
     bool differenced);
 
 #line 506 "SequencePathModule.cs"
 __device__ bool mathblocks_sequence_variation_value(
-    const double* values,
+    const float* values,
     int count,
-    double order,
+    float order,
     bool absolute,
-    double* value);
+    float* value);
 
 #line 481 "SequencePathModule.cs"
 __device__ bool mathblocks_sequence_decline_value(
-    const double* values,
+    const float* values,
     int count,
     bool relative,
-    double* value)
+    float* value)
 #line 487 "SequencePathModule.cs"
 {
 #line 488 "SequencePathModule.cs"
@@ -844,9 +844,9 @@ __device__ bool mathblocks_sequence_decline_value(
         return false;
     }
 #line 490 "SequencePathModule.cs"
-    double maximum = (values)[0];
+    float maximum = (values)[0];
 #line 491 "SequencePathModule.cs"
-    double decline = 0.0;
+    float decline = 0.0f;
 #line 492 "SequencePathModule.cs"
     {
 #line 492 "SequencePathModule.cs"
@@ -859,32 +859,32 @@ __device__ bool mathblocks_sequence_decline_value(
             {
 #line 495 "SequencePathModule.cs"
 #line 495 "SequencePathModule.cs"
-                double* csharp2cuda_temp_1 = &(maximum);
+                float* csharp2cuda_temp_1 = &(maximum);
 #line 495 "SequencePathModule.cs"
-                double csharp2cuda_temp_2 = (values)[index];
+                float csharp2cuda_temp_2 = (values)[index];
                 (*(csharp2cuda_temp_1) = mathblocks_maximum(maximum, csharp2cuda_temp_2));
 #line 496 "SequencePathModule.cs"
-                double csharp2cuda_temp_3;
+                float csharp2cuda_temp_3;
 #line 496 "SequencePathModule.cs"
                 if ((!(relative)))
                 {
 #line 497 "SequencePathModule.cs"
-                    double csharp2cuda_temp_4 = (values)[index];
+                    float csharp2cuda_temp_4 = (values)[index];
 #line 496 "SequencePathModule.cs"
-                    csharp2cuda_temp_3 = __dsub_rn(maximum, csharp2cuda_temp_4);
+                    csharp2cuda_temp_3 = __fsub_rn(maximum, csharp2cuda_temp_4);
                 }
                 else
                 {
 #line 498 "SequencePathModule.cs"
-                    double csharp2cuda_temp_5 = (values)[index];
+                    float csharp2cuda_temp_5 = (values)[index];
 #line 496 "SequencePathModule.cs"
-                    csharp2cuda_temp_3 = __ddiv_rn(__dsub_rn(maximum, csharp2cuda_temp_5), maximum);
+                    csharp2cuda_temp_3 = __fdiv_rn(__fsub_rn(maximum, csharp2cuda_temp_5), maximum);
                 }
 #line 496 "SequencePathModule.cs"
-                double candidate = csharp2cuda_temp_3;
+                float candidate = csharp2cuda_temp_3;
 #line 499 "SequencePathModule.cs"
 #line 499 "SequencePathModule.cs"
-                double* csharp2cuda_temp_6 = &(decline);
+                float* csharp2cuda_temp_6 = &(decline);
                 (*(csharp2cuda_temp_6) = mathblocks_maximum(decline, candidate));
             }
 #line 492 "SequencePathModule.cs"
@@ -894,17 +894,17 @@ __device__ bool mathblocks_sequence_decline_value(
     }
 #line 501 "SequencePathModule.cs"
 #line 501 "SequencePathModule.cs"
-    double* csharp2cuda_temp_7 = value;
+    float* csharp2cuda_temp_7 = value;
     (*(csharp2cuda_temp_7) = decline);
 #line 502 "SequencePathModule.cs"
     return isfinite(decline);
 }
 
 #line 447 "SequencePathModule.cs"
-__device__ double mathblocks_sequence_first_passage_value(
-    const double* values,
+__device__ float mathblocks_sequence_first_passage_value(
+    const float* values,
     int count,
-    double threshold,
+    float threshold,
     bool at_or_above)
 #line 453 "SequencePathModule.cs"
 {
@@ -927,14 +927,14 @@ __device__ double mathblocks_sequence_first_passage_value(
                 if (at_or_above)
                 {
 #line 457 "SequencePathModule.cs"
-                    double csharp2cuda_temp_2 = (values)[index];
+                    float csharp2cuda_temp_2 = (values)[index];
 #line 457 "SequencePathModule.cs"
                     csharp2cuda_temp_1 = ((csharp2cuda_temp_2) >= (threshold));
                 }
                 else
                 {
 #line 457 "SequencePathModule.cs"
-                    double csharp2cuda_temp_3 = (values)[index];
+                    float csharp2cuda_temp_3 = (values)[index];
 #line 457 "SequencePathModule.cs"
                     csharp2cuda_temp_1 = ((csharp2cuda_temp_3) <= (threshold));
                 }
@@ -955,7 +955,7 @@ __device__ double mathblocks_sequence_first_passage_value(
         }
     }
 #line 463 "SequencePathModule.cs"
-    return ((double)(result_index));
+    return ((float)(result_index));
 }
 
 #line 281 "SequencePathModule.cs"
@@ -1279,7 +1279,7 @@ __device__ bool mathblocks_sequence_is_power_of_two(int value)
 }
 
 #line 466 "SequencePathModule.cs"
-__device__ double mathblocks_sequence_longest_run_value(
+__device__ float mathblocks_sequence_longest_run_value(
     const int* values,
     int count)
 #line 470 "SequencePathModule.cs"
@@ -1341,21 +1341,21 @@ __device__ double mathblocks_sequence_longest_run_value(
         }
     }
 #line 478 "SequencePathModule.cs"
-    return ((double)(maximum));
+    return ((float)(maximum));
 }
 
 #line 571 "SequencePathModule.cs"
-__device__ bool mathblocks_sequence_offset(double value, int* result)
+__device__ bool mathblocks_sequence_offset(float value, int* result)
 #line 573 "SequencePathModule.cs"
 {
 #line 574 "SequencePathModule.cs"
 #line 574 "SequencePathModule.cs"
     bool csharp2cuda_temp_0;
 #line 574 "SequencePathModule.cs"
-    if (!(((value) != (trunc(value)))))
+    if (!(((value) != (truncf(value)))))
     {
 #line 574 "SequencePathModule.cs"
-        csharp2cuda_temp_0 = ((value) > (2147483647.0));
+        csharp2cuda_temp_0 = ((value) > (2.1474836E+09f));
     }
     else
     {
@@ -1368,7 +1368,7 @@ __device__ bool mathblocks_sequence_offset(double value, int* result)
     if (!(csharp2cuda_temp_0))
     {
 #line 574 "SequencePathModule.cs"
-        csharp2cuda_temp_1 = ((value) < ((-(2147483647.0))));
+        csharp2cuda_temp_1 = ((value) < ((-(2.1474836E+09f))));
     }
     else
     {
@@ -1390,7 +1390,7 @@ __device__ bool mathblocks_sequence_offset(double value, int* result)
 
 #line 581 "SequencePathModule.cs"
 __device__ bool mathblocks_sequence_offset_reachable(
-    const double* counts,
+    const float* counts,
     int count,
     int row,
     long long offset)
@@ -1422,33 +1422,33 @@ __device__ bool mathblocks_sequence_offset_reachable(
     {
 #line 592 "SequencePathModule.cs"
 #line 592 "SequencePathModule.cs"
-        double csharp2cuda_temp_1 = (counts)[row];
-        return ((csharp2cuda_temp_1) >= (((double)(csharp2cuda_i64_neg(offset)))));
+        float csharp2cuda_temp_1 = (counts)[row];
+        return ((csharp2cuda_temp_1) >= (((float)(csharp2cuda_i64_neg(offset)))));
     }
 #line 593 "SequencePathModule.cs"
 #line 593 "SequencePathModule.cs"
-    double csharp2cuda_temp_2 = (counts)[csharp2cuda_i32_from_bits(target)];
-    return ((csharp2cuda_temp_2) >= (((double)(offset))));
+    float csharp2cuda_temp_2 = (counts)[csharp2cuda_i32_from_bits(target)];
+    return ((csharp2cuda_temp_2) >= (((float)(offset))));
 }
 
 #line 599 "SequencePathModule.cs"
 __device__ bool mathblocks_sequence_offset_row(
     int kind,
-    const double* values,
+    const float* values,
     const int* values_valid,
-    const double* counts,
+    const float* counts,
     int count,
     int row,
     int start,
     int end,
-    double no_match,
-    double* result)
+    float no_match,
+    float* result)
 #line 611 "SequencePathModule.cs"
 {
 #line 612 "SequencePathModule.cs"
 #line 612 "SequencePathModule.cs"
-    double* csharp2cuda_temp_0 = result;
-    (*(csharp2cuda_temp_0) = 0.0);
+    float* csharp2cuda_temp_0 = result;
+    (*(csharp2cuda_temp_0) = 0.0f);
 #line 613 "SequencePathModule.cs"
     if (((kind) == (0)))
 #line 614 "SequencePathModule.cs"
@@ -1483,14 +1483,14 @@ __device__ bool mathblocks_sequence_offset_row(
                     }
 #line 622 "SequencePathModule.cs"
 #line 622 "SequencePathModule.cs"
-                    double csharp2cuda_temp_4 = (values)[target];
-                    if (((csharp2cuda_temp_4) != (0.0)))
+                    float csharp2cuda_temp_4 = (values)[target];
+                    if (((csharp2cuda_temp_4) != (0.0f)))
 #line 623 "SequencePathModule.cs"
                     {
 #line 624 "SequencePathModule.cs"
 #line 624 "SequencePathModule.cs"
-                        double* csharp2cuda_temp_5 = result;
-                        (*(csharp2cuda_temp_5) = ((double)(offset)));
+                        float* csharp2cuda_temp_5 = result;
+                        (*(csharp2cuda_temp_5) = ((float)(offset)));
 #line 625 "SequencePathModule.cs"
                         return true;
                     }
@@ -1502,7 +1502,7 @@ __device__ bool mathblocks_sequence_offset_row(
         }
 #line 628 "SequencePathModule.cs"
 #line 628 "SequencePathModule.cs"
-        double* csharp2cuda_temp_6 = result;
+        float* csharp2cuda_temp_6 = result;
         (*(csharp2cuda_temp_6) = no_match);
 #line 629 "SequencePathModule.cs"
         return true;
@@ -1534,9 +1534,9 @@ __device__ bool mathblocks_sequence_offset_row(
     if (!(((csharp2cuda_i64_add(((long long)(row)), ((long long)(start)))) < (((long long)(0))))))
     {
 #line 637 "SequencePathModule.cs"
-        double csharp2cuda_temp_10 = (counts)[row];
+        float csharp2cuda_temp_10 = (counts)[row];
 #line 637 "SequencePathModule.cs"
-        csharp2cuda_temp_9 = ((csharp2cuda_temp_10) < (((double)(before))));
+        csharp2cuda_temp_9 = ((csharp2cuda_temp_10) < (((float)(before))));
     }
     else
     {
@@ -1557,9 +1557,9 @@ __device__ bool mathblocks_sequence_offset_row(
     if (!(((last) >= (((long long)(count))))))
     {
 #line 640 "SequencePathModule.cs"
-        double csharp2cuda_temp_12 = (counts)[csharp2cuda_i32_from_bits(last)];
+        float csharp2cuda_temp_12 = (counts)[csharp2cuda_i32_from_bits(last)];
 #line 640 "SequencePathModule.cs"
-        csharp2cuda_temp_11 = ((csharp2cuda_temp_12) < (((double)(after))));
+        csharp2cuda_temp_11 = ((csharp2cuda_temp_12) < (((float)(after))));
     }
     else
     {
@@ -1574,7 +1574,7 @@ __device__ bool mathblocks_sequence_offset_row(
 #line 642 "SequencePathModule.cs"
     long long first = csharp2cuda_i64_add(((long long)(row)), ((long long)(start)));
 #line 643 "SequencePathModule.cs"
-    double accumulator = 0.0;
+    float accumulator = 0.0f;
 #line 644 "SequencePathModule.cs"
     {
 #line 644 "SequencePathModule.cs"
@@ -1599,12 +1599,12 @@ __device__ bool mathblocks_sequence_offset_row(
                 {
 #line 650 "SequencePathModule.cs"
 #line 650 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_15 = &(accumulator);
+                    float* csharp2cuda_temp_15 = &(accumulator);
 #line 650 "SequencePathModule.cs"
-                    double csharp2cuda_temp_16 = *(csharp2cuda_temp_15);
+                    float csharp2cuda_temp_16 = *(csharp2cuda_temp_15);
 #line 650 "SequencePathModule.cs"
-                    double csharp2cuda_temp_17 = (values)[csharp2cuda_i32_from_bits(index)];
-                    (*(csharp2cuda_temp_15) = __dadd_rn(csharp2cuda_temp_16, csharp2cuda_temp_17));
+                    float csharp2cuda_temp_17 = (values)[csharp2cuda_i32_from_bits(index)];
+                    (*(csharp2cuda_temp_15) = __fadd_rn(csharp2cuda_temp_16, csharp2cuda_temp_17));
 #line 651 "SequencePathModule.cs"
                     if ((!(isfinite(accumulator))))
                     {
@@ -1620,9 +1620,9 @@ __device__ bool mathblocks_sequence_offset_row(
                     {
 #line 656 "SequencePathModule.cs"
 #line 656 "SequencePathModule.cs"
-                        double* csharp2cuda_temp_18 = &(accumulator);
+                        float* csharp2cuda_temp_18 = &(accumulator);
 #line 656 "SequencePathModule.cs"
-                        double csharp2cuda_temp_19 = (values)[csharp2cuda_i32_from_bits(index)];
+                        float csharp2cuda_temp_19 = (values)[csharp2cuda_i32_from_bits(index)];
                         (*(csharp2cuda_temp_18) = csharp2cuda_temp_19);
                     }
                     else
@@ -1630,10 +1630,10 @@ __device__ bool mathblocks_sequence_offset_row(
                     {
 #line 660 "SequencePathModule.cs"
 #line 660 "SequencePathModule.cs"
-                        double* csharp2cuda_temp_20 = &(accumulator);
+                        float* csharp2cuda_temp_20 = &(accumulator);
 #line 660 "SequencePathModule.cs"
-                        double csharp2cuda_temp_21 = (values)[csharp2cuda_i32_from_bits(index)];
-                        (*(csharp2cuda_temp_20) = csharp2cuda_f64_maximum(accumulator, csharp2cuda_temp_21));
+                        float csharp2cuda_temp_21 = (values)[csharp2cuda_i32_from_bits(index)];
+                        (*(csharp2cuda_temp_20) = csharp2cuda_f32_maximum(accumulator, csharp2cuda_temp_21));
                     }
                 }
             }
@@ -1644,7 +1644,7 @@ __device__ bool mathblocks_sequence_offset_row(
     }
 #line 663 "SequencePathModule.cs"
 #line 663 "SequencePathModule.cs"
-    double* csharp2cuda_temp_22 = result;
+    float* csharp2cuda_temp_22 = result;
     (*(csharp2cuda_temp_22) = accumulator);
 #line 664 "SequencePathModule.cs"
     return true;
@@ -1689,7 +1689,7 @@ __device__ void mathblocks_sequence_offsets(
 #line 688 "SequencePathModule.cs"
     int end = 0;
 #line 689 "SequencePathModule.cs"
-    double csharp2cuda_temp_5 = (start_slot)->scalar_value;
+    float csharp2cuda_temp_5 = (start_slot)->scalar_value;
 #line 689 "SequencePathModule.cs"
     int* csharp2cuda_temp_6 = &(start);
 #line 689 "SequencePathModule.cs"
@@ -1701,7 +1701,7 @@ __device__ void mathblocks_sequence_offsets(
 #line 691 "SequencePathModule.cs"
         bool* csharp2cuda_temp_7 = &(offsets_valid);
 #line 691 "SequencePathModule.cs"
-        double csharp2cuda_temp_8 = (end_slot)->scalar_value;
+        float csharp2cuda_temp_8 = (end_slot)->scalar_value;
 #line 691 "SequencePathModule.cs"
         int* csharp2cuda_temp_9 = &(end);
 #line 691 "SequencePathModule.cs"
@@ -1869,7 +1869,7 @@ __device__ void mathblocks_sequence_offsets(
 #line 707 "SequencePathModule.cs"
     unsigned long long csharp2cuda_temp_31 = (series)->data_pointer;
 #line 707 "SequencePathModule.cs"
-    const double* values = ((double*)(csharp2cuda_temp_31));
+    const float* values = ((float*)(csharp2cuda_temp_31));
 #line 708 "SequencePathModule.cs"
     unsigned long long csharp2cuda_temp_32 = (flags)->data_pointer;
 #line 708 "SequencePathModule.cs"
@@ -1877,7 +1877,7 @@ __device__ void mathblocks_sequence_offsets(
 #line 709 "SequencePathModule.cs"
     unsigned long long csharp2cuda_temp_33 = (counts_slot)->data_pointer;
 #line 709 "SequencePathModule.cs"
-    const double* counts = ((double*)(csharp2cuda_temp_33));
+    const float* counts = ((float*)(csharp2cuda_temp_33));
 #line 710 "SequencePathModule.cs"
     {
 #line 710 "SequencePathModule.cs"
@@ -1907,18 +1907,18 @@ __device__ void mathblocks_sequence_offsets(
             {
 #line 712 "SequencePathModule.cs"
 #line 712 "SequencePathModule.cs"
-                double csharp2cuda_temp_39 = (counts)[index];
+                float csharp2cuda_temp_39 = (counts)[index];
 #line 712 "SequencePathModule.cs"
                 bool csharp2cuda_temp_40;
 #line 712 "SequencePathModule.cs"
-                if (!((!(((csharp2cuda_temp_39) >= (0.0))))))
+                if (!((!(((csharp2cuda_temp_39) >= (0.0f))))))
                 {
 #line 712 "SequencePathModule.cs"
-                    double csharp2cuda_temp_41 = (counts)[index];
+                    float csharp2cuda_temp_41 = (counts)[index];
 #line 712 "SequencePathModule.cs"
-                    double csharp2cuda_temp_42 = (counts)[index];
+                    float csharp2cuda_temp_42 = (counts)[index];
 #line 712 "SequencePathModule.cs"
-                    csharp2cuda_temp_40 = ((csharp2cuda_temp_41) != (trunc(csharp2cuda_temp_42)));
+                    csharp2cuda_temp_40 = ((csharp2cuda_temp_41) != (truncf(csharp2cuda_temp_42)));
                 }
                 else
                 {
@@ -1949,9 +1949,9 @@ __device__ void mathblocks_sequence_offsets(
         return;
     }
 #line 719 "SequencePathModule.cs"
-    double no_match = 0.0;
+    float no_match = 0.0f;
 #line 720 "SequencePathModule.cs"
-    double fill = 0.0;
+    float fill = 0.0f;
 #line 721 "SequencePathModule.cs"
     if ((!(validity)))
 #line 722 "SequencePathModule.cs"
@@ -1962,9 +1962,9 @@ __device__ void mathblocks_sequence_offsets(
         const MathBlockSlot* fill_slot = csharp2cuda_temp_44;
 #line 724 "SequencePathModule.cs"
 #line 724 "SequencePathModule.cs"
-        double* csharp2cuda_temp_45 = &(fill);
+        float* csharp2cuda_temp_45 = &(fill);
 #line 724 "SequencePathModule.cs"
-        double csharp2cuda_temp_46 = (fill_slot)->scalar_value;
+        float csharp2cuda_temp_46 = (fill_slot)->scalar_value;
         (*(csharp2cuda_temp_45) = csharp2cuda_temp_46);
 #line 725 "SequencePathModule.cs"
         if (((kind) == (0)))
@@ -1976,16 +1976,16 @@ __device__ void mathblocks_sequence_offsets(
             const MathBlockSlot* no_match_slot = csharp2cuda_temp_47;
 #line 728 "SequencePathModule.cs"
 #line 728 "SequencePathModule.cs"
-            double* csharp2cuda_temp_48 = &(no_match);
+            float* csharp2cuda_temp_48 = &(no_match);
 #line 728 "SequencePathModule.cs"
-            double csharp2cuda_temp_49 = (no_match_slot)->scalar_value;
+            float csharp2cuda_temp_49 = (no_match_slot)->scalar_value;
             (*(csharp2cuda_temp_48) = csharp2cuda_temp_49);
         }
     }
 #line 731 "SequencePathModule.cs"
     unsigned long long csharp2cuda_temp_50 = (output)->data_pointer;
 #line 731 "SequencePathModule.cs"
-    double* result = ((double*)(csharp2cuda_temp_50));
+    float* result = ((float*)(csharp2cuda_temp_50));
 #line 732 "SequencePathModule.cs"
     unsigned long long csharp2cuda_temp_51 = (output)->data_pointer;
 #line 732 "SequencePathModule.cs"
@@ -2003,11 +2003,11 @@ __device__ void mathblocks_sequence_offsets(
 #line 734 "SequencePathModule.cs"
             {
 #line 735 "SequencePathModule.cs"
-                double value = 0.0;
+                float value = 0.0f;
 #line 737 "SequencePathModule.cs"
                 int csharp2cuda_temp_55 = (series)->count;
 #line 737 "SequencePathModule.cs"
-                double* csharp2cuda_temp_56 = &(value);
+                float* csharp2cuda_temp_56 = &(value);
 #line 736 "SequencePathModule.cs"
                 bool row_valid = mathblocks_sequence_offset_row(kind, values, values_valid, counts, csharp2cuda_temp_55, row, start, end, no_match, csharp2cuda_temp_56);
 #line 738 "SequencePathModule.cs"
@@ -2022,9 +2022,9 @@ __device__ void mathblocks_sequence_offsets(
                 {
 #line 741 "SequencePathModule.cs"
 #line 741 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_58 = &((result)[row]);
+                    float* csharp2cuda_temp_58 = &((result)[row]);
 #line 741 "SequencePathModule.cs"
-                    double csharp2cuda_temp_59;
+                    float csharp2cuda_temp_59;
 #line 741 "SequencePathModule.cs"
                     if (row_valid)
                     {
@@ -2049,13 +2049,13 @@ __device__ void mathblocks_sequence_offsets(
 }
 
 #line 84 "SequencePathModule.cs"
-__device__ unsigned long long mathblocks_sequence_order_key(double value)
+__device__ unsigned long long mathblocks_sequence_order_key(float value)
 #line 86 "SequencePathModule.cs"
 {
 #line 87 "SequencePathModule.cs"
-    unsigned long long bits = ((unsigned long long)(__double_as_longlong(value)));
+    unsigned long long bits = ((unsigned long long)(__float_as_int(value)));
 #line 88 "SequencePathModule.cs"
-    if (((value) == (0.0)))
+    if (((value) == (0.0f)))
     {
 #line 89 "SequencePathModule.cs"
 #line 89 "SequencePathModule.cs"
@@ -2140,8 +2140,8 @@ __device__ void mathblocks_sequence_path_dispatch(
     {
 #line 758 "SequencePathModule.cs"
 #line 758 "SequencePathModule.cs"
-        double* csharp2cuda_temp_3 = &((output)->scalar_value);
-        (*(csharp2cuda_temp_3) = 0.0);
+        float* csharp2cuda_temp_3 = &((output)->scalar_value);
+        (*(csharp2cuda_temp_3) = 0.0f);
 #line 759 "SequencePathModule.cs"
 #line 759 "SequencePathModule.cs"
         int* csharp2cuda_temp_4 = &((output)->boolean_value);
@@ -2233,39 +2233,39 @@ __device__ void mathblocks_sequence_path_dispatch(
         return;
     }
 #line 773 "SequencePathModule.cs"
-    double* csharp2cuda_temp_17;
+    float* csharp2cuda_temp_17;
 #line 773 "SequencePathModule.cs"
     if (((((void*)(first))) == (((void*)(nullptr)))))
     {
 #line 773 "SequencePathModule.cs"
-        csharp2cuda_temp_17 = ((double*)(nullptr));
+        csharp2cuda_temp_17 = ((float*)(nullptr));
     }
     else
     {
 #line 773 "SequencePathModule.cs"
         unsigned long long csharp2cuda_temp_18 = (first)->data_pointer;
 #line 773 "SequencePathModule.cs"
-        csharp2cuda_temp_17 = ((double*)(csharp2cuda_temp_18));
+        csharp2cuda_temp_17 = ((float*)(csharp2cuda_temp_18));
     }
 #line 773 "SequencePathModule.cs"
-    const double* a = csharp2cuda_temp_17;
+    const float* a = csharp2cuda_temp_17;
 #line 774 "SequencePathModule.cs"
-    double* csharp2cuda_temp_19;
+    float* csharp2cuda_temp_19;
 #line 774 "SequencePathModule.cs"
     if (((((void*)(second))) == (((void*)(nullptr)))))
     {
 #line 774 "SequencePathModule.cs"
-        csharp2cuda_temp_19 = ((double*)(nullptr));
+        csharp2cuda_temp_19 = ((float*)(nullptr));
     }
     else
     {
 #line 774 "SequencePathModule.cs"
         unsigned long long csharp2cuda_temp_20 = (second)->data_pointer;
 #line 774 "SequencePathModule.cs"
-        csharp2cuda_temp_19 = ((double*)(csharp2cuda_temp_20));
+        csharp2cuda_temp_19 = ((float*)(csharp2cuda_temp_20));
     }
 #line 774 "SequencePathModule.cs"
-    const double* b = csharp2cuda_temp_19;
+    const float* b = csharp2cuda_temp_19;
 #line 775 "SequencePathModule.cs"
     int* csharp2cuda_temp_21;
 #line 775 "SequencePathModule.cs"
@@ -2286,11 +2286,11 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 776 "SequencePathModule.cs"
     unsigned long long csharp2cuda_temp_23 = (output)->data_pointer;
 #line 776 "SequencePathModule.cs"
-    double* result = ((double*)(csharp2cuda_temp_23));
+    float* result = ((float*)(csharp2cuda_temp_23));
 #line 777 "SequencePathModule.cs"
     unsigned long long csharp2cuda_temp_24 = (output)->scratch_pointer;
 #line 777 "SequencePathModule.cs"
-    double* scratch = ((double*)(csharp2cuda_temp_24));
+    float* scratch = ((float*)(csharp2cuda_temp_24));
 #line 783 "SequencePathModule.cs"
     if (((opcode) == (0)))
 #line 784 "SequencePathModule.cs"
@@ -2386,7 +2386,7 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 792 "SequencePathModule.cs"
                         int left_end = csharp2cuda_temp_37;
 #line 793 "SequencePathModule.cs"
-                        double sum = 0.0;
+                        float sum = 0.0f;
 #line 794 "SequencePathModule.cs"
                         {
 #line 794 "SequencePathModule.cs"
@@ -2397,14 +2397,14 @@ __device__ void mathblocks_sequence_path_dispatch(
                                     break;
 #line 795 "SequencePathModule.cs"
 #line 795 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_40 = &(sum);
+                                float* csharp2cuda_temp_40 = &(sum);
 #line 795 "SequencePathModule.cs"
-                                double csharp2cuda_temp_41 = *(csharp2cuda_temp_40);
+                                float csharp2cuda_temp_41 = *(csharp2cuda_temp_40);
 #line 795 "SequencePathModule.cs"
-                                double csharp2cuda_temp_42 = (a)[left];
+                                float csharp2cuda_temp_42 = (a)[left];
 #line 795 "SequencePathModule.cs"
-                                double csharp2cuda_temp_43 = (b)[csharp2cuda_i32_sub(output_index, left)];
-                                (*(csharp2cuda_temp_40) = __dadd_rn(csharp2cuda_temp_41, __dmul_rn(csharp2cuda_temp_42, csharp2cuda_temp_43)));
+                                float csharp2cuda_temp_43 = (b)[csharp2cuda_i32_sub(output_index, left)];
+                                (*(csharp2cuda_temp_40) = __fadd_rn(csharp2cuda_temp_41, __fmul_rn(csharp2cuda_temp_42, csharp2cuda_temp_43)));
 #line 794 "SequencePathModule.cs"
                                 int* csharp2cuda_temp_39 = &(left);
                                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_39));
@@ -2412,7 +2412,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                         }
 #line 796 "SequencePathModule.cs"
 #line 796 "SequencePathModule.cs"
-                        double* csharp2cuda_temp_44 = &((result)[output_index]);
+                        float* csharp2cuda_temp_44 = &((result)[output_index]);
                         (*(csharp2cuda_temp_44) = sum);
                     }
 #line 788 "SequencePathModule.cs"
@@ -2495,7 +2495,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                             break;
 #line 816 "SequencePathModule.cs"
 #line 816 "SequencePathModule.cs"
-                        double csharp2cuda_temp_54 = (result)[index];
+                        float csharp2cuda_temp_54 = (result)[index];
                         if ((!(isfinite(csharp2cuda_temp_54))))
                         {
 #line 817 "SequencePathModule.cs"
@@ -2539,8 +2539,8 @@ __device__ void mathblocks_sequence_path_dispatch(
                             break;
 #line 821 "SequencePathModule.cs"
 #line 821 "SequencePathModule.cs"
-                        double* csharp2cuda_temp_59 = &((result)[index]);
-                        (*(csharp2cuda_temp_59) = 0.0);
+                        float* csharp2cuda_temp_59 = &((result)[index]);
+                        (*(csharp2cuda_temp_59) = 0.0f);
 #line 820 "SequencePathModule.cs"
                         int* csharp2cuda_temp_56 = &(index);
                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_56));
@@ -2587,17 +2587,17 @@ __device__ void mathblocks_sequence_path_dispatch(
                                     {
 #line 826 "SequencePathModule.cs"
 #line 826 "SequencePathModule.cs"
-                                        double* csharp2cuda_temp_66 = &((result)[csharp2cuda_i32_add(left, right)]);
+                                        float* csharp2cuda_temp_66 = &((result)[csharp2cuda_i32_add(left, right)]);
 #line 826 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_67 = *(csharp2cuda_temp_66);
+                                        float csharp2cuda_temp_67 = *(csharp2cuda_temp_66);
 #line 826 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_68 = (a)[left];
+                                        float csharp2cuda_temp_68 = (a)[left];
 #line 826 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_69 = (b)[right];
-                                        (*(csharp2cuda_temp_66) = __dadd_rn(csharp2cuda_temp_67, __dmul_rn(csharp2cuda_temp_68, csharp2cuda_temp_69)));
+                                        float csharp2cuda_temp_69 = (b)[right];
+                                        (*(csharp2cuda_temp_66) = __fadd_rn(csharp2cuda_temp_67, __fmul_rn(csharp2cuda_temp_68, csharp2cuda_temp_69)));
 #line 827 "SequencePathModule.cs"
 #line 827 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_70 = (result)[csharp2cuda_i32_add(left, right)];
+                                        float csharp2cuda_temp_70 = (result)[csharp2cuda_i32_add(left, right)];
                                         if ((!(isfinite(csharp2cuda_temp_70))))
                                         {
 #line 828 "SequencePathModule.cs"
@@ -2632,7 +2632,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                 {
 #line 838 "SequencePathModule.cs"
 #line 838 "SequencePathModule.cs"
-                    double csharp2cuda_temp_72 = (second)->scalar_value;
+                    float csharp2cuda_temp_72 = (second)->scalar_value;
 #line 838 "SequencePathModule.cs"
                     int* csharp2cuda_temp_73 = &(lag);
 #line 838 "SequencePathModule.cs"
@@ -2668,8 +2668,8 @@ __device__ void mathblocks_sequence_path_dispatch(
                     }
 #line 842 "SequencePathModule.cs"
 #line 842 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_79 = &((output)->scalar_value);
-                    (*(csharp2cuda_temp_79) = ((double)(lag)));
+                    float* csharp2cuda_temp_79 = &((output)->scalar_value);
+                    (*(csharp2cuda_temp_79) = ((float)(lag)));
                 }
 #line 844 "SequencePathModule.cs"
                 __syncthreads();
@@ -2677,7 +2677,7 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 845 "SequencePathModule.cs"
                 int* csharp2cuda_temp_80 = &(lag);
 #line 845 "SequencePathModule.cs"
-                double csharp2cuda_temp_81 = (output)->scalar_value;
+                float csharp2cuda_temp_81 = (output)->scalar_value;
                 (*(csharp2cuda_temp_80) = csharp2cuda_f64_to_i32(csharp2cuda_temp_81));
 #line 846 "SequencePathModule.cs"
                 {
@@ -2708,15 +2708,15 @@ __device__ void mathblocks_sequence_path_dispatch(
                         {
 #line 848 "SequencePathModule.cs"
 #line 848 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_87 = &((result)[index]);
+                            float* csharp2cuda_temp_87 = &((result)[index]);
 #line 848 "SequencePathModule.cs"
-                            double csharp2cuda_temp_88 = (a)[csharp2cuda_i32_add(index, lag)];
+                            float csharp2cuda_temp_88 = (a)[csharp2cuda_i32_add(index, lag)];
 #line 848 "SequencePathModule.cs"
-                            double csharp2cuda_temp_89 = (a)[index];
-                            (*(csharp2cuda_temp_87) = __dsub_rn(csharp2cuda_temp_88, csharp2cuda_temp_89));
+                            float csharp2cuda_temp_89 = (a)[index];
+                            (*(csharp2cuda_temp_87) = __fsub_rn(csharp2cuda_temp_88, csharp2cuda_temp_89));
 #line 849 "SequencePathModule.cs"
 #line 849 "SequencePathModule.cs"
-                            double csharp2cuda_temp_90 = (result)[index];
+                            float csharp2cuda_temp_90 = (result)[index];
                             if ((!(isfinite(csharp2cuda_temp_90))))
                             {
 #line 849 "SequencePathModule.cs"
@@ -2740,7 +2740,7 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 855 "SequencePathModule.cs"
             {
 #line 856 "SequencePathModule.cs"
-                double alpha = (second)->scalar_value;
+                float alpha = (second)->scalar_value;
 #line 857 "SequencePathModule.cs"
 #line 857 "SequencePathModule.cs"
                 int csharp2cuda_temp_91 = (first)->count;
@@ -2756,10 +2756,10 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 858 "SequencePathModule.cs"
                     bool csharp2cuda_temp_94;
 #line 858 "SequencePathModule.cs"
-                    if (((alpha) > (0.0)))
+                    if (((alpha) > (0.0f)))
                     {
 #line 858 "SequencePathModule.cs"
-                        csharp2cuda_temp_94 = ((alpha) <= (1.0));
+                        csharp2cuda_temp_94 = ((alpha) <= (1.0f));
                     }
                     else
                     {
@@ -2787,9 +2787,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                 {
 #line 862 "SequencePathModule.cs"
 #line 862 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_96 = &((result)[0]);
+                    float* csharp2cuda_temp_96 = &((result)[0]);
 #line 862 "SequencePathModule.cs"
-                    double csharp2cuda_temp_97 = (a)[0];
+                    float csharp2cuda_temp_97 = (a)[0];
                     (*(csharp2cuda_temp_96) = csharp2cuda_temp_97);
 #line 863 "SequencePathModule.cs"
                     {
@@ -2805,15 +2805,15 @@ __device__ void mathblocks_sequence_path_dispatch(
                             {
 #line 865 "SequencePathModule.cs"
 #line 865 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_100 = &((result)[index]);
+                                float* csharp2cuda_temp_100 = &((result)[index]);
 #line 865 "SequencePathModule.cs"
-                                double csharp2cuda_temp_101 = (a)[index];
+                                float csharp2cuda_temp_101 = (a)[index];
 #line 865 "SequencePathModule.cs"
-                                double csharp2cuda_temp_102 = (result)[csharp2cuda_i32_sub(index, 1)];
-                                (*(csharp2cuda_temp_100) = __dadd_rn(__dmul_rn(alpha, csharp2cuda_temp_101), __dmul_rn(__dsub_rn(1.0, alpha), csharp2cuda_temp_102)));
+                                float csharp2cuda_temp_102 = (result)[csharp2cuda_i32_sub(index, 1)];
+                                (*(csharp2cuda_temp_100) = __fadd_rn(__fmul_rn(alpha, csharp2cuda_temp_101), __fmul_rn(__fsub_rn(1.0f, alpha), csharp2cuda_temp_102)));
 #line 866 "SequencePathModule.cs"
 #line 866 "SequencePathModule.cs"
-                                double csharp2cuda_temp_103 = (result)[index];
+                                float csharp2cuda_temp_103 = (result)[index];
                                 if ((!(isfinite(csharp2cuda_temp_103))))
                                 {
 #line 867 "SequencePathModule.cs"
@@ -2842,7 +2842,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                 int width = 0;
 #line 877 "SequencePathModule.cs"
 #line 877 "SequencePathModule.cs"
-                double csharp2cuda_temp_105 = (second)->scalar_value;
+                float csharp2cuda_temp_105 = (second)->scalar_value;
 #line 877 "SequencePathModule.cs"
                 int* csharp2cuda_temp_106 = &(width);
 #line 877 "SequencePathModule.cs"
@@ -2949,9 +2949,9 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 893 "SequencePathModule.cs"
                                             int csharp2cuda_temp_120 = (deque)[csharp2cuda_i32_sub(tail, 1)];
 #line 893 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_121 = (a)[csharp2cuda_temp_120];
+                                            float csharp2cuda_temp_121 = (a)[csharp2cuda_temp_120];
 #line 893 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_122 = (a)[index];
+                                            float csharp2cuda_temp_122 = (a)[index];
 #line 892 "SequencePathModule.cs"
                                             csharp2cuda_temp_119 = ((csharp2cuda_temp_121) >= (csharp2cuda_temp_122));
                                         }
@@ -2960,9 +2960,9 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 894 "SequencePathModule.cs"
                                             int csharp2cuda_temp_123 = (deque)[csharp2cuda_i32_sub(tail, 1)];
 #line 894 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_124 = (a)[csharp2cuda_temp_123];
+                                            float csharp2cuda_temp_124 = (a)[csharp2cuda_temp_123];
 #line 894 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_125 = (a)[index];
+                                            float csharp2cuda_temp_125 = (a)[index];
 #line 892 "SequencePathModule.cs"
                                             csharp2cuda_temp_119 = ((csharp2cuda_temp_124) <= (csharp2cuda_temp_125));
                                         }
@@ -2997,11 +2997,11 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 {
 #line 900 "SequencePathModule.cs"
 #line 900 "SequencePathModule.cs"
-                                    double* csharp2cuda_temp_130 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_sub(index, width), 1)]);
+                                    float* csharp2cuda_temp_130 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_sub(index, width), 1)]);
 #line 900 "SequencePathModule.cs"
                                     int csharp2cuda_temp_131 = (deque)[head];
 #line 900 "SequencePathModule.cs"
-                                    double csharp2cuda_temp_132 = (a)[csharp2cuda_temp_131];
+                                    float csharp2cuda_temp_132 = (a)[csharp2cuda_temp_131];
                                     (*(csharp2cuda_temp_130) = csharp2cuda_temp_132);
                                 }
                             }
@@ -3025,7 +3025,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                 int width = 0;
 #line 910 "SequencePathModule.cs"
 #line 910 "SequencePathModule.cs"
-                double csharp2cuda_temp_133 = (second)->scalar_value;
+                float csharp2cuda_temp_133 = (second)->scalar_value;
 #line 910 "SequencePathModule.cs"
                 int* csharp2cuda_temp_134 = &(width);
 #line 910 "SequencePathModule.cs"
@@ -3069,7 +3069,7 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 919 "SequencePathModule.cs"
                     {
 #line 920 "SequencePathModule.cs"
-                        double scale = __ddiv_rn(1.0, ((double)(width)));
+                        float scale = __fdiv_rn(1.0f, ((float)(width)));
 #line 921 "SequencePathModule.cs"
                         {
 #line 921 "SequencePathModule.cs"
@@ -3082,10 +3082,10 @@ __device__ void mathblocks_sequence_path_dispatch(
                                     break;
 #line 922 "SequencePathModule.cs"
 #line 922 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_143 = &((result)[index]);
+                                float* csharp2cuda_temp_143 = &((result)[index]);
 #line 922 "SequencePathModule.cs"
-                                double csharp2cuda_temp_144 = *(csharp2cuda_temp_143);
-                                (*(csharp2cuda_temp_143) = __dmul_rn(csharp2cuda_temp_144, scale));
+                                float csharp2cuda_temp_144 = *(csharp2cuda_temp_143);
+                                (*(csharp2cuda_temp_143) = __fmul_rn(csharp2cuda_temp_144, scale));
 #line 921 "SequencePathModule.cs"
                                 int* csharp2cuda_temp_141 = &(index);
                                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_141));
@@ -3104,7 +3104,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 break;
 #line 925 "SequencePathModule.cs"
 #line 925 "SequencePathModule.cs"
-                            double csharp2cuda_temp_147 = (result)[index];
+                            float csharp2cuda_temp_147 = (result)[index];
                             if ((!(isfinite(csharp2cuda_temp_147))))
                             {
 #line 925 "SequencePathModule.cs"
@@ -3129,21 +3129,21 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 932 "SequencePathModule.cs"
                 int width = 0;
 #line 933 "SequencePathModule.cs"
-                double probability = 0.0;
+                float probability = 0.0f;
 #line 934 "SequencePathModule.cs"
                 if (((thread) == (0)))
 #line 935 "SequencePathModule.cs"
                 {
 #line 936 "SequencePathModule.cs"
 #line 936 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_149 = &(probability);
+                    float* csharp2cuda_temp_149 = &(probability);
 #line 936 "SequencePathModule.cs"
-                    double csharp2cuda_temp_150;
+                    float csharp2cuda_temp_150;
 #line 936 "SequencePathModule.cs"
                     if (((opcode) == (5)))
                     {
 #line 936 "SequencePathModule.cs"
-                        csharp2cuda_temp_150 = 0.5;
+                        csharp2cuda_temp_150 = 0.5f;
                     }
                     else
                     {
@@ -3153,7 +3153,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                     (*(csharp2cuda_temp_149) = csharp2cuda_temp_150);
 #line 937 "SequencePathModule.cs"
 #line 937 "SequencePathModule.cs"
-                    double csharp2cuda_temp_151 = (second)->scalar_value;
+                    float csharp2cuda_temp_151 = (second)->scalar_value;
 #line 937 "SequencePathModule.cs"
                     int* csharp2cuda_temp_152 = &(width);
 #line 937 "SequencePathModule.cs"
@@ -3181,10 +3181,10 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 938 "SequencePathModule.cs"
                         bool csharp2cuda_temp_157;
 #line 938 "SequencePathModule.cs"
-                        if (((probability) >= (0.0)))
+                        if (((probability) >= (0.0f)))
                         {
 #line 938 "SequencePathModule.cs"
-                            csharp2cuda_temp_157 = ((probability) <= (1.0));
+                            csharp2cuda_temp_157 = ((probability) <= (1.0f));
                         }
                         else
                         {
@@ -3243,7 +3243,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                     }
 #line 947 "SequencePathModule.cs"
 #line 947 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_162 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_162 = &((output)->scalar_value);
                     (*(csharp2cuda_temp_162) = probability);
 #line 948 "SequencePathModule.cs"
 #line 948 "SequencePathModule.cs"
@@ -3260,9 +3260,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                 (*(csharp2cuda_temp_164) = csharp2cuda_temp_165);
 #line 952 "SequencePathModule.cs"
 #line 952 "SequencePathModule.cs"
-                double* csharp2cuda_temp_166 = &(probability);
+                float* csharp2cuda_temp_166 = &(probability);
 #line 952 "SequencePathModule.cs"
-                double csharp2cuda_temp_167 = (output)->scalar_value;
+                float csharp2cuda_temp_167 = (output)->scalar_value;
                 (*(csharp2cuda_temp_166) = csharp2cuda_temp_167);
 #line 954 "SequencePathModule.cs"
                 __syncthreads();
@@ -3290,9 +3290,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 break;
 #line 960 "SequencePathModule.cs"
 #line 960 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_172 = &((result)[index]);
+                            float* csharp2cuda_temp_172 = &((result)[index]);
 #line 960 "SequencePathModule.cs"
-                            double csharp2cuda_temp_173 = (a)[index];
+                            float csharp2cuda_temp_173 = (a)[index];
                             (*(csharp2cuda_temp_172) = csharp2cuda_temp_173);
 #line 959 "SequencePathModule.cs"
                             int* csharp2cuda_temp_169 = &(index);
@@ -3309,10 +3309,10 @@ __device__ void mathblocks_sequence_path_dispatch(
                     {
 #line 964 "SequencePathModule.cs"
 #line 964 "SequencePathModule.cs"
-                        double* csharp2cuda_temp_174 = &((output)->scalar_value);
+                        float* csharp2cuda_temp_174 = &((output)->scalar_value);
 #line 964 "SequencePathModule.cs"
                         int csharp2cuda_temp_175 = (first)->count;
-                        (*(csharp2cuda_temp_174) = ((double)(csharp2cuda_temp_175)));
+                        (*(csharp2cuda_temp_174) = ((float)(csharp2cuda_temp_175)));
 #line 965 "SequencePathModule.cs"
 #line 965 "SequencePathModule.cs"
                         int* csharp2cuda_temp_176 = &((output)->boolean_value);
@@ -3325,10 +3325,10 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 969 "SequencePathModule.cs"
                 bool csharp2cuda_temp_177;
 #line 969 "SequencePathModule.cs"
-                if (!(((probability) == (0.0))))
+                if (!(((probability) == (0.0f))))
                 {
 #line 969 "SequencePathModule.cs"
-                    csharp2cuda_temp_177 = ((probability) == (1.0));
+                    csharp2cuda_temp_177 = ((probability) == (1.0f));
                 }
                 else
                 {
@@ -3345,15 +3345,15 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 973 "SequencePathModule.cs"
 #line 975 "SequencePathModule.cs"
                         int csharp2cuda_temp_178 = (first)->count;
-                        mathblocks_sequence_rolling_extreme(a, csharp2cuda_temp_178, width, result, ((int*)(scratch)), ((probability) == (0.0)));
+                        mathblocks_sequence_rolling_extreme(a, csharp2cuda_temp_178, width, result, ((int*)(scratch)), ((probability) == (0.0f)));
 #line 980 "SequencePathModule.cs"
 #line 980 "SequencePathModule.cs"
-                        double* csharp2cuda_temp_179 = &((output)->scalar_value);
+                        float* csharp2cuda_temp_179 = &((output)->scalar_value);
 #line 981 "SequencePathModule.cs"
                         int csharp2cuda_temp_180 = (first)->count;
 #line 981 "SequencePathModule.cs"
                         int csharp2cuda_temp_181 = (output)->count;
-                        (*(csharp2cuda_temp_179) = ((double)(csharp2cuda_i64_add(csharp2cuda_i64_mul(((long long)(csharp2cuda_temp_180)), ((long long)(3))), ((long long)(csharp2cuda_temp_181))))));
+                        (*(csharp2cuda_temp_179) = ((float)(csharp2cuda_i64_add(csharp2cuda_i64_mul(((long long)(csharp2cuda_temp_180)), ((long long)(3))), ((long long)(csharp2cuda_temp_181))))));
 #line 982 "SequencePathModule.cs"
 #line 982 "SequencePathModule.cs"
                         int* csharp2cuda_temp_182 = &((output)->boolean_value);
@@ -3409,13 +3409,13 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1004 "SequencePathModule.cs"
                 int* kinds = csharp2cuda_pointer_add(positions, csharp2cuda_temp_190);
 #line 1005 "SequencePathModule.cs"
-                double quantile_position = __dmul_rn(probability, ((double)(csharp2cuda_i32_sub(width, 1))));
+                float quantile_position = __fmul_rn(probability, ((float)(csharp2cuda_i32_sub(width, 1))));
 #line 1006 "SequencePathModule.cs"
-                int lower_index = csharp2cuda_f64_to_i32(floor(quantile_position));
+                int lower_index = csharp2cuda_f64_to_i32(floorf(quantile_position));
 #line 1007 "SequencePathModule.cs"
-                int upper_index = csharp2cuda_f64_to_i32(ceil(quantile_position));
+                int upper_index = csharp2cuda_f64_to_i32(ceilf(quantile_position));
 #line 1008 "SequencePathModule.cs"
-                double weight = __dsub_rn(quantile_position, ((double)(lower_index)));
+                float weight = __fsub_rn(quantile_position, ((float)(lower_index)));
 #line 1010 "SequencePathModule.cs"
 #line 1010 "SequencePathModule.cs"
                 int csharp2cuda_temp_191 = (output)->count;
@@ -3429,27 +3429,27 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1014 "SequencePathModule.cs"
                         int csharp2cuda_temp_192 = (first_indexes)[lower_index];
 #line 1014 "SequencePathModule.cs"
-                        double lower_value = (a)[csharp2cuda_temp_192];
+                        float lower_value = (a)[csharp2cuda_temp_192];
 #line 1015 "SequencePathModule.cs"
                         int csharp2cuda_temp_193 = (first_indexes)[upper_index];
 #line 1015 "SequencePathModule.cs"
-                        double upper_value = (a)[csharp2cuda_temp_193];
+                        float upper_value = (a)[csharp2cuda_temp_193];
 #line 1016 "SequencePathModule.cs"
 #line 1016 "SequencePathModule.cs"
-                        double* csharp2cuda_temp_194 = &((result)[0]);
-                        (*(csharp2cuda_temp_194) = __dadd_rn(__dmul_rn(lower_value, __dsub_rn(1.0, weight)), __dmul_rn(upper_value, weight)));
+                        float* csharp2cuda_temp_194 = &((result)[0]);
+                        (*(csharp2cuda_temp_194) = __fadd_rn(__fmul_rn(lower_value, __fsub_rn(1.0f, weight)), __fmul_rn(upper_value, weight)));
 #line 1017 "SequencePathModule.cs"
 #line 1017 "SequencePathModule.cs"
                         int* csharp2cuda_temp_195 = &((output)->valid);
 #line 1017 "SequencePathModule.cs"
-                        double csharp2cuda_temp_196 = (result)[0];
+                        float csharp2cuda_temp_196 = (result)[0];
                         (*(csharp2cuda_temp_195) = isfinite(csharp2cuda_temp_196));
 #line 1018 "SequencePathModule.cs"
 #line 1018 "SequencePathModule.cs"
-                        double* csharp2cuda_temp_197 = &((output)->scalar_value);
+                        float* csharp2cuda_temp_197 = &((output)->scalar_value);
 #line 1018 "SequencePathModule.cs"
                         int csharp2cuda_temp_198 = (first)->count;
-                        (*(csharp2cuda_temp_197) = ((double)(csharp2cuda_i64_add(csharp2cuda_i64_mul(((long long)(csharp2cuda_temp_198)), ((long long)(64))), ((long long)(2))))));
+                        (*(csharp2cuda_temp_197) = ((float)(csharp2cuda_i64_add(csharp2cuda_i64_mul(((long long)(csharp2cuda_temp_198)), ((long long)(64))), ((long long)(2))))));
 #line 1019 "SequencePathModule.cs"
 #line 1019 "SequencePathModule.cs"
                         int* csharp2cuda_temp_199 = &((output)->boolean_value);
@@ -3612,9 +3612,9 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1101 "SequencePathModule.cs"
                                 int csharp2cuda_temp_219 = (lower_heap)[0];
 #line 1101 "SequencePathModule.cs"
-                                double lower_value = (a)[csharp2cuda_temp_219];
+                                float lower_value = (a)[csharp2cuda_temp_219];
 #line 1102 "SequencePathModule.cs"
-                                double csharp2cuda_temp_220;
+                                float csharp2cuda_temp_220;
 #line 1102 "SequencePathModule.cs"
                                 if (((lower_index) == (upper_index)))
                                 {
@@ -3629,14 +3629,14 @@ __device__ void mathblocks_sequence_path_dispatch(
                                     csharp2cuda_temp_220 = (a)[csharp2cuda_temp_221];
                                 }
 #line 1102 "SequencePathModule.cs"
-                                double upper_value = csharp2cuda_temp_220;
+                                float upper_value = csharp2cuda_temp_220;
 #line 1105 "SequencePathModule.cs"
 #line 1105 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_222 = &((result)[start]);
-                                (*(csharp2cuda_temp_222) = __dadd_rn(__dmul_rn(lower_value, __dsub_rn(1.0, weight)), __dmul_rn(upper_value, weight)));
+                                float* csharp2cuda_temp_222 = &((result)[start]);
+                                (*(csharp2cuda_temp_222) = __fadd_rn(__fmul_rn(lower_value, __fsub_rn(1.0f, weight)), __fmul_rn(upper_value, weight)));
 #line 1106 "SequencePathModule.cs"
 #line 1106 "SequencePathModule.cs"
-                                double csharp2cuda_temp_223 = (result)[start];
+                                float csharp2cuda_temp_223 = (result)[start];
                                 if ((!(isfinite(csharp2cuda_temp_223))))
 #line 1107 "SequencePathModule.cs"
                                 {
@@ -3754,10 +3754,10 @@ __device__ void mathblocks_sequence_path_dispatch(
                     long long selection_bound = csharp2cuda_i64_mul(((long long)(csharp2cuda_temp_240)), ((long long)(2)));
 #line 1189 "SequencePathModule.cs"
 #line 1189 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_241 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_241 = &((output)->scalar_value);
 #line 1190 "SequencePathModule.cs"
                     int csharp2cuda_temp_242 = (first)->count;
-                    (*(csharp2cuda_temp_241) = ((double)(csharp2cuda_i64_add(csharp2cuda_i64_add(csharp2cuda_i64_mul(((long long)(csharp2cuda_temp_242)), ((long long)(64))), heap_bound), selection_bound))));
+                    (*(csharp2cuda_temp_241) = ((float)(csharp2cuda_i64_add(csharp2cuda_i64_add(csharp2cuda_i64_mul(((long long)(csharp2cuda_temp_242)), ((long long)(64))), heap_bound), selection_bound))));
 #line 1191 "SequencePathModule.cs"
 #line 1191 "SequencePathModule.cs"
                     int* csharp2cuda_temp_243 = &((output)->boolean_value);
@@ -3779,7 +3779,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                 int width = 0;
 #line 1201 "SequencePathModule.cs"
 #line 1201 "SequencePathModule.cs"
-                double csharp2cuda_temp_244 = (second)->scalar_value;
+                float csharp2cuda_temp_244 = (second)->scalar_value;
 #line 1201 "SequencePathModule.cs"
                 int* csharp2cuda_temp_245 = &(width);
 #line 1201 "SequencePathModule.cs"
@@ -3827,7 +3827,7 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1209 "SequencePathModule.cs"
                             {
 #line 1210 "SequencePathModule.cs"
-                                double mean = 0.0;
+                                float mean = 0.0f;
 #line 1211 "SequencePathModule.cs"
                                 {
 #line 1211 "SequencePathModule.cs"
@@ -3838,12 +3838,12 @@ __device__ void mathblocks_sequence_path_dispatch(
                                             break;
 #line 1212 "SequencePathModule.cs"
 #line 1212 "SequencePathModule.cs"
-                                        double* csharp2cuda_temp_254 = &(mean);
+                                        float* csharp2cuda_temp_254 = &(mean);
 #line 1212 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_255 = *(csharp2cuda_temp_254);
+                                        float csharp2cuda_temp_255 = *(csharp2cuda_temp_254);
 #line 1212 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_256 = (a)[csharp2cuda_i32_add(start, index)];
-                                        (*(csharp2cuda_temp_254) = __dadd_rn(csharp2cuda_temp_255, csharp2cuda_temp_256));
+                                        float csharp2cuda_temp_256 = (a)[csharp2cuda_i32_add(start, index)];
+                                        (*(csharp2cuda_temp_254) = __fadd_rn(csharp2cuda_temp_255, csharp2cuda_temp_256));
 #line 1211 "SequencePathModule.cs"
                                         int* csharp2cuda_temp_253 = &(index);
                                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_253));
@@ -3851,12 +3851,12 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 }
 #line 1213 "SequencePathModule.cs"
 #line 1213 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_257 = &(mean);
+                                float* csharp2cuda_temp_257 = &(mean);
 #line 1213 "SequencePathModule.cs"
-                                double csharp2cuda_temp_258 = *(csharp2cuda_temp_257);
-                                (*(csharp2cuda_temp_257) = __ddiv_rn(csharp2cuda_temp_258, ((double)(width))));
+                                float csharp2cuda_temp_258 = *(csharp2cuda_temp_257);
+                                (*(csharp2cuda_temp_257) = __fdiv_rn(csharp2cuda_temp_258, ((float)(width))));
 #line 1214 "SequencePathModule.cs"
-                                double sum_squares = 0.0;
+                                float sum_squares = 0.0f;
 #line 1215 "SequencePathModule.cs"
                                 {
 #line 1215 "SequencePathModule.cs"
@@ -3868,15 +3868,15 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1216 "SequencePathModule.cs"
                                         {
 #line 1217 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_260 = (a)[csharp2cuda_i32_add(start, index)];
+                                            float csharp2cuda_temp_260 = (a)[csharp2cuda_i32_add(start, index)];
 #line 1217 "SequencePathModule.cs"
-                                            double difference = __dsub_rn(csharp2cuda_temp_260, mean);
+                                            float difference = __fsub_rn(csharp2cuda_temp_260, mean);
 #line 1218 "SequencePathModule.cs"
 #line 1218 "SequencePathModule.cs"
-                                            double* csharp2cuda_temp_261 = &(sum_squares);
+                                            float* csharp2cuda_temp_261 = &(sum_squares);
 #line 1218 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_262 = *(csharp2cuda_temp_261);
-                                            (*(csharp2cuda_temp_261) = __dadd_rn(csharp2cuda_temp_262, __dmul_rn(difference, difference)));
+                                            float csharp2cuda_temp_262 = *(csharp2cuda_temp_261);
+                                            (*(csharp2cuda_temp_261) = __fadd_rn(csharp2cuda_temp_262, __fmul_rn(difference, difference)));
                                         }
 #line 1215 "SequencePathModule.cs"
                                         int* csharp2cuda_temp_259 = &(index);
@@ -3884,14 +3884,14 @@ __device__ void mathblocks_sequence_path_dispatch(
                                     }
                                 }
 #line 1220 "SequencePathModule.cs"
-                                double csharp2cuda_temp_263 = __ddiv_rn(sum_squares, ((double)(width)));
+                                float csharp2cuda_temp_263 = __fdiv_rn(sum_squares, ((float)(width)));
 #line 1220 "SequencePathModule.cs"
-                                double deviation = mathblocks_square_root(csharp2cuda_temp_263);
+                                float deviation = mathblocks_square_root(csharp2cuda_temp_263);
 #line 1221 "SequencePathModule.cs"
 #line 1221 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_264 = &((result)[start]);
+                                float* csharp2cuda_temp_264 = &((result)[start]);
 #line 1221 "SequencePathModule.cs"
-                                double csharp2cuda_temp_265;
+                                float csharp2cuda_temp_265;
 #line 1221 "SequencePathModule.cs"
                                 if (((opcode) == (8)))
                                 {
@@ -3901,12 +3901,12 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 else
                                 {
 #line 1221 "SequencePathModule.cs"
-                                    csharp2cuda_temp_265 = __dmul_rn(deviation, deviation);
+                                    csharp2cuda_temp_265 = __fmul_rn(deviation, deviation);
                                 }
                                 (*(csharp2cuda_temp_264) = csharp2cuda_temp_265);
 #line 1222 "SequencePathModule.cs"
 #line 1222 "SequencePathModule.cs"
-                                double csharp2cuda_temp_266 = (result)[start];
+                                float csharp2cuda_temp_266 = (result)[start];
                                 if ((!(isfinite(csharp2cuda_temp_266))))
                                 {
 #line 1223 "SequencePathModule.cs"
@@ -3973,9 +3973,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 break;
 #line 1239 "SequencePathModule.cs"
 #line 1239 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_274 = &((result)[index]);
+                            float* csharp2cuda_temp_274 = &((result)[index]);
 #line 1239 "SequencePathModule.cs"
-                            double csharp2cuda_temp_275 = (a)[index];
+                            float csharp2cuda_temp_275 = (a)[index];
                             (*(csharp2cuda_temp_274) = csharp2cuda_temp_275);
 #line 1238 "SequencePathModule.cs"
                             int* csharp2cuda_temp_272 = &(index);
@@ -3985,7 +3985,7 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1240 "SequencePathModule.cs"
                     int length = (first)->count;
 #line 1241 "SequencePathModule.cs"
-                    double scale = __ddiv_rn(1.0, mathblocks_square_root(2.0));
+                    float scale = __fdiv_rn(1.0f, mathblocks_square_root(2.0f));
 #line 1242 "SequencePathModule.cs"
                     while (true)
                     {
@@ -4007,20 +4007,20 @@ __device__ void mathblocks_sequence_path_dispatch(
                                     {
 #line 1247 "SequencePathModule.cs"
 #line 1247 "SequencePathModule.cs"
-                                        double* csharp2cuda_temp_277 = &((scratch)[index]);
+                                        float* csharp2cuda_temp_277 = &((scratch)[index]);
 #line 1247 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_278 = (result)[csharp2cuda_i32_mul(2, index)];
+                                        float csharp2cuda_temp_278 = (result)[csharp2cuda_i32_mul(2, index)];
 #line 1247 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_279 = (result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
-                                        (*(csharp2cuda_temp_277) = __dmul_rn(__dadd_rn(csharp2cuda_temp_278, csharp2cuda_temp_279), scale));
+                                        float csharp2cuda_temp_279 = (result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
+                                        (*(csharp2cuda_temp_277) = __fmul_rn(__fadd_rn(csharp2cuda_temp_278, csharp2cuda_temp_279), scale));
 #line 1248 "SequencePathModule.cs"
 #line 1248 "SequencePathModule.cs"
-                                        double* csharp2cuda_temp_280 = &((scratch)[csharp2cuda_i32_add(half, index)]);
+                                        float* csharp2cuda_temp_280 = &((scratch)[csharp2cuda_i32_add(half, index)]);
 #line 1248 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_281 = (result)[csharp2cuda_i32_mul(2, index)];
+                                        float csharp2cuda_temp_281 = (result)[csharp2cuda_i32_mul(2, index)];
 #line 1248 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_282 = (result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
-                                        (*(csharp2cuda_temp_280) = __dmul_rn(__dsub_rn(csharp2cuda_temp_281, csharp2cuda_temp_282), scale));
+                                        float csharp2cuda_temp_282 = (result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
+                                        (*(csharp2cuda_temp_280) = __fmul_rn(__fsub_rn(csharp2cuda_temp_281, csharp2cuda_temp_282), scale));
                                     }
 #line 1245 "SequencePathModule.cs"
                                     int* csharp2cuda_temp_276 = &(index);
@@ -4037,9 +4037,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                                         break;
 #line 1251 "SequencePathModule.cs"
 #line 1251 "SequencePathModule.cs"
-                                    double* csharp2cuda_temp_284 = &((result)[index]);
+                                    float* csharp2cuda_temp_284 = &((result)[index]);
 #line 1251 "SequencePathModule.cs"
-                                    double csharp2cuda_temp_285 = (scratch)[index];
+                                    float csharp2cuda_temp_285 = (scratch)[index];
                                     (*(csharp2cuda_temp_284) = csharp2cuda_temp_285);
 #line 1250 "SequencePathModule.cs"
                                     int* csharp2cuda_temp_283 = &(index);
@@ -4064,7 +4064,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 break;
 #line 1255 "SequencePathModule.cs"
 #line 1255 "SequencePathModule.cs"
-                            double csharp2cuda_temp_289 = (result)[index];
+                            float csharp2cuda_temp_289 = (result)[index];
                             if ((!(isfinite(csharp2cuda_temp_289))))
                             {
 #line 1255 "SequencePathModule.cs"
@@ -4117,9 +4117,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 break;
 #line 1270 "SequencePathModule.cs"
 #line 1270 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_296 = &((result)[index]);
+                            float* csharp2cuda_temp_296 = &((result)[index]);
 #line 1270 "SequencePathModule.cs"
-                            double csharp2cuda_temp_297 = (a)[index];
+                            float csharp2cuda_temp_297 = (a)[index];
                             (*(csharp2cuda_temp_296) = csharp2cuda_temp_297);
 #line 1269 "SequencePathModule.cs"
                             int* csharp2cuda_temp_294 = &(index);
@@ -4161,17 +4161,17 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1276 "SequencePathModule.cs"
                                                     {
 #line 1277 "SequencePathModule.cs"
-                                                        double left = (result)[csharp2cuda_i32_add(start, offset)];
+                                                        float left = (result)[csharp2cuda_i32_add(start, offset)];
 #line 1278 "SequencePathModule.cs"
-                                                        double right = (result)[csharp2cuda_i32_add(csharp2cuda_i32_add(start, width), offset)];
+                                                        float right = (result)[csharp2cuda_i32_add(csharp2cuda_i32_add(start, width), offset)];
 #line 1279 "SequencePathModule.cs"
 #line 1279 "SequencePathModule.cs"
-                                                        double* csharp2cuda_temp_305 = &((result)[csharp2cuda_i32_add(start, offset)]);
-                                                        (*(csharp2cuda_temp_305) = __dadd_rn(left, right));
+                                                        float* csharp2cuda_temp_305 = &((result)[csharp2cuda_i32_add(start, offset)]);
+                                                        (*(csharp2cuda_temp_305) = __fadd_rn(left, right));
 #line 1280 "SequencePathModule.cs"
 #line 1280 "SequencePathModule.cs"
-                                                        double* csharp2cuda_temp_306 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_add(start, width), offset)]);
-                                                        (*(csharp2cuda_temp_306) = __dsub_rn(left, right));
+                                                        float* csharp2cuda_temp_306 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_add(start, width), offset)]);
+                                                        (*(csharp2cuda_temp_306) = __fsub_rn(left, right));
                                                     }
 #line 1275 "SequencePathModule.cs"
                                                     int* csharp2cuda_temp_304 = &(offset);
@@ -4197,7 +4197,7 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1284 "SequencePathModule.cs"
                     int csharp2cuda_temp_307 = (first)->count;
 #line 1284 "SequencePathModule.cs"
-                    double scale = __ddiv_rn(1.0, mathblocks_square_root(((double)(csharp2cuda_temp_307))));
+                    float scale = __fdiv_rn(1.0f, mathblocks_square_root(((float)(csharp2cuda_temp_307))));
 #line 1285 "SequencePathModule.cs"
                     {
 #line 1285 "SequencePathModule.cs"
@@ -4212,13 +4212,13 @@ __device__ void mathblocks_sequence_path_dispatch(
                             {
 #line 1287 "SequencePathModule.cs"
 #line 1287 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_310 = &((result)[index]);
+                                float* csharp2cuda_temp_310 = &((result)[index]);
 #line 1287 "SequencePathModule.cs"
-                                double csharp2cuda_temp_311 = *(csharp2cuda_temp_310);
-                                (*(csharp2cuda_temp_310) = __dmul_rn(csharp2cuda_temp_311, scale));
+                                float csharp2cuda_temp_311 = *(csharp2cuda_temp_310);
+                                (*(csharp2cuda_temp_310) = __fmul_rn(csharp2cuda_temp_311, scale));
 #line 1288 "SequencePathModule.cs"
 #line 1288 "SequencePathModule.cs"
-                                double csharp2cuda_temp_312 = (result)[index];
+                                float csharp2cuda_temp_312 = (result)[index];
                                 if ((!(isfinite(csharp2cuda_temp_312))))
                                 {
 #line 1288 "SequencePathModule.cs"
@@ -4247,7 +4247,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                 int csharp2cuda_temp_314 = (first)->count;
                 mathblocks_sequence_set_vector_shape(output, csharp2cuda_temp_314);
 #line 1297 "SequencePathModule.cs"
-                double sum = 0.0;
+                float sum = 0.0f;
 #line 1298 "SequencePathModule.cs"
                 {
 #line 1298 "SequencePathModule.cs"
@@ -4262,17 +4262,17 @@ __device__ void mathblocks_sequence_path_dispatch(
                         {
 #line 1300 "SequencePathModule.cs"
 #line 1300 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_317 = &(sum);
+                            float* csharp2cuda_temp_317 = &(sum);
 #line 1300 "SequencePathModule.cs"
-                            double csharp2cuda_temp_318 = *(csharp2cuda_temp_317);
+                            float csharp2cuda_temp_318 = *(csharp2cuda_temp_317);
 #line 1300 "SequencePathModule.cs"
-                            double csharp2cuda_temp_319 = (a)[index];
+                            float csharp2cuda_temp_319 = (a)[index];
 #line 1300 "SequencePathModule.cs"
-                            double csharp2cuda_temp_320 = (second)->scalar_value;
-                            (*(csharp2cuda_temp_317) = __dadd_rn(csharp2cuda_temp_318, __dsub_rn(csharp2cuda_temp_319, csharp2cuda_temp_320)));
+                            float csharp2cuda_temp_320 = (second)->scalar_value;
+                            (*(csharp2cuda_temp_317) = __fadd_rn(csharp2cuda_temp_318, __fsub_rn(csharp2cuda_temp_319, csharp2cuda_temp_320)));
 #line 1301 "SequencePathModule.cs"
 #line 1301 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_321 = &((result)[index]);
+                            float* csharp2cuda_temp_321 = &((result)[index]);
                             (*(csharp2cuda_temp_321) = sum);
 #line 1302 "SequencePathModule.cs"
                             if ((!(isfinite(sum))))
@@ -4343,9 +4343,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                     break;
                 }
 #line 1319 "SequencePathModule.cs"
-                double* diagonal_even = scratch;
+                float* diagonal_even = scratch;
 #line 1320 "SequencePathModule.cs"
-                double* diagonal_odd = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_add(columns_count, 1));
+                float* diagonal_odd = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_add(columns_count, 1));
 #line 1321 "SequencePathModule.cs"
                 {
 #line 1321 "SequencePathModule.cs"
@@ -4357,7 +4357,7 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1322 "SequencePathModule.cs"
                         {
 #line 1323 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_327;
+                            float* csharp2cuda_temp_327;
 #line 1323 "SequencePathModule.cs"
                             if (((csharp2cuda_i32_and(diagonal, 1)) == (0)))
                             {
@@ -4370,9 +4370,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 csharp2cuda_temp_327 = diagonal_odd;
                             }
 #line 1323 "SequencePathModule.cs"
-                            double* older = csharp2cuda_temp_327;
+                            float* older = csharp2cuda_temp_327;
 #line 1324 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_328;
+                            float* csharp2cuda_temp_328;
 #line 1324 "SequencePathModule.cs"
                             if (((csharp2cuda_i32_and(diagonal, 1)) == (0)))
                             {
@@ -4385,7 +4385,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 csharp2cuda_temp_328 = diagonal_even;
                             }
 #line 1324 "SequencePathModule.cs"
-                            double* newer = csharp2cuda_temp_328;
+                            float* newer = csharp2cuda_temp_328;
 #line 1325 "SequencePathModule.cs"
                             int csharp2cuda_temp_329;
 #line 1325 "SequencePathModule.cs"
@@ -4431,7 +4431,7 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1330 "SequencePathModule.cs"
                                         bool active = ((right) >= (low));
 #line 1331 "SequencePathModule.cs"
-                                        double value = 0.0;
+                                        float value = 0.0f;
 #line 1332 "SequencePathModule.cs"
                                         if (active)
 #line 1333 "SequencePathModule.cs"
@@ -4439,7 +4439,7 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1334 "SequencePathModule.cs"
                                             int left = csharp2cuda_i32_sub(diagonal, right);
 #line 1335 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_333;
+                                            float csharp2cuda_temp_333;
 #line 1335 "SequencePathModule.cs"
                                             if (((left) == (1)))
                                             {
@@ -4452,9 +4452,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                                                 csharp2cuda_temp_333 = (newer)[right];
                                             }
 #line 1335 "SequencePathModule.cs"
-                                            double above = csharp2cuda_temp_333;
+                                            float above = csharp2cuda_temp_333;
 #line 1336 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_334;
+                                            float csharp2cuda_temp_334;
 #line 1336 "SequencePathModule.cs"
                                             if (((right) == (1)))
                                             {
@@ -4467,7 +4467,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                                                 csharp2cuda_temp_334 = (newer)[csharp2cuda_i32_sub(right, 1)];
                                             }
 #line 1336 "SequencePathModule.cs"
-                                            double before = csharp2cuda_temp_334;
+                                            float before = csharp2cuda_temp_334;
 #line 1337 "SequencePathModule.cs"
                                             bool csharp2cuda_temp_335;
 #line 1337 "SequencePathModule.cs"
@@ -4482,7 +4482,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                                                 csharp2cuda_temp_335 = true;
                                             }
 #line 1337 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_336;
+                                            float csharp2cuda_temp_336;
 #line 1337 "SequencePathModule.cs"
                                             if (csharp2cuda_temp_335)
                                             {
@@ -4500,12 +4500,12 @@ __device__ void mathblocks_sequence_path_dispatch(
                                                     csharp2cuda_temp_337 = false;
                                                 }
 #line 1338 "SequencePathModule.cs"
-                                                double csharp2cuda_temp_338;
+                                                float csharp2cuda_temp_338;
 #line 1338 "SequencePathModule.cs"
                                                 if (csharp2cuda_temp_337)
                                                 {
 #line 1338 "SequencePathModule.cs"
-                                                    csharp2cuda_temp_338 = 0.0;
+                                                    csharp2cuda_temp_338 = 0.0f;
                                                 }
                                                 else
                                                 {
@@ -4521,9 +4521,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                                                 csharp2cuda_temp_336 = (older)[csharp2cuda_i32_sub(right, 1)];
                                             }
 #line 1337 "SequencePathModule.cs"
-                                            double corner = csharp2cuda_temp_336;
+                                            float corner = csharp2cuda_temp_336;
 #line 1340 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_339;
+                                            float csharp2cuda_temp_339;
 #line 1340 "SequencePathModule.cs"
                                             if (((above) < (before)))
                                             {
@@ -4536,12 +4536,12 @@ __device__ void mathblocks_sequence_path_dispatch(
                                                 csharp2cuda_temp_339 = before;
                                             }
 #line 1340 "SequencePathModule.cs"
-                                            double minimum = csharp2cuda_temp_339;
+                                            float minimum = csharp2cuda_temp_339;
 #line 1341 "SequencePathModule.cs"
 #line 1341 "SequencePathModule.cs"
-                                            double* csharp2cuda_temp_340 = &(minimum);
+                                            float* csharp2cuda_temp_340 = &(minimum);
 #line 1341 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_341;
+                                            float csharp2cuda_temp_341;
 #line 1341 "SequencePathModule.cs"
                                             if (((minimum) < (corner)))
                                             {
@@ -4556,12 +4556,12 @@ __device__ void mathblocks_sequence_path_dispatch(
                                             (*(csharp2cuda_temp_340) = csharp2cuda_temp_341);
 #line 1342 "SequencePathModule.cs"
 #line 1342 "SequencePathModule.cs"
-                                            double* csharp2cuda_temp_342 = &(value);
+                                            float* csharp2cuda_temp_342 = &(value);
 #line 1342 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_343 = (a)[csharp2cuda_i32_sub(left, 1)];
+                                            float csharp2cuda_temp_343 = (a)[csharp2cuda_i32_sub(left, 1)];
 #line 1342 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_344 = (b)[csharp2cuda_i32_sub(right, 1)];
-                                            (*(csharp2cuda_temp_342) = __dadd_rn(fabs(__dsub_rn(csharp2cuda_temp_343, csharp2cuda_temp_344)), minimum));
+                                            float csharp2cuda_temp_344 = (b)[csharp2cuda_i32_sub(right, 1)];
+                                            (*(csharp2cuda_temp_342) = __fadd_rn(fabsf(__fsub_rn(csharp2cuda_temp_343, csharp2cuda_temp_344)), minimum));
                                         }
 #line 1344 "SequencePathModule.cs"
                                         __syncthreads();
@@ -4570,7 +4570,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                                         {
 #line 1346 "SequencePathModule.cs"
 #line 1346 "SequencePathModule.cs"
-                                            double* csharp2cuda_temp_345 = &((older)[right]);
+                                            float* csharp2cuda_temp_345 = &((older)[right]);
                                             (*(csharp2cuda_temp_345) = value);
                                         }
 #line 1347 "SequencePathModule.cs"
@@ -4594,7 +4594,7 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1352 "SequencePathModule.cs"
                 {
 #line 1353 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_346;
+                    float* csharp2cuda_temp_346;
 #line 1353 "SequencePathModule.cs"
                     if (((csharp2cuda_i32_and(csharp2cuda_i32_add(rows_count, columns_count), 1)) == (0)))
                     {
@@ -4607,16 +4607,16 @@ __device__ void mathblocks_sequence_path_dispatch(
                         csharp2cuda_temp_346 = diagonal_odd;
                     }
 #line 1353 "SequencePathModule.cs"
-                    double* last = csharp2cuda_temp_346;
+                    float* last = csharp2cuda_temp_346;
 #line 1354 "SequencePathModule.cs"
 #line 1354 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_347 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_347 = &((output)->scalar_value);
 #line 1354 "SequencePathModule.cs"
-                    double csharp2cuda_temp_348 = (last)[columns_count];
+                    float csharp2cuda_temp_348 = (last)[columns_count];
                     (*(csharp2cuda_temp_347) = csharp2cuda_temp_348);
 #line 1355 "SequencePathModule.cs"
 #line 1355 "SequencePathModule.cs"
-                    double csharp2cuda_temp_349 = (output)->scalar_value;
+                    float csharp2cuda_temp_349 = (output)->scalar_value;
                     if ((!(isfinite(csharp2cuda_temp_349))))
                     {
 #line 1356 "SequencePathModule.cs"
@@ -4636,15 +4636,15 @@ __device__ void mathblocks_sequence_path_dispatch(
             {
 #line 1363 "SequencePathModule.cs"
 #line 1363 "SequencePathModule.cs"
-                double* csharp2cuda_temp_351 = &((output)->scalar_value);
+                float* csharp2cuda_temp_351 = &((output)->scalar_value);
 #line 1365 "SequencePathModule.cs"
                 int csharp2cuda_temp_352 = (first)->count;
 #line 1366 "SequencePathModule.cs"
-                double csharp2cuda_temp_353 = (second)->scalar_value;
+                float csharp2cuda_temp_353 = (second)->scalar_value;
 #line 1367 "SequencePathModule.cs"
                 int csharp2cuda_temp_354 = (third)->boolean_value;
 #line 1363 "SequencePathModule.cs"
-                double csharp2cuda_temp_355 = mathblocks_sequence_first_passage_value(a, csharp2cuda_temp_352, csharp2cuda_temp_353, ((csharp2cuda_temp_354) != (0)));
+                float csharp2cuda_temp_355 = mathblocks_sequence_first_passage_value(a, csharp2cuda_temp_352, csharp2cuda_temp_353, ((csharp2cuda_temp_354) != (0)));
                 (*(csharp2cuda_temp_351) = csharp2cuda_temp_355);
             }
 #line 1369 "SequencePathModule.cs"
@@ -4656,9 +4656,9 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1372 "SequencePathModule.cs"
             {
 #line 1373 "SequencePathModule.cs"
-                double lower = (second)->scalar_value;
+                float lower = (second)->scalar_value;
 #line 1374 "SequencePathModule.cs"
-                double upper = (third)->scalar_value;
+                float upper = (third)->scalar_value;
 #line 1375 "SequencePathModule.cs"
 #line 1375 "SequencePathModule.cs"
                 int csharp2cuda_temp_356 = (first)->count;
@@ -4676,7 +4676,7 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1381 "SequencePathModule.cs"
                 {
 #line 1382 "SequencePathModule.cs"
-                    double state = 0.0;
+                    float state = 0.0f;
 #line 1383 "SequencePathModule.cs"
                     {
 #line 1383 "SequencePathModule.cs"
@@ -4691,30 +4691,30 @@ __device__ void mathblocks_sequence_path_dispatch(
                             {
 #line 1385 "SequencePathModule.cs"
 #line 1385 "SequencePathModule.cs"
-                                double csharp2cuda_temp_360 = (a)[index];
+                                float csharp2cuda_temp_360 = (a)[index];
                                 if (((csharp2cuda_temp_360) >= (upper)))
                                 {
 #line 1386 "SequencePathModule.cs"
 #line 1386 "SequencePathModule.cs"
-                                    double* csharp2cuda_temp_361 = &(state);
-                                    (*(csharp2cuda_temp_361) = 1.0);
+                                    float* csharp2cuda_temp_361 = &(state);
+                                    (*(csharp2cuda_temp_361) = 1.0f);
                                 }
                                 else
                                 {
 #line 1387 "SequencePathModule.cs"
 #line 1387 "SequencePathModule.cs"
-                                    double csharp2cuda_temp_362 = (a)[index];
+                                    float csharp2cuda_temp_362 = (a)[index];
                                     if (((csharp2cuda_temp_362) <= (lower)))
                                     {
 #line 1388 "SequencePathModule.cs"
 #line 1388 "SequencePathModule.cs"
-                                        double* csharp2cuda_temp_363 = &(state);
-                                        (*(csharp2cuda_temp_363) = (-(1.0)));
+                                        float* csharp2cuda_temp_363 = &(state);
+                                        (*(csharp2cuda_temp_363) = (-(1.0f)));
                                     }
                                 }
 #line 1389 "SequencePathModule.cs"
 #line 1389 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_364 = &((result)[index]);
+                                float* csharp2cuda_temp_364 = &((result)[index]);
                                 (*(csharp2cuda_temp_364) = state);
                             }
 #line 1383 "SequencePathModule.cs"
@@ -4769,15 +4769,15 @@ __device__ void mathblocks_sequence_path_dispatch(
                 {
 #line 1405 "SequencePathModule.cs"
 #line 1405 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_370 = &((result)[0]);
+                    float* csharp2cuda_temp_370 = &((result)[0]);
 #line 1405 "SequencePathModule.cs"
-                    double csharp2cuda_temp_371 = (a)[0];
+                    float csharp2cuda_temp_371 = (a)[0];
                     (*(csharp2cuda_temp_370) = csharp2cuda_temp_371);
 #line 1406 "SequencePathModule.cs"
 #line 1406 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_372 = &((result)[1]);
+                    float* csharp2cuda_temp_372 = &((result)[1]);
 #line 1406 "SequencePathModule.cs"
-                    double csharp2cuda_temp_373 = (a)[0];
+                    float csharp2cuda_temp_373 = (a)[0];
                     (*(csharp2cuda_temp_372) = csharp2cuda_temp_373);
 #line 1407 "SequencePathModule.cs"
                     int row = 0;
@@ -4799,15 +4799,15 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_376));
 #line 1411 "SequencePathModule.cs"
 #line 1411 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_377 = &((result)[csharp2cuda_i32_mul(row, 2)]);
+                                float* csharp2cuda_temp_377 = &((result)[csharp2cuda_i32_mul(row, 2)]);
 #line 1411 "SequencePathModule.cs"
-                                double csharp2cuda_temp_378 = (a)[index];
+                                float csharp2cuda_temp_378 = (a)[index];
                                 (*(csharp2cuda_temp_377) = csharp2cuda_temp_378);
 #line 1412 "SequencePathModule.cs"
 #line 1412 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_379 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, 2), 1)]);
+                                float* csharp2cuda_temp_379 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, 2), 1)]);
 #line 1412 "SequencePathModule.cs"
-                                double csharp2cuda_temp_380 = (a)[csharp2cuda_i32_sub(index, 1)];
+                                float csharp2cuda_temp_380 = (a)[csharp2cuda_i32_sub(index, 1)];
                                 (*(csharp2cuda_temp_379) = csharp2cuda_temp_380);
 #line 1413 "SequencePathModule.cs"
 #line 1413 "SequencePathModule.cs"
@@ -4815,15 +4815,15 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_381));
 #line 1414 "SequencePathModule.cs"
 #line 1414 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_382 = &((result)[csharp2cuda_i32_mul(row, 2)]);
+                                float* csharp2cuda_temp_382 = &((result)[csharp2cuda_i32_mul(row, 2)]);
 #line 1414 "SequencePathModule.cs"
-                                double csharp2cuda_temp_383 = (a)[index];
+                                float csharp2cuda_temp_383 = (a)[index];
                                 (*(csharp2cuda_temp_382) = csharp2cuda_temp_383);
 #line 1415 "SequencePathModule.cs"
 #line 1415 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_384 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, 2), 1)]);
+                                float* csharp2cuda_temp_384 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, 2), 1)]);
 #line 1415 "SequencePathModule.cs"
-                                double csharp2cuda_temp_385 = (a)[index];
+                                float csharp2cuda_temp_385 = (a)[index];
                                 (*(csharp2cuda_temp_384) = csharp2cuda_temp_385);
                             }
 #line 1408 "SequencePathModule.cs"
@@ -4842,11 +4842,11 @@ __device__ void mathblocks_sequence_path_dispatch(
             {
 #line 1422 "SequencePathModule.cs"
 #line 1422 "SequencePathModule.cs"
-                double* csharp2cuda_temp_386 = &((output)->scalar_value);
+                float* csharp2cuda_temp_386 = &((output)->scalar_value);
 #line 1422 "SequencePathModule.cs"
                 int csharp2cuda_temp_387 = (first)->count;
 #line 1422 "SequencePathModule.cs"
-                double csharp2cuda_temp_388 = mathblocks_sequence_longest_run_value(boolean_a, csharp2cuda_temp_387);
+                float csharp2cuda_temp_388 = mathblocks_sequence_longest_run_value(boolean_a, csharp2cuda_temp_387);
                 (*(csharp2cuda_temp_386) = csharp2cuda_temp_388);
             }
 #line 1423 "SequencePathModule.cs"
@@ -4863,7 +4863,7 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1427 "SequencePathModule.cs"
                 int csharp2cuda_temp_390 = (first)->count;
 #line 1427 "SequencePathModule.cs"
-                double* csharp2cuda_temp_391 = &((output)->scalar_value);
+                float* csharp2cuda_temp_391 = &((output)->scalar_value);
 #line 1427 "SequencePathModule.cs"
                 bool csharp2cuda_temp_392 = mathblocks_sequence_decline_value(a, csharp2cuda_temp_390, ((opcode) == (20)), csharp2cuda_temp_391);
 #line 1426 "SequencePathModule.cs"
@@ -4896,22 +4896,22 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1436 "SequencePathModule.cs"
                 int csharp2cuda_temp_395 = (first)->count;
 #line 1437 "SequencePathModule.cs"
-                double csharp2cuda_temp_396;
+                float csharp2cuda_temp_396;
 #line 1437 "SequencePathModule.cs"
                 if (((opcode) == (22)))
                 {
 #line 1437 "SequencePathModule.cs"
-                    csharp2cuda_temp_396 = 2.0;
+                    csharp2cuda_temp_396 = 2.0f;
                 }
                 else
                 {
 #line 1437 "SequencePathModule.cs"
-                    double csharp2cuda_temp_397;
+                    float csharp2cuda_temp_397;
 #line 1437 "SequencePathModule.cs"
                     if (((((void*)(second))) == (((void*)(nullptr)))))
                     {
 #line 1437 "SequencePathModule.cs"
-                        csharp2cuda_temp_397 = 1.0;
+                        csharp2cuda_temp_397 = 1.0f;
                     }
                     else
                     {
@@ -4922,7 +4922,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                     csharp2cuda_temp_396 = csharp2cuda_temp_397;
                 }
 #line 1439 "SequencePathModule.cs"
-                double* csharp2cuda_temp_398 = &((output)->scalar_value);
+                float* csharp2cuda_temp_398 = &((output)->scalar_value);
 #line 1434 "SequencePathModule.cs"
                 bool csharp2cuda_temp_399 = mathblocks_sequence_variation_value(a, csharp2cuda_temp_395, csharp2cuda_temp_396, ((opcode) == (29)), csharp2cuda_temp_398);
 #line 1433 "SequencePathModule.cs"
@@ -4953,9 +4953,9 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1446 "SequencePathModule.cs"
                 int csharp2cuda_temp_402 = (first)->count;
 #line 1447 "SequencePathModule.cs"
-                double csharp2cuda_temp_403 = (second)->scalar_value;
+                float csharp2cuda_temp_403 = (second)->scalar_value;
 #line 1448 "SequencePathModule.cs"
-                double* csharp2cuda_temp_404 = &((output)->scalar_value);
+                float* csharp2cuda_temp_404 = &((output)->scalar_value);
 #line 1444 "SequencePathModule.cs"
                 bool csharp2cuda_temp_405 = mathblocks_sequence_recurrence_value(a, csharp2cuda_temp_402, csharp2cuda_temp_403, csharp2cuda_temp_404);
 #line 1443 "SequencePathModule.cs"
@@ -5000,9 +5000,9 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1460 "SequencePathModule.cs"
                 {
 #line 1461 "SequencePathModule.cs"
-                    double cumulative = 0.0;
+                    float cumulative = 0.0f;
 #line 1462 "SequencePathModule.cs"
-                    double minimum = 0.0;
+                    float minimum = 0.0f;
 #line 1463 "SequencePathModule.cs"
                     {
 #line 1463 "SequencePathModule.cs"
@@ -5017,17 +5017,17 @@ __device__ void mathblocks_sequence_path_dispatch(
                             {
 #line 1465 "SequencePathModule.cs"
 #line 1465 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_412 = &(cumulative);
+                                float* csharp2cuda_temp_412 = &(cumulative);
 #line 1465 "SequencePathModule.cs"
-                                double csharp2cuda_temp_413 = *(csharp2cuda_temp_412);
+                                float csharp2cuda_temp_413 = *(csharp2cuda_temp_412);
 #line 1465 "SequencePathModule.cs"
-                                double csharp2cuda_temp_414 = (a)[index];
-                                (*(csharp2cuda_temp_412) = __dadd_rn(csharp2cuda_temp_413, csharp2cuda_temp_414));
+                                float csharp2cuda_temp_414 = (a)[index];
+                                (*(csharp2cuda_temp_412) = __fadd_rn(csharp2cuda_temp_413, csharp2cuda_temp_414));
 #line 1466 "SequencePathModule.cs"
 #line 1466 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_415 = &(minimum);
+                                float* csharp2cuda_temp_415 = &(minimum);
 #line 1466 "SequencePathModule.cs"
-                                double csharp2cuda_temp_416;
+                                float csharp2cuda_temp_416;
 #line 1466 "SequencePathModule.cs"
                                 if (((minimum) < (cumulative)))
                                 {
@@ -5042,11 +5042,11 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 (*(csharp2cuda_temp_415) = csharp2cuda_temp_416);
 #line 1467 "SequencePathModule.cs"
 #line 1467 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_417 = &((result)[index]);
-                                (*(csharp2cuda_temp_417) = __dsub_rn(cumulative, minimum));
+                                float* csharp2cuda_temp_417 = &((result)[index]);
+                                (*(csharp2cuda_temp_417) = __fsub_rn(cumulative, minimum));
 #line 1468 "SequencePathModule.cs"
 #line 1468 "SequencePathModule.cs"
-                                double csharp2cuda_temp_418 = (result)[index];
+                                float csharp2cuda_temp_418 = (result)[index];
                                 if ((!(isfinite(csharp2cuda_temp_418))))
                                 {
 #line 1469 "SequencePathModule.cs"
@@ -5117,9 +5117,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 if (((index) < (csharp2cuda_temp_426)))
                                 {
 #line 1489 "SequencePathModule.cs"
-                                    double csharp2cuda_temp_428 = (a)[index];
+                                    float csharp2cuda_temp_428 = (a)[index];
 #line 1489 "SequencePathModule.cs"
-                                    double csharp2cuda_temp_429 = (a)[start];
+                                    float csharp2cuda_temp_429 = (a)[start];
 #line 1489 "SequencePathModule.cs"
                                     csharp2cuda_temp_427 = ((csharp2cuda_temp_428) == (csharp2cuda_temp_429));
                                 }
@@ -5183,9 +5183,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 (*(csharp2cuda_temp_439) = csharp2cuda_i32_sub(index, start));
 #line 1502 "SequencePathModule.cs"
 #line 1502 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_440 = &(((runs)[count]).value);
+                                float* csharp2cuda_temp_440 = &(((runs)[count]).value);
 #line 1502 "SequencePathModule.cs"
-                                double csharp2cuda_temp_441 = (a)[start];
+                                float csharp2cuda_temp_441 = (a)[start];
                                 (*(csharp2cuda_temp_440) = csharp2cuda_temp_441);
 #line 1503 "SequencePathModule.cs"
 #line 1503 "SequencePathModule.cs"
@@ -5257,19 +5257,19 @@ __device__ void mathblocks_sequence_path_dispatch(
                             {
 #line 1526 "SequencePathModule.cs"
 #line 1526 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_451 = &((result)[column]);
+                                float* csharp2cuda_temp_451 = &((result)[column]);
 #line 1526 "SequencePathModule.cs"
                                 int csharp2cuda_temp_452 = (first)->rows;
 #line 1526 "SequencePathModule.cs"
                                 int csharp2cuda_temp_453 = (first)->columns;
 #line 1526 "SequencePathModule.cs"
-                                double csharp2cuda_temp_454 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(csharp2cuda_temp_452, 1), csharp2cuda_temp_453), column)];
+                                float csharp2cuda_temp_454 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(csharp2cuda_temp_452, 1), csharp2cuda_temp_453), column)];
 #line 1526 "SequencePathModule.cs"
-                                double csharp2cuda_temp_455 = (a)[column];
-                                (*(csharp2cuda_temp_451) = __dsub_rn(csharp2cuda_temp_454, csharp2cuda_temp_455));
+                                float csharp2cuda_temp_455 = (a)[column];
+                                (*(csharp2cuda_temp_451) = __fsub_rn(csharp2cuda_temp_454, csharp2cuda_temp_455));
 #line 1527 "SequencePathModule.cs"
 #line 1527 "SequencePathModule.cs"
-                                double csharp2cuda_temp_456 = (result)[column];
+                                float csharp2cuda_temp_456 = (result)[column];
                                 if ((!(isfinite(csharp2cuda_temp_456))))
                                 {
 #line 1527 "SequencePathModule.cs"
@@ -5327,11 +5327,11 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1543 "SequencePathModule.cs"
                 {
 #line 1544 "SequencePathModule.cs"
-                    double* level_one = scratch;
+                    float* level_one = scratch;
 #line 1545 "SequencePathModule.cs"
-                    double* level_two = csharp2cuda_pointer_add(scratch, dimension);
+                    float* level_two = csharp2cuda_pointer_add(scratch, dimension);
 #line 1546 "SequencePathModule.cs"
-                    double* increment = csharp2cuda_pointer_add(level_two, csharp2cuda_i32_mul(dimension, dimension));
+                    float* increment = csharp2cuda_pointer_add(level_two, csharp2cuda_i32_mul(dimension, dimension));
 #line 1547 "SequencePathModule.cs"
                     {
 #line 1547 "SequencePathModule.cs"
@@ -5342,8 +5342,8 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 break;
 #line 1548 "SequencePathModule.cs"
 #line 1548 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_462 = &((level_one)[index]);
-                            (*(csharp2cuda_temp_462) = 0.0);
+                            float* csharp2cuda_temp_462 = &((level_one)[index]);
+                            (*(csharp2cuda_temp_462) = 0.0f);
 #line 1547 "SequencePathModule.cs"
                             int* csharp2cuda_temp_461 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_461));
@@ -5359,8 +5359,8 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 break;
 #line 1550 "SequencePathModule.cs"
 #line 1550 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_464 = &((level_two)[index]);
-                            (*(csharp2cuda_temp_464) = 0.0);
+                            float* csharp2cuda_temp_464 = &((level_two)[index]);
+                            (*(csharp2cuda_temp_464) = 0.0f);
 #line 1549 "SequencePathModule.cs"
                             int* csharp2cuda_temp_463 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_463));
@@ -5376,8 +5376,8 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 break;
 #line 1552 "SequencePathModule.cs"
 #line 1552 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_466 = &((result)[index]);
-                            (*(csharp2cuda_temp_466) = 0.0);
+                            float* csharp2cuda_temp_466 = &((result)[index]);
+                            (*(csharp2cuda_temp_466) = 0.0f);
 #line 1551 "SequencePathModule.cs"
                             int* csharp2cuda_temp_465 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_465));
@@ -5405,12 +5405,12 @@ __device__ void mathblocks_sequence_path_dispatch(
                                             break;
 #line 1556 "SequencePathModule.cs"
 #line 1556 "SequencePathModule.cs"
-                                        double* csharp2cuda_temp_470 = &((increment)[index]);
+                                        float* csharp2cuda_temp_470 = &((increment)[index]);
 #line 1556 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_471 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, dimension), index)];
+                                        float csharp2cuda_temp_471 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, dimension), index)];
 #line 1556 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_472 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, 1), dimension), index)];
-                                        (*(csharp2cuda_temp_470) = __dsub_rn(csharp2cuda_temp_471, csharp2cuda_temp_472));
+                                        float csharp2cuda_temp_472 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, 1), dimension), index)];
+                                        (*(csharp2cuda_temp_470) = __fsub_rn(csharp2cuda_temp_471, csharp2cuda_temp_472));
 #line 1555 "SequencePathModule.cs"
                                         int* csharp2cuda_temp_469 = &(index);
                                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_469));
@@ -5450,30 +5450,30 @@ __device__ void mathblocks_sequence_path_dispatch(
                                                                     int target = csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_add(csharp2cuda_i32_mul(left, dimension), middle), dimension), right);
 #line 1564 "SequencePathModule.cs"
 #line 1564 "SequencePathModule.cs"
-                                                                    double* csharp2cuda_temp_476 = &((result)[target]);
+                                                                    float* csharp2cuda_temp_476 = &((result)[target]);
 #line 1564 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_477 = *(csharp2cuda_temp_476);
+                                                                    float csharp2cuda_temp_477 = *(csharp2cuda_temp_476);
 #line 1565 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_478 = (level_two)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, dimension), middle)];
+                                                                    float csharp2cuda_temp_478 = (level_two)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, dimension), middle)];
 #line 1565 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_479 = (increment)[right];
+                                                                    float csharp2cuda_temp_479 = (increment)[right];
 #line 1566 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_480 = (level_one)[left];
+                                                                    float csharp2cuda_temp_480 = (level_one)[left];
 #line 1566 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_481 = (increment)[middle];
+                                                                    float csharp2cuda_temp_481 = (increment)[middle];
 #line 1566 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_482 = (increment)[right];
+                                                                    float csharp2cuda_temp_482 = (increment)[right];
 #line 1566 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_483 = __ddiv_rn(__dmul_rn(__dmul_rn(csharp2cuda_temp_480, csharp2cuda_temp_481), csharp2cuda_temp_482), 2.0);
+                                                                    float csharp2cuda_temp_483 = __fdiv_rn(__fmul_rn(__fmul_rn(csharp2cuda_temp_480, csharp2cuda_temp_481), csharp2cuda_temp_482), 2.0f);
 #line 1567 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_484 = (increment)[left];
+                                                                    float csharp2cuda_temp_484 = (increment)[left];
 #line 1567 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_485 = (increment)[middle];
+                                                                    float csharp2cuda_temp_485 = (increment)[middle];
 #line 1567 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_486 = (increment)[right];
+                                                                    float csharp2cuda_temp_486 = (increment)[right];
 #line 1567 "SequencePathModule.cs"
-                                                                    double csharp2cuda_temp_487 = __ddiv_rn(__dmul_rn(__dmul_rn(csharp2cuda_temp_484, csharp2cuda_temp_485), csharp2cuda_temp_486), 6.0);
-                                                                    (*(csharp2cuda_temp_476) = __dadd_rn(csharp2cuda_temp_477, __dadd_rn(__dadd_rn(__dmul_rn(csharp2cuda_temp_478, csharp2cuda_temp_479), csharp2cuda_temp_483), csharp2cuda_temp_487)));
+                                                                    float csharp2cuda_temp_487 = __fdiv_rn(__fmul_rn(__fmul_rn(csharp2cuda_temp_484, csharp2cuda_temp_485), csharp2cuda_temp_486), 6.0f);
+                                                                    (*(csharp2cuda_temp_476) = __fadd_rn(csharp2cuda_temp_477, __fadd_rn(__fadd_rn(__fmul_rn(csharp2cuda_temp_478, csharp2cuda_temp_479), csharp2cuda_temp_483), csharp2cuda_temp_487)));
                                                                 }
 #line 1561 "SequencePathModule.cs"
                                                                 int* csharp2cuda_temp_475 = &(right);
@@ -5482,20 +5482,20 @@ __device__ void mathblocks_sequence_path_dispatch(
                                                         }
 #line 1569 "SequencePathModule.cs"
 #line 1569 "SequencePathModule.cs"
-                                                        double* csharp2cuda_temp_488 = &((level_two)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, dimension), middle)]);
+                                                        float* csharp2cuda_temp_488 = &((level_two)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, dimension), middle)]);
 #line 1569 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_489 = *(csharp2cuda_temp_488);
+                                                        float csharp2cuda_temp_489 = *(csharp2cuda_temp_488);
 #line 1570 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_490 = (level_one)[left];
+                                                        float csharp2cuda_temp_490 = (level_one)[left];
 #line 1570 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_491 = (increment)[middle];
+                                                        float csharp2cuda_temp_491 = (increment)[middle];
 #line 1571 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_492 = (increment)[left];
+                                                        float csharp2cuda_temp_492 = (increment)[left];
 #line 1571 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_493 = (increment)[middle];
+                                                        float csharp2cuda_temp_493 = (increment)[middle];
 #line 1571 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_494 = __ddiv_rn(__dmul_rn(csharp2cuda_temp_492, csharp2cuda_temp_493), 2.0);
-                                                        (*(csharp2cuda_temp_488) = __dadd_rn(csharp2cuda_temp_489, __dadd_rn(__dmul_rn(csharp2cuda_temp_490, csharp2cuda_temp_491), csharp2cuda_temp_494)));
+                                                        float csharp2cuda_temp_494 = __fdiv_rn(__fmul_rn(csharp2cuda_temp_492, csharp2cuda_temp_493), 2.0f);
+                                                        (*(csharp2cuda_temp_488) = __fadd_rn(csharp2cuda_temp_489, __fadd_rn(__fmul_rn(csharp2cuda_temp_490, csharp2cuda_temp_491), csharp2cuda_temp_494)));
                                                     }
 #line 1559 "SequencePathModule.cs"
                                                     int* csharp2cuda_temp_474 = &(middle);
@@ -5504,12 +5504,12 @@ __device__ void mathblocks_sequence_path_dispatch(
                                             }
 #line 1573 "SequencePathModule.cs"
 #line 1573 "SequencePathModule.cs"
-                                            double* csharp2cuda_temp_495 = &((level_one)[left]);
+                                            float* csharp2cuda_temp_495 = &((level_one)[left]);
 #line 1573 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_496 = *(csharp2cuda_temp_495);
+                                            float csharp2cuda_temp_496 = *(csharp2cuda_temp_495);
 #line 1573 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_497 = (increment)[left];
-                                            (*(csharp2cuda_temp_495) = __dadd_rn(csharp2cuda_temp_496, csharp2cuda_temp_497));
+                                            float csharp2cuda_temp_497 = (increment)[left];
+                                            (*(csharp2cuda_temp_495) = __fadd_rn(csharp2cuda_temp_496, csharp2cuda_temp_497));
                                         }
 #line 1557 "SequencePathModule.cs"
                                         int* csharp2cuda_temp_473 = &(left);
@@ -5532,7 +5532,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 break;
 #line 1577 "SequencePathModule.cs"
 #line 1577 "SequencePathModule.cs"
-                            double csharp2cuda_temp_499 = (result)[index];
+                            float csharp2cuda_temp_499 = (result)[index];
                             if ((!(isfinite(csharp2cuda_temp_499))))
                             {
 #line 1577 "SequencePathModule.cs"
@@ -5572,9 +5572,9 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1591 "SequencePathModule.cs"
                 {
 #line 1592 "SequencePathModule.cs"
-                    double* cumulative = scratch;
+                    float* cumulative = scratch;
 #line 1593 "SequencePathModule.cs"
-                    double* increment = csharp2cuda_pointer_add(scratch, dimension);
+                    float* increment = csharp2cuda_pointer_add(scratch, dimension);
 #line 1594 "SequencePathModule.cs"
                     {
 #line 1594 "SequencePathModule.cs"
@@ -5585,8 +5585,8 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 break;
 #line 1595 "SequencePathModule.cs"
 #line 1595 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_503 = &((cumulative)[index]);
-                            (*(csharp2cuda_temp_503) = 0.0);
+                            float* csharp2cuda_temp_503 = &((cumulative)[index]);
+                            (*(csharp2cuda_temp_503) = 0.0f);
 #line 1594 "SequencePathModule.cs"
                             int* csharp2cuda_temp_502 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_502));
@@ -5602,8 +5602,8 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 break;
 #line 1597 "SequencePathModule.cs"
 #line 1597 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_505 = &((result)[index]);
-                            (*(csharp2cuda_temp_505) = 0.0);
+                            float* csharp2cuda_temp_505 = &((result)[index]);
+                            (*(csharp2cuda_temp_505) = 0.0f);
 #line 1596 "SequencePathModule.cs"
                             int* csharp2cuda_temp_504 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_504));
@@ -5631,12 +5631,12 @@ __device__ void mathblocks_sequence_path_dispatch(
                                             break;
 #line 1601 "SequencePathModule.cs"
 #line 1601 "SequencePathModule.cs"
-                                        double* csharp2cuda_temp_509 = &((increment)[column]);
+                                        float* csharp2cuda_temp_509 = &((increment)[column]);
 #line 1601 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_510 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, dimension), column)];
+                                        float csharp2cuda_temp_510 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, dimension), column)];
 #line 1601 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_511 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, 1), dimension), column)];
-                                        (*(csharp2cuda_temp_509) = __dsub_rn(csharp2cuda_temp_510, csharp2cuda_temp_511));
+                                        float csharp2cuda_temp_511 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, 1), dimension), column)];
+                                        (*(csharp2cuda_temp_509) = __fsub_rn(csharp2cuda_temp_510, csharp2cuda_temp_511));
 #line 1600 "SequencePathModule.cs"
                                         int* csharp2cuda_temp_508 = &(column);
                                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_508));
@@ -5664,18 +5664,18 @@ __device__ void mathblocks_sequence_path_dispatch(
                                                     {
 #line 1606 "SequencePathModule.cs"
 #line 1606 "SequencePathModule.cs"
-                                                        double* csharp2cuda_temp_514 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, dimension), right)]);
+                                                        float* csharp2cuda_temp_514 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, dimension), right)]);
 #line 1606 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_515 = *(csharp2cuda_temp_514);
+                                                        float csharp2cuda_temp_515 = *(csharp2cuda_temp_514);
 #line 1607 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_516 = (cumulative)[left];
+                                                        float csharp2cuda_temp_516 = (cumulative)[left];
 #line 1607 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_517 = (increment)[right];
+                                                        float csharp2cuda_temp_517 = (increment)[right];
 #line 1608 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_518 = (increment)[left];
+                                                        float csharp2cuda_temp_518 = (increment)[left];
 #line 1608 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_519 = (increment)[right];
-                                                        (*(csharp2cuda_temp_514) = __dadd_rn(csharp2cuda_temp_515, __dadd_rn(__dmul_rn(csharp2cuda_temp_516, csharp2cuda_temp_517), __dmul_rn(__dmul_rn(0.5, csharp2cuda_temp_518), csharp2cuda_temp_519))));
+                                                        float csharp2cuda_temp_519 = (increment)[right];
+                                                        (*(csharp2cuda_temp_514) = __fadd_rn(csharp2cuda_temp_515, __fadd_rn(__fmul_rn(csharp2cuda_temp_516, csharp2cuda_temp_517), __fmul_rn(__fmul_rn(0.5f, csharp2cuda_temp_518), csharp2cuda_temp_519))));
                                                     }
 #line 1604 "SequencePathModule.cs"
                                                     int* csharp2cuda_temp_513 = &(right);
@@ -5698,12 +5698,12 @@ __device__ void mathblocks_sequence_path_dispatch(
                                             break;
 #line 1612 "SequencePathModule.cs"
 #line 1612 "SequencePathModule.cs"
-                                        double* csharp2cuda_temp_521 = &((cumulative)[column]);
+                                        float* csharp2cuda_temp_521 = &((cumulative)[column]);
 #line 1612 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_522 = *(csharp2cuda_temp_521);
+                                        float csharp2cuda_temp_522 = *(csharp2cuda_temp_521);
 #line 1612 "SequencePathModule.cs"
-                                        double csharp2cuda_temp_523 = (increment)[column];
-                                        (*(csharp2cuda_temp_521) = __dadd_rn(csharp2cuda_temp_522, csharp2cuda_temp_523));
+                                        float csharp2cuda_temp_523 = (increment)[column];
+                                        (*(csharp2cuda_temp_521) = __fadd_rn(csharp2cuda_temp_522, csharp2cuda_temp_523));
 #line 1611 "SequencePathModule.cs"
                                         int* csharp2cuda_temp_520 = &(column);
                                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_520));
@@ -5725,7 +5725,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 break;
 #line 1615 "SequencePathModule.cs"
 #line 1615 "SequencePathModule.cs"
-                            double csharp2cuda_temp_525 = (result)[index];
+                            float csharp2cuda_temp_525 = (result)[index];
                             if ((!(isfinite(csharp2cuda_temp_525))))
                             {
 #line 1615 "SequencePathModule.cs"
@@ -5750,11 +5750,11 @@ __device__ void mathblocks_sequence_path_dispatch(
             {
 #line 1622 "SequencePathModule.cs"
 #line 1622 "SequencePathModule.cs"
-                double* csharp2cuda_temp_527 = &((output)->scalar_value);
+                float* csharp2cuda_temp_527 = &((output)->scalar_value);
 #line 1622 "SequencePathModule.cs"
                 int csharp2cuda_temp_528 = (first)->count;
 #line 1622 "SequencePathModule.cs"
-                double csharp2cuda_temp_529 = mathblocks_sequence_sign_change_value(a, csharp2cuda_temp_528, ((opcode) == (30)));
+                float csharp2cuda_temp_529 = mathblocks_sequence_sign_change_value(a, csharp2cuda_temp_528, ((opcode) == (30)));
                 (*(csharp2cuda_temp_527) = csharp2cuda_temp_529);
             }
 #line 1623 "SequencePathModule.cs"
@@ -5769,7 +5769,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                 int state_count = 0;
 #line 1628 "SequencePathModule.cs"
 #line 1628 "SequencePathModule.cs"
-                double csharp2cuda_temp_530 = (second)->scalar_value;
+                float csharp2cuda_temp_530 = (second)->scalar_value;
 #line 1628 "SequencePathModule.cs"
                 int* csharp2cuda_temp_531 = &(state_count);
 #line 1628 "SequencePathModule.cs"
@@ -5827,8 +5827,8 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 break;
 #line 1636 "SequencePathModule.cs"
 #line 1636 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_539 = &((result)[index]);
-                            (*(csharp2cuda_temp_539) = 0.0);
+                            float* csharp2cuda_temp_539 = &((result)[index]);
+                            (*(csharp2cuda_temp_539) = 0.0f);
 #line 1635 "SequencePathModule.cs"
                             int* csharp2cuda_temp_535 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_535));
@@ -5865,7 +5865,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 int state = 0;
 #line 1640 "SequencePathModule.cs"
 #line 1640 "SequencePathModule.cs"
-                                double csharp2cuda_temp_544 = (a)[index];
+                                float csharp2cuda_temp_544 = (a)[index];
 #line 1640 "SequencePathModule.cs"
                                 int* csharp2cuda_temp_545 = &(state);
 #line 1640 "SequencePathModule.cs"
@@ -5923,14 +5923,14 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 break;
 #line 1644 "SequencePathModule.cs"
 #line 1644 "SequencePathModule.cs"
-                            double csharp2cuda_temp_553 = (a)[csharp2cuda_i32_sub(index, 1)];
+                            float csharp2cuda_temp_553 = (a)[csharp2cuda_i32_sub(index, 1)];
 #line 1644 "SequencePathModule.cs"
-                            double csharp2cuda_temp_554 = (a)[index];
+                            float csharp2cuda_temp_554 = (a)[index];
 #line 1644 "SequencePathModule.cs"
-                            double* csharp2cuda_temp_555 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_f64_to_i32(csharp2cuda_temp_553), state_count), csharp2cuda_f64_to_i32(csharp2cuda_temp_554))]);
+                            float* csharp2cuda_temp_555 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_f64_to_i32(csharp2cuda_temp_553), state_count), csharp2cuda_f64_to_i32(csharp2cuda_temp_554))]);
 #line 1644 "SequencePathModule.cs"
-                            double csharp2cuda_temp_556 = *(csharp2cuda_temp_555);
-                            (*(csharp2cuda_temp_555) = __dadd_rn(csharp2cuda_temp_556, 1.0));
+                            float csharp2cuda_temp_556 = *(csharp2cuda_temp_555);
+                            (*(csharp2cuda_temp_555) = __fadd_rn(csharp2cuda_temp_556, 1.0f));
 #line 1643 "SequencePathModule.cs"
                             int* csharp2cuda_temp_549 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_549));
@@ -5990,7 +5990,7 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1664 "SequencePathModule.cs"
                 unsigned long long csharp2cuda_temp_561 = (third)->data_pointer;
 #line 1664 "SequencePathModule.cs"
-                const double* shift_counts = ((double*)(csharp2cuda_temp_561));
+                const float* shift_counts = ((float*)(csharp2cuda_temp_561));
 #line 1665 "SequencePathModule.cs"
                 unsigned long long csharp2cuda_temp_562 = (output)->data_pointer;
 #line 1665 "SequencePathModule.cs"
@@ -6004,12 +6004,12 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1669 "SequencePathModule.cs"
                     mathblocks_sequence_set_vector_shape(output, shift_rows);
 #line 1670 "SequencePathModule.cs"
-                    double csharp2cuda_temp_563;
+                    float csharp2cuda_temp_563;
 #line 1670 "SequencePathModule.cs"
                     if (((((void*)(shift_offset_input))) == (((void*)(nullptr)))))
                     {
 #line 1670 "SequencePathModule.cs"
-                        csharp2cuda_temp_563 = 0.0;
+                        csharp2cuda_temp_563 = 0.0f;
                     }
                     else
                     {
@@ -6017,7 +6017,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                         csharp2cuda_temp_563 = (shift_offset_input)->scalar_value;
                     }
 #line 1670 "SequencePathModule.cs"
-                    double shift_offset_value = csharp2cuda_temp_563;
+                    float shift_offset_value = csharp2cuda_temp_563;
 #line 1671 "SequencePathModule.cs"
 #line 1671 "SequencePathModule.cs"
                     int csharp2cuda_temp_564;
@@ -6111,7 +6111,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                     if (!(csharp2cuda_temp_572))
                     {
 #line 1671 "SequencePathModule.cs"
-                        csharp2cuda_temp_574 = (!(((shift_offset_value) >= (1.0))));
+                        csharp2cuda_temp_574 = (!(((shift_offset_value) >= (1.0f))));
                     }
                     else
                     {
@@ -6124,7 +6124,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                     if (!(csharp2cuda_temp_574))
                     {
 #line 1671 "SequencePathModule.cs"
-                        csharp2cuda_temp_575 = ((shift_offset_value) != (trunc(shift_offset_value)));
+                        csharp2cuda_temp_575 = ((shift_offset_value) != (truncf(shift_offset_value)));
                     }
                     else
                     {
@@ -6140,11 +6140,11 @@ __device__ void mathblocks_sequence_path_dispatch(
                     }
 #line 1675 "SequencePathModule.cs"
 #line 1675 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_577 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_577 = &((output)->scalar_value);
 #line 1675 "SequencePathModule.cs"
-                    double csharp2cuda_temp_578;
+                    float csharp2cuda_temp_578;
 #line 1675 "SequencePathModule.cs"
-                    if (((shift_offset_value) < (((double)(shift_rows)))))
+                    if (((shift_offset_value) < (((float)(shift_rows)))))
                     {
 #line 1675 "SequencePathModule.cs"
                         csharp2cuda_temp_578 = shift_offset_value;
@@ -6152,7 +6152,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                     else
                     {
 #line 1675 "SequencePathModule.cs"
-                        csharp2cuda_temp_578 = ((double)(shift_rows));
+                        csharp2cuda_temp_578 = ((float)(shift_rows));
                     }
                     (*(csharp2cuda_temp_577) = csharp2cuda_temp_578);
                 }
@@ -6184,15 +6184,15 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1679 "SequencePathModule.cs"
                         {
 #line 1680 "SequencePathModule.cs"
-                            double shift_count_value = (shift_counts)[shift_index];
+                            float shift_count_value = (shift_counts)[shift_index];
 #line 1681 "SequencePathModule.cs"
 #line 1681 "SequencePathModule.cs"
                             bool csharp2cuda_temp_583;
 #line 1681 "SequencePathModule.cs"
-                            if (!((!(((shift_count_value) >= (0.0))))))
+                            if (!((!(((shift_count_value) >= (0.0f))))))
                             {
 #line 1681 "SequencePathModule.cs"
-                                csharp2cuda_temp_583 = ((shift_count_value) != (trunc(shift_count_value)));
+                                csharp2cuda_temp_583 = ((shift_count_value) != (truncf(shift_count_value)));
                             }
                             else
                             {
@@ -6228,11 +6228,11 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1684 "SequencePathModule.cs"
                 __syncthreads();
 #line 1685 "SequencePathModule.cs"
-                double csharp2cuda_temp_585 = (output)->scalar_value;
+                float csharp2cuda_temp_585 = (output)->scalar_value;
 #line 1685 "SequencePathModule.cs"
                 int shift_offset = csharp2cuda_f64_to_i32(csharp2cuda_temp_585);
 #line 1686 "SequencePathModule.cs"
-                double shift_fill = 0.0;
+                float shift_fill = 0.0f;
 #line 1687 "SequencePathModule.cs"
 #line 1687 "SequencePathModule.cs"
                 bool csharp2cuda_temp_586 = (output)->valid;
@@ -6253,9 +6253,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                 {
 #line 1688 "SequencePathModule.cs"
 #line 1688 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_588 = &(shift_fill);
+                    float* csharp2cuda_temp_588 = &(shift_fill);
 #line 1688 "SequencePathModule.cs"
-                    double csharp2cuda_temp_589 = (shift_fill_input)->scalar_value;
+                    float csharp2cuda_temp_589 = (shift_fill_input)->scalar_value;
                     (*(csharp2cuda_temp_588) = csharp2cuda_temp_589);
                 }
 #line 1689 "SequencePathModule.cs"
@@ -6303,11 +6303,11 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1698 "SequencePathModule.cs"
                                     bool* csharp2cuda_temp_595 = &(shift_available);
 #line 1698 "SequencePathModule.cs"
-                                    double csharp2cuda_temp_596 = (shift_counts)[shift_source];
+                                    float csharp2cuda_temp_596 = (shift_counts)[shift_source];
 #line 1698 "SequencePathModule.cs"
                                     bool csharp2cuda_temp_597;
 #line 1698 "SequencePathModule.cs"
-                                    if (((csharp2cuda_temp_596) >= (((double)(shift_offset)))))
+                                    if (((csharp2cuda_temp_596) >= (((float)(shift_offset)))))
                                     {
 #line 1698 "SequencePathModule.cs"
                                         csharp2cuda_temp_597 = (shift_flags)[shift_source];
@@ -6334,11 +6334,11 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1704 "SequencePathModule.cs"
                                     bool* csharp2cuda_temp_599 = &(shift_available);
 #line 1704 "SequencePathModule.cs"
-                                    double csharp2cuda_temp_600 = (shift_counts)[shift_index];
+                                    float csharp2cuda_temp_600 = (shift_counts)[shift_index];
 #line 1704 "SequencePathModule.cs"
                                     bool csharp2cuda_temp_601;
 #line 1704 "SequencePathModule.cs"
-                                    if (((csharp2cuda_temp_600) >= (((double)(shift_offset)))))
+                                    if (((csharp2cuda_temp_600) >= (((float)(shift_offset)))))
                                     {
 #line 1704 "SequencePathModule.cs"
                                         csharp2cuda_temp_601 = (shift_flags)[shift_source];
@@ -6363,9 +6363,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                             {
 #line 1709 "SequencePathModule.cs"
 #line 1709 "SequencePathModule.cs"
-                                double* csharp2cuda_temp_603 = &((result)[shift_index]);
+                                float* csharp2cuda_temp_603 = &((result)[shift_index]);
 #line 1709 "SequencePathModule.cs"
-                                double csharp2cuda_temp_604;
+                                float csharp2cuda_temp_604;
 #line 1709 "SequencePathModule.cs"
                                 if (shift_available)
                                 {
@@ -6469,22 +6469,22 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1734 "SequencePathModule.cs"
                 const int* available = csharp2cuda_temp_608;
 #line 1735 "SequencePathModule.cs"
-                double* csharp2cuda_temp_610;
+                float* csharp2cuda_temp_610;
 #line 1735 "SequencePathModule.cs"
                 if (((((void*)(third))) == (((void*)(nullptr)))))
                 {
 #line 1735 "SequencePathModule.cs"
-                    csharp2cuda_temp_610 = ((double*)(nullptr));
+                    csharp2cuda_temp_610 = ((float*)(nullptr));
                 }
                 else
                 {
 #line 1735 "SequencePathModule.cs"
                     unsigned long long csharp2cuda_temp_611 = (third)->data_pointer;
 #line 1735 "SequencePathModule.cs"
-                    csharp2cuda_temp_610 = ((double*)(csharp2cuda_temp_611));
+                    csharp2cuda_temp_610 = ((float*)(csharp2cuda_temp_611));
                 }
 #line 1735 "SequencePathModule.cs"
-                const double* counts = csharp2cuda_temp_610;
+                const float* counts = csharp2cuda_temp_610;
 #line 1736 "SequencePathModule.cs"
                 unsigned long long csharp2cuda_temp_612 = (output)->data_pointer;
 #line 1736 "SequencePathModule.cs"
@@ -6496,19 +6496,19 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1739 "SequencePathModule.cs"
                     int count = (first)->count;
 #line 1740 "SequencePathModule.cs"
-                    double start = (start_slot)->scalar_value;
+                    float start = (start_slot)->scalar_value;
 #line 1741 "SequencePathModule.cs"
-                    double end = (end_slot)->scalar_value;
+                    float end = (end_slot)->scalar_value;
 #line 1742 "SequencePathModule.cs"
-                    double fill = 0.0;
+                    float fill = 0.0f;
 #line 1743 "SequencePathModule.cs"
                     if (((opcode) == (43)))
                     {
 #line 1744 "SequencePathModule.cs"
 #line 1744 "SequencePathModule.cs"
-                        double* csharp2cuda_temp_613 = &(fill);
+                        float* csharp2cuda_temp_613 = &(fill);
 #line 1744 "SequencePathModule.cs"
-                        double csharp2cuda_temp_614 = (fill_slot)->scalar_value;
+                        float csharp2cuda_temp_614 = (fill_slot)->scalar_value;
                         (*(csharp2cuda_temp_613) = csharp2cuda_temp_614);
                     }
 #line 1745 "SequencePathModule.cs"
@@ -6617,7 +6617,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                     if (!(csharp2cuda_temp_626))
                     {
 #line 1751 "SequencePathModule.cs"
-                        csharp2cuda_temp_627 = ((start) != (floor(start)));
+                        csharp2cuda_temp_627 = ((start) != (floorf(start)));
                     }
                     else
                     {
@@ -6630,7 +6630,7 @@ __device__ void mathblocks_sequence_path_dispatch(
                     if (!(csharp2cuda_temp_627))
                     {
 #line 1751 "SequencePathModule.cs"
-                        csharp2cuda_temp_628 = ((end) != (floor(end)));
+                        csharp2cuda_temp_628 = ((end) != (floorf(end)));
                     }
                     else
                     {
@@ -6683,16 +6683,16 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 break;
 #line 1757 "SequencePathModule.cs"
 #line 1757 "SequencePathModule.cs"
-                            double csharp2cuda_temp_634 = (counts)[row];
+                            float csharp2cuda_temp_634 = (counts)[row];
 #line 1757 "SequencePathModule.cs"
                             bool csharp2cuda_temp_635;
 #line 1757 "SequencePathModule.cs"
                             if (!((!(isfinite(csharp2cuda_temp_634)))))
                             {
 #line 1757 "SequencePathModule.cs"
-                                double csharp2cuda_temp_636 = (counts)[row];
+                                float csharp2cuda_temp_636 = (counts)[row];
 #line 1757 "SequencePathModule.cs"
-                                csharp2cuda_temp_635 = ((csharp2cuda_temp_636) < (0.0));
+                                csharp2cuda_temp_635 = ((csharp2cuda_temp_636) < (0.0f));
                             }
                             else
                             {
@@ -6705,11 +6705,11 @@ __device__ void mathblocks_sequence_path_dispatch(
                             if (!(csharp2cuda_temp_635))
                             {
 #line 1757 "SequencePathModule.cs"
-                                double csharp2cuda_temp_638 = (counts)[row];
+                                float csharp2cuda_temp_638 = (counts)[row];
 #line 1757 "SequencePathModule.cs"
-                                double csharp2cuda_temp_639 = (counts)[row];
+                                float csharp2cuda_temp_639 = (counts)[row];
 #line 1757 "SequencePathModule.cs"
-                                csharp2cuda_temp_637 = ((csharp2cuda_temp_638) != (floor(csharp2cuda_temp_639)));
+                                csharp2cuda_temp_637 = ((csharp2cuda_temp_638) != (floorf(csharp2cuda_temp_639)));
                             }
                             else
                             {
@@ -6763,9 +6763,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                                 if (((segment_end) < (count)))
                                 {
 #line 1763 "SequencePathModule.cs"
-                                    double csharp2cuda_temp_644 = (counts)[segment_end];
+                                    float csharp2cuda_temp_644 = (counts)[segment_end];
 #line 1763 "SequencePathModule.cs"
-                                    csharp2cuda_temp_643 = ((csharp2cuda_temp_644) != (0.0));
+                                    csharp2cuda_temp_643 = ((csharp2cuda_temp_644) != (0.0f));
                                 }
                                 else
                                 {
@@ -6782,13 +6782,13 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1765 "SequencePathModule.cs"
                             int low_position = segment_start;
 #line 1766 "SequencePathModule.cs"
-                            double low_sum = 0.0;
+                            float low_sum = 0.0f;
 #line 1767 "SequencePathModule.cs"
                             int low_missing = 0;
 #line 1768 "SequencePathModule.cs"
                             int high_position = segment_start;
 #line 1769 "SequencePathModule.cs"
-                            double high_sum = 0.0;
+                            float high_sum = 0.0f;
 #line 1770 "SequencePathModule.cs"
                             int high_missing = 0;
 #line 1771 "SequencePathModule.cs"
@@ -6802,21 +6802,21 @@ __device__ void mathblocks_sequence_path_dispatch(
 #line 1772 "SequencePathModule.cs"
                                     {
 #line 1773 "SequencePathModule.cs"
-                                        double low = __dadd_rn(((double)(row)), start);
+                                        float low = __fadd_rn(((float)(row)), start);
 #line 1774 "SequencePathModule.cs"
-                                        double high = __dadd_rn(((double)(row)), end);
+                                        float high = __fadd_rn(((float)(row)), end);
 #line 1775 "SequencePathModule.cs"
                                         bool row_valid = false;
 #line 1776 "SequencePathModule.cs"
-                                        double difference = 0.0;
+                                        float difference = 0.0f;
 #line 1777 "SequencePathModule.cs"
 #line 1777 "SequencePathModule.cs"
                                         bool csharp2cuda_temp_647;
 #line 1777 "SequencePathModule.cs"
-                                        if (((low) >= (((double)(segment_start)))))
+                                        if (((low) >= (((float)(segment_start)))))
                                         {
 #line 1777 "SequencePathModule.cs"
-                                            csharp2cuda_temp_647 = ((high) < (((double)(segment_end))));
+                                            csharp2cuda_temp_647 = ((high) < (((float)(segment_end))));
                                         }
                                         else
                                         {
@@ -6844,12 +6844,12 @@ __device__ void mathblocks_sequence_path_dispatch(
                                                     {
 #line 1784 "SequencePathModule.cs"
 #line 1784 "SequencePathModule.cs"
-                                                        double* csharp2cuda_temp_649 = &(low_sum);
+                                                        float* csharp2cuda_temp_649 = &(low_sum);
 #line 1784 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_650 = *(csharp2cuda_temp_649);
+                                                        float csharp2cuda_temp_650 = *(csharp2cuda_temp_649);
 #line 1784 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_651 = (a)[low_position];
-                                                        (*(csharp2cuda_temp_649) = __dadd_rn(csharp2cuda_temp_650, csharp2cuda_temp_651));
+                                                        float csharp2cuda_temp_651 = (a)[low_position];
+                                                        (*(csharp2cuda_temp_649) = __fadd_rn(csharp2cuda_temp_650, csharp2cuda_temp_651));
                                                     }
                                                     else
                                                     {
@@ -6878,12 +6878,12 @@ __device__ void mathblocks_sequence_path_dispatch(
                                                     {
 #line 1792 "SequencePathModule.cs"
 #line 1792 "SequencePathModule.cs"
-                                                        double* csharp2cuda_temp_655 = &(high_sum);
+                                                        float* csharp2cuda_temp_655 = &(high_sum);
 #line 1792 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_656 = *(csharp2cuda_temp_655);
+                                                        float csharp2cuda_temp_656 = *(csharp2cuda_temp_655);
 #line 1792 "SequencePathModule.cs"
-                                                        double csharp2cuda_temp_657 = (a)[high_position];
-                                                        (*(csharp2cuda_temp_655) = __dadd_rn(csharp2cuda_temp_656, csharp2cuda_temp_657));
+                                                        float csharp2cuda_temp_657 = (a)[high_position];
+                                                        (*(csharp2cuda_temp_655) = __fadd_rn(csharp2cuda_temp_656, csharp2cuda_temp_657));
                                                     }
                                                     else
                                                     {
@@ -6900,8 +6900,8 @@ __device__ void mathblocks_sequence_path_dispatch(
                                             }
 #line 1797 "SequencePathModule.cs"
 #line 1797 "SequencePathModule.cs"
-                                            double* csharp2cuda_temp_660 = &(difference);
-                                            (*(csharp2cuda_temp_660) = __dsub_rn(high_sum, low_sum));
+                                            float* csharp2cuda_temp_660 = &(difference);
+                                            (*(csharp2cuda_temp_660) = __fsub_rn(high_sum, low_sum));
 #line 1798 "SequencePathModule.cs"
 #line 1798 "SequencePathModule.cs"
                                             bool* csharp2cuda_temp_661 = &(row_valid);
@@ -6945,9 +6945,9 @@ __device__ void mathblocks_sequence_path_dispatch(
                                         {
 #line 1803 "SequencePathModule.cs"
 #line 1803 "SequencePathModule.cs"
-                                            double* csharp2cuda_temp_665 = &((result)[row]);
+                                            float* csharp2cuda_temp_665 = &((result)[row]);
 #line 1803 "SequencePathModule.cs"
-                                            double csharp2cuda_temp_666;
+                                            float csharp2cuda_temp_666;
 #line 1803 "SequencePathModule.cs"
                                             if (row_valid)
                                             {
@@ -6981,7 +6981,7 @@ __device__ void mathblocks_sequence_path_dispatch(
 }
 
 #line 48 "SequencePathModule.cs"
-__device__ bool mathblocks_sequence_positive_integer(double value, int* result)
+__device__ bool mathblocks_sequence_positive_integer(float value, int* result)
 #line 50 "SequencePathModule.cs"
 {
 #line 51 "SequencePathModule.cs"
@@ -7007,7 +7007,7 @@ __device__ bool mathblocks_sequence_positive_integer(double value, int* result)
 
 #line 101 "SequencePathModule.cs"
 __device__ void mathblocks_sequence_prepare_order_ranks(
-    const double* values,
+    const float* values,
     int count,
     unsigned char* scratch,
     MathBlockSlot* output)
@@ -7055,7 +7055,7 @@ __device__ void mathblocks_sequence_prepare_order_ranks(
             {
 #line 127 "SequencePathModule.cs"
 #line 127 "SequencePathModule.cs"
-                double csharp2cuda_temp_4 = (values)[index];
+                float csharp2cuda_temp_4 = (values)[index];
                 if ((!(isfinite(csharp2cuda_temp_4))))
                 {
 #line 128 "SequencePathModule.cs"
@@ -7065,7 +7065,7 @@ __device__ void mathblocks_sequence_prepare_order_ranks(
 #line 129 "SequencePathModule.cs"
                 unsigned long long* csharp2cuda_temp_5 = &((first_keys)[index]);
 #line 129 "SequencePathModule.cs"
-                double csharp2cuda_temp_6 = (values)[index];
+                float csharp2cuda_temp_6 = (values)[index];
                 (*(csharp2cuda_temp_5) = mathblocks_sequence_order_key(csharp2cuda_temp_6));
 #line 130 "SequencePathModule.cs"
 #line 130 "SequencePathModule.cs"
@@ -7397,10 +7397,10 @@ __device__ void mathblocks_sequence_rebalance_heaps(
 
 #line 528 "SequencePathModule.cs"
 __device__ bool mathblocks_sequence_recurrence_value(
-    const double* values,
+    const float* values,
     int count,
-    double threshold,
-    double* value)
+    float threshold,
+    float* value)
 #line 534 "SequencePathModule.cs"
 {
 #line 535 "SequencePathModule.cs"
@@ -7410,7 +7410,7 @@ __device__ bool mathblocks_sequence_recurrence_value(
     if (!(((count) <= (0))))
     {
 #line 535 "SequencePathModule.cs"
-        csharp2cuda_temp_0 = ((threshold) < (0.0));
+        csharp2cuda_temp_0 = ((threshold) < (0.0f));
     }
     else
     {
@@ -7444,10 +7444,10 @@ __device__ bool mathblocks_sequence_recurrence_value(
                         break;
 #line 541 "SequencePathModule.cs"
 #line 541 "SequencePathModule.cs"
-                    double csharp2cuda_temp_3 = (values)[left];
+                    float csharp2cuda_temp_3 = (values)[left];
 #line 541 "SequencePathModule.cs"
-                    double csharp2cuda_temp_4 = (values)[right];
-                    if (((fabs(__dsub_rn(csharp2cuda_temp_3, csharp2cuda_temp_4))) <= (threshold)))
+                    float csharp2cuda_temp_4 = (values)[right];
+                    if (((fabsf(__fsub_rn(csharp2cuda_temp_3, csharp2cuda_temp_4))) <= (threshold)))
                     {
 #line 542 "SequencePathModule.cs"
 #line 542 "SequencePathModule.cs"
@@ -7466,9 +7466,9 @@ __device__ bool mathblocks_sequence_recurrence_value(
     }
 #line 543 "SequencePathModule.cs"
 #line 543 "SequencePathModule.cs"
-    double* csharp2cuda_temp_6 = value;
+    float* csharp2cuda_temp_6 = value;
 #line 543 "SequencePathModule.cs"
-    double csharp2cuda_temp_7 = __ddiv_rn(((double)(recurrent)), ((double)(total)));
+    float csharp2cuda_temp_7 = __fdiv_rn(((float)(recurrent)), ((float)(total)));
     (*(csharp2cuda_temp_6) = csharp2cuda_temp_7);
 #line 544 "SequencePathModule.cs"
     return true;
@@ -7476,10 +7476,10 @@ __device__ bool mathblocks_sequence_recurrence_value(
 
 #line 402 "SequencePathModule.cs"
 __device__ void mathblocks_sequence_rolling_extreme(
-    const double* values,
+    const float* values,
     int count,
     int width,
-    double* result,
+    float* result,
     int* deque,
     bool minimum)
 #line 410 "SequencePathModule.cs"
@@ -7539,9 +7539,9 @@ __device__ void mathblocks_sequence_rolling_extreme(
 #line 418 "SequencePathModule.cs"
                             int csharp2cuda_temp_6 = (deque)[csharp2cuda_i32_sub(tail, 1)];
 #line 418 "SequencePathModule.cs"
-                            double csharp2cuda_temp_7 = (values)[csharp2cuda_temp_6];
+                            float csharp2cuda_temp_7 = (values)[csharp2cuda_temp_6];
 #line 418 "SequencePathModule.cs"
-                            double csharp2cuda_temp_8 = (values)[index];
+                            float csharp2cuda_temp_8 = (values)[index];
 #line 417 "SequencePathModule.cs"
                             csharp2cuda_temp_5 = ((csharp2cuda_temp_7) > (csharp2cuda_temp_8));
                         }
@@ -7550,9 +7550,9 @@ __device__ void mathblocks_sequence_rolling_extreme(
 #line 419 "SequencePathModule.cs"
                             int csharp2cuda_temp_9 = (deque)[csharp2cuda_i32_sub(tail, 1)];
 #line 419 "SequencePathModule.cs"
-                            double csharp2cuda_temp_10 = (values)[csharp2cuda_temp_9];
+                            float csharp2cuda_temp_10 = (values)[csharp2cuda_temp_9];
 #line 419 "SequencePathModule.cs"
-                            double csharp2cuda_temp_11 = (values)[index];
+                            float csharp2cuda_temp_11 = (values)[index];
 #line 417 "SequencePathModule.cs"
                             csharp2cuda_temp_5 = ((csharp2cuda_temp_10) < (csharp2cuda_temp_11));
                         }
@@ -7587,11 +7587,11 @@ __device__ void mathblocks_sequence_rolling_extreme(
                 {
 #line 425 "SequencePathModule.cs"
 #line 425 "SequencePathModule.cs"
-                    double* csharp2cuda_temp_16 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_sub(index, width), 1)]);
+                    float* csharp2cuda_temp_16 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_sub(index, width), 1)]);
 #line 425 "SequencePathModule.cs"
                     int csharp2cuda_temp_17 = (deque)[head];
 #line 425 "SequencePathModule.cs"
-                    double csharp2cuda_temp_18 = (values)[csharp2cuda_temp_17];
+                    float csharp2cuda_temp_18 = (values)[csharp2cuda_temp_17];
                     (*(csharp2cuda_temp_16) = csharp2cuda_temp_18);
                 }
             }
@@ -7604,14 +7604,14 @@ __device__ void mathblocks_sequence_rolling_extreme(
 
 #line 429 "SequencePathModule.cs"
 __device__ void mathblocks_sequence_rolling_sum(
-    const double* values,
+    const float* values,
     int count,
     int width,
-    double* result)
+    float* result)
 #line 435 "SequencePathModule.cs"
 {
 #line 436 "SequencePathModule.cs"
-    double sum = 0.0;
+    float sum = 0.0f;
 #line 437 "SequencePathModule.cs"
     {
 #line 437 "SequencePathModule.cs"
@@ -7622,12 +7622,12 @@ __device__ void mathblocks_sequence_rolling_sum(
                 break;
 #line 438 "SequencePathModule.cs"
 #line 438 "SequencePathModule.cs"
-            double* csharp2cuda_temp_1 = &(sum);
+            float* csharp2cuda_temp_1 = &(sum);
 #line 438 "SequencePathModule.cs"
-            double csharp2cuda_temp_2 = *(csharp2cuda_temp_1);
+            float csharp2cuda_temp_2 = *(csharp2cuda_temp_1);
 #line 438 "SequencePathModule.cs"
-            double csharp2cuda_temp_3 = (values)[index];
-            (*(csharp2cuda_temp_1) = __dadd_rn(csharp2cuda_temp_2, csharp2cuda_temp_3));
+            float csharp2cuda_temp_3 = (values)[index];
+            (*(csharp2cuda_temp_1) = __fadd_rn(csharp2cuda_temp_2, csharp2cuda_temp_3));
 #line 437 "SequencePathModule.cs"
             int* csharp2cuda_temp_0 = &(index);
             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_0));
@@ -7635,7 +7635,7 @@ __device__ void mathblocks_sequence_rolling_sum(
     }
 #line 439 "SequencePathModule.cs"
 #line 439 "SequencePathModule.cs"
-    double* csharp2cuda_temp_4 = &((result)[0]);
+    float* csharp2cuda_temp_4 = &((result)[0]);
     (*(csharp2cuda_temp_4) = sum);
 #line 440 "SequencePathModule.cs"
     {
@@ -7649,17 +7649,17 @@ __device__ void mathblocks_sequence_rolling_sum(
             {
 #line 442 "SequencePathModule.cs"
 #line 442 "SequencePathModule.cs"
-                double* csharp2cuda_temp_6 = &(sum);
+                float* csharp2cuda_temp_6 = &(sum);
 #line 442 "SequencePathModule.cs"
-                double csharp2cuda_temp_7 = *(csharp2cuda_temp_6);
+                float csharp2cuda_temp_7 = *(csharp2cuda_temp_6);
 #line 442 "SequencePathModule.cs"
-                double csharp2cuda_temp_8 = (values)[index];
+                float csharp2cuda_temp_8 = (values)[index];
 #line 442 "SequencePathModule.cs"
-                double csharp2cuda_temp_9 = (values)[csharp2cuda_i32_sub(index, width)];
-                (*(csharp2cuda_temp_6) = __dadd_rn(csharp2cuda_temp_7, __dsub_rn(csharp2cuda_temp_8, csharp2cuda_temp_9)));
+                float csharp2cuda_temp_9 = (values)[csharp2cuda_i32_sub(index, width)];
+                (*(csharp2cuda_temp_6) = __fadd_rn(csharp2cuda_temp_7, __fsub_rn(csharp2cuda_temp_8, csharp2cuda_temp_9)));
 #line 443 "SequencePathModule.cs"
 #line 443 "SequencePathModule.cs"
-                double* csharp2cuda_temp_10 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_sub(index, width), 1)]);
+                float* csharp2cuda_temp_10 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_sub(index, width), 1)]);
                 (*(csharp2cuda_temp_10) = sum);
             }
 #line 440 "SequencePathModule.cs"
@@ -7789,8 +7789,8 @@ __device__ void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int 
 }
 
 #line 548 "SequencePathModule.cs"
-__device__ double mathblocks_sequence_sign_change_value(
-    const double* values,
+__device__ float mathblocks_sequence_sign_change_value(
+    const float* values,
     int count,
     bool differenced)
 #line 553 "SequencePathModule.cs"
@@ -7825,16 +7825,16 @@ __device__ double mathblocks_sequence_sign_change_value(
 #line 558 "SequencePathModule.cs"
             {
 #line 559 "SequencePathModule.cs"
-                double csharp2cuda_temp_2;
+                float csharp2cuda_temp_2;
 #line 559 "SequencePathModule.cs"
                 if (differenced)
                 {
 #line 559 "SequencePathModule.cs"
-                    double csharp2cuda_temp_3 = (values)[index];
+                    float csharp2cuda_temp_3 = (values)[index];
 #line 559 "SequencePathModule.cs"
-                    double csharp2cuda_temp_4 = (values)[csharp2cuda_i32_sub(index, 1)];
+                    float csharp2cuda_temp_4 = (values)[csharp2cuda_i32_sub(index, 1)];
 #line 559 "SequencePathModule.cs"
-                    csharp2cuda_temp_2 = __dsub_rn(csharp2cuda_temp_3, csharp2cuda_temp_4);
+                    csharp2cuda_temp_2 = __fsub_rn(csharp2cuda_temp_3, csharp2cuda_temp_4);
                 }
                 else
                 {
@@ -7842,11 +7842,11 @@ __device__ double mathblocks_sequence_sign_change_value(
                     csharp2cuda_temp_2 = (values)[index];
                 }
 #line 559 "SequencePathModule.cs"
-                double difference = csharp2cuda_temp_2;
+                float difference = csharp2cuda_temp_2;
 #line 560 "SequencePathModule.cs"
                 int csharp2cuda_temp_5;
 #line 560 "SequencePathModule.cs"
-                if (((difference) > (0.0)))
+                if (((difference) > (0.0f)))
                 {
 #line 560 "SequencePathModule.cs"
                     csharp2cuda_temp_5 = 1;
@@ -7856,7 +7856,7 @@ __device__ double mathblocks_sequence_sign_change_value(
 #line 560 "SequencePathModule.cs"
                     int csharp2cuda_temp_6;
 #line 560 "SequencePathModule.cs"
-                    if (((difference) < (0.0)))
+                    if (((difference) < (0.0f)))
                     {
 #line 560 "SequencePathModule.cs"
                         csharp2cuda_temp_6 = csharp2cuda_i32_neg(1);
@@ -7910,16 +7910,16 @@ __device__ double mathblocks_sequence_sign_change_value(
         }
     }
 #line 567 "SequencePathModule.cs"
-    return ((double)(changes));
+    return ((float)(changes));
 }
 
 #line 506 "SequencePathModule.cs"
 __device__ bool mathblocks_sequence_variation_value(
-    const double* values,
+    const float* values,
     int count,
-    double order,
+    float order,
     bool absolute,
-    double* value)
+    float* value)
 #line 513 "SequencePathModule.cs"
 {
 #line 514 "SequencePathModule.cs"
@@ -7929,13 +7929,13 @@ __device__ bool mathblocks_sequence_variation_value(
         return false;
     }
 #line 516 "SequencePathModule.cs"
-    if ((!(((order) > (0.0)))))
+    if ((!(((order) > (0.0f)))))
     {
 #line 517 "SequencePathModule.cs"
         return false;
     }
 #line 518 "SequencePathModule.cs"
-    double total = 0.0;
+    float total = 0.0f;
 #line 519 "SequencePathModule.cs"
     {
 #line 519 "SequencePathModule.cs"
@@ -7947,18 +7947,18 @@ __device__ bool mathblocks_sequence_variation_value(
 #line 520 "SequencePathModule.cs"
             {
 #line 521 "SequencePathModule.cs"
-                double csharp2cuda_temp_1 = (values)[index];
+                float csharp2cuda_temp_1 = (values)[index];
 #line 521 "SequencePathModule.cs"
-                double csharp2cuda_temp_2 = (values)[csharp2cuda_i32_sub(index, 1)];
+                float csharp2cuda_temp_2 = (values)[csharp2cuda_i32_sub(index, 1)];
 #line 521 "SequencePathModule.cs"
-                double change = fabs(__dsub_rn(csharp2cuda_temp_1, csharp2cuda_temp_2));
+                float change = fabsf(__fsub_rn(csharp2cuda_temp_1, csharp2cuda_temp_2));
 #line 522 "SequencePathModule.cs"
 #line 522 "SequencePathModule.cs"
-                double* csharp2cuda_temp_3 = &(total);
+                float* csharp2cuda_temp_3 = &(total);
 #line 522 "SequencePathModule.cs"
-                double csharp2cuda_temp_4 = *(csharp2cuda_temp_3);
+                float csharp2cuda_temp_4 = *(csharp2cuda_temp_3);
 #line 522 "SequencePathModule.cs"
-                double csharp2cuda_temp_5;
+                float csharp2cuda_temp_5;
 #line 522 "SequencePathModule.cs"
                 if (absolute)
                 {
@@ -7970,7 +7970,7 @@ __device__ bool mathblocks_sequence_variation_value(
 #line 522 "SequencePathModule.cs"
                     csharp2cuda_temp_5 = mathblocks_power(change, order);
                 }
-                (*(csharp2cuda_temp_3) = __dadd_rn(csharp2cuda_temp_4, csharp2cuda_temp_5));
+                (*(csharp2cuda_temp_3) = __fadd_rn(csharp2cuda_temp_4, csharp2cuda_temp_5));
             }
 #line 519 "SequencePathModule.cs"
             int* csharp2cuda_temp_0 = &(index);
@@ -7979,7 +7979,7 @@ __device__ bool mathblocks_sequence_variation_value(
     }
 #line 524 "SequencePathModule.cs"
 #line 524 "SequencePathModule.cs"
-    double* csharp2cuda_temp_6 = value;
+    float* csharp2cuda_temp_6 = value;
     (*(csharp2cuda_temp_6) = total);
 #line 525 "SequencePathModule.cs"
     return isfinite(total);

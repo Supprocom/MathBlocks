@@ -645,38 +645,38 @@ struct MathBlockGeometryEdge
 {
     int from;
     int to;
-    double weight;
+    float weight;
 };
 
 #line 143 "GeometryModule.cs"
 __device__ void mathblocks_geometry_barycentric(
-    double point_x,
-    double point_y,
-    double first_x,
-    double first_y,
-    double second_x,
-    double second_y,
-    double third_x,
-    double third_y,
-    double* result);
+    float point_x,
+    float point_y,
+    float first_x,
+    float first_y,
+    float second_x,
+    float second_y,
+    float third_x,
+    float third_y,
+    float* result);
 
 #line 130 "GeometryModule.cs"
-__device__ double mathblocks_geometry_barycentric_denominator(
-    double first_x,
-    double first_y,
-    double second_x,
-    double second_y,
-    double third_x,
-    double third_y);
+__device__ float mathblocks_geometry_barycentric_denominator(
+    float first_x,
+    float first_y,
+    float second_x,
+    float second_y,
+    float third_x,
+    float third_y);
 
 #line 93 "GeometryModule.cs"
-__device__ double mathblocks_geometry_cross(
-    double origin_x,
-    double origin_y,
-    double left_x,
-    double left_y,
-    double right_x,
-    double right_y);
+__device__ float mathblocks_geometry_cross(
+    float origin_x,
+    float origin_y,
+    float left_x,
+    float left_y,
+    float right_x,
+    float right_y);
 
 #line 390 "GeometryModule.cs"
 __device__ void mathblocks_geometry_dispatch(
@@ -686,18 +686,18 @@ __device__ void mathblocks_geometry_dispatch(
     MathBlockSlot* output);
 
 #line 62 "GeometryModule.cs"
-__device__ double mathblocks_geometry_distance(
-    const double* left,
+__device__ float mathblocks_geometry_distance(
+    const float* left,
     int left_index,
-    const double* right,
+    const float* right,
     int right_index);
 
 #line 50 "GeometryModule.cs"
-__device__ double mathblocks_geometry_distance_coordinates(
-    double left_x,
-    double left_y,
-    double right_x,
-    double right_y);
+__device__ float mathblocks_geometry_distance_coordinates(
+    float left_x,
+    float left_y,
+    float right_x,
+    float right_y);
 
 #line 337 "GeometryModule.cs"
 __device__ bool mathblocks_geometry_edge_less(
@@ -709,7 +709,7 @@ __device__ int mathblocks_geometry_find(int* parent, int value);
 
 #line 237 "GeometryModule.cs"
 __device__ void mathblocks_geometry_index_order(
-    const double* points,
+    const float* points,
     int count,
     int* order,
     int* buffer);
@@ -717,122 +717,122 @@ __device__ void mathblocks_geometry_index_order(
 #line 77 "GeometryModule.cs"
 __device__ bool mathblocks_geometry_not_left_turn(
     int* overflow,
-    double origin_x,
-    double origin_y,
-    double left_x,
-    double left_y,
-    double right_x,
-    double right_y);
+    float origin_x,
+    float origin_y,
+    float left_x,
+    float left_y,
+    float right_x,
+    float right_y);
 
 #line 215 "GeometryModule.cs"
 __device__ bool mathblocks_geometry_point_less(
-    const double* points,
+    const float* points,
     int left,
     int right);
 
 #line 106 "GeometryModule.cs"
-__device__ double mathblocks_geometry_point_to_segment(
-    double point_x,
-    double point_y,
-    double start_x,
-    double start_y,
-    double end_x,
-    double end_y);
+__device__ float mathblocks_geometry_point_to_segment(
+    float point_x,
+    float point_y,
+    float start_x,
+    float start_y,
+    float end_x,
+    float end_y);
 
 #line 355 "GeometryModule.cs"
 __device__ void mathblocks_geometry_sort_edges(MathBlockGeometryEdge* edges, MathBlockGeometryEdge* buffer, int count);
 
 #line 279 "GeometryModule.cs"
-__device__ void mathblocks_geometry_sort_points(double* points, double* buffer, int count);
+__device__ void mathblocks_geometry_sort_points(float* points, float* buffer, int count);
 
 #line 174 "GeometryModule.cs"
 __device__ bool mathblocks_geometry_try_circumcircle(
-    const double* points,
+    const float* points,
     int first,
     int second,
     int third,
-    double* center_x,
-    double* center_y,
-    double* radius_square);
+    float* center_x,
+    float* center_y,
+    float* radius_square);
 
 #line 143 "GeometryModule.cs"
 __device__ void mathblocks_geometry_barycentric(
-    double point_x,
-    double point_y,
-    double first_x,
-    double first_y,
-    double second_x,
-    double second_y,
-    double third_x,
-    double third_y,
-    double* result)
+    float point_x,
+    float point_y,
+    float first_x,
+    float first_y,
+    float second_x,
+    float second_y,
+    float third_x,
+    float third_y,
+    float* result)
 #line 154 "GeometryModule.cs"
 {
 #line 155 "GeometryModule.cs"
-    double denominator = mathblocks_geometry_barycentric_denominator(first_x, first_y, second_x, second_y, third_x, third_y);
+    float denominator = mathblocks_geometry_barycentric_denominator(first_x, first_y, second_x, second_y, third_x, third_y);
 #line 158 "GeometryModule.cs"
     if ((!(isfinite(denominator))))
 #line 159 "GeometryModule.cs"
     {
 #line 160 "GeometryModule.cs"
 #line 160 "GeometryModule.cs"
-        double* csharp2cuda_temp_0 = &((result)[0]);
+        float* csharp2cuda_temp_0 = &((result)[0]);
         (*(csharp2cuda_temp_0) = mathblocks_quiet_nan());
 #line 161 "GeometryModule.cs"
 #line 161 "GeometryModule.cs"
-        double* csharp2cuda_temp_1 = &((result)[1]);
+        float* csharp2cuda_temp_1 = &((result)[1]);
         (*(csharp2cuda_temp_1) = mathblocks_quiet_nan());
 #line 162 "GeometryModule.cs"
 #line 162 "GeometryModule.cs"
-        double* csharp2cuda_temp_2 = &((result)[2]);
+        float* csharp2cuda_temp_2 = &((result)[2]);
         (*(csharp2cuda_temp_2) = mathblocks_quiet_nan());
 #line 163 "GeometryModule.cs"
         return;
     }
 #line 165 "GeometryModule.cs"
-    double first_weight = __ddiv_rn(__dadd_rn(__dmul_rn(__dsub_rn(second_y, third_y), __dsub_rn(point_x, third_x)), __dmul_rn(__dsub_rn(third_x, second_x), __dsub_rn(point_y, third_y))), denominator);
+    float first_weight = __fdiv_rn(__fadd_rn(__fmul_rn(__fsub_rn(second_y, third_y), __fsub_rn(point_x, third_x)), __fmul_rn(__fsub_rn(third_x, second_x), __fsub_rn(point_y, third_y))), denominator);
 #line 167 "GeometryModule.cs"
-    double second_weight = __ddiv_rn(__dadd_rn(__dmul_rn(__dsub_rn(third_y, first_y), __dsub_rn(point_x, third_x)), __dmul_rn(__dsub_rn(first_x, third_x), __dsub_rn(point_y, third_y))), denominator);
+    float second_weight = __fdiv_rn(__fadd_rn(__fmul_rn(__fsub_rn(third_y, first_y), __fsub_rn(point_x, third_x)), __fmul_rn(__fsub_rn(first_x, third_x), __fsub_rn(point_y, third_y))), denominator);
 #line 169 "GeometryModule.cs"
 #line 169 "GeometryModule.cs"
-    double* csharp2cuda_temp_3 = &((result)[0]);
+    float* csharp2cuda_temp_3 = &((result)[0]);
     (*(csharp2cuda_temp_3) = first_weight);
 #line 170 "GeometryModule.cs"
 #line 170 "GeometryModule.cs"
-    double* csharp2cuda_temp_4 = &((result)[1]);
+    float* csharp2cuda_temp_4 = &((result)[1]);
     (*(csharp2cuda_temp_4) = second_weight);
 #line 171 "GeometryModule.cs"
 #line 171 "GeometryModule.cs"
-    double* csharp2cuda_temp_5 = &((result)[2]);
-    (*(csharp2cuda_temp_5) = __dsub_rn(__dsub_rn(1.0, first_weight), second_weight));
+    float* csharp2cuda_temp_5 = &((result)[2]);
+    (*(csharp2cuda_temp_5) = __fsub_rn(__fsub_rn(1.0f, first_weight), second_weight));
 }
 
 #line 130 "GeometryModule.cs"
-__device__ double mathblocks_geometry_barycentric_denominator(
-    double first_x,
-    double first_y,
-    double second_x,
-    double second_y,
-    double third_x,
-    double third_y)
+__device__ float mathblocks_geometry_barycentric_denominator(
+    float first_x,
+    float first_y,
+    float second_x,
+    float second_y,
+    float third_x,
+    float third_y)
 #line 138 "GeometryModule.cs"
 {
 #line 139 "GeometryModule.cs"
-    return __dadd_rn(__dmul_rn(__dsub_rn(second_y, third_y), __dsub_rn(first_x, third_x)), __dmul_rn(__dsub_rn(third_x, second_x), __dsub_rn(first_y, third_y)));
+    return __fadd_rn(__fmul_rn(__fsub_rn(second_y, third_y), __fsub_rn(first_x, third_x)), __fmul_rn(__fsub_rn(third_x, second_x), __fsub_rn(first_y, third_y)));
 }
 
 #line 93 "GeometryModule.cs"
-__device__ double mathblocks_geometry_cross(
-    double origin_x,
-    double origin_y,
-    double left_x,
-    double left_y,
-    double right_x,
-    double right_y)
+__device__ float mathblocks_geometry_cross(
+    float origin_x,
+    float origin_y,
+    float left_x,
+    float left_y,
+    float right_x,
+    float right_y)
 #line 101 "GeometryModule.cs"
 {
 #line 102 "GeometryModule.cs"
-    return __dsub_rn(__dmul_rn(__dsub_rn(left_x, origin_x), __dsub_rn(right_y, origin_y)), __dmul_rn(__dsub_rn(left_y, origin_y), __dsub_rn(right_x, origin_x)));
+    return __fsub_rn(__fmul_rn(__fsub_rn(left_x, origin_x), __fsub_rn(right_y, origin_y)), __fmul_rn(__fsub_rn(left_y, origin_y), __fsub_rn(right_x, origin_x)));
 }
 
 #line 390 "GeometryModule.cs"
@@ -881,8 +881,8 @@ __device__ void mathblocks_geometry_dispatch(
     {
 #line 402 "GeometryModule.cs"
 #line 402 "GeometryModule.cs"
-        double* csharp2cuda_temp_2 = &((output)->scalar_value);
-        (*(csharp2cuda_temp_2) = 0.0);
+        float* csharp2cuda_temp_2 = &((output)->scalar_value);
+        (*(csharp2cuda_temp_2) = 0.0f);
 #line 403 "GeometryModule.cs"
 #line 403 "GeometryModule.cs"
         int* csharp2cuda_temp_3 = &((output)->boolean_value);
@@ -951,47 +951,47 @@ __device__ void mathblocks_geometry_dispatch(
         return;
     }
 #line 415 "GeometryModule.cs"
-    double* csharp2cuda_temp_13;
+    float* csharp2cuda_temp_13;
 #line 415 "GeometryModule.cs"
     if (((((void*)(first))) == (((void*)(nullptr)))))
     {
 #line 415 "GeometryModule.cs"
-        csharp2cuda_temp_13 = ((double*)(nullptr));
+        csharp2cuda_temp_13 = ((float*)(nullptr));
     }
     else
     {
 #line 415 "GeometryModule.cs"
         unsigned long long csharp2cuda_temp_14 = (first)->data_pointer;
 #line 415 "GeometryModule.cs"
-        csharp2cuda_temp_13 = ((double*)(csharp2cuda_temp_14));
+        csharp2cuda_temp_13 = ((float*)(csharp2cuda_temp_14));
     }
 #line 415 "GeometryModule.cs"
-    const double* a = csharp2cuda_temp_13;
+    const float* a = csharp2cuda_temp_13;
 #line 416 "GeometryModule.cs"
-    double* csharp2cuda_temp_15;
+    float* csharp2cuda_temp_15;
 #line 416 "GeometryModule.cs"
     if (((((void*)(second))) == (((void*)(nullptr)))))
     {
 #line 416 "GeometryModule.cs"
-        csharp2cuda_temp_15 = ((double*)(nullptr));
+        csharp2cuda_temp_15 = ((float*)(nullptr));
     }
     else
     {
 #line 416 "GeometryModule.cs"
         unsigned long long csharp2cuda_temp_16 = (second)->data_pointer;
 #line 416 "GeometryModule.cs"
-        csharp2cuda_temp_15 = ((double*)(csharp2cuda_temp_16));
+        csharp2cuda_temp_15 = ((float*)(csharp2cuda_temp_16));
     }
 #line 416 "GeometryModule.cs"
-    const double* b = csharp2cuda_temp_15;
+    const float* b = csharp2cuda_temp_15;
 #line 417 "GeometryModule.cs"
     unsigned long long csharp2cuda_temp_17 = (output)->data_pointer;
 #line 417 "GeometryModule.cs"
-    double* result = ((double*)(csharp2cuda_temp_17));
+    float* result = ((float*)(csharp2cuda_temp_17));
 #line 418 "GeometryModule.cs"
     unsigned long long csharp2cuda_temp_18 = (output)->scratch_pointer;
 #line 418 "GeometryModule.cs"
-    double* scratch = ((double*)(csharp2cuda_temp_18));
+    float* scratch = ((float*)(csharp2cuda_temp_18));
 #line 420 "GeometryModule.cs"
     if (((thread) == (0)))
 #line 421 "GeometryModule.cs"
@@ -1033,21 +1033,21 @@ __device__ void mathblocks_geometry_dispatch(
                 }
 #line 431 "GeometryModule.cs"
 #line 432 "GeometryModule.cs"
-                double csharp2cuda_temp_23 = (a)[0];
+                float csharp2cuda_temp_23 = (a)[0];
 #line 432 "GeometryModule.cs"
-                double csharp2cuda_temp_24 = (a)[1];
+                float csharp2cuda_temp_24 = (a)[1];
 #line 432 "GeometryModule.cs"
-                double csharp2cuda_temp_25 = (b)[0];
+                float csharp2cuda_temp_25 = (b)[0];
 #line 432 "GeometryModule.cs"
-                double csharp2cuda_temp_26 = (b)[1];
+                float csharp2cuda_temp_26 = (b)[1];
 #line 432 "GeometryModule.cs"
-                double csharp2cuda_temp_27 = (b)[2];
+                float csharp2cuda_temp_27 = (b)[2];
 #line 432 "GeometryModule.cs"
-                double csharp2cuda_temp_28 = (b)[3];
+                float csharp2cuda_temp_28 = (b)[3];
 #line 432 "GeometryModule.cs"
-                double csharp2cuda_temp_29 = (b)[4];
+                float csharp2cuda_temp_29 = (b)[4];
 #line 432 "GeometryModule.cs"
-                double csharp2cuda_temp_30 = (b)[5];
+                float csharp2cuda_temp_30 = (b)[5];
                 mathblocks_geometry_barycentric(csharp2cuda_temp_23, csharp2cuda_temp_24, csharp2cuda_temp_25, csharp2cuda_temp_26, csharp2cuda_temp_27, csharp2cuda_temp_28, csharp2cuda_temp_29, csharp2cuda_temp_30, result);
 #line 433 "GeometryModule.cs"
                 {
@@ -1059,7 +1059,7 @@ __device__ void mathblocks_geometry_dispatch(
                             break;
 #line 434 "GeometryModule.cs"
 #line 434 "GeometryModule.cs"
-                        double csharp2cuda_temp_32 = (result)[index];
+                        float csharp2cuda_temp_32 = (result)[index];
                         if ((!(isfinite(csharp2cuda_temp_32))))
                         {
 #line 434 "GeometryModule.cs"
@@ -1114,12 +1114,12 @@ __device__ void mathblocks_geometry_dispatch(
                 }
 #line 444 "GeometryModule.cs"
 #line 444 "GeometryModule.cs"
-                double* csharp2cuda_temp_40 = &((result)[0]);
-                (*(csharp2cuda_temp_40) = 0.0);
+                float* csharp2cuda_temp_40 = &((result)[0]);
+                (*(csharp2cuda_temp_40) = 0.0f);
 #line 445 "GeometryModule.cs"
 #line 445 "GeometryModule.cs"
-                double* csharp2cuda_temp_41 = &((result)[1]);
-                (*(csharp2cuda_temp_41) = 0.0);
+                float* csharp2cuda_temp_41 = &((result)[1]);
+                (*(csharp2cuda_temp_41) = 0.0f);
 #line 446 "GeometryModule.cs"
                 {
 #line 446 "GeometryModule.cs"
@@ -1134,20 +1134,20 @@ __device__ void mathblocks_geometry_dispatch(
                         {
 #line 448 "GeometryModule.cs"
 #line 448 "GeometryModule.cs"
-                            double* csharp2cuda_temp_44 = &((result)[0]);
+                            float* csharp2cuda_temp_44 = &((result)[0]);
 #line 448 "GeometryModule.cs"
-                            double csharp2cuda_temp_45 = *(csharp2cuda_temp_44);
+                            float csharp2cuda_temp_45 = *(csharp2cuda_temp_44);
 #line 448 "GeometryModule.cs"
-                            double csharp2cuda_temp_46 = (a)[csharp2cuda_i32_mul(2, index)];
-                            (*(csharp2cuda_temp_44) = __dadd_rn(csharp2cuda_temp_45, csharp2cuda_temp_46));
+                            float csharp2cuda_temp_46 = (a)[csharp2cuda_i32_mul(2, index)];
+                            (*(csharp2cuda_temp_44) = __fadd_rn(csharp2cuda_temp_45, csharp2cuda_temp_46));
 #line 449 "GeometryModule.cs"
 #line 449 "GeometryModule.cs"
-                            double* csharp2cuda_temp_47 = &((result)[1]);
+                            float* csharp2cuda_temp_47 = &((result)[1]);
 #line 449 "GeometryModule.cs"
-                            double csharp2cuda_temp_48 = *(csharp2cuda_temp_47);
+                            float csharp2cuda_temp_48 = *(csharp2cuda_temp_47);
 #line 449 "GeometryModule.cs"
-                            double csharp2cuda_temp_49 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
-                            (*(csharp2cuda_temp_47) = __dadd_rn(csharp2cuda_temp_48, csharp2cuda_temp_49));
+                            float csharp2cuda_temp_49 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
+                            (*(csharp2cuda_temp_47) = __fadd_rn(csharp2cuda_temp_48, csharp2cuda_temp_49));
                         }
 #line 446 "GeometryModule.cs"
                         int* csharp2cuda_temp_42 = &(index);
@@ -1156,30 +1156,30 @@ __device__ void mathblocks_geometry_dispatch(
                 }
 #line 451 "GeometryModule.cs"
 #line 451 "GeometryModule.cs"
-                double* csharp2cuda_temp_50 = &((result)[0]);
+                float* csharp2cuda_temp_50 = &((result)[0]);
 #line 451 "GeometryModule.cs"
-                double csharp2cuda_temp_51 = *(csharp2cuda_temp_50);
+                float csharp2cuda_temp_51 = *(csharp2cuda_temp_50);
 #line 451 "GeometryModule.cs"
                 int csharp2cuda_temp_52 = (first)->count;
-                (*(csharp2cuda_temp_50) = __ddiv_rn(csharp2cuda_temp_51, ((double)(csharp2cuda_temp_52))));
+                (*(csharp2cuda_temp_50) = __fdiv_rn(csharp2cuda_temp_51, ((float)(csharp2cuda_temp_52))));
 #line 452 "GeometryModule.cs"
 #line 452 "GeometryModule.cs"
-                double* csharp2cuda_temp_53 = &((result)[1]);
+                float* csharp2cuda_temp_53 = &((result)[1]);
 #line 452 "GeometryModule.cs"
-                double csharp2cuda_temp_54 = *(csharp2cuda_temp_53);
+                float csharp2cuda_temp_54 = *(csharp2cuda_temp_53);
 #line 452 "GeometryModule.cs"
                 int csharp2cuda_temp_55 = (first)->count;
-                (*(csharp2cuda_temp_53) = __ddiv_rn(csharp2cuda_temp_54, ((double)(csharp2cuda_temp_55))));
+                (*(csharp2cuda_temp_53) = __fdiv_rn(csharp2cuda_temp_54, ((float)(csharp2cuda_temp_55))));
 #line 453 "GeometryModule.cs"
 #line 453 "GeometryModule.cs"
-                double csharp2cuda_temp_56 = (result)[0];
+                float csharp2cuda_temp_56 = (result)[0];
 #line 453 "GeometryModule.cs"
                 bool csharp2cuda_temp_57;
 #line 453 "GeometryModule.cs"
                 if (!((!(isfinite(csharp2cuda_temp_56)))))
                 {
 #line 453 "GeometryModule.cs"
-                    double csharp2cuda_temp_58 = (result)[1];
+                    float csharp2cuda_temp_58 = (result)[1];
 #line 453 "GeometryModule.cs"
                     csharp2cuda_temp_57 = (!(isfinite(csharp2cuda_temp_58)));
                 }
@@ -1215,30 +1215,30 @@ __device__ void mathblocks_geometry_dispatch(
 #line 461 "GeometryModule.cs"
                 {
 #line 462 "GeometryModule.cs"
-                    double first_length = mathblocks_geometry_distance(a, 1, a, 2);
+                    float first_length = mathblocks_geometry_distance(a, 1, a, 2);
 #line 463 "GeometryModule.cs"
-                    double second_length = mathblocks_geometry_distance(a, 0, a, 2);
+                    float second_length = mathblocks_geometry_distance(a, 0, a, 2);
 #line 464 "GeometryModule.cs"
-                    double third_length = mathblocks_geometry_distance(a, 0, a, 1);
+                    float third_length = mathblocks_geometry_distance(a, 0, a, 1);
 #line 466 "GeometryModule.cs"
-                    double csharp2cuda_temp_62 = (a)[0];
+                    float csharp2cuda_temp_62 = (a)[0];
 #line 466 "GeometryModule.cs"
-                    double csharp2cuda_temp_63 = (a)[1];
+                    float csharp2cuda_temp_63 = (a)[1];
 #line 466 "GeometryModule.cs"
-                    double csharp2cuda_temp_64 = (a)[2];
+                    float csharp2cuda_temp_64 = (a)[2];
 #line 466 "GeometryModule.cs"
-                    double csharp2cuda_temp_65 = (a)[3];
+                    float csharp2cuda_temp_65 = (a)[3];
 #line 466 "GeometryModule.cs"
-                    double csharp2cuda_temp_66 = (a)[4];
+                    float csharp2cuda_temp_66 = (a)[4];
 #line 466 "GeometryModule.cs"
-                    double csharp2cuda_temp_67 = (a)[5];
+                    float csharp2cuda_temp_67 = (a)[5];
 #line 465 "GeometryModule.cs"
-                    double cross = mathblocks_geometry_cross(csharp2cuda_temp_62, csharp2cuda_temp_63, csharp2cuda_temp_64, csharp2cuda_temp_65, csharp2cuda_temp_66, csharp2cuda_temp_67);
+                    float cross = mathblocks_geometry_cross(csharp2cuda_temp_62, csharp2cuda_temp_63, csharp2cuda_temp_64, csharp2cuda_temp_65, csharp2cuda_temp_66, csharp2cuda_temp_67);
 #line 467 "GeometryModule.cs"
 #line 467 "GeometryModule.cs"
-                    double* csharp2cuda_temp_68 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_68 = &((output)->scalar_value);
 #line 467 "GeometryModule.cs"
-                    double csharp2cuda_temp_69 = __ddiv_rn(__dmul_rn(__dmul_rn(first_length, second_length), third_length), __dmul_rn(2.0, fabs(cross)));
+                    float csharp2cuda_temp_69 = __fdiv_rn(__fmul_rn(__fmul_rn(first_length, second_length), third_length), __fmul_rn(2.0f, fabsf(cross)));
                     (*(csharp2cuda_temp_68) = csharp2cuda_temp_69);
 #line 469 "GeometryModule.cs"
                     break;
@@ -1278,9 +1278,9 @@ __device__ void mathblocks_geometry_dispatch(
 #line 478 "GeometryModule.cs"
                     bool inside = false;
 #line 479 "GeometryModule.cs"
-                    double point_x = (b)[0];
+                    float point_x = (b)[0];
 #line 480 "GeometryModule.cs"
-                    double point_y = (b)[1];
+                    float point_y = (b)[1];
 #line 481 "GeometryModule.cs"
                     {
 #line 481 "GeometryModule.cs"
@@ -1311,15 +1311,15 @@ __device__ void mathblocks_geometry_dispatch(
 #line 483 "GeometryModule.cs"
                                 int previous = csharp2cuda_temp_76;
 #line 484 "GeometryModule.cs"
-                                double left_x = (a)[csharp2cuda_i32_mul(2, current)];
+                                float left_x = (a)[csharp2cuda_i32_mul(2, current)];
 #line 485 "GeometryModule.cs"
-                                double left_y = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, current), 1)];
+                                float left_y = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, current), 1)];
 #line 486 "GeometryModule.cs"
-                                double right_x = (a)[csharp2cuda_i32_mul(2, previous)];
+                                float right_x = (a)[csharp2cuda_i32_mul(2, previous)];
 #line 487 "GeometryModule.cs"
-                                double right_y = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, previous), 1)];
+                                float right_y = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, previous), 1)];
 #line 488 "GeometryModule.cs"
-                                if (((mathblocks_geometry_point_to_segment(point_x, point_y, left_x, left_y, right_x, right_y)) == (0.0)))
+                                if (((mathblocks_geometry_point_to_segment(point_x, point_y, left_x, left_y, right_x, right_y)) == (0.0f)))
 #line 490 "GeometryModule.cs"
                                 {
 #line 491 "GeometryModule.cs"
@@ -1334,9 +1334,9 @@ __device__ void mathblocks_geometry_dispatch(
 #line 495 "GeometryModule.cs"
                                 {
 #line 497 "GeometryModule.cs"
-                                    double csharp2cuda_temp_79 = __ddiv_rn(__dmul_rn(__dsub_rn(right_x, left_x), __dsub_rn(point_y, left_y)), __dsub_rn(right_y, left_y));
+                                    float csharp2cuda_temp_79 = __fdiv_rn(__fmul_rn(__fsub_rn(right_x, left_x), __fsub_rn(point_y, left_y)), __fsub_rn(right_y, left_y));
 #line 497 "GeometryModule.cs"
-                                    double crossing = __dadd_rn(csharp2cuda_temp_79, left_x);
+                                    float crossing = __fadd_rn(csharp2cuda_temp_79, left_x);
 #line 499 "GeometryModule.cs"
                                     if ((!(isfinite(crossing))))
                                     {
@@ -1411,11 +1411,11 @@ __device__ void mathblocks_geometry_dispatch(
 #line 514 "GeometryModule.cs"
                 {
 #line 515 "GeometryModule.cs"
-                    double* sorted = scratch;
+                    float* sorted = scratch;
 #line 516 "GeometryModule.cs"
                     int csharp2cuda_temp_87 = (first)->count;
 #line 516 "GeometryModule.cs"
-                    double* hull = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_mul(csharp2cuda_temp_87, 4));
+                    float* hull = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_mul(csharp2cuda_temp_87, 4));
 #line 517 "GeometryModule.cs"
                     {
 #line 517 "GeometryModule.cs"
@@ -1428,9 +1428,9 @@ __device__ void mathblocks_geometry_dispatch(
                                 break;
 #line 518 "GeometryModule.cs"
 #line 518 "GeometryModule.cs"
-                            double* csharp2cuda_temp_90 = &((sorted)[index]);
+                            float* csharp2cuda_temp_90 = &((sorted)[index]);
 #line 518 "GeometryModule.cs"
-                            double csharp2cuda_temp_91 = (a)[index];
+                            float csharp2cuda_temp_91 = (a)[index];
                             (*(csharp2cuda_temp_90) = csharp2cuda_temp_91);
 #line 517 "GeometryModule.cs"
                             int* csharp2cuda_temp_88 = &(index);
@@ -1458,9 +1458,9 @@ __device__ void mathblocks_geometry_dispatch(
 #line 522 "GeometryModule.cs"
                             {
 #line 523 "GeometryModule.cs"
-                                double x = (sorted)[csharp2cuda_i32_mul(2, index)];
+                                float x = (sorted)[csharp2cuda_i32_mul(2, index)];
 #line 524 "GeometryModule.cs"
-                                double y = (sorted)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
+                                float y = (sorted)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
 #line 525 "GeometryModule.cs"
 #line 525 "GeometryModule.cs"
                                 bool csharp2cuda_temp_96;
@@ -1468,7 +1468,7 @@ __device__ void mathblocks_geometry_dispatch(
                                 if (((unique_count) > (0)))
                                 {
 #line 525 "GeometryModule.cs"
-                                    double csharp2cuda_temp_97 = (sorted)[csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(unique_count, 1))];
+                                    float csharp2cuda_temp_97 = (sorted)[csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(unique_count, 1))];
 #line 525 "GeometryModule.cs"
                                     csharp2cuda_temp_96 = ((csharp2cuda_temp_97) == (x));
                                 }
@@ -1483,7 +1483,7 @@ __device__ void mathblocks_geometry_dispatch(
                                 if (csharp2cuda_temp_96)
                                 {
 #line 525 "GeometryModule.cs"
-                                    double csharp2cuda_temp_99 = (sorted)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(unique_count, 1)), 1)];
+                                    float csharp2cuda_temp_99 = (sorted)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(unique_count, 1)), 1)];
 #line 525 "GeometryModule.cs"
                                     csharp2cuda_temp_98 = ((csharp2cuda_temp_99) == (y));
                                 }
@@ -1499,11 +1499,11 @@ __device__ void mathblocks_geometry_dispatch(
                                 }
 #line 527 "GeometryModule.cs"
 #line 527 "GeometryModule.cs"
-                                double* csharp2cuda_temp_100 = &((sorted)[csharp2cuda_i32_mul(2, unique_count)]);
+                                float* csharp2cuda_temp_100 = &((sorted)[csharp2cuda_i32_mul(2, unique_count)]);
                                 (*(csharp2cuda_temp_100) = x);
 #line 528 "GeometryModule.cs"
 #line 528 "GeometryModule.cs"
-                                double* csharp2cuda_temp_101 = &((sorted)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, unique_count), 1)]);
+                                float* csharp2cuda_temp_101 = &((sorted)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, unique_count), 1)]);
                                 (*(csharp2cuda_temp_101) = y);
 #line 529 "GeometryModule.cs"
 #line 529 "GeometryModule.cs"
@@ -1534,15 +1534,15 @@ __device__ void mathblocks_geometry_dispatch(
                         {
 #line 538 "GeometryModule.cs"
 #line 538 "GeometryModule.cs"
-                            double* csharp2cuda_temp_104 = &((hull)[0]);
+                            float* csharp2cuda_temp_104 = &((hull)[0]);
 #line 538 "GeometryModule.cs"
-                            double csharp2cuda_temp_105 = (sorted)[0];
+                            float csharp2cuda_temp_105 = (sorted)[0];
                             (*(csharp2cuda_temp_104) = csharp2cuda_temp_105);
 #line 539 "GeometryModule.cs"
 #line 539 "GeometryModule.cs"
-                            double* csharp2cuda_temp_106 = &((hull)[1]);
+                            float* csharp2cuda_temp_106 = &((hull)[1]);
 #line 539 "GeometryModule.cs"
-                            double csharp2cuda_temp_107 = (sorted)[1];
+                            float csharp2cuda_temp_107 = (sorted)[1];
                             (*(csharp2cuda_temp_106) = csharp2cuda_temp_107);
                         }
                     }
@@ -1570,17 +1570,17 @@ __device__ void mathblocks_geometry_dispatch(
 #line 547 "GeometryModule.cs"
                                             int* csharp2cuda_temp_110 = &(hull_overflow);
 #line 548 "GeometryModule.cs"
-                                            double csharp2cuda_temp_111 = (hull)[csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 2))];
+                                            float csharp2cuda_temp_111 = (hull)[csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 2))];
 #line 548 "GeometryModule.cs"
-                                            double csharp2cuda_temp_112 = (hull)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 2)), 1)];
+                                            float csharp2cuda_temp_112 = (hull)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 2)), 1)];
 #line 549 "GeometryModule.cs"
-                                            double csharp2cuda_temp_113 = (hull)[csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 1))];
+                                            float csharp2cuda_temp_113 = (hull)[csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 1))];
 #line 549 "GeometryModule.cs"
-                                            double csharp2cuda_temp_114 = (hull)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 1)), 1)];
+                                            float csharp2cuda_temp_114 = (hull)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 1)), 1)];
 #line 550 "GeometryModule.cs"
-                                            double csharp2cuda_temp_115 = (sorted)[csharp2cuda_i32_mul(2, index)];
+                                            float csharp2cuda_temp_115 = (sorted)[csharp2cuda_i32_mul(2, index)];
 #line 550 "GeometryModule.cs"
-                                            double csharp2cuda_temp_116 = (sorted)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
+                                            float csharp2cuda_temp_116 = (sorted)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
 #line 546 "GeometryModule.cs"
                                             csharp2cuda_temp_109 = mathblocks_geometry_not_left_turn(csharp2cuda_temp_110, csharp2cuda_temp_111, csharp2cuda_temp_112, csharp2cuda_temp_113, csharp2cuda_temp_114, csharp2cuda_temp_115, csharp2cuda_temp_116);
                                         }
@@ -1601,15 +1601,15 @@ __device__ void mathblocks_geometry_dispatch(
                                     }
 #line 554 "GeometryModule.cs"
 #line 554 "GeometryModule.cs"
-                                    double* csharp2cuda_temp_118 = &((hull)[csharp2cuda_i32_mul(2, count)]);
+                                    float* csharp2cuda_temp_118 = &((hull)[csharp2cuda_i32_mul(2, count)]);
 #line 554 "GeometryModule.cs"
-                                    double csharp2cuda_temp_119 = (sorted)[csharp2cuda_i32_mul(2, index)];
+                                    float csharp2cuda_temp_119 = (sorted)[csharp2cuda_i32_mul(2, index)];
                                     (*(csharp2cuda_temp_118) = csharp2cuda_temp_119);
 #line 555 "GeometryModule.cs"
 #line 555 "GeometryModule.cs"
-                                    double* csharp2cuda_temp_120 = &((hull)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, count), 1)]);
+                                    float* csharp2cuda_temp_120 = &((hull)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, count), 1)]);
 #line 555 "GeometryModule.cs"
-                                    double csharp2cuda_temp_121 = (sorted)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
+                                    float csharp2cuda_temp_121 = (sorted)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
                                     (*(csharp2cuda_temp_120) = csharp2cuda_temp_121);
 #line 556 "GeometryModule.cs"
 #line 556 "GeometryModule.cs"
@@ -1644,17 +1644,17 @@ __device__ void mathblocks_geometry_dispatch(
 #line 562 "GeometryModule.cs"
                                             int* csharp2cuda_temp_125 = &(hull_overflow);
 #line 563 "GeometryModule.cs"
-                                            double csharp2cuda_temp_126 = (hull)[csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 2))];
+                                            float csharp2cuda_temp_126 = (hull)[csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 2))];
 #line 563 "GeometryModule.cs"
-                                            double csharp2cuda_temp_127 = (hull)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 2)), 1)];
+                                            float csharp2cuda_temp_127 = (hull)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 2)), 1)];
 #line 564 "GeometryModule.cs"
-                                            double csharp2cuda_temp_128 = (hull)[csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 1))];
+                                            float csharp2cuda_temp_128 = (hull)[csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 1))];
 #line 564 "GeometryModule.cs"
-                                            double csharp2cuda_temp_129 = (hull)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 1)), 1)];
+                                            float csharp2cuda_temp_129 = (hull)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, csharp2cuda_i32_sub(count, 1)), 1)];
 #line 565 "GeometryModule.cs"
-                                            double csharp2cuda_temp_130 = (sorted)[csharp2cuda_i32_mul(2, index)];
+                                            float csharp2cuda_temp_130 = (sorted)[csharp2cuda_i32_mul(2, index)];
 #line 565 "GeometryModule.cs"
-                                            double csharp2cuda_temp_131 = (sorted)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
+                                            float csharp2cuda_temp_131 = (sorted)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
 #line 561 "GeometryModule.cs"
                                             csharp2cuda_temp_124 = mathblocks_geometry_not_left_turn(csharp2cuda_temp_125, csharp2cuda_temp_126, csharp2cuda_temp_127, csharp2cuda_temp_128, csharp2cuda_temp_129, csharp2cuda_temp_130, csharp2cuda_temp_131);
                                         }
@@ -1675,15 +1675,15 @@ __device__ void mathblocks_geometry_dispatch(
                                     }
 #line 569 "GeometryModule.cs"
 #line 569 "GeometryModule.cs"
-                                    double* csharp2cuda_temp_133 = &((hull)[csharp2cuda_i32_mul(2, count)]);
+                                    float* csharp2cuda_temp_133 = &((hull)[csharp2cuda_i32_mul(2, count)]);
 #line 569 "GeometryModule.cs"
-                                    double csharp2cuda_temp_134 = (sorted)[csharp2cuda_i32_mul(2, index)];
+                                    float csharp2cuda_temp_134 = (sorted)[csharp2cuda_i32_mul(2, index)];
                                     (*(csharp2cuda_temp_133) = csharp2cuda_temp_134);
 #line 570 "GeometryModule.cs"
 #line 570 "GeometryModule.cs"
-                                    double* csharp2cuda_temp_135 = &((hull)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, count), 1)]);
+                                    float* csharp2cuda_temp_135 = &((hull)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, count), 1)]);
 #line 570 "GeometryModule.cs"
-                                    double csharp2cuda_temp_136 = (sorted)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
+                                    float csharp2cuda_temp_136 = (sorted)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
                                     (*(csharp2cuda_temp_135) = csharp2cuda_temp_136);
 #line 571 "GeometryModule.cs"
 #line 571 "GeometryModule.cs"
@@ -1739,9 +1739,9 @@ __device__ void mathblocks_geometry_dispatch(
                                 break;
 #line 585 "GeometryModule.cs"
 #line 585 "GeometryModule.cs"
-                            double* csharp2cuda_temp_145 = &((result)[index]);
+                            float* csharp2cuda_temp_145 = &((result)[index]);
 #line 585 "GeometryModule.cs"
-                            double csharp2cuda_temp_146 = (hull)[index];
+                            float csharp2cuda_temp_146 = (hull)[index];
                             (*(csharp2cuda_temp_145) = csharp2cuda_temp_146);
 #line 584 "GeometryModule.cs"
                             int* csharp2cuda_temp_144 = &(index);
@@ -1835,18 +1835,18 @@ __device__ void mathblocks_geometry_dispatch(
 #line 605 "GeometryModule.cs"
                                                     {
 #line 606 "GeometryModule.cs"
-                                                        double center_x;
+                                                        float center_x;
 #line 607 "GeometryModule.cs"
-                                                        double center_y;
+                                                        float center_y;
 #line 608 "GeometryModule.cs"
-                                                        double radius_square;
+                                                        float radius_square;
 #line 609 "GeometryModule.cs"
 #line 611 "GeometryModule.cs"
-                                                        double* csharp2cuda_temp_155 = &(center_x);
+                                                        float* csharp2cuda_temp_155 = &(center_x);
 #line 611 "GeometryModule.cs"
-                                                        double* csharp2cuda_temp_156 = &(center_y);
+                                                        float* csharp2cuda_temp_156 = &(center_y);
 #line 611 "GeometryModule.cs"
-                                                        double* csharp2cuda_temp_157 = &(radius_square);
+                                                        float* csharp2cuda_temp_157 = &(radius_square);
 #line 609 "GeometryModule.cs"
                                                         bool csharp2cuda_temp_158 = mathblocks_geometry_try_circumcircle(a, first_index, second_index, third_index, csharp2cuda_temp_155, csharp2cuda_temp_156, csharp2cuda_temp_157);
                                                         if ((!(csharp2cuda_temp_158)))
@@ -1900,15 +1900,15 @@ __device__ void mathblocks_geometry_dispatch(
                                                                         goto csharp2cuda_for_continue_9;
                                                                     }
 #line 620 "GeometryModule.cs"
-                                                                    double csharp2cuda_temp_162 = (a)[csharp2cuda_i32_mul(2, index)];
+                                                                    float csharp2cuda_temp_162 = (a)[csharp2cuda_i32_mul(2, index)];
 #line 620 "GeometryModule.cs"
-                                                                    double x = __dsub_rn(csharp2cuda_temp_162, center_x);
+                                                                    float x = __fsub_rn(csharp2cuda_temp_162, center_x);
 #line 621 "GeometryModule.cs"
-                                                                    double csharp2cuda_temp_163 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
+                                                                    float csharp2cuda_temp_163 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
 #line 621 "GeometryModule.cs"
-                                                                    double y = __dsub_rn(csharp2cuda_temp_163, center_y);
+                                                                    float y = __fsub_rn(csharp2cuda_temp_163, center_y);
 #line 622 "GeometryModule.cs"
-                                                                    if (((__dadd_rn(__dmul_rn(x, x), __dmul_rn(y, y))) < (radius_square)))
+                                                                    if (((__fadd_rn(__fmul_rn(x, x), __fmul_rn(y, y))) < (radius_square)))
 #line 623 "GeometryModule.cs"
                                                                     {
 #line 624 "GeometryModule.cs"
@@ -2143,13 +2143,13 @@ __device__ void mathblocks_geometry_dispatch(
                                             (*(csharp2cuda_temp_193) = right);
 #line 672 "GeometryModule.cs"
 #line 672 "GeometryModule.cs"
-                                            double* csharp2cuda_temp_194 = &(((edges)[edge_count]).weight);
+                                            float* csharp2cuda_temp_194 = &(((edges)[edge_count]).weight);
 #line 672 "GeometryModule.cs"
-                                            double csharp2cuda_temp_195 = mathblocks_geometry_distance(a, left, a, right);
+                                            float csharp2cuda_temp_195 = mathblocks_geometry_distance(a, left, a, right);
                                             (*(csharp2cuda_temp_194) = csharp2cuda_temp_195);
 #line 673 "GeometryModule.cs"
 #line 673 "GeometryModule.cs"
-                                            double csharp2cuda_temp_196 = ((edges)[edge_count]).weight;
+                                            float csharp2cuda_temp_196 = ((edges)[edge_count]).weight;
                                             if ((!(isfinite(csharp2cuda_temp_196))))
                                             {
 #line 673 "GeometryModule.cs"
@@ -2207,7 +2207,7 @@ __device__ void mathblocks_geometry_dispatch(
 #line 688 "GeometryModule.cs"
                 {
 #line 689 "GeometryModule.cs"
-                    double maximum = 0.0;
+                    float maximum = 0.0f;
 #line 690 "GeometryModule.cs"
                     {
 #line 690 "GeometryModule.cs"
@@ -2231,12 +2231,12 @@ __device__ void mathblocks_geometry_dispatch(
 #line 692 "GeometryModule.cs"
                                     {
 #line 693 "GeometryModule.cs"
-                                        double distance = mathblocks_geometry_distance(a, left, a, right);
+                                        float distance = mathblocks_geometry_distance(a, left, a, right);
 #line 694 "GeometryModule.cs"
 #line 694 "GeometryModule.cs"
-                                        double* csharp2cuda_temp_207 = &(maximum);
+                                        float* csharp2cuda_temp_207 = &(maximum);
 #line 694 "GeometryModule.cs"
-                                        double csharp2cuda_temp_208;
+                                        float csharp2cuda_temp_208;
 #line 694 "GeometryModule.cs"
                                         if (((maximum) > (distance)))
                                         {
@@ -2262,7 +2262,7 @@ __device__ void mathblocks_geometry_dispatch(
                     }
 #line 696 "GeometryModule.cs"
 #line 696 "GeometryModule.cs"
-                    double* csharp2cuda_temp_209 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_209 = &((output)->scalar_value);
                     (*(csharp2cuda_temp_209) = maximum);
 #line 697 "GeometryModule.cs"
                     break;
@@ -2337,7 +2337,7 @@ __device__ void mathblocks_geometry_dispatch(
 #line 709 "GeometryModule.cs"
                                         {
 #line 710 "GeometryModule.cs"
-                                            double distance = mathblocks_geometry_distance(a, left, b, right);
+                                            float distance = mathblocks_geometry_distance(a, left, b, right);
 #line 711 "GeometryModule.cs"
                                             int csharp2cuda_temp_219 = (second)->count;
 #line 711 "GeometryModule.cs"
@@ -2360,7 +2360,7 @@ __device__ void mathblocks_geometry_dispatch(
                                             {
 #line 713 "GeometryModule.cs"
 #line 713 "GeometryModule.cs"
-                                                double* csharp2cuda_temp_221 = &((scratch)[0]);
+                                                float* csharp2cuda_temp_221 = &((scratch)[0]);
                                                 (*(csharp2cuda_temp_221) = distance);
                                             }
                                             else
@@ -2370,11 +2370,11 @@ __device__ void mathblocks_geometry_dispatch(
                                                 {
 #line 715 "GeometryModule.cs"
 #line 715 "GeometryModule.cs"
-                                                    double* csharp2cuda_temp_222 = &((scratch)[right]);
+                                                    float* csharp2cuda_temp_222 = &((scratch)[right]);
 #line 715 "GeometryModule.cs"
-                                                    double csharp2cuda_temp_223 = (scratch)[csharp2cuda_i32_sub(right, 1)];
+                                                    float csharp2cuda_temp_223 = (scratch)[csharp2cuda_i32_sub(right, 1)];
 #line 715 "GeometryModule.cs"
-                                                    double csharp2cuda_temp_224;
+                                                    float csharp2cuda_temp_224;
 #line 715 "GeometryModule.cs"
                                                     if (((csharp2cuda_temp_223) > (distance)))
                                                     {
@@ -2397,13 +2397,13 @@ __device__ void mathblocks_geometry_dispatch(
 #line 719 "GeometryModule.cs"
                                                         int csharp2cuda_temp_225 = (second)->count;
 #line 719 "GeometryModule.cs"
-                                                        double* csharp2cuda_temp_226 = &((scratch)[csharp2cuda_i32_mul(left, csharp2cuda_temp_225)]);
+                                                        float* csharp2cuda_temp_226 = &((scratch)[csharp2cuda_i32_mul(left, csharp2cuda_temp_225)]);
 #line 719 "GeometryModule.cs"
                                                         int csharp2cuda_temp_227 = (second)->count;
 #line 719 "GeometryModule.cs"
-                                                        double csharp2cuda_temp_228 = (scratch)[csharp2cuda_i32_mul(csharp2cuda_i32_sub(left, 1), csharp2cuda_temp_227)];
+                                                        float csharp2cuda_temp_228 = (scratch)[csharp2cuda_i32_mul(csharp2cuda_i32_sub(left, 1), csharp2cuda_temp_227)];
 #line 719 "GeometryModule.cs"
-                                                        double csharp2cuda_temp_229;
+                                                        float csharp2cuda_temp_229;
 #line 719 "GeometryModule.cs"
                                                         if (((csharp2cuda_temp_228) > (distance)))
                                                         {
@@ -2425,16 +2425,16 @@ __device__ void mathblocks_geometry_dispatch(
 #line 724 "GeometryModule.cs"
                                                         int csharp2cuda_temp_231 = (second)->count;
 #line 724 "GeometryModule.cs"
-                                                        double preceding = (scratch)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(left, 1), csharp2cuda_temp_231), right)];
+                                                        float preceding = (scratch)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(left, 1), csharp2cuda_temp_231), right)];
 #line 725 "GeometryModule.cs"
                                                         int csharp2cuda_temp_232 = (second)->count;
 #line 725 "GeometryModule.cs"
-                                                        double candidate = (scratch)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(left, 1), csharp2cuda_temp_232), right), 1)];
+                                                        float candidate = (scratch)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(left, 1), csharp2cuda_temp_232), right), 1)];
 #line 726 "GeometryModule.cs"
 #line 726 "GeometryModule.cs"
-                                                        double* csharp2cuda_temp_233 = &(preceding);
+                                                        float* csharp2cuda_temp_233 = &(preceding);
 #line 726 "GeometryModule.cs"
-                                                        double csharp2cuda_temp_234;
+                                                        float csharp2cuda_temp_234;
 #line 726 "GeometryModule.cs"
                                                         if (((preceding) < (candidate)))
                                                         {
@@ -2449,17 +2449,17 @@ __device__ void mathblocks_geometry_dispatch(
                                                         (*(csharp2cuda_temp_233) = csharp2cuda_temp_234);
 #line 727 "GeometryModule.cs"
 #line 727 "GeometryModule.cs"
-                                                        double* csharp2cuda_temp_235 = &(candidate);
+                                                        float* csharp2cuda_temp_235 = &(candidate);
 #line 727 "GeometryModule.cs"
                                                         int csharp2cuda_temp_236 = (second)->count;
 #line 727 "GeometryModule.cs"
-                                                        double csharp2cuda_temp_237 = (scratch)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(left, csharp2cuda_temp_236), right), 1)];
+                                                        float csharp2cuda_temp_237 = (scratch)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(left, csharp2cuda_temp_236), right), 1)];
                                                         (*(csharp2cuda_temp_235) = csharp2cuda_temp_237);
 #line 728 "GeometryModule.cs"
 #line 728 "GeometryModule.cs"
-                                                        double* csharp2cuda_temp_238 = &(preceding);
+                                                        float* csharp2cuda_temp_238 = &(preceding);
 #line 728 "GeometryModule.cs"
-                                                        double csharp2cuda_temp_239;
+                                                        float csharp2cuda_temp_239;
 #line 728 "GeometryModule.cs"
                                                         if (((preceding) < (candidate)))
                                                         {
@@ -2474,9 +2474,9 @@ __device__ void mathblocks_geometry_dispatch(
                                                         (*(csharp2cuda_temp_238) = csharp2cuda_temp_239);
 #line 729 "GeometryModule.cs"
 #line 729 "GeometryModule.cs"
-                                                        double* csharp2cuda_temp_240 = &((scratch)[target]);
+                                                        float* csharp2cuda_temp_240 = &((scratch)[target]);
 #line 729 "GeometryModule.cs"
-                                                        double csharp2cuda_temp_241;
+                                                        float csharp2cuda_temp_241;
 #line 729 "GeometryModule.cs"
                                                         if (((preceding) > (distance)))
                                                         {
@@ -2506,13 +2506,13 @@ __device__ void mathblocks_geometry_dispatch(
                     }
 #line 733 "GeometryModule.cs"
 #line 733 "GeometryModule.cs"
-                    double* csharp2cuda_temp_242 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_242 = &((output)->scalar_value);
 #line 733 "GeometryModule.cs"
                     int csharp2cuda_temp_243 = (first)->count;
 #line 733 "GeometryModule.cs"
                     int csharp2cuda_temp_244 = (second)->count;
 #line 733 "GeometryModule.cs"
-                    double csharp2cuda_temp_245 = (scratch)[csharp2cuda_i32_sub(csharp2cuda_i32_mul(csharp2cuda_temp_243, csharp2cuda_temp_244), 1)];
+                    float csharp2cuda_temp_245 = (scratch)[csharp2cuda_i32_sub(csharp2cuda_i32_mul(csharp2cuda_temp_243, csharp2cuda_temp_244), 1)];
                     (*(csharp2cuda_temp_242) = csharp2cuda_temp_245);
 #line 734 "GeometryModule.cs"
                     break;
@@ -2548,9 +2548,9 @@ __device__ void mathblocks_geometry_dispatch(
                 {
 #line 740 "GeometryModule.cs"
 #line 740 "GeometryModule.cs"
-                    double* csharp2cuda_temp_250 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_250 = &((output)->scalar_value);
 #line 740 "GeometryModule.cs"
-                    double csharp2cuda_temp_251 = mathblocks_geometry_distance(a, 0, b, 0);
+                    float csharp2cuda_temp_251 = mathblocks_geometry_distance(a, 0, b, 0);
                     (*(csharp2cuda_temp_250) = csharp2cuda_temp_251);
                 }
 #line 741 "GeometryModule.cs"
@@ -2620,7 +2620,7 @@ __device__ void mathblocks_geometry_dispatch(
 #line 750 "GeometryModule.cs"
                 {
 #line 751 "GeometryModule.cs"
-                    double affinity = 0.0;
+                    float affinity = 0.0f;
 #line 752 "GeometryModule.cs"
                     {
 #line 752 "GeometryModule.cs"
@@ -2633,14 +2633,14 @@ __device__ void mathblocks_geometry_dispatch(
                                 break;
 #line 753 "GeometryModule.cs"
 #line 753 "GeometryModule.cs"
-                            double* csharp2cuda_temp_263 = &(affinity);
+                            float* csharp2cuda_temp_263 = &(affinity);
 #line 753 "GeometryModule.cs"
-                            double csharp2cuda_temp_264 = *(csharp2cuda_temp_263);
+                            float csharp2cuda_temp_264 = *(csharp2cuda_temp_263);
 #line 753 "GeometryModule.cs"
-                            double csharp2cuda_temp_265 = (a)[index];
+                            float csharp2cuda_temp_265 = (a)[index];
 #line 753 "GeometryModule.cs"
-                            double csharp2cuda_temp_266 = (b)[index];
-                            (*(csharp2cuda_temp_263) = __dadd_rn(csharp2cuda_temp_264, mathblocks_square_root(__dmul_rn(csharp2cuda_temp_265, csharp2cuda_temp_266))));
+                            float csharp2cuda_temp_266 = (b)[index];
+                            (*(csharp2cuda_temp_263) = __fadd_rn(csharp2cuda_temp_264, mathblocks_square_root(__fmul_rn(csharp2cuda_temp_265, csharp2cuda_temp_266))));
 #line 752 "GeometryModule.cs"
                             int* csharp2cuda_temp_261 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_261));
@@ -2648,24 +2648,24 @@ __device__ void mathblocks_geometry_dispatch(
                     }
 #line 754 "GeometryModule.cs"
 #line 754 "GeometryModule.cs"
-                    double* csharp2cuda_temp_267 = &(affinity);
+                    float* csharp2cuda_temp_267 = &(affinity);
 #line 754 "GeometryModule.cs"
-                    double csharp2cuda_temp_268;
+                    float csharp2cuda_temp_268;
 #line 754 "GeometryModule.cs"
-                    if (((affinity) < ((-(1.0)))))
+                    if (((affinity) < ((-(1.0f)))))
                     {
 #line 754 "GeometryModule.cs"
-                        csharp2cuda_temp_268 = (-(1.0));
+                        csharp2cuda_temp_268 = (-(1.0f));
                     }
                     else
                     {
 #line 754 "GeometryModule.cs"
-                        double csharp2cuda_temp_269;
+                        float csharp2cuda_temp_269;
 #line 754 "GeometryModule.cs"
-                        if (((affinity) > (1.0)))
+                        if (((affinity) > (1.0f)))
                         {
 #line 754 "GeometryModule.cs"
-                            csharp2cuda_temp_269 = 1.0;
+                            csharp2cuda_temp_269 = 1.0f;
                         }
                         else
                         {
@@ -2678,8 +2678,8 @@ __device__ void mathblocks_geometry_dispatch(
                     (*(csharp2cuda_temp_267) = csharp2cuda_temp_268);
 #line 755 "GeometryModule.cs"
 #line 755 "GeometryModule.cs"
-                    double* csharp2cuda_temp_270 = &((output)->scalar_value);
-                    (*(csharp2cuda_temp_270) = __dmul_rn(2.0, mathblocks_arc_cosine(affinity)));
+                    float* csharp2cuda_temp_270 = &((output)->scalar_value);
+                    (*(csharp2cuda_temp_270) = __fmul_rn(2.0f, mathblocks_arc_cosine(affinity)));
 #line 756 "GeometryModule.cs"
                     break;
                 }
@@ -2731,21 +2731,21 @@ __device__ void mathblocks_geometry_dispatch(
 #line 770 "GeometryModule.cs"
                                         {
 #line 771 "GeometryModule.cs"
-                                            double csharp2cuda_temp_278 = (a)[csharp2cuda_i32_mul(2, left)];
+                                            float csharp2cuda_temp_278 = (a)[csharp2cuda_i32_mul(2, left)];
 #line 771 "GeometryModule.cs"
-                                            double csharp2cuda_temp_279 = (a)[csharp2cuda_i32_mul(2, right)];
+                                            float csharp2cuda_temp_279 = (a)[csharp2cuda_i32_mul(2, right)];
 #line 771 "GeometryModule.cs"
-                                            double center_x = __ddiv_rn(__dadd_rn(csharp2cuda_temp_278, csharp2cuda_temp_279), 2.0);
+                                            float center_x = __fdiv_rn(__fadd_rn(csharp2cuda_temp_278, csharp2cuda_temp_279), 2.0f);
 #line 772 "GeometryModule.cs"
-                                            double csharp2cuda_temp_280 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, left), 1)];
+                                            float csharp2cuda_temp_280 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, left), 1)];
 #line 772 "GeometryModule.cs"
-                                            double csharp2cuda_temp_281 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, right), 1)];
+                                            float csharp2cuda_temp_281 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, right), 1)];
 #line 772 "GeometryModule.cs"
-                                            double center_y = __ddiv_rn(__dadd_rn(csharp2cuda_temp_280, csharp2cuda_temp_281), 2.0);
+                                            float center_y = __fdiv_rn(__fadd_rn(csharp2cuda_temp_280, csharp2cuda_temp_281), 2.0f);
 #line 773 "GeometryModule.cs"
-                                            double csharp2cuda_temp_282 = mathblocks_geometry_distance(a, left, a, right);
+                                            float csharp2cuda_temp_282 = mathblocks_geometry_distance(a, left, a, right);
 #line 773 "GeometryModule.cs"
-                                            double radius = __ddiv_rn(csharp2cuda_temp_282, 2.0);
+                                            float radius = __fdiv_rn(csharp2cuda_temp_282, 2.0f);
 #line 774 "GeometryModule.cs"
                                             bool empty = true;
 #line 775 "GeometryModule.cs"
@@ -2780,9 +2780,9 @@ __device__ void mathblocks_geometry_dispatch(
                                                         if (csharp2cuda_temp_285)
                                                         {
 #line 779 "GeometryModule.cs"
-                                                            double csharp2cuda_temp_287 = (a)[csharp2cuda_i32_mul(2, index)];
+                                                            float csharp2cuda_temp_287 = (a)[csharp2cuda_i32_mul(2, index)];
 #line 779 "GeometryModule.cs"
-                                                            double csharp2cuda_temp_288 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
+                                                            float csharp2cuda_temp_288 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
 #line 777 "GeometryModule.cs"
                                                             csharp2cuda_temp_286 = ((mathblocks_geometry_distance_coordinates(csharp2cuda_temp_287, csharp2cuda_temp_288, center_x, center_y)) < (radius));
                                                         }
@@ -2857,11 +2857,11 @@ __device__ void mathblocks_geometry_dispatch(
                                             (*(csharp2cuda_temp_297) = right);
 #line 797 "GeometryModule.cs"
 #line 797 "GeometryModule.cs"
-                                            double* csharp2cuda_temp_298 = &(((edges)[edge_count]).weight);
-                                            (*(csharp2cuda_temp_298) = __dmul_rn(2.0, radius));
+                                            float* csharp2cuda_temp_298 = &(((edges)[edge_count]).weight);
+                                            (*(csharp2cuda_temp_298) = __fmul_rn(2.0f, radius));
 #line 798 "GeometryModule.cs"
 #line 798 "GeometryModule.cs"
-                                            double csharp2cuda_temp_299 = ((edges)[edge_count]).weight;
+                                            float csharp2cuda_temp_299 = ((edges)[edge_count]).weight;
                                             if ((!(isfinite(csharp2cuda_temp_299))))
                                             {
 #line 798 "GeometryModule.cs"
@@ -2936,9 +2936,9 @@ __device__ void mathblocks_geometry_dispatch(
 #line 813 "GeometryModule.cs"
                 {
 #line 814 "GeometryModule.cs"
-                    double point_x = (b)[0];
+                    float point_x = (b)[0];
 #line 815 "GeometryModule.cs"
-                    double point_y = (b)[1];
+                    float point_y = (b)[1];
 #line 816 "GeometryModule.cs"
                     int coincident = 0;
 #line 817 "GeometryModule.cs"
@@ -2956,21 +2956,21 @@ __device__ void mathblocks_geometry_dispatch(
 #line 819 "GeometryModule.cs"
                             {
 #line 820 "GeometryModule.cs"
-                                double csharp2cuda_temp_311 = (a)[csharp2cuda_i32_mul(2, index)];
+                                float csharp2cuda_temp_311 = (a)[csharp2cuda_i32_mul(2, index)];
 #line 820 "GeometryModule.cs"
-                                double x = __dsub_rn(csharp2cuda_temp_311, point_x);
+                                float x = __fsub_rn(csharp2cuda_temp_311, point_x);
 #line 821 "GeometryModule.cs"
-                                double csharp2cuda_temp_312 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
+                                float csharp2cuda_temp_312 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
 #line 821 "GeometryModule.cs"
-                                double y = __dsub_rn(csharp2cuda_temp_312, point_y);
+                                float y = __fsub_rn(csharp2cuda_temp_312, point_y);
 #line 822 "GeometryModule.cs"
 #line 822 "GeometryModule.cs"
                                 bool csharp2cuda_temp_313;
 #line 822 "GeometryModule.cs"
-                                if (((x) == (0.0)))
+                                if (((x) == (0.0f)))
                                 {
 #line 822 "GeometryModule.cs"
-                                    csharp2cuda_temp_313 = ((y) == (0.0));
+                                    csharp2cuda_temp_313 = ((y) == (0.0f));
                                 }
                                 else
                                 {
@@ -3003,8 +3003,8 @@ __device__ void mathblocks_geometry_dispatch(
                     {
 #line 829 "GeometryModule.cs"
 #line 829 "GeometryModule.cs"
-                        double* csharp2cuda_temp_316 = &((output)->scalar_value);
-                        (*(csharp2cuda_temp_316) = 1.0);
+                        float* csharp2cuda_temp_316 = &((output)->scalar_value);
+                        (*(csharp2cuda_temp_316) = 1.0f);
 #line 830 "GeometryModule.cs"
                         break;
                     }
@@ -3023,21 +3023,21 @@ __device__ void mathblocks_geometry_dispatch(
 #line 834 "GeometryModule.cs"
                             {
 #line 835 "GeometryModule.cs"
-                                double csharp2cuda_temp_319 = (a)[csharp2cuda_i32_mul(2, pivot)];
+                                float csharp2cuda_temp_319 = (a)[csharp2cuda_i32_mul(2, pivot)];
 #line 835 "GeometryModule.cs"
-                                double pivot_x = __dsub_rn(csharp2cuda_temp_319, point_x);
+                                float pivot_x = __fsub_rn(csharp2cuda_temp_319, point_x);
 #line 836 "GeometryModule.cs"
-                                double csharp2cuda_temp_320 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, pivot), 1)];
+                                float csharp2cuda_temp_320 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, pivot), 1)];
 #line 836 "GeometryModule.cs"
-                                double pivot_y = __dsub_rn(csharp2cuda_temp_320, point_y);
+                                float pivot_y = __fsub_rn(csharp2cuda_temp_320, point_y);
 #line 837 "GeometryModule.cs"
 #line 837 "GeometryModule.cs"
                                 bool csharp2cuda_temp_321;
 #line 837 "GeometryModule.cs"
-                                if (((pivot_x) == (0.0)))
+                                if (((pivot_x) == (0.0f)))
                                 {
 #line 837 "GeometryModule.cs"
-                                    csharp2cuda_temp_321 = ((pivot_y) == (0.0));
+                                    csharp2cuda_temp_321 = ((pivot_y) == (0.0f));
                                 }
                                 else
                                 {
@@ -3064,21 +3064,21 @@ __device__ void mathblocks_geometry_dispatch(
 #line 841 "GeometryModule.cs"
                                         {
 #line 842 "GeometryModule.cs"
-                                            double csharp2cuda_temp_324 = (a)[csharp2cuda_i32_mul(2, index)];
+                                            float csharp2cuda_temp_324 = (a)[csharp2cuda_i32_mul(2, index)];
 #line 842 "GeometryModule.cs"
-                                            double x = __dsub_rn(csharp2cuda_temp_324, point_x);
+                                            float x = __fsub_rn(csharp2cuda_temp_324, point_x);
 #line 843 "GeometryModule.cs"
-                                            double csharp2cuda_temp_325 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
+                                            float csharp2cuda_temp_325 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
 #line 843 "GeometryModule.cs"
-                                            double y = __dsub_rn(csharp2cuda_temp_325, point_y);
+                                            float y = __fsub_rn(csharp2cuda_temp_325, point_y);
 #line 844 "GeometryModule.cs"
 #line 844 "GeometryModule.cs"
                                             bool csharp2cuda_temp_326;
 #line 844 "GeometryModule.cs"
-                                            if (((x) == (0.0)))
+                                            if (((x) == (0.0f)))
                                             {
 #line 844 "GeometryModule.cs"
-                                                csharp2cuda_temp_326 = ((y) == (0.0));
+                                                csharp2cuda_temp_326 = ((y) == (0.0f));
                                             }
                                             else
                                             {
@@ -3091,9 +3091,9 @@ __device__ void mathblocks_geometry_dispatch(
                                                 goto csharp2cuda_for_continue_27;
                                             }
 #line 846 "GeometryModule.cs"
-                                            double cross = __dsub_rn(__dmul_rn(pivot_x, y), __dmul_rn(pivot_y, x));
+                                            float cross = __fsub_rn(__fmul_rn(pivot_x, y), __fmul_rn(pivot_y, x));
 #line 847 "GeometryModule.cs"
-                                            double dot = __dadd_rn(__dmul_rn(pivot_x, x), __dmul_rn(pivot_y, y));
+                                            float dot = __fadd_rn(__fmul_rn(pivot_x, x), __fmul_rn(pivot_y, y));
 #line 849 "GeometryModule.cs"
 #line 849 "GeometryModule.cs"
                                             bool csharp2cuda_temp_327;
@@ -3119,15 +3119,15 @@ __device__ void mathblocks_geometry_dispatch(
 #line 851 "GeometryModule.cs"
                                             bool csharp2cuda_temp_329;
 #line 851 "GeometryModule.cs"
-                                            if (!(((cross) > (0.0))))
+                                            if (!(((cross) > (0.0f))))
                                             {
 #line 851 "GeometryModule.cs"
                                                 bool csharp2cuda_temp_330;
 #line 851 "GeometryModule.cs"
-                                                if (((cross) == (0.0)))
+                                                if (((cross) == (0.0f)))
                                                 {
 #line 851 "GeometryModule.cs"
-                                                    csharp2cuda_temp_330 = ((dot) > (0.0));
+                                                    csharp2cuda_temp_330 = ((dot) > (0.0f));
                                                 }
                                                 else
                                                 {
@@ -3182,11 +3182,11 @@ __device__ void mathblocks_geometry_dispatch(
                     }
 #line 856 "GeometryModule.cs"
 #line 856 "GeometryModule.cs"
-                    double* csharp2cuda_temp_334 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_334 = &((output)->scalar_value);
 #line 857 "GeometryModule.cs"
                     int csharp2cuda_temp_335 = (first)->count;
 #line 856 "GeometryModule.cs"
-                    double csharp2cuda_temp_336 = __ddiv_rn(((double)(csharp2cuda_i32_sub(csharp2cuda_i32_add(coincident, vector_count), maximum))), ((double)(csharp2cuda_temp_335)));
+                    float csharp2cuda_temp_336 = __fdiv_rn(((float)(csharp2cuda_i32_sub(csharp2cuda_i32_add(coincident, vector_count), maximum))), ((float)(csharp2cuda_temp_335)));
                     (*(csharp2cuda_temp_334) = csharp2cuda_temp_336);
 #line 858 "GeometryModule.cs"
                     break;
@@ -3224,7 +3224,7 @@ __device__ void mathblocks_geometry_dispatch(
 #line 866 "GeometryModule.cs"
                 {
 #line 867 "GeometryModule.cs"
-                    double directed_left = 0.0;
+                    float directed_left = 0.0f;
 #line 868 "GeometryModule.cs"
                     {
 #line 868 "GeometryModule.cs"
@@ -3238,7 +3238,7 @@ __device__ void mathblocks_geometry_dispatch(
 #line 869 "GeometryModule.cs"
                             {
 #line 870 "GeometryModule.cs"
-                                double minimum = mathblocks_positive_infinity();
+                                float minimum = mathblocks_positive_infinity();
 #line 871 "GeometryModule.cs"
                                 {
 #line 871 "GeometryModule.cs"
@@ -3252,12 +3252,12 @@ __device__ void mathblocks_geometry_dispatch(
 #line 872 "GeometryModule.cs"
                                         {
 #line 873 "GeometryModule.cs"
-                                            double distance = mathblocks_geometry_distance(a, left, b, right);
+                                            float distance = mathblocks_geometry_distance(a, left, b, right);
 #line 874 "GeometryModule.cs"
 #line 874 "GeometryModule.cs"
-                                            double* csharp2cuda_temp_345 = &(minimum);
+                                            float* csharp2cuda_temp_345 = &(minimum);
 #line 874 "GeometryModule.cs"
-                                            double csharp2cuda_temp_346;
+                                            float csharp2cuda_temp_346;
 #line 874 "GeometryModule.cs"
                                             if (((minimum) < (distance)))
                                             {
@@ -3278,9 +3278,9 @@ __device__ void mathblocks_geometry_dispatch(
                                 }
 #line 876 "GeometryModule.cs"
 #line 876 "GeometryModule.cs"
-                                double* csharp2cuda_temp_347 = &(directed_left);
+                                float* csharp2cuda_temp_347 = &(directed_left);
 #line 876 "GeometryModule.cs"
-                                double csharp2cuda_temp_348;
+                                float csharp2cuda_temp_348;
 #line 876 "GeometryModule.cs"
                                 if (((directed_left) > (minimum)))
                                 {
@@ -3300,7 +3300,7 @@ __device__ void mathblocks_geometry_dispatch(
                         }
                     }
 #line 878 "GeometryModule.cs"
-                    double directed_right = 0.0;
+                    float directed_right = 0.0f;
 #line 879 "GeometryModule.cs"
                     {
 #line 879 "GeometryModule.cs"
@@ -3314,7 +3314,7 @@ __device__ void mathblocks_geometry_dispatch(
 #line 880 "GeometryModule.cs"
                             {
 #line 881 "GeometryModule.cs"
-                                double minimum = mathblocks_positive_infinity();
+                                float minimum = mathblocks_positive_infinity();
 #line 882 "GeometryModule.cs"
                                 {
 #line 882 "GeometryModule.cs"
@@ -3328,12 +3328,12 @@ __device__ void mathblocks_geometry_dispatch(
 #line 883 "GeometryModule.cs"
                                         {
 #line 884 "GeometryModule.cs"
-                                            double distance = mathblocks_geometry_distance(b, right, a, left);
+                                            float distance = mathblocks_geometry_distance(b, right, a, left);
 #line 885 "GeometryModule.cs"
 #line 885 "GeometryModule.cs"
-                                            double* csharp2cuda_temp_353 = &(minimum);
+                                            float* csharp2cuda_temp_353 = &(minimum);
 #line 885 "GeometryModule.cs"
-                                            double csharp2cuda_temp_354;
+                                            float csharp2cuda_temp_354;
 #line 885 "GeometryModule.cs"
                                             if (((minimum) < (distance)))
                                             {
@@ -3354,9 +3354,9 @@ __device__ void mathblocks_geometry_dispatch(
                                 }
 #line 887 "GeometryModule.cs"
 #line 887 "GeometryModule.cs"
-                                double* csharp2cuda_temp_355 = &(directed_right);
+                                float* csharp2cuda_temp_355 = &(directed_right);
 #line 887 "GeometryModule.cs"
-                                double csharp2cuda_temp_356;
+                                float csharp2cuda_temp_356;
 #line 887 "GeometryModule.cs"
                                 if (((directed_right) > (minimum)))
                                 {
@@ -3377,9 +3377,9 @@ __device__ void mathblocks_geometry_dispatch(
                     }
 #line 889 "GeometryModule.cs"
 #line 889 "GeometryModule.cs"
-                    double* csharp2cuda_temp_357 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_357 = &((output)->scalar_value);
 #line 889 "GeometryModule.cs"
-                    double csharp2cuda_temp_358;
+                    float csharp2cuda_temp_358;
 #line 889 "GeometryModule.cs"
                     if (((directed_left) > (directed_right)))
                     {
@@ -3414,7 +3414,7 @@ __device__ void mathblocks_geometry_dispatch(
 #line 901 "GeometryModule.cs"
                 {
 #line 902 "GeometryModule.cs"
-                    double total = 0.0;
+                    float total = 0.0f;
 #line 903 "GeometryModule.cs"
                     int csharp2cuda_temp_361;
 #line 903 "GeometryModule.cs"
@@ -3476,12 +3476,12 @@ __device__ void mathblocks_geometry_dispatch(
                                 int next = csharp2cuda_temp_365;
 #line 908 "GeometryModule.cs"
 #line 908 "GeometryModule.cs"
-                                double* csharp2cuda_temp_367 = &(total);
+                                float* csharp2cuda_temp_367 = &(total);
 #line 908 "GeometryModule.cs"
-                                double csharp2cuda_temp_368 = *(csharp2cuda_temp_367);
+                                float csharp2cuda_temp_368 = *(csharp2cuda_temp_367);
 #line 908 "GeometryModule.cs"
-                                double csharp2cuda_temp_369 = mathblocks_geometry_distance(a, previous, a, next);
-                                (*(csharp2cuda_temp_367) = __dadd_rn(csharp2cuda_temp_368, csharp2cuda_temp_369));
+                                float csharp2cuda_temp_369 = mathblocks_geometry_distance(a, previous, a, next);
+                                (*(csharp2cuda_temp_367) = __fadd_rn(csharp2cuda_temp_368, csharp2cuda_temp_369));
                             }
 #line 904 "GeometryModule.cs"
                             int* csharp2cuda_temp_362 = &(index);
@@ -3490,7 +3490,7 @@ __device__ void mathblocks_geometry_dispatch(
                     }
 #line 910 "GeometryModule.cs"
 #line 910 "GeometryModule.cs"
-                    double* csharp2cuda_temp_370 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_370 = &((output)->scalar_value);
                     (*(csharp2cuda_temp_370) = total);
 #line 911 "GeometryModule.cs"
                     break;
@@ -3527,19 +3527,19 @@ __device__ void mathblocks_geometry_dispatch(
                 }
 #line 919 "GeometryModule.cs"
 #line 919 "GeometryModule.cs"
-                double* csharp2cuda_temp_375 = &((output)->scalar_value);
+                float* csharp2cuda_temp_375 = &((output)->scalar_value);
 #line 920 "GeometryModule.cs"
-                double csharp2cuda_temp_376 = (a)[0];
+                float csharp2cuda_temp_376 = (a)[0];
 #line 920 "GeometryModule.cs"
-                double csharp2cuda_temp_377 = (a)[1];
+                float csharp2cuda_temp_377 = (a)[1];
 #line 920 "GeometryModule.cs"
-                double csharp2cuda_temp_378 = (b)[0];
+                float csharp2cuda_temp_378 = (b)[0];
 #line 920 "GeometryModule.cs"
-                double csharp2cuda_temp_379 = (b)[1];
+                float csharp2cuda_temp_379 = (b)[1];
 #line 920 "GeometryModule.cs"
-                double csharp2cuda_temp_380 = (b)[2];
+                float csharp2cuda_temp_380 = (b)[2];
 #line 920 "GeometryModule.cs"
-                double csharp2cuda_temp_381 = (b)[3];
+                float csharp2cuda_temp_381 = (b)[3];
                 (*(csharp2cuda_temp_375) = mathblocks_geometry_point_to_segment(csharp2cuda_temp_376, csharp2cuda_temp_377, csharp2cuda_temp_378, csharp2cuda_temp_379, csharp2cuda_temp_380, csharp2cuda_temp_381));
 #line 921 "GeometryModule.cs"
                 break;
@@ -3562,7 +3562,7 @@ __device__ void mathblocks_geometry_dispatch(
 #line 929 "GeometryModule.cs"
                 {
 #line 930 "GeometryModule.cs"
-                    double twice_area = 0.0;
+                    float twice_area = 0.0f;
 #line 931 "GeometryModule.cs"
                     {
 #line 931 "GeometryModule.cs"
@@ -3581,18 +3581,18 @@ __device__ void mathblocks_geometry_dispatch(
                                 int next = csharp2cuda_i32_rem(csharp2cuda_i32_add(index, 1), csharp2cuda_temp_386);
 #line 934 "GeometryModule.cs"
 #line 934 "GeometryModule.cs"
-                                double* csharp2cuda_temp_387 = &(twice_area);
+                                float* csharp2cuda_temp_387 = &(twice_area);
 #line 934 "GeometryModule.cs"
-                                double csharp2cuda_temp_388 = *(csharp2cuda_temp_387);
+                                float csharp2cuda_temp_388 = *(csharp2cuda_temp_387);
 #line 934 "GeometryModule.cs"
-                                double csharp2cuda_temp_389 = (a)[csharp2cuda_i32_mul(2, index)];
+                                float csharp2cuda_temp_389 = (a)[csharp2cuda_i32_mul(2, index)];
 #line 934 "GeometryModule.cs"
-                                double csharp2cuda_temp_390 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, next), 1)];
+                                float csharp2cuda_temp_390 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, next), 1)];
 #line 935 "GeometryModule.cs"
-                                double csharp2cuda_temp_391 = (a)[csharp2cuda_i32_mul(2, next)];
+                                float csharp2cuda_temp_391 = (a)[csharp2cuda_i32_mul(2, next)];
 #line 935 "GeometryModule.cs"
-                                double csharp2cuda_temp_392 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
-                                (*(csharp2cuda_temp_387) = __dadd_rn(csharp2cuda_temp_388, __dsub_rn(__dmul_rn(csharp2cuda_temp_389, csharp2cuda_temp_390), __dmul_rn(csharp2cuda_temp_391, csharp2cuda_temp_392))));
+                                float csharp2cuda_temp_392 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, index), 1)];
+                                (*(csharp2cuda_temp_387) = __fadd_rn(csharp2cuda_temp_388, __fsub_rn(__fmul_rn(csharp2cuda_temp_389, csharp2cuda_temp_390), __fmul_rn(csharp2cuda_temp_391, csharp2cuda_temp_392))));
                             }
 #line 931 "GeometryModule.cs"
                             int* csharp2cuda_temp_384 = &(index);
@@ -3601,21 +3601,21 @@ __device__ void mathblocks_geometry_dispatch(
                     }
 #line 937 "GeometryModule.cs"
 #line 937 "GeometryModule.cs"
-                    double* csharp2cuda_temp_393 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_393 = &((output)->scalar_value);
 #line 937 "GeometryModule.cs"
-                    double csharp2cuda_temp_394;
+                    float csharp2cuda_temp_394;
 #line 937 "GeometryModule.cs"
                     if (((opcode) == (16)))
                     {
 #line 937 "GeometryModule.cs"
-                        double csharp2cuda_temp_395 = __ddiv_rn(twice_area, 2.0);
+                        float csharp2cuda_temp_395 = __fdiv_rn(twice_area, 2.0f);
 #line 937 "GeometryModule.cs"
-                        csharp2cuda_temp_394 = fabs(csharp2cuda_temp_395);
+                        csharp2cuda_temp_394 = fabsf(csharp2cuda_temp_395);
                     }
                     else
                     {
 #line 937 "GeometryModule.cs"
-                        csharp2cuda_temp_394 = __ddiv_rn(twice_area, 2.0);
+                        csharp2cuda_temp_394 = __fdiv_rn(twice_area, 2.0f);
                     }
                     (*(csharp2cuda_temp_393) = csharp2cuda_temp_394);
 #line 938 "GeometryModule.cs"
@@ -3658,8 +3658,8 @@ __device__ void mathblocks_geometry_dispatch(
 #line 948 "GeometryModule.cs"
                     int total = 0;
 #line 949 "GeometryModule.cs"
-                    double csharp2cuda_temp_400_storage[3];
-                    double* coordinates = csharp2cuda_temp_400_storage;
+                    float csharp2cuda_temp_400_storage[3];
+                    float* coordinates = csharp2cuda_temp_400_storage;
 #line 950 "GeometryModule.cs"
                     {
 #line 950 "GeometryModule.cs"
@@ -3698,50 +3698,50 @@ __device__ void mathblocks_geometry_dispatch(
                                                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_407));
 #line 956 "GeometryModule.cs"
 #line 957 "GeometryModule.cs"
-                                                double csharp2cuda_temp_408 = (a)[csharp2cuda_i32_mul(2, one)];
+                                                float csharp2cuda_temp_408 = (a)[csharp2cuda_i32_mul(2, one)];
 #line 957 "GeometryModule.cs"
-                                                double csharp2cuda_temp_409 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, one), 1)];
+                                                float csharp2cuda_temp_409 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, one), 1)];
 #line 958 "GeometryModule.cs"
-                                                double csharp2cuda_temp_410 = (a)[csharp2cuda_i32_mul(2, two)];
+                                                float csharp2cuda_temp_410 = (a)[csharp2cuda_i32_mul(2, two)];
 #line 958 "GeometryModule.cs"
-                                                double csharp2cuda_temp_411 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, two), 1)];
+                                                float csharp2cuda_temp_411 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, two), 1)];
 #line 959 "GeometryModule.cs"
-                                                double csharp2cuda_temp_412 = (a)[csharp2cuda_i32_mul(2, three)];
+                                                float csharp2cuda_temp_412 = (a)[csharp2cuda_i32_mul(2, three)];
 #line 959 "GeometryModule.cs"
-                                                double csharp2cuda_temp_413 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, three), 1)];
-                                                if (((mathblocks_geometry_barycentric_denominator(csharp2cuda_temp_408, csharp2cuda_temp_409, csharp2cuda_temp_410, csharp2cuda_temp_411, csharp2cuda_temp_412, csharp2cuda_temp_413)) == (0.0)))
+                                                float csharp2cuda_temp_413 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, three), 1)];
+                                                if (((mathblocks_geometry_barycentric_denominator(csharp2cuda_temp_408, csharp2cuda_temp_409, csharp2cuda_temp_410, csharp2cuda_temp_411, csharp2cuda_temp_412, csharp2cuda_temp_413)) == (0.0f)))
                                                 {
 #line 960 "GeometryModule.cs"
                                                     goto csharp2cuda_for_continue_35;
                                                 }
 #line 961 "GeometryModule.cs"
 #line 962 "GeometryModule.cs"
-                                                double csharp2cuda_temp_414 = (b)[0];
+                                                float csharp2cuda_temp_414 = (b)[0];
 #line 962 "GeometryModule.cs"
-                                                double csharp2cuda_temp_415 = (b)[1];
+                                                float csharp2cuda_temp_415 = (b)[1];
 #line 963 "GeometryModule.cs"
-                                                double csharp2cuda_temp_416 = (a)[csharp2cuda_i32_mul(2, one)];
+                                                float csharp2cuda_temp_416 = (a)[csharp2cuda_i32_mul(2, one)];
 #line 963 "GeometryModule.cs"
-                                                double csharp2cuda_temp_417 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, one), 1)];
+                                                float csharp2cuda_temp_417 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, one), 1)];
 #line 964 "GeometryModule.cs"
-                                                double csharp2cuda_temp_418 = (a)[csharp2cuda_i32_mul(2, two)];
+                                                float csharp2cuda_temp_418 = (a)[csharp2cuda_i32_mul(2, two)];
 #line 964 "GeometryModule.cs"
-                                                double csharp2cuda_temp_419 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, two), 1)];
+                                                float csharp2cuda_temp_419 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, two), 1)];
 #line 965 "GeometryModule.cs"
-                                                double csharp2cuda_temp_420 = (a)[csharp2cuda_i32_mul(2, three)];
+                                                float csharp2cuda_temp_420 = (a)[csharp2cuda_i32_mul(2, three)];
 #line 965 "GeometryModule.cs"
-                                                double csharp2cuda_temp_421 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, three), 1)];
+                                                float csharp2cuda_temp_421 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, three), 1)];
                                                 mathblocks_geometry_barycentric(csharp2cuda_temp_414, csharp2cuda_temp_415, csharp2cuda_temp_416, csharp2cuda_temp_417, csharp2cuda_temp_418, csharp2cuda_temp_419, csharp2cuda_temp_420, csharp2cuda_temp_421, coordinates);
 #line 967 "GeometryModule.cs"
 #line 967 "GeometryModule.cs"
-                                                double csharp2cuda_temp_422 = (coordinates)[0];
+                                                float csharp2cuda_temp_422 = (coordinates)[0];
 #line 967 "GeometryModule.cs"
                                                 bool csharp2cuda_temp_423;
 #line 967 "GeometryModule.cs"
                                                 if (!((!(isfinite(csharp2cuda_temp_422)))))
                                                 {
 #line 967 "GeometryModule.cs"
-                                                    double csharp2cuda_temp_424 = (coordinates)[1];
+                                                    float csharp2cuda_temp_424 = (coordinates)[1];
 #line 967 "GeometryModule.cs"
                                                     csharp2cuda_temp_423 = (!(isfinite(csharp2cuda_temp_424)));
                                                 }
@@ -3756,7 +3756,7 @@ __device__ void mathblocks_geometry_dispatch(
                                                 if (!(csharp2cuda_temp_423))
                                                 {
 #line 968 "GeometryModule.cs"
-                                                    double csharp2cuda_temp_426 = (coordinates)[2];
+                                                    float csharp2cuda_temp_426 = (coordinates)[2];
 #line 967 "GeometryModule.cs"
                                                     csharp2cuda_temp_425 = (!(isfinite(csharp2cuda_temp_426)));
                                                 }
@@ -3774,16 +3774,16 @@ __device__ void mathblocks_geometry_dispatch(
                                                 }
 #line 970 "GeometryModule.cs"
 #line 970 "GeometryModule.cs"
-                                                double csharp2cuda_temp_428 = (coordinates)[0];
+                                                float csharp2cuda_temp_428 = (coordinates)[0];
 #line 970 "GeometryModule.cs"
                                                 bool csharp2cuda_temp_429;
 #line 970 "GeometryModule.cs"
-                                                if (((csharp2cuda_temp_428) >= (0.0)))
+                                                if (((csharp2cuda_temp_428) >= (0.0f)))
                                                 {
 #line 970 "GeometryModule.cs"
-                                                    double csharp2cuda_temp_430 = (coordinates)[0];
+                                                    float csharp2cuda_temp_430 = (coordinates)[0];
 #line 970 "GeometryModule.cs"
-                                                    csharp2cuda_temp_429 = ((csharp2cuda_temp_430) <= (1.0));
+                                                    csharp2cuda_temp_429 = ((csharp2cuda_temp_430) <= (1.0f));
                                                 }
                                                 else
                                                 {
@@ -3796,9 +3796,9 @@ __device__ void mathblocks_geometry_dispatch(
                                                 if (csharp2cuda_temp_429)
                                                 {
 #line 971 "GeometryModule.cs"
-                                                    double csharp2cuda_temp_432 = (coordinates)[1];
+                                                    float csharp2cuda_temp_432 = (coordinates)[1];
 #line 970 "GeometryModule.cs"
-                                                    csharp2cuda_temp_431 = ((csharp2cuda_temp_432) >= (0.0));
+                                                    csharp2cuda_temp_431 = ((csharp2cuda_temp_432) >= (0.0f));
                                                 }
                                                 else
                                                 {
@@ -3811,9 +3811,9 @@ __device__ void mathblocks_geometry_dispatch(
                                                 if (csharp2cuda_temp_431)
                                                 {
 #line 971 "GeometryModule.cs"
-                                                    double csharp2cuda_temp_434 = (coordinates)[1];
+                                                    float csharp2cuda_temp_434 = (coordinates)[1];
 #line 970 "GeometryModule.cs"
-                                                    csharp2cuda_temp_433 = ((csharp2cuda_temp_434) <= (1.0));
+                                                    csharp2cuda_temp_433 = ((csharp2cuda_temp_434) <= (1.0f));
                                                 }
                                                 else
                                                 {
@@ -3826,9 +3826,9 @@ __device__ void mathblocks_geometry_dispatch(
                                                 if (csharp2cuda_temp_433)
                                                 {
 #line 972 "GeometryModule.cs"
-                                                    double csharp2cuda_temp_436 = (coordinates)[2];
+                                                    float csharp2cuda_temp_436 = (coordinates)[2];
 #line 970 "GeometryModule.cs"
-                                                    csharp2cuda_temp_435 = ((csharp2cuda_temp_436) >= (0.0));
+                                                    csharp2cuda_temp_435 = ((csharp2cuda_temp_436) >= (0.0f));
                                                 }
                                                 else
                                                 {
@@ -3841,9 +3841,9 @@ __device__ void mathblocks_geometry_dispatch(
                                                 if (csharp2cuda_temp_435)
                                                 {
 #line 972 "GeometryModule.cs"
-                                                    double csharp2cuda_temp_438 = (coordinates)[2];
+                                                    float csharp2cuda_temp_438 = (coordinates)[2];
 #line 970 "GeometryModule.cs"
-                                                    csharp2cuda_temp_437 = ((csharp2cuda_temp_438) <= (1.0));
+                                                    csharp2cuda_temp_437 = ((csharp2cuda_temp_438) <= (1.0f));
                                                 }
                                                 else
                                                 {
@@ -3877,9 +3877,9 @@ __device__ void mathblocks_geometry_dispatch(
                     }
 #line 977 "GeometryModule.cs"
 #line 977 "GeometryModule.cs"
-                    double* csharp2cuda_temp_440 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_440 = &((output)->scalar_value);
 #line 977 "GeometryModule.cs"
-                    double csharp2cuda_temp_441 = __ddiv_rn(((double)(containing)), ((double)(total)));
+                    float csharp2cuda_temp_441 = __fdiv_rn(((float)(containing)), ((float)(total)));
                     (*(csharp2cuda_temp_440) = csharp2cuda_temp_441);
 #line 978 "GeometryModule.cs"
                     break;
@@ -3940,9 +3940,9 @@ __device__ void mathblocks_geometry_dispatch(
                             break;
 #line 989 "GeometryModule.cs"
 #line 989 "GeometryModule.cs"
-                        double* csharp2cuda_temp_453 = &((result)[index]);
+                        float* csharp2cuda_temp_453 = &((result)[index]);
 #line 989 "GeometryModule.cs"
-                        double csharp2cuda_temp_454 = (a)[index];
+                        float csharp2cuda_temp_454 = (a)[index];
                         (*(csharp2cuda_temp_453) = csharp2cuda_temp_454);
 #line 988 "GeometryModule.cs"
                         int* csharp2cuda_temp_451 = &(index);
@@ -3982,9 +3982,9 @@ __device__ void mathblocks_geometry_dispatch(
                             break;
 #line 999 "GeometryModule.cs"
 #line 999 "GeometryModule.cs"
-                        double* csharp2cuda_temp_460 = &((result)[index]);
+                        float* csharp2cuda_temp_460 = &((result)[index]);
 #line 999 "GeometryModule.cs"
-                        double csharp2cuda_temp_461 = (a)[index];
+                        float csharp2cuda_temp_461 = (a)[index];
                         (*(csharp2cuda_temp_460) = csharp2cuda_temp_461);
 #line 998 "GeometryModule.cs"
                         int* csharp2cuda_temp_458 = &(index);
@@ -4070,9 +4070,9 @@ __device__ void mathblocks_geometry_dispatch(
                                         (*(csharp2cuda_temp_469) = right);
 #line 1022 "GeometryModule.cs"
 #line 1022 "GeometryModule.cs"
-                                        double* csharp2cuda_temp_470 = &(((edges)[edge_count]).weight);
+                                        float* csharp2cuda_temp_470 = &(((edges)[edge_count]).weight);
 #line 1022 "GeometryModule.cs"
-                                        double csharp2cuda_temp_471 = mathblocks_geometry_distance(a, left, a, right);
+                                        float csharp2cuda_temp_471 = mathblocks_geometry_distance(a, left, a, right);
                                         (*(csharp2cuda_temp_470) = csharp2cuda_temp_471);
 #line 1023 "GeometryModule.cs"
 #line 1023 "GeometryModule.cs"
@@ -4203,9 +4203,9 @@ __device__ void mathblocks_geometry_dispatch(
 #line 1049 "GeometryModule.cs"
                                 int csharp2cuda_temp_489 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_488));
 #line 1049 "GeometryModule.cs"
-                                double* csharp2cuda_temp_490 = &((result)[csharp2cuda_temp_489]);
+                                float* csharp2cuda_temp_490 = &((result)[csharp2cuda_temp_489]);
 #line 1049 "GeometryModule.cs"
-                                double csharp2cuda_temp_491 = ((edges)[index]).weight;
+                                float csharp2cuda_temp_491 = ((edges)[index]).weight;
                                 (*(csharp2cuda_temp_490) = csharp2cuda_temp_491);
                             }
                             csharp2cuda_for_continue_43:
@@ -4226,7 +4226,7 @@ __device__ void mathblocks_geometry_dispatch(
                                 break;
 #line 1053 "GeometryModule.cs"
 #line 1053 "GeometryModule.cs"
-                            double csharp2cuda_temp_493 = (result)[index];
+                            float csharp2cuda_temp_493 = (result)[index];
                             if ((!(isfinite(csharp2cuda_temp_493))))
                             {
 #line 1053 "GeometryModule.cs"
@@ -4369,7 +4369,7 @@ __device__ void mathblocks_geometry_dispatch(
         if (csharp2cuda_temp_504)
         {
 #line 1060 "GeometryModule.cs"
-            double csharp2cuda_temp_506 = (output)->scalar_value;
+            float csharp2cuda_temp_506 = (output)->scalar_value;
 #line 1057 "GeometryModule.cs"
             csharp2cuda_temp_505 = (!(isfinite(csharp2cuda_temp_506)));
         }
@@ -4390,39 +4390,39 @@ __device__ void mathblocks_geometry_dispatch(
 }
 
 #line 62 "GeometryModule.cs"
-__device__ double mathblocks_geometry_distance(
-    const double* left,
+__device__ float mathblocks_geometry_distance(
+    const float* left,
     int left_index,
-    const double* right,
+    const float* right,
     int right_index)
 #line 68 "GeometryModule.cs"
 {
 #line 69 "GeometryModule.cs"
 #line 70 "GeometryModule.cs"
-    double csharp2cuda_temp_0 = (left)[csharp2cuda_i32_mul(2, left_index)];
+    float csharp2cuda_temp_0 = (left)[csharp2cuda_i32_mul(2, left_index)];
 #line 71 "GeometryModule.cs"
-    double csharp2cuda_temp_1 = (left)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, left_index), 1)];
+    float csharp2cuda_temp_1 = (left)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, left_index), 1)];
 #line 72 "GeometryModule.cs"
-    double csharp2cuda_temp_2 = (right)[csharp2cuda_i32_mul(2, right_index)];
+    float csharp2cuda_temp_2 = (right)[csharp2cuda_i32_mul(2, right_index)];
 #line 73 "GeometryModule.cs"
-    double csharp2cuda_temp_3 = (right)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, right_index), 1)];
+    float csharp2cuda_temp_3 = (right)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, right_index), 1)];
     return mathblocks_geometry_distance_coordinates(csharp2cuda_temp_0, csharp2cuda_temp_1, csharp2cuda_temp_2, csharp2cuda_temp_3);
 }
 
 #line 50 "GeometryModule.cs"
-__device__ double mathblocks_geometry_distance_coordinates(
-    double left_x,
-    double left_y,
-    double right_x,
-    double right_y)
+__device__ float mathblocks_geometry_distance_coordinates(
+    float left_x,
+    float left_y,
+    float right_x,
+    float right_y)
 #line 56 "GeometryModule.cs"
 {
 #line 57 "GeometryModule.cs"
-    double x = __dsub_rn(left_x, right_x);
+    float x = __fsub_rn(left_x, right_x);
 #line 58 "GeometryModule.cs"
-    double y = __dsub_rn(left_y, right_y);
+    float y = __fsub_rn(left_y, right_y);
 #line 59 "GeometryModule.cs"
-    return mathblocks_square_root(__dadd_rn(__dmul_rn(x, x), __dmul_rn(y, y)));
+    return mathblocks_square_root(__fadd_rn(__fmul_rn(x, x), __fmul_rn(y, y)));
 }
 
 #line 337 "GeometryModule.cs"
@@ -4433,9 +4433,9 @@ __device__ bool mathblocks_geometry_edge_less(
 {
 #line 342 "GeometryModule.cs"
 #line 342 "GeometryModule.cs"
-    double csharp2cuda_temp_0 = (*(left)).weight;
+    float csharp2cuda_temp_0 = (*(left)).weight;
 #line 342 "GeometryModule.cs"
-    double csharp2cuda_temp_1 = (*(right)).weight;
+    float csharp2cuda_temp_1 = (*(right)).weight;
     if (((csharp2cuda_temp_0) < (csharp2cuda_temp_1)))
     {
 #line 343 "GeometryModule.cs"
@@ -4443,9 +4443,9 @@ __device__ bool mathblocks_geometry_edge_less(
     }
 #line 344 "GeometryModule.cs"
 #line 344 "GeometryModule.cs"
-    double csharp2cuda_temp_2 = (*(right)).weight;
+    float csharp2cuda_temp_2 = (*(right)).weight;
 #line 344 "GeometryModule.cs"
-    double csharp2cuda_temp_3 = (*(left)).weight;
+    float csharp2cuda_temp_3 = (*(left)).weight;
     if (((csharp2cuda_temp_2) < (csharp2cuda_temp_3)))
     {
 #line 345 "GeometryModule.cs"
@@ -4514,7 +4514,7 @@ __device__ int mathblocks_geometry_find(int* parent, int value)
 
 #line 237 "GeometryModule.cs"
 __device__ void mathblocks_geometry_index_order(
-    const double* points,
+    const float* points,
     int count,
     int* order,
     int* buffer)
@@ -4748,16 +4748,16 @@ __device__ void mathblocks_geometry_index_order(
 #line 77 "GeometryModule.cs"
 __device__ bool mathblocks_geometry_not_left_turn(
     int* overflow,
-    double origin_x,
-    double origin_y,
-    double left_x,
-    double left_y,
-    double right_x,
-    double right_y)
+    float origin_x,
+    float origin_y,
+    float left_x,
+    float left_y,
+    float right_x,
+    float right_y)
 #line 86 "GeometryModule.cs"
 {
 #line 87 "GeometryModule.cs"
-    double cross = mathblocks_geometry_cross(origin_x, origin_y, left_x, left_y, right_x, right_y);
+    float cross = mathblocks_geometry_cross(origin_x, origin_y, left_x, left_y, right_x, right_y);
 #line 88 "GeometryModule.cs"
     if (isnan(cross))
     {
@@ -4767,20 +4767,20 @@ __device__ bool mathblocks_geometry_not_left_turn(
         (*(csharp2cuda_temp_0) = 1);
     }
 #line 90 "GeometryModule.cs"
-    return ((cross) <= (0.0));
+    return ((cross) <= (0.0f));
 }
 
 #line 215 "GeometryModule.cs"
 __device__ bool mathblocks_geometry_point_less(
-    const double* points,
+    const float* points,
     int left,
     int right)
 #line 220 "GeometryModule.cs"
 {
 #line 221 "GeometryModule.cs"
-    double left_x = (points)[csharp2cuda_i32_mul(2, left)];
+    float left_x = (points)[csharp2cuda_i32_mul(2, left)];
 #line 222 "GeometryModule.cs"
-    double right_x = (points)[csharp2cuda_i32_mul(2, right)];
+    float right_x = (points)[csharp2cuda_i32_mul(2, right)];
 #line 223 "GeometryModule.cs"
     if (((left_x) < (right_x)))
     {
@@ -4794,9 +4794,9 @@ __device__ bool mathblocks_geometry_point_less(
         return false;
     }
 #line 227 "GeometryModule.cs"
-    double left_y = (points)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, left), 1)];
+    float left_y = (points)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, left), 1)];
 #line 228 "GeometryModule.cs"
-    double right_y = (points)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, right), 1)];
+    float right_y = (points)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, right), 1)];
 #line 229 "GeometryModule.cs"
     if (((left_y) < (right_y)))
     {
@@ -4814,49 +4814,49 @@ __device__ bool mathblocks_geometry_point_less(
 }
 
 #line 106 "GeometryModule.cs"
-__device__ double mathblocks_geometry_point_to_segment(
-    double point_x,
-    double point_y,
-    double start_x,
-    double start_y,
-    double end_x,
-    double end_y)
+__device__ float mathblocks_geometry_point_to_segment(
+    float point_x,
+    float point_y,
+    float start_x,
+    float start_y,
+    float end_x,
+    float end_y)
 #line 114 "GeometryModule.cs"
 {
 #line 115 "GeometryModule.cs"
-    double x = __dsub_rn(end_x, start_x);
+    float x = __fsub_rn(end_x, start_x);
 #line 116 "GeometryModule.cs"
-    double y = __dsub_rn(end_y, start_y);
+    float y = __fsub_rn(end_y, start_y);
 #line 117 "GeometryModule.cs"
-    double length_square = __dadd_rn(__dmul_rn(x, x), __dmul_rn(y, y));
+    float length_square = __fadd_rn(__fmul_rn(x, x), __fmul_rn(y, y));
 #line 118 "GeometryModule.cs"
-    if (((length_square) == (0.0)))
+    if (((length_square) == (0.0f)))
     {
 #line 119 "GeometryModule.cs"
         return mathblocks_geometry_distance_coordinates(point_x, point_y, start_x, start_y);
     }
 #line 120 "GeometryModule.cs"
-    double projection = __ddiv_rn(__dadd_rn(__dmul_rn(__dsub_rn(point_x, start_x), x), __dmul_rn(__dsub_rn(point_y, start_y), y)), length_square);
+    float projection = __fdiv_rn(__fadd_rn(__fmul_rn(__fsub_rn(point_x, start_x), x), __fmul_rn(__fsub_rn(point_y, start_y), y)), length_square);
 #line 122 "GeometryModule.cs"
 #line 122 "GeometryModule.cs"
-    double* csharp2cuda_temp_0 = &(projection);
+    float* csharp2cuda_temp_0 = &(projection);
 #line 122 "GeometryModule.cs"
-    double csharp2cuda_temp_1;
+    float csharp2cuda_temp_1;
 #line 122 "GeometryModule.cs"
-    if (((projection) < (0.0)))
+    if (((projection) < (0.0f)))
     {
 #line 122 "GeometryModule.cs"
-        csharp2cuda_temp_1 = 0.0;
+        csharp2cuda_temp_1 = 0.0f;
     }
     else
     {
 #line 122 "GeometryModule.cs"
-        double csharp2cuda_temp_2;
+        float csharp2cuda_temp_2;
 #line 122 "GeometryModule.cs"
-        if (((projection) > (1.0)))
+        if (((projection) > (1.0f)))
         {
 #line 122 "GeometryModule.cs"
-            csharp2cuda_temp_2 = 1.0;
+            csharp2cuda_temp_2 = 1.0f;
         }
         else
         {
@@ -4868,7 +4868,7 @@ __device__ double mathblocks_geometry_point_to_segment(
     }
     (*(csharp2cuda_temp_0) = csharp2cuda_temp_1);
 #line 123 "GeometryModule.cs"
-    return mathblocks_geometry_distance_coordinates(point_x, point_y, __dadd_rn(start_x, __dmul_rn(projection, x)), __dadd_rn(start_y, __dmul_rn(projection, y)));
+    return mathblocks_geometry_distance_coordinates(point_x, point_y, __fadd_rn(start_x, __fmul_rn(projection, x)), __fadd_rn(start_y, __fmul_rn(projection, y)));
 }
 
 #line 355 "GeometryModule.cs"
@@ -5088,13 +5088,13 @@ __device__ void mathblocks_geometry_sort_edges(MathBlockGeometryEdge* edges, Mat
 }
 
 #line 279 "GeometryModule.cs"
-__device__ void mathblocks_geometry_sort_points(double* points, double* buffer, int count)
+__device__ void mathblocks_geometry_sort_points(float* points, float* buffer, int count)
 #line 281 "GeometryModule.cs"
 {
 #line 282 "GeometryModule.cs"
-    double* source = points;
+    float* source = points;
 #line 283 "GeometryModule.cs"
-    double* target = buffer;
+    float* target = buffer;
 #line 284 "GeometryModule.cs"
     {
 #line 284 "GeometryModule.cs"
@@ -5172,27 +5172,27 @@ __device__ void mathblocks_geometry_sort_points(double* points, double* buffer, 
 #line 294 "GeometryModule.cs"
                                 {
 #line 295 "GeometryModule.cs"
-                                    double csharp2cuda_temp_7 = (source)[csharp2cuda_i32_mul(2, right)];
+                                    float csharp2cuda_temp_7 = (source)[csharp2cuda_i32_mul(2, right)];
 #line 295 "GeometryModule.cs"
-                                    double csharp2cuda_temp_8 = (source)[csharp2cuda_i32_mul(2, left)];
+                                    float csharp2cuda_temp_8 = (source)[csharp2cuda_i32_mul(2, left)];
 #line 295 "GeometryModule.cs"
                                     bool csharp2cuda_temp_9;
 #line 295 "GeometryModule.cs"
                                     if (!(((csharp2cuda_temp_7) < (csharp2cuda_temp_8))))
                                     {
 #line 296 "GeometryModule.cs"
-                                        double csharp2cuda_temp_10 = (source)[csharp2cuda_i32_mul(2, right)];
+                                        float csharp2cuda_temp_10 = (source)[csharp2cuda_i32_mul(2, right)];
 #line 296 "GeometryModule.cs"
-                                        double csharp2cuda_temp_11 = (source)[csharp2cuda_i32_mul(2, left)];
+                                        float csharp2cuda_temp_11 = (source)[csharp2cuda_i32_mul(2, left)];
 #line 296 "GeometryModule.cs"
                                         bool csharp2cuda_temp_12;
 #line 296 "GeometryModule.cs"
                                         if (((csharp2cuda_temp_10) == (csharp2cuda_temp_11)))
                                         {
 #line 296 "GeometryModule.cs"
-                                            double csharp2cuda_temp_13 = (source)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, right), 1)];
+                                            float csharp2cuda_temp_13 = (source)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, right), 1)];
 #line 296 "GeometryModule.cs"
-                                            double csharp2cuda_temp_14 = (source)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, left), 1)];
+                                            float csharp2cuda_temp_14 = (source)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, left), 1)];
 #line 296 "GeometryModule.cs"
                                             csharp2cuda_temp_12 = ((csharp2cuda_temp_13) < (csharp2cuda_temp_14));
                                         }
@@ -5232,15 +5232,15 @@ __device__ void mathblocks_geometry_sort_points(double* points, double* buffer, 
                                     int from = csharp2cuda_temp_15;
 #line 298 "GeometryModule.cs"
 #line 298 "GeometryModule.cs"
-                                    double* csharp2cuda_temp_18 = &((target)[csharp2cuda_i32_mul(2, position)]);
+                                    float* csharp2cuda_temp_18 = &((target)[csharp2cuda_i32_mul(2, position)]);
 #line 298 "GeometryModule.cs"
-                                    double csharp2cuda_temp_19 = (source)[csharp2cuda_i32_mul(2, from)];
+                                    float csharp2cuda_temp_19 = (source)[csharp2cuda_i32_mul(2, from)];
                                     (*(csharp2cuda_temp_18) = csharp2cuda_temp_19);
 #line 299 "GeometryModule.cs"
 #line 299 "GeometryModule.cs"
-                                    double* csharp2cuda_temp_20 = &((target)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, position), 1)]);
+                                    float* csharp2cuda_temp_20 = &((target)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, position), 1)]);
 #line 299 "GeometryModule.cs"
-                                    double csharp2cuda_temp_21 = (source)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, from), 1)];
+                                    float csharp2cuda_temp_21 = (source)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, from), 1)];
                                     (*(csharp2cuda_temp_20) = csharp2cuda_temp_21);
 #line 300 "GeometryModule.cs"
 #line 300 "GeometryModule.cs"
@@ -5257,15 +5257,15 @@ __device__ void mathblocks_geometry_sort_points(double* points, double* buffer, 
                                 {
 #line 304 "GeometryModule.cs"
 #line 304 "GeometryModule.cs"
-                                    double* csharp2cuda_temp_23 = &((target)[csharp2cuda_i32_mul(2, position)]);
+                                    float* csharp2cuda_temp_23 = &((target)[csharp2cuda_i32_mul(2, position)]);
 #line 304 "GeometryModule.cs"
-                                    double csharp2cuda_temp_24 = (source)[csharp2cuda_i32_mul(2, left)];
+                                    float csharp2cuda_temp_24 = (source)[csharp2cuda_i32_mul(2, left)];
                                     (*(csharp2cuda_temp_23) = csharp2cuda_temp_24);
 #line 305 "GeometryModule.cs"
 #line 305 "GeometryModule.cs"
-                                    double* csharp2cuda_temp_25 = &((target)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, position), 1)]);
+                                    float* csharp2cuda_temp_25 = &((target)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, position), 1)]);
 #line 305 "GeometryModule.cs"
-                                    double csharp2cuda_temp_26 = (source)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, left), 1)];
+                                    float csharp2cuda_temp_26 = (source)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, left), 1)];
                                     (*(csharp2cuda_temp_25) = csharp2cuda_temp_26);
 #line 306 "GeometryModule.cs"
 #line 306 "GeometryModule.cs"
@@ -5286,15 +5286,15 @@ __device__ void mathblocks_geometry_sort_points(double* points, double* buffer, 
                                 {
 #line 311 "GeometryModule.cs"
 #line 311 "GeometryModule.cs"
-                                    double* csharp2cuda_temp_29 = &((target)[csharp2cuda_i32_mul(2, position)]);
+                                    float* csharp2cuda_temp_29 = &((target)[csharp2cuda_i32_mul(2, position)]);
 #line 311 "GeometryModule.cs"
-                                    double csharp2cuda_temp_30 = (source)[csharp2cuda_i32_mul(2, right)];
+                                    float csharp2cuda_temp_30 = (source)[csharp2cuda_i32_mul(2, right)];
                                     (*(csharp2cuda_temp_29) = csharp2cuda_temp_30);
 #line 312 "GeometryModule.cs"
 #line 312 "GeometryModule.cs"
-                                    double* csharp2cuda_temp_31 = &((target)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, position), 1)]);
+                                    float* csharp2cuda_temp_31 = &((target)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, position), 1)]);
 #line 312 "GeometryModule.cs"
-                                    double csharp2cuda_temp_32 = (source)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, right), 1)];
+                                    float csharp2cuda_temp_32 = (source)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, right), 1)];
                                     (*(csharp2cuda_temp_31) = csharp2cuda_temp_32);
 #line 313 "GeometryModule.cs"
 #line 313 "GeometryModule.cs"
@@ -5315,14 +5315,14 @@ __device__ void mathblocks_geometry_sort_points(double* points, double* buffer, 
                     }
                 }
 #line 317 "GeometryModule.cs"
-                double* sorted = target;
+                float* sorted = target;
 #line 318 "GeometryModule.cs"
 #line 318 "GeometryModule.cs"
-                double** csharp2cuda_temp_35 = &(target);
+                float** csharp2cuda_temp_35 = &(target);
                 (*(csharp2cuda_temp_35) = source);
 #line 319 "GeometryModule.cs"
 #line 319 "GeometryModule.cs"
-                double** csharp2cuda_temp_36 = &(source);
+                float** csharp2cuda_temp_36 = &(source);
                 (*(csharp2cuda_temp_36) = sorted);
             }
 #line 284 "GeometryModule.cs"
@@ -5345,9 +5345,9 @@ __device__ void mathblocks_geometry_sort_points(double* points, double* buffer, 
                     break;
 #line 323 "GeometryModule.cs"
 #line 323 "GeometryModule.cs"
-                double* csharp2cuda_temp_38 = &((points)[index]);
+                float* csharp2cuda_temp_38 = &((points)[index]);
 #line 323 "GeometryModule.cs"
-                double csharp2cuda_temp_39 = (source)[index];
+                float csharp2cuda_temp_39 = (source)[index];
                 (*(csharp2cuda_temp_38) = csharp2cuda_temp_39);
 #line 322 "GeometryModule.cs"
                 int* csharp2cuda_temp_37 = &(index);
@@ -5359,78 +5359,78 @@ __device__ void mathblocks_geometry_sort_points(double* points, double* buffer, 
 
 #line 174 "GeometryModule.cs"
 __device__ bool mathblocks_geometry_try_circumcircle(
-    const double* points,
+    const float* points,
     int first,
     int second,
     int third,
-    double* center_x,
-    double* center_y,
-    double* radius_square)
+    float* center_x,
+    float* center_y,
+    float* radius_square)
 #line 183 "GeometryModule.cs"
 {
 #line 184 "GeometryModule.cs"
-    double first_x = (points)[csharp2cuda_i32_mul(2, first)];
+    float first_x = (points)[csharp2cuda_i32_mul(2, first)];
 #line 185 "GeometryModule.cs"
-    double first_y = (points)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, first), 1)];
+    float first_y = (points)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, first), 1)];
 #line 186 "GeometryModule.cs"
-    double second_x = (points)[csharp2cuda_i32_mul(2, second)];
+    float second_x = (points)[csharp2cuda_i32_mul(2, second)];
 #line 187 "GeometryModule.cs"
-    double second_y = (points)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, second), 1)];
+    float second_y = (points)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, second), 1)];
 #line 188 "GeometryModule.cs"
-    double third_x = (points)[csharp2cuda_i32_mul(2, third)];
+    float third_x = (points)[csharp2cuda_i32_mul(2, third)];
 #line 189 "GeometryModule.cs"
-    double third_y = (points)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, third), 1)];
+    float third_y = (points)[csharp2cuda_i32_add(csharp2cuda_i32_mul(2, third), 1)];
 #line 190 "GeometryModule.cs"
-    double denominator = __dmul_rn(2.0, __dadd_rn(__dadd_rn(__dmul_rn(first_x, __dsub_rn(second_y, third_y)), __dmul_rn(second_x, __dsub_rn(third_y, first_y))), __dmul_rn(third_x, __dsub_rn(first_y, second_y))));
+    float denominator = __fmul_rn(2.0f, __fadd_rn(__fadd_rn(__fmul_rn(first_x, __fsub_rn(second_y, third_y)), __fmul_rn(second_x, __fsub_rn(third_y, first_y))), __fmul_rn(third_x, __fsub_rn(first_y, second_y))));
 #line 193 "GeometryModule.cs"
-    if (((denominator) == (0.0)))
+    if (((denominator) == (0.0f)))
 #line 194 "GeometryModule.cs"
     {
 #line 195 "GeometryModule.cs"
 #line 195 "GeometryModule.cs"
-        double* csharp2cuda_temp_0 = center_x;
-        (*(csharp2cuda_temp_0) = 0.0);
+        float* csharp2cuda_temp_0 = center_x;
+        (*(csharp2cuda_temp_0) = 0.0f);
 #line 196 "GeometryModule.cs"
 #line 196 "GeometryModule.cs"
-        double* csharp2cuda_temp_1 = center_y;
-        (*(csharp2cuda_temp_1) = 0.0);
+        float* csharp2cuda_temp_1 = center_y;
+        (*(csharp2cuda_temp_1) = 0.0f);
 #line 197 "GeometryModule.cs"
 #line 197 "GeometryModule.cs"
-        double* csharp2cuda_temp_2 = radius_square;
-        (*(csharp2cuda_temp_2) = 0.0);
+        float* csharp2cuda_temp_2 = radius_square;
+        (*(csharp2cuda_temp_2) = 0.0f);
 #line 198 "GeometryModule.cs"
         return false;
     }
 #line 200 "GeometryModule.cs"
-    double first_square = __dadd_rn(__dmul_rn(first_x, first_x), __dmul_rn(first_y, first_y));
+    float first_square = __fadd_rn(__fmul_rn(first_x, first_x), __fmul_rn(first_y, first_y));
 #line 201 "GeometryModule.cs"
-    double second_square = __dadd_rn(__dmul_rn(second_x, second_x), __dmul_rn(second_y, second_y));
+    float second_square = __fadd_rn(__fmul_rn(second_x, second_x), __fmul_rn(second_y, second_y));
 #line 202 "GeometryModule.cs"
-    double third_square = __dadd_rn(__dmul_rn(third_x, third_x), __dmul_rn(third_y, third_y));
+    float third_square = __fadd_rn(__fmul_rn(third_x, third_x), __fmul_rn(third_y, third_y));
 #line 203 "GeometryModule.cs"
 #line 203 "GeometryModule.cs"
-    double* csharp2cuda_temp_3 = center_x;
+    float* csharp2cuda_temp_3 = center_x;
 #line 203 "GeometryModule.cs"
-    double csharp2cuda_temp_4 = __ddiv_rn(__dadd_rn(__dadd_rn(__dmul_rn(first_square, __dsub_rn(second_y, third_y)), __dmul_rn(second_square, __dsub_rn(third_y, first_y))), __dmul_rn(third_square, __dsub_rn(first_y, second_y))), denominator);
+    float csharp2cuda_temp_4 = __fdiv_rn(__fadd_rn(__fadd_rn(__fmul_rn(first_square, __fsub_rn(second_y, third_y)), __fmul_rn(second_square, __fsub_rn(third_y, first_y))), __fmul_rn(third_square, __fsub_rn(first_y, second_y))), denominator);
     (*(csharp2cuda_temp_3) = csharp2cuda_temp_4);
 #line 206 "GeometryModule.cs"
 #line 206 "GeometryModule.cs"
-    double* csharp2cuda_temp_5 = center_y;
+    float* csharp2cuda_temp_5 = center_y;
 #line 206 "GeometryModule.cs"
-    double csharp2cuda_temp_6 = __ddiv_rn(__dadd_rn(__dadd_rn(__dmul_rn(first_square, __dsub_rn(third_x, second_x)), __dmul_rn(second_square, __dsub_rn(first_x, third_x))), __dmul_rn(third_square, __dsub_rn(second_x, first_x))), denominator);
+    float csharp2cuda_temp_6 = __fdiv_rn(__fadd_rn(__fadd_rn(__fmul_rn(first_square, __fsub_rn(third_x, second_x)), __fmul_rn(second_square, __fsub_rn(first_x, third_x))), __fmul_rn(third_square, __fsub_rn(second_x, first_x))), denominator);
     (*(csharp2cuda_temp_5) = csharp2cuda_temp_6);
 #line 209 "GeometryModule.cs"
-    double csharp2cuda_temp_7 = *(center_x);
+    float csharp2cuda_temp_7 = *(center_x);
 #line 209 "GeometryModule.cs"
-    double x = __dsub_rn(first_x, csharp2cuda_temp_7);
+    float x = __fsub_rn(first_x, csharp2cuda_temp_7);
 #line 210 "GeometryModule.cs"
-    double csharp2cuda_temp_8 = *(center_y);
+    float csharp2cuda_temp_8 = *(center_y);
 #line 210 "GeometryModule.cs"
-    double y = __dsub_rn(first_y, csharp2cuda_temp_8);
+    float y = __fsub_rn(first_y, csharp2cuda_temp_8);
 #line 211 "GeometryModule.cs"
 #line 211 "GeometryModule.cs"
-    double* csharp2cuda_temp_9 = radius_square;
-    (*(csharp2cuda_temp_9) = __dadd_rn(__dmul_rn(x, x), __dmul_rn(y, y)));
+    float* csharp2cuda_temp_9 = radius_square;
+    (*(csharp2cuda_temp_9) = __fadd_rn(__fmul_rn(x, x), __fmul_rn(y, y)));
 #line 212 "GeometryModule.cs"
     return true;
 }

@@ -639,16 +639,16 @@ static __device__ __forceinline__ short csharp2cuda_i16_post_decrement(short& ta
 #endif
 
 #line 116 "VectorModule.cs"
-__device__ double mathblocks_compensated_absolute_sum(const double* values, int count);
+__device__ float mathblocks_compensated_absolute_sum(const float* values, int count);
 
 #line 96 "VectorModule.cs"
-__device__ double mathblocks_compensated_product_sum(
-    const double* first,
-    const double* second,
+__device__ float mathblocks_compensated_product_sum(
+    const float* first,
+    const float* second,
     int count);
 
 #line 79 "VectorModule.cs"
-__device__ double mathblocks_compensated_sum(const double* values, int count);
+__device__ float mathblocks_compensated_sum(const float* values, int count);
 
 #line 259 "VectorModule.cs"
 __device__ void mathblocks_copy_and_sort(
@@ -656,56 +656,56 @@ __device__ void mathblocks_copy_and_sort(
     MathBlockSlot* output);
 
 #line 56 "VectorModule.cs"
-__device__ double mathblocks_maximum(double first, double second);
+__device__ float mathblocks_maximum(float first, float second);
 
 #line 42 "VectorModule.cs"
-__device__ double mathblocks_minimum(double first, double second);
+__device__ float mathblocks_minimum(float first, float second);
 
 #line 70 "VectorModule.cs"
-__device__ bool mathblocks_nonnegative_integer(double value, int* result);
+__device__ bool mathblocks_nonnegative_integer(float value, int* result);
 
 #line 292 "VectorModule.cs"
-__device__ double mathblocks_quantile(
+__device__ float mathblocks_quantile(
     const MathBlockSlot* input,
     MathBlockSlot* output,
-    double probability);
+    float probability);
 
 #line 273 "VectorModule.cs"
-__device__ double mathblocks_quantile_values(
-    const double* values,
+__device__ float mathblocks_quantile_values(
+    const float* values,
     int count,
-    double* sorted,
-    double probability);
+    float* sorted,
+    float probability);
 
 #line 133 "VectorModule.cs"
 __device__ void mathblocks_set_vector_shape(MathBlockSlot* output, int count);
 
 #line 201 "VectorModule.cs"
 __device__ void mathblocks_sort_copy_values(
-    const double* source,
+    const float* source,
     int count,
-    double* sorted);
+    float* sorted);
 
 #line 222 "VectorModule.cs"
-__device__ void mathblocks_stable_index_order(const double* keys, int count, int* order, int* buffer);
+__device__ void mathblocks_stable_index_order(const float* keys, int count, int* order, int* buffer);
 
 #line 151 "VectorModule.cs"
-__device__ double* mathblocks_stable_merge_sort(double* values, double* buffer, int count, bool descending);
+__device__ float* mathblocks_stable_merge_sort(float* values, float* buffer, int count, bool descending);
 
 #line 184 "VectorModule.cs"
 __device__ void mathblocks_stable_sort_into(
-    const double* values,
+    const float* values,
     int count,
-    double* result,
-    double* buffer,
+    float* result,
+    float* buffer,
     bool descending);
 
 #line 334 "VectorModule.cs"
 __device__ bool mathblocks_vector_arg_extreme_value(
-    const double* values,
+    const float* values,
     int count,
     bool maximum,
-    double* value);
+    float* value);
 
 #line 387 "VectorModule.cs"
 __device__ void mathblocks_vector_dispatch(
@@ -716,32 +716,32 @@ __device__ void mathblocks_vector_dispatch(
 
 #line 311 "VectorModule.cs"
 __device__ bool mathblocks_vector_geometric_mean_value(
-    const double* values,
+    const float* values,
     int count,
-    double* logarithms,
-    double* value);
+    float* logarithms,
+    float* value);
 
 #line 351 "VectorModule.cs"
-__device__ double mathblocks_vector_rank_at(
-    const double* values,
+__device__ float mathblocks_vector_rank_at(
+    const float* values,
     int count,
     int position);
 
 #line 367 "VectorModule.cs"
 __device__ void mathblocks_vector_standardize_moments(
-    const double* values,
+    const float* values,
     int count,
-    double* mean,
-    double* deviation);
+    float* mean,
+    float* deviation);
 
 #line 116 "VectorModule.cs"
-__device__ double mathblocks_compensated_absolute_sum(const double* values, int count)
+__device__ float mathblocks_compensated_absolute_sum(const float* values, int count)
 #line 118 "VectorModule.cs"
 {
 #line 119 "VectorModule.cs"
-    double sum = 0.0;
+    float sum = 0.0f;
 #line 120 "VectorModule.cs"
-    double correction = 0.0;
+    float correction = 0.0f;
 #line 121 "VectorModule.cs"
     {
 #line 121 "VectorModule.cs"
@@ -753,33 +753,33 @@ __device__ double mathblocks_compensated_absolute_sum(const double* values, int 
 #line 122 "VectorModule.cs"
             {
 #line 123 "VectorModule.cs"
-                double csharp2cuda_temp_1 = (values)[index];
+                float csharp2cuda_temp_1 = (values)[index];
 #line 123 "VectorModule.cs"
-                double value = fabs(csharp2cuda_temp_1);
+                float value = fabsf(csharp2cuda_temp_1);
 #line 124 "VectorModule.cs"
-                double next = __dadd_rn(sum, value);
+                float next = __fadd_rn(sum, value);
 #line 125 "VectorModule.cs"
 #line 125 "VectorModule.cs"
-                double* csharp2cuda_temp_2 = &(correction);
+                float* csharp2cuda_temp_2 = &(correction);
 #line 125 "VectorModule.cs"
-                double csharp2cuda_temp_3 = *(csharp2cuda_temp_2);
+                float csharp2cuda_temp_3 = *(csharp2cuda_temp_2);
 #line 125 "VectorModule.cs"
-                double csharp2cuda_temp_4;
+                float csharp2cuda_temp_4;
 #line 125 "VectorModule.cs"
-                if (((fabs(sum)) >= (fabs(value))))
+                if (((fabsf(sum)) >= (fabsf(value))))
                 {
 #line 125 "VectorModule.cs"
-                    csharp2cuda_temp_4 = __dadd_rn(__dsub_rn(sum, next), value);
+                    csharp2cuda_temp_4 = __fadd_rn(__fsub_rn(sum, next), value);
                 }
                 else
                 {
 #line 125 "VectorModule.cs"
-                    csharp2cuda_temp_4 = __dadd_rn(__dsub_rn(value, next), sum);
+                    csharp2cuda_temp_4 = __fadd_rn(__fsub_rn(value, next), sum);
                 }
-                (*(csharp2cuda_temp_2) = __dadd_rn(csharp2cuda_temp_3, csharp2cuda_temp_4));
+                (*(csharp2cuda_temp_2) = __fadd_rn(csharp2cuda_temp_3, csharp2cuda_temp_4));
 #line 128 "VectorModule.cs"
 #line 128 "VectorModule.cs"
-                double* csharp2cuda_temp_5 = &(sum);
+                float* csharp2cuda_temp_5 = &(sum);
                 (*(csharp2cuda_temp_5) = next);
             }
 #line 121 "VectorModule.cs"
@@ -788,20 +788,20 @@ __device__ double mathblocks_compensated_absolute_sum(const double* values, int 
         }
     }
 #line 130 "VectorModule.cs"
-    return __dadd_rn(sum, correction);
+    return __fadd_rn(sum, correction);
 }
 
 #line 96 "VectorModule.cs"
-__device__ double mathblocks_compensated_product_sum(
-    const double* first,
-    const double* second,
+__device__ float mathblocks_compensated_product_sum(
+    const float* first,
+    const float* second,
     int count)
 #line 101 "VectorModule.cs"
 {
 #line 102 "VectorModule.cs"
-    double sum = 0.0;
+    float sum = 0.0f;
 #line 103 "VectorModule.cs"
-    double correction = 0.0;
+    float correction = 0.0f;
 #line 104 "VectorModule.cs"
     {
 #line 104 "VectorModule.cs"
@@ -813,35 +813,35 @@ __device__ double mathblocks_compensated_product_sum(
 #line 105 "VectorModule.cs"
             {
 #line 106 "VectorModule.cs"
-                double csharp2cuda_temp_1 = (first)[index];
+                float csharp2cuda_temp_1 = (first)[index];
 #line 106 "VectorModule.cs"
-                double csharp2cuda_temp_2 = (second)[index];
+                float csharp2cuda_temp_2 = (second)[index];
 #line 106 "VectorModule.cs"
-                double value = __dmul_rn(csharp2cuda_temp_1, csharp2cuda_temp_2);
+                float value = __fmul_rn(csharp2cuda_temp_1, csharp2cuda_temp_2);
 #line 107 "VectorModule.cs"
-                double next = __dadd_rn(sum, value);
+                float next = __fadd_rn(sum, value);
 #line 108 "VectorModule.cs"
 #line 108 "VectorModule.cs"
-                double* csharp2cuda_temp_3 = &(correction);
+                float* csharp2cuda_temp_3 = &(correction);
 #line 108 "VectorModule.cs"
-                double csharp2cuda_temp_4 = *(csharp2cuda_temp_3);
+                float csharp2cuda_temp_4 = *(csharp2cuda_temp_3);
 #line 108 "VectorModule.cs"
-                double csharp2cuda_temp_5;
+                float csharp2cuda_temp_5;
 #line 108 "VectorModule.cs"
-                if (((fabs(sum)) >= (fabs(value))))
+                if (((fabsf(sum)) >= (fabsf(value))))
                 {
 #line 108 "VectorModule.cs"
-                    csharp2cuda_temp_5 = __dadd_rn(__dsub_rn(sum, next), value);
+                    csharp2cuda_temp_5 = __fadd_rn(__fsub_rn(sum, next), value);
                 }
                 else
                 {
 #line 108 "VectorModule.cs"
-                    csharp2cuda_temp_5 = __dadd_rn(__dsub_rn(value, next), sum);
+                    csharp2cuda_temp_5 = __fadd_rn(__fsub_rn(value, next), sum);
                 }
-                (*(csharp2cuda_temp_3) = __dadd_rn(csharp2cuda_temp_4, csharp2cuda_temp_5));
+                (*(csharp2cuda_temp_3) = __fadd_rn(csharp2cuda_temp_4, csharp2cuda_temp_5));
 #line 111 "VectorModule.cs"
 #line 111 "VectorModule.cs"
-                double* csharp2cuda_temp_6 = &(sum);
+                float* csharp2cuda_temp_6 = &(sum);
                 (*(csharp2cuda_temp_6) = next);
             }
 #line 104 "VectorModule.cs"
@@ -850,17 +850,17 @@ __device__ double mathblocks_compensated_product_sum(
         }
     }
 #line 113 "VectorModule.cs"
-    return __dadd_rn(sum, correction);
+    return __fadd_rn(sum, correction);
 }
 
 #line 79 "VectorModule.cs"
-__device__ double mathblocks_compensated_sum(const double* values, int count)
+__device__ float mathblocks_compensated_sum(const float* values, int count)
 #line 81 "VectorModule.cs"
 {
 #line 82 "VectorModule.cs"
-    double sum = 0.0;
+    float sum = 0.0f;
 #line 83 "VectorModule.cs"
-    double correction = 0.0;
+    float correction = 0.0f;
 #line 84 "VectorModule.cs"
     {
 #line 84 "VectorModule.cs"
@@ -872,31 +872,31 @@ __device__ double mathblocks_compensated_sum(const double* values, int count)
 #line 85 "VectorModule.cs"
             {
 #line 86 "VectorModule.cs"
-                double value = (values)[index];
+                float value = (values)[index];
 #line 87 "VectorModule.cs"
-                double next = __dadd_rn(sum, value);
+                float next = __fadd_rn(sum, value);
 #line 88 "VectorModule.cs"
 #line 88 "VectorModule.cs"
-                double* csharp2cuda_temp_1 = &(correction);
+                float* csharp2cuda_temp_1 = &(correction);
 #line 88 "VectorModule.cs"
-                double csharp2cuda_temp_2 = *(csharp2cuda_temp_1);
+                float csharp2cuda_temp_2 = *(csharp2cuda_temp_1);
 #line 88 "VectorModule.cs"
-                double csharp2cuda_temp_3;
+                float csharp2cuda_temp_3;
 #line 88 "VectorModule.cs"
-                if (((fabs(sum)) >= (fabs(value))))
+                if (((fabsf(sum)) >= (fabsf(value))))
                 {
 #line 88 "VectorModule.cs"
-                    csharp2cuda_temp_3 = __dadd_rn(__dsub_rn(sum, next), value);
+                    csharp2cuda_temp_3 = __fadd_rn(__fsub_rn(sum, next), value);
                 }
                 else
                 {
 #line 88 "VectorModule.cs"
-                    csharp2cuda_temp_3 = __dadd_rn(__dsub_rn(value, next), sum);
+                    csharp2cuda_temp_3 = __fadd_rn(__fsub_rn(value, next), sum);
                 }
-                (*(csharp2cuda_temp_1) = __dadd_rn(csharp2cuda_temp_2, csharp2cuda_temp_3));
+                (*(csharp2cuda_temp_1) = __fadd_rn(csharp2cuda_temp_2, csharp2cuda_temp_3));
 #line 91 "VectorModule.cs"
 #line 91 "VectorModule.cs"
-                double* csharp2cuda_temp_4 = &(sum);
+                float* csharp2cuda_temp_4 = &(sum);
                 (*(csharp2cuda_temp_4) = next);
             }
 #line 84 "VectorModule.cs"
@@ -905,7 +905,7 @@ __device__ double mathblocks_compensated_sum(const double* values, int count)
         }
     }
 #line 93 "VectorModule.cs"
-    return __dadd_rn(sum, correction);
+    return __fadd_rn(sum, correction);
 }
 
 #line 259 "VectorModule.cs"
@@ -917,11 +917,11 @@ __device__ void mathblocks_copy_and_sort(
 #line 264 "VectorModule.cs"
     unsigned long long csharp2cuda_temp_0 = (output)->scratch_pointer;
 #line 264 "VectorModule.cs"
-    double* scratch = ((double*)(csharp2cuda_temp_0));
+    float* scratch = ((float*)(csharp2cuda_temp_0));
 #line 265 "VectorModule.cs"
     unsigned long long csharp2cuda_temp_1 = (input)->data_pointer;
 #line 265 "VectorModule.cs"
-    const double* source = ((double*)(csharp2cuda_temp_1));
+    const float* source = ((float*)(csharp2cuda_temp_1));
 #line 266 "VectorModule.cs"
 #line 266 "VectorModule.cs"
     unsigned long long csharp2cuda_temp_2 = (output)->data_pointer;
@@ -932,7 +932,7 @@ __device__ void mathblocks_copy_and_sort(
         int csharp2cuda_temp_3 = (input)->count;
 #line 267 "VectorModule.cs"
         unsigned long long csharp2cuda_temp_4 = (output)->data_pointer;
-        mathblocks_stable_sort_into(source, csharp2cuda_temp_3, ((double*)(csharp2cuda_temp_4)), scratch, false);
+        mathblocks_stable_sort_into(source, csharp2cuda_temp_3, ((float*)(csharp2cuda_temp_4)), scratch, false);
     }
     else
     {
@@ -946,7 +946,7 @@ __device__ void mathblocks_copy_and_sort(
 }
 
 #line 56 "VectorModule.cs"
-__device__ double mathblocks_maximum(double first, double second)
+__device__ float mathblocks_maximum(float first, float second)
 #line 58 "VectorModule.cs"
 {
 #line 59 "VectorModule.cs"
@@ -981,13 +981,13 @@ __device__ double mathblocks_maximum(double first, double second)
         return second;
     }
 #line 65 "VectorModule.cs"
-    if (((first) == (0.0)))
+    if (((first) == (0.0f)))
     {
 #line 66 "VectorModule.cs"
 #line 66 "VectorModule.cs"
-        double csharp2cuda_temp_1;
+        float csharp2cuda_temp_1;
 #line 66 "VectorModule.cs"
-        if (signbit(first))
+        if (signbit(((double)(first))))
         {
 #line 66 "VectorModule.cs"
             csharp2cuda_temp_1 = second;
@@ -1004,7 +1004,7 @@ __device__ double mathblocks_maximum(double first, double second)
 }
 
 #line 42 "VectorModule.cs"
-__device__ double mathblocks_minimum(double first, double second)
+__device__ float mathblocks_minimum(float first, float second)
 #line 44 "VectorModule.cs"
 {
 #line 45 "VectorModule.cs"
@@ -1039,13 +1039,13 @@ __device__ double mathblocks_minimum(double first, double second)
         return second;
     }
 #line 51 "VectorModule.cs"
-    if (((first) == (0.0)))
+    if (((first) == (0.0f)))
     {
 #line 52 "VectorModule.cs"
 #line 52 "VectorModule.cs"
-        double csharp2cuda_temp_1;
+        float csharp2cuda_temp_1;
 #line 52 "VectorModule.cs"
-        if (signbit(first))
+        if (signbit(((double)(first))))
         {
 #line 52 "VectorModule.cs"
             csharp2cuda_temp_1 = first;
@@ -1062,17 +1062,17 @@ __device__ double mathblocks_minimum(double first, double second)
 }
 
 #line 70 "VectorModule.cs"
-__device__ bool mathblocks_nonnegative_integer(double value, int* result)
+__device__ bool mathblocks_nonnegative_integer(float value, int* result)
 #line 72 "VectorModule.cs"
 {
 #line 73 "VectorModule.cs"
 #line 73 "VectorModule.cs"
     bool csharp2cuda_temp_0;
 #line 73 "VectorModule.cs"
-    if (!(((value) < (0.0))))
+    if (!(((value) < (0.0f))))
     {
 #line 73 "VectorModule.cs"
-        csharp2cuda_temp_0 = ((value) > (2147483647.0));
+        csharp2cuda_temp_0 = ((value) > (2.1474836E+09f));
     }
     else
     {
@@ -1085,7 +1085,7 @@ __device__ bool mathblocks_nonnegative_integer(double value, int* result)
     if (!(csharp2cuda_temp_0))
     {
 #line 73 "VectorModule.cs"
-        csharp2cuda_temp_1 = ((value) != (trunc(value)));
+        csharp2cuda_temp_1 = ((value) != (truncf(value)));
     }
     else
     {
@@ -1106,20 +1106,20 @@ __device__ bool mathblocks_nonnegative_integer(double value, int* result)
 }
 
 #line 292 "VectorModule.cs"
-__device__ double mathblocks_quantile(
+__device__ float mathblocks_quantile(
     const MathBlockSlot* input,
     MathBlockSlot* output,
-    double probability)
+    float probability)
 #line 297 "VectorModule.cs"
 {
 #line 298 "VectorModule.cs"
     unsigned long long csharp2cuda_temp_0 = (output)->scratch_pointer;
 #line 298 "VectorModule.cs"
-    double* sorted = ((double*)(csharp2cuda_temp_0));
+    float* sorted = ((float*)(csharp2cuda_temp_0));
 #line 299 "VectorModule.cs"
     unsigned long long csharp2cuda_temp_1 = (input)->data_pointer;
 #line 299 "VectorModule.cs"
-    const double* source = ((double*)(csharp2cuda_temp_1));
+    const float* source = ((float*)(csharp2cuda_temp_1));
 #line 300 "VectorModule.cs"
     int count = (input)->count;
 #line 301 "VectorModule.cs"
@@ -1131,27 +1131,27 @@ __device__ double mathblocks_quantile(
         return (sorted)[0];
     }
 #line 304 "VectorModule.cs"
-    double position = __dmul_rn(probability, ((double)(csharp2cuda_i32_sub(count, 1))));
+    float position = __fmul_rn(probability, ((float)(csharp2cuda_i32_sub(count, 1))));
 #line 305 "VectorModule.cs"
-    int lower = csharp2cuda_f64_to_i32(floor(position));
+    int lower = csharp2cuda_f64_to_i32(floorf(position));
 #line 306 "VectorModule.cs"
-    int upper = csharp2cuda_f64_to_i32(ceil(position));
+    int upper = csharp2cuda_f64_to_i32(ceilf(position));
 #line 307 "VectorModule.cs"
-    double weight = __dsub_rn(position, ((double)(lower)));
+    float weight = __fsub_rn(position, ((float)(lower)));
 #line 308 "VectorModule.cs"
 #line 308 "VectorModule.cs"
-    double csharp2cuda_temp_2 = (sorted)[lower];
+    float csharp2cuda_temp_2 = (sorted)[lower];
 #line 308 "VectorModule.cs"
-    double csharp2cuda_temp_3 = (sorted)[upper];
-    return __dadd_rn(__dmul_rn(csharp2cuda_temp_2, __dsub_rn(1.0, weight)), __dmul_rn(csharp2cuda_temp_3, weight));
+    float csharp2cuda_temp_3 = (sorted)[upper];
+    return __fadd_rn(__fmul_rn(csharp2cuda_temp_2, __fsub_rn(1.0f, weight)), __fmul_rn(csharp2cuda_temp_3, weight));
 }
 
 #line 273 "VectorModule.cs"
-__device__ double mathblocks_quantile_values(
-    const double* values,
+__device__ float mathblocks_quantile_values(
+    const float* values,
     int count,
-    double* sorted,
-    double probability)
+    float* sorted,
+    float probability)
 #line 279 "VectorModule.cs"
 {
 #line 280 "VectorModule.cs"
@@ -1163,19 +1163,19 @@ __device__ double mathblocks_quantile_values(
         return (sorted)[0];
     }
 #line 283 "VectorModule.cs"
-    double position = __dmul_rn(probability, ((double)(csharp2cuda_i32_sub(count, 1))));
+    float position = __fmul_rn(probability, ((float)(csharp2cuda_i32_sub(count, 1))));
 #line 284 "VectorModule.cs"
-    int lower = csharp2cuda_f64_to_i32(floor(position));
+    int lower = csharp2cuda_f64_to_i32(floorf(position));
 #line 285 "VectorModule.cs"
-    int upper = csharp2cuda_f64_to_i32(ceil(position));
+    int upper = csharp2cuda_f64_to_i32(ceilf(position));
 #line 286 "VectorModule.cs"
-    double weight = __dsub_rn(position, ((double)(lower)));
+    float weight = __fsub_rn(position, ((float)(lower)));
 #line 287 "VectorModule.cs"
 #line 287 "VectorModule.cs"
-    double csharp2cuda_temp_0 = (sorted)[lower];
+    float csharp2cuda_temp_0 = (sorted)[lower];
 #line 287 "VectorModule.cs"
-    double csharp2cuda_temp_1 = (sorted)[upper];
-    return __dadd_rn(__dmul_rn(csharp2cuda_temp_0, __dsub_rn(1.0, weight)), __dmul_rn(csharp2cuda_temp_1, weight));
+    float csharp2cuda_temp_1 = (sorted)[upper];
+    return __fadd_rn(__fmul_rn(csharp2cuda_temp_0, __fsub_rn(1.0f, weight)), __fmul_rn(csharp2cuda_temp_1, weight));
 }
 
 #line 133 "VectorModule.cs"
@@ -1224,9 +1224,9 @@ __device__ void mathblocks_set_vector_shape(MathBlockSlot* output, int count)
 
 #line 201 "VectorModule.cs"
 __device__ void mathblocks_sort_copy_values(
-    const double* source,
+    const float* source,
     int count,
-    double* sorted)
+    float* sorted)
 #line 206 "VectorModule.cs"
 {
 #line 207 "VectorModule.cs"
@@ -1240,7 +1240,7 @@ __device__ void mathblocks_sort_copy_values(
 #line 208 "VectorModule.cs"
             {
 #line 209 "VectorModule.cs"
-                double value = (source)[index];
+                float value = (source)[index];
 #line 210 "VectorModule.cs"
                 int position = index;
 #line 211 "VectorModule.cs"
@@ -1252,7 +1252,7 @@ __device__ void mathblocks_sort_copy_values(
                     if (((position) > (0)))
                     {
 #line 211 "VectorModule.cs"
-                        double csharp2cuda_temp_2 = (sorted)[csharp2cuda_i32_sub(position, 1)];
+                        float csharp2cuda_temp_2 = (sorted)[csharp2cuda_i32_sub(position, 1)];
 #line 211 "VectorModule.cs"
                         csharp2cuda_temp_1 = ((csharp2cuda_temp_2) > (value));
                     }
@@ -1267,9 +1267,9 @@ __device__ void mathblocks_sort_copy_values(
                     {
 #line 213 "VectorModule.cs"
 #line 213 "VectorModule.cs"
-                        double* csharp2cuda_temp_3 = &((sorted)[position]);
+                        float* csharp2cuda_temp_3 = &((sorted)[position]);
 #line 213 "VectorModule.cs"
-                        double csharp2cuda_temp_4 = (sorted)[csharp2cuda_i32_sub(position, 1)];
+                        float csharp2cuda_temp_4 = (sorted)[csharp2cuda_i32_sub(position, 1)];
                         (*(csharp2cuda_temp_3) = csharp2cuda_temp_4);
 #line 214 "VectorModule.cs"
 #line 214 "VectorModule.cs"
@@ -1279,7 +1279,7 @@ __device__ void mathblocks_sort_copy_values(
                 }
 #line 216 "VectorModule.cs"
 #line 216 "VectorModule.cs"
-                double* csharp2cuda_temp_6 = &((sorted)[position]);
+                float* csharp2cuda_temp_6 = &((sorted)[position]);
                 (*(csharp2cuda_temp_6) = value);
             }
 #line 207 "VectorModule.cs"
@@ -1290,7 +1290,7 @@ __device__ void mathblocks_sort_copy_values(
 }
 
 #line 222 "VectorModule.cs"
-__device__ void mathblocks_stable_index_order(const double* keys, int count, int* order, int* buffer)
+__device__ void mathblocks_stable_index_order(const float* keys, int count, int* order, int* buffer)
 #line 224 "VectorModule.cs"
 {
 #line 225 "VectorModule.cs"
@@ -1393,11 +1393,11 @@ __device__ void mathblocks_stable_index_order(const double* keys, int count, int
 #line 240 "VectorModule.cs"
                                     int csharp2cuda_temp_9 = (source)[right];
 #line 240 "VectorModule.cs"
-                                    double csharp2cuda_temp_10 = (keys)[csharp2cuda_temp_9];
+                                    float csharp2cuda_temp_10 = (keys)[csharp2cuda_temp_9];
 #line 240 "VectorModule.cs"
                                     int csharp2cuda_temp_11 = (source)[left];
 #line 240 "VectorModule.cs"
-                                    double csharp2cuda_temp_12 = (keys)[csharp2cuda_temp_11];
+                                    float csharp2cuda_temp_12 = (keys)[csharp2cuda_temp_11];
 #line 240 "VectorModule.cs"
                                     bool take_right = ((csharp2cuda_temp_10) < (csharp2cuda_temp_12));
 #line 241 "VectorModule.cs"
@@ -1523,13 +1523,13 @@ __device__ void mathblocks_stable_index_order(const double* keys, int count, int
 }
 
 #line 151 "VectorModule.cs"
-__device__ double* mathblocks_stable_merge_sort(double* values, double* buffer, int count, bool descending)
+__device__ float* mathblocks_stable_merge_sort(float* values, float* buffer, int count, bool descending)
 #line 153 "VectorModule.cs"
 {
 #line 154 "VectorModule.cs"
-    double* source = values;
+    float* source = values;
 #line 155 "VectorModule.cs"
-    double* target = buffer;
+    float* target = buffer;
 #line 156 "VectorModule.cs"
     {
 #line 156 "VectorModule.cs"
@@ -1612,18 +1612,18 @@ __device__ double* mathblocks_stable_merge_sort(double* values, double* buffer, 
                                     if (descending)
                                     {
 #line 167 "VectorModule.cs"
-                                        double csharp2cuda_temp_8 = (source)[right];
+                                        float csharp2cuda_temp_8 = (source)[right];
 #line 167 "VectorModule.cs"
-                                        double csharp2cuda_temp_9 = (source)[left];
+                                        float csharp2cuda_temp_9 = (source)[left];
 #line 167 "VectorModule.cs"
                                         csharp2cuda_temp_7 = ((csharp2cuda_temp_8) > (csharp2cuda_temp_9));
                                     }
                                     else
                                     {
 #line 167 "VectorModule.cs"
-                                        double csharp2cuda_temp_10 = (source)[right];
+                                        float csharp2cuda_temp_10 = (source)[right];
 #line 167 "VectorModule.cs"
-                                        double csharp2cuda_temp_11 = (source)[left];
+                                        float csharp2cuda_temp_11 = (source)[left];
 #line 167 "VectorModule.cs"
                                         csharp2cuda_temp_7 = ((csharp2cuda_temp_10) < (csharp2cuda_temp_11));
                                     }
@@ -1635,9 +1635,9 @@ __device__ double* mathblocks_stable_merge_sort(double* values, double* buffer, 
 #line 168 "VectorModule.cs"
                                     int csharp2cuda_temp_13 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_12));
 #line 168 "VectorModule.cs"
-                                    double* csharp2cuda_temp_14 = &((target)[csharp2cuda_temp_13]);
+                                    float* csharp2cuda_temp_14 = &((target)[csharp2cuda_temp_13]);
 #line 168 "VectorModule.cs"
-                                    double csharp2cuda_temp_15;
+                                    float csharp2cuda_temp_15;
 #line 168 "VectorModule.cs"
                                     if (take_right)
                                     {
@@ -1671,13 +1671,13 @@ __device__ double* mathblocks_stable_merge_sort(double* values, double* buffer, 
 #line 171 "VectorModule.cs"
                                 int csharp2cuda_temp_21 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_20));
 #line 171 "VectorModule.cs"
-                                double* csharp2cuda_temp_22 = &((target)[csharp2cuda_temp_21]);
+                                float* csharp2cuda_temp_22 = &((target)[csharp2cuda_temp_21]);
 #line 171 "VectorModule.cs"
                                 int* csharp2cuda_temp_23 = &(left);
 #line 171 "VectorModule.cs"
                                 int csharp2cuda_temp_24 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_23));
 #line 171 "VectorModule.cs"
-                                double csharp2cuda_temp_25 = (source)[csharp2cuda_temp_24];
+                                float csharp2cuda_temp_25 = (source)[csharp2cuda_temp_24];
                                 (*(csharp2cuda_temp_22) = csharp2cuda_temp_25);
                             }
 #line 172 "VectorModule.cs"
@@ -1691,13 +1691,13 @@ __device__ double* mathblocks_stable_merge_sort(double* values, double* buffer, 
 #line 173 "VectorModule.cs"
                                 int csharp2cuda_temp_27 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_26));
 #line 173 "VectorModule.cs"
-                                double* csharp2cuda_temp_28 = &((target)[csharp2cuda_temp_27]);
+                                float* csharp2cuda_temp_28 = &((target)[csharp2cuda_temp_27]);
 #line 173 "VectorModule.cs"
                                 int* csharp2cuda_temp_29 = &(right);
 #line 173 "VectorModule.cs"
                                 int csharp2cuda_temp_30 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_29));
 #line 173 "VectorModule.cs"
-                                double csharp2cuda_temp_31 = (source)[csharp2cuda_temp_30];
+                                float csharp2cuda_temp_31 = (source)[csharp2cuda_temp_30];
                                 (*(csharp2cuda_temp_28) = csharp2cuda_temp_31);
                             }
                         }
@@ -1709,14 +1709,14 @@ __device__ double* mathblocks_stable_merge_sort(double* values, double* buffer, 
                     }
                 }
 #line 175 "VectorModule.cs"
-                double* sorted = target;
+                float* sorted = target;
 #line 176 "VectorModule.cs"
 #line 176 "VectorModule.cs"
-                double** csharp2cuda_temp_32 = &(target);
+                float** csharp2cuda_temp_32 = &(target);
                 (*(csharp2cuda_temp_32) = source);
 #line 177 "VectorModule.cs"
 #line 177 "VectorModule.cs"
-                double** csharp2cuda_temp_33 = &(source);
+                float** csharp2cuda_temp_33 = &(source);
                 (*(csharp2cuda_temp_33) = sorted);
             }
 #line 156 "VectorModule.cs"
@@ -1732,10 +1732,10 @@ __device__ double* mathblocks_stable_merge_sort(double* values, double* buffer, 
 
 #line 184 "VectorModule.cs"
 __device__ void mathblocks_stable_sort_into(
-    const double* values,
+    const float* values,
     int count,
-    double* result,
-    double* buffer,
+    float* result,
+    float* buffer,
     bool descending)
 #line 191 "VectorModule.cs"
 {
@@ -1749,9 +1749,9 @@ __device__ void mathblocks_stable_sort_into(
                 break;
 #line 193 "VectorModule.cs"
 #line 193 "VectorModule.cs"
-            double* csharp2cuda_temp_1 = &((result)[index]);
+            float* csharp2cuda_temp_1 = &((result)[index]);
 #line 193 "VectorModule.cs"
-            double csharp2cuda_temp_2 = (values)[index];
+            float csharp2cuda_temp_2 = (values)[index];
             (*(csharp2cuda_temp_1) = csharp2cuda_temp_2);
 #line 192 "VectorModule.cs"
             int* csharp2cuda_temp_0 = &(index);
@@ -1759,7 +1759,7 @@ __device__ void mathblocks_stable_sort_into(
         }
     }
 #line 194 "VectorModule.cs"
-    double* sorted = mathblocks_stable_merge_sort(result, buffer, count, descending);
+    float* sorted = mathblocks_stable_merge_sort(result, buffer, count, descending);
 #line 195 "VectorModule.cs"
     if (((((void*)(sorted))) != (((void*)(result)))))
     {
@@ -1773,9 +1773,9 @@ __device__ void mathblocks_stable_sort_into(
                     break;
 #line 197 "VectorModule.cs"
 #line 197 "VectorModule.cs"
-                double* csharp2cuda_temp_4 = &((result)[index]);
+                float* csharp2cuda_temp_4 = &((result)[index]);
 #line 197 "VectorModule.cs"
-                double csharp2cuda_temp_5 = (sorted)[index];
+                float csharp2cuda_temp_5 = (sorted)[index];
                 (*(csharp2cuda_temp_4) = csharp2cuda_temp_5);
 #line 196 "VectorModule.cs"
                 int* csharp2cuda_temp_3 = &(index);
@@ -1787,10 +1787,10 @@ __device__ void mathblocks_stable_sort_into(
 
 #line 334 "VectorModule.cs"
 __device__ bool mathblocks_vector_arg_extreme_value(
-    const double* values,
+    const float* values,
     int count,
     bool maximum,
-    double* value)
+    float* value)
 #line 340 "VectorModule.cs"
 {
 #line 341 "VectorModule.cs"
@@ -1816,18 +1816,18 @@ __device__ bool mathblocks_vector_arg_extreme_value(
             if (maximum)
             {
 #line 345 "VectorModule.cs"
-                double csharp2cuda_temp_2 = (values)[index];
+                float csharp2cuda_temp_2 = (values)[index];
 #line 345 "VectorModule.cs"
-                double csharp2cuda_temp_3 = (values)[selected];
+                float csharp2cuda_temp_3 = (values)[selected];
 #line 345 "VectorModule.cs"
                 csharp2cuda_temp_1 = ((csharp2cuda_temp_2) > (csharp2cuda_temp_3));
             }
             else
             {
 #line 345 "VectorModule.cs"
-                double csharp2cuda_temp_4 = (values)[index];
+                float csharp2cuda_temp_4 = (values)[index];
 #line 345 "VectorModule.cs"
-                double csharp2cuda_temp_5 = (values)[selected];
+                float csharp2cuda_temp_5 = (values)[selected];
 #line 345 "VectorModule.cs"
                 csharp2cuda_temp_1 = ((csharp2cuda_temp_4) < (csharp2cuda_temp_5));
             }
@@ -1845,8 +1845,8 @@ __device__ bool mathblocks_vector_arg_extreme_value(
     }
 #line 346 "VectorModule.cs"
 #line 346 "VectorModule.cs"
-    double* csharp2cuda_temp_7 = value;
-    (*(csharp2cuda_temp_7) = ((double)(selected)));
+    float* csharp2cuda_temp_7 = value;
+    (*(csharp2cuda_temp_7) = ((float)(selected)));
 #line 347 "VectorModule.cs"
     return true;
 }
@@ -1912,8 +1912,8 @@ __device__ void mathblocks_vector_dispatch(
     {
 #line 401 "VectorModule.cs"
 #line 401 "VectorModule.cs"
-        double* csharp2cuda_temp_3 = &((output)->scalar_value);
-        (*(csharp2cuda_temp_3) = 0.0);
+        float* csharp2cuda_temp_3 = &((output)->scalar_value);
+        (*(csharp2cuda_temp_3) = 0.0f);
 #line 402 "VectorModule.cs"
 #line 402 "VectorModule.cs"
         int* csharp2cuda_temp_4 = &((output)->boolean_value);
@@ -2005,56 +2005,56 @@ __device__ void mathblocks_vector_dispatch(
         return;
     }
 #line 416 "VectorModule.cs"
-    double* csharp2cuda_temp_17;
+    float* csharp2cuda_temp_17;
 #line 416 "VectorModule.cs"
     if (((((void*)(first))) == (((void*)(nullptr)))))
     {
 #line 416 "VectorModule.cs"
-        csharp2cuda_temp_17 = ((double*)(nullptr));
+        csharp2cuda_temp_17 = ((float*)(nullptr));
     }
     else
     {
 #line 416 "VectorModule.cs"
         unsigned long long csharp2cuda_temp_18 = (first)->data_pointer;
 #line 416 "VectorModule.cs"
-        csharp2cuda_temp_17 = ((double*)(csharp2cuda_temp_18));
+        csharp2cuda_temp_17 = ((float*)(csharp2cuda_temp_18));
     }
 #line 416 "VectorModule.cs"
-    const double* a = csharp2cuda_temp_17;
+    const float* a = csharp2cuda_temp_17;
 #line 417 "VectorModule.cs"
-    double* csharp2cuda_temp_19;
+    float* csharp2cuda_temp_19;
 #line 417 "VectorModule.cs"
     if (((((void*)(second))) == (((void*)(nullptr)))))
     {
 #line 417 "VectorModule.cs"
-        csharp2cuda_temp_19 = ((double*)(nullptr));
+        csharp2cuda_temp_19 = ((float*)(nullptr));
     }
     else
     {
 #line 417 "VectorModule.cs"
         unsigned long long csharp2cuda_temp_20 = (second)->data_pointer;
 #line 417 "VectorModule.cs"
-        csharp2cuda_temp_19 = ((double*)(csharp2cuda_temp_20));
+        csharp2cuda_temp_19 = ((float*)(csharp2cuda_temp_20));
     }
 #line 417 "VectorModule.cs"
-    const double* b = csharp2cuda_temp_19;
+    const float* b = csharp2cuda_temp_19;
 #line 418 "VectorModule.cs"
-    double* csharp2cuda_temp_21;
+    float* csharp2cuda_temp_21;
 #line 418 "VectorModule.cs"
     if (((((void*)(third))) == (((void*)(nullptr)))))
     {
 #line 418 "VectorModule.cs"
-        csharp2cuda_temp_21 = ((double*)(nullptr));
+        csharp2cuda_temp_21 = ((float*)(nullptr));
     }
     else
     {
 #line 418 "VectorModule.cs"
         unsigned long long csharp2cuda_temp_22 = (third)->data_pointer;
 #line 418 "VectorModule.cs"
-        csharp2cuda_temp_21 = ((double*)(csharp2cuda_temp_22));
+        csharp2cuda_temp_21 = ((float*)(csharp2cuda_temp_22));
     }
 #line 418 "VectorModule.cs"
-    const double* c = csharp2cuda_temp_21;
+    const float* c = csharp2cuda_temp_21;
 #line 419 "VectorModule.cs"
     int* csharp2cuda_temp_23;
 #line 419 "VectorModule.cs"
@@ -2105,7 +2105,7 @@ __device__ void mathblocks_vector_dispatch(
         csharp2cuda_temp_28 = (output)->scratch_pointer;
     }
 #line 421 "VectorModule.cs"
-    double* result = ((double*)(csharp2cuda_temp_28));
+    float* result = ((float*)(csharp2cuda_temp_28));
 #line 424 "VectorModule.cs"
     unsigned long long csharp2cuda_temp_29 = (output)->data_pointer;
 #line 424 "VectorModule.cs"
@@ -2152,10 +2152,10 @@ __device__ void mathblocks_vector_dispatch(
                         break;
 #line 432 "VectorModule.cs"
 #line 432 "VectorModule.cs"
-                    double* csharp2cuda_temp_36 = &((result)[index]);
+                    float* csharp2cuda_temp_36 = &((result)[index]);
 #line 432 "VectorModule.cs"
-                    double csharp2cuda_temp_37 = (a)[index];
-                    (*(csharp2cuda_temp_36) = fabs(csharp2cuda_temp_37));
+                    float csharp2cuda_temp_37 = (a)[index];
+                    (*(csharp2cuda_temp_36) = fabsf(csharp2cuda_temp_37));
 #line 431 "VectorModule.cs"
                     int* csharp2cuda_temp_31 = &(index);
 #line 431 "VectorModule.cs"
@@ -2206,15 +2206,15 @@ __device__ void mathblocks_vector_dispatch(
                     {
 #line 439 "VectorModule.cs"
 #line 439 "VectorModule.cs"
-                        double* csharp2cuda_temp_44 = &((result)[index]);
+                        float* csharp2cuda_temp_44 = &((result)[index]);
 #line 439 "VectorModule.cs"
-                        double csharp2cuda_temp_45 = (a)[index];
+                        float csharp2cuda_temp_45 = (a)[index];
 #line 439 "VectorModule.cs"
-                        double csharp2cuda_temp_46 = (second)->scalar_value;
-                        (*(csharp2cuda_temp_44) = __dadd_rn(csharp2cuda_temp_45, csharp2cuda_temp_46));
+                        float csharp2cuda_temp_46 = (second)->scalar_value;
+                        (*(csharp2cuda_temp_44) = __fadd_rn(csharp2cuda_temp_45, csharp2cuda_temp_46));
 #line 440 "VectorModule.cs"
 #line 440 "VectorModule.cs"
-                        double csharp2cuda_temp_47 = (result)[index];
+                        float csharp2cuda_temp_47 = (result)[index];
                         if ((!(isfinite(csharp2cuda_temp_47))))
                         {
 #line 440 "VectorModule.cs"
@@ -2286,53 +2286,53 @@ __device__ void mathblocks_vector_dispatch(
 #line 454 "VectorModule.cs"
                     {
 #line 455 "VectorModule.cs"
-                        double csharp2cuda_temp_57;
+                        float csharp2cuda_temp_57;
 #line 455 "VectorModule.cs"
                         if (((opcode) == (2)))
                         {
 #line 455 "VectorModule.cs"
-                            double csharp2cuda_temp_58 = (a)[index];
+                            float csharp2cuda_temp_58 = (a)[index];
 #line 455 "VectorModule.cs"
-                            double csharp2cuda_temp_59 = (b)[index];
+                            float csharp2cuda_temp_59 = (b)[index];
 #line 455 "VectorModule.cs"
-                            csharp2cuda_temp_57 = __dadd_rn(csharp2cuda_temp_58, csharp2cuda_temp_59);
+                            csharp2cuda_temp_57 = __fadd_rn(csharp2cuda_temp_58, csharp2cuda_temp_59);
                         }
                         else
                         {
 #line 456 "VectorModule.cs"
-                            double csharp2cuda_temp_60;
+                            float csharp2cuda_temp_60;
 #line 456 "VectorModule.cs"
                             if (((opcode) == (9)))
                             {
 #line 456 "VectorModule.cs"
-                                double csharp2cuda_temp_61 = (a)[index];
+                                float csharp2cuda_temp_61 = (a)[index];
 #line 456 "VectorModule.cs"
-                                double csharp2cuda_temp_62 = (b)[index];
+                                float csharp2cuda_temp_62 = (b)[index];
 #line 456 "VectorModule.cs"
-                                csharp2cuda_temp_60 = __ddiv_rn(csharp2cuda_temp_61, csharp2cuda_temp_62);
+                                csharp2cuda_temp_60 = __fdiv_rn(csharp2cuda_temp_61, csharp2cuda_temp_62);
                             }
                             else
                             {
 #line 457 "VectorModule.cs"
-                                double csharp2cuda_temp_63;
+                                float csharp2cuda_temp_63;
 #line 457 "VectorModule.cs"
                                 if (((opcode) == (26)))
                                 {
 #line 457 "VectorModule.cs"
-                                    double csharp2cuda_temp_64 = (a)[index];
+                                    float csharp2cuda_temp_64 = (a)[index];
 #line 457 "VectorModule.cs"
-                                    double csharp2cuda_temp_65 = (b)[index];
+                                    float csharp2cuda_temp_65 = (b)[index];
 #line 457 "VectorModule.cs"
-                                    csharp2cuda_temp_63 = __dmul_rn(csharp2cuda_temp_64, csharp2cuda_temp_65);
+                                    csharp2cuda_temp_63 = __fmul_rn(csharp2cuda_temp_64, csharp2cuda_temp_65);
                                 }
                                 else
                                 {
 #line 458 "VectorModule.cs"
-                                    double csharp2cuda_temp_66 = (a)[index];
+                                    float csharp2cuda_temp_66 = (a)[index];
 #line 458 "VectorModule.cs"
-                                    double csharp2cuda_temp_67 = (b)[index];
+                                    float csharp2cuda_temp_67 = (b)[index];
 #line 457 "VectorModule.cs"
-                                    csharp2cuda_temp_63 = __dsub_rn(csharp2cuda_temp_66, csharp2cuda_temp_67);
+                                    csharp2cuda_temp_63 = __fsub_rn(csharp2cuda_temp_66, csharp2cuda_temp_67);
                                 }
 #line 456 "VectorModule.cs"
                                 csharp2cuda_temp_60 = csharp2cuda_temp_63;
@@ -2341,10 +2341,10 @@ __device__ void mathblocks_vector_dispatch(
                             csharp2cuda_temp_57 = csharp2cuda_temp_60;
                         }
 #line 455 "VectorModule.cs"
-                        double value = csharp2cuda_temp_57;
+                        float value = csharp2cuda_temp_57;
 #line 459 "VectorModule.cs"
 #line 459 "VectorModule.cs"
-                        double* csharp2cuda_temp_68 = &((result)[index]);
+                        float* csharp2cuda_temp_68 = &((result)[index]);
                         (*(csharp2cuda_temp_68) = value);
 #line 460 "VectorModule.cs"
                         if ((!(isfinite(value))))
@@ -2401,9 +2401,9 @@ __device__ void mathblocks_vector_dispatch(
                         break;
 #line 467 "VectorModule.cs"
 #line 467 "VectorModule.cs"
-                    double* csharp2cuda_temp_75 = &((result)[index]);
+                    float* csharp2cuda_temp_75 = &((result)[index]);
 #line 467 "VectorModule.cs"
-                    double csharp2cuda_temp_76 = (a)[index];
+                    float csharp2cuda_temp_76 = (a)[index];
                     (*(csharp2cuda_temp_75) = csharp2cuda_temp_76);
 #line 466 "VectorModule.cs"
                     int* csharp2cuda_temp_70 = &(index);
@@ -2432,9 +2432,9 @@ __device__ void mathblocks_vector_dispatch(
 #line 468 "VectorModule.cs"
                 int csharp2cuda_temp_78 = (first)->count;
 #line 468 "VectorModule.cs"
-                double* csharp2cuda_temp_79 = &((result)[csharp2cuda_temp_78]);
+                float* csharp2cuda_temp_79 = &((result)[csharp2cuda_temp_78]);
 #line 468 "VectorModule.cs"
-                double csharp2cuda_temp_80 = (second)->scalar_value;
+                float csharp2cuda_temp_80 = (second)->scalar_value;
                 (*(csharp2cuda_temp_79) = csharp2cuda_temp_80);
             }
 #line 469 "VectorModule.cs"
@@ -2451,7 +2451,7 @@ __device__ void mathblocks_vector_dispatch(
 #line 473 "VectorModule.cs"
                 int csharp2cuda_temp_82 = (first)->count;
 #line 473 "VectorModule.cs"
-                double* csharp2cuda_temp_83 = &((output)->scalar_value);
+                float* csharp2cuda_temp_83 = &((output)->scalar_value);
 #line 473 "VectorModule.cs"
                 bool csharp2cuda_temp_84 = mathblocks_vector_arg_extreme_value(a, csharp2cuda_temp_82, ((opcode) == (4)), csharp2cuda_temp_83);
 #line 472 "VectorModule.cs"
@@ -2512,9 +2512,9 @@ __device__ void mathblocks_vector_dispatch(
                         break;
 #line 480 "VectorModule.cs"
 #line 480 "VectorModule.cs"
-                    double* csharp2cuda_temp_93 = &((result)[index]);
+                    float* csharp2cuda_temp_93 = &((result)[index]);
 #line 480 "VectorModule.cs"
-                    double csharp2cuda_temp_94 = (a)[index];
+                    float csharp2cuda_temp_94 = (a)[index];
                     (*(csharp2cuda_temp_93) = csharp2cuda_temp_94);
 #line 479 "VectorModule.cs"
                     int* csharp2cuda_temp_88 = &(index);
@@ -2552,9 +2552,9 @@ __device__ void mathblocks_vector_dispatch(
 #line 482 "VectorModule.cs"
                     int csharp2cuda_temp_100 = (first)->count;
 #line 482 "VectorModule.cs"
-                    double* csharp2cuda_temp_101 = &((result)[csharp2cuda_i32_add(csharp2cuda_temp_100, index)]);
+                    float* csharp2cuda_temp_101 = &((result)[csharp2cuda_i32_add(csharp2cuda_temp_100, index)]);
 #line 482 "VectorModule.cs"
-                    double csharp2cuda_temp_102 = (b)[index];
+                    float csharp2cuda_temp_102 = (b)[index];
                     (*(csharp2cuda_temp_101) = csharp2cuda_temp_102);
 #line 481 "VectorModule.cs"
                     int* csharp2cuda_temp_95 = &(index);
@@ -2576,7 +2576,7 @@ __device__ void mathblocks_vector_dispatch(
                 int csharp2cuda_temp_103 = (first)->count;
                 mathblocks_set_vector_shape(output, csharp2cuda_temp_103);
 #line 488 "VectorModule.cs"
-                double product = 1.0;
+                float product = 1.0f;
 #line 489 "VectorModule.cs"
                 {
 #line 489 "VectorModule.cs"
@@ -2606,15 +2606,15 @@ __device__ void mathblocks_vector_dispatch(
                         {
 #line 491 "VectorModule.cs"
 #line 491 "VectorModule.cs"
-                            double* csharp2cuda_temp_108 = &(product);
+                            float* csharp2cuda_temp_108 = &(product);
 #line 491 "VectorModule.cs"
-                            double csharp2cuda_temp_109 = *(csharp2cuda_temp_108);
+                            float csharp2cuda_temp_109 = *(csharp2cuda_temp_108);
 #line 491 "VectorModule.cs"
-                            double csharp2cuda_temp_110 = (a)[index];
-                            (*(csharp2cuda_temp_108) = __dmul_rn(csharp2cuda_temp_109, csharp2cuda_temp_110));
+                            float csharp2cuda_temp_110 = (a)[index];
+                            (*(csharp2cuda_temp_108) = __fmul_rn(csharp2cuda_temp_109, csharp2cuda_temp_110));
 #line 492 "VectorModule.cs"
 #line 492 "VectorModule.cs"
-                            double* csharp2cuda_temp_111 = &((result)[index]);
+                            float* csharp2cuda_temp_111 = &((result)[index]);
                             (*(csharp2cuda_temp_111) = product);
 #line 493 "VectorModule.cs"
                             if ((!(isfinite(product))))
@@ -2644,7 +2644,7 @@ __device__ void mathblocks_vector_dispatch(
                 int csharp2cuda_temp_113 = (first)->count;
                 mathblocks_set_vector_shape(output, csharp2cuda_temp_113);
 #line 501 "VectorModule.cs"
-                double sum = 0.0;
+                float sum = 0.0f;
 #line 502 "VectorModule.cs"
                 {
 #line 502 "VectorModule.cs"
@@ -2674,15 +2674,15 @@ __device__ void mathblocks_vector_dispatch(
                         {
 #line 504 "VectorModule.cs"
 #line 504 "VectorModule.cs"
-                            double* csharp2cuda_temp_118 = &(sum);
+                            float* csharp2cuda_temp_118 = &(sum);
 #line 504 "VectorModule.cs"
-                            double csharp2cuda_temp_119 = *(csharp2cuda_temp_118);
+                            float csharp2cuda_temp_119 = *(csharp2cuda_temp_118);
 #line 504 "VectorModule.cs"
-                            double csharp2cuda_temp_120 = (a)[index];
-                            (*(csharp2cuda_temp_118) = __dadd_rn(csharp2cuda_temp_119, csharp2cuda_temp_120));
+                            float csharp2cuda_temp_120 = (a)[index];
+                            (*(csharp2cuda_temp_118) = __fadd_rn(csharp2cuda_temp_119, csharp2cuda_temp_120));
 #line 505 "VectorModule.cs"
 #line 505 "VectorModule.cs"
-                            double* csharp2cuda_temp_121 = &((result)[index]);
+                            float* csharp2cuda_temp_121 = &((result)[index]);
                             (*(csharp2cuda_temp_121) = sum);
 #line 506 "VectorModule.cs"
                             if ((!(isfinite(sum))))
@@ -2724,15 +2724,15 @@ __device__ void mathblocks_vector_dispatch(
                 {
 #line 516 "VectorModule.cs"
 #line 516 "VectorModule.cs"
-                    double* csharp2cuda_temp_126 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_126 = &((output)->scalar_value);
 #line 516 "VectorModule.cs"
                     int csharp2cuda_temp_127 = (first)->count;
 #line 516 "VectorModule.cs"
-                    double csharp2cuda_temp_128 = mathblocks_compensated_product_sum(a, b, csharp2cuda_temp_127);
+                    float csharp2cuda_temp_128 = mathblocks_compensated_product_sum(a, b, csharp2cuda_temp_127);
                     (*(csharp2cuda_temp_126) = csharp2cuda_temp_128);
 #line 517 "VectorModule.cs"
 #line 517 "VectorModule.cs"
-                    double csharp2cuda_temp_129 = (output)->scalar_value;
+                    float csharp2cuda_temp_129 = (output)->scalar_value;
                     if ((!(isfinite(csharp2cuda_temp_129))))
                     {
 #line 517 "VectorModule.cs"
@@ -2805,9 +2805,9 @@ __device__ void mathblocks_vector_dispatch(
                     if (((opcode) == (11)))
                     {
 #line 531 "VectorModule.cs"
-                        double csharp2cuda_temp_142 = (a)[index];
+                        float csharp2cuda_temp_142 = (a)[index];
 #line 531 "VectorModule.cs"
-                        double csharp2cuda_temp_143 = (b)[index];
+                        float csharp2cuda_temp_143 = (b)[index];
 #line 531 "VectorModule.cs"
                         csharp2cuda_temp_141 = ((csharp2cuda_temp_142) == (csharp2cuda_temp_143));
                     }
@@ -2819,18 +2819,18 @@ __device__ void mathblocks_vector_dispatch(
                         if (((opcode) == (15)))
                         {
 #line 532 "VectorModule.cs"
-                            double csharp2cuda_temp_145 = (a)[index];
+                            float csharp2cuda_temp_145 = (a)[index];
 #line 532 "VectorModule.cs"
-                            double csharp2cuda_temp_146 = (b)[index];
+                            float csharp2cuda_temp_146 = (b)[index];
 #line 532 "VectorModule.cs"
                             csharp2cuda_temp_144 = ((csharp2cuda_temp_145) > (csharp2cuda_temp_146));
                         }
                         else
                         {
 #line 533 "VectorModule.cs"
-                            double csharp2cuda_temp_147 = (a)[index];
+                            float csharp2cuda_temp_147 = (a)[index];
 #line 533 "VectorModule.cs"
-                            double csharp2cuda_temp_148 = (b)[index];
+                            float csharp2cuda_temp_148 = (b)[index];
 #line 532 "VectorModule.cs"
                             csharp2cuda_temp_144 = ((csharp2cuda_temp_147) < (csharp2cuda_temp_148));
                         }
@@ -2889,31 +2889,31 @@ __device__ void mathblocks_vector_dispatch(
 #line 541 "VectorModule.cs"
                     {
 #line 542 "VectorModule.cs"
-                        double csharp2cuda_temp_155;
+                        float csharp2cuda_temp_155;
 #line 542 "VectorModule.cs"
                         if (((opcode) == (12)))
                         {
 #line 542 "VectorModule.cs"
-                            double csharp2cuda_temp_156 = (a)[index];
+                            float csharp2cuda_temp_156 = (a)[index];
 #line 542 "VectorModule.cs"
                             csharp2cuda_temp_155 = mathblocks_exponential(csharp2cuda_temp_156);
                         }
                         else
                         {
 #line 543 "VectorModule.cs"
-                            double csharp2cuda_temp_157;
+                            float csharp2cuda_temp_157;
 #line 543 "VectorModule.cs"
                             if (((opcode) == (27)))
                             {
 #line 543 "VectorModule.cs"
-                                double csharp2cuda_temp_158 = (a)[index];
+                                float csharp2cuda_temp_158 = (a)[index];
 #line 543 "VectorModule.cs"
                                 csharp2cuda_temp_157 = mathblocks_natural_logarithm(csharp2cuda_temp_158);
                             }
                             else
                             {
 #line 544 "VectorModule.cs"
-                                double csharp2cuda_temp_159 = (a)[index];
+                                float csharp2cuda_temp_159 = (a)[index];
 #line 543 "VectorModule.cs"
                                 csharp2cuda_temp_157 = mathblocks_square_root(csharp2cuda_temp_159);
                             }
@@ -2921,10 +2921,10 @@ __device__ void mathblocks_vector_dispatch(
                             csharp2cuda_temp_155 = csharp2cuda_temp_157;
                         }
 #line 542 "VectorModule.cs"
-                        double value = csharp2cuda_temp_155;
+                        float value = csharp2cuda_temp_155;
 #line 545 "VectorModule.cs"
 #line 545 "VectorModule.cs"
-                        double* csharp2cuda_temp_160 = &((result)[index]);
+                        float* csharp2cuda_temp_160 = &((result)[index]);
                         (*(csharp2cuda_temp_160) = value);
 #line 546 "VectorModule.cs"
                         if ((!(isfinite(value))))
@@ -2985,7 +2985,7 @@ __device__ void mathblocks_vector_dispatch(
                         int source_index = 0;
 #line 555 "VectorModule.cs"
 #line 555 "VectorModule.cs"
-                        double csharp2cuda_temp_167 = (b)[index];
+                        float csharp2cuda_temp_167 = (b)[index];
 #line 555 "VectorModule.cs"
                         int* csharp2cuda_temp_168 = &(source_index);
 #line 555 "VectorModule.cs"
@@ -3014,9 +3014,9 @@ __device__ void mathblocks_vector_dispatch(
                         {
 #line 558 "VectorModule.cs"
 #line 558 "VectorModule.cs"
-                            double* csharp2cuda_temp_172 = &((result)[index]);
+                            float* csharp2cuda_temp_172 = &((result)[index]);
 #line 558 "VectorModule.cs"
-                            double csharp2cuda_temp_173 = (a)[source_index];
+                            float csharp2cuda_temp_173 = (a)[source_index];
                             (*(csharp2cuda_temp_172) = csharp2cuda_temp_173);
                         }
                     }
@@ -3047,7 +3047,7 @@ __device__ void mathblocks_vector_dispatch(
 #line 564 "VectorModule.cs"
                     int csharp2cuda_temp_177 = (first)->count;
 #line 564 "VectorModule.cs"
-                    double* csharp2cuda_temp_178 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_178 = &((output)->scalar_value);
 #line 564 "VectorModule.cs"
                     bool csharp2cuda_temp_179 = mathblocks_vector_geometric_mean_value(a, csharp2cuda_temp_177, result, csharp2cuda_temp_178);
 #line 563 "VectorModule.cs"
@@ -3085,7 +3085,7 @@ __device__ void mathblocks_vector_dispatch(
                 int index = 0;
 #line 571 "VectorModule.cs"
 #line 571 "VectorModule.cs"
-                double csharp2cuda_temp_181 = (second)->scalar_value;
+                float csharp2cuda_temp_181 = (second)->scalar_value;
 #line 571 "VectorModule.cs"
                 int* csharp2cuda_temp_182 = &(index);
 #line 571 "VectorModule.cs"
@@ -3116,9 +3116,9 @@ __device__ void mathblocks_vector_dispatch(
                 {
 #line 574 "VectorModule.cs"
 #line 574 "VectorModule.cs"
-                    double* csharp2cuda_temp_187 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_187 = &((output)->scalar_value);
 #line 574 "VectorModule.cs"
-                    double csharp2cuda_temp_188 = (a)[index];
+                    float csharp2cuda_temp_188 = (a)[index];
                     (*(csharp2cuda_temp_187) = csharp2cuda_temp_188);
                 }
             }
@@ -3132,7 +3132,7 @@ __device__ void mathblocks_vector_dispatch(
 #line 580 "VectorModule.cs"
             {
 #line 581 "VectorModule.cs"
-                double csharp2cuda_temp_189;
+                float csharp2cuda_temp_189;
 #line 581 "VectorModule.cs"
                 if (((opcode) == (17)))
                 {
@@ -3146,15 +3146,15 @@ __device__ void mathblocks_vector_dispatch(
 #line 583 "VectorModule.cs"
                     int csharp2cuda_temp_191 = (first)->count;
 #line 583 "VectorModule.cs"
-                    double csharp2cuda_temp_192 = mathblocks_compensated_product_sum(a, a, csharp2cuda_temp_191);
+                    float csharp2cuda_temp_192 = mathblocks_compensated_product_sum(a, a, csharp2cuda_temp_191);
 #line 581 "VectorModule.cs"
                     csharp2cuda_temp_189 = mathblocks_square_root(csharp2cuda_temp_192);
                 }
 #line 581 "VectorModule.cs"
-                double norm = csharp2cuda_temp_189;
+                float norm = csharp2cuda_temp_189;
 #line 584 "VectorModule.cs"
 #line 584 "VectorModule.cs"
-                double* csharp2cuda_temp_193 = &((output)->scalar_value);
+                float* csharp2cuda_temp_193 = &((output)->scalar_value);
                 (*(csharp2cuda_temp_193) = norm);
 #line 585 "VectorModule.cs"
                 if ((!(isfinite(norm))))
@@ -3174,10 +3174,10 @@ __device__ void mathblocks_vector_dispatch(
             {
 #line 589 "VectorModule.cs"
 #line 589 "VectorModule.cs"
-                double* csharp2cuda_temp_195 = &((output)->scalar_value);
+                float* csharp2cuda_temp_195 = &((output)->scalar_value);
 #line 589 "VectorModule.cs"
                 int csharp2cuda_temp_196 = (first)->count;
-                (*(csharp2cuda_temp_195) = ((double)(csharp2cuda_temp_196)));
+                (*(csharp2cuda_temp_195) = ((float)(csharp2cuda_temp_196)));
             }
 #line 590 "VectorModule.cs"
             break;
@@ -3191,7 +3191,7 @@ __device__ void mathblocks_vector_dispatch(
                 int count = 0;
 #line 595 "VectorModule.cs"
 #line 595 "VectorModule.cs"
-                double csharp2cuda_temp_197 = (third)->scalar_value;
+                float csharp2cuda_temp_197 = (third)->scalar_value;
 #line 595 "VectorModule.cs"
                 int* csharp2cuda_temp_198 = &(count);
 #line 595 "VectorModule.cs"
@@ -3242,28 +3242,28 @@ __device__ void mathblocks_vector_dispatch(
 #line 602 "VectorModule.cs"
             {
 #line 603 "VectorModule.cs"
-                double start = (first)->scalar_value;
+                float start = (first)->scalar_value;
 #line 604 "VectorModule.cs"
-                double end = (second)->scalar_value;
+                float end = (second)->scalar_value;
 #line 605 "VectorModule.cs"
                 int csharp2cuda_temp_203 = (output)->count;
 #line 605 "VectorModule.cs"
-                double csharp2cuda_temp_204;
+                float csharp2cuda_temp_204;
 #line 605 "VectorModule.cs"
                 if (((csharp2cuda_temp_203) == (1)))
                 {
 #line 605 "VectorModule.cs"
-                    csharp2cuda_temp_204 = 0.0;
+                    csharp2cuda_temp_204 = 0.0f;
                 }
                 else
                 {
 #line 605 "VectorModule.cs"
                     int csharp2cuda_temp_205 = (output)->count;
 #line 605 "VectorModule.cs"
-                    csharp2cuda_temp_204 = __ddiv_rn(__dsub_rn(end, start), ((double)(csharp2cuda_i32_sub(csharp2cuda_temp_205, 1))));
+                    csharp2cuda_temp_204 = __fdiv_rn(__fsub_rn(end, start), ((float)(csharp2cuda_i32_sub(csharp2cuda_temp_205, 1))));
                 }
 #line 605 "VectorModule.cs"
-                double step = csharp2cuda_temp_204;
+                float step = csharp2cuda_temp_204;
 #line 606 "VectorModule.cs"
                 {
 #line 606 "VectorModule.cs"
@@ -3278,11 +3278,11 @@ __device__ void mathblocks_vector_dispatch(
                         {
 #line 608 "VectorModule.cs"
 #line 608 "VectorModule.cs"
-                            double* csharp2cuda_temp_209 = &((result)[index]);
+                            float* csharp2cuda_temp_209 = &((result)[index]);
 #line 608 "VectorModule.cs"
                             int csharp2cuda_temp_210 = (output)->count;
 #line 608 "VectorModule.cs"
-                            double csharp2cuda_temp_211;
+                            float csharp2cuda_temp_211;
 #line 608 "VectorModule.cs"
                             if (((index) == (csharp2cuda_i32_sub(csharp2cuda_temp_210, 1))))
                             {
@@ -3292,12 +3292,12 @@ __device__ void mathblocks_vector_dispatch(
                             else
                             {
 #line 608 "VectorModule.cs"
-                                csharp2cuda_temp_211 = __dadd_rn(start, __dmul_rn(step, ((double)(index))));
+                                csharp2cuda_temp_211 = __fadd_rn(start, __fmul_rn(step, ((float)(index))));
                             }
                             (*(csharp2cuda_temp_209) = csharp2cuda_temp_211);
 #line 609 "VectorModule.cs"
 #line 609 "VectorModule.cs"
-                            double csharp2cuda_temp_212 = (result)[index];
+                            float csharp2cuda_temp_212 = (result)[index];
                             if ((!(isfinite(csharp2cuda_temp_212))))
                             {
 #line 609 "VectorModule.cs"
@@ -3335,7 +3335,7 @@ __device__ void mathblocks_vector_dispatch(
                     break;
                 }
 #line 622 "VectorModule.cs"
-                double selected = (a)[0];
+                float selected = (a)[0];
 #line 623 "VectorModule.cs"
                 {
 #line 623 "VectorModule.cs"
@@ -3348,21 +3348,21 @@ __device__ void mathblocks_vector_dispatch(
                             break;
 #line 624 "VectorModule.cs"
 #line 624 "VectorModule.cs"
-                        double* csharp2cuda_temp_217 = &(selected);
+                        float* csharp2cuda_temp_217 = &(selected);
 #line 624 "VectorModule.cs"
-                        double csharp2cuda_temp_218;
+                        float csharp2cuda_temp_218;
 #line 624 "VectorModule.cs"
                         if (((opcode) == (22)))
                         {
 #line 625 "VectorModule.cs"
-                            double csharp2cuda_temp_219 = (a)[index];
+                            float csharp2cuda_temp_219 = (a)[index];
 #line 624 "VectorModule.cs"
                             csharp2cuda_temp_218 = mathblocks_maximum(selected, csharp2cuda_temp_219);
                         }
                         else
                         {
 #line 626 "VectorModule.cs"
-                            double csharp2cuda_temp_220 = (a)[index];
+                            float csharp2cuda_temp_220 = (a)[index];
 #line 624 "VectorModule.cs"
                             csharp2cuda_temp_218 = mathblocks_minimum(selected, csharp2cuda_temp_220);
                         }
@@ -3374,7 +3374,7 @@ __device__ void mathblocks_vector_dispatch(
                 }
 #line 627 "VectorModule.cs"
 #line 627 "VectorModule.cs"
-                double* csharp2cuda_temp_221 = &((output)->scalar_value);
+                float* csharp2cuda_temp_221 = &((output)->scalar_value);
                 (*(csharp2cuda_temp_221) = selected);
             }
 #line 629 "VectorModule.cs"
@@ -3389,19 +3389,19 @@ __device__ void mathblocks_vector_dispatch(
 #line 634 "VectorModule.cs"
                 int csharp2cuda_temp_222 = (first)->count;
 #line 634 "VectorModule.cs"
-                double sum = mathblocks_compensated_sum(a, csharp2cuda_temp_222);
+                float sum = mathblocks_compensated_sum(a, csharp2cuda_temp_222);
 #line 635 "VectorModule.cs"
 #line 635 "VectorModule.cs"
-                double* csharp2cuda_temp_223 = &((output)->scalar_value);
+                float* csharp2cuda_temp_223 = &((output)->scalar_value);
 #line 635 "VectorModule.cs"
-                double csharp2cuda_temp_224;
+                float csharp2cuda_temp_224;
 #line 635 "VectorModule.cs"
                 if (((opcode) == (23)))
                 {
 #line 635 "VectorModule.cs"
                     int csharp2cuda_temp_225 = (first)->count;
 #line 635 "VectorModule.cs"
-                    csharp2cuda_temp_224 = __ddiv_rn(sum, ((double)(csharp2cuda_temp_225)));
+                    csharp2cuda_temp_224 = __fdiv_rn(sum, ((float)(csharp2cuda_temp_225)));
                 }
                 else
                 {
@@ -3411,7 +3411,7 @@ __device__ void mathblocks_vector_dispatch(
                 (*(csharp2cuda_temp_223) = csharp2cuda_temp_224);
 #line 636 "VectorModule.cs"
 #line 636 "VectorModule.cs"
-                double csharp2cuda_temp_226 = (output)->scalar_value;
+                float csharp2cuda_temp_226 = (output)->scalar_value;
                 if ((!(isfinite(csharp2cuda_temp_226))))
                 {
 #line 636 "VectorModule.cs"
@@ -3430,12 +3430,12 @@ __device__ void mathblocks_vector_dispatch(
 #line 642 "VectorModule.cs"
             {
 #line 643 "VectorModule.cs"
-                double csharp2cuda_temp_228;
+                float csharp2cuda_temp_228;
 #line 643 "VectorModule.cs"
                 if (((opcode) == (24)))
                 {
 #line 643 "VectorModule.cs"
-                    csharp2cuda_temp_228 = 0.5;
+                    csharp2cuda_temp_228 = 0.5f;
                 }
                 else
                 {
@@ -3443,7 +3443,7 @@ __device__ void mathblocks_vector_dispatch(
                     csharp2cuda_temp_228 = (second)->scalar_value;
                 }
 #line 643 "VectorModule.cs"
-                double probability = csharp2cuda_temp_228;
+                float probability = csharp2cuda_temp_228;
 #line 644 "VectorModule.cs"
 #line 644 "VectorModule.cs"
                 int csharp2cuda_temp_229 = (first)->count;
@@ -3468,7 +3468,7 @@ __device__ void mathblocks_vector_dispatch(
                 if (!(csharp2cuda_temp_230))
                 {
 #line 644 "VectorModule.cs"
-                    csharp2cuda_temp_232 = ((probability) < (0.0));
+                    csharp2cuda_temp_232 = ((probability) < (0.0f));
                 }
                 else
                 {
@@ -3481,7 +3481,7 @@ __device__ void mathblocks_vector_dispatch(
                 if (!(csharp2cuda_temp_232))
                 {
 #line 644 "VectorModule.cs"
-                    csharp2cuda_temp_233 = ((probability) > (1.0));
+                    csharp2cuda_temp_233 = ((probability) > (1.0f));
                 }
                 else
                 {
@@ -3500,13 +3500,13 @@ __device__ void mathblocks_vector_dispatch(
                 {
 #line 649 "VectorModule.cs"
 #line 649 "VectorModule.cs"
-                    double* csharp2cuda_temp_235 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_235 = &((output)->scalar_value);
 #line 649 "VectorModule.cs"
-                    double csharp2cuda_temp_236 = mathblocks_quantile(first, output, probability);
+                    float csharp2cuda_temp_236 = mathblocks_quantile(first, output, probability);
                     (*(csharp2cuda_temp_235) = csharp2cuda_temp_236);
 #line 650 "VectorModule.cs"
 #line 650 "VectorModule.cs"
-                    double csharp2cuda_temp_237 = (output)->scalar_value;
+                    float csharp2cuda_temp_237 = (output)->scalar_value;
                     if ((!(isfinite(csharp2cuda_temp_237))))
                     {
 #line 650 "VectorModule.cs"
@@ -3531,9 +3531,9 @@ __device__ void mathblocks_vector_dispatch(
                 mathblocks_set_vector_shape(output, csharp2cuda_temp_239);
 #line 659 "VectorModule.cs"
 #line 659 "VectorModule.cs"
-                double* csharp2cuda_temp_240 = &((output)->scalar_value);
+                float* csharp2cuda_temp_240 = &((output)->scalar_value);
 #line 659 "VectorModule.cs"
-                double csharp2cuda_temp_241;
+                float csharp2cuda_temp_241;
 #line 659 "VectorModule.cs"
                 if (((opcode) == (28)))
                 {
@@ -3547,23 +3547,23 @@ __device__ void mathblocks_vector_dispatch(
 #line 661 "VectorModule.cs"
                     int csharp2cuda_temp_243 = (first)->count;
 #line 661 "VectorModule.cs"
-                    double csharp2cuda_temp_244 = mathblocks_compensated_product_sum(a, a, csharp2cuda_temp_243);
+                    float csharp2cuda_temp_244 = mathblocks_compensated_product_sum(a, a, csharp2cuda_temp_243);
 #line 659 "VectorModule.cs"
                     csharp2cuda_temp_241 = mathblocks_square_root(csharp2cuda_temp_244);
                 }
                 (*(csharp2cuda_temp_240) = csharp2cuda_temp_241);
 #line 662 "VectorModule.cs"
 #line 662 "VectorModule.cs"
-                double csharp2cuda_temp_245 = (output)->scalar_value;
+                float csharp2cuda_temp_245 = (output)->scalar_value;
 #line 662 "VectorModule.cs"
                 bool csharp2cuda_temp_246;
 #line 662 "VectorModule.cs"
                 if (!((!(isfinite(csharp2cuda_temp_245)))))
                 {
 #line 662 "VectorModule.cs"
-                    double csharp2cuda_temp_247 = (output)->scalar_value;
+                    float csharp2cuda_temp_247 = (output)->scalar_value;
 #line 662 "VectorModule.cs"
-                    csharp2cuda_temp_246 = ((csharp2cuda_temp_247) == (0.0));
+                    csharp2cuda_temp_246 = ((csharp2cuda_temp_247) == (0.0f));
                 }
                 else
                 {
@@ -3609,17 +3609,17 @@ __device__ void mathblocks_vector_dispatch(
                     {
 #line 667 "VectorModule.cs"
 #line 667 "VectorModule.cs"
-                        double* csharp2cuda_temp_254 = &((result)[index]);
+                        float* csharp2cuda_temp_254 = &((result)[index]);
 #line 667 "VectorModule.cs"
-                        double csharp2cuda_temp_255 = (a)[index];
+                        float csharp2cuda_temp_255 = (a)[index];
 #line 667 "VectorModule.cs"
-                        double csharp2cuda_temp_256 = (output)->scalar_value;
+                        float csharp2cuda_temp_256 = (output)->scalar_value;
 #line 667 "VectorModule.cs"
-                        double csharp2cuda_temp_257 = __ddiv_rn(1.0, csharp2cuda_temp_256);
-                        (*(csharp2cuda_temp_254) = __dmul_rn(csharp2cuda_temp_255, csharp2cuda_temp_257));
+                        float csharp2cuda_temp_257 = __fdiv_rn(1.0f, csharp2cuda_temp_256);
+                        (*(csharp2cuda_temp_254) = __fmul_rn(csharp2cuda_temp_255, csharp2cuda_temp_257));
 #line 668 "VectorModule.cs"
 #line 668 "VectorModule.cs"
-                        double csharp2cuda_temp_258 = (result)[index];
+                        float csharp2cuda_temp_258 = (result)[index];
                         if ((!(isfinite(csharp2cuda_temp_258))))
                         {
 #line 668 "VectorModule.cs"
@@ -3649,15 +3649,15 @@ __device__ void mathblocks_vector_dispatch(
                 {
 #line 677 "VectorModule.cs"
 #line 677 "VectorModule.cs"
-                    double* csharp2cuda_temp_259 = &((result)[0]);
+                    float* csharp2cuda_temp_259 = &((result)[0]);
 #line 677 "VectorModule.cs"
-                    double csharp2cuda_temp_260 = (first)->scalar_value;
+                    float csharp2cuda_temp_260 = (first)->scalar_value;
                     (*(csharp2cuda_temp_259) = csharp2cuda_temp_260);
 #line 678 "VectorModule.cs"
 #line 678 "VectorModule.cs"
-                    double* csharp2cuda_temp_261 = &((result)[1]);
+                    float* csharp2cuda_temp_261 = &((result)[1]);
 #line 678 "VectorModule.cs"
-                    double csharp2cuda_temp_262 = (second)->scalar_value;
+                    float csharp2cuda_temp_262 = (second)->scalar_value;
                     (*(csharp2cuda_temp_261) = csharp2cuda_temp_262);
                 }
             }
@@ -3705,46 +3705,46 @@ __device__ void mathblocks_vector_dispatch(
 #line 688 "VectorModule.cs"
                     {
 #line 689 "VectorModule.cs"
-                        double csharp2cuda_temp_269;
+                        float csharp2cuda_temp_269;
 #line 689 "VectorModule.cs"
                         if (((opcode) == (31)))
                         {
 #line 689 "VectorModule.cs"
-                            double csharp2cuda_temp_270 = (a)[index];
+                            float csharp2cuda_temp_270 = (a)[index];
 #line 689 "VectorModule.cs"
-                            csharp2cuda_temp_269 = mathblocks_maximum(csharp2cuda_temp_270, 0.0);
+                            csharp2cuda_temp_269 = mathblocks_maximum(csharp2cuda_temp_270, 0.0f);
                         }
                         else
                         {
 #line 690 "VectorModule.cs"
-                            double csharp2cuda_temp_271;
+                            float csharp2cuda_temp_271;
 #line 690 "VectorModule.cs"
                             if (((opcode) == (41)))
                             {
 #line 690 "VectorModule.cs"
-                                double csharp2cuda_temp_272 = (a)[index];
+                                float csharp2cuda_temp_272 = (a)[index];
 #line 690 "VectorModule.cs"
-                                double csharp2cuda_temp_273 = (a)[index];
+                                float csharp2cuda_temp_273 = (a)[index];
 #line 690 "VectorModule.cs"
-                                csharp2cuda_temp_271 = ((double)(csharp2cuda_i32_sub(((((csharp2cuda_temp_272) > (0.0))) ? 1 : 0), ((((csharp2cuda_temp_273) < (0.0))) ? 1 : 0))));
+                                csharp2cuda_temp_271 = ((float)(csharp2cuda_i32_sub(((((csharp2cuda_temp_272) > (0.0f))) ? 1 : 0), ((((csharp2cuda_temp_273) < (0.0f))) ? 1 : 0))));
                             }
                             else
                             {
 #line 691 "VectorModule.cs"
-                                double csharp2cuda_temp_274 = (a)[index];
+                                float csharp2cuda_temp_274 = (a)[index];
 #line 691 "VectorModule.cs"
-                                double csharp2cuda_temp_275 = (a)[index];
+                                float csharp2cuda_temp_275 = (a)[index];
 #line 690 "VectorModule.cs"
-                                csharp2cuda_temp_271 = __dmul_rn(csharp2cuda_temp_274, csharp2cuda_temp_275);
+                                csharp2cuda_temp_271 = __fmul_rn(csharp2cuda_temp_274, csharp2cuda_temp_275);
                             }
 #line 689 "VectorModule.cs"
                             csharp2cuda_temp_269 = csharp2cuda_temp_271;
                         }
 #line 689 "VectorModule.cs"
-                        double value = csharp2cuda_temp_269;
+                        float value = csharp2cuda_temp_269;
 #line 692 "VectorModule.cs"
 #line 692 "VectorModule.cs"
-                        double* csharp2cuda_temp_276 = &((result)[index]);
+                        float* csharp2cuda_temp_276 = &((result)[index]);
                         (*(csharp2cuda_temp_276) = value);
 #line 693 "VectorModule.cs"
                         if ((!(isfinite(value))))
@@ -3803,15 +3803,15 @@ __device__ void mathblocks_vector_dispatch(
                     {
 #line 701 "VectorModule.cs"
 #line 701 "VectorModule.cs"
-                        double* csharp2cuda_temp_283 = &((result)[index]);
+                        float* csharp2cuda_temp_283 = &((result)[index]);
 #line 701 "VectorModule.cs"
-                        double csharp2cuda_temp_284 = (a)[index];
+                        float csharp2cuda_temp_284 = (a)[index];
 #line 701 "VectorModule.cs"
-                        double csharp2cuda_temp_285 = (second)->scalar_value;
+                        float csharp2cuda_temp_285 = (second)->scalar_value;
                         (*(csharp2cuda_temp_283) = mathblocks_power(csharp2cuda_temp_284, csharp2cuda_temp_285));
 #line 702 "VectorModule.cs"
 #line 702 "VectorModule.cs"
-                        double csharp2cuda_temp_286 = (result)[index];
+                        float csharp2cuda_temp_286 = (result)[index];
                         if ((!(isfinite(csharp2cuda_temp_286))))
                         {
 #line 702 "VectorModule.cs"
@@ -3857,9 +3857,9 @@ __device__ void mathblocks_vector_dispatch(
             {
 #line 708 "VectorModule.cs"
 #line 708 "VectorModule.cs"
-                double* csharp2cuda_temp_289 = &((result)[0]);
+                float* csharp2cuda_temp_289 = &((result)[0]);
 #line 708 "VectorModule.cs"
-                double csharp2cuda_temp_290 = (second)->scalar_value;
+                float csharp2cuda_temp_290 = (second)->scalar_value;
                 (*(csharp2cuda_temp_289) = csharp2cuda_temp_290);
             }
 #line 709 "VectorModule.cs"
@@ -3889,9 +3889,9 @@ __device__ void mathblocks_vector_dispatch(
                         break;
 #line 710 "VectorModule.cs"
 #line 710 "VectorModule.cs"
-                    double* csharp2cuda_temp_296 = &((result)[csharp2cuda_i32_add(index, 1)]);
+                    float* csharp2cuda_temp_296 = &((result)[csharp2cuda_i32_add(index, 1)]);
 #line 710 "VectorModule.cs"
-                    double csharp2cuda_temp_297 = (a)[index];
+                    float csharp2cuda_temp_297 = (a)[index];
                     (*(csharp2cuda_temp_296) = csharp2cuda_temp_297);
 #line 709 "VectorModule.cs"
                     int* csharp2cuda_temp_291 = &(index);
@@ -3909,7 +3909,7 @@ __device__ void mathblocks_vector_dispatch(
 #line 714 "VectorModule.cs"
             {
 #line 715 "VectorModule.cs"
-                double product = 1.0;
+                float product = 1.0f;
 #line 716 "VectorModule.cs"
                 {
 #line 716 "VectorModule.cs"
@@ -3922,12 +3922,12 @@ __device__ void mathblocks_vector_dispatch(
                             break;
 #line 716 "VectorModule.cs"
 #line 716 "VectorModule.cs"
-                        double* csharp2cuda_temp_300 = &(product);
+                        float* csharp2cuda_temp_300 = &(product);
 #line 716 "VectorModule.cs"
-                        double csharp2cuda_temp_301 = *(csharp2cuda_temp_300);
+                        float csharp2cuda_temp_301 = *(csharp2cuda_temp_300);
 #line 716 "VectorModule.cs"
-                        double csharp2cuda_temp_302 = (a)[index];
-                        (*(csharp2cuda_temp_300) = __dmul_rn(csharp2cuda_temp_301, csharp2cuda_temp_302));
+                        float csharp2cuda_temp_302 = (a)[index];
+                        (*(csharp2cuda_temp_300) = __fmul_rn(csharp2cuda_temp_301, csharp2cuda_temp_302));
 #line 716 "VectorModule.cs"
                         int* csharp2cuda_temp_298 = &(index);
                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_298));
@@ -3935,7 +3935,7 @@ __device__ void mathblocks_vector_dispatch(
                 }
 #line 717 "VectorModule.cs"
 #line 717 "VectorModule.cs"
-                double* csharp2cuda_temp_303 = &((output)->scalar_value);
+                float* csharp2cuda_temp_303 = &((output)->scalar_value);
                 (*(csharp2cuda_temp_303) = product);
 #line 718 "VectorModule.cs"
                 if ((!(isfinite(product))))
@@ -3987,11 +3987,11 @@ __device__ void mathblocks_vector_dispatch(
                         break;
 #line 725 "VectorModule.cs"
 #line 725 "VectorModule.cs"
-                    double* csharp2cuda_temp_311 = &((result)[index]);
+                    float* csharp2cuda_temp_311 = &((result)[index]);
 #line 725 "VectorModule.cs"
                     int csharp2cuda_temp_312 = (first)->count;
 #line 725 "VectorModule.cs"
-                    double csharp2cuda_temp_313 = mathblocks_vector_rank_at(a, csharp2cuda_temp_312, index);
+                    float csharp2cuda_temp_313 = mathblocks_vector_rank_at(a, csharp2cuda_temp_312, index);
                     (*(csharp2cuda_temp_311) = csharp2cuda_temp_313);
 #line 724 "VectorModule.cs"
                     int* csharp2cuda_temp_306 = &(index);
@@ -4012,7 +4012,7 @@ __device__ void mathblocks_vector_dispatch(
                 int count = 0;
 #line 731 "VectorModule.cs"
 #line 731 "VectorModule.cs"
-                double csharp2cuda_temp_314 = (second)->scalar_value;
+                float csharp2cuda_temp_314 = (second)->scalar_value;
 #line 731 "VectorModule.cs"
                 int* csharp2cuda_temp_315 = &(count);
 #line 731 "VectorModule.cs"
@@ -4072,9 +4072,9 @@ __device__ void mathblocks_vector_dispatch(
                         break;
 #line 738 "VectorModule.cs"
 #line 738 "VectorModule.cs"
-                    double* csharp2cuda_temp_324 = &((result)[index]);
+                    float* csharp2cuda_temp_324 = &((result)[index]);
 #line 738 "VectorModule.cs"
-                    double csharp2cuda_temp_325 = (first)->scalar_value;
+                    float csharp2cuda_temp_325 = (first)->scalar_value;
                     (*(csharp2cuda_temp_324) = csharp2cuda_temp_325);
 #line 737 "VectorModule.cs"
                     int* csharp2cuda_temp_319 = &(index);
@@ -4124,11 +4124,11 @@ __device__ void mathblocks_vector_dispatch(
                         break;
 #line 744 "VectorModule.cs"
 #line 744 "VectorModule.cs"
-                    double* csharp2cuda_temp_332 = &((result)[index]);
+                    float* csharp2cuda_temp_332 = &((result)[index]);
 #line 744 "VectorModule.cs"
                     int csharp2cuda_temp_333 = (first)->count;
 #line 744 "VectorModule.cs"
-                    double csharp2cuda_temp_334 = (a)[csharp2cuda_i32_sub(csharp2cuda_i32_sub(csharp2cuda_temp_333, index), 1)];
+                    float csharp2cuda_temp_334 = (a)[csharp2cuda_i32_sub(csharp2cuda_i32_sub(csharp2cuda_temp_333, index), 1)];
                     (*(csharp2cuda_temp_332) = csharp2cuda_temp_334);
 #line 743 "VectorModule.cs"
                     int* csharp2cuda_temp_327 = &(index);
@@ -4180,15 +4180,15 @@ __device__ void mathblocks_vector_dispatch(
                     {
 #line 751 "VectorModule.cs"
 #line 751 "VectorModule.cs"
-                        double* csharp2cuda_temp_341 = &((result)[index]);
+                        float* csharp2cuda_temp_341 = &((result)[index]);
 #line 751 "VectorModule.cs"
-                        double csharp2cuda_temp_342 = (a)[index];
+                        float csharp2cuda_temp_342 = (a)[index];
 #line 751 "VectorModule.cs"
-                        double csharp2cuda_temp_343 = (second)->scalar_value;
-                        (*(csharp2cuda_temp_341) = __dmul_rn(csharp2cuda_temp_342, csharp2cuda_temp_343));
+                        float csharp2cuda_temp_343 = (second)->scalar_value;
+                        (*(csharp2cuda_temp_341) = __fmul_rn(csharp2cuda_temp_342, csharp2cuda_temp_343));
 #line 752 "VectorModule.cs"
 #line 752 "VectorModule.cs"
-                        double csharp2cuda_temp_344 = (result)[index];
+                        float csharp2cuda_temp_344 = (result)[index];
                         if ((!(isfinite(csharp2cuda_temp_344))))
                         {
 #line 752 "VectorModule.cs"
@@ -4273,11 +4273,11 @@ __device__ void mathblocks_vector_dispatch(
                         break;
 #line 763 "VectorModule.cs"
 #line 763 "VectorModule.cs"
-                    double* csharp2cuda_temp_357 = &((result)[index]);
+                    float* csharp2cuda_temp_357 = &((result)[index]);
 #line 763 "VectorModule.cs"
                     bool csharp2cuda_temp_358 = (boolean_a)[index];
 #line 763 "VectorModule.cs"
-                    double csharp2cuda_temp_359;
+                    float csharp2cuda_temp_359;
 #line 763 "VectorModule.cs"
                     if (csharp2cuda_temp_358)
                     {
@@ -4311,7 +4311,7 @@ __device__ void mathblocks_vector_dispatch(
                 int length = 0;
 #line 770 "VectorModule.cs"
 #line 770 "VectorModule.cs"
-                double csharp2cuda_temp_360 = (second)->scalar_value;
+                float csharp2cuda_temp_360 = (second)->scalar_value;
 #line 770 "VectorModule.cs"
                 int* csharp2cuda_temp_361 = &(start);
 #line 770 "VectorModule.cs"
@@ -4322,7 +4322,7 @@ __device__ void mathblocks_vector_dispatch(
                 if (!((!(csharp2cuda_temp_362))))
                 {
 #line 771 "VectorModule.cs"
-                    double csharp2cuda_temp_364 = (third)->scalar_value;
+                    float csharp2cuda_temp_364 = (third)->scalar_value;
 #line 771 "VectorModule.cs"
                     int* csharp2cuda_temp_365 = &(length);
 #line 771 "VectorModule.cs"
@@ -4385,7 +4385,7 @@ __device__ void mathblocks_vector_dispatch(
 #line 779 "VectorModule.cs"
             {
 #line 780 "VectorModule.cs"
-                double csharp2cuda_temp_372 = (second)->scalar_value;
+                float csharp2cuda_temp_372 = (second)->scalar_value;
 #line 780 "VectorModule.cs"
                 int start = csharp2cuda_f64_to_i32(csharp2cuda_temp_372);
 #line 781 "VectorModule.cs"
@@ -4400,9 +4400,9 @@ __device__ void mathblocks_vector_dispatch(
                             break;
 #line 782 "VectorModule.cs"
 #line 782 "VectorModule.cs"
-                        double* csharp2cuda_temp_376 = &((result)[index]);
+                        float* csharp2cuda_temp_376 = &((result)[index]);
 #line 782 "VectorModule.cs"
-                        double csharp2cuda_temp_377 = (a)[csharp2cuda_i32_add(start, index)];
+                        float csharp2cuda_temp_377 = (a)[csharp2cuda_i32_add(start, index)];
                         (*(csharp2cuda_temp_376) = csharp2cuda_temp_377);
 #line 781 "VectorModule.cs"
                         int* csharp2cuda_temp_373 = &(index);
@@ -4472,16 +4472,16 @@ __device__ void mathblocks_vector_dispatch(
                     break;
                 }
 #line 801 "VectorModule.cs"
-                double mean = 0.0;
+                float mean = 0.0f;
 #line 802 "VectorModule.cs"
-                double deviation = 0.0;
+                float deviation = 0.0f;
 #line 803 "VectorModule.cs"
 #line 803 "VectorModule.cs"
                 int csharp2cuda_temp_384 = (first)->count;
 #line 803 "VectorModule.cs"
-                double* csharp2cuda_temp_385 = &(mean);
+                float* csharp2cuda_temp_385 = &(mean);
 #line 803 "VectorModule.cs"
-                double* csharp2cuda_temp_386 = &(deviation);
+                float* csharp2cuda_temp_386 = &(deviation);
                 mathblocks_vector_standardize_moments(a, csharp2cuda_temp_384, csharp2cuda_temp_385, csharp2cuda_temp_386);
 #line 804 "VectorModule.cs"
                 {
@@ -4497,15 +4497,15 @@ __device__ void mathblocks_vector_dispatch(
                         {
 #line 806 "VectorModule.cs"
 #line 806 "VectorModule.cs"
-                            double* csharp2cuda_temp_389 = &((result)[index]);
+                            float* csharp2cuda_temp_389 = &((result)[index]);
 #line 806 "VectorModule.cs"
-                            double csharp2cuda_temp_390 = (a)[index];
+                            float csharp2cuda_temp_390 = (a)[index];
 #line 806 "VectorModule.cs"
-                            double csharp2cuda_temp_391 = __ddiv_rn(__dsub_rn(csharp2cuda_temp_390, mean), deviation);
+                            float csharp2cuda_temp_391 = __fdiv_rn(__fsub_rn(csharp2cuda_temp_390, mean), deviation);
                             (*(csharp2cuda_temp_389) = csharp2cuda_temp_391);
 #line 807 "VectorModule.cs"
 #line 807 "VectorModule.cs"
-                            double csharp2cuda_temp_392 = (result)[index];
+                            float csharp2cuda_temp_392 = (result)[index];
                             if ((!(isfinite(csharp2cuda_temp_392))))
                             {
 #line 807 "VectorModule.cs"
@@ -4554,9 +4554,9 @@ __device__ void mathblocks_vector_dispatch(
                                         break;
 #line 819 "VectorModule.cs"
 #line 819 "VectorModule.cs"
-                                    double csharp2cuda_temp_397 = (result)[prior];
+                                    float csharp2cuda_temp_397 = (result)[prior];
 #line 819 "VectorModule.cs"
-                                    double csharp2cuda_temp_398 = (a)[index];
+                                    float csharp2cuda_temp_398 = (a)[index];
                                     if (((csharp2cuda_temp_397) == (csharp2cuda_temp_398)))
 #line 819 "VectorModule.cs"
                                     {
@@ -4581,9 +4581,9 @@ __device__ void mathblocks_vector_dispatch(
 #line 820 "VectorModule.cs"
                                 int csharp2cuda_temp_401 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_400));
 #line 820 "VectorModule.cs"
-                                double* csharp2cuda_temp_402 = &((result)[csharp2cuda_temp_401]);
+                                float* csharp2cuda_temp_402 = &((result)[csharp2cuda_temp_401]);
 #line 820 "VectorModule.cs"
-                                double csharp2cuda_temp_403 = (a)[index];
+                                float csharp2cuda_temp_403 = (a)[index];
                                 (*(csharp2cuda_temp_402) = csharp2cuda_temp_403);
                             }
                         }
@@ -4626,8 +4626,8 @@ __device__ void mathblocks_vector_dispatch(
                     (*(csharp2cuda_temp_404) = csharp2cuda_temp_405);
 #line 832 "VectorModule.cs"
 #line 832 "VectorModule.cs"
-                    double* csharp2cuda_temp_406 = &((output)->scalar_value);
-                    (*(csharp2cuda_temp_406) = 0.0);
+                    float* csharp2cuda_temp_406 = &((output)->scalar_value);
+                    (*(csharp2cuda_temp_406) = 0.0f);
                 }
 #line 834 "VectorModule.cs"
                 __syncthreads();
@@ -4787,10 +4787,10 @@ __device__ void mathblocks_vector_dispatch(
                 {
 #line 854 "VectorModule.cs"
 #line 854 "VectorModule.cs"
-                    double* csharp2cuda_temp_420 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_420 = &((output)->scalar_value);
 #line 854 "VectorModule.cs"
                     int csharp2cuda_temp_421 = (output)->boolean_value;
-                    (*(csharp2cuda_temp_420) = ((double)(csharp2cuda_temp_421)));
+                    (*(csharp2cuda_temp_420) = ((float)(csharp2cuda_temp_421)));
 #line 855 "VectorModule.cs"
 #line 855 "VectorModule.cs"
                     int* csharp2cuda_temp_422 = &((output)->boolean_value);
@@ -5003,8 +5003,8 @@ __device__ void mathblocks_vector_dispatch(
 #line 884 "VectorModule.cs"
                             int csharp2cuda_temp_452 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_451));
 #line 884 "VectorModule.cs"
-                            double* csharp2cuda_temp_453 = &((result)[csharp2cuda_temp_452]);
-                            (*(csharp2cuda_temp_453) = ((double)(index)));
+                            float* csharp2cuda_temp_453 = &((result)[csharp2cuda_temp_452]);
+                            (*(csharp2cuda_temp_453) = ((float)(index)));
                         }
 #line 883 "VectorModule.cs"
                         int* csharp2cuda_temp_449 = &(index);
@@ -5033,10 +5033,10 @@ __device__ void mathblocks_vector_dispatch(
 
 #line 311 "VectorModule.cs"
 __device__ bool mathblocks_vector_geometric_mean_value(
-    const double* values,
+    const float* values,
     int count,
-    double* logarithms,
-    double* value)
+    float* logarithms,
+    float* value)
 #line 317 "VectorModule.cs"
 {
 #line 318 "VectorModule.cs"
@@ -5059,13 +5059,13 @@ __device__ bool mathblocks_vector_geometric_mean_value(
             {
 #line 323 "VectorModule.cs"
 #line 323 "VectorModule.cs"
-                double* csharp2cuda_temp_1 = &((logarithms)[index]);
+                float* csharp2cuda_temp_1 = &((logarithms)[index]);
 #line 323 "VectorModule.cs"
-                double csharp2cuda_temp_2 = (values)[index];
+                float csharp2cuda_temp_2 = (values)[index];
                 (*(csharp2cuda_temp_1) = mathblocks_natural_logarithm(csharp2cuda_temp_2));
 #line 324 "VectorModule.cs"
 #line 324 "VectorModule.cs"
-                double csharp2cuda_temp_3 = (logarithms)[index];
+                float csharp2cuda_temp_3 = (logarithms)[index];
                 if ((!(isfinite(csharp2cuda_temp_3))))
                 {
 #line 325 "VectorModule.cs"
@@ -5087,21 +5087,21 @@ __device__ bool mathblocks_vector_geometric_mean_value(
     }
 #line 329 "VectorModule.cs"
 #line 329 "VectorModule.cs"
-    double* csharp2cuda_temp_5 = value;
+    float* csharp2cuda_temp_5 = value;
 #line 329 "VectorModule.cs"
-    double csharp2cuda_temp_6 = mathblocks_compensated_sum(logarithms, count);
+    float csharp2cuda_temp_6 = mathblocks_compensated_sum(logarithms, count);
 #line 329 "VectorModule.cs"
-    double csharp2cuda_temp_7 = __ddiv_rn(csharp2cuda_temp_6, ((double)(count)));
+    float csharp2cuda_temp_7 = __fdiv_rn(csharp2cuda_temp_6, ((float)(count)));
     (*(csharp2cuda_temp_5) = mathblocks_exponential(csharp2cuda_temp_7));
 #line 330 "VectorModule.cs"
 #line 330 "VectorModule.cs"
-    double csharp2cuda_temp_8 = *(value);
+    float csharp2cuda_temp_8 = *(value);
     return isfinite(csharp2cuda_temp_8);
 }
 
 #line 351 "VectorModule.cs"
-__device__ double mathblocks_vector_rank_at(
-    const double* values,
+__device__ float mathblocks_vector_rank_at(
+    const float* values,
     int count,
     int position)
 #line 356 "VectorModule.cs"
@@ -5122,9 +5122,9 @@ __device__ double mathblocks_vector_rank_at(
             {
 #line 361 "VectorModule.cs"
 #line 361 "VectorModule.cs"
-                double csharp2cuda_temp_1 = (values)[other];
+                float csharp2cuda_temp_1 = (values)[other];
 #line 361 "VectorModule.cs"
-                double csharp2cuda_temp_2 = (values)[position];
+                float csharp2cuda_temp_2 = (values)[position];
                 if (((csharp2cuda_temp_1) < (csharp2cuda_temp_2)))
                 {
 #line 361 "VectorModule.cs"
@@ -5136,9 +5136,9 @@ __device__ double mathblocks_vector_rank_at(
                 {
 #line 362 "VectorModule.cs"
 #line 362 "VectorModule.cs"
-                    double csharp2cuda_temp_4 = (values)[other];
+                    float csharp2cuda_temp_4 = (values)[other];
 #line 362 "VectorModule.cs"
-                    double csharp2cuda_temp_5 = (values)[position];
+                    float csharp2cuda_temp_5 = (values)[position];
                     if (((csharp2cuda_temp_4) == (csharp2cuda_temp_5)))
                     {
 #line 362 "VectorModule.cs"
@@ -5155,24 +5155,24 @@ __device__ double mathblocks_vector_rank_at(
     }
 #line 364 "VectorModule.cs"
 #line 364 "VectorModule.cs"
-    double csharp2cuda_temp_7 = __ddiv_rn(__dadd_rn(((double)(equal)), 1.0), 2.0);
-    return __dadd_rn(((double)(less)), csharp2cuda_temp_7);
+    float csharp2cuda_temp_7 = __fdiv_rn(__fadd_rn(((float)(equal)), 1.0f), 2.0f);
+    return __fadd_rn(((float)(less)), csharp2cuda_temp_7);
 }
 
 #line 367 "VectorModule.cs"
 __device__ void mathblocks_vector_standardize_moments(
-    const double* values,
+    const float* values,
     int count,
-    double* mean,
-    double* deviation)
+    float* mean,
+    float* deviation)
 #line 373 "VectorModule.cs"
 {
 #line 374 "VectorModule.cs"
-    double csharp2cuda_temp_0 = mathblocks_compensated_sum(values, count);
+    float csharp2cuda_temp_0 = mathblocks_compensated_sum(values, count);
 #line 374 "VectorModule.cs"
-    double average = __ddiv_rn(csharp2cuda_temp_0, ((double)(count)));
+    float average = __fdiv_rn(csharp2cuda_temp_0, ((float)(count)));
 #line 375 "VectorModule.cs"
-    double variance = 0.0;
+    float variance = 0.0f;
 #line 376 "VectorModule.cs"
     {
 #line 376 "VectorModule.cs"
@@ -5184,15 +5184,15 @@ __device__ void mathblocks_vector_standardize_moments(
 #line 377 "VectorModule.cs"
             {
 #line 378 "VectorModule.cs"
-                double csharp2cuda_temp_2 = (values)[index];
+                float csharp2cuda_temp_2 = (values)[index];
 #line 378 "VectorModule.cs"
-                double difference = __dsub_rn(csharp2cuda_temp_2, average);
+                float difference = __fsub_rn(csharp2cuda_temp_2, average);
 #line 379 "VectorModule.cs"
 #line 379 "VectorModule.cs"
-                double* csharp2cuda_temp_3 = &(variance);
+                float* csharp2cuda_temp_3 = &(variance);
 #line 379 "VectorModule.cs"
-                double csharp2cuda_temp_4 = *(csharp2cuda_temp_3);
-                (*(csharp2cuda_temp_3) = __dadd_rn(csharp2cuda_temp_4, __dmul_rn(difference, difference)));
+                float csharp2cuda_temp_4 = *(csharp2cuda_temp_3);
+                (*(csharp2cuda_temp_3) = __fadd_rn(csharp2cuda_temp_4, __fmul_rn(difference, difference)));
             }
 #line 376 "VectorModule.cs"
             int* csharp2cuda_temp_1 = &(index);
@@ -5201,19 +5201,19 @@ __device__ void mathblocks_vector_standardize_moments(
     }
 #line 381 "VectorModule.cs"
 #line 381 "VectorModule.cs"
-    double* csharp2cuda_temp_5 = &(variance);
+    float* csharp2cuda_temp_5 = &(variance);
 #line 381 "VectorModule.cs"
-    double csharp2cuda_temp_6 = *(csharp2cuda_temp_5);
-    (*(csharp2cuda_temp_5) = __ddiv_rn(csharp2cuda_temp_6, ((double)(count))));
+    float csharp2cuda_temp_6 = *(csharp2cuda_temp_5);
+    (*(csharp2cuda_temp_5) = __fdiv_rn(csharp2cuda_temp_6, ((float)(count))));
 #line 382 "VectorModule.cs"
 #line 382 "VectorModule.cs"
-    double* csharp2cuda_temp_7 = mean;
+    float* csharp2cuda_temp_7 = mean;
     (*(csharp2cuda_temp_7) = average);
 #line 384 "VectorModule.cs"
 #line 384 "VectorModule.cs"
-    double* csharp2cuda_temp_8 = deviation;
+    float* csharp2cuda_temp_8 = deviation;
 #line 384 "VectorModule.cs"
-    double csharp2cuda_temp_9;
+    float csharp2cuda_temp_9;
 #line 384 "VectorModule.cs"
     if (isfinite(variance))
     {

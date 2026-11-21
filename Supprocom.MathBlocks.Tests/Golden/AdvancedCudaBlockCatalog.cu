@@ -646,10 +646,10 @@ __device__ void mathblocks_advanced_dispatch(
     MathBlockSlot* output);
 
 #line 97 "AdvancedModule.cs"
-__device__ bool mathblocks_advanced_distribution(const double* values, int count);
+__device__ bool mathblocks_advanced_distribution(const float* values, int count);
 
 #line 88 "AdvancedModule.cs"
-__device__ double mathblocks_advanced_factorial(int value);
+__device__ float mathblocks_advanced_factorial(int value);
 
 #line 64 "AdvancedModule.cs"
 __device__ int mathblocks_advanced_log_two(int value);
@@ -662,7 +662,7 @@ __device__ bool mathblocks_advanced_power_of_two(int value);
 
 #line 103 "AdvancedModule.cs"
 __device__ bool mathblocks_advanced_transition(
-    const double* values,
+    const float* values,
     int rows,
     int columns);
 
@@ -742,8 +742,8 @@ __device__ void mathblocks_advanced_dispatch(
     {
 #line 147 "AdvancedModule.cs"
 #line 147 "AdvancedModule.cs"
-        double* csharp2cuda_temp_4 = &((output)->scalar_value);
-        (*(csharp2cuda_temp_4) = 0.0);
+        float* csharp2cuda_temp_4 = &((output)->scalar_value);
+        (*(csharp2cuda_temp_4) = 0.0f);
 #line 148 "AdvancedModule.cs"
 #line 148 "AdvancedModule.cs"
         int* csharp2cuda_temp_5 = &((output)->boolean_value);
@@ -816,64 +816,64 @@ __device__ void mathblocks_advanced_dispatch(
         return;
     }
 #line 160 "AdvancedModule.cs"
-    double* csharp2cuda_temp_17;
+    float* csharp2cuda_temp_17;
 #line 160 "AdvancedModule.cs"
     if (((((void*)(first))) == (((void*)(nullptr)))))
     {
 #line 160 "AdvancedModule.cs"
-        csharp2cuda_temp_17 = ((double*)(nullptr));
+        csharp2cuda_temp_17 = ((float*)(nullptr));
     }
     else
     {
 #line 160 "AdvancedModule.cs"
         unsigned long long csharp2cuda_temp_18 = (first)->data_pointer;
 #line 160 "AdvancedModule.cs"
-        csharp2cuda_temp_17 = ((double*)(csharp2cuda_temp_18));
+        csharp2cuda_temp_17 = ((float*)(csharp2cuda_temp_18));
     }
 #line 160 "AdvancedModule.cs"
-    const double* a = csharp2cuda_temp_17;
+    const float* a = csharp2cuda_temp_17;
 #line 161 "AdvancedModule.cs"
-    double* csharp2cuda_temp_19;
+    float* csharp2cuda_temp_19;
 #line 161 "AdvancedModule.cs"
     if (((((void*)(second))) == (((void*)(nullptr)))))
     {
 #line 161 "AdvancedModule.cs"
-        csharp2cuda_temp_19 = ((double*)(nullptr));
+        csharp2cuda_temp_19 = ((float*)(nullptr));
     }
     else
     {
 #line 161 "AdvancedModule.cs"
         unsigned long long csharp2cuda_temp_20 = (second)->data_pointer;
 #line 161 "AdvancedModule.cs"
-        csharp2cuda_temp_19 = ((double*)(csharp2cuda_temp_20));
+        csharp2cuda_temp_19 = ((float*)(csharp2cuda_temp_20));
     }
 #line 161 "AdvancedModule.cs"
-    const double* b = csharp2cuda_temp_19;
+    const float* b = csharp2cuda_temp_19;
 #line 162 "AdvancedModule.cs"
-    double* csharp2cuda_temp_21;
+    float* csharp2cuda_temp_21;
 #line 162 "AdvancedModule.cs"
     if (((((void*)(third))) == (((void*)(nullptr)))))
     {
 #line 162 "AdvancedModule.cs"
-        csharp2cuda_temp_21 = ((double*)(nullptr));
+        csharp2cuda_temp_21 = ((float*)(nullptr));
     }
     else
     {
 #line 162 "AdvancedModule.cs"
         unsigned long long csharp2cuda_temp_22 = (third)->data_pointer;
 #line 162 "AdvancedModule.cs"
-        csharp2cuda_temp_21 = ((double*)(csharp2cuda_temp_22));
+        csharp2cuda_temp_21 = ((float*)(csharp2cuda_temp_22));
     }
 #line 162 "AdvancedModule.cs"
-    const double* c = csharp2cuda_temp_21;
+    const float* c = csharp2cuda_temp_21;
 #line 163 "AdvancedModule.cs"
     unsigned long long csharp2cuda_temp_23 = (output)->data_pointer;
 #line 163 "AdvancedModule.cs"
-    double* result = ((double*)(csharp2cuda_temp_23));
+    float* result = ((float*)(csharp2cuda_temp_23));
 #line 164 "AdvancedModule.cs"
     unsigned long long csharp2cuda_temp_24 = (output)->scratch_pointer;
 #line 164 "AdvancedModule.cs"
-    double* scratch = ((double*)(csharp2cuda_temp_24));
+    float* scratch = ((float*)(csharp2cuda_temp_24));
 #line 171 "AdvancedModule.cs"
 #line 171 "AdvancedModule.cs"
     bool csharp2cuda_temp_25;
@@ -916,9 +916,9 @@ __device__ void mathblocks_advanced_dispatch(
         if (!(csharp2cuda_temp_27))
         {
 #line 173 "AdvancedModule.cs"
-            double csharp2cuda_temp_31 = (fourth)->scalar_value;
+            float csharp2cuda_temp_31 = (fourth)->scalar_value;
 #line 173 "AdvancedModule.cs"
-            csharp2cuda_temp_30 = ((csharp2cuda_temp_31) < (0.0));
+            csharp2cuda_temp_30 = ((csharp2cuda_temp_31) < (0.0f));
         }
         else
         {
@@ -944,7 +944,7 @@ __device__ void mathblocks_advanced_dispatch(
 #line 177 "AdvancedModule.cs"
                     {
 #line 178 "AdvancedModule.cs"
-                        double csharp2cuda_temp_35;
+                        float csharp2cuda_temp_35;
 #line 178 "AdvancedModule.cs"
                         if (((opcode) == (4)))
                         {
@@ -957,7 +957,7 @@ __device__ void mathblocks_advanced_dispatch(
                             csharp2cuda_temp_35 = (-(mathblocks_positive_infinity()));
                         }
 #line 178 "AdvancedModule.cs"
-                        double selected = csharp2cuda_temp_35;
+                        float selected = csharp2cuda_temp_35;
 #line 181 "AdvancedModule.cs"
                         {
 #line 181 "AdvancedModule.cs"
@@ -971,41 +971,41 @@ __device__ void mathblocks_advanced_dispatch(
 #line 182 "AdvancedModule.cs"
                                 {
 #line 183 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_38;
+                                    float csharp2cuda_temp_38;
 #line 183 "AdvancedModule.cs"
                                     if (((opcode) == (4)))
                                     {
 #line 184 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_39 = (b)[index];
+                                        float csharp2cuda_temp_39 = (b)[index];
 #line 184 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_40 = (fourth)->scalar_value;
+                                        float csharp2cuda_temp_40 = (fourth)->scalar_value;
 #line 184 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_41 = (c)[query];
+                                        float csharp2cuda_temp_41 = (c)[query];
 #line 184 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_42 = (a)[index];
+                                        float csharp2cuda_temp_42 = (a)[index];
 #line 183 "AdvancedModule.cs"
-                                        csharp2cuda_temp_38 = __dadd_rn(csharp2cuda_temp_39, __dmul_rn(csharp2cuda_temp_40, fabs(__dsub_rn(csharp2cuda_temp_41, csharp2cuda_temp_42))));
+                                        csharp2cuda_temp_38 = __fadd_rn(csharp2cuda_temp_39, __fmul_rn(csharp2cuda_temp_40, fabsf(__fsub_rn(csharp2cuda_temp_41, csharp2cuda_temp_42))));
                                     }
                                     else
                                     {
 #line 185 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_43 = (b)[index];
+                                        float csharp2cuda_temp_43 = (b)[index];
 #line 185 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_44 = (fourth)->scalar_value;
+                                        float csharp2cuda_temp_44 = (fourth)->scalar_value;
 #line 185 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_45 = (c)[query];
+                                        float csharp2cuda_temp_45 = (c)[query];
 #line 185 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_46 = (a)[index];
+                                        float csharp2cuda_temp_46 = (a)[index];
 #line 183 "AdvancedModule.cs"
-                                        csharp2cuda_temp_38 = __dsub_rn(csharp2cuda_temp_43, __dmul_rn(csharp2cuda_temp_44, fabs(__dsub_rn(csharp2cuda_temp_45, csharp2cuda_temp_46))));
+                                        csharp2cuda_temp_38 = __fsub_rn(csharp2cuda_temp_43, __fmul_rn(csharp2cuda_temp_44, fabsf(__fsub_rn(csharp2cuda_temp_45, csharp2cuda_temp_46))));
                                     }
 #line 183 "AdvancedModule.cs"
-                                    double candidate = csharp2cuda_temp_38;
+                                    float candidate = csharp2cuda_temp_38;
 #line 188 "AdvancedModule.cs"
 #line 188 "AdvancedModule.cs"
-                                    double* csharp2cuda_temp_47 = &(selected);
+                                    float* csharp2cuda_temp_47 = &(selected);
 #line 188 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_48;
+                                    float csharp2cuda_temp_48;
 #line 188 "AdvancedModule.cs"
                                     if (((opcode) == (4)))
                                     {
@@ -1026,7 +1026,7 @@ __device__ void mathblocks_advanced_dispatch(
                         }
 #line 192 "AdvancedModule.cs"
 #line 192 "AdvancedModule.cs"
-                        double* csharp2cuda_temp_49 = &((result)[query]);
+                        float* csharp2cuda_temp_49 = &((result)[query]);
                         (*(csharp2cuda_temp_49) = selected);
                     }
 #line 176 "AdvancedModule.cs"
@@ -1121,8 +1121,8 @@ __device__ void mathblocks_advanced_dispatch(
                         {
 #line 211 "AdvancedModule.cs"
 #line 211 "AdvancedModule.cs"
-                            double csharp2cuda_temp_60 = (a)[index];
-                            if (((csharp2cuda_temp_60) < (0.0)))
+                            float csharp2cuda_temp_60 = (a)[index];
+                            if (((csharp2cuda_temp_60) < (0.0f)))
 #line 212 "AdvancedModule.cs"
                             {
 #line 213 "AdvancedModule.cs"
@@ -1143,11 +1143,11 @@ __device__ void mathblocks_advanced_dispatch(
                                 if (((position) > (0)))
                                 {
 #line 217 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_63 = (scratch)[csharp2cuda_i32_sub(position, 1)];
+                                    float csharp2cuda_temp_63 = (scratch)[csharp2cuda_i32_sub(position, 1)];
 #line 217 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_64 = (a)[csharp2cuda_f64_to_i32(csharp2cuda_temp_63)];
+                                    float csharp2cuda_temp_64 = (a)[csharp2cuda_f64_to_i32(csharp2cuda_temp_63)];
 #line 217 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_65 = (a)[index];
+                                    float csharp2cuda_temp_65 = (a)[index];
 #line 217 "AdvancedModule.cs"
                                     csharp2cuda_temp_62 = ((csharp2cuda_temp_64) > (csharp2cuda_temp_65));
                                 }
@@ -1162,9 +1162,9 @@ __device__ void mathblocks_advanced_dispatch(
                                 {
 #line 219 "AdvancedModule.cs"
 #line 219 "AdvancedModule.cs"
-                                    double* csharp2cuda_temp_66 = &((scratch)[position]);
+                                    float* csharp2cuda_temp_66 = &((scratch)[position]);
 #line 219 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_67 = (scratch)[csharp2cuda_i32_sub(position, 1)];
+                                    float csharp2cuda_temp_67 = (scratch)[csharp2cuda_i32_sub(position, 1)];
                                     (*(csharp2cuda_temp_66) = csharp2cuda_temp_67);
 #line 220 "AdvancedModule.cs"
 #line 220 "AdvancedModule.cs"
@@ -1174,8 +1174,8 @@ __device__ void mathblocks_advanced_dispatch(
                             }
 #line 222 "AdvancedModule.cs"
 #line 222 "AdvancedModule.cs"
-                            double* csharp2cuda_temp_69 = &((scratch)[position]);
-                            (*(csharp2cuda_temp_69) = ((double)(index)));
+                            float* csharp2cuda_temp_69 = &((scratch)[position]);
+                            (*(csharp2cuda_temp_69) = ((float)(index)));
                         }
 #line 209 "AdvancedModule.cs"
                         int* csharp2cuda_temp_58 = &(index);
@@ -1187,9 +1187,9 @@ __device__ void mathblocks_advanced_dispatch(
 #line 225 "AdvancedModule.cs"
                 {
 #line 226 "AdvancedModule.cs"
-                    double total = 0.0;
+                    float total = 0.0f;
 #line 227 "AdvancedModule.cs"
-                    double previous = 0.0;
+                    float previous = 0.0f;
 #line 228 "AdvancedModule.cs"
                     {
 #line 228 "AdvancedModule.cs"
@@ -1220,7 +1220,7 @@ __device__ void mathblocks_advanced_dispatch(
 #line 232 "AdvancedModule.cs"
                                         int csharp2cuda_temp_75 = *(csharp2cuda_temp_74);
 #line 232 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_76 = (scratch)[index];
+                                        float csharp2cuda_temp_76 = (scratch)[index];
                                         (*(csharp2cuda_temp_74) = csharp2cuda_i32_or(csharp2cuda_temp_75, csharp2cuda_i32_shl(1, csharp2cuda_f64_to_i32(csharp2cuda_temp_76))));
 #line 231 "AdvancedModule.cs"
                                         int* csharp2cuda_temp_72 = &(index);
@@ -1228,24 +1228,24 @@ __device__ void mathblocks_advanced_dispatch(
                                     }
                                 }
 #line 233 "AdvancedModule.cs"
-                                double csharp2cuda_temp_77 = (scratch)[position];
+                                float csharp2cuda_temp_77 = (scratch)[position];
 #line 233 "AdvancedModule.cs"
                                 int ordered = csharp2cuda_f64_to_i32(csharp2cuda_temp_77);
 #line 234 "AdvancedModule.cs"
 #line 234 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_78 = &(total);
+                                float* csharp2cuda_temp_78 = &(total);
 #line 234 "AdvancedModule.cs"
-                                double csharp2cuda_temp_79 = *(csharp2cuda_temp_78);
+                                float csharp2cuda_temp_79 = *(csharp2cuda_temp_78);
 #line 234 "AdvancedModule.cs"
-                                double csharp2cuda_temp_80 = (a)[ordered];
+                                float csharp2cuda_temp_80 = (a)[ordered];
 #line 234 "AdvancedModule.cs"
-                                double csharp2cuda_temp_81 = (b)[coalition];
-                                (*(csharp2cuda_temp_78) = __dadd_rn(csharp2cuda_temp_79, __dmul_rn(__dsub_rn(csharp2cuda_temp_80, previous), csharp2cuda_temp_81)));
+                                float csharp2cuda_temp_81 = (b)[coalition];
+                                (*(csharp2cuda_temp_78) = __fadd_rn(csharp2cuda_temp_79, __fmul_rn(__fsub_rn(csharp2cuda_temp_80, previous), csharp2cuda_temp_81)));
 #line 235 "AdvancedModule.cs"
 #line 235 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_82 = &(previous);
+                                float* csharp2cuda_temp_82 = &(previous);
 #line 235 "AdvancedModule.cs"
-                                double csharp2cuda_temp_83 = (a)[ordered];
+                                float csharp2cuda_temp_83 = (a)[ordered];
                                 (*(csharp2cuda_temp_82) = csharp2cuda_temp_83);
                             }
 #line 228 "AdvancedModule.cs"
@@ -1255,7 +1255,7 @@ __device__ void mathblocks_advanced_dispatch(
                     }
 #line 237 "AdvancedModule.cs"
 #line 237 "AdvancedModule.cs"
-                    double* csharp2cuda_temp_84 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_84 = &((output)->scalar_value);
                     (*(csharp2cuda_temp_84) = total);
                 }
 #line 239 "AdvancedModule.cs"
@@ -1329,14 +1329,14 @@ __device__ void mathblocks_advanced_dispatch(
                                     break;
 #line 249 "AdvancedModule.cs"
 #line 249 "AdvancedModule.cs"
-                                double csharp2cuda_temp_95 = (a)[left];
+                                float csharp2cuda_temp_95 = (a)[left];
 #line 249 "AdvancedModule.cs"
-                                double csharp2cuda_temp_96 = (a)[right];
+                                float csharp2cuda_temp_96 = (a)[right];
 #line 249 "AdvancedModule.cs"
-                                double csharp2cuda_temp_97 = (a)[csharp2cuda_i32_or(left, right)];
+                                float csharp2cuda_temp_97 = (a)[csharp2cuda_i32_or(left, right)];
 #line 249 "AdvancedModule.cs"
-                                double csharp2cuda_temp_98 = (a)[csharp2cuda_i32_and(left, right)];
-                                if (((__dadd_rn(csharp2cuda_temp_95, csharp2cuda_temp_96)) < (__dadd_rn(csharp2cuda_temp_97, csharp2cuda_temp_98))))
+                                float csharp2cuda_temp_98 = (a)[csharp2cuda_i32_and(left, right)];
+                                if (((__fadd_rn(csharp2cuda_temp_95, csharp2cuda_temp_96)) < (__fadd_rn(csharp2cuda_temp_97, csharp2cuda_temp_98))))
 #line 250 "AdvancedModule.cs"
                                 {
 #line 251 "AdvancedModule.cs"
@@ -1389,9 +1389,9 @@ __device__ void mathblocks_advanced_dispatch(
                             break;
 #line 263 "AdvancedModule.cs"
 #line 263 "AdvancedModule.cs"
-                        double* csharp2cuda_temp_105 = &((result)[index]);
+                        float* csharp2cuda_temp_105 = &((result)[index]);
 #line 263 "AdvancedModule.cs"
-                        double csharp2cuda_temp_106 = (a)[index];
+                        float csharp2cuda_temp_106 = (a)[index];
                         (*(csharp2cuda_temp_105) = csharp2cuda_temp_106);
 #line 262 "AdvancedModule.cs"
                         int* csharp2cuda_temp_103 = &(index);
@@ -1423,12 +1423,12 @@ __device__ void mathblocks_advanced_dispatch(
                                 {
 #line 267 "AdvancedModule.cs"
 #line 267 "AdvancedModule.cs"
-                                    double* csharp2cuda_temp_111 = &((result)[mask]);
+                                    float* csharp2cuda_temp_111 = &((result)[mask]);
 #line 267 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_112 = *(csharp2cuda_temp_111);
+                                    float csharp2cuda_temp_112 = *(csharp2cuda_temp_111);
 #line 267 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_113 = (result)[csharp2cuda_i32_xor(mask, csharp2cuda_i32_shl(1, bit))];
-                                    (*(csharp2cuda_temp_111) = __dsub_rn(csharp2cuda_temp_112, csharp2cuda_temp_113));
+                                    float csharp2cuda_temp_113 = (result)[csharp2cuda_i32_xor(mask, csharp2cuda_i32_shl(1, bit))];
+                                    (*(csharp2cuda_temp_111) = __fsub_rn(csharp2cuda_temp_112, csharp2cuda_temp_113));
                                 }
 #line 265 "AdvancedModule.cs"
                                 int* csharp2cuda_temp_109 = &(mask);
@@ -1481,7 +1481,7 @@ __device__ void mathblocks_advanced_dispatch(
 #line 277 "AdvancedModule.cs"
                     mathblocks_sequence_set_vector_shape(output, player_count);
 #line 278 "AdvancedModule.cs"
-                    double denominator = mathblocks_advanced_factorial(player_count);
+                    float denominator = mathblocks_advanced_factorial(player_count);
 #line 279 "AdvancedModule.cs"
                     {
 #line 279 "AdvancedModule.cs"
@@ -1494,8 +1494,8 @@ __device__ void mathblocks_advanced_dispatch(
                             {
 #line 281 "AdvancedModule.cs"
 #line 281 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_120 = &((result)[player]);
-                                (*(csharp2cuda_temp_120) = 0.0);
+                                float* csharp2cuda_temp_120 = &((result)[player]);
+                                (*(csharp2cuda_temp_120) = 0.0f);
 #line 282 "AdvancedModule.cs"
                                 {
 #line 282 "AdvancedModule.cs"
@@ -1517,17 +1517,17 @@ __device__ void mathblocks_advanced_dispatch(
 #line 286 "AdvancedModule.cs"
                                             int size = mathblocks_advanced_popcount(coalition);
 #line 287 "AdvancedModule.cs"
-                                            double weight = __ddiv_rn(__dmul_rn(mathblocks_advanced_factorial(size), mathblocks_advanced_factorial(csharp2cuda_i32_sub(csharp2cuda_i32_sub(player_count, size), 1))), denominator);
+                                            float weight = __fdiv_rn(__fmul_rn(mathblocks_advanced_factorial(size), mathblocks_advanced_factorial(csharp2cuda_i32_sub(csharp2cuda_i32_sub(player_count, size), 1))), denominator);
 #line 290 "AdvancedModule.cs"
 #line 290 "AdvancedModule.cs"
-                                            double* csharp2cuda_temp_123 = &((result)[player]);
+                                            float* csharp2cuda_temp_123 = &((result)[player]);
 #line 290 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_124 = *(csharp2cuda_temp_123);
+                                            float csharp2cuda_temp_124 = *(csharp2cuda_temp_123);
 #line 291 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_125 = (a)[csharp2cuda_i32_or(coalition, csharp2cuda_i32_shl(1, player))];
+                                            float csharp2cuda_temp_125 = (a)[csharp2cuda_i32_or(coalition, csharp2cuda_i32_shl(1, player))];
 #line 291 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_126 = (a)[coalition];
-                                            (*(csharp2cuda_temp_123) = __dadd_rn(csharp2cuda_temp_124, __dmul_rn(weight, __dsub_rn(csharp2cuda_temp_125, csharp2cuda_temp_126))));
+                                            float csharp2cuda_temp_126 = (a)[coalition];
+                                            (*(csharp2cuda_temp_123) = __fadd_rn(csharp2cuda_temp_124, __fmul_rn(weight, __fsub_rn(csharp2cuda_temp_125, csharp2cuda_temp_126))));
                                         }
                                         csharp2cuda_for_continue_11:
 #line 282 "AdvancedModule.cs"
@@ -1577,9 +1577,9 @@ __device__ void mathblocks_advanced_dispatch(
                 if (!(csharp2cuda_temp_129))
                 {
 #line 299 "AdvancedModule.cs"
-                    double csharp2cuda_temp_133 = (fourth)->scalar_value;
+                    float csharp2cuda_temp_133 = (fourth)->scalar_value;
 #line 299 "AdvancedModule.cs"
-                    csharp2cuda_temp_132 = ((csharp2cuda_temp_133) < (0.0));
+                    csharp2cuda_temp_132 = ((csharp2cuda_temp_133) < (0.0f));
                 }
                 else
                 {
@@ -1616,7 +1616,7 @@ __device__ void mathblocks_advanced_dispatch(
 #line 311 "AdvancedModule.cs"
                 {
 #line 312 "AdvancedModule.cs"
-                    double sum = 0.0;
+                    float sum = 0.0f;
 #line 313 "AdvancedModule.cs"
                     {
 #line 313 "AdvancedModule.cs"
@@ -1639,14 +1639,14 @@ __device__ void mathblocks_advanced_dispatch(
                                         break;
 #line 315 "AdvancedModule.cs"
 #line 315 "AdvancedModule.cs"
-                                    double* csharp2cuda_temp_141 = &(sum);
+                                    float* csharp2cuda_temp_141 = &(sum);
 #line 315 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_142 = *(csharp2cuda_temp_141);
+                                    float csharp2cuda_temp_142 = *(csharp2cuda_temp_141);
 #line 315 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_143 = (a)[left];
+                                    float csharp2cuda_temp_143 = (a)[left];
 #line 315 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_144 = (a)[right];
-                                    (*(csharp2cuda_temp_141) = __dadd_rn(csharp2cuda_temp_142, fabs(__dsub_rn(csharp2cuda_temp_143, csharp2cuda_temp_144))));
+                                    float csharp2cuda_temp_144 = (a)[right];
+                                    (*(csharp2cuda_temp_141) = __fadd_rn(csharp2cuda_temp_142, fabsf(__fsub_rn(csharp2cuda_temp_143, csharp2cuda_temp_144))));
 #line 314 "AdvancedModule.cs"
                                     int* csharp2cuda_temp_139 = &(right);
                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_139));
@@ -1659,13 +1659,13 @@ __device__ void mathblocks_advanced_dispatch(
                     }
 #line 316 "AdvancedModule.cs"
 #line 316 "AdvancedModule.cs"
-                    double* csharp2cuda_temp_145 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_145 = &((output)->scalar_value);
 #line 317 "AdvancedModule.cs"
                     int csharp2cuda_temp_146 = (first)->count;
 #line 317 "AdvancedModule.cs"
                     int csharp2cuda_temp_147 = (first)->count;
 #line 316 "AdvancedModule.cs"
-                    double csharp2cuda_temp_148 = __ddiv_rn(sum, __dmul_rn(__dmul_rn(2.0, ((double)(csharp2cuda_temp_146))), mathblocks_compensated_sum(a, csharp2cuda_temp_147)));
+                    float csharp2cuda_temp_148 = __fdiv_rn(sum, __fmul_rn(__fmul_rn(2.0f, ((float)(csharp2cuda_temp_146))), mathblocks_compensated_sum(a, csharp2cuda_temp_147)));
                     (*(csharp2cuda_temp_145) = csharp2cuda_temp_148);
 #line 318 "AdvancedModule.cs"
                     break;
@@ -1704,8 +1704,8 @@ __device__ void mathblocks_advanced_dispatch(
                 }
 #line 327 "AdvancedModule.cs"
 #line 327 "AdvancedModule.cs"
-                double* csharp2cuda_temp_153 = &((result)[0]);
-                (*(csharp2cuda_temp_153) = 0.0);
+                float* csharp2cuda_temp_153 = &((result)[0]);
+                (*(csharp2cuda_temp_153) = 0.0f);
 #line 328 "AdvancedModule.cs"
                 {
 #line 328 "AdvancedModule.cs"
@@ -1718,9 +1718,9 @@ __device__ void mathblocks_advanced_dispatch(
                             break;
 #line 329 "AdvancedModule.cs"
 #line 329 "AdvancedModule.cs"
-                        double* csharp2cuda_temp_156 = &((result)[csharp2cuda_i32_add(index, 1)]);
+                        float* csharp2cuda_temp_156 = &((result)[csharp2cuda_i32_add(index, 1)]);
 #line 329 "AdvancedModule.cs"
-                        double csharp2cuda_temp_157 = (a)[index];
+                        float csharp2cuda_temp_157 = (a)[index];
                         (*(csharp2cuda_temp_156) = csharp2cuda_temp_157);
 #line 328 "AdvancedModule.cs"
                         int* csharp2cuda_temp_154 = &(index);
@@ -1732,7 +1732,7 @@ __device__ void mathblocks_advanced_dispatch(
 #line 331 "AdvancedModule.cs"
                     int csharp2cuda_temp_158 = (first)->count;
 #line 331 "AdvancedModule.cs"
-                    double* sorted = mathblocks_stable_merge_sort(csharp2cuda_pointer_add(result, 1), scratch, csharp2cuda_temp_158, false);
+                    float* sorted = mathblocks_stable_merge_sort(csharp2cuda_pointer_add(result, 1), scratch, csharp2cuda_temp_158, false);
 #line 332 "AdvancedModule.cs"
                     if (((((void*)(sorted))) != (((void*)(csharp2cuda_pointer_add(result, 1))))))
                     {
@@ -1748,9 +1748,9 @@ __device__ void mathblocks_advanced_dispatch(
                                     break;
 #line 334 "AdvancedModule.cs"
 #line 334 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_161 = &((result)[csharp2cuda_i32_add(index, 1)]);
+                                float* csharp2cuda_temp_161 = &((result)[csharp2cuda_i32_add(index, 1)]);
 #line 334 "AdvancedModule.cs"
-                                double csharp2cuda_temp_162 = (sorted)[index];
+                                float csharp2cuda_temp_162 = (sorted)[index];
                                 (*(csharp2cuda_temp_161) = csharp2cuda_temp_162);
 #line 333 "AdvancedModule.cs"
                                 int* csharp2cuda_temp_159 = &(index);
@@ -1764,7 +1764,7 @@ __device__ void mathblocks_advanced_dispatch(
 #line 337 "AdvancedModule.cs"
                     int csharp2cuda_temp_163 = (first)->count;
 #line 337 "AdvancedModule.cs"
-                    double total = mathblocks_compensated_sum(csharp2cuda_pointer_add(result, 1), csharp2cuda_temp_163);
+                    float total = mathblocks_compensated_sum(csharp2cuda_pointer_add(result, 1), csharp2cuda_temp_163);
 #line 338 "AdvancedModule.cs"
                     {
 #line 338 "AdvancedModule.cs"
@@ -1777,14 +1777,14 @@ __device__ void mathblocks_advanced_dispatch(
                                 break;
 #line 339 "AdvancedModule.cs"
 #line 339 "AdvancedModule.cs"
-                            double* csharp2cuda_temp_166 = &((result)[csharp2cuda_i32_add(index, 1)]);
+                            float* csharp2cuda_temp_166 = &((result)[csharp2cuda_i32_add(index, 1)]);
 #line 339 "AdvancedModule.cs"
-                            double csharp2cuda_temp_167 = (result)[index];
+                            float csharp2cuda_temp_167 = (result)[index];
 #line 339 "AdvancedModule.cs"
-                            double csharp2cuda_temp_168 = (result)[csharp2cuda_i32_add(index, 1)];
+                            float csharp2cuda_temp_168 = (result)[csharp2cuda_i32_add(index, 1)];
 #line 339 "AdvancedModule.cs"
-                            double csharp2cuda_temp_169 = __ddiv_rn(csharp2cuda_temp_168, total);
-                            (*(csharp2cuda_temp_166) = __dadd_rn(csharp2cuda_temp_167, csharp2cuda_temp_169));
+                            float csharp2cuda_temp_169 = __fdiv_rn(csharp2cuda_temp_168, total);
+                            (*(csharp2cuda_temp_166) = __fadd_rn(csharp2cuda_temp_167, csharp2cuda_temp_169));
 #line 338 "AdvancedModule.cs"
                             int* csharp2cuda_temp_164 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_164));
@@ -1866,7 +1866,7 @@ __device__ void mathblocks_advanced_dispatch(
 #line 350 "AdvancedModule.cs"
                 {
 #line 351 "AdvancedModule.cs"
-                    double total = 0.0;
+                    float total = 0.0f;
 #line 352 "AdvancedModule.cs"
                     {
 #line 352 "AdvancedModule.cs"
@@ -1890,29 +1890,29 @@ __device__ void mathblocks_advanced_dispatch(
 #line 354 "AdvancedModule.cs"
                                     {
 #line 355 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_187 = (b)[row];
+                                        float csharp2cuda_temp_187 = (b)[row];
 #line 355 "AdvancedModule.cs"
                                         int csharp2cuda_temp_188 = (first)->columns;
 #line 355 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_189 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_188), column)];
+                                        float csharp2cuda_temp_189 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_188), column)];
 #line 355 "AdvancedModule.cs"
-                                        double forward = __dmul_rn(csharp2cuda_temp_187, csharp2cuda_temp_189);
+                                        float forward = __fmul_rn(csharp2cuda_temp_187, csharp2cuda_temp_189);
 #line 356 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_190 = (b)[column];
+                                        float csharp2cuda_temp_190 = (b)[column];
 #line 356 "AdvancedModule.cs"
                                         int csharp2cuda_temp_191 = (first)->columns;
 #line 356 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_192 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(column, csharp2cuda_temp_191), row)];
+                                        float csharp2cuda_temp_192 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(column, csharp2cuda_temp_191), row)];
 #line 356 "AdvancedModule.cs"
-                                        double reverse = __dmul_rn(csharp2cuda_temp_190, csharp2cuda_temp_192);
+                                        float reverse = __fmul_rn(csharp2cuda_temp_190, csharp2cuda_temp_192);
 #line 357 "AdvancedModule.cs"
 #line 357 "AdvancedModule.cs"
                                         bool csharp2cuda_temp_193;
 #line 357 "AdvancedModule.cs"
-                                        if (((forward) > (0.0)))
+                                        if (((forward) > (0.0f)))
                                         {
 #line 357 "AdvancedModule.cs"
-                                            csharp2cuda_temp_193 = ((reverse) == (0.0));
+                                            csharp2cuda_temp_193 = ((reverse) == (0.0f));
                                         }
                                         else
                                         {
@@ -1933,10 +1933,10 @@ __device__ void mathblocks_advanced_dispatch(
 #line 362 "AdvancedModule.cs"
                                         bool csharp2cuda_temp_195;
 #line 362 "AdvancedModule.cs"
-                                        if (((forward) > (0.0)))
+                                        if (((forward) > (0.0f)))
                                         {
 #line 362 "AdvancedModule.cs"
-                                            csharp2cuda_temp_195 = ((reverse) > (0.0));
+                                            csharp2cuda_temp_195 = ((reverse) > (0.0f));
                                         }
                                         else
                                         {
@@ -1947,12 +1947,12 @@ __device__ void mathblocks_advanced_dispatch(
                                         {
 #line 363 "AdvancedModule.cs"
 #line 363 "AdvancedModule.cs"
-                                            double* csharp2cuda_temp_196 = &(total);
+                                            float* csharp2cuda_temp_196 = &(total);
 #line 363 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_197 = *(csharp2cuda_temp_196);
+                                            float csharp2cuda_temp_197 = *(csharp2cuda_temp_196);
 #line 363 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_198 = __ddiv_rn(forward, reverse);
-                                            (*(csharp2cuda_temp_196) = __dadd_rn(csharp2cuda_temp_197, __dmul_rn(forward, mathblocks_natural_logarithm(csharp2cuda_temp_198))));
+                                            float csharp2cuda_temp_198 = __fdiv_rn(forward, reverse);
+                                            (*(csharp2cuda_temp_196) = __fadd_rn(csharp2cuda_temp_197, __fmul_rn(forward, mathblocks_natural_logarithm(csharp2cuda_temp_198))));
                                         }
                                     }
 #line 353 "AdvancedModule.cs"
@@ -1967,7 +1967,7 @@ __device__ void mathblocks_advanced_dispatch(
                     }
 #line 365 "AdvancedModule.cs"
 #line 365 "AdvancedModule.cs"
-                    double* csharp2cuda_temp_199 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_199 = &((output)->scalar_value);
                     (*(csharp2cuda_temp_199) = total);
 #line 366 "AdvancedModule.cs"
                     break;
@@ -2014,7 +2014,7 @@ __device__ void mathblocks_advanced_dispatch(
                     int iterations = 0;
 #line 377 "AdvancedModule.cs"
 #line 377 "AdvancedModule.cs"
-                    double csharp2cuda_temp_206 = (second)->scalar_value;
+                    float csharp2cuda_temp_206 = (second)->scalar_value;
 #line 377 "AdvancedModule.cs"
                     int* csharp2cuda_temp_207 = &(iterations);
 #line 377 "AdvancedModule.cs"
@@ -2054,11 +2054,11 @@ __device__ void mathblocks_advanced_dispatch(
                                 break;
 #line 383 "AdvancedModule.cs"
 #line 383 "AdvancedModule.cs"
-                            double* csharp2cuda_temp_213 = &((result)[index]);
+                            float* csharp2cuda_temp_213 = &((result)[index]);
 #line 383 "AdvancedModule.cs"
                             int csharp2cuda_temp_214 = (first)->rows;
 #line 383 "AdvancedModule.cs"
-                            double csharp2cuda_temp_215 = __ddiv_rn(1.0, ((double)(csharp2cuda_temp_214)));
+                            float csharp2cuda_temp_215 = __fdiv_rn(1.0f, ((float)(csharp2cuda_temp_214)));
                             (*(csharp2cuda_temp_213) = csharp2cuda_temp_215);
 #line 382 "AdvancedModule.cs"
                             int* csharp2cuda_temp_211 = &(index);
@@ -2087,8 +2087,8 @@ __device__ void mathblocks_advanced_dispatch(
                                             break;
 #line 387 "AdvancedModule.cs"
 #line 387 "AdvancedModule.cs"
-                                        double* csharp2cuda_temp_219 = &((scratch)[index]);
-                                        (*(csharp2cuda_temp_219) = 0.0);
+                                        float* csharp2cuda_temp_219 = &((scratch)[index]);
+                                        (*(csharp2cuda_temp_219) = 0.0f);
 #line 386 "AdvancedModule.cs"
                                         int* csharp2cuda_temp_217 = &(index);
                                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_217));
@@ -2116,16 +2116,16 @@ __device__ void mathblocks_advanced_dispatch(
                                                     break;
 #line 390 "AdvancedModule.cs"
 #line 390 "AdvancedModule.cs"
-                                                double* csharp2cuda_temp_224 = &((scratch)[column]);
+                                                float* csharp2cuda_temp_224 = &((scratch)[column]);
 #line 390 "AdvancedModule.cs"
-                                                double csharp2cuda_temp_225 = *(csharp2cuda_temp_224);
+                                                float csharp2cuda_temp_225 = *(csharp2cuda_temp_224);
 #line 390 "AdvancedModule.cs"
-                                                double csharp2cuda_temp_226 = (result)[row];
+                                                float csharp2cuda_temp_226 = (result)[row];
 #line 390 "AdvancedModule.cs"
                                                 int csharp2cuda_temp_227 = (first)->columns;
 #line 390 "AdvancedModule.cs"
-                                                double csharp2cuda_temp_228 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_227), column)];
-                                                (*(csharp2cuda_temp_224) = __dadd_rn(csharp2cuda_temp_225, __dmul_rn(csharp2cuda_temp_226, csharp2cuda_temp_228)));
+                                                float csharp2cuda_temp_228 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_227), column)];
+                                                (*(csharp2cuda_temp_224) = __fadd_rn(csharp2cuda_temp_225, __fmul_rn(csharp2cuda_temp_226, csharp2cuda_temp_228)));
 #line 389 "AdvancedModule.cs"
                                                 int* csharp2cuda_temp_222 = &(column);
                                                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_222));
@@ -2148,9 +2148,9 @@ __device__ void mathblocks_advanced_dispatch(
                                             break;
 #line 392 "AdvancedModule.cs"
 #line 392 "AdvancedModule.cs"
-                                        double* csharp2cuda_temp_231 = &((result)[index]);
+                                        float* csharp2cuda_temp_231 = &((result)[index]);
 #line 392 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_232 = (scratch)[index];
+                                        float csharp2cuda_temp_232 = (scratch)[index];
                                         (*(csharp2cuda_temp_231) = csharp2cuda_temp_232);
 #line 391 "AdvancedModule.cs"
                                         int* csharp2cuda_temp_229 = &(index);
@@ -2201,7 +2201,7 @@ __device__ void mathblocks_advanced_dispatch(
 #line 403 "AdvancedModule.cs"
                 {
 #line 404 "AdvancedModule.cs"
-                    double* means = scratch;
+                    float* means = scratch;
 #line 405 "AdvancedModule.cs"
                     int csharp2cuda_temp_237 = (first)->count;
 #line 405 "AdvancedModule.cs"
@@ -2226,9 +2226,9 @@ __device__ void mathblocks_advanced_dispatch(
                             {
 #line 410 "AdvancedModule.cs"
 #line 410 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_241 = &((means)[block_count]);
+                                float* csharp2cuda_temp_241 = &((means)[block_count]);
 #line 410 "AdvancedModule.cs"
-                                double csharp2cuda_temp_242 = (a)[index];
+                                float csharp2cuda_temp_242 = (a)[index];
                                 (*(csharp2cuda_temp_241) = csharp2cuda_temp_242);
 #line 411 "AdvancedModule.cs"
 #line 411 "AdvancedModule.cs"
@@ -2251,9 +2251,9 @@ __device__ void mathblocks_advanced_dispatch(
                                     if (((block_count) >= (2)))
                                     {
 #line 414 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_247 = (means)[csharp2cuda_i32_sub(block_count, 2)];
+                                        float csharp2cuda_temp_247 = (means)[csharp2cuda_i32_sub(block_count, 2)];
 #line 414 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_248 = (means)[csharp2cuda_i32_sub(block_count, 1)];
+                                        float csharp2cuda_temp_248 = (means)[csharp2cuda_i32_sub(block_count, 1)];
 #line 414 "AdvancedModule.cs"
                                         csharp2cuda_temp_246 = ((csharp2cuda_temp_247) > (csharp2cuda_temp_248));
                                     }
@@ -2274,17 +2274,17 @@ __device__ void mathblocks_advanced_dispatch(
                                         int combined_weight = csharp2cuda_i32_add(csharp2cuda_temp_249, csharp2cuda_temp_250);
 #line 417 "AdvancedModule.cs"
 #line 417 "AdvancedModule.cs"
-                                        double* csharp2cuda_temp_251 = &((means)[csharp2cuda_i32_sub(block_count, 2)]);
+                                        float* csharp2cuda_temp_251 = &((means)[csharp2cuda_i32_sub(block_count, 2)]);
 #line 418 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_252 = (means)[csharp2cuda_i32_sub(block_count, 2)];
+                                        float csharp2cuda_temp_252 = (means)[csharp2cuda_i32_sub(block_count, 2)];
 #line 418 "AdvancedModule.cs"
                                         int csharp2cuda_temp_253 = (weights)[csharp2cuda_i32_sub(block_count, 2)];
 #line 419 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_254 = (means)[csharp2cuda_i32_sub(block_count, 1)];
+                                        float csharp2cuda_temp_254 = (means)[csharp2cuda_i32_sub(block_count, 1)];
 #line 419 "AdvancedModule.cs"
                                         int csharp2cuda_temp_255 = (weights)[csharp2cuda_i32_sub(block_count, 1)];
 #line 418 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_256 = __ddiv_rn(__dadd_rn(__dmul_rn(csharp2cuda_temp_252, ((double)(csharp2cuda_temp_253))), __dmul_rn(csharp2cuda_temp_254, ((double)(csharp2cuda_temp_255)))), ((double)(combined_weight)));
+                                        float csharp2cuda_temp_256 = __fdiv_rn(__fadd_rn(__fmul_rn(csharp2cuda_temp_252, ((float)(csharp2cuda_temp_253))), __fmul_rn(csharp2cuda_temp_254, ((float)(csharp2cuda_temp_255)))), ((float)(combined_weight)));
                                         (*(csharp2cuda_temp_251) = csharp2cuda_temp_256);
 #line 421 "AdvancedModule.cs"
 #line 421 "AdvancedModule.cs"
@@ -2337,9 +2337,9 @@ __device__ void mathblocks_advanced_dispatch(
                                             break;
 #line 429 "AdvancedModule.cs"
 #line 429 "AdvancedModule.cs"
-                                        double* csharp2cuda_temp_262 = &((result)[index]);
+                                        float* csharp2cuda_temp_262 = &((result)[index]);
 #line 429 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_263 = (means)[block];
+                                        float csharp2cuda_temp_263 = (means)[block];
                                         (*(csharp2cuda_temp_262) = csharp2cuda_temp_263);
 #line 428 "AdvancedModule.cs"
                                         int* csharp2cuda_temp_261 = &(index);
@@ -2388,11 +2388,11 @@ __device__ void mathblocks_advanced_dispatch(
 #line 439 "AdvancedModule.cs"
                 {
 #line 440 "AdvancedModule.cs"
-                    double* left_sorted = scratch;
+                    float* left_sorted = scratch;
 #line 441 "AdvancedModule.cs"
                     int csharp2cuda_temp_268 = (first)->count;
 #line 441 "AdvancedModule.cs"
-                    double* right_sorted = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_268);
+                    float* right_sorted = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_268);
 #line 442 "AdvancedModule.cs"
 #line 442 "AdvancedModule.cs"
                     int csharp2cuda_temp_269 = (first)->count;
@@ -2402,9 +2402,9 @@ __device__ void mathblocks_advanced_dispatch(
                     int csharp2cuda_temp_270 = (first)->count;
                     mathblocks_statistics_sort_copy(b, csharp2cuda_temp_270, right_sorted, true);
 #line 444 "AdvancedModule.cs"
-                    double left_sum = 0.0;
+                    float left_sum = 0.0f;
 #line 445 "AdvancedModule.cs"
-                    double right_sum = 0.0;
+                    float right_sum = 0.0f;
 #line 446 "AdvancedModule.cs"
                     bool majorizes = true;
 #line 447 "AdvancedModule.cs"
@@ -2421,20 +2421,20 @@ __device__ void mathblocks_advanced_dispatch(
                             {
 #line 449 "AdvancedModule.cs"
 #line 449 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_273 = &(left_sum);
+                                float* csharp2cuda_temp_273 = &(left_sum);
 #line 449 "AdvancedModule.cs"
-                                double csharp2cuda_temp_274 = *(csharp2cuda_temp_273);
+                                float csharp2cuda_temp_274 = *(csharp2cuda_temp_273);
 #line 449 "AdvancedModule.cs"
-                                double csharp2cuda_temp_275 = (left_sorted)[index];
-                                (*(csharp2cuda_temp_273) = __dadd_rn(csharp2cuda_temp_274, csharp2cuda_temp_275));
+                                float csharp2cuda_temp_275 = (left_sorted)[index];
+                                (*(csharp2cuda_temp_273) = __fadd_rn(csharp2cuda_temp_274, csharp2cuda_temp_275));
 #line 450 "AdvancedModule.cs"
 #line 450 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_276 = &(right_sum);
+                                float* csharp2cuda_temp_276 = &(right_sum);
 #line 450 "AdvancedModule.cs"
-                                double csharp2cuda_temp_277 = *(csharp2cuda_temp_276);
+                                float csharp2cuda_temp_277 = *(csharp2cuda_temp_276);
 #line 450 "AdvancedModule.cs"
-                                double csharp2cuda_temp_278 = (right_sorted)[index];
-                                (*(csharp2cuda_temp_276) = __dadd_rn(csharp2cuda_temp_277, csharp2cuda_temp_278));
+                                float csharp2cuda_temp_278 = (right_sorted)[index];
+                                (*(csharp2cuda_temp_276) = __fadd_rn(csharp2cuda_temp_277, csharp2cuda_temp_278));
 #line 451 "AdvancedModule.cs"
 #line 451 "AdvancedModule.cs"
                                 int csharp2cuda_temp_279 = (first)->count;
@@ -2532,9 +2532,9 @@ __device__ void mathblocks_advanced_dispatch(
 #line 463 "AdvancedModule.cs"
                 {
 #line 464 "AdvancedModule.cs"
-                    double minimum = mathblocks_positive_infinity();
+                    float minimum = mathblocks_positive_infinity();
 #line 465 "AdvancedModule.cs"
-                    double maximum = (-(mathblocks_positive_infinity()));
+                    float maximum = (-(mathblocks_positive_infinity()));
 #line 466 "AdvancedModule.cs"
                     {
 #line 466 "AdvancedModule.cs"
@@ -2549,16 +2549,16 @@ __device__ void mathblocks_advanced_dispatch(
                             {
 #line 468 "AdvancedModule.cs"
 #line 468 "AdvancedModule.cs"
-                                double csharp2cuda_temp_292 = (a)[index];
+                                float csharp2cuda_temp_292 = (a)[index];
 #line 468 "AdvancedModule.cs"
                                 bool csharp2cuda_temp_293;
 #line 468 "AdvancedModule.cs"
-                                if (!(((csharp2cuda_temp_292) <= (0.0))))
+                                if (!(((csharp2cuda_temp_292) <= (0.0f))))
                                 {
 #line 468 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_294 = (b)[index];
+                                    float csharp2cuda_temp_294 = (b)[index];
 #line 468 "AdvancedModule.cs"
-                                    csharp2cuda_temp_293 = ((csharp2cuda_temp_294) <= (0.0));
+                                    csharp2cuda_temp_293 = ((csharp2cuda_temp_294) <= (0.0f));
                                 }
                                 else
                                 {
@@ -2576,16 +2576,16 @@ __device__ void mathblocks_advanced_dispatch(
                                     break;
                                 }
 #line 473 "AdvancedModule.cs"
-                                double csharp2cuda_temp_296 = (a)[index];
+                                float csharp2cuda_temp_296 = (a)[index];
 #line 473 "AdvancedModule.cs"
-                                double csharp2cuda_temp_297 = (b)[index];
+                                float csharp2cuda_temp_297 = (b)[index];
 #line 473 "AdvancedModule.cs"
-                                double ratio = __ddiv_rn(csharp2cuda_temp_296, csharp2cuda_temp_297);
+                                float ratio = __fdiv_rn(csharp2cuda_temp_296, csharp2cuda_temp_297);
 #line 474 "AdvancedModule.cs"
 #line 474 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_298 = &(minimum);
+                                float* csharp2cuda_temp_298 = &(minimum);
 #line 474 "AdvancedModule.cs"
-                                double csharp2cuda_temp_299;
+                                float csharp2cuda_temp_299;
 #line 474 "AdvancedModule.cs"
                                 if (((minimum) < (ratio)))
                                 {
@@ -2600,9 +2600,9 @@ __device__ void mathblocks_advanced_dispatch(
                                 (*(csharp2cuda_temp_298) = csharp2cuda_temp_299);
 #line 475 "AdvancedModule.cs"
 #line 475 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_300 = &(maximum);
+                                float* csharp2cuda_temp_300 = &(maximum);
 #line 475 "AdvancedModule.cs"
-                                double csharp2cuda_temp_301;
+                                float csharp2cuda_temp_301;
 #line 475 "AdvancedModule.cs"
                                 if (((maximum) > (ratio)))
                                 {
@@ -2623,9 +2623,9 @@ __device__ void mathblocks_advanced_dispatch(
                     }
 #line 477 "AdvancedModule.cs"
 #line 477 "AdvancedModule.cs"
-                    double* csharp2cuda_temp_302 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_302 = &((output)->scalar_value);
 #line 477 "AdvancedModule.cs"
-                    double csharp2cuda_temp_303 = __ddiv_rn(maximum, minimum);
+                    float csharp2cuda_temp_303 = __fdiv_rn(maximum, minimum);
                     (*(csharp2cuda_temp_302) = mathblocks_natural_logarithm(csharp2cuda_temp_303));
 #line 478 "AdvancedModule.cs"
                     break;
@@ -2705,17 +2705,17 @@ __device__ void mathblocks_advanced_dispatch(
 #line 499 "AdvancedModule.cs"
                                         int last = (hull)[csharp2cuda_i32_sub(hull_count, 1)];
 #line 500 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_313 = (a)[middle];
+                                        float csharp2cuda_temp_313 = (a)[middle];
 #line 500 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_314 = (a)[one];
+                                        float csharp2cuda_temp_314 = (a)[one];
 #line 500 "AdvancedModule.cs"
-                                        double first_slope = __ddiv_rn(__dsub_rn(csharp2cuda_temp_313, csharp2cuda_temp_314), ((double)(csharp2cuda_i32_sub(middle, one))));
+                                        float first_slope = __fdiv_rn(__fsub_rn(csharp2cuda_temp_313, csharp2cuda_temp_314), ((float)(csharp2cuda_i32_sub(middle, one))));
 #line 501 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_315 = (a)[last];
+                                        float csharp2cuda_temp_315 = (a)[last];
 #line 501 "AdvancedModule.cs"
-                                        double csharp2cuda_temp_316 = (a)[middle];
+                                        float csharp2cuda_temp_316 = (a)[middle];
 #line 501 "AdvancedModule.cs"
-                                        double second_slope = __ddiv_rn(__dsub_rn(csharp2cuda_temp_315, csharp2cuda_temp_316), ((double)(csharp2cuda_i32_sub(last, middle))));
+                                        float second_slope = __fdiv_rn(__fsub_rn(csharp2cuda_temp_315, csharp2cuda_temp_316), ((float)(csharp2cuda_i32_sub(last, middle))));
 #line 502 "AdvancedModule.cs"
 #line 502 "AdvancedModule.cs"
                                         bool csharp2cuda_temp_317;
@@ -2778,15 +2778,15 @@ __device__ void mathblocks_advanced_dispatch(
 #line 513 "AdvancedModule.cs"
                                         {
 #line 514 "AdvancedModule.cs"
-                                            double weight = __ddiv_rn(((double)(csharp2cuda_i32_sub(index, start))), ((double)(csharp2cuda_i32_sub(end, start))));
+                                            float weight = __fdiv_rn(((float)(csharp2cuda_i32_sub(index, start))), ((float)(csharp2cuda_i32_sub(end, start))));
 #line 515 "AdvancedModule.cs"
 #line 515 "AdvancedModule.cs"
-                                            double* csharp2cuda_temp_323 = &((result)[index]);
+                                            float* csharp2cuda_temp_323 = &((result)[index]);
 #line 515 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_324 = (a)[start];
+                                            float csharp2cuda_temp_324 = (a)[start];
 #line 515 "AdvancedModule.cs"
-                                            double csharp2cuda_temp_325 = (a)[end];
-                                            (*(csharp2cuda_temp_323) = __dadd_rn(__dmul_rn(csharp2cuda_temp_324, __dsub_rn(1.0, weight)), __dmul_rn(csharp2cuda_temp_325, weight)));
+                                            float csharp2cuda_temp_325 = (a)[end];
+                                            (*(csharp2cuda_temp_323) = __fadd_rn(__fmul_rn(csharp2cuda_temp_324, __fsub_rn(1.0f, weight)), __fmul_rn(csharp2cuda_temp_325, weight)));
                                         }
 #line 512 "AdvancedModule.cs"
                                         int* csharp2cuda_temp_322 = &(index);
@@ -2827,9 +2827,9 @@ __device__ void mathblocks_advanced_dispatch(
                             break;
 #line 527 "AdvancedModule.cs"
 #line 527 "AdvancedModule.cs"
-                        double* csharp2cuda_temp_329 = &((scratch)[index]);
+                        float* csharp2cuda_temp_329 = &((scratch)[index]);
 #line 527 "AdvancedModule.cs"
-                        double csharp2cuda_temp_330 = (a)[index];
+                        float csharp2cuda_temp_330 = (a)[index];
                         (*(csharp2cuda_temp_329) = csharp2cuda_temp_330);
 #line 526 "AdvancedModule.cs"
                         int* csharp2cuda_temp_327 = &(index);
@@ -2868,20 +2868,20 @@ __device__ void mathblocks_advanced_dispatch(
 #line 532 "AdvancedModule.cs"
                         {
 #line 533 "AdvancedModule.cs"
-                            double csharp2cuda_temp_336;
+                            float csharp2cuda_temp_336;
 #line 533 "AdvancedModule.cs"
                             if (((csharp2cuda_i32_and(order, 1)) == (0)))
                             {
 #line 533 "AdvancedModule.cs"
-                                csharp2cuda_temp_336 = 1.0;
+                                csharp2cuda_temp_336 = 1.0f;
                             }
                             else
                             {
 #line 533 "AdvancedModule.cs"
-                                csharp2cuda_temp_336 = (-(1.0));
+                                csharp2cuda_temp_336 = (-(1.0f));
                             }
 #line 533 "AdvancedModule.cs"
-                            double sign = csharp2cuda_temp_336;
+                            float sign = csharp2cuda_temp_336;
 #line 534 "AdvancedModule.cs"
                             {
 #line 534 "AdvancedModule.cs"
@@ -2892,8 +2892,8 @@ __device__ void mathblocks_advanced_dispatch(
                                         break;
 #line 535 "AdvancedModule.cs"
 #line 535 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_338 = (scratch)[index];
-                                    if (((__dmul_rn(sign, csharp2cuda_temp_338)) < (0.0)))
+                                    float csharp2cuda_temp_338 = (scratch)[index];
+                                    if (((__fmul_rn(sign, csharp2cuda_temp_338)) < (0.0f)))
 #line 536 "AdvancedModule.cs"
                                     {
 #line 537 "AdvancedModule.cs"
@@ -2933,12 +2933,12 @@ __device__ void mathblocks_advanced_dispatch(
                                         break;
 #line 541 "AdvancedModule.cs"
 #line 541 "AdvancedModule.cs"
-                                    double* csharp2cuda_temp_343 = &((scratch)[csharp2cuda_i32_sub(index, 1)]);
+                                    float* csharp2cuda_temp_343 = &((scratch)[csharp2cuda_i32_sub(index, 1)]);
 #line 541 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_344 = (scratch)[index];
+                                    float csharp2cuda_temp_344 = (scratch)[index];
 #line 541 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_345 = (scratch)[csharp2cuda_i32_sub(index, 1)];
-                                    (*(csharp2cuda_temp_343) = __dsub_rn(csharp2cuda_temp_344, csharp2cuda_temp_345));
+                                    float csharp2cuda_temp_345 = (scratch)[csharp2cuda_i32_sub(index, 1)];
+                                    (*(csharp2cuda_temp_343) = __fsub_rn(csharp2cuda_temp_344, csharp2cuda_temp_345));
 #line 540 "AdvancedModule.cs"
                                     int* csharp2cuda_temp_340 = &(index);
                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_340));
@@ -2973,8 +2973,8 @@ __device__ void mathblocks_advanced_dispatch(
                             break;
 #line 547 "AdvancedModule.cs"
 #line 547 "AdvancedModule.cs"
-                        double csharp2cuda_temp_349 = (a)[index];
-                        if (((csharp2cuda_temp_349) < (0.0)))
+                        float csharp2cuda_temp_349 = (a)[index];
+                        if (((csharp2cuda_temp_349) < (0.0f)))
                         {
 #line 547 "AdvancedModule.cs"
 #line 547 "AdvancedModule.cs"
@@ -3013,14 +3013,14 @@ __device__ void mathblocks_advanced_dispatch(
                             break;
 #line 549 "AdvancedModule.cs"
 #line 549 "AdvancedModule.cs"
-                        double csharp2cuda_temp_355 = (a)[index];
+                        float csharp2cuda_temp_355 = (a)[index];
 #line 549 "AdvancedModule.cs"
-                        double csharp2cuda_temp_356 = (a)[index];
+                        float csharp2cuda_temp_356 = (a)[index];
 #line 549 "AdvancedModule.cs"
-                        double csharp2cuda_temp_357 = (a)[csharp2cuda_i32_sub(index, 1)];
+                        float csharp2cuda_temp_357 = (a)[csharp2cuda_i32_sub(index, 1)];
 #line 549 "AdvancedModule.cs"
-                        double csharp2cuda_temp_358 = (a)[csharp2cuda_i32_add(index, 1)];
-                        if (((__dmul_rn(csharp2cuda_temp_355, csharp2cuda_temp_356)) < (__dmul_rn(csharp2cuda_temp_357, csharp2cuda_temp_358))))
+                        float csharp2cuda_temp_358 = (a)[csharp2cuda_i32_add(index, 1)];
+                        if (((__fmul_rn(csharp2cuda_temp_355, csharp2cuda_temp_356)) < (__fmul_rn(csharp2cuda_temp_357, csharp2cuda_temp_358))))
                         {
 #line 550 "AdvancedModule.cs"
 #line 550 "AdvancedModule.cs"
@@ -3058,7 +3058,7 @@ __device__ void mathblocks_advanced_dispatch(
 #line 559 "AdvancedModule.cs"
                 {
 #line 560 "AdvancedModule.cs"
-                    double survival = 1.0;
+                    float survival = 1.0f;
 #line 561 "AdvancedModule.cs"
                     {
 #line 561 "AdvancedModule.cs"
@@ -3073,20 +3073,20 @@ __device__ void mathblocks_advanced_dispatch(
                             {
 #line 563 "AdvancedModule.cs"
 #line 563 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_366 = &((result)[index]);
+                                float* csharp2cuda_temp_366 = &((result)[index]);
 #line 563 "AdvancedModule.cs"
-                                double csharp2cuda_temp_367 = (a)[index];
+                                float csharp2cuda_temp_367 = (a)[index];
 #line 563 "AdvancedModule.cs"
-                                double csharp2cuda_temp_368 = __ddiv_rn(csharp2cuda_temp_367, survival);
+                                float csharp2cuda_temp_368 = __fdiv_rn(csharp2cuda_temp_367, survival);
                                 (*(csharp2cuda_temp_366) = csharp2cuda_temp_368);
 #line 564 "AdvancedModule.cs"
 #line 564 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_369 = &(survival);
+                                float* csharp2cuda_temp_369 = &(survival);
 #line 564 "AdvancedModule.cs"
-                                double csharp2cuda_temp_370 = *(csharp2cuda_temp_369);
+                                float csharp2cuda_temp_370 = *(csharp2cuda_temp_369);
 #line 564 "AdvancedModule.cs"
-                                double csharp2cuda_temp_371 = (a)[index];
-                                (*(csharp2cuda_temp_369) = __dsub_rn(csharp2cuda_temp_370, csharp2cuda_temp_371));
+                                float csharp2cuda_temp_371 = (a)[index];
+                                (*(csharp2cuda_temp_369) = __fsub_rn(csharp2cuda_temp_370, csharp2cuda_temp_371));
                             }
 #line 561 "AdvancedModule.cs"
                             int* csharp2cuda_temp_364 = &(index);
@@ -3120,7 +3120,7 @@ __device__ void mathblocks_advanced_dispatch(
 #line 575 "AdvancedModule.cs"
                 {
 #line 576 "AdvancedModule.cs"
-                    double survival = 1.0;
+                    float survival = 1.0f;
 #line 577 "AdvancedModule.cs"
                     {
 #line 577 "AdvancedModule.cs"
@@ -3135,16 +3135,16 @@ __device__ void mathblocks_advanced_dispatch(
                             {
 #line 579 "AdvancedModule.cs"
 #line 579 "AdvancedModule.cs"
-                                double csharp2cuda_temp_378 = (a)[index];
+                                float csharp2cuda_temp_378 = (a)[index];
 #line 579 "AdvancedModule.cs"
                                 bool csharp2cuda_temp_379;
 #line 579 "AdvancedModule.cs"
-                                if (!(((csharp2cuda_temp_378) < (0.0))))
+                                if (!(((csharp2cuda_temp_378) < (0.0f))))
                                 {
 #line 579 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_380 = (b)[index];
+                                    float csharp2cuda_temp_380 = (b)[index];
 #line 579 "AdvancedModule.cs"
-                                    csharp2cuda_temp_379 = ((csharp2cuda_temp_380) <= (0.0));
+                                    csharp2cuda_temp_379 = ((csharp2cuda_temp_380) <= (0.0f));
                                 }
                                 else
                                 {
@@ -3157,9 +3157,9 @@ __device__ void mathblocks_advanced_dispatch(
                                 if (!(csharp2cuda_temp_379))
                                 {
 #line 579 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_382 = (a)[index];
+                                    float csharp2cuda_temp_382 = (a)[index];
 #line 579 "AdvancedModule.cs"
-                                    double csharp2cuda_temp_383 = (b)[index];
+                                    float csharp2cuda_temp_383 = (b)[index];
 #line 579 "AdvancedModule.cs"
                                     csharp2cuda_temp_381 = ((csharp2cuda_temp_382) > (csharp2cuda_temp_383));
                                 }
@@ -3180,19 +3180,19 @@ __device__ void mathblocks_advanced_dispatch(
                                 }
 #line 584 "AdvancedModule.cs"
 #line 584 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_385 = &(survival);
+                                float* csharp2cuda_temp_385 = &(survival);
 #line 584 "AdvancedModule.cs"
-                                double csharp2cuda_temp_386 = *(csharp2cuda_temp_385);
+                                float csharp2cuda_temp_386 = *(csharp2cuda_temp_385);
 #line 584 "AdvancedModule.cs"
-                                double csharp2cuda_temp_387 = (a)[index];
+                                float csharp2cuda_temp_387 = (a)[index];
 #line 584 "AdvancedModule.cs"
-                                double csharp2cuda_temp_388 = (b)[index];
+                                float csharp2cuda_temp_388 = (b)[index];
 #line 584 "AdvancedModule.cs"
-                                double csharp2cuda_temp_389 = __ddiv_rn(csharp2cuda_temp_387, csharp2cuda_temp_388);
-                                (*(csharp2cuda_temp_385) = __dmul_rn(csharp2cuda_temp_386, __dsub_rn(1.0, csharp2cuda_temp_389)));
+                                float csharp2cuda_temp_389 = __fdiv_rn(csharp2cuda_temp_387, csharp2cuda_temp_388);
+                                (*(csharp2cuda_temp_385) = __fmul_rn(csharp2cuda_temp_386, __fsub_rn(1.0f, csharp2cuda_temp_389)));
 #line 585 "AdvancedModule.cs"
 #line 585 "AdvancedModule.cs"
-                                double* csharp2cuda_temp_390 = &((result)[index]);
+                                float* csharp2cuda_temp_390 = &((result)[index]);
                                 (*(csharp2cuda_temp_390) = survival);
                             }
 #line 577 "AdvancedModule.cs"
@@ -3408,7 +3408,7 @@ __device__ void mathblocks_advanced_dispatch(
         if (csharp2cuda_temp_406)
         {
 #line 595 "AdvancedModule.cs"
-            double csharp2cuda_temp_408 = (output)->scalar_value;
+            float csharp2cuda_temp_408 = (output)->scalar_value;
 #line 591 "AdvancedModule.cs"
             csharp2cuda_temp_407 = (!(isfinite(csharp2cuda_temp_408)));
         }
@@ -3586,7 +3586,7 @@ __device__ void mathblocks_advanced_dispatch(
                         break;
 #line 605 "AdvancedModule.cs"
 #line 605 "AdvancedModule.cs"
-                    double csharp2cuda_temp_424 = (result)[index];
+                    float csharp2cuda_temp_424 = (result)[index];
                     if ((!(isfinite(csharp2cuda_temp_424))))
                     {
 #line 605 "AdvancedModule.cs"
@@ -3604,7 +3604,7 @@ __device__ void mathblocks_advanced_dispatch(
 }
 
 #line 97 "AdvancedModule.cs"
-__device__ bool mathblocks_advanced_distribution(const double* values, int count)
+__device__ bool mathblocks_advanced_distribution(const float* values, int count)
 #line 99 "AdvancedModule.cs"
 {
 #line 100 "AdvancedModule.cs"
@@ -3612,11 +3612,11 @@ __device__ bool mathblocks_advanced_distribution(const double* values, int count
 }
 
 #line 88 "AdvancedModule.cs"
-__device__ double mathblocks_advanced_factorial(int value)
+__device__ float mathblocks_advanced_factorial(int value)
 #line 90 "AdvancedModule.cs"
 {
 #line 91 "AdvancedModule.cs"
-    double result = 1.0;
+    float result = 1.0f;
 #line 92 "AdvancedModule.cs"
     {
 #line 92 "AdvancedModule.cs"
@@ -3627,10 +3627,10 @@ __device__ double mathblocks_advanced_factorial(int value)
                 break;
 #line 93 "AdvancedModule.cs"
 #line 93 "AdvancedModule.cs"
-            double* csharp2cuda_temp_1 = &(result);
+            float* csharp2cuda_temp_1 = &(result);
 #line 93 "AdvancedModule.cs"
-            double csharp2cuda_temp_2 = *(csharp2cuda_temp_1);
-            (*(csharp2cuda_temp_1) = __dmul_rn(csharp2cuda_temp_2, ((double)(index))));
+            float csharp2cuda_temp_2 = *(csharp2cuda_temp_1);
+            (*(csharp2cuda_temp_1) = __fmul_rn(csharp2cuda_temp_2, ((float)(index))));
 #line 92 "AdvancedModule.cs"
             int* csharp2cuda_temp_0 = &(index);
             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_0));
@@ -3723,7 +3723,7 @@ __device__ bool mathblocks_advanced_power_of_two(int value)
 
 #line 103 "AdvancedModule.cs"
 __device__ bool mathblocks_advanced_transition(
-    const double* values,
+    const float* values,
     int rows,
     int columns)
 #line 108 "AdvancedModule.cs"
@@ -3745,7 +3745,7 @@ __device__ bool mathblocks_advanced_transition(
 #line 112 "AdvancedModule.cs"
             {
 #line 113 "AdvancedModule.cs"
-                double sum = 0.0;
+                float sum = 0.0f;
 #line 114 "AdvancedModule.cs"
                 {
 #line 114 "AdvancedModule.cs"
@@ -3757,19 +3757,19 @@ __device__ bool mathblocks_advanced_transition(
 #line 115 "AdvancedModule.cs"
                         {
 #line 116 "AdvancedModule.cs"
-                            double value = (values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)];
+                            float value = (values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)];
 #line 117 "AdvancedModule.cs"
-                            if (((value) < (0.0)))
+                            if (((value) < (0.0f)))
                             {
 #line 118 "AdvancedModule.cs"
                                 return false;
                             }
 #line 119 "AdvancedModule.cs"
 #line 119 "AdvancedModule.cs"
-                            double* csharp2cuda_temp_2 = &(sum);
+                            float* csharp2cuda_temp_2 = &(sum);
 #line 119 "AdvancedModule.cs"
-                            double csharp2cuda_temp_3 = *(csharp2cuda_temp_2);
-                            (*(csharp2cuda_temp_2) = __dadd_rn(csharp2cuda_temp_3, value));
+                            float csharp2cuda_temp_3 = *(csharp2cuda_temp_2);
+                            (*(csharp2cuda_temp_2) = __fadd_rn(csharp2cuda_temp_3, value));
                         }
 #line 114 "AdvancedModule.cs"
                         int* csharp2cuda_temp_1 = &(column);
@@ -3777,7 +3777,7 @@ __device__ bool mathblocks_advanced_transition(
                     }
                 }
 #line 121 "AdvancedModule.cs"
-                if (((fabs(__dsub_rn(sum, 1.0))) > (1E-10)))
+                if (((fabsf(__fsub_rn(sum, 1.0f))) > (1E-05f)))
                 {
 #line 122 "AdvancedModule.cs"
                     return false;

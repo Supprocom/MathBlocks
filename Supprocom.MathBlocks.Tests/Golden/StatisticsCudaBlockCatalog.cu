@@ -640,13 +640,13 @@ static __device__ __forceinline__ short csharp2cuda_i16_post_decrement(short& ta
 
 #line 200 "StatisticsModule.cs"
 __device__ void mathblocks_statistics_center_distance(
-    const double* values,
+    const float* values,
     int count,
-    double* result,
-    double* row_means);
+    float* result,
+    float* row_means);
 
 #line 94 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_correlation_value(double covariance, double left_variance, double right_variance);
+__device__ float mathblocks_statistics_correlation_value(float covariance, float left_variance, float right_variance);
 
 #line 387 "StatisticsModule.cs"
 __device__ void mathblocks_statistics_dispatch(
@@ -656,115 +656,115 @@ __device__ void mathblocks_statistics_dispatch(
     MathBlockSlot* output);
 
 #line 106 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_distance_correlation_value(
-    double covariance_square,
-    double left_variance_square,
-    double right_variance_square);
+__device__ float mathblocks_statistics_distance_correlation_value(
+    float covariance_square,
+    float left_variance_square,
+    float right_variance_square);
 
 #line 247 "StatisticsModule.cs"
 __device__ bool mathblocks_statistics_kendall_value(
-    const double* left_values,
-    const double* right_values,
+    const float* left_values,
+    const float* right_values,
     int count,
-    double* value);
+    float* value);
 
 #line 49 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_mean(const double* values, int count);
+__device__ float mathblocks_statistics_mean(const float* values, int count);
 
 #line 163 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_median(double* values, int count);
+__device__ float mathblocks_statistics_median(float* values, int count);
 
 #line 227 "StatisticsModule.cs"
 __device__ bool mathblocks_statistics_moment_value(
-    const double* values,
+    const float* values,
     int count,
-    double order_value,
+    float order_value,
     bool central,
-    double* value);
+    float* value);
 
 #line 343 "StatisticsModule.cs"
 __device__ int mathblocks_statistics_pair_averages(
-    const double* values,
+    const float* values,
     int count,
-    double* averages);
+    float* averages);
 
 #line 358 "StatisticsModule.cs"
 __device__ int mathblocks_statistics_pair_slopes(
-    const double* x,
-    const double* y,
+    const float* x,
+    const float* y,
     int count,
-    double* slopes);
+    float* slopes);
 
 #line 119 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_pearson(
-    const double* left,
-    const double* right,
+__device__ float mathblocks_statistics_pearson(
+    const float* left,
+    const float* right,
     int count);
 
 #line 70 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_population_covariance(
-    const double* left,
-    const double* right,
+__device__ float mathblocks_statistics_population_covariance(
+    const float* left,
+    const float* right,
     int count);
 
 #line 55 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_population_variance(
-    const double* values,
+__device__ float mathblocks_statistics_population_variance(
+    const float* values,
     int count);
 
 #line 85 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_quotient_by_variance(double covariance, double variance);
+__device__ float mathblocks_statistics_quotient_by_variance(float covariance, float variance);
 
 #line 190 "StatisticsModule.cs"
 __device__ void mathblocks_statistics_rank(
-    const double* values,
+    const float* values,
     int count,
-    double* result);
+    float* result);
 
 #line 172 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_rank_at(
-    const double* values,
+__device__ float mathblocks_statistics_rank_at(
+    const float* values,
     int count,
     int index);
 
 #line 285 "StatisticsModule.cs"
 __device__ bool mathblocks_statistics_shape_moment_value(
-    const double* values,
+    const float* values,
     int count,
     bool kurtosis,
-    double* value);
+    float* value);
 
 #line 138 "StatisticsModule.cs"
 __device__ void mathblocks_statistics_sort_copy(
-    const double* values,
+    const float* values,
     int count,
-    double* result,
+    float* result,
     bool descending);
 
 #line 148 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_sorted_quantile(
-    const double* sorted,
+__device__ float mathblocks_statistics_sorted_quantile(
+    const float* sorted,
     int count,
-    double probability);
+    float probability);
 
 #line 312 "StatisticsModule.cs"
 __device__ bool mathblocks_statistics_weighted_value(
-    const double* values,
-    const double* weights,
+    const float* values,
+    const float* weights,
     int count,
     bool variance,
-    double* value);
+    float* value);
 
 #line 200 "StatisticsModule.cs"
 __device__ void mathblocks_statistics_center_distance(
-    const double* values,
+    const float* values,
     int count,
-    double* result,
-    double* row_means)
+    float* result,
+    float* row_means)
 #line 206 "StatisticsModule.cs"
 {
 #line 207 "StatisticsModule.cs"
-    double total_mean = 0.0;
+    float total_mean = 0.0f;
 #line 208 "StatisticsModule.cs"
     {
 #line 208 "StatisticsModule.cs"
@@ -777,8 +777,8 @@ __device__ void mathblocks_statistics_center_distance(
             {
 #line 210 "StatisticsModule.cs"
 #line 210 "StatisticsModule.cs"
-                double* csharp2cuda_temp_1 = &((row_means)[row]);
-                (*(csharp2cuda_temp_1) = 0.0);
+                float* csharp2cuda_temp_1 = &((row_means)[row]);
+                (*(csharp2cuda_temp_1) = 0.0f);
 #line 211 "StatisticsModule.cs"
                 {
 #line 211 "StatisticsModule.cs"
@@ -790,27 +790,27 @@ __device__ void mathblocks_statistics_center_distance(
 #line 212 "StatisticsModule.cs"
                         {
 #line 213 "StatisticsModule.cs"
-                            double csharp2cuda_temp_3 = (values)[row];
+                            float csharp2cuda_temp_3 = (values)[row];
 #line 213 "StatisticsModule.cs"
-                            double csharp2cuda_temp_4 = (values)[column];
+                            float csharp2cuda_temp_4 = (values)[column];
 #line 213 "StatisticsModule.cs"
-                            double distance = fabs(__dsub_rn(csharp2cuda_temp_3, csharp2cuda_temp_4));
+                            float distance = fabsf(__fsub_rn(csharp2cuda_temp_3, csharp2cuda_temp_4));
 #line 214 "StatisticsModule.cs"
 #line 214 "StatisticsModule.cs"
-                            double* csharp2cuda_temp_5 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, count), column)]);
+                            float* csharp2cuda_temp_5 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, count), column)]);
                             (*(csharp2cuda_temp_5) = distance);
 #line 215 "StatisticsModule.cs"
 #line 215 "StatisticsModule.cs"
-                            double* csharp2cuda_temp_6 = &((row_means)[row]);
+                            float* csharp2cuda_temp_6 = &((row_means)[row]);
 #line 215 "StatisticsModule.cs"
-                            double csharp2cuda_temp_7 = *(csharp2cuda_temp_6);
-                            (*(csharp2cuda_temp_6) = __dadd_rn(csharp2cuda_temp_7, distance));
+                            float csharp2cuda_temp_7 = *(csharp2cuda_temp_6);
+                            (*(csharp2cuda_temp_6) = __fadd_rn(csharp2cuda_temp_7, distance));
 #line 216 "StatisticsModule.cs"
 #line 216 "StatisticsModule.cs"
-                            double* csharp2cuda_temp_8 = &(total_mean);
+                            float* csharp2cuda_temp_8 = &(total_mean);
 #line 216 "StatisticsModule.cs"
-                            double csharp2cuda_temp_9 = *(csharp2cuda_temp_8);
-                            (*(csharp2cuda_temp_8) = __dadd_rn(csharp2cuda_temp_9, distance));
+                            float csharp2cuda_temp_9 = *(csharp2cuda_temp_8);
+                            (*(csharp2cuda_temp_8) = __fadd_rn(csharp2cuda_temp_9, distance));
                         }
 #line 211 "StatisticsModule.cs"
                         int* csharp2cuda_temp_2 = &(column);
@@ -819,10 +819,10 @@ __device__ void mathblocks_statistics_center_distance(
                 }
 #line 218 "StatisticsModule.cs"
 #line 218 "StatisticsModule.cs"
-                double* csharp2cuda_temp_10 = &((row_means)[row]);
+                float* csharp2cuda_temp_10 = &((row_means)[row]);
 #line 218 "StatisticsModule.cs"
-                double csharp2cuda_temp_11 = *(csharp2cuda_temp_10);
-                (*(csharp2cuda_temp_10) = __ddiv_rn(csharp2cuda_temp_11, ((double)(count))));
+                float csharp2cuda_temp_11 = *(csharp2cuda_temp_10);
+                (*(csharp2cuda_temp_10) = __fdiv_rn(csharp2cuda_temp_11, ((float)(count))));
             }
 #line 208 "StatisticsModule.cs"
             int* csharp2cuda_temp_0 = &(row);
@@ -831,10 +831,10 @@ __device__ void mathblocks_statistics_center_distance(
     }
 #line 220 "StatisticsModule.cs"
 #line 220 "StatisticsModule.cs"
-    double* csharp2cuda_temp_12 = &(total_mean);
+    float* csharp2cuda_temp_12 = &(total_mean);
 #line 220 "StatisticsModule.cs"
-    double csharp2cuda_temp_13 = *(csharp2cuda_temp_12);
-    (*(csharp2cuda_temp_12) = __ddiv_rn(csharp2cuda_temp_13, ((double)(csharp2cuda_i32_mul(count, count)))));
+    float csharp2cuda_temp_13 = *(csharp2cuda_temp_12);
+    (*(csharp2cuda_temp_12) = __fdiv_rn(csharp2cuda_temp_13, ((float)(csharp2cuda_i32_mul(count, count)))));
 #line 221 "StatisticsModule.cs"
     {
 #line 221 "StatisticsModule.cs"
@@ -853,14 +853,14 @@ __device__ void mathblocks_statistics_center_distance(
                         break;
 #line 223 "StatisticsModule.cs"
 #line 223 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_16 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, count), column)]);
+                    float* csharp2cuda_temp_16 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, count), column)]);
 #line 223 "StatisticsModule.cs"
-                    double csharp2cuda_temp_17 = *(csharp2cuda_temp_16);
+                    float csharp2cuda_temp_17 = *(csharp2cuda_temp_16);
 #line 224 "StatisticsModule.cs"
-                    double csharp2cuda_temp_18 = (row_means)[row];
+                    float csharp2cuda_temp_18 = (row_means)[row];
 #line 224 "StatisticsModule.cs"
-                    double csharp2cuda_temp_19 = (row_means)[column];
-                    (*(csharp2cuda_temp_16) = __dsub_rn(csharp2cuda_temp_17, __dsub_rn(__dadd_rn(csharp2cuda_temp_18, csharp2cuda_temp_19), total_mean)));
+                    float csharp2cuda_temp_19 = (row_means)[column];
+                    (*(csharp2cuda_temp_16) = __fsub_rn(csharp2cuda_temp_17, __fsub_rn(__fadd_rn(csharp2cuda_temp_18, csharp2cuda_temp_19), total_mean)));
 #line 222 "StatisticsModule.cs"
                     int* csharp2cuda_temp_15 = &(column);
                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_15));
@@ -874,7 +874,7 @@ __device__ void mathblocks_statistics_center_distance(
 }
 
 #line 94 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_correlation_value(double covariance, double left_variance, double right_variance)
+__device__ float mathblocks_statistics_correlation_value(float covariance, float left_variance, float right_variance)
 #line 96 "StatisticsModule.cs"
 {
 #line 97 "StatisticsModule.cs"
@@ -897,7 +897,7 @@ __device__ double mathblocks_statistics_correlation_value(double covariance, dou
         return mathblocks_quiet_nan();
     }
 #line 99 "StatisticsModule.cs"
-    double denominator = __dmul_rn(mathblocks_square_root(left_variance), mathblocks_square_root(right_variance));
+    float denominator = __fmul_rn(mathblocks_square_root(left_variance), mathblocks_square_root(right_variance));
 #line 100 "StatisticsModule.cs"
     if ((!(isfinite(denominator))))
     {
@@ -905,7 +905,7 @@ __device__ double mathblocks_statistics_correlation_value(double covariance, dou
         return mathblocks_quiet_nan();
     }
 #line 102 "StatisticsModule.cs"
-    return __ddiv_rn(covariance, denominator);
+    return __fdiv_rn(covariance, denominator);
 }
 
 #line 387 "StatisticsModule.cs"
@@ -954,8 +954,8 @@ __device__ void mathblocks_statistics_dispatch(
     {
 #line 399 "StatisticsModule.cs"
 #line 399 "StatisticsModule.cs"
-        double* csharp2cuda_temp_2 = &((output)->scalar_value);
-        (*(csharp2cuda_temp_2) = 0.0);
+        float* csharp2cuda_temp_2 = &((output)->scalar_value);
+        (*(csharp2cuda_temp_2) = 0.0f);
 #line 400 "StatisticsModule.cs"
 #line 400 "StatisticsModule.cs"
         int* csharp2cuda_temp_3 = &((output)->boolean_value);
@@ -1024,47 +1024,47 @@ __device__ void mathblocks_statistics_dispatch(
         return;
     }
 #line 412 "StatisticsModule.cs"
-    double* csharp2cuda_temp_13;
+    float* csharp2cuda_temp_13;
 #line 412 "StatisticsModule.cs"
     if (((((void*)(first))) == (((void*)(nullptr)))))
     {
 #line 412 "StatisticsModule.cs"
-        csharp2cuda_temp_13 = ((double*)(nullptr));
+        csharp2cuda_temp_13 = ((float*)(nullptr));
     }
     else
     {
 #line 412 "StatisticsModule.cs"
         unsigned long long csharp2cuda_temp_14 = (first)->data_pointer;
 #line 412 "StatisticsModule.cs"
-        csharp2cuda_temp_13 = ((double*)(csharp2cuda_temp_14));
+        csharp2cuda_temp_13 = ((float*)(csharp2cuda_temp_14));
     }
 #line 412 "StatisticsModule.cs"
-    const double* a = csharp2cuda_temp_13;
+    const float* a = csharp2cuda_temp_13;
 #line 413 "StatisticsModule.cs"
-    double* csharp2cuda_temp_15;
+    float* csharp2cuda_temp_15;
 #line 413 "StatisticsModule.cs"
     if (((((void*)(second))) == (((void*)(nullptr)))))
     {
 #line 413 "StatisticsModule.cs"
-        csharp2cuda_temp_15 = ((double*)(nullptr));
+        csharp2cuda_temp_15 = ((float*)(nullptr));
     }
     else
     {
 #line 413 "StatisticsModule.cs"
         unsigned long long csharp2cuda_temp_16 = (second)->data_pointer;
 #line 413 "StatisticsModule.cs"
-        csharp2cuda_temp_15 = ((double*)(csharp2cuda_temp_16));
+        csharp2cuda_temp_15 = ((float*)(csharp2cuda_temp_16));
     }
 #line 413 "StatisticsModule.cs"
-    const double* b = csharp2cuda_temp_15;
+    const float* b = csharp2cuda_temp_15;
 #line 414 "StatisticsModule.cs"
     unsigned long long csharp2cuda_temp_17 = (output)->data_pointer;
 #line 414 "StatisticsModule.cs"
-    double* result = ((double*)(csharp2cuda_temp_17));
+    float* result = ((float*)(csharp2cuda_temp_17));
 #line 415 "StatisticsModule.cs"
     unsigned long long csharp2cuda_temp_18 = (output)->scratch_pointer;
 #line 415 "StatisticsModule.cs"
-    double* scratch = ((double*)(csharp2cuda_temp_18));
+    float* scratch = ((float*)(csharp2cuda_temp_18));
 #line 419 "StatisticsModule.cs"
 #line 419 "StatisticsModule.cs"
     bool csharp2cuda_temp_19;
@@ -1128,21 +1128,21 @@ __device__ void mathblocks_statistics_dispatch(
                 {
 #line 423 "StatisticsModule.cs"
 #line 423 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_28 = &((scratch)[index]);
+                    float* csharp2cuda_temp_28 = &((scratch)[index]);
 #line 423 "StatisticsModule.cs"
                     int csharp2cuda_temp_29 = (first)->count;
 #line 423 "StatisticsModule.cs"
-                    double csharp2cuda_temp_30 = mathblocks_statistics_rank_at(a, csharp2cuda_temp_29, index);
+                    float csharp2cuda_temp_30 = mathblocks_statistics_rank_at(a, csharp2cuda_temp_29, index);
                     (*(csharp2cuda_temp_28) = csharp2cuda_temp_30);
 #line 424 "StatisticsModule.cs"
 #line 424 "StatisticsModule.cs"
                     int csharp2cuda_temp_31 = (first)->count;
 #line 424 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_32 = &((scratch)[csharp2cuda_i32_add(csharp2cuda_temp_31, index)]);
+                    float* csharp2cuda_temp_32 = &((scratch)[csharp2cuda_i32_add(csharp2cuda_temp_31, index)]);
 #line 424 "StatisticsModule.cs"
                     int csharp2cuda_temp_33 = (first)->count;
 #line 424 "StatisticsModule.cs"
-                    double csharp2cuda_temp_34 = mathblocks_statistics_rank_at(b, csharp2cuda_temp_33, index);
+                    float csharp2cuda_temp_34 = mathblocks_statistics_rank_at(b, csharp2cuda_temp_33, index);
                     (*(csharp2cuda_temp_32) = csharp2cuda_temp_34);
                 }
 #line 421 "StatisticsModule.cs"
@@ -1211,11 +1211,11 @@ __device__ void mathblocks_statistics_dispatch(
 #line 438 "StatisticsModule.cs"
         int distance_cells = csharp2cuda_i32_mul(distance_count, distance_count);
 #line 439 "StatisticsModule.cs"
-        double* left_distances = scratch;
+        float* left_distances = scratch;
 #line 440 "StatisticsModule.cs"
-        double* right_distances = csharp2cuda_pointer_add(scratch, distance_cells);
+        float* right_distances = csharp2cuda_pointer_add(scratch, distance_cells);
 #line 441 "StatisticsModule.cs"
-        double* row_means = csharp2cuda_pointer_add(right_distances, distance_cells);
+        float* row_means = csharp2cuda_pointer_add(right_distances, distance_cells);
 #line 442 "StatisticsModule.cs"
         int second_owner = csharp2cuda_i32_rem(1, blockDim.x);
 #line 443 "StatisticsModule.cs"
@@ -1232,8 +1232,8 @@ __device__ void mathblocks_statistics_dispatch(
                 {
 #line 446 "StatisticsModule.cs"
 #line 446 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_43 = &((row_means)[row]);
-                    (*(csharp2cuda_temp_43) = 0.0);
+                    float* csharp2cuda_temp_43 = &((row_means)[row]);
+                    (*(csharp2cuda_temp_43) = 0.0f);
 #line 447 "StatisticsModule.cs"
                     {
 #line 447 "StatisticsModule.cs"
@@ -1245,29 +1245,29 @@ __device__ void mathblocks_statistics_dispatch(
 #line 448 "StatisticsModule.cs"
                             {
 #line 449 "StatisticsModule.cs"
-                                double csharp2cuda_temp_45 = (a)[row];
+                                float csharp2cuda_temp_45 = (a)[row];
 #line 449 "StatisticsModule.cs"
-                                double csharp2cuda_temp_46 = (a)[column];
+                                float csharp2cuda_temp_46 = (a)[column];
 #line 449 "StatisticsModule.cs"
-                                double distance = fabs(__dsub_rn(csharp2cuda_temp_45, csharp2cuda_temp_46));
+                                float distance = fabsf(__fsub_rn(csharp2cuda_temp_45, csharp2cuda_temp_46));
 #line 450 "StatisticsModule.cs"
 #line 450 "StatisticsModule.cs"
-                                double* csharp2cuda_temp_47 = &((left_distances)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, distance_count), column)]);
+                                float* csharp2cuda_temp_47 = &((left_distances)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, distance_count), column)]);
                                 (*(csharp2cuda_temp_47) = distance);
 #line 451 "StatisticsModule.cs"
 #line 451 "StatisticsModule.cs"
-                                double* csharp2cuda_temp_48 = &((row_means)[row]);
+                                float* csharp2cuda_temp_48 = &((row_means)[row]);
 #line 451 "StatisticsModule.cs"
-                                double csharp2cuda_temp_49 = *(csharp2cuda_temp_48);
-                                (*(csharp2cuda_temp_48) = __dadd_rn(csharp2cuda_temp_49, distance));
+                                float csharp2cuda_temp_49 = *(csharp2cuda_temp_48);
+                                (*(csharp2cuda_temp_48) = __fadd_rn(csharp2cuda_temp_49, distance));
 #line 452 "StatisticsModule.cs"
 #line 452 "StatisticsModule.cs"
-                                double* csharp2cuda_temp_50 = &((right_distances)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, distance_count), column)]);
+                                float* csharp2cuda_temp_50 = &((right_distances)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, distance_count), column)]);
 #line 452 "StatisticsModule.cs"
-                                double csharp2cuda_temp_51 = (b)[row];
+                                float csharp2cuda_temp_51 = (b)[row];
 #line 452 "StatisticsModule.cs"
-                                double csharp2cuda_temp_52 = (b)[column];
-                                (*(csharp2cuda_temp_50) = fabs(__dsub_rn(csharp2cuda_temp_51, csharp2cuda_temp_52)));
+                                float csharp2cuda_temp_52 = (b)[column];
+                                (*(csharp2cuda_temp_50) = fabsf(__fsub_rn(csharp2cuda_temp_51, csharp2cuda_temp_52)));
                             }
 #line 447 "StatisticsModule.cs"
                             int* csharp2cuda_temp_44 = &(column);
@@ -1276,10 +1276,10 @@ __device__ void mathblocks_statistics_dispatch(
                     }
 #line 454 "StatisticsModule.cs"
 #line 454 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_53 = &((row_means)[row]);
+                    float* csharp2cuda_temp_53 = &((row_means)[row]);
 #line 454 "StatisticsModule.cs"
-                    double csharp2cuda_temp_54 = *(csharp2cuda_temp_53);
-                    (*(csharp2cuda_temp_53) = __ddiv_rn(csharp2cuda_temp_54, ((double)(distance_count))));
+                    float csharp2cuda_temp_54 = *(csharp2cuda_temp_53);
+                    (*(csharp2cuda_temp_53) = __fdiv_rn(csharp2cuda_temp_54, ((float)(distance_count))));
                 }
 #line 444 "StatisticsModule.cs"
                 int* csharp2cuda_temp_41 = &(row);
@@ -1291,9 +1291,9 @@ __device__ void mathblocks_statistics_dispatch(
 #line 456 "StatisticsModule.cs"
         __syncthreads();
 #line 457 "StatisticsModule.cs"
-        double left_total = 0.0;
+        float left_total = 0.0f;
 #line 458 "StatisticsModule.cs"
-        double right_total = 0.0;
+        float right_total = 0.0f;
 #line 459 "StatisticsModule.cs"
         if (((thread) == (0)))
 #line 460 "StatisticsModule.cs"
@@ -1308,12 +1308,12 @@ __device__ void mathblocks_statistics_dispatch(
                         break;
 #line 462 "StatisticsModule.cs"
 #line 462 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_56 = &(left_total);
+                    float* csharp2cuda_temp_56 = &(left_total);
 #line 462 "StatisticsModule.cs"
-                    double csharp2cuda_temp_57 = *(csharp2cuda_temp_56);
+                    float csharp2cuda_temp_57 = *(csharp2cuda_temp_56);
 #line 462 "StatisticsModule.cs"
-                    double csharp2cuda_temp_58 = (left_distances)[index];
-                    (*(csharp2cuda_temp_56) = __dadd_rn(csharp2cuda_temp_57, csharp2cuda_temp_58));
+                    float csharp2cuda_temp_58 = (left_distances)[index];
+                    (*(csharp2cuda_temp_56) = __fadd_rn(csharp2cuda_temp_57, csharp2cuda_temp_58));
 #line 461 "StatisticsModule.cs"
                     int* csharp2cuda_temp_55 = &(index);
                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_55));
@@ -1321,13 +1321,13 @@ __device__ void mathblocks_statistics_dispatch(
             }
 #line 463 "StatisticsModule.cs"
 #line 463 "StatisticsModule.cs"
-            double* csharp2cuda_temp_59 = &(left_total);
+            float* csharp2cuda_temp_59 = &(left_total);
 #line 463 "StatisticsModule.cs"
-            double csharp2cuda_temp_60 = *(csharp2cuda_temp_59);
-            (*(csharp2cuda_temp_59) = __ddiv_rn(csharp2cuda_temp_60, ((double)(csharp2cuda_i32_mul(distance_count, distance_count)))));
+            float csharp2cuda_temp_60 = *(csharp2cuda_temp_59);
+            (*(csharp2cuda_temp_59) = __fdiv_rn(csharp2cuda_temp_60, ((float)(csharp2cuda_i32_mul(distance_count, distance_count)))));
 #line 464 "StatisticsModule.cs"
 #line 464 "StatisticsModule.cs"
-            double* csharp2cuda_temp_61 = &((output)->scalar_value);
+            float* csharp2cuda_temp_61 = &((output)->scalar_value);
             (*(csharp2cuda_temp_61) = left_total);
         }
 #line 466 "StatisticsModule.cs"
@@ -1344,12 +1344,12 @@ __device__ void mathblocks_statistics_dispatch(
                         break;
 #line 469 "StatisticsModule.cs"
 #line 469 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_63 = &(right_total);
+                    float* csharp2cuda_temp_63 = &(right_total);
 #line 469 "StatisticsModule.cs"
-                    double csharp2cuda_temp_64 = *(csharp2cuda_temp_63);
+                    float csharp2cuda_temp_64 = *(csharp2cuda_temp_63);
 #line 469 "StatisticsModule.cs"
-                    double csharp2cuda_temp_65 = (right_distances)[index];
-                    (*(csharp2cuda_temp_63) = __dadd_rn(csharp2cuda_temp_64, csharp2cuda_temp_65));
+                    float csharp2cuda_temp_65 = (right_distances)[index];
+                    (*(csharp2cuda_temp_63) = __fadd_rn(csharp2cuda_temp_64, csharp2cuda_temp_65));
 #line 468 "StatisticsModule.cs"
                     int* csharp2cuda_temp_62 = &(index);
                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_62));
@@ -1357,15 +1357,15 @@ __device__ void mathblocks_statistics_dispatch(
             }
 #line 470 "StatisticsModule.cs"
 #line 470 "StatisticsModule.cs"
-            double* csharp2cuda_temp_66 = &(right_total);
+            float* csharp2cuda_temp_66 = &(right_total);
 #line 470 "StatisticsModule.cs"
-            double csharp2cuda_temp_67 = *(csharp2cuda_temp_66);
-            (*(csharp2cuda_temp_66) = __ddiv_rn(csharp2cuda_temp_67, ((double)(csharp2cuda_i32_mul(distance_count, distance_count)))));
+            float csharp2cuda_temp_67 = *(csharp2cuda_temp_66);
+            (*(csharp2cuda_temp_66) = __fdiv_rn(csharp2cuda_temp_67, ((float)(csharp2cuda_i32_mul(distance_count, distance_count)))));
         }
 #line 472 "StatisticsModule.cs"
         __syncthreads();
 #line 473 "StatisticsModule.cs"
-        double left_mean = (output)->scalar_value;
+        float left_mean = (output)->scalar_value;
 #line 474 "StatisticsModule.cs"
         {
 #line 474 "StatisticsModule.cs"
@@ -1384,14 +1384,14 @@ __device__ void mathblocks_statistics_dispatch(
                             break;
 #line 476 "StatisticsModule.cs"
 #line 476 "StatisticsModule.cs"
-                        double* csharp2cuda_temp_71 = &((left_distances)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, distance_count), column)]);
+                        float* csharp2cuda_temp_71 = &((left_distances)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, distance_count), column)]);
 #line 476 "StatisticsModule.cs"
-                        double csharp2cuda_temp_72 = *(csharp2cuda_temp_71);
+                        float csharp2cuda_temp_72 = *(csharp2cuda_temp_71);
 #line 477 "StatisticsModule.cs"
-                        double csharp2cuda_temp_73 = (row_means)[row];
+                        float csharp2cuda_temp_73 = (row_means)[row];
 #line 477 "StatisticsModule.cs"
-                        double csharp2cuda_temp_74 = (row_means)[column];
-                        (*(csharp2cuda_temp_71) = __dsub_rn(csharp2cuda_temp_72, __dsub_rn(__dadd_rn(csharp2cuda_temp_73, csharp2cuda_temp_74), left_mean)));
+                        float csharp2cuda_temp_74 = (row_means)[column];
+                        (*(csharp2cuda_temp_71) = __fsub_rn(csharp2cuda_temp_72, __fsub_rn(__fadd_rn(csharp2cuda_temp_73, csharp2cuda_temp_74), left_mean)));
 #line 475 "StatisticsModule.cs"
                         int* csharp2cuda_temp_70 = &(column);
                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_70));
@@ -1411,7 +1411,7 @@ __device__ void mathblocks_statistics_dispatch(
         {
 #line 480 "StatisticsModule.cs"
 #line 480 "StatisticsModule.cs"
-            double* csharp2cuda_temp_75 = &((output)->scalar_value);
+            float* csharp2cuda_temp_75 = &((output)->scalar_value);
             (*(csharp2cuda_temp_75) = right_total);
         }
 #line 481 "StatisticsModule.cs"
@@ -1426,8 +1426,8 @@ __device__ void mathblocks_statistics_dispatch(
                 {
 #line 483 "StatisticsModule.cs"
 #line 483 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_78 = &((row_means)[row]);
-                    (*(csharp2cuda_temp_78) = 0.0);
+                    float* csharp2cuda_temp_78 = &((row_means)[row]);
+                    (*(csharp2cuda_temp_78) = 0.0f);
 #line 484 "StatisticsModule.cs"
                     {
 #line 484 "StatisticsModule.cs"
@@ -1438,12 +1438,12 @@ __device__ void mathblocks_statistics_dispatch(
                                 break;
 #line 485 "StatisticsModule.cs"
 #line 485 "StatisticsModule.cs"
-                            double* csharp2cuda_temp_80 = &((row_means)[row]);
+                            float* csharp2cuda_temp_80 = &((row_means)[row]);
 #line 485 "StatisticsModule.cs"
-                            double csharp2cuda_temp_81 = *(csharp2cuda_temp_80);
+                            float csharp2cuda_temp_81 = *(csharp2cuda_temp_80);
 #line 485 "StatisticsModule.cs"
-                            double csharp2cuda_temp_82 = (right_distances)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, distance_count), column)];
-                            (*(csharp2cuda_temp_80) = __dadd_rn(csharp2cuda_temp_81, csharp2cuda_temp_82));
+                            float csharp2cuda_temp_82 = (right_distances)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, distance_count), column)];
+                            (*(csharp2cuda_temp_80) = __fadd_rn(csharp2cuda_temp_81, csharp2cuda_temp_82));
 #line 484 "StatisticsModule.cs"
                             int* csharp2cuda_temp_79 = &(column);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_79));
@@ -1451,10 +1451,10 @@ __device__ void mathblocks_statistics_dispatch(
                     }
 #line 486 "StatisticsModule.cs"
 #line 486 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_83 = &((row_means)[row]);
+                    float* csharp2cuda_temp_83 = &((row_means)[row]);
 #line 486 "StatisticsModule.cs"
-                    double csharp2cuda_temp_84 = *(csharp2cuda_temp_83);
-                    (*(csharp2cuda_temp_83) = __ddiv_rn(csharp2cuda_temp_84, ((double)(distance_count))));
+                    float csharp2cuda_temp_84 = *(csharp2cuda_temp_83);
+                    (*(csharp2cuda_temp_83) = __fdiv_rn(csharp2cuda_temp_84, ((float)(distance_count))));
                 }
 #line 481 "StatisticsModule.cs"
                 int* csharp2cuda_temp_76 = &(row);
@@ -1466,7 +1466,7 @@ __device__ void mathblocks_statistics_dispatch(
 #line 488 "StatisticsModule.cs"
         __syncthreads();
 #line 489 "StatisticsModule.cs"
-        double right_mean = (output)->scalar_value;
+        float right_mean = (output)->scalar_value;
 #line 490 "StatisticsModule.cs"
         {
 #line 490 "StatisticsModule.cs"
@@ -1485,14 +1485,14 @@ __device__ void mathblocks_statistics_dispatch(
                             break;
 #line 492 "StatisticsModule.cs"
 #line 492 "StatisticsModule.cs"
-                        double* csharp2cuda_temp_88 = &((right_distances)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, distance_count), column)]);
+                        float* csharp2cuda_temp_88 = &((right_distances)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, distance_count), column)]);
 #line 492 "StatisticsModule.cs"
-                        double csharp2cuda_temp_89 = *(csharp2cuda_temp_88);
+                        float csharp2cuda_temp_89 = *(csharp2cuda_temp_88);
 #line 493 "StatisticsModule.cs"
-                        double csharp2cuda_temp_90 = (row_means)[row];
+                        float csharp2cuda_temp_90 = (row_means)[row];
 #line 493 "StatisticsModule.cs"
-                        double csharp2cuda_temp_91 = (row_means)[column];
-                        (*(csharp2cuda_temp_88) = __dsub_rn(csharp2cuda_temp_89, __dsub_rn(__dadd_rn(csharp2cuda_temp_90, csharp2cuda_temp_91), right_mean)));
+                        float csharp2cuda_temp_91 = (row_means)[column];
+                        (*(csharp2cuda_temp_88) = __fsub_rn(csharp2cuda_temp_89, __fsub_rn(__fadd_rn(csharp2cuda_temp_90, csharp2cuda_temp_91), right_mean)));
 #line 491 "StatisticsModule.cs"
                         int* csharp2cuda_temp_87 = &(column);
                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_87));
@@ -1508,11 +1508,11 @@ __device__ void mathblocks_statistics_dispatch(
 #line 494 "StatisticsModule.cs"
         __syncthreads();
 #line 495 "StatisticsModule.cs"
-        double covariance_moment = 0.0;
+        float covariance_moment = 0.0f;
 #line 496 "StatisticsModule.cs"
-        double left_moment = 0.0;
+        float left_moment = 0.0f;
 #line 497 "StatisticsModule.cs"
-        double right_moment = 0.0;
+        float right_moment = 0.0f;
 #line 498 "StatisticsModule.cs"
         if (((thread) == (0)))
         {
@@ -1526,14 +1526,14 @@ __device__ void mathblocks_statistics_dispatch(
                         break;
 #line 500 "StatisticsModule.cs"
 #line 500 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_93 = &(covariance_moment);
+                    float* csharp2cuda_temp_93 = &(covariance_moment);
 #line 500 "StatisticsModule.cs"
-                    double csharp2cuda_temp_94 = *(csharp2cuda_temp_93);
+                    float csharp2cuda_temp_94 = *(csharp2cuda_temp_93);
 #line 500 "StatisticsModule.cs"
-                    double csharp2cuda_temp_95 = (left_distances)[index];
+                    float csharp2cuda_temp_95 = (left_distances)[index];
 #line 500 "StatisticsModule.cs"
-                    double csharp2cuda_temp_96 = (right_distances)[index];
-                    (*(csharp2cuda_temp_93) = __dadd_rn(csharp2cuda_temp_94, __dmul_rn(csharp2cuda_temp_95, csharp2cuda_temp_96)));
+                    float csharp2cuda_temp_96 = (right_distances)[index];
+                    (*(csharp2cuda_temp_93) = __fadd_rn(csharp2cuda_temp_94, __fmul_rn(csharp2cuda_temp_95, csharp2cuda_temp_96)));
 #line 499 "StatisticsModule.cs"
                     int* csharp2cuda_temp_92 = &(index);
                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_92));
@@ -1553,14 +1553,14 @@ __device__ void mathblocks_statistics_dispatch(
                         break;
 #line 503 "StatisticsModule.cs"
 #line 503 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_98 = &(left_moment);
+                    float* csharp2cuda_temp_98 = &(left_moment);
 #line 503 "StatisticsModule.cs"
-                    double csharp2cuda_temp_99 = *(csharp2cuda_temp_98);
+                    float csharp2cuda_temp_99 = *(csharp2cuda_temp_98);
 #line 503 "StatisticsModule.cs"
-                    double csharp2cuda_temp_100 = (left_distances)[index];
+                    float csharp2cuda_temp_100 = (left_distances)[index];
 #line 503 "StatisticsModule.cs"
-                    double csharp2cuda_temp_101 = (left_distances)[index];
-                    (*(csharp2cuda_temp_98) = __dadd_rn(csharp2cuda_temp_99, __dmul_rn(csharp2cuda_temp_100, csharp2cuda_temp_101)));
+                    float csharp2cuda_temp_101 = (left_distances)[index];
+                    (*(csharp2cuda_temp_98) = __fadd_rn(csharp2cuda_temp_99, __fmul_rn(csharp2cuda_temp_100, csharp2cuda_temp_101)));
 #line 502 "StatisticsModule.cs"
                     int* csharp2cuda_temp_97 = &(index);
                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_97));
@@ -1580,14 +1580,14 @@ __device__ void mathblocks_statistics_dispatch(
                         break;
 #line 506 "StatisticsModule.cs"
 #line 506 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_103 = &(right_moment);
+                    float* csharp2cuda_temp_103 = &(right_moment);
 #line 506 "StatisticsModule.cs"
-                    double csharp2cuda_temp_104 = *(csharp2cuda_temp_103);
+                    float csharp2cuda_temp_104 = *(csharp2cuda_temp_103);
 #line 506 "StatisticsModule.cs"
-                    double csharp2cuda_temp_105 = (right_distances)[index];
+                    float csharp2cuda_temp_105 = (right_distances)[index];
 #line 506 "StatisticsModule.cs"
-                    double csharp2cuda_temp_106 = (right_distances)[index];
-                    (*(csharp2cuda_temp_103) = __dadd_rn(csharp2cuda_temp_104, __dmul_rn(csharp2cuda_temp_105, csharp2cuda_temp_106)));
+                    float csharp2cuda_temp_106 = (right_distances)[index];
+                    (*(csharp2cuda_temp_103) = __fadd_rn(csharp2cuda_temp_104, __fmul_rn(csharp2cuda_temp_105, csharp2cuda_temp_106)));
 #line 505 "StatisticsModule.cs"
                     int* csharp2cuda_temp_102 = &(index);
                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_102));
@@ -1601,7 +1601,7 @@ __device__ void mathblocks_statistics_dispatch(
         {
 #line 509 "StatisticsModule.cs"
 #line 509 "StatisticsModule.cs"
-            double* csharp2cuda_temp_107 = &((scratch)[0]);
+            float* csharp2cuda_temp_107 = &((scratch)[0]);
             (*(csharp2cuda_temp_107) = covariance_moment);
         }
 #line 510 "StatisticsModule.cs"
@@ -1609,7 +1609,7 @@ __device__ void mathblocks_statistics_dispatch(
         {
 #line 511 "StatisticsModule.cs"
 #line 511 "StatisticsModule.cs"
-            double* csharp2cuda_temp_108 = &((scratch)[1]);
+            float* csharp2cuda_temp_108 = &((scratch)[1]);
             (*(csharp2cuda_temp_108) = left_moment);
         }
 #line 512 "StatisticsModule.cs"
@@ -1617,7 +1617,7 @@ __device__ void mathblocks_statistics_dispatch(
         {
 #line 513 "StatisticsModule.cs"
 #line 513 "StatisticsModule.cs"
-            double* csharp2cuda_temp_109 = &((scratch)[2]);
+            float* csharp2cuda_temp_109 = &((scratch)[2]);
             (*(csharp2cuda_temp_109) = right_moment);
         }
 #line 514 "StatisticsModule.cs"
@@ -1638,7 +1638,7 @@ __device__ void mathblocks_statistics_dispatch(
                     int lag = 0;
 #line 524 "StatisticsModule.cs"
 #line 524 "StatisticsModule.cs"
-                    double csharp2cuda_temp_110 = (second)->scalar_value;
+                    float csharp2cuda_temp_110 = (second)->scalar_value;
 #line 524 "StatisticsModule.cs"
                     int* csharp2cuda_temp_111 = &(lag);
 #line 524 "StatisticsModule.cs"
@@ -1674,9 +1674,9 @@ __device__ void mathblocks_statistics_dispatch(
                     int count = csharp2cuda_i32_sub(csharp2cuda_temp_116, lag);
 #line 530 "StatisticsModule.cs"
 #line 530 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_117 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_117 = &((output)->scalar_value);
 #line 530 "StatisticsModule.cs"
-                    double csharp2cuda_temp_118 = mathblocks_statistics_pearson(a, csharp2cuda_pointer_add(a, lag), count);
+                    float csharp2cuda_temp_118 = mathblocks_statistics_pearson(a, csharp2cuda_pointer_add(a, lag), count);
                     (*(csharp2cuda_temp_117) = csharp2cuda_temp_118);
 #line 531 "StatisticsModule.cs"
                     break;
@@ -1688,9 +1688,9 @@ __device__ void mathblocks_statistics_dispatch(
 #line 537 "StatisticsModule.cs"
                 int csharp2cuda_temp_119 = (first)->count;
 #line 538 "StatisticsModule.cs"
-                double csharp2cuda_temp_120 = (second)->scalar_value;
+                float csharp2cuda_temp_120 = (second)->scalar_value;
 #line 540 "StatisticsModule.cs"
-                double* csharp2cuda_temp_121 = &((output)->scalar_value);
+                float* csharp2cuda_temp_121 = &((output)->scalar_value);
 #line 535 "StatisticsModule.cs"
                 bool csharp2cuda_temp_122 = mathblocks_statistics_moment_value(a, csharp2cuda_temp_119, csharp2cuda_temp_120, ((opcode) == (1)), csharp2cuda_temp_121);
                 if ((!(csharp2cuda_temp_122)))
@@ -1761,8 +1761,8 @@ __device__ void mathblocks_statistics_dispatch(
                             {
 #line 555 "StatisticsModule.cs"
 #line 555 "StatisticsModule.cs"
-                                double* csharp2cuda_temp_128 = &((scratch)[column]);
-                                (*(csharp2cuda_temp_128) = 0.0);
+                                float* csharp2cuda_temp_128 = &((scratch)[column]);
+                                (*(csharp2cuda_temp_128) = 0.0f);
 #line 556 "StatisticsModule.cs"
                                 {
 #line 556 "StatisticsModule.cs"
@@ -1773,14 +1773,14 @@ __device__ void mathblocks_statistics_dispatch(
                                             break;
 #line 557 "StatisticsModule.cs"
 #line 557 "StatisticsModule.cs"
-                                        double* csharp2cuda_temp_130 = &((scratch)[column]);
+                                        float* csharp2cuda_temp_130 = &((scratch)[column]);
 #line 557 "StatisticsModule.cs"
-                                        double csharp2cuda_temp_131 = *(csharp2cuda_temp_130);
+                                        float csharp2cuda_temp_131 = *(csharp2cuda_temp_130);
 #line 557 "StatisticsModule.cs"
-                                        double csharp2cuda_temp_132 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)];
+                                        float csharp2cuda_temp_132 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)];
 #line 557 "StatisticsModule.cs"
-                                        double csharp2cuda_temp_133 = __ddiv_rn(csharp2cuda_temp_132, ((double)(rows)));
-                                        (*(csharp2cuda_temp_130) = __dadd_rn(csharp2cuda_temp_131, csharp2cuda_temp_133));
+                                        float csharp2cuda_temp_133 = __fdiv_rn(csharp2cuda_temp_132, ((float)(rows)));
+                                        (*(csharp2cuda_temp_130) = __fadd_rn(csharp2cuda_temp_131, csharp2cuda_temp_133));
 #line 556 "StatisticsModule.cs"
                                         int* csharp2cuda_temp_129 = &(row);
                                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_129));
@@ -1813,7 +1813,7 @@ __device__ void mathblocks_statistics_dispatch(
 #line 562 "StatisticsModule.cs"
                                         {
 #line 563 "StatisticsModule.cs"
-                                            double sum = 0.0;
+                                            float sum = 0.0f;
 #line 564 "StatisticsModule.cs"
                                             {
 #line 564 "StatisticsModule.cs"
@@ -1826,18 +1826,18 @@ __device__ void mathblocks_statistics_dispatch(
                                                     {
 #line 566 "StatisticsModule.cs"
 #line 566 "StatisticsModule.cs"
-                                                        double* csharp2cuda_temp_137 = &(sum);
+                                                        float* csharp2cuda_temp_137 = &(sum);
 #line 566 "StatisticsModule.cs"
-                                                        double csharp2cuda_temp_138 = *(csharp2cuda_temp_137);
+                                                        float csharp2cuda_temp_138 = *(csharp2cuda_temp_137);
 #line 566 "StatisticsModule.cs"
-                                                        double csharp2cuda_temp_139 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), left)];
+                                                        float csharp2cuda_temp_139 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), left)];
 #line 566 "StatisticsModule.cs"
-                                                        double csharp2cuda_temp_140 = (scratch)[left];
+                                                        float csharp2cuda_temp_140 = (scratch)[left];
 #line 567 "StatisticsModule.cs"
-                                                        double csharp2cuda_temp_141 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), right)];
+                                                        float csharp2cuda_temp_141 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), right)];
 #line 567 "StatisticsModule.cs"
-                                                        double csharp2cuda_temp_142 = (scratch)[right];
-                                                        (*(csharp2cuda_temp_137) = __dadd_rn(csharp2cuda_temp_138, __dmul_rn(__dsub_rn(csharp2cuda_temp_139, csharp2cuda_temp_140), __dsub_rn(csharp2cuda_temp_141, csharp2cuda_temp_142))));
+                                                        float csharp2cuda_temp_142 = (scratch)[right];
+                                                        (*(csharp2cuda_temp_137) = __fadd_rn(csharp2cuda_temp_138, __fmul_rn(__fsub_rn(csharp2cuda_temp_139, csharp2cuda_temp_140), __fsub_rn(csharp2cuda_temp_141, csharp2cuda_temp_142))));
                                                     }
 #line 564 "StatisticsModule.cs"
                                                     int* csharp2cuda_temp_136 = &(row);
@@ -1845,14 +1845,14 @@ __device__ void mathblocks_statistics_dispatch(
                                                 }
                                             }
 #line 569 "StatisticsModule.cs"
-                                            double covariance = __ddiv_rn(sum, ((double)(rows)));
+                                            float covariance = __fdiv_rn(sum, ((float)(rows)));
 #line 570 "StatisticsModule.cs"
 #line 570 "StatisticsModule.cs"
-                                            double* csharp2cuda_temp_143 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, columns), right)]);
+                                            float* csharp2cuda_temp_143 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, columns), right)]);
                                             (*(csharp2cuda_temp_143) = covariance);
 #line 571 "StatisticsModule.cs"
 #line 571 "StatisticsModule.cs"
-                                            double* csharp2cuda_temp_144 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(right, columns), left)]);
+                                            float* csharp2cuda_temp_144 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(right, columns), left)]);
                                             (*(csharp2cuda_temp_144) = covariance);
 #line 572 "StatisticsModule.cs"
                                             if ((!(isfinite(covariance))))
@@ -1923,32 +1923,32 @@ __device__ void mathblocks_statistics_dispatch(
                         break;
                     }
 #line 585 "StatisticsModule.cs"
-                    double covariance_square = (scratch)[0];
+                    float covariance_square = (scratch)[0];
 #line 586 "StatisticsModule.cs"
-                    double left_variance_square = (scratch)[1];
+                    float left_variance_square = (scratch)[1];
 #line 587 "StatisticsModule.cs"
-                    double right_variance_square = (scratch)[2];
+                    float right_variance_square = (scratch)[2];
 #line 588 "StatisticsModule.cs"
 #line 588 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_150 = &(covariance_square);
+                    float* csharp2cuda_temp_150 = &(covariance_square);
 #line 588 "StatisticsModule.cs"
-                    double csharp2cuda_temp_151 = *(csharp2cuda_temp_150);
-                    (*(csharp2cuda_temp_150) = __ddiv_rn(csharp2cuda_temp_151, ((double)(csharp2cuda_i32_mul(count, count)))));
+                    float csharp2cuda_temp_151 = *(csharp2cuda_temp_150);
+                    (*(csharp2cuda_temp_150) = __fdiv_rn(csharp2cuda_temp_151, ((float)(csharp2cuda_i32_mul(count, count)))));
 #line 589 "StatisticsModule.cs"
 #line 589 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_152 = &(left_variance_square);
+                    float* csharp2cuda_temp_152 = &(left_variance_square);
 #line 589 "StatisticsModule.cs"
-                    double csharp2cuda_temp_153 = *(csharp2cuda_temp_152);
-                    (*(csharp2cuda_temp_152) = __ddiv_rn(csharp2cuda_temp_153, ((double)(csharp2cuda_i32_mul(count, count)))));
+                    float csharp2cuda_temp_153 = *(csharp2cuda_temp_152);
+                    (*(csharp2cuda_temp_152) = __fdiv_rn(csharp2cuda_temp_153, ((float)(csharp2cuda_i32_mul(count, count)))));
 #line 590 "StatisticsModule.cs"
 #line 590 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_154 = &(right_variance_square);
+                    float* csharp2cuda_temp_154 = &(right_variance_square);
 #line 590 "StatisticsModule.cs"
-                    double csharp2cuda_temp_155 = *(csharp2cuda_temp_154);
-                    (*(csharp2cuda_temp_154) = __ddiv_rn(csharp2cuda_temp_155, ((double)(csharp2cuda_i32_mul(count, count)))));
+                    float csharp2cuda_temp_155 = *(csharp2cuda_temp_154);
+                    (*(csharp2cuda_temp_154) = __fdiv_rn(csharp2cuda_temp_155, ((float)(csharp2cuda_i32_mul(count, count)))));
 #line 591 "StatisticsModule.cs"
 #line 591 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_156 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_156 = &((output)->scalar_value);
                     (*(csharp2cuda_temp_156) = mathblocks_statistics_distance_correlation_value(covariance_square, left_variance_square, right_variance_square));
 #line 593 "StatisticsModule.cs"
                     break;
@@ -1975,9 +1975,9 @@ __device__ void mathblocks_statistics_dispatch(
                             {
 #line 600 "StatisticsModule.cs"
 #line 600 "StatisticsModule.cs"
-                                double csharp2cuda_temp_160 = (b)[index];
+                                float csharp2cuda_temp_160 = (b)[index];
 #line 600 "StatisticsModule.cs"
-                                double csharp2cuda_temp_161 = (b)[csharp2cuda_i32_sub(index, 1)];
+                                float csharp2cuda_temp_161 = (b)[csharp2cuda_i32_sub(index, 1)];
                                 if (((csharp2cuda_temp_160) <= (csharp2cuda_temp_161)))
 #line 601 "StatisticsModule.cs"
                                 {
@@ -2021,8 +2021,8 @@ __device__ void mathblocks_statistics_dispatch(
                                 break;
 #line 607 "StatisticsModule.cs"
 #line 607 "StatisticsModule.cs"
-                            double* csharp2cuda_temp_167 = &((result)[index]);
-                            (*(csharp2cuda_temp_167) = 0.0);
+                            float* csharp2cuda_temp_167 = &((result)[index]);
+                            (*(csharp2cuda_temp_167) = 0.0f);
 #line 606 "StatisticsModule.cs"
                             int* csharp2cuda_temp_163 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_163));
@@ -2072,9 +2072,9 @@ __device__ void mathblocks_statistics_dispatch(
                                         int middle = csharp2cuda_i32_add(lower, csharp2cuda_temp_172);
 #line 615 "StatisticsModule.cs"
 #line 615 "StatisticsModule.cs"
-                                        double csharp2cuda_temp_173 = (a)[value_index];
+                                        float csharp2cuda_temp_173 = (a)[value_index];
 #line 615 "StatisticsModule.cs"
-                                        double csharp2cuda_temp_174 = (b)[middle];
+                                        float csharp2cuda_temp_174 = (b)[middle];
                                         if (((csharp2cuda_temp_173) <= (csharp2cuda_temp_174)))
                                         {
 #line 616 "StatisticsModule.cs"
@@ -2093,10 +2093,10 @@ __device__ void mathblocks_statistics_dispatch(
                                 }
 #line 620 "StatisticsModule.cs"
 #line 620 "StatisticsModule.cs"
-                                double* csharp2cuda_temp_177 = &((result)[lower]);
+                                float* csharp2cuda_temp_177 = &((result)[lower]);
 #line 620 "StatisticsModule.cs"
-                                double csharp2cuda_temp_178 = *(csharp2cuda_temp_177);
-                                (*(csharp2cuda_temp_177) = __dadd_rn(csharp2cuda_temp_178, 1.0));
+                                float csharp2cuda_temp_178 = *(csharp2cuda_temp_177);
+                                (*(csharp2cuda_temp_177) = __fadd_rn(csharp2cuda_temp_178, 1.0f));
                             }
 #line 608 "StatisticsModule.cs"
                             int* csharp2cuda_temp_168 = &(value_index);
@@ -2142,16 +2142,16 @@ __device__ void mathblocks_statistics_dispatch(
                     mathblocks_statistics_sort_copy(a, csharp2cuda_temp_182, scratch, false);
 #line 632 "StatisticsModule.cs"
 #line 632 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_183 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_183 = &((output)->scalar_value);
 #line 633 "StatisticsModule.cs"
                     int csharp2cuda_temp_184 = (first)->count;
 #line 633 "StatisticsModule.cs"
-                    double csharp2cuda_temp_185 = mathblocks_statistics_sorted_quantile(scratch, csharp2cuda_temp_184, 0.75);
+                    float csharp2cuda_temp_185 = mathblocks_statistics_sorted_quantile(scratch, csharp2cuda_temp_184, 0.75f);
 #line 634 "StatisticsModule.cs"
                     int csharp2cuda_temp_186 = (first)->count;
 #line 634 "StatisticsModule.cs"
-                    double csharp2cuda_temp_187 = mathblocks_statistics_sorted_quantile(scratch, csharp2cuda_temp_186, 0.25);
-                    (*(csharp2cuda_temp_183) = __dsub_rn(csharp2cuda_temp_185, csharp2cuda_temp_187));
+                    float csharp2cuda_temp_187 = mathblocks_statistics_sorted_quantile(scratch, csharp2cuda_temp_186, 0.25f);
+                    (*(csharp2cuda_temp_183) = __fsub_rn(csharp2cuda_temp_185, csharp2cuda_temp_187));
 #line 635 "StatisticsModule.cs"
                     break;
                 }
@@ -2170,7 +2170,7 @@ __device__ void mathblocks_statistics_dispatch(
 #line 639 "StatisticsModule.cs"
                     int csharp2cuda_temp_191 = (first)->count;
 #line 639 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_192 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_192 = &((output)->scalar_value);
 #line 639 "StatisticsModule.cs"
                     bool csharp2cuda_temp_193 = mathblocks_statistics_kendall_value(a, b, csharp2cuda_temp_191, csharp2cuda_temp_192);
 #line 638 "StatisticsModule.cs"
@@ -2232,7 +2232,7 @@ __device__ void mathblocks_statistics_dispatch(
 #line 654 "StatisticsModule.cs"
                     int csharp2cuda_temp_200 = (first)->count;
 #line 654 "StatisticsModule.cs"
-                    double covariance = mathblocks_statistics_population_covariance(a, b, csharp2cuda_temp_200);
+                    float covariance = mathblocks_statistics_population_covariance(a, b, csharp2cuda_temp_200);
 #line 655 "StatisticsModule.cs"
 #line 655 "StatisticsModule.cs"
                     bool csharp2cuda_temp_201;
@@ -2252,9 +2252,9 @@ __device__ void mathblocks_statistics_dispatch(
                     {
 #line 657 "StatisticsModule.cs"
 #line 657 "StatisticsModule.cs"
-                        double* csharp2cuda_temp_202 = &((output)->scalar_value);
+                        float* csharp2cuda_temp_202 = &((output)->scalar_value);
 #line 657 "StatisticsModule.cs"
-                        double csharp2cuda_temp_203;
+                        float csharp2cuda_temp_203;
 #line 657 "StatisticsModule.cs"
                         if (((opcode) == (12)))
                         {
@@ -2268,7 +2268,7 @@ __device__ void mathblocks_statistics_dispatch(
 #line 659 "StatisticsModule.cs"
                             int csharp2cuda_temp_205 = (first)->count;
 #line 657 "StatisticsModule.cs"
-                            csharp2cuda_temp_203 = __ddiv_rn(__dmul_rn(covariance, ((double)(csharp2cuda_temp_204))), __dsub_rn(((double)(csharp2cuda_temp_205)), 1.0));
+                            csharp2cuda_temp_203 = __fdiv_rn(__fmul_rn(covariance, ((float)(csharp2cuda_temp_204))), __fsub_rn(((float)(csharp2cuda_temp_205)), 1.0f));
                         }
                         (*(csharp2cuda_temp_202) = csharp2cuda_temp_203);
                     }
@@ -2280,11 +2280,11 @@ __device__ void mathblocks_statistics_dispatch(
                         {
 #line 663 "StatisticsModule.cs"
 #line 663 "StatisticsModule.cs"
-                            double* csharp2cuda_temp_206 = &((output)->scalar_value);
+                            float* csharp2cuda_temp_206 = &((output)->scalar_value);
 #line 664 "StatisticsModule.cs"
                             int csharp2cuda_temp_207 = (first)->count;
 #line 664 "StatisticsModule.cs"
-                            double csharp2cuda_temp_208 = mathblocks_statistics_population_variance(a, csharp2cuda_temp_207);
+                            float csharp2cuda_temp_208 = mathblocks_statistics_population_variance(a, csharp2cuda_temp_207);
                             (*(csharp2cuda_temp_206) = mathblocks_statistics_quotient_by_variance(covariance, csharp2cuda_temp_208));
                         }
                         else
@@ -2296,21 +2296,21 @@ __device__ void mathblocks_statistics_dispatch(
 #line 669 "StatisticsModule.cs"
                                 int csharp2cuda_temp_209 = (first)->count;
 #line 669 "StatisticsModule.cs"
-                                double csharp2cuda_temp_210 = mathblocks_statistics_population_variance(a, csharp2cuda_temp_209);
+                                float csharp2cuda_temp_210 = mathblocks_statistics_population_variance(a, csharp2cuda_temp_209);
 #line 668 "StatisticsModule.cs"
-                                double slope = mathblocks_statistics_quotient_by_variance(covariance, csharp2cuda_temp_210);
+                                float slope = mathblocks_statistics_quotient_by_variance(covariance, csharp2cuda_temp_210);
 #line 670 "StatisticsModule.cs"
 #line 670 "StatisticsModule.cs"
-                                double* csharp2cuda_temp_211 = &((output)->scalar_value);
+                                float* csharp2cuda_temp_211 = &((output)->scalar_value);
 #line 670 "StatisticsModule.cs"
                                 int csharp2cuda_temp_212 = (first)->count;
 #line 670 "StatisticsModule.cs"
-                                double csharp2cuda_temp_213 = mathblocks_statistics_mean(b, csharp2cuda_temp_212);
+                                float csharp2cuda_temp_213 = mathblocks_statistics_mean(b, csharp2cuda_temp_212);
 #line 671 "StatisticsModule.cs"
                                 int csharp2cuda_temp_214 = (first)->count;
 #line 671 "StatisticsModule.cs"
-                                double csharp2cuda_temp_215 = mathblocks_statistics_mean(a, csharp2cuda_temp_214);
-                                (*(csharp2cuda_temp_211) = __dsub_rn(csharp2cuda_temp_213, __dmul_rn(slope, csharp2cuda_temp_215)));
+                                float csharp2cuda_temp_215 = mathblocks_statistics_mean(a, csharp2cuda_temp_214);
+                                (*(csharp2cuda_temp_211) = __fsub_rn(csharp2cuda_temp_213, __fmul_rn(slope, csharp2cuda_temp_215)));
                             }
                             else
 #line 674 "StatisticsModule.cs"
@@ -2318,23 +2318,23 @@ __device__ void mathblocks_statistics_dispatch(
 #line 677 "StatisticsModule.cs"
                                 int csharp2cuda_temp_216 = (first)->count;
 #line 677 "StatisticsModule.cs"
-                                double csharp2cuda_temp_217 = mathblocks_statistics_population_variance(a, csharp2cuda_temp_216);
+                                float csharp2cuda_temp_217 = mathblocks_statistics_population_variance(a, csharp2cuda_temp_216);
 #line 678 "StatisticsModule.cs"
                                 int csharp2cuda_temp_218 = (first)->count;
 #line 678 "StatisticsModule.cs"
-                                double csharp2cuda_temp_219 = mathblocks_statistics_population_variance(b, csharp2cuda_temp_218);
+                                float csharp2cuda_temp_219 = mathblocks_statistics_population_variance(b, csharp2cuda_temp_218);
 #line 675 "StatisticsModule.cs"
-                                double correlation = mathblocks_statistics_correlation_value(covariance, csharp2cuda_temp_217, csharp2cuda_temp_219);
+                                float correlation = mathblocks_statistics_correlation_value(covariance, csharp2cuda_temp_217, csharp2cuda_temp_219);
 #line 679 "StatisticsModule.cs"
 #line 679 "StatisticsModule.cs"
-                                double* csharp2cuda_temp_220 = &((output)->scalar_value);
+                                float* csharp2cuda_temp_220 = &((output)->scalar_value);
 #line 679 "StatisticsModule.cs"
-                                double csharp2cuda_temp_221;
+                                float csharp2cuda_temp_221;
 #line 679 "StatisticsModule.cs"
                                 if (((opcode) == (8)))
                                 {
 #line 679 "StatisticsModule.cs"
-                                    csharp2cuda_temp_221 = __dmul_rn(correlation, correlation);
+                                    csharp2cuda_temp_221 = __fmul_rn(correlation, correlation);
                                 }
                                 else
                                 {
@@ -2379,11 +2379,11 @@ __device__ void mathblocks_statistics_dispatch(
                         break;
                     }
 #line 690 "StatisticsModule.cs"
-                    double* sorted = scratch;
+                    float* sorted = scratch;
 #line 691 "StatisticsModule.cs"
                     int csharp2cuda_temp_225 = (first)->count;
 #line 691 "StatisticsModule.cs"
-                    double* deviations = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_225);
+                    float* deviations = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_225);
 #line 692 "StatisticsModule.cs"
 #line 692 "StatisticsModule.cs"
                     int csharp2cuda_temp_226 = (first)->count;
@@ -2391,7 +2391,7 @@ __device__ void mathblocks_statistics_dispatch(
 #line 693 "StatisticsModule.cs"
                     int csharp2cuda_temp_227 = (first)->count;
 #line 693 "StatisticsModule.cs"
-                    double median = mathblocks_statistics_sorted_quantile(sorted, csharp2cuda_temp_227, 0.5);
+                    float median = mathblocks_statistics_sorted_quantile(sorted, csharp2cuda_temp_227, 0.5f);
 #line 694 "StatisticsModule.cs"
                     {
 #line 694 "StatisticsModule.cs"
@@ -2404,10 +2404,10 @@ __device__ void mathblocks_statistics_dispatch(
                                 break;
 #line 695 "StatisticsModule.cs"
 #line 695 "StatisticsModule.cs"
-                            double* csharp2cuda_temp_230 = &((deviations)[index]);
+                            float* csharp2cuda_temp_230 = &((deviations)[index]);
 #line 695 "StatisticsModule.cs"
-                            double csharp2cuda_temp_231 = (a)[index];
-                            (*(csharp2cuda_temp_230) = fabs(__dsub_rn(csharp2cuda_temp_231, median)));
+                            float csharp2cuda_temp_231 = (a)[index];
+                            (*(csharp2cuda_temp_230) = fabsf(__fsub_rn(csharp2cuda_temp_231, median)));
 #line 694 "StatisticsModule.cs"
                             int* csharp2cuda_temp_228 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_228));
@@ -2419,11 +2419,11 @@ __device__ void mathblocks_statistics_dispatch(
                     mathblocks_statistics_sort_copy(deviations, csharp2cuda_temp_232, sorted, false);
 #line 697 "StatisticsModule.cs"
 #line 697 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_233 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_233 = &((output)->scalar_value);
 #line 697 "StatisticsModule.cs"
                     int csharp2cuda_temp_234 = (first)->count;
 #line 697 "StatisticsModule.cs"
-                    double csharp2cuda_temp_235 = mathblocks_statistics_sorted_quantile(sorted, csharp2cuda_temp_234, 0.5);
+                    float csharp2cuda_temp_235 = mathblocks_statistics_sorted_quantile(sorted, csharp2cuda_temp_234, 0.5f);
                     (*(csharp2cuda_temp_233) = csharp2cuda_temp_235);
 #line 698 "StatisticsModule.cs"
                     break;
@@ -2435,7 +2435,7 @@ __device__ void mathblocks_statistics_dispatch(
 #line 704 "StatisticsModule.cs"
                 int csharp2cuda_temp_236 = (first)->count;
 #line 706 "StatisticsModule.cs"
-                double* csharp2cuda_temp_237 = &((output)->scalar_value);
+                float* csharp2cuda_temp_237 = &((output)->scalar_value);
 #line 702 "StatisticsModule.cs"
                 bool csharp2cuda_temp_238 = mathblocks_statistics_shape_moment_value(a, csharp2cuda_temp_236, ((opcode) == (13)), csharp2cuda_temp_237);
                 if ((!(csharp2cuda_temp_238)))
@@ -2470,7 +2470,7 @@ __device__ void mathblocks_statistics_dispatch(
 #line 719 "StatisticsModule.cs"
                     int csharp2cuda_temp_242 = (first)->count;
 #line 719 "StatisticsModule.cs"
-                    double variance = mathblocks_statistics_population_variance(a, csharp2cuda_temp_242);
+                    float variance = mathblocks_statistics_population_variance(a, csharp2cuda_temp_242);
 #line 720 "StatisticsModule.cs"
 #line 720 "StatisticsModule.cs"
                     bool csharp2cuda_temp_243;
@@ -2489,18 +2489,18 @@ __device__ void mathblocks_statistics_dispatch(
                     {
 #line 721 "StatisticsModule.cs"
 #line 721 "StatisticsModule.cs"
-                        double* csharp2cuda_temp_244 = &(variance);
+                        float* csharp2cuda_temp_244 = &(variance);
 #line 721 "StatisticsModule.cs"
                         int csharp2cuda_temp_245 = (first)->count;
 #line 721 "StatisticsModule.cs"
                         int csharp2cuda_temp_246 = (first)->count;
 #line 721 "StatisticsModule.cs"
-                        double csharp2cuda_temp_247 = __ddiv_rn(__dmul_rn(variance, ((double)(csharp2cuda_temp_245))), __dsub_rn(((double)(csharp2cuda_temp_246)), 1.0));
+                        float csharp2cuda_temp_247 = __fdiv_rn(__fmul_rn(variance, ((float)(csharp2cuda_temp_245))), __fsub_rn(((float)(csharp2cuda_temp_246)), 1.0f));
                         (*(csharp2cuda_temp_244) = csharp2cuda_temp_247);
                     }
 #line 722 "StatisticsModule.cs"
 #line 722 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_248 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_248 = &((output)->scalar_value);
 #line 722 "StatisticsModule.cs"
                     bool csharp2cuda_temp_249;
 #line 722 "StatisticsModule.cs"
@@ -2515,7 +2515,7 @@ __device__ void mathblocks_statistics_dispatch(
                         csharp2cuda_temp_249 = true;
                     }
 #line 722 "StatisticsModule.cs"
-                    double csharp2cuda_temp_250;
+                    float csharp2cuda_temp_250;
 #line 722 "StatisticsModule.cs"
                     if (csharp2cuda_temp_249)
                     {
@@ -2567,9 +2567,9 @@ __device__ void mathblocks_statistics_dispatch(
                     int count = mathblocks_statistics_pair_averages(a, csharp2cuda_temp_254, scratch);
 #line 735 "StatisticsModule.cs"
 #line 735 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_255 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_255 = &((output)->scalar_value);
 #line 735 "StatisticsModule.cs"
-                    double csharp2cuda_temp_256 = mathblocks_statistics_median(scratch, count);
+                    float csharp2cuda_temp_256 = mathblocks_statistics_median(scratch, count);
                     (*(csharp2cuda_temp_255) = csharp2cuda_temp_256);
 #line 736 "StatisticsModule.cs"
                     break;
@@ -2578,13 +2578,13 @@ __device__ void mathblocks_statistics_dispatch(
             case 19:
 #line 739 "StatisticsModule.cs"
 #line 739 "StatisticsModule.cs"
-                double* csharp2cuda_temp_257 = &((output)->scalar_value);
+                float* csharp2cuda_temp_257 = &((output)->scalar_value);
 #line 740 "StatisticsModule.cs"
                 int csharp2cuda_temp_258 = (first)->count;
 #line 740 "StatisticsModule.cs"
                 int csharp2cuda_temp_259 = (first)->count;
 #line 740 "StatisticsModule.cs"
-                double csharp2cuda_temp_260 = __ddiv_rn(mathblocks_compensated_product_sum(a, a, csharp2cuda_temp_258), ((double)(csharp2cuda_temp_259)));
+                float csharp2cuda_temp_260 = __fdiv_rn(mathblocks_compensated_product_sum(a, a, csharp2cuda_temp_258), ((float)(csharp2cuda_temp_259)));
                 (*(csharp2cuda_temp_257) = mathblocks_square_root(csharp2cuda_temp_260));
 #line 741 "StatisticsModule.cs"
                 break;
@@ -2636,18 +2636,18 @@ __device__ void mathblocks_statistics_dispatch(
                         break;
                     }
 #line 750 "StatisticsModule.cs"
-                    double* left_ranks = scratch;
+                    float* left_ranks = scratch;
 #line 751 "StatisticsModule.cs"
                     int csharp2cuda_temp_267 = (first)->count;
 #line 751 "StatisticsModule.cs"
-                    double* right_ranks = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_267);
+                    float* right_ranks = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_267);
 #line 752 "StatisticsModule.cs"
 #line 752 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_268 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_268 = &((output)->scalar_value);
 #line 755 "StatisticsModule.cs"
                     int csharp2cuda_temp_269 = (first)->count;
 #line 752 "StatisticsModule.cs"
-                    double csharp2cuda_temp_270 = mathblocks_statistics_pearson(left_ranks, right_ranks, csharp2cuda_temp_269);
+                    float csharp2cuda_temp_270 = mathblocks_statistics_pearson(left_ranks, right_ranks, csharp2cuda_temp_269);
                     (*(csharp2cuda_temp_268) = csharp2cuda_temp_270);
 #line 756 "StatisticsModule.cs"
                     break;
@@ -2700,9 +2700,9 @@ __device__ void mathblocks_statistics_dispatch(
                     {
 #line 769 "StatisticsModule.cs"
 #line 769 "StatisticsModule.cs"
-                        double* csharp2cuda_temp_277 = &((output)->scalar_value);
+                        float* csharp2cuda_temp_277 = &((output)->scalar_value);
 #line 769 "StatisticsModule.cs"
-                        double csharp2cuda_temp_278 = mathblocks_statistics_median(scratch, count);
+                        float csharp2cuda_temp_278 = mathblocks_statistics_median(scratch, count);
                         (*(csharp2cuda_temp_277) = csharp2cuda_temp_278);
                     }
 #line 770 "StatisticsModule.cs"
@@ -2724,7 +2724,7 @@ __device__ void mathblocks_statistics_dispatch(
 #line 778 "StatisticsModule.cs"
                     int csharp2cuda_temp_282 = (first)->count;
 #line 780 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_283 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_283 = &((output)->scalar_value);
 #line 775 "StatisticsModule.cs"
                     bool csharp2cuda_temp_284 = mathblocks_statistics_weighted_value(a, b, csharp2cuda_temp_282, ((opcode) == (26)), csharp2cuda_temp_283);
 #line 774 "StatisticsModule.cs"
@@ -2780,7 +2780,7 @@ __device__ void mathblocks_statistics_dispatch(
         if (csharp2cuda_temp_288)
         {
 #line 784 "StatisticsModule.cs"
-            double csharp2cuda_temp_290 = (output)->scalar_value;
+            float csharp2cuda_temp_290 = (output)->scalar_value;
 #line 784 "StatisticsModule.cs"
             csharp2cuda_temp_289 = (!(isfinite(csharp2cuda_temp_290)));
         }
@@ -2800,14 +2800,14 @@ __device__ void mathblocks_statistics_dispatch(
 }
 
 #line 106 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_distance_correlation_value(
-    double covariance_square,
-    double left_variance_square,
-    double right_variance_square)
+__device__ float mathblocks_statistics_distance_correlation_value(
+    float covariance_square,
+    float left_variance_square,
+    float right_variance_square)
 #line 111 "StatisticsModule.cs"
 {
 #line 112 "StatisticsModule.cs"
-    double denominator = mathblocks_square_root(__dmul_rn(left_variance_square, right_variance_square));
+    float denominator = mathblocks_square_root(__fmul_rn(left_variance_square, right_variance_square));
 #line 113 "StatisticsModule.cs"
 #line 113 "StatisticsModule.cs"
     bool csharp2cuda_temp_0;
@@ -2855,16 +2855,16 @@ __device__ double mathblocks_statistics_distance_correlation_value(
     }
 #line 116 "StatisticsModule.cs"
 #line 116 "StatisticsModule.cs"
-    double csharp2cuda_temp_3 = __ddiv_rn(covariance_square, denominator);
+    float csharp2cuda_temp_3 = __fdiv_rn(covariance_square, denominator);
     return mathblocks_square_root(csharp2cuda_temp_3);
 }
 
 #line 247 "StatisticsModule.cs"
 __device__ bool mathblocks_statistics_kendall_value(
-    const double* left_values,
-    const double* right_values,
+    const float* left_values,
+    const float* right_values,
     int count,
-    double* value)
+    float* value)
 #line 253 "StatisticsModule.cs"
 {
 #line 254 "StatisticsModule.cs"
@@ -2896,21 +2896,21 @@ __device__ bool mathblocks_statistics_kendall_value(
 #line 261 "StatisticsModule.cs"
                         {
 #line 262 "StatisticsModule.cs"
-                            double csharp2cuda_temp_2 = (left_values)[left];
+                            float csharp2cuda_temp_2 = (left_values)[left];
 #line 262 "StatisticsModule.cs"
-                            double csharp2cuda_temp_3 = (left_values)[right];
+                            float csharp2cuda_temp_3 = (left_values)[right];
 #line 262 "StatisticsModule.cs"
-                            double left_difference = __dsub_rn(csharp2cuda_temp_2, csharp2cuda_temp_3);
+                            float left_difference = __fsub_rn(csharp2cuda_temp_2, csharp2cuda_temp_3);
 #line 263 "StatisticsModule.cs"
-                            double csharp2cuda_temp_4 = (right_values)[left];
+                            float csharp2cuda_temp_4 = (right_values)[left];
 #line 263 "StatisticsModule.cs"
-                            double csharp2cuda_temp_5 = (right_values)[right];
+                            float csharp2cuda_temp_5 = (right_values)[right];
 #line 263 "StatisticsModule.cs"
-                            double right_difference = __dsub_rn(csharp2cuda_temp_4, csharp2cuda_temp_5);
+                            float right_difference = __fsub_rn(csharp2cuda_temp_4, csharp2cuda_temp_5);
 #line 264 "StatisticsModule.cs"
                             int csharp2cuda_temp_6;
 #line 264 "StatisticsModule.cs"
-                            if (((left_difference) > (0.0)))
+                            if (((left_difference) > (0.0f)))
                             {
 #line 264 "StatisticsModule.cs"
                                 csharp2cuda_temp_6 = 1;
@@ -2920,7 +2920,7 @@ __device__ bool mathblocks_statistics_kendall_value(
 #line 264 "StatisticsModule.cs"
                                 int csharp2cuda_temp_7;
 #line 264 "StatisticsModule.cs"
-                                if (((left_difference) < (0.0)))
+                                if (((left_difference) < (0.0f)))
                                 {
 #line 264 "StatisticsModule.cs"
                                     csharp2cuda_temp_7 = csharp2cuda_i32_neg(1);
@@ -2938,7 +2938,7 @@ __device__ bool mathblocks_statistics_kendall_value(
 #line 265 "StatisticsModule.cs"
                             int csharp2cuda_temp_8;
 #line 265 "StatisticsModule.cs"
-                            if (((right_difference) > (0.0)))
+                            if (((right_difference) > (0.0f)))
                             {
 #line 265 "StatisticsModule.cs"
                                 csharp2cuda_temp_8 = 1;
@@ -2948,7 +2948,7 @@ __device__ bool mathblocks_statistics_kendall_value(
 #line 265 "StatisticsModule.cs"
                                 int csharp2cuda_temp_9;
 #line 265 "StatisticsModule.cs"
-                                if (((right_difference) < (0.0)))
+                                if (((right_difference) < (0.0f)))
                                 {
 #line 265 "StatisticsModule.cs"
                                     csharp2cuda_temp_9 = csharp2cuda_i32_neg(1);
@@ -3034,41 +3034,41 @@ __device__ bool mathblocks_statistics_kendall_value(
     }
 #line 278 "StatisticsModule.cs"
 #line 278 "StatisticsModule.cs"
-    double* csharp2cuda_temp_15 = value;
+    float* csharp2cuda_temp_15 = value;
 #line 278 "StatisticsModule.cs"
-    double csharp2cuda_temp_16 = __ddiv_rn(((double)(csharp2cuda_i64_sub(concordant, discordant))), mathblocks_square_root(__dmul_rn(((double)(csharp2cuda_i64_add(csharp2cuda_i64_add(concordant, discordant), left_ties))), ((double)(csharp2cuda_i64_add(csharp2cuda_i64_add(concordant, discordant), right_ties))))));
+    float csharp2cuda_temp_16 = __fdiv_rn(((float)(csharp2cuda_i64_sub(concordant, discordant))), mathblocks_square_root(__fmul_rn(((float)(csharp2cuda_i64_add(csharp2cuda_i64_add(concordant, discordant), left_ties))), ((float)(csharp2cuda_i64_add(csharp2cuda_i64_add(concordant, discordant), right_ties))))));
     (*(csharp2cuda_temp_15) = csharp2cuda_temp_16);
 #line 282 "StatisticsModule.cs"
 #line 282 "StatisticsModule.cs"
-    double csharp2cuda_temp_17 = *(value);
+    float csharp2cuda_temp_17 = *(value);
     return isfinite(csharp2cuda_temp_17);
 }
 
 #line 49 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_mean(const double* values, int count)
+__device__ float mathblocks_statistics_mean(const float* values, int count)
 #line 51 "StatisticsModule.cs"
 {
 #line 52 "StatisticsModule.cs"
-    return __ddiv_rn(mathblocks_compensated_sum(values, count), ((double)(count)));
+    return __fdiv_rn(mathblocks_compensated_sum(values, count), ((float)(count)));
 }
 
 #line 163 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_median(double* values, int count)
+__device__ float mathblocks_statistics_median(float* values, int count)
 #line 165 "StatisticsModule.cs"
 {
 #line 166 "StatisticsModule.cs"
-    double* sorted = mathblocks_stable_merge_sort(values, csharp2cuda_pointer_add(values, count), count, false);
+    float* sorted = mathblocks_stable_merge_sort(values, csharp2cuda_pointer_add(values, count), count, false);
 #line 167 "StatisticsModule.cs"
-    return mathblocks_statistics_sorted_quantile(sorted, count, 0.5);
+    return mathblocks_statistics_sorted_quantile(sorted, count, 0.5f);
 }
 
 #line 227 "StatisticsModule.cs"
 __device__ bool mathblocks_statistics_moment_value(
-    const double* values,
+    const float* values,
     int count,
-    double order_value,
+    float order_value,
     bool central,
-    double* value)
+    float* value)
 #line 234 "StatisticsModule.cs"
 {
 #line 235 "StatisticsModule.cs"
@@ -3097,7 +3097,7 @@ __device__ bool mathblocks_statistics_moment_value(
         return false;
     }
 #line 239 "StatisticsModule.cs"
-    double csharp2cuda_temp_3;
+    float csharp2cuda_temp_3;
 #line 239 "StatisticsModule.cs"
     if (central)
     {
@@ -3107,12 +3107,12 @@ __device__ bool mathblocks_statistics_moment_value(
     else
     {
 #line 239 "StatisticsModule.cs"
-        csharp2cuda_temp_3 = 0.0;
+        csharp2cuda_temp_3 = 0.0f;
     }
 #line 239 "StatisticsModule.cs"
-    double mean = csharp2cuda_temp_3;
+    float mean = csharp2cuda_temp_3;
 #line 240 "StatisticsModule.cs"
-    double sum = 0.0;
+    float sum = 0.0f;
 #line 241 "StatisticsModule.cs"
     {
 #line 241 "StatisticsModule.cs"
@@ -3123,12 +3123,12 @@ __device__ bool mathblocks_statistics_moment_value(
                 break;
 #line 242 "StatisticsModule.cs"
 #line 242 "StatisticsModule.cs"
-            double* csharp2cuda_temp_5 = &(sum);
+            float* csharp2cuda_temp_5 = &(sum);
 #line 242 "StatisticsModule.cs"
-            double csharp2cuda_temp_6 = *(csharp2cuda_temp_5);
+            float csharp2cuda_temp_6 = *(csharp2cuda_temp_5);
 #line 242 "StatisticsModule.cs"
-            double csharp2cuda_temp_7 = (values)[index];
-            (*(csharp2cuda_temp_5) = __dadd_rn(csharp2cuda_temp_6, mathblocks_power(__dsub_rn(csharp2cuda_temp_7, mean), ((double)(order)))));
+            float csharp2cuda_temp_7 = (values)[index];
+            (*(csharp2cuda_temp_5) = __fadd_rn(csharp2cuda_temp_6, mathblocks_power(__fsub_rn(csharp2cuda_temp_7, mean), ((float)(order)))));
 #line 241 "StatisticsModule.cs"
             int* csharp2cuda_temp_4 = &(index);
             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_4));
@@ -3136,21 +3136,21 @@ __device__ bool mathblocks_statistics_moment_value(
     }
 #line 243 "StatisticsModule.cs"
 #line 243 "StatisticsModule.cs"
-    double* csharp2cuda_temp_8 = value;
+    float* csharp2cuda_temp_8 = value;
 #line 243 "StatisticsModule.cs"
-    double csharp2cuda_temp_9 = __ddiv_rn(sum, ((double)(count)));
+    float csharp2cuda_temp_9 = __fdiv_rn(sum, ((float)(count)));
     (*(csharp2cuda_temp_8) = csharp2cuda_temp_9);
 #line 244 "StatisticsModule.cs"
 #line 244 "StatisticsModule.cs"
-    double csharp2cuda_temp_10 = *(value);
+    float csharp2cuda_temp_10 = *(value);
     return isfinite(csharp2cuda_temp_10);
 }
 
 #line 343 "StatisticsModule.cs"
 __device__ int mathblocks_statistics_pair_averages(
-    const double* values,
+    const float* values,
     int count,
-    double* averages)
+    float* averages)
 #line 348 "StatisticsModule.cs"
 {
 #line 349 "StatisticsModule.cs"
@@ -3177,13 +3177,13 @@ __device__ int mathblocks_statistics_pair_averages(
 #line 352 "StatisticsModule.cs"
                     int csharp2cuda_temp_3 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_2));
 #line 352 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_4 = &((averages)[csharp2cuda_temp_3]);
+                    float* csharp2cuda_temp_4 = &((averages)[csharp2cuda_temp_3]);
 #line 352 "StatisticsModule.cs"
-                    double csharp2cuda_temp_5 = (values)[left];
+                    float csharp2cuda_temp_5 = (values)[left];
 #line 352 "StatisticsModule.cs"
-                    double csharp2cuda_temp_6 = (values)[right];
+                    float csharp2cuda_temp_6 = (values)[right];
 #line 352 "StatisticsModule.cs"
-                    double csharp2cuda_temp_7 = __ddiv_rn(__dadd_rn(csharp2cuda_temp_5, csharp2cuda_temp_6), 2.0);
+                    float csharp2cuda_temp_7 = __fdiv_rn(__fadd_rn(csharp2cuda_temp_5, csharp2cuda_temp_6), 2.0f);
                     (*(csharp2cuda_temp_4) = csharp2cuda_temp_7);
 #line 351 "StatisticsModule.cs"
                     int* csharp2cuda_temp_1 = &(right);
@@ -3201,10 +3201,10 @@ __device__ int mathblocks_statistics_pair_averages(
 
 #line 358 "StatisticsModule.cs"
 __device__ int mathblocks_statistics_pair_slopes(
-    const double* x,
-    const double* y,
+    const float* x,
+    const float* y,
     int count,
-    double* slopes)
+    float* slopes)
 #line 364 "StatisticsModule.cs"
 {
 #line 365 "StatisticsModule.cs"
@@ -3230,11 +3230,11 @@ __device__ int mathblocks_statistics_pair_slopes(
 #line 369 "StatisticsModule.cs"
                         {
 #line 370 "StatisticsModule.cs"
-                            double csharp2cuda_temp_2 = (x)[right];
+                            float csharp2cuda_temp_2 = (x)[right];
 #line 370 "StatisticsModule.cs"
-                            double csharp2cuda_temp_3 = (x)[left];
+                            float csharp2cuda_temp_3 = (x)[left];
 #line 370 "StatisticsModule.cs"
-                            double difference = __dsub_rn(csharp2cuda_temp_2, csharp2cuda_temp_3);
+                            float difference = __fsub_rn(csharp2cuda_temp_2, csharp2cuda_temp_3);
 #line 372 "StatisticsModule.cs"
                             if ((!(isfinite(difference))))
                             {
@@ -3242,17 +3242,17 @@ __device__ int mathblocks_statistics_pair_slopes(
                                 return csharp2cuda_i32_neg(1);
                             }
 #line 374 "StatisticsModule.cs"
-                            if (((difference) != (0.0)))
+                            if (((difference) != (0.0f)))
 #line 375 "StatisticsModule.cs"
                             {
 #line 376 "StatisticsModule.cs"
-                                double csharp2cuda_temp_4 = (y)[right];
+                                float csharp2cuda_temp_4 = (y)[right];
 #line 376 "StatisticsModule.cs"
-                                double csharp2cuda_temp_5 = (y)[left];
+                                float csharp2cuda_temp_5 = (y)[left];
 #line 376 "StatisticsModule.cs"
-                                double rise = __dsub_rn(csharp2cuda_temp_4, csharp2cuda_temp_5);
+                                float rise = __fsub_rn(csharp2cuda_temp_4, csharp2cuda_temp_5);
 #line 377 "StatisticsModule.cs"
-                                double slope = __ddiv_rn(rise, difference);
+                                float slope = __fdiv_rn(rise, difference);
 #line 378 "StatisticsModule.cs"
 #line 378 "StatisticsModule.cs"
                                 bool csharp2cuda_temp_6;
@@ -3278,7 +3278,7 @@ __device__ int mathblocks_statistics_pair_slopes(
 #line 380 "StatisticsModule.cs"
                                 int csharp2cuda_temp_8 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_7));
 #line 380 "StatisticsModule.cs"
-                                double* csharp2cuda_temp_9 = &((slopes)[csharp2cuda_temp_8]);
+                                float* csharp2cuda_temp_9 = &((slopes)[csharp2cuda_temp_8]);
                                 (*(csharp2cuda_temp_9) = slope);
                             }
                         }
@@ -3298,35 +3298,35 @@ __device__ int mathblocks_statistics_pair_slopes(
 }
 
 #line 119 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_pearson(
-    const double* left,
-    const double* right,
+__device__ float mathblocks_statistics_pearson(
+    const float* left,
+    const float* right,
     int count)
 #line 124 "StatisticsModule.cs"
 {
 #line 125 "StatisticsModule.cs"
 #line 126 "StatisticsModule.cs"
-    double csharp2cuda_temp_0 = mathblocks_statistics_population_covariance(left, right, count);
+    float csharp2cuda_temp_0 = mathblocks_statistics_population_covariance(left, right, count);
 #line 127 "StatisticsModule.cs"
-    double csharp2cuda_temp_1 = mathblocks_statistics_population_variance(left, count);
+    float csharp2cuda_temp_1 = mathblocks_statistics_population_variance(left, count);
 #line 128 "StatisticsModule.cs"
-    double csharp2cuda_temp_2 = mathblocks_statistics_population_variance(right, count);
+    float csharp2cuda_temp_2 = mathblocks_statistics_population_variance(right, count);
     return mathblocks_statistics_correlation_value(csharp2cuda_temp_0, csharp2cuda_temp_1, csharp2cuda_temp_2);
 }
 
 #line 70 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_population_covariance(
-    const double* left,
-    const double* right,
+__device__ float mathblocks_statistics_population_covariance(
+    const float* left,
+    const float* right,
     int count)
 #line 75 "StatisticsModule.cs"
 {
 #line 76 "StatisticsModule.cs"
-    double left_mean = mathblocks_statistics_mean(left, count);
+    float left_mean = mathblocks_statistics_mean(left, count);
 #line 77 "StatisticsModule.cs"
-    double right_mean = mathblocks_statistics_mean(right, count);
+    float right_mean = mathblocks_statistics_mean(right, count);
 #line 78 "StatisticsModule.cs"
-    double sum = 0.0;
+    float sum = 0.0f;
 #line 79 "StatisticsModule.cs"
     {
 #line 79 "StatisticsModule.cs"
@@ -3337,33 +3337,33 @@ __device__ double mathblocks_statistics_population_covariance(
                 break;
 #line 80 "StatisticsModule.cs"
 #line 80 "StatisticsModule.cs"
-            double* csharp2cuda_temp_1 = &(sum);
+            float* csharp2cuda_temp_1 = &(sum);
 #line 80 "StatisticsModule.cs"
-            double csharp2cuda_temp_2 = *(csharp2cuda_temp_1);
+            float csharp2cuda_temp_2 = *(csharp2cuda_temp_1);
 #line 80 "StatisticsModule.cs"
-            double csharp2cuda_temp_3 = (left)[index];
+            float csharp2cuda_temp_3 = (left)[index];
 #line 80 "StatisticsModule.cs"
-            double csharp2cuda_temp_4 = (right)[index];
-            (*(csharp2cuda_temp_1) = __dadd_rn(csharp2cuda_temp_2, __dmul_rn(__dsub_rn(csharp2cuda_temp_3, left_mean), __dsub_rn(csharp2cuda_temp_4, right_mean))));
+            float csharp2cuda_temp_4 = (right)[index];
+            (*(csharp2cuda_temp_1) = __fadd_rn(csharp2cuda_temp_2, __fmul_rn(__fsub_rn(csharp2cuda_temp_3, left_mean), __fsub_rn(csharp2cuda_temp_4, right_mean))));
 #line 79 "StatisticsModule.cs"
             int* csharp2cuda_temp_0 = &(index);
             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_0));
         }
     }
 #line 81 "StatisticsModule.cs"
-    return __ddiv_rn(sum, ((double)(count)));
+    return __fdiv_rn(sum, ((float)(count)));
 }
 
 #line 55 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_population_variance(
-    const double* values,
+__device__ float mathblocks_statistics_population_variance(
+    const float* values,
     int count)
 #line 59 "StatisticsModule.cs"
 {
 #line 60 "StatisticsModule.cs"
-    double mean = mathblocks_statistics_mean(values, count);
+    float mean = mathblocks_statistics_mean(values, count);
 #line 61 "StatisticsModule.cs"
-    double sum = 0.0;
+    float sum = 0.0f;
 #line 62 "StatisticsModule.cs"
     {
 #line 62 "StatisticsModule.cs"
@@ -3375,15 +3375,15 @@ __device__ double mathblocks_statistics_population_variance(
 #line 63 "StatisticsModule.cs"
             {
 #line 64 "StatisticsModule.cs"
-                double csharp2cuda_temp_1 = (values)[index];
+                float csharp2cuda_temp_1 = (values)[index];
 #line 64 "StatisticsModule.cs"
-                double difference = __dsub_rn(csharp2cuda_temp_1, mean);
+                float difference = __fsub_rn(csharp2cuda_temp_1, mean);
 #line 65 "StatisticsModule.cs"
 #line 65 "StatisticsModule.cs"
-                double* csharp2cuda_temp_2 = &(sum);
+                float* csharp2cuda_temp_2 = &(sum);
 #line 65 "StatisticsModule.cs"
-                double csharp2cuda_temp_3 = *(csharp2cuda_temp_2);
-                (*(csharp2cuda_temp_2) = __dadd_rn(csharp2cuda_temp_3, __dmul_rn(difference, difference)));
+                float csharp2cuda_temp_3 = *(csharp2cuda_temp_2);
+                (*(csharp2cuda_temp_2) = __fadd_rn(csharp2cuda_temp_3, __fmul_rn(difference, difference)));
             }
 #line 62 "StatisticsModule.cs"
             int* csharp2cuda_temp_0 = &(index);
@@ -3391,11 +3391,11 @@ __device__ double mathblocks_statistics_population_variance(
         }
     }
 #line 67 "StatisticsModule.cs"
-    return __ddiv_rn(sum, ((double)(count)));
+    return __fdiv_rn(sum, ((float)(count)));
 }
 
 #line 85 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_quotient_by_variance(double covariance, double variance)
+__device__ float mathblocks_statistics_quotient_by_variance(float covariance, float variance)
 #line 87 "StatisticsModule.cs"
 {
 #line 88 "StatisticsModule.cs"
@@ -3405,14 +3405,14 @@ __device__ double mathblocks_statistics_quotient_by_variance(double covariance, 
         return mathblocks_quiet_nan();
     }
 #line 90 "StatisticsModule.cs"
-    return __ddiv_rn(covariance, variance);
+    return __fdiv_rn(covariance, variance);
 }
 
 #line 190 "StatisticsModule.cs"
 __device__ void mathblocks_statistics_rank(
-    const double* values,
+    const float* values,
     int count,
-    double* result)
+    float* result)
 #line 195 "StatisticsModule.cs"
 {
 #line 196 "StatisticsModule.cs"
@@ -3425,9 +3425,9 @@ __device__ void mathblocks_statistics_rank(
                 break;
 #line 197 "StatisticsModule.cs"
 #line 197 "StatisticsModule.cs"
-            double* csharp2cuda_temp_1 = &((result)[index]);
+            float* csharp2cuda_temp_1 = &((result)[index]);
 #line 197 "StatisticsModule.cs"
-            double csharp2cuda_temp_2 = mathblocks_statistics_rank_at(values, count, index);
+            float csharp2cuda_temp_2 = mathblocks_statistics_rank_at(values, count, index);
             (*(csharp2cuda_temp_1) = csharp2cuda_temp_2);
 #line 196 "StatisticsModule.cs"
             int* csharp2cuda_temp_0 = &(index);
@@ -3437,8 +3437,8 @@ __device__ void mathblocks_statistics_rank(
 }
 
 #line 172 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_rank_at(
-    const double* values,
+__device__ float mathblocks_statistics_rank_at(
+    const float* values,
     int count,
     int index)
 #line 177 "StatisticsModule.cs"
@@ -3459,9 +3459,9 @@ __device__ double mathblocks_statistics_rank_at(
             {
 #line 182 "StatisticsModule.cs"
 #line 182 "StatisticsModule.cs"
-                double csharp2cuda_temp_1 = (values)[candidate];
+                float csharp2cuda_temp_1 = (values)[candidate];
 #line 182 "StatisticsModule.cs"
-                double csharp2cuda_temp_2 = (values)[index];
+                float csharp2cuda_temp_2 = (values)[index];
                 if (((csharp2cuda_temp_1) < (csharp2cuda_temp_2)))
                 {
 #line 183 "StatisticsModule.cs"
@@ -3473,9 +3473,9 @@ __device__ double mathblocks_statistics_rank_at(
                 {
 #line 184 "StatisticsModule.cs"
 #line 184 "StatisticsModule.cs"
-                    double csharp2cuda_temp_4 = (values)[candidate];
+                    float csharp2cuda_temp_4 = (values)[candidate];
 #line 184 "StatisticsModule.cs"
-                    double csharp2cuda_temp_5 = (values)[index];
+                    float csharp2cuda_temp_5 = (values)[index];
                     if (((csharp2cuda_temp_4) == (csharp2cuda_temp_5)))
                     {
 #line 185 "StatisticsModule.cs"
@@ -3492,16 +3492,16 @@ __device__ double mathblocks_statistics_rank_at(
     }
 #line 187 "StatisticsModule.cs"
 #line 187 "StatisticsModule.cs"
-    double csharp2cuda_temp_7 = __ddiv_rn(__dadd_rn(((double)(equal)), 1.0), 2.0);
-    return __dadd_rn(((double)(lower)), csharp2cuda_temp_7);
+    float csharp2cuda_temp_7 = __fdiv_rn(__fadd_rn(((float)(equal)), 1.0f), 2.0f);
+    return __fadd_rn(((float)(lower)), csharp2cuda_temp_7);
 }
 
 #line 285 "StatisticsModule.cs"
 __device__ bool mathblocks_statistics_shape_moment_value(
-    const double* values,
+    const float* values,
     int count,
     bool kurtosis,
-    double* value)
+    float* value)
 #line 291 "StatisticsModule.cs"
 {
 #line 292 "StatisticsModule.cs"
@@ -3511,11 +3511,11 @@ __device__ bool mathblocks_statistics_shape_moment_value(
         return false;
     }
 #line 294 "StatisticsModule.cs"
-    double mean = mathblocks_statistics_mean(values, count);
+    float mean = mathblocks_statistics_mean(values, count);
 #line 295 "StatisticsModule.cs"
-    double second_moment = 0.0;
+    float second_moment = 0.0f;
 #line 296 "StatisticsModule.cs"
-    double higher_moment = 0.0;
+    float higher_moment = 0.0f;
 #line 297 "StatisticsModule.cs"
     {
 #line 297 "StatisticsModule.cs"
@@ -3527,36 +3527,36 @@ __device__ bool mathblocks_statistics_shape_moment_value(
 #line 298 "StatisticsModule.cs"
             {
 #line 299 "StatisticsModule.cs"
-                double csharp2cuda_temp_1 = (values)[index];
+                float csharp2cuda_temp_1 = (values)[index];
 #line 299 "StatisticsModule.cs"
-                double difference = __dsub_rn(csharp2cuda_temp_1, mean);
+                float difference = __fsub_rn(csharp2cuda_temp_1, mean);
 #line 300 "StatisticsModule.cs"
-                double square = __dmul_rn(difference, difference);
+                float square = __fmul_rn(difference, difference);
 #line 301 "StatisticsModule.cs"
 #line 301 "StatisticsModule.cs"
-                double* csharp2cuda_temp_2 = &(second_moment);
+                float* csharp2cuda_temp_2 = &(second_moment);
 #line 301 "StatisticsModule.cs"
-                double csharp2cuda_temp_3 = *(csharp2cuda_temp_2);
-                (*(csharp2cuda_temp_2) = __dadd_rn(csharp2cuda_temp_3, square));
+                float csharp2cuda_temp_3 = *(csharp2cuda_temp_2);
+                (*(csharp2cuda_temp_2) = __fadd_rn(csharp2cuda_temp_3, square));
 #line 302 "StatisticsModule.cs"
 #line 302 "StatisticsModule.cs"
-                double* csharp2cuda_temp_4 = &(higher_moment);
+                float* csharp2cuda_temp_4 = &(higher_moment);
 #line 302 "StatisticsModule.cs"
-                double csharp2cuda_temp_5 = *(csharp2cuda_temp_4);
+                float csharp2cuda_temp_5 = *(csharp2cuda_temp_4);
 #line 302 "StatisticsModule.cs"
-                double csharp2cuda_temp_6;
+                float csharp2cuda_temp_6;
 #line 302 "StatisticsModule.cs"
                 if (kurtosis)
                 {
 #line 302 "StatisticsModule.cs"
-                    csharp2cuda_temp_6 = __dmul_rn(square, square);
+                    csharp2cuda_temp_6 = __fmul_rn(square, square);
                 }
                 else
                 {
 #line 302 "StatisticsModule.cs"
-                    csharp2cuda_temp_6 = __dmul_rn(square, difference);
+                    csharp2cuda_temp_6 = __fmul_rn(square, difference);
                 }
-                (*(csharp2cuda_temp_4) = __dadd_rn(csharp2cuda_temp_5, csharp2cuda_temp_6));
+                (*(csharp2cuda_temp_4) = __fadd_rn(csharp2cuda_temp_5, csharp2cuda_temp_6));
             }
 #line 297 "StatisticsModule.cs"
             int* csharp2cuda_temp_0 = &(index);
@@ -3565,46 +3565,46 @@ __device__ bool mathblocks_statistics_shape_moment_value(
     }
 #line 304 "StatisticsModule.cs"
 #line 304 "StatisticsModule.cs"
-    double* csharp2cuda_temp_7 = &(second_moment);
+    float* csharp2cuda_temp_7 = &(second_moment);
 #line 304 "StatisticsModule.cs"
-    double csharp2cuda_temp_8 = *(csharp2cuda_temp_7);
-    (*(csharp2cuda_temp_7) = __ddiv_rn(csharp2cuda_temp_8, ((double)(count))));
+    float csharp2cuda_temp_8 = *(csharp2cuda_temp_7);
+    (*(csharp2cuda_temp_7) = __fdiv_rn(csharp2cuda_temp_8, ((float)(count))));
 #line 305 "StatisticsModule.cs"
 #line 305 "StatisticsModule.cs"
-    double* csharp2cuda_temp_9 = &(higher_moment);
+    float* csharp2cuda_temp_9 = &(higher_moment);
 #line 305 "StatisticsModule.cs"
-    double csharp2cuda_temp_10 = *(csharp2cuda_temp_9);
-    (*(csharp2cuda_temp_9) = __ddiv_rn(csharp2cuda_temp_10, ((double)(count))));
+    float csharp2cuda_temp_10 = *(csharp2cuda_temp_9);
+    (*(csharp2cuda_temp_9) = __fdiv_rn(csharp2cuda_temp_10, ((float)(count))));
 #line 306 "StatisticsModule.cs"
 #line 306 "StatisticsModule.cs"
-    double* csharp2cuda_temp_11 = value;
+    float* csharp2cuda_temp_11 = value;
 #line 306 "StatisticsModule.cs"
-    double csharp2cuda_temp_12;
+    float csharp2cuda_temp_12;
 #line 306 "StatisticsModule.cs"
     if (kurtosis)
     {
 #line 307 "StatisticsModule.cs"
-        double csharp2cuda_temp_13 = __ddiv_rn(higher_moment, __dmul_rn(second_moment, second_moment));
+        float csharp2cuda_temp_13 = __fdiv_rn(higher_moment, __fmul_rn(second_moment, second_moment));
 #line 306 "StatisticsModule.cs"
-        csharp2cuda_temp_12 = __dsub_rn(csharp2cuda_temp_13, 3.0);
+        csharp2cuda_temp_12 = __fsub_rn(csharp2cuda_temp_13, 3.0f);
     }
     else
     {
 #line 306 "StatisticsModule.cs"
-        csharp2cuda_temp_12 = __ddiv_rn(higher_moment, mathblocks_power(second_moment, 1.5));
+        csharp2cuda_temp_12 = __fdiv_rn(higher_moment, mathblocks_power(second_moment, 1.5f));
     }
     (*(csharp2cuda_temp_11) = csharp2cuda_temp_12);
 #line 309 "StatisticsModule.cs"
 #line 309 "StatisticsModule.cs"
-    double csharp2cuda_temp_14 = *(value);
+    float csharp2cuda_temp_14 = *(value);
     return isfinite(csharp2cuda_temp_14);
 }
 
 #line 138 "StatisticsModule.cs"
 __device__ void mathblocks_statistics_sort_copy(
-    const double* values,
+    const float* values,
     int count,
-    double* result,
+    float* result,
     bool descending)
 #line 144 "StatisticsModule.cs"
 {
@@ -3613,10 +3613,10 @@ __device__ void mathblocks_statistics_sort_copy(
 }
 
 #line 148 "StatisticsModule.cs"
-__device__ double mathblocks_statistics_sorted_quantile(
-    const double* sorted,
+__device__ float mathblocks_statistics_sorted_quantile(
+    const float* sorted,
     int count,
-    double probability)
+    float probability)
 #line 153 "StatisticsModule.cs"
 {
 #line 154 "StatisticsModule.cs"
@@ -3626,28 +3626,28 @@ __device__ double mathblocks_statistics_sorted_quantile(
         return (sorted)[0];
     }
 #line 156 "StatisticsModule.cs"
-    double position = __dmul_rn(probability, ((double)(csharp2cuda_i32_sub(count, 1))));
+    float position = __fmul_rn(probability, ((float)(csharp2cuda_i32_sub(count, 1))));
 #line 157 "StatisticsModule.cs"
-    int lower = csharp2cuda_f64_to_i32(floor(position));
+    int lower = csharp2cuda_f64_to_i32(floorf(position));
 #line 158 "StatisticsModule.cs"
-    int upper = csharp2cuda_f64_to_i32(ceil(position));
+    int upper = csharp2cuda_f64_to_i32(ceilf(position));
 #line 159 "StatisticsModule.cs"
-    double weight = __dsub_rn(position, ((double)(lower)));
+    float weight = __fsub_rn(position, ((float)(lower)));
 #line 160 "StatisticsModule.cs"
 #line 160 "StatisticsModule.cs"
-    double csharp2cuda_temp_0 = (sorted)[lower];
+    float csharp2cuda_temp_0 = (sorted)[lower];
 #line 160 "StatisticsModule.cs"
-    double csharp2cuda_temp_1 = (sorted)[upper];
-    return __dadd_rn(__dmul_rn(csharp2cuda_temp_0, __dsub_rn(1.0, weight)), __dmul_rn(csharp2cuda_temp_1, weight));
+    float csharp2cuda_temp_1 = (sorted)[upper];
+    return __fadd_rn(__fmul_rn(csharp2cuda_temp_0, __fsub_rn(1.0f, weight)), __fmul_rn(csharp2cuda_temp_1, weight));
 }
 
 #line 312 "StatisticsModule.cs"
 __device__ bool mathblocks_statistics_weighted_value(
-    const double* values,
-    const double* weights,
+    const float* values,
+    const float* weights,
     int count,
     bool variance,
-    double* value)
+    float* value)
 #line 319 "StatisticsModule.cs"
 {
 #line 320 "StatisticsModule.cs"
@@ -3657,23 +3657,23 @@ __device__ bool mathblocks_statistics_weighted_value(
         return false;
     }
 #line 322 "StatisticsModule.cs"
-    double weight_sum = mathblocks_compensated_sum(weights, count);
+    float weight_sum = mathblocks_compensated_sum(weights, count);
 #line 323 "StatisticsModule.cs"
-    double mean = __ddiv_rn(mathblocks_compensated_product_sum(values, weights, count), weight_sum);
+    float mean = __fdiv_rn(mathblocks_compensated_product_sum(values, weights, count), weight_sum);
 #line 324 "StatisticsModule.cs"
     if ((!(variance)))
 #line 325 "StatisticsModule.cs"
     {
 #line 326 "StatisticsModule.cs"
 #line 326 "StatisticsModule.cs"
-        double* csharp2cuda_temp_0 = value;
+        float* csharp2cuda_temp_0 = value;
         (*(csharp2cuda_temp_0) = mean);
     }
     else
 #line 329 "StatisticsModule.cs"
     {
 #line 330 "StatisticsModule.cs"
-        double numerator = 0.0;
+        float numerator = 0.0f;
 #line 331 "StatisticsModule.cs"
         {
 #line 331 "StatisticsModule.cs"
@@ -3685,17 +3685,17 @@ __device__ bool mathblocks_statistics_weighted_value(
 #line 332 "StatisticsModule.cs"
                 {
 #line 333 "StatisticsModule.cs"
-                    double csharp2cuda_temp_2 = (values)[index];
+                    float csharp2cuda_temp_2 = (values)[index];
 #line 333 "StatisticsModule.cs"
-                    double difference = __dsub_rn(csharp2cuda_temp_2, mean);
+                    float difference = __fsub_rn(csharp2cuda_temp_2, mean);
 #line 334 "StatisticsModule.cs"
 #line 334 "StatisticsModule.cs"
-                    double* csharp2cuda_temp_3 = &(numerator);
+                    float* csharp2cuda_temp_3 = &(numerator);
 #line 334 "StatisticsModule.cs"
-                    double csharp2cuda_temp_4 = *(csharp2cuda_temp_3);
+                    float csharp2cuda_temp_4 = *(csharp2cuda_temp_3);
 #line 334 "StatisticsModule.cs"
-                    double csharp2cuda_temp_5 = (weights)[index];
-                    (*(csharp2cuda_temp_3) = __dadd_rn(csharp2cuda_temp_4, __dmul_rn(__dmul_rn(csharp2cuda_temp_5, difference), difference)));
+                    float csharp2cuda_temp_5 = (weights)[index];
+                    (*(csharp2cuda_temp_3) = __fadd_rn(csharp2cuda_temp_4, __fmul_rn(__fmul_rn(csharp2cuda_temp_5, difference), difference)));
                 }
 #line 331 "StatisticsModule.cs"
                 int* csharp2cuda_temp_1 = &(index);
@@ -3704,13 +3704,13 @@ __device__ bool mathblocks_statistics_weighted_value(
         }
 #line 336 "StatisticsModule.cs"
 #line 336 "StatisticsModule.cs"
-        double* csharp2cuda_temp_6 = value;
+        float* csharp2cuda_temp_6 = value;
 #line 336 "StatisticsModule.cs"
-        double csharp2cuda_temp_7 = __ddiv_rn(numerator, weight_sum);
+        float csharp2cuda_temp_7 = __fdiv_rn(numerator, weight_sum);
         (*(csharp2cuda_temp_6) = csharp2cuda_temp_7);
     }
 #line 338 "StatisticsModule.cs"
 #line 338 "StatisticsModule.cs"
-    double csharp2cuda_temp_8 = *(value);
+    float csharp2cuda_temp_8 = *(value);
     return isfinite(csharp2cuda_temp_8);
 }

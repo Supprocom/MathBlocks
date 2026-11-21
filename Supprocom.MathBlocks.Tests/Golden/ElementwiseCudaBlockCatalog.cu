@@ -639,7 +639,7 @@ static __device__ __forceinline__ short csharp2cuda_i16_post_decrement(short& ta
 #endif
 
 #line 144 "ElementwiseModule.cs"
-__device__ double mathblocks_elementwise_argument(const MathBlockSlot* slot, bool vector, int row);
+__device__ float mathblocks_elementwise_argument(const MathBlockSlot* slot, bool vector, int row);
 
 #line 168 "ElementwiseModule.cs"
 __device__ int mathblocks_elementwise_decode(int opcode, int* passed_mask, int* source, bool* sibling);
@@ -655,21 +655,21 @@ __device__ void mathblocks_elementwise_dispatch(
 __device__ void mathblocks_elementwise_publish(MathBlockSlot* output, bool valid, int count, int thread);
 
 #line 299 "ElementwiseModule.cs"
-__device__ bool mathblocks_elementwise_row(int opcode, double a, double b, double c, double fill, double* result);
+__device__ bool mathblocks_elementwise_row(int opcode, float a, float b, float c, float fill, float* result);
 
 #line 188 "ElementwiseModule.cs"
 __device__ bool mathblocks_elementwise_row_core(
     int form,
     int source_opcode,
     int arity,
-    double a,
-    double b,
-    double c,
-    double fill,
-    double* result);
+    float a,
+    float b,
+    float c,
+    float fill,
+    float* result);
 
 #line 134 "ElementwiseModule.cs"
-__device__ bool mathblocks_elementwise_row_value(int source_opcode, double a, double b, double c, double* value, bool* converged);
+__device__ bool mathblocks_elementwise_row_value(int source_opcode, float a, float b, float c, float* value, bool* converged);
 
 #line 218 "ElementwiseModule.cs"
 __device__ void mathblocks_elementwise_run(
@@ -687,25 +687,25 @@ __device__ int mathblocks_elementwise_source_arity(int source);
 __device__ int mathblocks_elementwise_source_opcode(int source);
 
 #line 144 "ElementwiseModule.cs"
-__device__ double mathblocks_elementwise_argument(const MathBlockSlot* slot, bool vector, int row)
+__device__ float mathblocks_elementwise_argument(const MathBlockSlot* slot, bool vector, int row)
 #line 146 "ElementwiseModule.cs"
 {
 #line 147 "ElementwiseModule.cs"
     if (((((void*)(slot))) == (((void*)(nullptr)))))
     {
 #line 148 "ElementwiseModule.cs"
-        return 0.0;
+        return 0.0f;
     }
 #line 149 "ElementwiseModule.cs"
 #line 149 "ElementwiseModule.cs"
-    double csharp2cuda_temp_0;
+    float csharp2cuda_temp_0;
 #line 149 "ElementwiseModule.cs"
     if (vector)
     {
 #line 149 "ElementwiseModule.cs"
         unsigned long long csharp2cuda_temp_1 = (slot)->data_pointer;
 #line 149 "ElementwiseModule.cs"
-        csharp2cuda_temp_0 = (((double*)(csharp2cuda_temp_1)))[row];
+        csharp2cuda_temp_0 = (((float*)(csharp2cuda_temp_1)))[row];
     }
     else
     {
@@ -786,8 +786,8 @@ __device__ void mathblocks_elementwise_publish(MathBlockSlot* output, bool valid
     }
 #line 157 "ElementwiseModule.cs"
 #line 157 "ElementwiseModule.cs"
-    double* csharp2cuda_temp_0 = &((output)->scalar_value);
-    (*(csharp2cuda_temp_0) = 0.0);
+    float* csharp2cuda_temp_0 = &((output)->scalar_value);
+    (*(csharp2cuda_temp_0) = 0.0f);
 #line 158 "ElementwiseModule.cs"
 #line 158 "ElementwiseModule.cs"
     int* csharp2cuda_temp_1 = &((output)->boolean_value);
@@ -837,7 +837,7 @@ __device__ void mathblocks_elementwise_publish(MathBlockSlot* output, bool valid
 }
 
 #line 299 "ElementwiseModule.cs"
-__device__ bool mathblocks_elementwise_row(int opcode, double a, double b, double c, double fill, double* result)
+__device__ bool mathblocks_elementwise_row(int opcode, float a, float b, float c, float fill, float* result)
 #line 301 "ElementwiseModule.cs"
 {
 #line 302 "ElementwiseModule.cs"
@@ -873,7 +873,7 @@ __device__ bool mathblocks_elementwise_row(int opcode, double a, double b, doubl
     {
 #line 308 "ElementwiseModule.cs"
 #line 308 "ElementwiseModule.cs"
-        double* csharp2cuda_temp_4 = result;
+        float* csharp2cuda_temp_4 = result;
         (*(csharp2cuda_temp_4) = fill);
 #line 309 "ElementwiseModule.cs"
         return false;
@@ -881,7 +881,7 @@ __device__ bool mathblocks_elementwise_row(int opcode, double a, double b, doubl
 #line 311 "ElementwiseModule.cs"
     int arity = mathblocks_elementwise_source_arity(source);
 #line 312 "ElementwiseModule.cs"
-    double csharp2cuda_temp_5;
+    float csharp2cuda_temp_5;
 #line 312 "ElementwiseModule.cs"
     if (((arity) > (1)))
     {
@@ -891,12 +891,12 @@ __device__ bool mathblocks_elementwise_row(int opcode, double a, double b, doubl
     else
     {
 #line 312 "ElementwiseModule.cs"
-        csharp2cuda_temp_5 = 0.0;
+        csharp2cuda_temp_5 = 0.0f;
     }
 #line 312 "ElementwiseModule.cs"
-    double argument_b = csharp2cuda_temp_5;
+    float argument_b = csharp2cuda_temp_5;
 #line 313 "ElementwiseModule.cs"
-    double csharp2cuda_temp_6;
+    float csharp2cuda_temp_6;
 #line 313 "ElementwiseModule.cs"
     if (((arity) > (2)))
     {
@@ -906,10 +906,10 @@ __device__ bool mathblocks_elementwise_row(int opcode, double a, double b, doubl
     else
     {
 #line 313 "ElementwiseModule.cs"
-        csharp2cuda_temp_6 = 0.0;
+        csharp2cuda_temp_6 = 0.0f;
     }
 #line 313 "ElementwiseModule.cs"
-    double argument_c = csharp2cuda_temp_6;
+    float argument_c = csharp2cuda_temp_6;
 #line 314 "ElementwiseModule.cs"
     return mathblocks_elementwise_row_core(form, mathblocks_elementwise_source_opcode(source), arity, a, argument_b, argument_c, fill, result);
 }
@@ -919,15 +919,15 @@ __device__ bool mathblocks_elementwise_row_core(
     int form,
     int source_opcode,
     int arity,
-    double a,
-    double b,
-    double c,
-    double fill,
-    double* result)
+    float a,
+    float b,
+    float c,
+    float fill,
+    float* result)
 #line 198 "ElementwiseModule.cs"
 {
 #line 199 "ElementwiseModule.cs"
-    double value = 0.0;
+    float value = 0.0f;
 #line 200 "ElementwiseModule.cs"
     bool converged = true;
 #line 201 "ElementwiseModule.cs"
@@ -991,7 +991,7 @@ __device__ bool mathblocks_elementwise_row_core(
 #line 205 "ElementwiseModule.cs"
         bool* csharp2cuda_temp_4 = &(row_valid);
 #line 210 "ElementwiseModule.cs"
-        double* csharp2cuda_temp_5 = &(value);
+        float* csharp2cuda_temp_5 = &(value);
 #line 211 "ElementwiseModule.cs"
         bool* csharp2cuda_temp_6 = &(converged);
 #line 205 "ElementwiseModule.cs"
@@ -1006,9 +1006,9 @@ __device__ bool mathblocks_elementwise_row_core(
     }
 #line 213 "ElementwiseModule.cs"
 #line 213 "ElementwiseModule.cs"
-    double* csharp2cuda_temp_8 = result;
+    float* csharp2cuda_temp_8 = result;
 #line 213 "ElementwiseModule.cs"
-    double csharp2cuda_temp_9;
+    float csharp2cuda_temp_9;
 #line 213 "ElementwiseModule.cs"
     if (row_valid)
     {
@@ -1026,7 +1026,7 @@ __device__ bool mathblocks_elementwise_row_core(
 }
 
 #line 134 "ElementwiseModule.cs"
-__device__ bool mathblocks_elementwise_row_value(int source_opcode, double a, double b, double c, double* value, bool* converged)
+__device__ bool mathblocks_elementwise_row_value(int source_opcode, float a, float b, float c, float* value, bool* converged)
 #line 136 "ElementwiseModule.cs"
 {
 #line 137 "ElementwiseModule.cs"
@@ -1418,12 +1418,12 @@ __device__ void mathblocks_elementwise_run(
 #line 267 "ElementwiseModule.cs"
     bool third_vector = ((csharp2cuda_i32_and(mask, 4)) != (0));
 #line 268 "ElementwiseModule.cs"
-    double csharp2cuda_temp_39;
+    float csharp2cuda_temp_39;
 #line 268 "ElementwiseModule.cs"
     if (sibling)
     {
 #line 268 "ElementwiseModule.cs"
-        csharp2cuda_temp_39 = 0.0;
+        csharp2cuda_temp_39 = 0.0f;
     }
     else
     {
@@ -1433,13 +1433,13 @@ __device__ void mathblocks_elementwise_run(
         csharp2cuda_temp_39 = (csharp2cuda_temp_40)->scalar_value;
     }
 #line 268 "ElementwiseModule.cs"
-    double fill = csharp2cuda_temp_39;
+    float fill = csharp2cuda_temp_39;
 #line 269 "ElementwiseModule.cs"
     int source_opcode = mathblocks_elementwise_source_opcode(source);
 #line 270 "ElementwiseModule.cs"
     unsigned long long csharp2cuda_temp_41 = (output)->data_pointer;
 #line 270 "ElementwiseModule.cs"
-    double* result = ((double*)(csharp2cuda_temp_41));
+    float* result = ((float*)(csharp2cuda_temp_41));
 #line 271 "ElementwiseModule.cs"
     unsigned long long csharp2cuda_temp_42 = (output)->data_pointer;
 #line 271 "ElementwiseModule.cs"
@@ -1455,15 +1455,15 @@ __device__ void mathblocks_elementwise_run(
 #line 273 "ElementwiseModule.cs"
             {
 #line 274 "ElementwiseModule.cs"
-                double value = 0.0;
+                float value = 0.0f;
 #line 275 "ElementwiseModule.cs"
-                double argument_a = mathblocks_elementwise_argument(first, first_vector, row);
+                float argument_a = mathblocks_elementwise_argument(first, first_vector, row);
 #line 276 "ElementwiseModule.cs"
-                double argument_b = mathblocks_elementwise_argument(second, second_vector, row);
+                float argument_b = mathblocks_elementwise_argument(second, second_vector, row);
 #line 277 "ElementwiseModule.cs"
-                double argument_c = mathblocks_elementwise_argument(third, third_vector, row);
+                float argument_c = mathblocks_elementwise_argument(third, third_vector, row);
 #line 286 "ElementwiseModule.cs"
-                double* csharp2cuda_temp_45 = &(value);
+                float* csharp2cuda_temp_45 = &(value);
 #line 278 "ElementwiseModule.cs"
                 bool row_valid = mathblocks_elementwise_row_core(form, source_opcode, arity, argument_a, argument_b, argument_c, fill, csharp2cuda_temp_45);
 #line 287 "ElementwiseModule.cs"
@@ -1478,7 +1478,7 @@ __device__ void mathblocks_elementwise_run(
                 {
 #line 290 "ElementwiseModule.cs"
 #line 290 "ElementwiseModule.cs"
-                    double* csharp2cuda_temp_47 = &((result)[row]);
+                    float* csharp2cuda_temp_47 = &((result)[row]);
                     (*(csharp2cuda_temp_47) = value);
                 }
             }

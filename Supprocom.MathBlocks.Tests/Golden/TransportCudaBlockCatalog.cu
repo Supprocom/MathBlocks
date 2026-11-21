@@ -646,10 +646,10 @@ __device__ void mathblocks_transport_dispatch(
     MathBlockSlot* output);
 
 #line 70 "TransportModule.cs"
-__device__ double mathblocks_transport_mean_pairwise(
-    const double* left,
+__device__ float mathblocks_transport_mean_pairwise(
+    const float* left,
     int left_count,
-    const double* right,
+    const float* right,
     int right_count);
 
 #line 84 "TransportModule.cs"
@@ -743,8 +743,8 @@ __device__ void mathblocks_transport_dispatch(
     {
 #line 99 "TransportModule.cs"
 #line 99 "TransportModule.cs"
-        double* csharp2cuda_temp_5 = &((output)->scalar_value);
-        (*(csharp2cuda_temp_5) = 0.0);
+        float* csharp2cuda_temp_5 = &((output)->scalar_value);
+        (*(csharp2cuda_temp_5) = 0.0f);
 #line 100 "TransportModule.cs"
 #line 100 "TransportModule.cs"
         int* csharp2cuda_temp_6 = &((output)->boolean_value);
@@ -817,81 +817,81 @@ __device__ void mathblocks_transport_dispatch(
         return;
     }
 #line 112 "TransportModule.cs"
-    double* csharp2cuda_temp_18;
+    float* csharp2cuda_temp_18;
 #line 112 "TransportModule.cs"
     if (((((void*)(first))) == (((void*)(nullptr)))))
     {
 #line 112 "TransportModule.cs"
-        csharp2cuda_temp_18 = ((double*)(nullptr));
+        csharp2cuda_temp_18 = ((float*)(nullptr));
     }
     else
     {
 #line 112 "TransportModule.cs"
         unsigned long long csharp2cuda_temp_19 = (first)->data_pointer;
 #line 112 "TransportModule.cs"
-        csharp2cuda_temp_18 = ((double*)(csharp2cuda_temp_19));
+        csharp2cuda_temp_18 = ((float*)(csharp2cuda_temp_19));
     }
 #line 112 "TransportModule.cs"
-    const double* a = csharp2cuda_temp_18;
+    const float* a = csharp2cuda_temp_18;
 #line 113 "TransportModule.cs"
-    double* csharp2cuda_temp_20;
+    float* csharp2cuda_temp_20;
 #line 113 "TransportModule.cs"
     if (((((void*)(second))) == (((void*)(nullptr)))))
     {
 #line 113 "TransportModule.cs"
-        csharp2cuda_temp_20 = ((double*)(nullptr));
+        csharp2cuda_temp_20 = ((float*)(nullptr));
     }
     else
     {
 #line 113 "TransportModule.cs"
         unsigned long long csharp2cuda_temp_21 = (second)->data_pointer;
 #line 113 "TransportModule.cs"
-        csharp2cuda_temp_20 = ((double*)(csharp2cuda_temp_21));
+        csharp2cuda_temp_20 = ((float*)(csharp2cuda_temp_21));
     }
 #line 113 "TransportModule.cs"
-    const double* b = csharp2cuda_temp_20;
+    const float* b = csharp2cuda_temp_20;
 #line 114 "TransportModule.cs"
-    double* csharp2cuda_temp_22;
+    float* csharp2cuda_temp_22;
 #line 114 "TransportModule.cs"
     if (((((void*)(third))) == (((void*)(nullptr)))))
     {
 #line 114 "TransportModule.cs"
-        csharp2cuda_temp_22 = ((double*)(nullptr));
+        csharp2cuda_temp_22 = ((float*)(nullptr));
     }
     else
     {
 #line 114 "TransportModule.cs"
         unsigned long long csharp2cuda_temp_23 = (third)->data_pointer;
 #line 114 "TransportModule.cs"
-        csharp2cuda_temp_22 = ((double*)(csharp2cuda_temp_23));
+        csharp2cuda_temp_22 = ((float*)(csharp2cuda_temp_23));
     }
 #line 114 "TransportModule.cs"
-    const double* c = csharp2cuda_temp_22;
+    const float* c = csharp2cuda_temp_22;
 #line 115 "TransportModule.cs"
-    double* csharp2cuda_temp_24;
+    float* csharp2cuda_temp_24;
 #line 115 "TransportModule.cs"
     if (((((void*)(fourth))) == (((void*)(nullptr)))))
     {
 #line 115 "TransportModule.cs"
-        csharp2cuda_temp_24 = ((double*)(nullptr));
+        csharp2cuda_temp_24 = ((float*)(nullptr));
     }
     else
     {
 #line 115 "TransportModule.cs"
         unsigned long long csharp2cuda_temp_25 = (fourth)->data_pointer;
 #line 115 "TransportModule.cs"
-        csharp2cuda_temp_24 = ((double*)(csharp2cuda_temp_25));
+        csharp2cuda_temp_24 = ((float*)(csharp2cuda_temp_25));
     }
 #line 115 "TransportModule.cs"
-    const double* d = csharp2cuda_temp_24;
+    const float* d = csharp2cuda_temp_24;
 #line 116 "TransportModule.cs"
     unsigned long long csharp2cuda_temp_26 = (output)->data_pointer;
 #line 116 "TransportModule.cs"
-    double* result = ((double*)(csharp2cuda_temp_26));
+    float* result = ((float*)(csharp2cuda_temp_26));
 #line 117 "TransportModule.cs"
     unsigned long long csharp2cuda_temp_27 = (output)->scratch_pointer;
 #line 117 "TransportModule.cs"
-    double* scratch = ((double*)(csharp2cuda_temp_27));
+    float* scratch = ((float*)(csharp2cuda_temp_27));
 #line 119 "TransportModule.cs"
     if (((thread) == (0)))
 #line 120 "TransportModule.cs"
@@ -936,7 +936,7 @@ __device__ void mathblocks_transport_dispatch(
 #line 129 "TransportModule.cs"
                 {
 #line 130 "TransportModule.cs"
-                    double total = 0.0;
+                    float total = 0.0f;
 #line 131 "TransportModule.cs"
                     {
 #line 131 "TransportModule.cs"
@@ -953,7 +953,7 @@ __device__ void mathblocks_transport_dispatch(
                                 int column = 0;
 #line 134 "TransportModule.cs"
 #line 134 "TransportModule.cs"
-                                double csharp2cuda_temp_36 = (b)[row];
+                                float csharp2cuda_temp_36 = (b)[row];
 #line 134 "TransportModule.cs"
                                 int* csharp2cuda_temp_37 = &(column);
 #line 134 "TransportModule.cs"
@@ -985,14 +985,14 @@ __device__ void mathblocks_transport_dispatch(
                                 }
 #line 139 "TransportModule.cs"
 #line 139 "TransportModule.cs"
-                                double* csharp2cuda_temp_42 = &(total);
+                                float* csharp2cuda_temp_42 = &(total);
 #line 139 "TransportModule.cs"
-                                double csharp2cuda_temp_43 = *(csharp2cuda_temp_42);
+                                float csharp2cuda_temp_43 = *(csharp2cuda_temp_42);
 #line 139 "TransportModule.cs"
                                 int csharp2cuda_temp_44 = (first)->columns;
 #line 139 "TransportModule.cs"
-                                double csharp2cuda_temp_45 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_44), column)];
-                                (*(csharp2cuda_temp_42) = __dadd_rn(csharp2cuda_temp_43, csharp2cuda_temp_45));
+                                float csharp2cuda_temp_45 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_44), column)];
+                                (*(csharp2cuda_temp_42) = __fadd_rn(csharp2cuda_temp_43, csharp2cuda_temp_45));
                             }
 #line 131 "TransportModule.cs"
                             int* csharp2cuda_temp_34 = &(row);
@@ -1001,7 +1001,7 @@ __device__ void mathblocks_transport_dispatch(
                     }
 #line 141 "TransportModule.cs"
 #line 141 "TransportModule.cs"
-                    double* csharp2cuda_temp_46 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_46 = &((output)->scalar_value);
                     (*(csharp2cuda_temp_46) = total);
 #line 142 "TransportModule.cs"
                     break;
@@ -1043,7 +1043,7 @@ __device__ void mathblocks_transport_dispatch(
 #line 150 "TransportModule.cs"
                 {
 #line 151 "TransportModule.cs"
-                    double total = 0.0;
+                    float total = 0.0f;
 #line 152 "TransportModule.cs"
                     {
 #line 152 "TransportModule.cs"
@@ -1066,18 +1066,18 @@ __device__ void mathblocks_transport_dispatch(
                                         break;
 #line 154 "TransportModule.cs"
 #line 154 "TransportModule.cs"
-                                    double* csharp2cuda_temp_57 = &(total);
+                                    float* csharp2cuda_temp_57 = &(total);
 #line 154 "TransportModule.cs"
-                                    double csharp2cuda_temp_58 = *(csharp2cuda_temp_57);
+                                    float csharp2cuda_temp_58 = *(csharp2cuda_temp_57);
 #line 154 "TransportModule.cs"
                                     int csharp2cuda_temp_59 = (first)->columns;
 #line 154 "TransportModule.cs"
-                                    double csharp2cuda_temp_60 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_59), column)];
+                                    float csharp2cuda_temp_60 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_59), column)];
 #line 155 "TransportModule.cs"
                                     int csharp2cuda_temp_61 = (first)->columns;
 #line 155 "TransportModule.cs"
-                                    double csharp2cuda_temp_62 = (b)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_61), column)];
-                                    (*(csharp2cuda_temp_57) = __dadd_rn(csharp2cuda_temp_58, __dmul_rn(csharp2cuda_temp_60, csharp2cuda_temp_62)));
+                                    float csharp2cuda_temp_62 = (b)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_61), column)];
+                                    (*(csharp2cuda_temp_57) = __fadd_rn(csharp2cuda_temp_58, __fmul_rn(csharp2cuda_temp_60, csharp2cuda_temp_62)));
 #line 153 "TransportModule.cs"
                                     int* csharp2cuda_temp_55 = &(column);
                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_55));
@@ -1090,7 +1090,7 @@ __device__ void mathblocks_transport_dispatch(
                     }
 #line 156 "TransportModule.cs"
 #line 156 "TransportModule.cs"
-                    double* csharp2cuda_temp_63 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_63 = &((output)->scalar_value);
                     (*(csharp2cuda_temp_63) = total);
 #line 157 "TransportModule.cs"
                     break;
@@ -1132,25 +1132,25 @@ __device__ void mathblocks_transport_dispatch(
 #line 167 "TransportModule.cs"
                     int csharp2cuda_temp_69 = (second)->count;
 #line 166 "TransportModule.cs"
-                    double cross = mathblocks_transport_mean_pairwise(a, csharp2cuda_temp_68, b, csharp2cuda_temp_69);
+                    float cross = mathblocks_transport_mean_pairwise(a, csharp2cuda_temp_68, b, csharp2cuda_temp_69);
 #line 169 "TransportModule.cs"
                     int csharp2cuda_temp_70 = (first)->count;
 #line 169 "TransportModule.cs"
                     int csharp2cuda_temp_71 = (first)->count;
 #line 168 "TransportModule.cs"
-                    double left_within = mathblocks_transport_mean_pairwise(a, csharp2cuda_temp_70, a, csharp2cuda_temp_71);
+                    float left_within = mathblocks_transport_mean_pairwise(a, csharp2cuda_temp_70, a, csharp2cuda_temp_71);
 #line 171 "TransportModule.cs"
                     int csharp2cuda_temp_72 = (second)->count;
 #line 171 "TransportModule.cs"
                     int csharp2cuda_temp_73 = (second)->count;
 #line 170 "TransportModule.cs"
-                    double right_within = mathblocks_transport_mean_pairwise(b, csharp2cuda_temp_72, b, csharp2cuda_temp_73);
+                    float right_within = mathblocks_transport_mean_pairwise(b, csharp2cuda_temp_72, b, csharp2cuda_temp_73);
 #line 172 "TransportModule.cs"
-                    double squared = __dsub_rn(__dsub_rn(__dmul_rn(2.0, cross), left_within), right_within);
+                    float squared = __fsub_rn(__fsub_rn(__fmul_rn(2.0f, cross), left_within), right_within);
 #line 174 "TransportModule.cs"
 #line 174 "TransportModule.cs"
-                    double* csharp2cuda_temp_74 = &((output)->scalar_value);
-                    (*(csharp2cuda_temp_74) = mathblocks_square_root(mathblocks_maximum(squared, 0.0)));
+                    float* csharp2cuda_temp_74 = &((output)->scalar_value);
+                    (*(csharp2cuda_temp_74) = mathblocks_square_root(mathblocks_maximum(squared, 0.0f)));
 #line 175 "TransportModule.cs"
                     break;
                 }
@@ -1208,7 +1208,7 @@ __device__ void mathblocks_transport_dispatch(
 #line 186 "TransportModule.cs"
                     mathblocks_sequence_set_vector_shape(output, size);
 #line 187 "TransportModule.cs"
-                    double* values = scratch;
+                    float* values = scratch;
 #line 188 "TransportModule.cs"
                     int* previous_mask = ((int*)(csharp2cuda_pointer_add(values, state_count)));
 #line 189 "TransportModule.cs"
@@ -1225,7 +1225,7 @@ __device__ void mathblocks_transport_dispatch(
                             {
 #line 192 "TransportModule.cs"
 #line 192 "TransportModule.cs"
-                                double* csharp2cuda_temp_82 = &((values)[index]);
+                                float* csharp2cuda_temp_82 = &((values)[index]);
                                 (*(csharp2cuda_temp_82) = mathblocks_positive_infinity());
 #line 193 "TransportModule.cs"
 #line 193 "TransportModule.cs"
@@ -1243,8 +1243,8 @@ __device__ void mathblocks_transport_dispatch(
                     }
 #line 196 "TransportModule.cs"
 #line 196 "TransportModule.cs"
-                    double* csharp2cuda_temp_85 = &((values)[0]);
-                    (*(csharp2cuda_temp_85) = 0.0);
+                    float* csharp2cuda_temp_85 = &((values)[0]);
+                    (*(csharp2cuda_temp_85) = 0.0f);
 #line 197 "TransportModule.cs"
                     {
 #line 197 "TransportModule.cs"
@@ -1264,7 +1264,7 @@ __device__ void mathblocks_transport_dispatch(
                                 if (!(((row) >= (size))))
                                 {
 #line 200 "TransportModule.cs"
-                                    double csharp2cuda_temp_88 = (values)[mask];
+                                    float csharp2cuda_temp_88 = (values)[mask];
 #line 200 "TransportModule.cs"
                                     csharp2cuda_temp_87 = (!(isfinite(csharp2cuda_temp_88)));
                                 }
@@ -1297,14 +1297,14 @@ __device__ void mathblocks_transport_dispatch(
 #line 206 "TransportModule.cs"
                                             int next = csharp2cuda_i32_or(mask, csharp2cuda_i32_shl(1, column));
 #line 207 "TransportModule.cs"
-                                            double csharp2cuda_temp_90 = (values)[mask];
+                                            float csharp2cuda_temp_90 = (values)[mask];
 #line 207 "TransportModule.cs"
-                                            double csharp2cuda_temp_91 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
+                                            float csharp2cuda_temp_91 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
 #line 207 "TransportModule.cs"
-                                            double candidate = __dadd_rn(csharp2cuda_temp_90, csharp2cuda_temp_91);
+                                            float candidate = __fadd_rn(csharp2cuda_temp_90, csharp2cuda_temp_91);
 #line 208 "TransportModule.cs"
 #line 208 "TransportModule.cs"
-                                            double csharp2cuda_temp_92 = (values)[next];
+                                            float csharp2cuda_temp_92 = (values)[next];
                                             if (((candidate) >= (csharp2cuda_temp_92)))
                                             {
 #line 209 "TransportModule.cs"
@@ -1312,7 +1312,7 @@ __device__ void mathblocks_transport_dispatch(
                                             }
 #line 210 "TransportModule.cs"
 #line 210 "TransportModule.cs"
-                                            double* csharp2cuda_temp_93 = &((values)[next]);
+                                            float* csharp2cuda_temp_93 = &((values)[next]);
                                             (*(csharp2cuda_temp_93) = candidate);
 #line 211 "TransportModule.cs"
 #line 211 "TransportModule.cs"
@@ -1350,10 +1350,10 @@ __device__ void mathblocks_transport_dispatch(
                             {
 #line 218 "TransportModule.cs"
 #line 218 "TransportModule.cs"
-                                double* csharp2cuda_temp_97 = &((result)[row]);
+                                float* csharp2cuda_temp_97 = &((result)[row]);
 #line 218 "TransportModule.cs"
                                 int csharp2cuda_temp_98 = (chosen_column)[current];
-                                (*(csharp2cuda_temp_97) = ((double)(csharp2cuda_temp_98)));
+                                (*(csharp2cuda_temp_97) = ((float)(csharp2cuda_temp_98)));
 #line 219 "TransportModule.cs"
 #line 219 "TransportModule.cs"
                                 int* csharp2cuda_temp_99 = &(current);
@@ -1417,8 +1417,8 @@ __device__ void mathblocks_transport_dispatch(
                             break;
 #line 232 "TransportModule.cs"
 #line 232 "TransportModule.cs"
-                        double* csharp2cuda_temp_109 = &((result)[index]);
-                        (*(csharp2cuda_temp_109) = 0.0);
+                        float* csharp2cuda_temp_109 = &((result)[index]);
+                        (*(csharp2cuda_temp_109) = 0.0f);
 #line 231 "TransportModule.cs"
                         int* csharp2cuda_temp_107 = &(index);
                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_107));
@@ -1431,9 +1431,9 @@ __device__ void mathblocks_transport_dispatch(
 #line 235 "TransportModule.cs"
                     int right_index = 0;
 #line 236 "TransportModule.cs"
-                    double left_remaining = (a)[0];
+                    float left_remaining = (a)[0];
 #line 237 "TransportModule.cs"
-                    double right_remaining = (b)[0];
+                    float right_remaining = (b)[0];
 #line 238 "TransportModule.cs"
                     while (true)
                     {
@@ -1459,7 +1459,7 @@ __device__ void mathblocks_transport_dispatch(
 #line 239 "TransportModule.cs"
                         {
 #line 240 "TransportModule.cs"
-                            double csharp2cuda_temp_113;
+                            float csharp2cuda_temp_113;
 #line 240 "TransportModule.cs"
                             if (((left_remaining) < (right_remaining)))
                             {
@@ -1472,32 +1472,32 @@ __device__ void mathblocks_transport_dispatch(
                                 csharp2cuda_temp_113 = right_remaining;
                             }
 #line 240 "TransportModule.cs"
-                            double amount = csharp2cuda_temp_113;
+                            float amount = csharp2cuda_temp_113;
 #line 243 "TransportModule.cs"
 #line 243 "TransportModule.cs"
                             int csharp2cuda_temp_114 = (second)->count;
 #line 243 "TransportModule.cs"
-                            double* csharp2cuda_temp_115 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left_index, csharp2cuda_temp_114), right_index)]);
+                            float* csharp2cuda_temp_115 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left_index, csharp2cuda_temp_114), right_index)]);
 #line 243 "TransportModule.cs"
-                            double csharp2cuda_temp_116 = *(csharp2cuda_temp_115);
-                            (*(csharp2cuda_temp_115) = __dadd_rn(csharp2cuda_temp_116, amount));
+                            float csharp2cuda_temp_116 = *(csharp2cuda_temp_115);
+                            (*(csharp2cuda_temp_115) = __fadd_rn(csharp2cuda_temp_116, amount));
 #line 244 "TransportModule.cs"
 #line 244 "TransportModule.cs"
-                            double* csharp2cuda_temp_117 = &(left_remaining);
+                            float* csharp2cuda_temp_117 = &(left_remaining);
 #line 244 "TransportModule.cs"
-                            double csharp2cuda_temp_118 = *(csharp2cuda_temp_117);
-                            (*(csharp2cuda_temp_117) = __dsub_rn(csharp2cuda_temp_118, amount));
+                            float csharp2cuda_temp_118 = *(csharp2cuda_temp_117);
+                            (*(csharp2cuda_temp_117) = __fsub_rn(csharp2cuda_temp_118, amount));
 #line 245 "TransportModule.cs"
 #line 245 "TransportModule.cs"
-                            double* csharp2cuda_temp_119 = &(right_remaining);
+                            float* csharp2cuda_temp_119 = &(right_remaining);
 #line 245 "TransportModule.cs"
-                            double csharp2cuda_temp_120 = *(csharp2cuda_temp_119);
-                            (*(csharp2cuda_temp_119) = __dsub_rn(csharp2cuda_temp_120, amount));
+                            float csharp2cuda_temp_120 = *(csharp2cuda_temp_119);
+                            (*(csharp2cuda_temp_119) = __fsub_rn(csharp2cuda_temp_120, amount));
 #line 246 "TransportModule.cs"
 #line 246 "TransportModule.cs"
                             bool csharp2cuda_temp_121;
 #line 246 "TransportModule.cs"
-                            if (((left_remaining) == (0.0)))
+                            if (((left_remaining) == (0.0f)))
                             {
 #line 246 "TransportModule.cs"
                                 int* csharp2cuda_temp_122 = &(left_index);
@@ -1517,16 +1517,16 @@ __device__ void mathblocks_transport_dispatch(
                             {
 #line 247 "TransportModule.cs"
 #line 247 "TransportModule.cs"
-                                double* csharp2cuda_temp_125 = &(left_remaining);
+                                float* csharp2cuda_temp_125 = &(left_remaining);
 #line 247 "TransportModule.cs"
-                                double csharp2cuda_temp_126 = (a)[left_index];
+                                float csharp2cuda_temp_126 = (a)[left_index];
                                 (*(csharp2cuda_temp_125) = csharp2cuda_temp_126);
                             }
 #line 248 "TransportModule.cs"
 #line 248 "TransportModule.cs"
                             bool csharp2cuda_temp_127;
 #line 248 "TransportModule.cs"
-                            if (((right_remaining) == (0.0)))
+                            if (((right_remaining) == (0.0f)))
                             {
 #line 248 "TransportModule.cs"
                                 int* csharp2cuda_temp_128 = &(right_index);
@@ -1546,9 +1546,9 @@ __device__ void mathblocks_transport_dispatch(
                             {
 #line 249 "TransportModule.cs"
 #line 249 "TransportModule.cs"
-                                double* csharp2cuda_temp_131 = &(right_remaining);
+                                float* csharp2cuda_temp_131 = &(right_remaining);
 #line 249 "TransportModule.cs"
-                                double csharp2cuda_temp_132 = (b)[right_index];
+                                float csharp2cuda_temp_132 = (b)[right_index];
                                 (*(csharp2cuda_temp_131) = csharp2cuda_temp_132);
                             }
                         }
@@ -1606,9 +1606,9 @@ __device__ void mathblocks_transport_dispatch(
 #line 261 "TransportModule.cs"
                 {
 #line 262 "TransportModule.cs"
-                    double cumulative = 0.0;
+                    float cumulative = 0.0f;
 #line 263 "TransportModule.cs"
-                    double total = 0.0;
+                    float total = 0.0f;
 #line 264 "TransportModule.cs"
                     {
 #line 264 "TransportModule.cs"
@@ -1623,20 +1623,20 @@ __device__ void mathblocks_transport_dispatch(
                             {
 #line 266 "TransportModule.cs"
 #line 266 "TransportModule.cs"
-                                double* csharp2cuda_temp_142 = &(cumulative);
+                                float* csharp2cuda_temp_142 = &(cumulative);
 #line 266 "TransportModule.cs"
-                                double csharp2cuda_temp_143 = *(csharp2cuda_temp_142);
+                                float csharp2cuda_temp_143 = *(csharp2cuda_temp_142);
 #line 266 "TransportModule.cs"
-                                double csharp2cuda_temp_144 = (a)[index];
+                                float csharp2cuda_temp_144 = (a)[index];
 #line 266 "TransportModule.cs"
-                                double csharp2cuda_temp_145 = (b)[index];
-                                (*(csharp2cuda_temp_142) = __dadd_rn(csharp2cuda_temp_143, __dsub_rn(csharp2cuda_temp_144, csharp2cuda_temp_145)));
+                                float csharp2cuda_temp_145 = (b)[index];
+                                (*(csharp2cuda_temp_142) = __fadd_rn(csharp2cuda_temp_143, __fsub_rn(csharp2cuda_temp_144, csharp2cuda_temp_145)));
 #line 267 "TransportModule.cs"
 #line 267 "TransportModule.cs"
-                                double* csharp2cuda_temp_146 = &(total);
+                                float* csharp2cuda_temp_146 = &(total);
 #line 267 "TransportModule.cs"
-                                double csharp2cuda_temp_147 = *(csharp2cuda_temp_146);
-                                (*(csharp2cuda_temp_146) = __dadd_rn(csharp2cuda_temp_147, fabs(cumulative)));
+                                float csharp2cuda_temp_147 = *(csharp2cuda_temp_146);
+                                (*(csharp2cuda_temp_146) = __fadd_rn(csharp2cuda_temp_147, fabsf(cumulative)));
                             }
 #line 264 "TransportModule.cs"
                             int* csharp2cuda_temp_140 = &(index);
@@ -1645,7 +1645,7 @@ __device__ void mathblocks_transport_dispatch(
                     }
 #line 269 "TransportModule.cs"
 #line 269 "TransportModule.cs"
-                    double* csharp2cuda_temp_148 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_148 = &((output)->scalar_value);
                     (*(csharp2cuda_temp_148) = total);
 #line 270 "TransportModule.cs"
                     break;
@@ -1716,9 +1716,9 @@ __device__ void mathblocks_transport_dispatch(
                 if (!(csharp2cuda_temp_158))
                 {
 #line 277 "TransportModule.cs"
-                    double csharp2cuda_temp_161 = (fourth)->scalar_value;
+                    float csharp2cuda_temp_161 = (fourth)->scalar_value;
 #line 274 "TransportModule.cs"
-                    csharp2cuda_temp_160 = ((csharp2cuda_temp_161) <= (0.0));
+                    csharp2cuda_temp_160 = ((csharp2cuda_temp_161) <= (0.0f));
                 }
                 else
                 {
@@ -1754,7 +1754,7 @@ __device__ void mathblocks_transport_dispatch(
                     int iterations = 0;
 #line 284 "TransportModule.cs"
 #line 284 "TransportModule.cs"
-                    double csharp2cuda_temp_164 = (fifth)->scalar_value;
+                    float csharp2cuda_temp_164 = (fifth)->scalar_value;
 #line 284 "TransportModule.cs"
                     int* csharp2cuda_temp_165 = &(iterations);
 #line 284 "TransportModule.cs"
@@ -1783,15 +1783,15 @@ __device__ void mathblocks_transport_dispatch(
                         break;
                     }
 #line 289 "TransportModule.cs"
-                    double* kernel = scratch;
+                    float* kernel = scratch;
 #line 290 "TransportModule.cs"
                     int csharp2cuda_temp_169 = (first)->count;
 #line 290 "TransportModule.cs"
-                    double* left_scale = csharp2cuda_pointer_add(kernel, csharp2cuda_temp_169);
+                    float* left_scale = csharp2cuda_pointer_add(kernel, csharp2cuda_temp_169);
 #line 291 "TransportModule.cs"
                     int csharp2cuda_temp_170 = (first)->rows;
 #line 291 "TransportModule.cs"
-                    double* right_scale = csharp2cuda_pointer_add(left_scale, csharp2cuda_temp_170);
+                    float* right_scale = csharp2cuda_pointer_add(left_scale, csharp2cuda_temp_170);
 #line 292 "TransportModule.cs"
                     {
 #line 292 "TransportModule.cs"
@@ -1816,15 +1816,15 @@ __device__ void mathblocks_transport_dispatch(
 #line 294 "TransportModule.cs"
                                     int csharp2cuda_temp_175 = (first)->columns;
 #line 294 "TransportModule.cs"
-                                    double* csharp2cuda_temp_176 = &((kernel)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_175), column)]);
+                                    float* csharp2cuda_temp_176 = &((kernel)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_175), column)]);
 #line 295 "TransportModule.cs"
                                     int csharp2cuda_temp_177 = (first)->columns;
 #line 295 "TransportModule.cs"
-                                    double csharp2cuda_temp_178 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_177), column)];
+                                    float csharp2cuda_temp_178 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_177), column)];
 #line 296 "TransportModule.cs"
-                                    double csharp2cuda_temp_179 = (fourth)->scalar_value;
+                                    float csharp2cuda_temp_179 = (fourth)->scalar_value;
 #line 295 "TransportModule.cs"
-                                    double csharp2cuda_temp_180 = __ddiv_rn((-(csharp2cuda_temp_178)), csharp2cuda_temp_179);
+                                    float csharp2cuda_temp_180 = __fdiv_rn((-(csharp2cuda_temp_178)), csharp2cuda_temp_179);
                                     (*(csharp2cuda_temp_176) = mathblocks_exponential(csharp2cuda_temp_180));
 #line 293 "TransportModule.cs"
                                     int* csharp2cuda_temp_173 = &(column);
@@ -1848,8 +1848,8 @@ __device__ void mathblocks_transport_dispatch(
                                 break;
 #line 298 "TransportModule.cs"
 #line 298 "TransportModule.cs"
-                            double* csharp2cuda_temp_183 = &((left_scale)[row]);
-                            (*(csharp2cuda_temp_183) = 1.0);
+                            float* csharp2cuda_temp_183 = &((left_scale)[row]);
+                            (*(csharp2cuda_temp_183) = 1.0f);
 #line 297 "TransportModule.cs"
                             int* csharp2cuda_temp_181 = &(row);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_181));
@@ -1867,8 +1867,8 @@ __device__ void mathblocks_transport_dispatch(
                                 break;
 #line 300 "TransportModule.cs"
 #line 300 "TransportModule.cs"
-                            double* csharp2cuda_temp_186 = &((right_scale)[column]);
-                            (*(csharp2cuda_temp_186) = 1.0);
+                            float* csharp2cuda_temp_186 = &((right_scale)[column]);
+                            (*(csharp2cuda_temp_186) = 1.0f);
 #line 299 "TransportModule.cs"
                             int* csharp2cuda_temp_184 = &(column);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_184));
@@ -1897,7 +1897,7 @@ __device__ void mathblocks_transport_dispatch(
 #line 304 "TransportModule.cs"
                                         {
 #line 305 "TransportModule.cs"
-                                            double sum = 0.0;
+                                            float sum = 0.0f;
 #line 306 "TransportModule.cs"
                                             {
 #line 306 "TransportModule.cs"
@@ -1910,16 +1910,16 @@ __device__ void mathblocks_transport_dispatch(
                                                         break;
 #line 307 "TransportModule.cs"
 #line 307 "TransportModule.cs"
-                                                    double* csharp2cuda_temp_192 = &(sum);
+                                                    float* csharp2cuda_temp_192 = &(sum);
 #line 307 "TransportModule.cs"
-                                                    double csharp2cuda_temp_193 = *(csharp2cuda_temp_192);
+                                                    float csharp2cuda_temp_193 = *(csharp2cuda_temp_192);
 #line 307 "TransportModule.cs"
                                                     int csharp2cuda_temp_194 = (first)->columns;
 #line 307 "TransportModule.cs"
-                                                    double csharp2cuda_temp_195 = (kernel)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_194), column)];
+                                                    float csharp2cuda_temp_195 = (kernel)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_194), column)];
 #line 307 "TransportModule.cs"
-                                                    double csharp2cuda_temp_196 = (right_scale)[column];
-                                                    (*(csharp2cuda_temp_192) = __dadd_rn(csharp2cuda_temp_193, __dmul_rn(csharp2cuda_temp_195, csharp2cuda_temp_196)));
+                                                    float csharp2cuda_temp_196 = (right_scale)[column];
+                                                    (*(csharp2cuda_temp_192) = __fadd_rn(csharp2cuda_temp_193, __fmul_rn(csharp2cuda_temp_195, csharp2cuda_temp_196)));
 #line 306 "TransportModule.cs"
                                                     int* csharp2cuda_temp_190 = &(column);
                                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_190));
@@ -1927,11 +1927,11 @@ __device__ void mathblocks_transport_dispatch(
                                             }
 #line 308 "TransportModule.cs"
 #line 308 "TransportModule.cs"
-                                            double* csharp2cuda_temp_197 = &((left_scale)[row]);
+                                            float* csharp2cuda_temp_197 = &((left_scale)[row]);
 #line 308 "TransportModule.cs"
-                                            double csharp2cuda_temp_198 = (b)[row];
+                                            float csharp2cuda_temp_198 = (b)[row];
 #line 308 "TransportModule.cs"
-                                            double csharp2cuda_temp_199 = __ddiv_rn(csharp2cuda_temp_198, sum);
+                                            float csharp2cuda_temp_199 = __fdiv_rn(csharp2cuda_temp_198, sum);
                                             (*(csharp2cuda_temp_197) = csharp2cuda_temp_199);
                                         }
 #line 303 "TransportModule.cs"
@@ -1952,7 +1952,7 @@ __device__ void mathblocks_transport_dispatch(
 #line 311 "TransportModule.cs"
                                         {
 #line 312 "TransportModule.cs"
-                                            double sum = 0.0;
+                                            float sum = 0.0f;
 #line 313 "TransportModule.cs"
                                             {
 #line 313 "TransportModule.cs"
@@ -1965,16 +1965,16 @@ __device__ void mathblocks_transport_dispatch(
                                                         break;
 #line 314 "TransportModule.cs"
 #line 314 "TransportModule.cs"
-                                                    double* csharp2cuda_temp_204 = &(sum);
+                                                    float* csharp2cuda_temp_204 = &(sum);
 #line 314 "TransportModule.cs"
-                                                    double csharp2cuda_temp_205 = *(csharp2cuda_temp_204);
+                                                    float csharp2cuda_temp_205 = *(csharp2cuda_temp_204);
 #line 314 "TransportModule.cs"
                                                     int csharp2cuda_temp_206 = (first)->columns;
 #line 314 "TransportModule.cs"
-                                                    double csharp2cuda_temp_207 = (kernel)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_206), column)];
+                                                    float csharp2cuda_temp_207 = (kernel)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_206), column)];
 #line 314 "TransportModule.cs"
-                                                    double csharp2cuda_temp_208 = (left_scale)[row];
-                                                    (*(csharp2cuda_temp_204) = __dadd_rn(csharp2cuda_temp_205, __dmul_rn(csharp2cuda_temp_207, csharp2cuda_temp_208)));
+                                                    float csharp2cuda_temp_208 = (left_scale)[row];
+                                                    (*(csharp2cuda_temp_204) = __fadd_rn(csharp2cuda_temp_205, __fmul_rn(csharp2cuda_temp_207, csharp2cuda_temp_208)));
 #line 313 "TransportModule.cs"
                                                     int* csharp2cuda_temp_202 = &(row);
                                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_202));
@@ -1982,11 +1982,11 @@ __device__ void mathblocks_transport_dispatch(
                                             }
 #line 315 "TransportModule.cs"
 #line 315 "TransportModule.cs"
-                                            double* csharp2cuda_temp_209 = &((right_scale)[column]);
+                                            float* csharp2cuda_temp_209 = &((right_scale)[column]);
 #line 315 "TransportModule.cs"
-                                            double csharp2cuda_temp_210 = (c)[column];
+                                            float csharp2cuda_temp_210 = (c)[column];
 #line 315 "TransportModule.cs"
-                                            double csharp2cuda_temp_211 = __ddiv_rn(csharp2cuda_temp_210, sum);
+                                            float csharp2cuda_temp_211 = __fdiv_rn(csharp2cuda_temp_210, sum);
                                             (*(csharp2cuda_temp_209) = csharp2cuda_temp_211);
                                         }
 #line 310 "TransportModule.cs"
@@ -2024,16 +2024,16 @@ __device__ void mathblocks_transport_dispatch(
 #line 320 "TransportModule.cs"
                                     int csharp2cuda_temp_216 = (first)->columns;
 #line 320 "TransportModule.cs"
-                                    double* csharp2cuda_temp_217 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_216), column)]);
+                                    float* csharp2cuda_temp_217 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_216), column)]);
 #line 321 "TransportModule.cs"
-                                    double csharp2cuda_temp_218 = (left_scale)[row];
+                                    float csharp2cuda_temp_218 = (left_scale)[row];
 #line 321 "TransportModule.cs"
                                     int csharp2cuda_temp_219 = (first)->columns;
 #line 321 "TransportModule.cs"
-                                    double csharp2cuda_temp_220 = (kernel)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_219), column)];
+                                    float csharp2cuda_temp_220 = (kernel)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_219), column)];
 #line 322 "TransportModule.cs"
-                                    double csharp2cuda_temp_221 = (right_scale)[column];
-                                    (*(csharp2cuda_temp_217) = __dmul_rn(__dmul_rn(csharp2cuda_temp_218, csharp2cuda_temp_220), csharp2cuda_temp_221));
+                                    float csharp2cuda_temp_221 = (right_scale)[column];
+                                    (*(csharp2cuda_temp_217) = __fmul_rn(__fmul_rn(csharp2cuda_temp_218, csharp2cuda_temp_220), csharp2cuda_temp_221));
 #line 319 "TransportModule.cs"
                                     int* csharp2cuda_temp_214 = &(column);
                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_214));
@@ -2075,9 +2075,9 @@ __device__ void mathblocks_transport_dispatch(
                 if (!(csharp2cuda_temp_223))
                 {
 #line 327 "TransportModule.cs"
-                    double csharp2cuda_temp_227 = (third)->scalar_value;
+                    float csharp2cuda_temp_227 = (third)->scalar_value;
 #line 326 "TransportModule.cs"
-                    csharp2cuda_temp_226 = ((csharp2cuda_temp_227) < (1.0));
+                    csharp2cuda_temp_226 = ((csharp2cuda_temp_227) < (1.0f));
                 }
                 else
                 {
@@ -2110,11 +2110,11 @@ __device__ void mathblocks_transport_dispatch(
 #line 332 "TransportModule.cs"
                 {
 #line 333 "TransportModule.cs"
-                    double* left_sorted = scratch;
+                    float* left_sorted = scratch;
 #line 334 "TransportModule.cs"
                     int csharp2cuda_temp_230 = (first)->count;
 #line 334 "TransportModule.cs"
-                    double* right_sorted = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_230);
+                    float* right_sorted = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_230);
 #line 335 "TransportModule.cs"
 #line 335 "TransportModule.cs"
                     int csharp2cuda_temp_231 = (first)->count;
@@ -2124,7 +2124,7 @@ __device__ void mathblocks_transport_dispatch(
                     int csharp2cuda_temp_232 = (second)->count;
                     mathblocks_statistics_sort_copy(b, csharp2cuda_temp_232, right_sorted, false);
 #line 337 "TransportModule.cs"
-                    double sum = 0.0;
+                    float sum = 0.0f;
 #line 338 "TransportModule.cs"
                     {
 #line 338 "TransportModule.cs"
@@ -2137,16 +2137,16 @@ __device__ void mathblocks_transport_dispatch(
                                 break;
 #line 339 "TransportModule.cs"
 #line 339 "TransportModule.cs"
-                            double* csharp2cuda_temp_235 = &(sum);
+                            float* csharp2cuda_temp_235 = &(sum);
 #line 339 "TransportModule.cs"
-                            double csharp2cuda_temp_236 = *(csharp2cuda_temp_235);
+                            float csharp2cuda_temp_236 = *(csharp2cuda_temp_235);
 #line 340 "TransportModule.cs"
-                            double csharp2cuda_temp_237 = (left_sorted)[index];
+                            float csharp2cuda_temp_237 = (left_sorted)[index];
 #line 340 "TransportModule.cs"
-                            double csharp2cuda_temp_238 = (right_sorted)[index];
+                            float csharp2cuda_temp_238 = (right_sorted)[index];
 #line 341 "TransportModule.cs"
-                            double csharp2cuda_temp_239 = (third)->scalar_value;
-                            (*(csharp2cuda_temp_235) = __dadd_rn(csharp2cuda_temp_236, mathblocks_power(fabs(__dsub_rn(csharp2cuda_temp_237, csharp2cuda_temp_238)), csharp2cuda_temp_239)));
+                            float csharp2cuda_temp_239 = (third)->scalar_value;
+                            (*(csharp2cuda_temp_235) = __fadd_rn(csharp2cuda_temp_236, mathblocks_power(fabsf(__fsub_rn(csharp2cuda_temp_237, csharp2cuda_temp_238)), csharp2cuda_temp_239)));
 #line 338 "TransportModule.cs"
                             int* csharp2cuda_temp_233 = &(index);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_233));
@@ -2154,15 +2154,15 @@ __device__ void mathblocks_transport_dispatch(
                     }
 #line 342 "TransportModule.cs"
 #line 342 "TransportModule.cs"
-                    double* csharp2cuda_temp_240 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_240 = &((output)->scalar_value);
 #line 343 "TransportModule.cs"
                     int csharp2cuda_temp_241 = (first)->count;
 #line 343 "TransportModule.cs"
-                    double csharp2cuda_temp_242 = __ddiv_rn(sum, ((double)(csharp2cuda_temp_241)));
+                    float csharp2cuda_temp_242 = __fdiv_rn(sum, ((float)(csharp2cuda_temp_241)));
 #line 344 "TransportModule.cs"
-                    double csharp2cuda_temp_243 = (third)->scalar_value;
+                    float csharp2cuda_temp_243 = (third)->scalar_value;
 #line 344 "TransportModule.cs"
-                    double csharp2cuda_temp_244 = __ddiv_rn(1.0, csharp2cuda_temp_243);
+                    float csharp2cuda_temp_244 = __fdiv_rn(1.0f, csharp2cuda_temp_243);
                     (*(csharp2cuda_temp_240) = mathblocks_power(csharp2cuda_temp_242, csharp2cuda_temp_244));
 #line 345 "TransportModule.cs"
                     break;
@@ -2305,13 +2305,13 @@ __device__ void mathblocks_transport_dispatch(
 #line 365 "TransportModule.cs"
                     int csharp2cuda_temp_265 = (left_order)[0];
 #line 365 "TransportModule.cs"
-                    double left_remaining = (b)[csharp2cuda_temp_265];
+                    float left_remaining = (b)[csharp2cuda_temp_265];
 #line 366 "TransportModule.cs"
                     int csharp2cuda_temp_266 = (right_order)[0];
 #line 366 "TransportModule.cs"
-                    double right_remaining = (d)[csharp2cuda_temp_266];
+                    float right_remaining = (d)[csharp2cuda_temp_266];
 #line 367 "TransportModule.cs"
-                    double total = 0.0;
+                    float total = 0.0f;
 #line 368 "TransportModule.cs"
                     while (true)
                     {
@@ -2337,7 +2337,7 @@ __device__ void mathblocks_transport_dispatch(
 #line 369 "TransportModule.cs"
                         {
 #line 370 "TransportModule.cs"
-                            double csharp2cuda_temp_270;
+                            float csharp2cuda_temp_270;
 #line 370 "TransportModule.cs"
                             if (((left_remaining) < (right_remaining)))
                             {
@@ -2350,38 +2350,38 @@ __device__ void mathblocks_transport_dispatch(
                                 csharp2cuda_temp_270 = right_remaining;
                             }
 #line 370 "TransportModule.cs"
-                            double amount = csharp2cuda_temp_270;
+                            float amount = csharp2cuda_temp_270;
 #line 373 "TransportModule.cs"
 #line 373 "TransportModule.cs"
-                            double* csharp2cuda_temp_271 = &(total);
+                            float* csharp2cuda_temp_271 = &(total);
 #line 373 "TransportModule.cs"
-                            double csharp2cuda_temp_272 = *(csharp2cuda_temp_271);
+                            float csharp2cuda_temp_272 = *(csharp2cuda_temp_271);
 #line 374 "TransportModule.cs"
                             int csharp2cuda_temp_273 = (left_order)[left_index];
 #line 374 "TransportModule.cs"
-                            double csharp2cuda_temp_274 = (a)[csharp2cuda_temp_273];
+                            float csharp2cuda_temp_274 = (a)[csharp2cuda_temp_273];
 #line 374 "TransportModule.cs"
                             int csharp2cuda_temp_275 = (right_order)[right_index];
 #line 374 "TransportModule.cs"
-                            double csharp2cuda_temp_276 = (c)[csharp2cuda_temp_275];
-                            (*(csharp2cuda_temp_271) = __dadd_rn(csharp2cuda_temp_272, __dmul_rn(amount, fabs(__dsub_rn(csharp2cuda_temp_274, csharp2cuda_temp_276)))));
+                            float csharp2cuda_temp_276 = (c)[csharp2cuda_temp_275];
+                            (*(csharp2cuda_temp_271) = __fadd_rn(csharp2cuda_temp_272, __fmul_rn(amount, fabsf(__fsub_rn(csharp2cuda_temp_274, csharp2cuda_temp_276)))));
 #line 375 "TransportModule.cs"
 #line 375 "TransportModule.cs"
-                            double* csharp2cuda_temp_277 = &(left_remaining);
+                            float* csharp2cuda_temp_277 = &(left_remaining);
 #line 375 "TransportModule.cs"
-                            double csharp2cuda_temp_278 = *(csharp2cuda_temp_277);
-                            (*(csharp2cuda_temp_277) = __dsub_rn(csharp2cuda_temp_278, amount));
+                            float csharp2cuda_temp_278 = *(csharp2cuda_temp_277);
+                            (*(csharp2cuda_temp_277) = __fsub_rn(csharp2cuda_temp_278, amount));
 #line 376 "TransportModule.cs"
 #line 376 "TransportModule.cs"
-                            double* csharp2cuda_temp_279 = &(right_remaining);
+                            float* csharp2cuda_temp_279 = &(right_remaining);
 #line 376 "TransportModule.cs"
-                            double csharp2cuda_temp_280 = *(csharp2cuda_temp_279);
-                            (*(csharp2cuda_temp_279) = __dsub_rn(csharp2cuda_temp_280, amount));
+                            float csharp2cuda_temp_280 = *(csharp2cuda_temp_279);
+                            (*(csharp2cuda_temp_279) = __fsub_rn(csharp2cuda_temp_280, amount));
 #line 377 "TransportModule.cs"
 #line 377 "TransportModule.cs"
                             bool csharp2cuda_temp_281;
 #line 377 "TransportModule.cs"
-                            if (((left_remaining) == (0.0)))
+                            if (((left_remaining) == (0.0f)))
                             {
 #line 377 "TransportModule.cs"
                                 int* csharp2cuda_temp_282 = &(left_index);
@@ -2401,18 +2401,18 @@ __device__ void mathblocks_transport_dispatch(
                             {
 #line 378 "TransportModule.cs"
 #line 378 "TransportModule.cs"
-                                double* csharp2cuda_temp_285 = &(left_remaining);
+                                float* csharp2cuda_temp_285 = &(left_remaining);
 #line 378 "TransportModule.cs"
                                 int csharp2cuda_temp_286 = (left_order)[left_index];
 #line 378 "TransportModule.cs"
-                                double csharp2cuda_temp_287 = (b)[csharp2cuda_temp_286];
+                                float csharp2cuda_temp_287 = (b)[csharp2cuda_temp_286];
                                 (*(csharp2cuda_temp_285) = csharp2cuda_temp_287);
                             }
 #line 379 "TransportModule.cs"
 #line 379 "TransportModule.cs"
                             bool csharp2cuda_temp_288;
 #line 379 "TransportModule.cs"
-                            if (((right_remaining) == (0.0)))
+                            if (((right_remaining) == (0.0f)))
                             {
 #line 379 "TransportModule.cs"
                                 int* csharp2cuda_temp_289 = &(right_index);
@@ -2432,18 +2432,18 @@ __device__ void mathblocks_transport_dispatch(
                             {
 #line 380 "TransportModule.cs"
 #line 380 "TransportModule.cs"
-                                double* csharp2cuda_temp_292 = &(right_remaining);
+                                float* csharp2cuda_temp_292 = &(right_remaining);
 #line 380 "TransportModule.cs"
                                 int csharp2cuda_temp_293 = (right_order)[right_index];
 #line 380 "TransportModule.cs"
-                                double csharp2cuda_temp_294 = (d)[csharp2cuda_temp_293];
+                                float csharp2cuda_temp_294 = (d)[csharp2cuda_temp_293];
                                 (*(csharp2cuda_temp_292) = csharp2cuda_temp_294);
                             }
                         }
                     }
 #line 382 "TransportModule.cs"
 #line 382 "TransportModule.cs"
-                    double* csharp2cuda_temp_295 = &((output)->scalar_value);
+                    float* csharp2cuda_temp_295 = &((output)->scalar_value);
                     (*(csharp2cuda_temp_295) = total);
 #line 383 "TransportModule.cs"
                     break;
@@ -2495,7 +2495,7 @@ __device__ void mathblocks_transport_dispatch(
 #line 395 "TransportModule.cs"
                                 {
 #line 396 "TransportModule.cs"
-                                    double csharp2cuda_temp_305;
+                                    float csharp2cuda_temp_305;
 #line 396 "TransportModule.cs"
                                     if (((opcode) == (9)))
                                     {
@@ -2508,7 +2508,7 @@ __device__ void mathblocks_transport_dispatch(
                                         csharp2cuda_temp_305 = mathblocks_positive_infinity();
                                     }
 #line 396 "TransportModule.cs"
-                                    double selected = csharp2cuda_temp_305;
+                                    float selected = csharp2cuda_temp_305;
 #line 399 "TransportModule.cs"
                                     {
 #line 399 "TransportModule.cs"
@@ -2524,18 +2524,18 @@ __device__ void mathblocks_transport_dispatch(
 #line 401 "TransportModule.cs"
                                                 int csharp2cuda_temp_308 = (first)->columns;
 #line 401 "TransportModule.cs"
-                                                double csharp2cuda_temp_309 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_308), inner)];
+                                                float csharp2cuda_temp_309 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_308), inner)];
 #line 402 "TransportModule.cs"
                                                 int csharp2cuda_temp_310 = (second)->columns;
 #line 402 "TransportModule.cs"
-                                                double csharp2cuda_temp_311 = (b)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_310), column)];
+                                                float csharp2cuda_temp_311 = (b)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_310), column)];
 #line 401 "TransportModule.cs"
-                                                double candidate = __dadd_rn(csharp2cuda_temp_309, csharp2cuda_temp_311);
+                                                float candidate = __fadd_rn(csharp2cuda_temp_309, csharp2cuda_temp_311);
 #line 404 "TransportModule.cs"
 #line 404 "TransportModule.cs"
-                                                double* csharp2cuda_temp_312 = &(selected);
+                                                float* csharp2cuda_temp_312 = &(selected);
 #line 404 "TransportModule.cs"
-                                                double csharp2cuda_temp_313;
+                                                float csharp2cuda_temp_313;
 #line 404 "TransportModule.cs"
                                                 if (((opcode) == (9)))
                                                 {
@@ -2558,7 +2558,7 @@ __device__ void mathblocks_transport_dispatch(
 #line 408 "TransportModule.cs"
                                     int csharp2cuda_temp_314 = (second)->columns;
 #line 408 "TransportModule.cs"
-                                    double* csharp2cuda_temp_315 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_314), column)]);
+                                    float* csharp2cuda_temp_315 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_314), column)]);
                                     (*(csharp2cuda_temp_315) = selected);
                                 }
 #line 394 "TransportModule.cs"
@@ -2648,7 +2648,7 @@ __device__ void mathblocks_transport_dispatch(
         if (csharp2cuda_temp_321)
         {
 #line 415 "TransportModule.cs"
-            double csharp2cuda_temp_323 = (output)->scalar_value;
+            float csharp2cuda_temp_323 = (output)->scalar_value;
 #line 413 "TransportModule.cs"
             csharp2cuda_temp_322 = (!(isfinite(csharp2cuda_temp_323)));
         }
@@ -2747,7 +2747,7 @@ __device__ void mathblocks_transport_dispatch(
                         break;
 #line 421 "TransportModule.cs"
 #line 421 "TransportModule.cs"
-                    double csharp2cuda_temp_333 = (result)[index];
+                    float csharp2cuda_temp_333 = (result)[index];
                     if ((!(isfinite(csharp2cuda_temp_333))))
                     {
 #line 421 "TransportModule.cs"
@@ -2765,15 +2765,15 @@ __device__ void mathblocks_transport_dispatch(
 }
 
 #line 70 "TransportModule.cs"
-__device__ double mathblocks_transport_mean_pairwise(
-    const double* left,
+__device__ float mathblocks_transport_mean_pairwise(
+    const float* left,
     int left_count,
-    const double* right,
+    const float* right,
     int right_count)
 #line 76 "TransportModule.cs"
 {
 #line 77 "TransportModule.cs"
-    double sum = 0.0;
+    float sum = 0.0f;
 #line 78 "TransportModule.cs"
     {
 #line 78 "TransportModule.cs"
@@ -2792,14 +2792,14 @@ __device__ double mathblocks_transport_mean_pairwise(
                         break;
 #line 80 "TransportModule.cs"
 #line 80 "TransportModule.cs"
-                    double* csharp2cuda_temp_2 = &(sum);
+                    float* csharp2cuda_temp_2 = &(sum);
 #line 80 "TransportModule.cs"
-                    double csharp2cuda_temp_3 = *(csharp2cuda_temp_2);
+                    float csharp2cuda_temp_3 = *(csharp2cuda_temp_2);
 #line 80 "TransportModule.cs"
-                    double csharp2cuda_temp_4 = (left)[left_index];
+                    float csharp2cuda_temp_4 = (left)[left_index];
 #line 80 "TransportModule.cs"
-                    double csharp2cuda_temp_5 = (right)[right_index];
-                    (*(csharp2cuda_temp_2) = __dadd_rn(csharp2cuda_temp_3, fabs(__dsub_rn(csharp2cuda_temp_4, csharp2cuda_temp_5))));
+                    float csharp2cuda_temp_5 = (right)[right_index];
+                    (*(csharp2cuda_temp_2) = __fadd_rn(csharp2cuda_temp_3, fabsf(__fsub_rn(csharp2cuda_temp_4, csharp2cuda_temp_5))));
 #line 79 "TransportModule.cs"
                     int* csharp2cuda_temp_1 = &(right_index);
                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_1));
@@ -2811,5 +2811,5 @@ __device__ double mathblocks_transport_mean_pairwise(
         }
     }
 #line 81 "TransportModule.cs"
-    return __ddiv_rn(sum, ((double)(csharp2cuda_i32_mul(left_count, right_count))));
+    return __fdiv_rn(sum, ((float)(csharp2cuda_i32_mul(left_count, right_count))));
 }

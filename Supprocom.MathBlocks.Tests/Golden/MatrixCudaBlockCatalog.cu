@@ -644,13 +644,13 @@ __device__ bool mathblocks_matrix_compatible(
     const MathBlockSlot* right);
 
 #line 102 "MatrixModule.cs"
-__device__ void mathblocks_matrix_copy(const double* source, double* destination, int count);
+__device__ void mathblocks_matrix_copy(const float* source, float* destination, int count);
 
 #line 126 "MatrixModule.cs"
-__device__ double mathblocks_matrix_determinant(
-    const double* source,
+__device__ float mathblocks_matrix_determinant(
+    const float* source,
     int size,
-    double* work);
+    float* work);
 
 #line 474 "MatrixModule.cs"
 __device__ void mathblocks_matrix_dispatch(
@@ -661,65 +661,65 @@ __device__ void mathblocks_matrix_dispatch(
 
 #line 271 "MatrixModule.cs"
 __device__ bool mathblocks_matrix_is_positive_definite(
-    const double* values,
+    const float* values,
     int size,
-    double* lower);
+    float* lower);
 
 #line 259 "MatrixModule.cs"
-__device__ bool mathblocks_matrix_is_symmetric(const double* values, int rows, int columns);
+__device__ bool mathblocks_matrix_is_symmetric(const float* values, int rows, int columns);
 
 #line 416 "MatrixModule.cs"
 __device__ void mathblocks_matrix_multiply_square(
-    const double* left,
-    const double* right,
+    const float* left,
+    const float* right,
     int size,
-    double* destination);
+    float* destination);
 
 #line 382 "MatrixModule.cs"
-__device__ int mathblocks_matrix_rank(const double* source, int rows, int columns, double* work);
+__device__ int mathblocks_matrix_rank(const float* source, int rows, int columns, float* work);
 
 #line 83 "MatrixModule.cs"
 __device__ void mathblocks_matrix_shape(MathBlockSlot* output, int rows, int columns);
 
 #line 447 "MatrixModule.cs"
 __device__ void mathblocks_matrix_submatrix_from_masks(
-    const double* source,
+    const float* source,
     int source_columns,
     int row_mask,
     int column_mask,
     int order,
-    double* destination);
+    float* destination);
 
 #line 109 "MatrixModule.cs"
 __device__ void mathblocks_matrix_swap_rows(
-    double* values,
+    float* values,
     int columns,
     int left,
     int right);
 
 #line 306 "MatrixModule.cs"
 __device__ bool mathblocks_matrix_symmetric_eigenvalues(
-    const double* source,
+    const float* source,
     int size,
-    double* work,
-    double* eigenvalues,
-    double* buffer);
+    float* work,
+    float* eigenvalues,
+    float* buffer);
 
 #line 159 "MatrixModule.cs"
 __device__ bool mathblocks_matrix_try_solve(
-    const double* matrix,
-    const double* right,
+    const float* matrix,
+    const float* right,
     int size,
-    double* augmented,
-    double* solution);
+    float* augmented,
+    float* solution);
 
 #line 209 "MatrixModule.cs"
 __device__ bool mathblocks_matrix_try_solve_basis(
-    const double* matrix,
+    const float* matrix,
     int size,
     int basis,
-    double* augmented,
-    double* solution);
+    float* augmented,
+    float* solution);
 
 #line 435 "MatrixModule.cs"
 __device__ int mathblocks_pop_count(int value);
@@ -756,7 +756,7 @@ __device__ bool mathblocks_matrix_compatible(
 }
 
 #line 102 "MatrixModule.cs"
-__device__ void mathblocks_matrix_copy(const double* source, double* destination, int count)
+__device__ void mathblocks_matrix_copy(const float* source, float* destination, int count)
 #line 104 "MatrixModule.cs"
 {
 #line 105 "MatrixModule.cs"
@@ -769,9 +769,9 @@ __device__ void mathblocks_matrix_copy(const double* source, double* destination
                 break;
 #line 106 "MatrixModule.cs"
 #line 106 "MatrixModule.cs"
-            double* csharp2cuda_temp_1 = &((destination)[index]);
+            float* csharp2cuda_temp_1 = &((destination)[index]);
 #line 106 "MatrixModule.cs"
-            double csharp2cuda_temp_2 = (source)[index];
+            float csharp2cuda_temp_2 = (source)[index];
             (*(csharp2cuda_temp_1) = csharp2cuda_temp_2);
 #line 105 "MatrixModule.cs"
             int* csharp2cuda_temp_0 = &(index);
@@ -781,16 +781,16 @@ __device__ void mathblocks_matrix_copy(const double* source, double* destination
 }
 
 #line 126 "MatrixModule.cs"
-__device__ double mathblocks_matrix_determinant(
-    const double* source,
+__device__ float mathblocks_matrix_determinant(
+    const float* source,
     int size,
-    double* work)
+    float* work)
 #line 131 "MatrixModule.cs"
 {
 #line 132 "MatrixModule.cs"
     mathblocks_matrix_copy(source, work, csharp2cuda_i32_mul(size, size));
 #line 133 "MatrixModule.cs"
-    double determinant = 1.0;
+    float determinant = 1.0f;
 #line 134 "MatrixModule.cs"
     {
 #line 134 "MatrixModule.cs"
@@ -813,10 +813,10 @@ __device__ double mathblocks_matrix_determinant(
                             break;
 #line 138 "MatrixModule.cs"
 #line 138 "MatrixModule.cs"
-                        double csharp2cuda_temp_2 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), pivot)];
+                        float csharp2cuda_temp_2 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), pivot)];
 #line 138 "MatrixModule.cs"
-                        double csharp2cuda_temp_3 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot)];
-                        if (((fabs(csharp2cuda_temp_2)) > (fabs(csharp2cuda_temp_3))))
+                        float csharp2cuda_temp_3 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot)];
+                        if (((fabsf(csharp2cuda_temp_2)) > (fabsf(csharp2cuda_temp_3))))
                         {
 #line 139 "MatrixModule.cs"
 #line 139 "MatrixModule.cs"
@@ -830,11 +830,11 @@ __device__ double mathblocks_matrix_determinant(
                 }
 #line 140 "MatrixModule.cs"
 #line 140 "MatrixModule.cs"
-                double csharp2cuda_temp_5 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot)];
-                if (((csharp2cuda_temp_5) == (0.0)))
+                float csharp2cuda_temp_5 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot)];
+                if (((csharp2cuda_temp_5) == (0.0f)))
                 {
 #line 141 "MatrixModule.cs"
-                    return 0.0;
+                    return 0.0f;
                 }
 #line 142 "MatrixModule.cs"
                 if (((pivot_row) != (pivot)))
@@ -844,17 +844,17 @@ __device__ double mathblocks_matrix_determinant(
                     mathblocks_matrix_swap_rows(work, size, pivot, pivot_row);
 #line 145 "MatrixModule.cs"
 #line 145 "MatrixModule.cs"
-                    double* csharp2cuda_temp_6 = &(determinant);
+                    float* csharp2cuda_temp_6 = &(determinant);
                     (*(csharp2cuda_temp_6) = (-(determinant)));
                 }
 #line 147 "MatrixModule.cs"
-                double diagonal = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, size), pivot)];
+                float diagonal = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, size), pivot)];
 #line 148 "MatrixModule.cs"
 #line 148 "MatrixModule.cs"
-                double* csharp2cuda_temp_7 = &(determinant);
+                float* csharp2cuda_temp_7 = &(determinant);
 #line 148 "MatrixModule.cs"
-                double csharp2cuda_temp_8 = *(csharp2cuda_temp_7);
-                (*(csharp2cuda_temp_7) = __dmul_rn(csharp2cuda_temp_8, diagonal));
+                float csharp2cuda_temp_8 = *(csharp2cuda_temp_7);
+                (*(csharp2cuda_temp_7) = __fmul_rn(csharp2cuda_temp_8, diagonal));
 #line 149 "MatrixModule.cs"
                 {
 #line 149 "MatrixModule.cs"
@@ -866,9 +866,9 @@ __device__ double mathblocks_matrix_determinant(
 #line 150 "MatrixModule.cs"
                         {
 #line 151 "MatrixModule.cs"
-                            double csharp2cuda_temp_10 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), pivot)];
+                            float csharp2cuda_temp_10 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), pivot)];
 #line 151 "MatrixModule.cs"
-                            double scale = __ddiv_rn(csharp2cuda_temp_10, diagonal);
+                            float scale = __fdiv_rn(csharp2cuda_temp_10, diagonal);
 #line 152 "MatrixModule.cs"
                             {
 #line 152 "MatrixModule.cs"
@@ -879,12 +879,12 @@ __device__ double mathblocks_matrix_determinant(
                                         break;
 #line 153 "MatrixModule.cs"
 #line 153 "MatrixModule.cs"
-                                    double* csharp2cuda_temp_12 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
+                                    float* csharp2cuda_temp_12 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
 #line 153 "MatrixModule.cs"
-                                    double csharp2cuda_temp_13 = *(csharp2cuda_temp_12);
+                                    float csharp2cuda_temp_13 = *(csharp2cuda_temp_12);
 #line 153 "MatrixModule.cs"
-                                    double csharp2cuda_temp_14 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, size), column)];
-                                    (*(csharp2cuda_temp_12) = __dsub_rn(csharp2cuda_temp_13, __dmul_rn(scale, csharp2cuda_temp_14)));
+                                    float csharp2cuda_temp_14 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, size), column)];
+                                    (*(csharp2cuda_temp_12) = __fsub_rn(csharp2cuda_temp_13, __fmul_rn(scale, csharp2cuda_temp_14)));
 #line 152 "MatrixModule.cs"
                                     int* csharp2cuda_temp_11 = &(column);
                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_11));
@@ -967,8 +967,8 @@ __device__ void mathblocks_matrix_dispatch(
     {
 #line 487 "MatrixModule.cs"
 #line 487 "MatrixModule.cs"
-        double* csharp2cuda_temp_3 = &((output)->scalar_value);
-        (*(csharp2cuda_temp_3) = 0.0);
+        float* csharp2cuda_temp_3 = &((output)->scalar_value);
+        (*(csharp2cuda_temp_3) = 0.0f);
 #line 488 "MatrixModule.cs"
 #line 488 "MatrixModule.cs"
         int* csharp2cuda_temp_4 = &((output)->boolean_value);
@@ -1041,47 +1041,47 @@ __device__ void mathblocks_matrix_dispatch(
         return;
     }
 #line 500 "MatrixModule.cs"
-    double* csharp2cuda_temp_16;
+    float* csharp2cuda_temp_16;
 #line 500 "MatrixModule.cs"
     if (((((void*)(first))) == (((void*)(nullptr)))))
     {
 #line 500 "MatrixModule.cs"
-        csharp2cuda_temp_16 = ((double*)(nullptr));
+        csharp2cuda_temp_16 = ((float*)(nullptr));
     }
     else
     {
 #line 500 "MatrixModule.cs"
         unsigned long long csharp2cuda_temp_17 = (first)->data_pointer;
 #line 500 "MatrixModule.cs"
-        csharp2cuda_temp_16 = ((double*)(csharp2cuda_temp_17));
+        csharp2cuda_temp_16 = ((float*)(csharp2cuda_temp_17));
     }
 #line 500 "MatrixModule.cs"
-    const double* a = csharp2cuda_temp_16;
+    const float* a = csharp2cuda_temp_16;
 #line 501 "MatrixModule.cs"
-    double* csharp2cuda_temp_18;
+    float* csharp2cuda_temp_18;
 #line 501 "MatrixModule.cs"
     if (((((void*)(second))) == (((void*)(nullptr)))))
     {
 #line 501 "MatrixModule.cs"
-        csharp2cuda_temp_18 = ((double*)(nullptr));
+        csharp2cuda_temp_18 = ((float*)(nullptr));
     }
     else
     {
 #line 501 "MatrixModule.cs"
         unsigned long long csharp2cuda_temp_19 = (second)->data_pointer;
 #line 501 "MatrixModule.cs"
-        csharp2cuda_temp_18 = ((double*)(csharp2cuda_temp_19));
+        csharp2cuda_temp_18 = ((float*)(csharp2cuda_temp_19));
     }
 #line 501 "MatrixModule.cs"
-    const double* b = csharp2cuda_temp_18;
+    const float* b = csharp2cuda_temp_18;
 #line 502 "MatrixModule.cs"
     unsigned long long csharp2cuda_temp_20 = (output)->data_pointer;
 #line 502 "MatrixModule.cs"
-    double* result = ((double*)(csharp2cuda_temp_20));
+    float* result = ((float*)(csharp2cuda_temp_20));
 #line 503 "MatrixModule.cs"
     unsigned long long csharp2cuda_temp_21 = (output)->scratch_pointer;
 #line 503 "MatrixModule.cs"
-    double* scratch = ((double*)(csharp2cuda_temp_21));
+    float* scratch = ((float*)(csharp2cuda_temp_21));
 #line 505 "MatrixModule.cs"
 #line 505 "MatrixModule.cs"
     bool csharp2cuda_temp_22;
@@ -1163,48 +1163,48 @@ __device__ void mathblocks_matrix_dispatch(
 #line 514 "MatrixModule.cs"
                 {
 #line 515 "MatrixModule.cs"
-                    double csharp2cuda_temp_33;
+                    float csharp2cuda_temp_33;
 #line 515 "MatrixModule.cs"
                     if (((opcode) == (0)))
                     {
 #line 515 "MatrixModule.cs"
-                        double csharp2cuda_temp_34 = (a)[index];
+                        float csharp2cuda_temp_34 = (a)[index];
 #line 515 "MatrixModule.cs"
-                        double csharp2cuda_temp_35 = (b)[index];
+                        float csharp2cuda_temp_35 = (b)[index];
 #line 515 "MatrixModule.cs"
-                        csharp2cuda_temp_33 = __dadd_rn(csharp2cuda_temp_34, csharp2cuda_temp_35);
+                        csharp2cuda_temp_33 = __fadd_rn(csharp2cuda_temp_34, csharp2cuda_temp_35);
                     }
                     else
                     {
 #line 516 "MatrixModule.cs"
-                        double csharp2cuda_temp_36;
+                        float csharp2cuda_temp_36;
 #line 516 "MatrixModule.cs"
                         if (((opcode) == (10)))
                         {
 #line 516 "MatrixModule.cs"
-                            double csharp2cuda_temp_37 = (a)[index];
+                            float csharp2cuda_temp_37 = (a)[index];
 #line 516 "MatrixModule.cs"
-                            double csharp2cuda_temp_38 = (b)[index];
+                            float csharp2cuda_temp_38 = (b)[index];
 #line 516 "MatrixModule.cs"
-                            csharp2cuda_temp_36 = __dmul_rn(csharp2cuda_temp_37, csharp2cuda_temp_38);
+                            csharp2cuda_temp_36 = __fmul_rn(csharp2cuda_temp_37, csharp2cuda_temp_38);
                         }
                         else
                         {
 #line 517 "MatrixModule.cs"
-                            double csharp2cuda_temp_39 = (a)[index];
+                            float csharp2cuda_temp_39 = (a)[index];
 #line 517 "MatrixModule.cs"
-                            double csharp2cuda_temp_40 = (b)[index];
+                            float csharp2cuda_temp_40 = (b)[index];
 #line 516 "MatrixModule.cs"
-                            csharp2cuda_temp_36 = __dsub_rn(csharp2cuda_temp_39, csharp2cuda_temp_40);
+                            csharp2cuda_temp_36 = __fsub_rn(csharp2cuda_temp_39, csharp2cuda_temp_40);
                         }
 #line 515 "MatrixModule.cs"
                         csharp2cuda_temp_33 = csharp2cuda_temp_36;
                     }
 #line 515 "MatrixModule.cs"
-                    double value = csharp2cuda_temp_33;
+                    float value = csharp2cuda_temp_33;
 #line 518 "MatrixModule.cs"
 #line 518 "MatrixModule.cs"
-                    double* csharp2cuda_temp_41 = &((result)[index]);
+                    float* csharp2cuda_temp_41 = &((result)[index]);
                     (*(csharp2cuda_temp_41) = value);
 #line 519 "MatrixModule.cs"
                     if ((!(isfinite(value))))
@@ -1279,11 +1279,11 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 533 "MatrixModule.cs"
 #line 533 "MatrixModule.cs"
-                double* csharp2cuda_temp_52 = &((result)[index]);
+                float* csharp2cuda_temp_52 = &((result)[index]);
 #line 533 "MatrixModule.cs"
                 int csharp2cuda_temp_53 = (first)->count;
 #line 533 "MatrixModule.cs"
-                double csharp2cuda_temp_54;
+                float csharp2cuda_temp_54;
 #line 533 "MatrixModule.cs"
                 if (((index) < (csharp2cuda_temp_53)))
                 {
@@ -1374,7 +1374,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 543 "MatrixModule.cs"
                 {
 #line 544 "MatrixModule.cs"
-                    double sum = 0.0;
+                    float sum = 0.0f;
 #line 545 "MatrixModule.cs"
                     if (((opcode) == (2)))
 #line 546 "MatrixModule.cs"
@@ -1391,14 +1391,14 @@ __device__ void mathblocks_matrix_dispatch(
                                     break;
 #line 548 "MatrixModule.cs"
 #line 548 "MatrixModule.cs"
-                                double* csharp2cuda_temp_64 = &(sum);
+                                float* csharp2cuda_temp_64 = &(sum);
 #line 548 "MatrixModule.cs"
-                                double csharp2cuda_temp_65 = *(csharp2cuda_temp_64);
+                                float csharp2cuda_temp_65 = *(csharp2cuda_temp_64);
 #line 548 "MatrixModule.cs"
                                 int csharp2cuda_temp_66 = (first)->columns;
 #line 548 "MatrixModule.cs"
-                                double csharp2cuda_temp_67 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_66), index)];
-                                (*(csharp2cuda_temp_64) = __dadd_rn(csharp2cuda_temp_65, csharp2cuda_temp_67));
+                                float csharp2cuda_temp_67 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_66), index)];
+                                (*(csharp2cuda_temp_64) = __fadd_rn(csharp2cuda_temp_65, csharp2cuda_temp_67));
 #line 547 "MatrixModule.cs"
                                 int* csharp2cuda_temp_62 = &(row);
                                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_62));
@@ -1420,14 +1420,14 @@ __device__ void mathblocks_matrix_dispatch(
                                     break;
 #line 553 "MatrixModule.cs"
 #line 553 "MatrixModule.cs"
-                                double* csharp2cuda_temp_70 = &(sum);
+                                float* csharp2cuda_temp_70 = &(sum);
 #line 553 "MatrixModule.cs"
-                                double csharp2cuda_temp_71 = *(csharp2cuda_temp_70);
+                                float csharp2cuda_temp_71 = *(csharp2cuda_temp_70);
 #line 553 "MatrixModule.cs"
                                 int csharp2cuda_temp_72 = (first)->columns;
 #line 553 "MatrixModule.cs"
-                                double csharp2cuda_temp_73 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, csharp2cuda_temp_72), column)];
-                                (*(csharp2cuda_temp_70) = __dadd_rn(csharp2cuda_temp_71, csharp2cuda_temp_73));
+                                float csharp2cuda_temp_73 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, csharp2cuda_temp_72), column)];
+                                (*(csharp2cuda_temp_70) = __fadd_rn(csharp2cuda_temp_71, csharp2cuda_temp_73));
 #line 552 "MatrixModule.cs"
                                 int* csharp2cuda_temp_68 = &(column);
                                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_68));
@@ -1436,7 +1436,7 @@ __device__ void mathblocks_matrix_dispatch(
                     }
 #line 555 "MatrixModule.cs"
 #line 555 "MatrixModule.cs"
-                    double* csharp2cuda_temp_74 = &((result)[index]);
+                    float* csharp2cuda_temp_74 = &((result)[index]);
                     (*(csharp2cuda_temp_74) = sum);
 #line 556 "MatrixModule.cs"
                     if ((!(isfinite(sum))))
@@ -1475,7 +1475,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 563 "MatrixModule.cs"
         int selected = 0;
 #line 564 "MatrixModule.cs"
-        double csharp2cuda_temp_76 = (second)->scalar_value;
+        float csharp2cuda_temp_76 = (second)->scalar_value;
 #line 564 "MatrixModule.cs"
         int* csharp2cuda_temp_77 = &(selected);
 #line 564 "MatrixModule.cs"
@@ -1565,9 +1565,9 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 574 "MatrixModule.cs"
 #line 574 "MatrixModule.cs"
-                double* csharp2cuda_temp_86 = &((result)[index]);
+                float* csharp2cuda_temp_86 = &((result)[index]);
 #line 574 "MatrixModule.cs"
-                double csharp2cuda_temp_87;
+                float csharp2cuda_temp_87;
 #line 574 "MatrixModule.cs"
                 if (((opcode) == (3)))
                 {
@@ -1674,9 +1674,9 @@ __device__ void mathblocks_matrix_dispatch(
 #line 592 "MatrixModule.cs"
                     int column = csharp2cuda_i32_sub(flat, csharp2cuda_i32_mul(row, csharp2cuda_temp_103));
 #line 593 "MatrixModule.cs"
-                    double left_product = 0.0;
+                    float left_product = 0.0f;
 #line 594 "MatrixModule.cs"
-                    double right_product = 0.0;
+                    float right_product = 0.0f;
 #line 595 "MatrixModule.cs"
                     {
 #line 595 "MatrixModule.cs"
@@ -1691,32 +1691,32 @@ __device__ void mathblocks_matrix_dispatch(
                             {
 #line 597 "MatrixModule.cs"
 #line 597 "MatrixModule.cs"
-                                double* csharp2cuda_temp_106 = &(left_product);
+                                float* csharp2cuda_temp_106 = &(left_product);
 #line 597 "MatrixModule.cs"
-                                double csharp2cuda_temp_107 = *(csharp2cuda_temp_106);
+                                float csharp2cuda_temp_107 = *(csharp2cuda_temp_106);
 #line 597 "MatrixModule.cs"
                                 int csharp2cuda_temp_108 = (first)->columns;
 #line 597 "MatrixModule.cs"
-                                double csharp2cuda_temp_109 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_108), inner)];
+                                float csharp2cuda_temp_109 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_108), inner)];
 #line 598 "MatrixModule.cs"
                                 int csharp2cuda_temp_110 = (second)->columns;
 #line 598 "MatrixModule.cs"
-                                double csharp2cuda_temp_111 = (b)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_110), column)];
-                                (*(csharp2cuda_temp_106) = __dadd_rn(csharp2cuda_temp_107, __dmul_rn(csharp2cuda_temp_109, csharp2cuda_temp_111)));
+                                float csharp2cuda_temp_111 = (b)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_110), column)];
+                                (*(csharp2cuda_temp_106) = __fadd_rn(csharp2cuda_temp_107, __fmul_rn(csharp2cuda_temp_109, csharp2cuda_temp_111)));
 #line 599 "MatrixModule.cs"
 #line 599 "MatrixModule.cs"
-                                double* csharp2cuda_temp_112 = &(right_product);
+                                float* csharp2cuda_temp_112 = &(right_product);
 #line 599 "MatrixModule.cs"
-                                double csharp2cuda_temp_113 = *(csharp2cuda_temp_112);
+                                float csharp2cuda_temp_113 = *(csharp2cuda_temp_112);
 #line 599 "MatrixModule.cs"
                                 int csharp2cuda_temp_114 = (second)->columns;
 #line 599 "MatrixModule.cs"
-                                double csharp2cuda_temp_115 = (b)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_114), inner)];
+                                float csharp2cuda_temp_115 = (b)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_114), inner)];
 #line 600 "MatrixModule.cs"
                                 int csharp2cuda_temp_116 = (first)->columns;
 #line 600 "MatrixModule.cs"
-                                double csharp2cuda_temp_117 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_116), column)];
-                                (*(csharp2cuda_temp_112) = __dadd_rn(csharp2cuda_temp_113, __dmul_rn(csharp2cuda_temp_115, csharp2cuda_temp_117)));
+                                float csharp2cuda_temp_117 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_116), column)];
+                                (*(csharp2cuda_temp_112) = __fadd_rn(csharp2cuda_temp_113, __fmul_rn(csharp2cuda_temp_115, csharp2cuda_temp_117)));
                             }
 #line 595 "MatrixModule.cs"
                             int* csharp2cuda_temp_104 = &(inner);
@@ -1725,11 +1725,11 @@ __device__ void mathblocks_matrix_dispatch(
                     }
 #line 602 "MatrixModule.cs"
 #line 602 "MatrixModule.cs"
-                    double* csharp2cuda_temp_118 = &((result)[flat]);
-                    (*(csharp2cuda_temp_118) = __dsub_rn(left_product, right_product));
+                    float* csharp2cuda_temp_118 = &((result)[flat]);
+                    (*(csharp2cuda_temp_118) = __fsub_rn(left_product, right_product));
 #line 603 "MatrixModule.cs"
 #line 603 "MatrixModule.cs"
-                    double csharp2cuda_temp_119 = (result)[flat];
+                    float csharp2cuda_temp_119 = (result)[flat];
                     if ((!(isfinite(csharp2cuda_temp_119))))
                     {
 #line 603 "MatrixModule.cs"
@@ -1800,9 +1800,9 @@ __device__ void mathblocks_matrix_dispatch(
                     int column = csharp2cuda_i32_sub(flat, csharp2cuda_i32_mul(row, size));
 #line 621 "MatrixModule.cs"
 #line 621 "MatrixModule.cs"
-                    double* csharp2cuda_temp_125 = &((result)[flat]);
+                    float* csharp2cuda_temp_125 = &((result)[flat]);
 #line 621 "MatrixModule.cs"
-                    double csharp2cuda_temp_126;
+                    float csharp2cuda_temp_126;
 #line 621 "MatrixModule.cs"
                     if (((row) == (column)))
                     {
@@ -1812,7 +1812,7 @@ __device__ void mathblocks_matrix_dispatch(
                     else
                     {
 #line 621 "MatrixModule.cs"
-                        csharp2cuda_temp_126 = 0.0;
+                        csharp2cuda_temp_126 = 0.0f;
                     }
                     (*(csharp2cuda_temp_125) = csharp2cuda_temp_126);
                 }
@@ -1882,11 +1882,11 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 632 "MatrixModule.cs"
 #line 632 "MatrixModule.cs"
-                double* csharp2cuda_temp_134 = &((result)[index]);
+                float* csharp2cuda_temp_134 = &((result)[index]);
 #line 632 "MatrixModule.cs"
                 int csharp2cuda_temp_135 = (first)->columns;
 #line 632 "MatrixModule.cs"
-                double csharp2cuda_temp_136 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, csharp2cuda_temp_135), index)];
+                float csharp2cuda_temp_136 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, csharp2cuda_temp_135), index)];
                 (*(csharp2cuda_temp_134) = csharp2cuda_temp_136);
 #line 631 "MatrixModule.cs"
                 int* csharp2cuda_temp_130 = &(index);
@@ -1939,9 +1939,9 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 641 "MatrixModule.cs"
 #line 641 "MatrixModule.cs"
-                double* csharp2cuda_temp_143 = &((result)[index]);
+                float* csharp2cuda_temp_143 = &((result)[index]);
 #line 641 "MatrixModule.cs"
-                double csharp2cuda_temp_144 = (a)[index];
+                float csharp2cuda_temp_144 = (a)[index];
                 (*(csharp2cuda_temp_143) = csharp2cuda_temp_144);
 #line 640 "MatrixModule.cs"
                 int* csharp2cuda_temp_138 = &(index);
@@ -1963,13 +1963,13 @@ __device__ void mathblocks_matrix_dispatch(
         {
 #line 649 "MatrixModule.cs"
 #line 649 "MatrixModule.cs"
-            double* csharp2cuda_temp_145 = &((output)->scalar_value);
+            float* csharp2cuda_temp_145 = &((output)->scalar_value);
 #line 650 "MatrixModule.cs"
             int csharp2cuda_temp_146 = (first)->count;
             (*(csharp2cuda_temp_145) = mathblocks_square_root(mathblocks_compensated_product_sum(a, a, csharp2cuda_temp_146)));
 #line 651 "MatrixModule.cs"
 #line 651 "MatrixModule.cs"
-            double csharp2cuda_temp_147 = (output)->scalar_value;
+            float csharp2cuda_temp_147 = (output)->scalar_value;
             if ((!(isfinite(csharp2cuda_temp_147))))
             {
 #line 651 "MatrixModule.cs"
@@ -2025,7 +2025,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 664 "MatrixModule.cs"
                     int column = csharp2cuda_i32_sub(flat, csharp2cuda_i32_mul(row, size));
 #line 665 "MatrixModule.cs"
-                    double sum = 0.0;
+                    float sum = 0.0f;
 #line 666 "MatrixModule.cs"
                     {
 #line 666 "MatrixModule.cs"
@@ -2038,18 +2038,18 @@ __device__ void mathblocks_matrix_dispatch(
                                 break;
 #line 667 "MatrixModule.cs"
 #line 667 "MatrixModule.cs"
-                            double* csharp2cuda_temp_155 = &(sum);
+                            float* csharp2cuda_temp_155 = &(sum);
 #line 667 "MatrixModule.cs"
-                            double csharp2cuda_temp_156 = *(csharp2cuda_temp_155);
+                            float csharp2cuda_temp_156 = *(csharp2cuda_temp_155);
 #line 667 "MatrixModule.cs"
                             int csharp2cuda_temp_157 = (first)->columns;
 #line 667 "MatrixModule.cs"
-                            double csharp2cuda_temp_158 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_157), row)];
+                            float csharp2cuda_temp_158 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_157), row)];
 #line 667 "MatrixModule.cs"
                             int csharp2cuda_temp_159 = (first)->columns;
 #line 667 "MatrixModule.cs"
-                            double csharp2cuda_temp_160 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_159), column)];
-                            (*(csharp2cuda_temp_155) = __dadd_rn(csharp2cuda_temp_156, __dmul_rn(csharp2cuda_temp_158, csharp2cuda_temp_160)));
+                            float csharp2cuda_temp_160 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_159), column)];
+                            (*(csharp2cuda_temp_155) = __fadd_rn(csharp2cuda_temp_156, __fmul_rn(csharp2cuda_temp_158, csharp2cuda_temp_160)));
 #line 666 "MatrixModule.cs"
                             int* csharp2cuda_temp_153 = &(inner);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_153));
@@ -2057,7 +2057,7 @@ __device__ void mathblocks_matrix_dispatch(
                     }
 #line 668 "MatrixModule.cs"
 #line 668 "MatrixModule.cs"
-                    double* csharp2cuda_temp_161 = &((result)[flat]);
+                    float* csharp2cuda_temp_161 = &((result)[flat]);
                     (*(csharp2cuda_temp_161) = sum);
 #line 669 "MatrixModule.cs"
                     if ((!(isfinite(sum))))
@@ -2134,18 +2134,18 @@ __device__ void mathblocks_matrix_dispatch(
 #line 680 "MatrixModule.cs"
                     int csharp2cuda_temp_170 = (first)->count;
 #line 680 "MatrixModule.cs"
-                    double csharp2cuda_temp_171 = (a)[csharp2cuda_i32_sub(csharp2cuda_temp_170, 1)];
+                    float csharp2cuda_temp_171 = (a)[csharp2cuda_i32_sub(csharp2cuda_temp_170, 1)];
 #line 680 "MatrixModule.cs"
-                    double csharp2cuda_temp_172 = (b)[0];
+                    float csharp2cuda_temp_172 = (b)[0];
 #line 680 "MatrixModule.cs"
                     csharp2cuda_temp_169 = ((csharp2cuda_temp_171) != (csharp2cuda_temp_172));
                 }
                 else
                 {
 #line 680 "MatrixModule.cs"
-                    double csharp2cuda_temp_173 = (a)[0];
+                    float csharp2cuda_temp_173 = (a)[0];
 #line 680 "MatrixModule.cs"
-                    double csharp2cuda_temp_174 = (b)[0];
+                    float csharp2cuda_temp_174 = (b)[0];
 #line 680 "MatrixModule.cs"
                     csharp2cuda_temp_169 = ((csharp2cuda_temp_173) != (csharp2cuda_temp_174));
                 }
@@ -2209,9 +2209,9 @@ __device__ void mathblocks_matrix_dispatch(
                     {
 #line 692 "MatrixModule.cs"
 #line 692 "MatrixModule.cs"
-                        double* csharp2cuda_temp_183 = &((result)[flat]);
+                        float* csharp2cuda_temp_183 = &((result)[flat]);
 #line 692 "MatrixModule.cs"
-                        double csharp2cuda_temp_184;
+                        float csharp2cuda_temp_184;
 #line 692 "MatrixModule.cs"
                         if (((column) >= (row)))
                         {
@@ -2232,11 +2232,11 @@ __device__ void mathblocks_matrix_dispatch(
                         int index = csharp2cuda_i32_add(row, column);
 #line 697 "MatrixModule.cs"
 #line 697 "MatrixModule.cs"
-                        double* csharp2cuda_temp_185 = &((result)[flat]);
+                        float* csharp2cuda_temp_185 = &((result)[flat]);
 #line 697 "MatrixModule.cs"
                         int csharp2cuda_temp_186 = (first)->count;
 #line 697 "MatrixModule.cs"
-                        double csharp2cuda_temp_187;
+                        float csharp2cuda_temp_187;
 #line 697 "MatrixModule.cs"
                         if (((index) < (csharp2cuda_temp_186)))
                         {
@@ -2270,7 +2270,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 705 "MatrixModule.cs"
         int size = 0;
 #line 706 "MatrixModule.cs"
-        double csharp2cuda_temp_189 = (first)->scalar_value;
+        float csharp2cuda_temp_189 = (first)->scalar_value;
 #line 706 "MatrixModule.cs"
         int* csharp2cuda_temp_190 = &(size);
 #line 706 "MatrixModule.cs"
@@ -2349,19 +2349,19 @@ __device__ void mathblocks_matrix_dispatch(
                     int column = csharp2cuda_i32_sub(flat, csharp2cuda_i32_mul(row, size));
 #line 717 "MatrixModule.cs"
 #line 717 "MatrixModule.cs"
-                    double* csharp2cuda_temp_198 = &((result)[flat]);
+                    float* csharp2cuda_temp_198 = &((result)[flat]);
 #line 717 "MatrixModule.cs"
-                    double csharp2cuda_temp_199;
+                    float csharp2cuda_temp_199;
 #line 717 "MatrixModule.cs"
                     if (((row) == (column)))
                     {
 #line 717 "MatrixModule.cs"
-                        csharp2cuda_temp_199 = 1.0;
+                        csharp2cuda_temp_199 = 1.0f;
                     }
                     else
                     {
 #line 717 "MatrixModule.cs"
-                        csharp2cuda_temp_199 = 0.0;
+                        csharp2cuda_temp_199 = 0.0f;
                     }
                     (*(csharp2cuda_temp_198) = csharp2cuda_temp_199);
                 }
@@ -2446,19 +2446,19 @@ __device__ void mathblocks_matrix_dispatch(
                     int right_column = csharp2cuda_i32_sub(column, csharp2cuda_i32_mul(left_column, csharp2cuda_temp_211));
 #line 736 "MatrixModule.cs"
 #line 736 "MatrixModule.cs"
-                    double* csharp2cuda_temp_212 = &((result)[flat]);
+                    float* csharp2cuda_temp_212 = &((result)[flat]);
 #line 736 "MatrixModule.cs"
                     int csharp2cuda_temp_213 = (first)->columns;
 #line 736 "MatrixModule.cs"
-                    double csharp2cuda_temp_214 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left_row, csharp2cuda_temp_213), left_column)];
+                    float csharp2cuda_temp_214 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left_row, csharp2cuda_temp_213), left_column)];
 #line 737 "MatrixModule.cs"
                     int csharp2cuda_temp_215 = (second)->columns;
 #line 737 "MatrixModule.cs"
-                    double csharp2cuda_temp_216 = (b)[csharp2cuda_i32_add(csharp2cuda_i32_mul(right_row, csharp2cuda_temp_215), right_column)];
-                    (*(csharp2cuda_temp_212) = __dmul_rn(csharp2cuda_temp_214, csharp2cuda_temp_216));
+                    float csharp2cuda_temp_216 = (b)[csharp2cuda_i32_add(csharp2cuda_i32_mul(right_row, csharp2cuda_temp_215), right_column)];
+                    (*(csharp2cuda_temp_212) = __fmul_rn(csharp2cuda_temp_214, csharp2cuda_temp_216));
 #line 738 "MatrixModule.cs"
 #line 738 "MatrixModule.cs"
-                    double csharp2cuda_temp_217 = (result)[flat];
+                    float csharp2cuda_temp_217 = (result)[flat];
                     if ((!(isfinite(csharp2cuda_temp_217))))
                     {
 #line 738 "MatrixModule.cs"
@@ -2530,7 +2530,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 752 "MatrixModule.cs"
                 {
 #line 753 "MatrixModule.cs"
-                    double sum = 0.0;
+                    float sum = 0.0f;
 #line 754 "MatrixModule.cs"
                     {
 #line 754 "MatrixModule.cs"
@@ -2543,16 +2543,16 @@ __device__ void mathblocks_matrix_dispatch(
                                 break;
 #line 755 "MatrixModule.cs"
 #line 755 "MatrixModule.cs"
-                            double* csharp2cuda_temp_229 = &(sum);
+                            float* csharp2cuda_temp_229 = &(sum);
 #line 755 "MatrixModule.cs"
-                            double csharp2cuda_temp_230 = *(csharp2cuda_temp_229);
+                            float csharp2cuda_temp_230 = *(csharp2cuda_temp_229);
 #line 755 "MatrixModule.cs"
                             int csharp2cuda_temp_231 = (first)->columns;
 #line 755 "MatrixModule.cs"
-                            double csharp2cuda_temp_232 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_231), column)];
+                            float csharp2cuda_temp_232 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_231), column)];
 #line 755 "MatrixModule.cs"
-                            double csharp2cuda_temp_233 = (b)[column];
-                            (*(csharp2cuda_temp_229) = __dadd_rn(csharp2cuda_temp_230, __dmul_rn(csharp2cuda_temp_232, csharp2cuda_temp_233)));
+                            float csharp2cuda_temp_233 = (b)[column];
+                            (*(csharp2cuda_temp_229) = __fadd_rn(csharp2cuda_temp_230, __fmul_rn(csharp2cuda_temp_232, csharp2cuda_temp_233)));
 #line 754 "MatrixModule.cs"
                             int* csharp2cuda_temp_227 = &(column);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_227));
@@ -2560,7 +2560,7 @@ __device__ void mathblocks_matrix_dispatch(
                     }
 #line 756 "MatrixModule.cs"
 #line 756 "MatrixModule.cs"
-                    double* csharp2cuda_temp_234 = &((result)[row]);
+                    float* csharp2cuda_temp_234 = &((result)[row]);
                     (*(csharp2cuda_temp_234) = sum);
 #line 757 "MatrixModule.cs"
                     if ((!(isfinite(sum))))
@@ -2644,7 +2644,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 773 "MatrixModule.cs"
                     int column = csharp2cuda_i32_sub(flat, csharp2cuda_i32_mul(row, csharp2cuda_temp_246));
 #line 774 "MatrixModule.cs"
-                    double sum = 0.0;
+                    float sum = 0.0f;
 #line 775 "MatrixModule.cs"
                     {
 #line 775 "MatrixModule.cs"
@@ -2657,18 +2657,18 @@ __device__ void mathblocks_matrix_dispatch(
                                 break;
 #line 776 "MatrixModule.cs"
 #line 776 "MatrixModule.cs"
-                            double* csharp2cuda_temp_249 = &(sum);
+                            float* csharp2cuda_temp_249 = &(sum);
 #line 776 "MatrixModule.cs"
-                            double csharp2cuda_temp_250 = *(csharp2cuda_temp_249);
+                            float csharp2cuda_temp_250 = *(csharp2cuda_temp_249);
 #line 776 "MatrixModule.cs"
                             int csharp2cuda_temp_251 = (first)->columns;
 #line 776 "MatrixModule.cs"
-                            double csharp2cuda_temp_252 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_251), inner)];
+                            float csharp2cuda_temp_252 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, csharp2cuda_temp_251), inner)];
 #line 776 "MatrixModule.cs"
                             int csharp2cuda_temp_253 = (second)->columns;
 #line 776 "MatrixModule.cs"
-                            double csharp2cuda_temp_254 = (b)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_253), column)];
-                            (*(csharp2cuda_temp_249) = __dadd_rn(csharp2cuda_temp_250, __dmul_rn(csharp2cuda_temp_252, csharp2cuda_temp_254)));
+                            float csharp2cuda_temp_254 = (b)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_253), column)];
+                            (*(csharp2cuda_temp_249) = __fadd_rn(csharp2cuda_temp_250, __fmul_rn(csharp2cuda_temp_252, csharp2cuda_temp_254)));
 #line 775 "MatrixModule.cs"
                             int* csharp2cuda_temp_247 = &(inner);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_247));
@@ -2676,7 +2676,7 @@ __device__ void mathblocks_matrix_dispatch(
                     }
 #line 777 "MatrixModule.cs"
 #line 777 "MatrixModule.cs"
-                    double* csharp2cuda_temp_255 = &((result)[flat]);
+                    float* csharp2cuda_temp_255 = &((result)[flat]);
                     (*(csharp2cuda_temp_255) = sum);
 #line 778 "MatrixModule.cs"
                     if ((!(isfinite(sum))))
@@ -2748,15 +2748,15 @@ __device__ void mathblocks_matrix_dispatch(
                     int column = csharp2cuda_i32_sub(flat, csharp2cuda_i32_mul(row, csharp2cuda_temp_264));
 #line 791 "MatrixModule.cs"
 #line 791 "MatrixModule.cs"
-                    double* csharp2cuda_temp_265 = &((result)[flat]);
+                    float* csharp2cuda_temp_265 = &((result)[flat]);
 #line 791 "MatrixModule.cs"
-                    double csharp2cuda_temp_266 = (a)[row];
+                    float csharp2cuda_temp_266 = (a)[row];
 #line 791 "MatrixModule.cs"
-                    double csharp2cuda_temp_267 = (b)[column];
-                    (*(csharp2cuda_temp_265) = __dmul_rn(csharp2cuda_temp_266, csharp2cuda_temp_267));
+                    float csharp2cuda_temp_267 = (b)[column];
+                    (*(csharp2cuda_temp_265) = __fmul_rn(csharp2cuda_temp_266, csharp2cuda_temp_267));
 #line 792 "MatrixModule.cs"
 #line 792 "MatrixModule.cs"
-                    double csharp2cuda_temp_268 = (result)[flat];
+                    float csharp2cuda_temp_268 = (result)[flat];
                     if ((!(isfinite(csharp2cuda_temp_268))))
                     {
 #line 792 "MatrixModule.cs"
@@ -2782,13 +2782,13 @@ __device__ void mathblocks_matrix_dispatch(
 #line 800 "MatrixModule.cs"
         int columns = 0;
 #line 801 "MatrixModule.cs"
-        double csharp2cuda_temp_269 = (second)->scalar_value;
+        float csharp2cuda_temp_269 = (second)->scalar_value;
 #line 801 "MatrixModule.cs"
         int* csharp2cuda_temp_270 = &(rows);
 #line 801 "MatrixModule.cs"
         bool valid_rows = mathblocks_nonnegative_integer(csharp2cuda_temp_269, csharp2cuda_temp_270);
 #line 802 "MatrixModule.cs"
-        double csharp2cuda_temp_271 = (third)->scalar_value;
+        float csharp2cuda_temp_271 = (third)->scalar_value;
 #line 802 "MatrixModule.cs"
         int* csharp2cuda_temp_272 = &(columns);
 #line 802 "MatrixModule.cs"
@@ -2892,9 +2892,9 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 814 "MatrixModule.cs"
 #line 814 "MatrixModule.cs"
-                double* csharp2cuda_temp_284 = &((result)[index]);
+                float* csharp2cuda_temp_284 = &((result)[index]);
 #line 814 "MatrixModule.cs"
-                double csharp2cuda_temp_285 = (a)[index];
+                float csharp2cuda_temp_285 = (a)[index];
                 (*(csharp2cuda_temp_284) = csharp2cuda_temp_285);
 #line 813 "MatrixModule.cs"
                 int* csharp2cuda_temp_279 = &(index);
@@ -2951,15 +2951,15 @@ __device__ void mathblocks_matrix_dispatch(
                 {
 #line 824 "MatrixModule.cs"
 #line 824 "MatrixModule.cs"
-                    double* csharp2cuda_temp_293 = &((result)[index]);
+                    float* csharp2cuda_temp_293 = &((result)[index]);
 #line 824 "MatrixModule.cs"
-                    double csharp2cuda_temp_294 = (a)[index];
+                    float csharp2cuda_temp_294 = (a)[index];
 #line 824 "MatrixModule.cs"
-                    double csharp2cuda_temp_295 = (second)->scalar_value;
-                    (*(csharp2cuda_temp_293) = __dmul_rn(csharp2cuda_temp_294, csharp2cuda_temp_295));
+                    float csharp2cuda_temp_295 = (second)->scalar_value;
+                    (*(csharp2cuda_temp_293) = __fmul_rn(csharp2cuda_temp_294, csharp2cuda_temp_295));
 #line 825 "MatrixModule.cs"
 #line 825 "MatrixModule.cs"
-                    double csharp2cuda_temp_296 = (result)[index];
+                    float csharp2cuda_temp_296 = (result)[index];
                     if ((!(isfinite(csharp2cuda_temp_296))))
                     {
 #line 825 "MatrixModule.cs"
@@ -3032,17 +3032,17 @@ __device__ void mathblocks_matrix_dispatch(
                 {
 #line 840 "MatrixModule.cs"
 #line 840 "MatrixModule.cs"
-                    double* csharp2cuda_temp_306 = &((result)[index]);
+                    float* csharp2cuda_temp_306 = &((result)[index]);
 #line 840 "MatrixModule.cs"
-                    double csharp2cuda_temp_307 = (a)[index];
+                    float csharp2cuda_temp_307 = (a)[index];
                     (*(csharp2cuda_temp_306) = csharp2cuda_temp_307);
 #line 841 "MatrixModule.cs"
 #line 841 "MatrixModule.cs"
                     int csharp2cuda_temp_308 = (first)->count;
 #line 841 "MatrixModule.cs"
-                    double* csharp2cuda_temp_309 = &((result)[csharp2cuda_i32_add(csharp2cuda_temp_308, index)]);
+                    float* csharp2cuda_temp_309 = &((result)[csharp2cuda_i32_add(csharp2cuda_temp_308, index)]);
 #line 841 "MatrixModule.cs"
-                    double csharp2cuda_temp_310 = (b)[index];
+                    float csharp2cuda_temp_310 = (b)[index];
                     (*(csharp2cuda_temp_309) = csharp2cuda_temp_310);
                 }
 #line 838 "MatrixModule.cs"
@@ -3079,7 +3079,7 @@ __device__ void mathblocks_matrix_dispatch(
                 return;
             }
 #line 855 "MatrixModule.cs"
-            double trace = 0.0;
+            float trace = 0.0f;
 #line 856 "MatrixModule.cs"
             {
 #line 856 "MatrixModule.cs"
@@ -3092,14 +3092,14 @@ __device__ void mathblocks_matrix_dispatch(
                         break;
 #line 857 "MatrixModule.cs"
 #line 857 "MatrixModule.cs"
-                    double* csharp2cuda_temp_316 = &(trace);
+                    float* csharp2cuda_temp_316 = &(trace);
 #line 857 "MatrixModule.cs"
-                    double csharp2cuda_temp_317 = *(csharp2cuda_temp_316);
+                    float csharp2cuda_temp_317 = *(csharp2cuda_temp_316);
 #line 857 "MatrixModule.cs"
                     int csharp2cuda_temp_318 = (first)->columns;
 #line 857 "MatrixModule.cs"
-                    double csharp2cuda_temp_319 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, csharp2cuda_temp_318), index)];
-                    (*(csharp2cuda_temp_316) = __dadd_rn(csharp2cuda_temp_317, csharp2cuda_temp_319));
+                    float csharp2cuda_temp_319 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, csharp2cuda_temp_318), index)];
+                    (*(csharp2cuda_temp_316) = __fadd_rn(csharp2cuda_temp_317, csharp2cuda_temp_319));
 #line 856 "MatrixModule.cs"
                     int* csharp2cuda_temp_314 = &(index);
                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_314));
@@ -3107,7 +3107,7 @@ __device__ void mathblocks_matrix_dispatch(
             }
 #line 858 "MatrixModule.cs"
 #line 858 "MatrixModule.cs"
-            double* csharp2cuda_temp_320 = &((output)->scalar_value);
+            float* csharp2cuda_temp_320 = &((output)->scalar_value);
             (*(csharp2cuda_temp_320) = trace);
 #line 859 "MatrixModule.cs"
             if ((!(isfinite(trace))))
@@ -3174,11 +3174,11 @@ __device__ void mathblocks_matrix_dispatch(
                     int column = csharp2cuda_i32_sub(flat, csharp2cuda_i32_mul(row, csharp2cuda_temp_330));
 #line 872 "MatrixModule.cs"
 #line 872 "MatrixModule.cs"
-                    double* csharp2cuda_temp_331 = &((result)[flat]);
+                    float* csharp2cuda_temp_331 = &((result)[flat]);
 #line 872 "MatrixModule.cs"
                     int csharp2cuda_temp_332 = (first)->columns;
 #line 872 "MatrixModule.cs"
-                    double csharp2cuda_temp_333 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(column, csharp2cuda_temp_332), row)];
+                    float csharp2cuda_temp_333 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(column, csharp2cuda_temp_332), row)];
                     (*(csharp2cuda_temp_331) = csharp2cuda_temp_333);
                 }
 #line 868 "MatrixModule.cs"
@@ -3231,15 +3231,15 @@ __device__ void mathblocks_matrix_dispatch(
         }
 #line 887 "MatrixModule.cs"
 #line 887 "MatrixModule.cs"
-        double* csharp2cuda_temp_338 = &((output)->scalar_value);
+        float* csharp2cuda_temp_338 = &((output)->scalar_value);
 #line 887 "MatrixModule.cs"
         int csharp2cuda_temp_339 = (first)->rows;
 #line 887 "MatrixModule.cs"
-        double csharp2cuda_temp_340 = mathblocks_matrix_determinant(a, csharp2cuda_temp_339, scratch);
+        float csharp2cuda_temp_340 = mathblocks_matrix_determinant(a, csharp2cuda_temp_339, scratch);
         (*(csharp2cuda_temp_338) = csharp2cuda_temp_340);
 #line 888 "MatrixModule.cs"
 #line 888 "MatrixModule.cs"
-        double csharp2cuda_temp_341 = (output)->scalar_value;
+        float csharp2cuda_temp_341 = (output)->scalar_value;
         if ((!(isfinite(csharp2cuda_temp_341))))
         {
 #line 888 "MatrixModule.cs"
@@ -3287,7 +3287,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 901 "MatrixModule.cs"
         mathblocks_matrix_shape(output, size, size);
 #line 902 "MatrixModule.cs"
-        double norm = 0.0;
+        float norm = 0.0f;
 #line 903 "MatrixModule.cs"
         {
 #line 903 "MatrixModule.cs"
@@ -3299,7 +3299,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 904 "MatrixModule.cs"
                 {
 #line 905 "MatrixModule.cs"
-                    double row_sum = 0.0;
+                    float row_sum = 0.0f;
 #line 906 "MatrixModule.cs"
                     {
 #line 906 "MatrixModule.cs"
@@ -3310,12 +3310,12 @@ __device__ void mathblocks_matrix_dispatch(
                                 break;
 #line 907 "MatrixModule.cs"
 #line 907 "MatrixModule.cs"
-                            double* csharp2cuda_temp_348 = &(row_sum);
+                            float* csharp2cuda_temp_348 = &(row_sum);
 #line 907 "MatrixModule.cs"
-                            double csharp2cuda_temp_349 = *(csharp2cuda_temp_348);
+                            float csharp2cuda_temp_349 = *(csharp2cuda_temp_348);
 #line 907 "MatrixModule.cs"
-                            double csharp2cuda_temp_350 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
-                            (*(csharp2cuda_temp_348) = __dadd_rn(csharp2cuda_temp_349, fabs(csharp2cuda_temp_350)));
+                            float csharp2cuda_temp_350 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
+                            (*(csharp2cuda_temp_348) = __fadd_rn(csharp2cuda_temp_349, fabsf(csharp2cuda_temp_350)));
 #line 906 "MatrixModule.cs"
                             int* csharp2cuda_temp_347 = &(column);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_347));
@@ -3326,7 +3326,7 @@ __device__ void mathblocks_matrix_dispatch(
                     {
 #line 908 "MatrixModule.cs"
 #line 908 "MatrixModule.cs"
-                        double* csharp2cuda_temp_351 = &(norm);
+                        float* csharp2cuda_temp_351 = &(norm);
                         (*(csharp2cuda_temp_351) = row_sum);
                     }
                 }
@@ -3347,7 +3347,7 @@ __device__ void mathblocks_matrix_dispatch(
             return;
         }
 #line 918 "MatrixModule.cs"
-        double trace = 0.0;
+        float trace = 0.0f;
 #line 919 "MatrixModule.cs"
         {
 #line 919 "MatrixModule.cs"
@@ -3358,12 +3358,12 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 920 "MatrixModule.cs"
 #line 920 "MatrixModule.cs"
-                double* csharp2cuda_temp_354 = &(trace);
+                float* csharp2cuda_temp_354 = &(trace);
 #line 920 "MatrixModule.cs"
-                double csharp2cuda_temp_355 = *(csharp2cuda_temp_354);
+                float csharp2cuda_temp_355 = *(csharp2cuda_temp_354);
 #line 920 "MatrixModule.cs"
-                double csharp2cuda_temp_356 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)];
-                (*(csharp2cuda_temp_354) = __dadd_rn(csharp2cuda_temp_355, csharp2cuda_temp_356));
+                float csharp2cuda_temp_356 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)];
+                (*(csharp2cuda_temp_354) = __fadd_rn(csharp2cuda_temp_355, csharp2cuda_temp_356));
 #line 919 "MatrixModule.cs"
                 int* csharp2cuda_temp_353 = &(index);
                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_353));
@@ -3371,8 +3371,8 @@ __device__ void mathblocks_matrix_dispatch(
         }
 #line 921 "MatrixModule.cs"
 #line 921 "MatrixModule.cs"
-        double csharp2cuda_temp_357 = __ddiv_rn(trace, ((double)(size)));
-        if (((csharp2cuda_temp_357) > (__dadd_rn(709.782712893384, __dmul_rn(0.5, __dmul_rn(mathblocks_binary_logarithm(((double)(size))), 0.6931471805599453))))))
+        float csharp2cuda_temp_357 = __fdiv_rn(trace, ((float)(size)));
+        if (((csharp2cuda_temp_357) > (__fadd_rn(709.7827f, __fmul_rn(0.5f, __fmul_rn(mathblocks_binary_logarithm(((float)(size))), 0.6931472f))))))
 #line 922 "MatrixModule.cs"
         {
 #line 923 "MatrixModule.cs"
@@ -3385,10 +3385,10 @@ __device__ void mathblocks_matrix_dispatch(
 #line 926 "MatrixModule.cs"
         int csharp2cuda_temp_359;
 #line 926 "MatrixModule.cs"
-        if (((norm) > (1.0)))
+        if (((norm) > (1.0f)))
         {
 #line 926 "MatrixModule.cs"
-            csharp2cuda_temp_359 = csharp2cuda_f64_to_i32(ceil(mathblocks_binary_logarithm(norm)));
+            csharp2cuda_temp_359 = csharp2cuda_f64_to_i32(ceilf(mathblocks_binary_logarithm(norm)));
         }
         else
         {
@@ -3406,13 +3406,13 @@ __device__ void mathblocks_matrix_dispatch(
             (*(csharp2cuda_temp_360) = 0);
         }
 #line 928 "MatrixModule.cs"
-        double scale = mathblocks_power(2.0, ((double)(csharp2cuda_i32_neg(scaling))));
+        float scale = mathblocks_power(2.0f, ((float)(csharp2cuda_i32_neg(scaling))));
 #line 929 "MatrixModule.cs"
-        double* scaled = scratch;
+        float* scaled = scratch;
 #line 930 "MatrixModule.cs"
-        double* term = csharp2cuda_pointer_add(scratch, count);
+        float* term = csharp2cuda_pointer_add(scratch, count);
 #line 931 "MatrixModule.cs"
-        double* temporary = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_mul(count, 2));
+        float* temporary = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_mul(count, 2));
 #line 932 "MatrixModule.cs"
         {
 #line 932 "MatrixModule.cs"
@@ -3425,18 +3425,18 @@ __device__ void mathblocks_matrix_dispatch(
                 {
 #line 934 "MatrixModule.cs"
 #line 934 "MatrixModule.cs"
-                    double* csharp2cuda_temp_362 = &((scaled)[index]);
+                    float* csharp2cuda_temp_362 = &((scaled)[index]);
 #line 934 "MatrixModule.cs"
-                    double csharp2cuda_temp_363 = (a)[index];
-                    (*(csharp2cuda_temp_362) = __dmul_rn(csharp2cuda_temp_363, scale));
+                    float csharp2cuda_temp_363 = (a)[index];
+                    (*(csharp2cuda_temp_362) = __fmul_rn(csharp2cuda_temp_363, scale));
 #line 935 "MatrixModule.cs"
 #line 935 "MatrixModule.cs"
-                    double* csharp2cuda_temp_364 = &((result)[index]);
-                    (*(csharp2cuda_temp_364) = 0.0);
+                    float* csharp2cuda_temp_364 = &((result)[index]);
+                    (*(csharp2cuda_temp_364) = 0.0f);
 #line 936 "MatrixModule.cs"
 #line 936 "MatrixModule.cs"
-                    double* csharp2cuda_temp_365 = &((term)[index]);
-                    (*(csharp2cuda_temp_365) = 0.0);
+                    float* csharp2cuda_temp_365 = &((term)[index]);
+                    (*(csharp2cuda_temp_365) = 0.0f);
                 }
 #line 932 "MatrixModule.cs"
                 int* csharp2cuda_temp_361 = &(index);
@@ -3455,12 +3455,12 @@ __device__ void mathblocks_matrix_dispatch(
                 {
 #line 940 "MatrixModule.cs"
 #line 940 "MatrixModule.cs"
-                    double* csharp2cuda_temp_367 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)]);
-                    (*(csharp2cuda_temp_367) = 1.0);
+                    float* csharp2cuda_temp_367 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)]);
+                    (*(csharp2cuda_temp_367) = 1.0f);
 #line 941 "MatrixModule.cs"
 #line 941 "MatrixModule.cs"
-                    double* csharp2cuda_temp_368 = &((term)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)]);
-                    (*(csharp2cuda_temp_368) = 1.0);
+                    float* csharp2cuda_temp_368 = &((term)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)]);
+                    (*(csharp2cuda_temp_368) = 1.0f);
                 }
 #line 938 "MatrixModule.cs"
                 int* csharp2cuda_temp_366 = &(index);
@@ -3480,7 +3480,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 945 "MatrixModule.cs"
                     mathblocks_matrix_multiply_square(term, scaled, size, temporary);
 #line 946 "MatrixModule.cs"
-                    double order_scale = __ddiv_rn(1.0, ((double)(order)));
+                    float order_scale = __fdiv_rn(1.0f, ((float)(order)));
 #line 947 "MatrixModule.cs"
                     {
 #line 947 "MatrixModule.cs"
@@ -3493,18 +3493,18 @@ __device__ void mathblocks_matrix_dispatch(
                             {
 #line 949 "MatrixModule.cs"
 #line 949 "MatrixModule.cs"
-                                double* csharp2cuda_temp_371 = &((term)[index]);
+                                float* csharp2cuda_temp_371 = &((term)[index]);
 #line 949 "MatrixModule.cs"
-                                double csharp2cuda_temp_372 = (temporary)[index];
-                                (*(csharp2cuda_temp_371) = __dmul_rn(csharp2cuda_temp_372, order_scale));
+                                float csharp2cuda_temp_372 = (temporary)[index];
+                                (*(csharp2cuda_temp_371) = __fmul_rn(csharp2cuda_temp_372, order_scale));
 #line 950 "MatrixModule.cs"
 #line 950 "MatrixModule.cs"
-                                double* csharp2cuda_temp_373 = &((result)[index]);
+                                float* csharp2cuda_temp_373 = &((result)[index]);
 #line 950 "MatrixModule.cs"
-                                double csharp2cuda_temp_374 = *(csharp2cuda_temp_373);
+                                float csharp2cuda_temp_374 = *(csharp2cuda_temp_373);
 #line 950 "MatrixModule.cs"
-                                double csharp2cuda_temp_375 = (term)[index];
-                                (*(csharp2cuda_temp_373) = __dadd_rn(csharp2cuda_temp_374, csharp2cuda_temp_375));
+                                float csharp2cuda_temp_375 = (term)[index];
+                                (*(csharp2cuda_temp_373) = __fadd_rn(csharp2cuda_temp_374, csharp2cuda_temp_375));
                             }
 #line 947 "MatrixModule.cs"
                             int* csharp2cuda_temp_370 = &(index);
@@ -3547,7 +3547,7 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 959 "MatrixModule.cs"
 #line 959 "MatrixModule.cs"
-                double csharp2cuda_temp_378 = (result)[index];
+                float csharp2cuda_temp_378 = (result)[index];
                 if ((!(isfinite(csharp2cuda_temp_378))))
                 {
 #line 959 "MatrixModule.cs"
@@ -3580,7 +3580,7 @@ __device__ void mathblocks_matrix_dispatch(
         if (!(((csharp2cuda_temp_380) != (csharp2cuda_temp_381))))
         {
 #line 967 "MatrixModule.cs"
-            double csharp2cuda_temp_383 = (second)->scalar_value;
+            float csharp2cuda_temp_383 = (second)->scalar_value;
 #line 967 "MatrixModule.cs"
             int* csharp2cuda_temp_384 = &(exponent);
 #line 967 "MatrixModule.cs"
@@ -3623,9 +3623,9 @@ __device__ void mathblocks_matrix_dispatch(
 #line 975 "MatrixModule.cs"
         mathblocks_matrix_shape(output, size, size);
 #line 976 "MatrixModule.cs"
-        double* power = scratch;
+        float* power = scratch;
 #line 977 "MatrixModule.cs"
-        double* temporary = csharp2cuda_pointer_add(scratch, count);
+        float* temporary = csharp2cuda_pointer_add(scratch, count);
 #line 978 "MatrixModule.cs"
         mathblocks_matrix_copy(a, power, count);
 #line 979 "MatrixModule.cs"
@@ -3638,8 +3638,8 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 980 "MatrixModule.cs"
 #line 980 "MatrixModule.cs"
-                double* csharp2cuda_temp_389 = &((result)[index]);
-                (*(csharp2cuda_temp_389) = 0.0);
+                float* csharp2cuda_temp_389 = &((result)[index]);
+                (*(csharp2cuda_temp_389) = 0.0f);
 #line 979 "MatrixModule.cs"
                 int* csharp2cuda_temp_388 = &(index);
                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_388));
@@ -3655,8 +3655,8 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 982 "MatrixModule.cs"
 #line 982 "MatrixModule.cs"
-                double* csharp2cuda_temp_391 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)]);
-                (*(csharp2cuda_temp_391) = 1.0);
+                float* csharp2cuda_temp_391 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)]);
+                (*(csharp2cuda_temp_391) = 1.0f);
 #line 981 "MatrixModule.cs"
                 int* csharp2cuda_temp_390 = &(index);
                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_390));
@@ -3705,7 +3705,7 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 998 "MatrixModule.cs"
 #line 998 "MatrixModule.cs"
-                double csharp2cuda_temp_395 = (result)[index];
+                float csharp2cuda_temp_395 = (result)[index];
                 if ((!(isfinite(csharp2cuda_temp_395))))
                 {
 #line 998 "MatrixModule.cs"
@@ -3756,9 +3756,9 @@ __device__ void mathblocks_matrix_dispatch(
 #line 1010 "MatrixModule.cs"
         mathblocks_matrix_shape(output, size, size);
 #line 1011 "MatrixModule.cs"
-        double* augmented = scratch;
+        float* augmented = scratch;
 #line 1012 "MatrixModule.cs"
-        double* solution = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_mul(size, csharp2cuda_i32_add(size, 1)));
+        float* solution = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_mul(size, csharp2cuda_i32_add(size, 1)));
 #line 1013 "MatrixModule.cs"
         {
 #line 1013 "MatrixModule.cs"
@@ -3792,9 +3792,9 @@ __device__ void mathblocks_matrix_dispatch(
                                 break;
 #line 1021 "MatrixModule.cs"
 #line 1021 "MatrixModule.cs"
-                            double* csharp2cuda_temp_404 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
+                            float* csharp2cuda_temp_404 = &((result)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
 #line 1021 "MatrixModule.cs"
-                            double csharp2cuda_temp_405 = (solution)[row];
+                            float csharp2cuda_temp_405 = (solution)[row];
                             (*(csharp2cuda_temp_404) = csharp2cuda_temp_405);
 #line 1020 "MatrixModule.cs"
                             int* csharp2cuda_temp_403 = &(row);
@@ -3916,11 +3916,11 @@ __device__ void mathblocks_matrix_dispatch(
             return;
         }
 #line 1046 "MatrixModule.cs"
-        double* submatrix = scratch;
+        float* submatrix = scratch;
 #line 1047 "MatrixModule.cs"
         int csharp2cuda_temp_421 = (first)->count;
 #line 1047 "MatrixModule.cs"
-        double* work = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_421);
+        float* work = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_421);
 #line 1048 "MatrixModule.cs"
 #line 1048 "MatrixModule.cs"
         int* csharp2cuda_temp_422 = &((output)->boolean_value);
@@ -4028,8 +4028,8 @@ __device__ void mathblocks_matrix_dispatch(
                                             mathblocks_matrix_submatrix_from_masks(a, csharp2cuda_temp_435, row_mask, column_mask, order, submatrix);
 #line 1069 "MatrixModule.cs"
 #line 1069 "MatrixModule.cs"
-                                            double csharp2cuda_temp_436 = mathblocks_matrix_determinant(submatrix, order, work);
-                                            if (((csharp2cuda_temp_436) < (0.0)))
+                                            float csharp2cuda_temp_436 = mathblocks_matrix_determinant(submatrix, order, work);
+                                            if (((csharp2cuda_temp_436) < (0.0f)))
 #line 1070 "MatrixModule.cs"
                                             {
 #line 1071 "MatrixModule.cs"
@@ -4121,7 +4121,7 @@ __device__ void mathblocks_matrix_dispatch(
             return;
         }
 #line 1088 "MatrixModule.cs"
-        double* csharp2cuda_temp_443;
+        float* csharp2cuda_temp_443;
 #line 1088 "MatrixModule.cs"
         if (((opcode) == (43)))
         {
@@ -4136,7 +4136,7 @@ __device__ void mathblocks_matrix_dispatch(
             csharp2cuda_temp_443 = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_444);
         }
 #line 1088 "MatrixModule.cs"
-        double* eigenvalues = csharp2cuda_temp_443;
+        float* eigenvalues = csharp2cuda_temp_443;
 #line 1089 "MatrixModule.cs"
 #line 1089 "MatrixModule.cs"
         bool csharp2cuda_temp_445;
@@ -4209,9 +4209,9 @@ __device__ void mathblocks_matrix_dispatch(
         {
 #line 1105 "MatrixModule.cs"
 #line 1105 "MatrixModule.cs"
-            double* csharp2cuda_temp_451 = &((output)->scalar_value);
+            float* csharp2cuda_temp_451 = &((output)->scalar_value);
 #line 1105 "MatrixModule.cs"
-            double csharp2cuda_temp_452 = (eigenvalues)[csharp2cuda_i32_sub(size, 1)];
+            float csharp2cuda_temp_452 = (eigenvalues)[csharp2cuda_i32_sub(size, 1)];
             (*(csharp2cuda_temp_451) = csharp2cuda_temp_452);
         }
         else
@@ -4221,9 +4221,9 @@ __device__ void mathblocks_matrix_dispatch(
             {
 #line 1106 "MatrixModule.cs"
 #line 1106 "MatrixModule.cs"
-                double* csharp2cuda_temp_453 = &((output)->scalar_value);
+                float* csharp2cuda_temp_453 = &((output)->scalar_value);
 #line 1106 "MatrixModule.cs"
-                double csharp2cuda_temp_454 = (eigenvalues)[0];
+                float csharp2cuda_temp_454 = (eigenvalues)[0];
                 (*(csharp2cuda_temp_453) = csharp2cuda_temp_454);
             }
         }
@@ -4237,7 +4237,7 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 1108 "MatrixModule.cs"
 #line 1108 "MatrixModule.cs"
-                double csharp2cuda_temp_456 = (eigenvalues)[index];
+                float csharp2cuda_temp_456 = (eigenvalues)[index];
                 if ((!(isfinite(csharp2cuda_temp_456))))
                 {
 #line 1108 "MatrixModule.cs"
@@ -4301,11 +4301,11 @@ __device__ void mathblocks_matrix_dispatch(
             return;
         }
 #line 1119 "MatrixModule.cs"
-        double* submatrix = scratch;
+        float* submatrix = scratch;
 #line 1120 "MatrixModule.cs"
         int csharp2cuda_temp_464 = (first)->count;
 #line 1120 "MatrixModule.cs"
-        double* work = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_464);
+        float* work = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_464);
 #line 1121 "MatrixModule.cs"
         int csharp2cuda_temp_465 = (first)->rows;
 #line 1121 "MatrixModule.cs"
@@ -4346,11 +4346,11 @@ __device__ void mathblocks_matrix_dispatch(
 #line 1135 "MatrixModule.cs"
                     int csharp2cuda_temp_472 = csharp2cuda_i32_post_increment(*(csharp2cuda_temp_471));
 #line 1135 "MatrixModule.cs"
-                    double* csharp2cuda_temp_473 = &((result)[csharp2cuda_temp_472]);
+                    float* csharp2cuda_temp_473 = &((result)[csharp2cuda_temp_472]);
 #line 1137 "MatrixModule.cs"
                     int csharp2cuda_temp_474 = (first)->rows;
 #line 1135 "MatrixModule.cs"
-                    double csharp2cuda_temp_475 = mathblocks_matrix_determinant(submatrix, csharp2cuda_temp_474, work);
+                    float csharp2cuda_temp_475 = mathblocks_matrix_determinant(submatrix, csharp2cuda_temp_474, work);
                     (*(csharp2cuda_temp_473) = csharp2cuda_temp_475);
                 }
                 csharp2cuda_for_continue_45:
@@ -4371,7 +4371,7 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 1142 "MatrixModule.cs"
 #line 1142 "MatrixModule.cs"
-                double csharp2cuda_temp_477 = (result)[index];
+                float csharp2cuda_temp_477 = (result)[index];
                 if ((!(isfinite(csharp2cuda_temp_477))))
                 {
 #line 1142 "MatrixModule.cs"
@@ -4417,7 +4417,7 @@ __device__ void mathblocks_matrix_dispatch(
         if (!(((size) != (csharp2cuda_temp_480))))
         {
 #line 1151 "MatrixModule.cs"
-            double csharp2cuda_temp_482 = (second)->scalar_value;
+            float csharp2cuda_temp_482 = (second)->scalar_value;
 #line 1151 "MatrixModule.cs"
             int* csharp2cuda_temp_483 = &(iterations);
 #line 1151 "MatrixModule.cs"
@@ -4491,8 +4491,8 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 1158 "MatrixModule.cs"
 #line 1158 "MatrixModule.cs"
-                double csharp2cuda_temp_491 = (a)[index];
-                if (((csharp2cuda_temp_491) < (0.0)))
+                float csharp2cuda_temp_491 = (a)[index];
+                if (((csharp2cuda_temp_491) < (0.0f)))
                 {
 #line 1158 "MatrixModule.cs"
 #line 1158 "MatrixModule.cs"
@@ -4513,7 +4513,7 @@ __device__ void mathblocks_matrix_dispatch(
             return;
         }
 #line 1161 "MatrixModule.cs"
-        double* csharp2cuda_temp_494;
+        float* csharp2cuda_temp_494;
 #line 1161 "MatrixModule.cs"
         if (((opcode) == (36)))
         {
@@ -4526,9 +4526,9 @@ __device__ void mathblocks_matrix_dispatch(
             csharp2cuda_temp_494 = scratch;
         }
 #line 1161 "MatrixModule.cs"
-        double* vector = csharp2cuda_temp_494;
+        float* vector = csharp2cuda_temp_494;
 #line 1162 "MatrixModule.cs"
-        double* csharp2cuda_temp_495;
+        float* csharp2cuda_temp_495;
 #line 1162 "MatrixModule.cs"
         if (((opcode) == (36)))
         {
@@ -4541,9 +4541,9 @@ __device__ void mathblocks_matrix_dispatch(
             csharp2cuda_temp_495 = csharp2cuda_pointer_add(scratch, size);
         }
 #line 1162 "MatrixModule.cs"
-        double* next = csharp2cuda_temp_495;
+        float* next = csharp2cuda_temp_495;
 #line 1163 "MatrixModule.cs"
-        double* csharp2cuda_temp_496;
+        float* csharp2cuda_temp_496;
 #line 1163 "MatrixModule.cs"
         if (((opcode) == (36)))
         {
@@ -4556,7 +4556,7 @@ __device__ void mathblocks_matrix_dispatch(
             csharp2cuda_temp_496 = csharp2cuda_pointer_add(scratch, csharp2cuda_i32_mul(size, 2));
         }
 #line 1163 "MatrixModule.cs"
-        double* products = csharp2cuda_temp_496;
+        float* products = csharp2cuda_temp_496;
 #line 1164 "MatrixModule.cs"
         {
 #line 1164 "MatrixModule.cs"
@@ -4567,9 +4567,9 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 1165 "MatrixModule.cs"
 #line 1165 "MatrixModule.cs"
-                double* csharp2cuda_temp_498 = &((vector)[index]);
+                float* csharp2cuda_temp_498 = &((vector)[index]);
 #line 1165 "MatrixModule.cs"
-                double csharp2cuda_temp_499 = __ddiv_rn(1.0, ((double)(size)));
+                float csharp2cuda_temp_499 = __fdiv_rn(1.0f, ((float)(size)));
                 (*(csharp2cuda_temp_498) = csharp2cuda_temp_499);
 #line 1164 "MatrixModule.cs"
                 int* csharp2cuda_temp_497 = &(index);
@@ -4597,7 +4597,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 1169 "MatrixModule.cs"
                             {
 #line 1170 "MatrixModule.cs"
-                                double sum = 0.0;
+                                float sum = 0.0f;
 #line 1171 "MatrixModule.cs"
                                 {
 #line 1171 "MatrixModule.cs"
@@ -4608,14 +4608,14 @@ __device__ void mathblocks_matrix_dispatch(
                                             break;
 #line 1172 "MatrixModule.cs"
 #line 1172 "MatrixModule.cs"
-                                        double* csharp2cuda_temp_503 = &(sum);
+                                        float* csharp2cuda_temp_503 = &(sum);
 #line 1172 "MatrixModule.cs"
-                                        double csharp2cuda_temp_504 = *(csharp2cuda_temp_503);
+                                        float csharp2cuda_temp_504 = *(csharp2cuda_temp_503);
 #line 1172 "MatrixModule.cs"
-                                        double csharp2cuda_temp_505 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
+                                        float csharp2cuda_temp_505 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
 #line 1172 "MatrixModule.cs"
-                                        double csharp2cuda_temp_506 = (vector)[column];
-                                        (*(csharp2cuda_temp_503) = __dadd_rn(csharp2cuda_temp_504, __dmul_rn(csharp2cuda_temp_505, csharp2cuda_temp_506)));
+                                        float csharp2cuda_temp_506 = (vector)[column];
+                                        (*(csharp2cuda_temp_503) = __fadd_rn(csharp2cuda_temp_504, __fmul_rn(csharp2cuda_temp_505, csharp2cuda_temp_506)));
 #line 1171 "MatrixModule.cs"
                                         int* csharp2cuda_temp_502 = &(column);
                                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_502));
@@ -4623,10 +4623,10 @@ __device__ void mathblocks_matrix_dispatch(
                                 }
 #line 1173 "MatrixModule.cs"
 #line 1173 "MatrixModule.cs"
-                                double* csharp2cuda_temp_507 = &((next)[row]);
+                                float* csharp2cuda_temp_507 = &((next)[row]);
 #line 1173 "MatrixModule.cs"
-                                double csharp2cuda_temp_508 = (vector)[row];
-                                (*(csharp2cuda_temp_507) = __dadd_rn(sum, csharp2cuda_temp_508));
+                                float csharp2cuda_temp_508 = (vector)[row];
+                                (*(csharp2cuda_temp_507) = __fadd_rn(sum, csharp2cuda_temp_508));
                             }
 #line 1168 "MatrixModule.cs"
                             int* csharp2cuda_temp_501 = &(row);
@@ -4634,7 +4634,7 @@ __device__ void mathblocks_matrix_dispatch(
                         }
                     }
 #line 1175 "MatrixModule.cs"
-                    double norm = mathblocks_compensated_sum(next, size);
+                    float norm = mathblocks_compensated_sum(next, size);
 #line 1176 "MatrixModule.cs"
                     {
 #line 1176 "MatrixModule.cs"
@@ -4645,11 +4645,11 @@ __device__ void mathblocks_matrix_dispatch(
                                 break;
 #line 1177 "MatrixModule.cs"
 #line 1177 "MatrixModule.cs"
-                            double* csharp2cuda_temp_510 = &((vector)[index]);
+                            float* csharp2cuda_temp_510 = &((vector)[index]);
 #line 1177 "MatrixModule.cs"
-                            double csharp2cuda_temp_511 = (next)[index];
+                            float csharp2cuda_temp_511 = (next)[index];
 #line 1177 "MatrixModule.cs"
-                            double csharp2cuda_temp_512 = __ddiv_rn(csharp2cuda_temp_511, norm);
+                            float csharp2cuda_temp_512 = __fdiv_rn(csharp2cuda_temp_511, norm);
                             (*(csharp2cuda_temp_510) = csharp2cuda_temp_512);
 #line 1176 "MatrixModule.cs"
                             int* csharp2cuda_temp_509 = &(index);
@@ -4678,7 +4678,7 @@ __device__ void mathblocks_matrix_dispatch(
                         break;
 #line 1183 "MatrixModule.cs"
 #line 1183 "MatrixModule.cs"
-                    double csharp2cuda_temp_514 = (result)[index];
+                    float csharp2cuda_temp_514 = (result)[index];
                     if ((!(isfinite(csharp2cuda_temp_514))))
                     {
 #line 1183 "MatrixModule.cs"
@@ -4705,7 +4705,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 1187 "MatrixModule.cs"
                 {
 #line 1188 "MatrixModule.cs"
-                    double sum = 0.0;
+                    float sum = 0.0f;
 #line 1189 "MatrixModule.cs"
                     {
 #line 1189 "MatrixModule.cs"
@@ -4716,14 +4716,14 @@ __device__ void mathblocks_matrix_dispatch(
                                 break;
 #line 1190 "MatrixModule.cs"
 #line 1190 "MatrixModule.cs"
-                            double* csharp2cuda_temp_518 = &(sum);
+                            float* csharp2cuda_temp_518 = &(sum);
 #line 1190 "MatrixModule.cs"
-                            double csharp2cuda_temp_519 = *(csharp2cuda_temp_518);
+                            float csharp2cuda_temp_519 = *(csharp2cuda_temp_518);
 #line 1190 "MatrixModule.cs"
-                            double csharp2cuda_temp_520 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
+                            float csharp2cuda_temp_520 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
 #line 1190 "MatrixModule.cs"
-                            double csharp2cuda_temp_521 = (vector)[column];
-                            (*(csharp2cuda_temp_518) = __dadd_rn(csharp2cuda_temp_519, __dmul_rn(csharp2cuda_temp_520, csharp2cuda_temp_521)));
+                            float csharp2cuda_temp_521 = (vector)[column];
+                            (*(csharp2cuda_temp_518) = __fadd_rn(csharp2cuda_temp_519, __fmul_rn(csharp2cuda_temp_520, csharp2cuda_temp_521)));
 #line 1189 "MatrixModule.cs"
                             int* csharp2cuda_temp_517 = &(column);
                             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_517));
@@ -4731,7 +4731,7 @@ __device__ void mathblocks_matrix_dispatch(
                     }
 #line 1191 "MatrixModule.cs"
 #line 1191 "MatrixModule.cs"
-                    double* csharp2cuda_temp_522 = &((next)[row]);
+                    float* csharp2cuda_temp_522 = &((next)[row]);
                     (*(csharp2cuda_temp_522) = sum);
                 }
 #line 1186 "MatrixModule.cs"
@@ -4749,19 +4749,19 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 1194 "MatrixModule.cs"
 #line 1194 "MatrixModule.cs"
-                double* csharp2cuda_temp_524 = &((products)[index]);
+                float* csharp2cuda_temp_524 = &((products)[index]);
 #line 1194 "MatrixModule.cs"
-                double csharp2cuda_temp_525 = (vector)[index];
+                float csharp2cuda_temp_525 = (vector)[index];
 #line 1194 "MatrixModule.cs"
-                double csharp2cuda_temp_526 = (next)[index];
-                (*(csharp2cuda_temp_524) = __dmul_rn(csharp2cuda_temp_525, csharp2cuda_temp_526));
+                float csharp2cuda_temp_526 = (next)[index];
+                (*(csharp2cuda_temp_524) = __fmul_rn(csharp2cuda_temp_525, csharp2cuda_temp_526));
 #line 1193 "MatrixModule.cs"
                 int* csharp2cuda_temp_523 = &(index);
                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_523));
             }
         }
 #line 1195 "MatrixModule.cs"
-        double numerator = mathblocks_compensated_sum(products, size);
+        float numerator = mathblocks_compensated_sum(products, size);
 #line 1196 "MatrixModule.cs"
         {
 #line 1196 "MatrixModule.cs"
@@ -4772,28 +4772,28 @@ __device__ void mathblocks_matrix_dispatch(
                     break;
 #line 1197 "MatrixModule.cs"
 #line 1197 "MatrixModule.cs"
-                double* csharp2cuda_temp_528 = &((products)[index]);
+                float* csharp2cuda_temp_528 = &((products)[index]);
 #line 1197 "MatrixModule.cs"
-                double csharp2cuda_temp_529 = (vector)[index];
+                float csharp2cuda_temp_529 = (vector)[index];
 #line 1197 "MatrixModule.cs"
-                double csharp2cuda_temp_530 = (vector)[index];
-                (*(csharp2cuda_temp_528) = __dmul_rn(csharp2cuda_temp_529, csharp2cuda_temp_530));
+                float csharp2cuda_temp_530 = (vector)[index];
+                (*(csharp2cuda_temp_528) = __fmul_rn(csharp2cuda_temp_529, csharp2cuda_temp_530));
 #line 1196 "MatrixModule.cs"
                 int* csharp2cuda_temp_527 = &(index);
                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_527));
             }
         }
 #line 1198 "MatrixModule.cs"
-        double denominator = mathblocks_compensated_sum(products, size);
+        float denominator = mathblocks_compensated_sum(products, size);
 #line 1199 "MatrixModule.cs"
 #line 1199 "MatrixModule.cs"
-        double* csharp2cuda_temp_531 = &((output)->scalar_value);
+        float* csharp2cuda_temp_531 = &((output)->scalar_value);
 #line 1199 "MatrixModule.cs"
-        double csharp2cuda_temp_532 = __ddiv_rn(numerator, denominator);
+        float csharp2cuda_temp_532 = __fdiv_rn(numerator, denominator);
         (*(csharp2cuda_temp_531) = csharp2cuda_temp_532);
 #line 1200 "MatrixModule.cs"
 #line 1200 "MatrixModule.cs"
-        double csharp2cuda_temp_533 = (output)->scalar_value;
+        float csharp2cuda_temp_533 = (output)->scalar_value;
         if ((!(isfinite(csharp2cuda_temp_533))))
         {
 #line 1200 "MatrixModule.cs"
@@ -4854,11 +4854,11 @@ __device__ void mathblocks_matrix_dispatch(
 #line 1213 "MatrixModule.cs"
         mathblocks_set_vector_shape(output, csharp2cuda_i32_sub(limit, 1));
 #line 1214 "MatrixModule.cs"
-        double* submatrix = scratch;
+        float* submatrix = scratch;
 #line 1215 "MatrixModule.cs"
         int csharp2cuda_temp_539 = (first)->count;
 #line 1215 "MatrixModule.cs"
-        double* work = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_539);
+        float* work = csharp2cuda_pointer_add(scratch, csharp2cuda_temp_539);
 #line 1216 "MatrixModule.cs"
         {
 #line 1216 "MatrixModule.cs"
@@ -4875,13 +4875,13 @@ __device__ void mathblocks_matrix_dispatch(
                     mathblocks_matrix_submatrix_from_masks(a, size, mask, mask, order, submatrix);
 #line 1226 "MatrixModule.cs"
 #line 1226 "MatrixModule.cs"
-                    double* csharp2cuda_temp_541 = &((result)[csharp2cuda_i32_sub(mask, 1)]);
+                    float* csharp2cuda_temp_541 = &((result)[csharp2cuda_i32_sub(mask, 1)]);
 #line 1226 "MatrixModule.cs"
-                    double csharp2cuda_temp_542 = mathblocks_matrix_determinant(submatrix, order, work);
+                    float csharp2cuda_temp_542 = mathblocks_matrix_determinant(submatrix, order, work);
                     (*(csharp2cuda_temp_541) = csharp2cuda_temp_542);
 #line 1227 "MatrixModule.cs"
 #line 1227 "MatrixModule.cs"
-                    double csharp2cuda_temp_543 = (result)[csharp2cuda_i32_sub(mask, 1)];
+                    float csharp2cuda_temp_543 = (result)[csharp2cuda_i32_sub(mask, 1)];
                     if ((!(isfinite(csharp2cuda_temp_543))))
                     {
 #line 1227 "MatrixModule.cs"
@@ -4915,14 +4915,14 @@ __device__ void mathblocks_matrix_dispatch(
         }
 #line 1239 "MatrixModule.cs"
 #line 1239 "MatrixModule.cs"
-        double* csharp2cuda_temp_546 = &((output)->scalar_value);
+        float* csharp2cuda_temp_546 = &((output)->scalar_value);
 #line 1241 "MatrixModule.cs"
         int csharp2cuda_temp_547 = (first)->rows;
 #line 1242 "MatrixModule.cs"
         int csharp2cuda_temp_548 = (first)->columns;
 #line 1239 "MatrixModule.cs"
         int csharp2cuda_temp_549 = mathblocks_matrix_rank(a, csharp2cuda_temp_547, csharp2cuda_temp_548, scratch);
-        (*(csharp2cuda_temp_546) = ((double)(csharp2cuda_temp_549)));
+        (*(csharp2cuda_temp_546) = ((float)(csharp2cuda_temp_549)));
 #line 1244 "MatrixModule.cs"
         return;
     }
@@ -4943,7 +4943,7 @@ __device__ void mathblocks_matrix_dispatch(
         if (!(((size) != (csharp2cuda_temp_550))))
         {
 #line 1252 "MatrixModule.cs"
-            double csharp2cuda_temp_552 = (second)->scalar_value;
+            float csharp2cuda_temp_552 = (second)->scalar_value;
 #line 1252 "MatrixModule.cs"
             int* csharp2cuda_temp_553 = &(retained);
 #line 1252 "MatrixModule.cs"
@@ -5008,23 +5008,23 @@ __device__ void mathblocks_matrix_dispatch(
 #line 1258 "MatrixModule.cs"
         int eliminated = csharp2cuda_i32_sub(size, retained);
 #line 1259 "MatrixModule.cs"
-        double* leading = scratch;
+        float* leading = scratch;
 #line 1260 "MatrixModule.cs"
-        double* upper = csharp2cuda_pointer_add(leading, csharp2cuda_i32_mul(retained, retained));
+        float* upper = csharp2cuda_pointer_add(leading, csharp2cuda_i32_mul(retained, retained));
 #line 1261 "MatrixModule.cs"
-        double* lower = csharp2cuda_pointer_add(upper, csharp2cuda_i32_mul(retained, eliminated));
+        float* lower = csharp2cuda_pointer_add(upper, csharp2cuda_i32_mul(retained, eliminated));
 #line 1262 "MatrixModule.cs"
-        double* trailing = csharp2cuda_pointer_add(lower, csharp2cuda_i32_mul(eliminated, retained));
+        float* trailing = csharp2cuda_pointer_add(lower, csharp2cuda_i32_mul(eliminated, retained));
 #line 1263 "MatrixModule.cs"
-        double* inverse = csharp2cuda_pointer_add(trailing, csharp2cuda_i32_mul(eliminated, eliminated));
+        float* inverse = csharp2cuda_pointer_add(trailing, csharp2cuda_i32_mul(eliminated, eliminated));
 #line 1264 "MatrixModule.cs"
-        double* augmented = csharp2cuda_pointer_add(inverse, csharp2cuda_i32_mul(eliminated, eliminated));
+        float* augmented = csharp2cuda_pointer_add(inverse, csharp2cuda_i32_mul(eliminated, eliminated));
 #line 1265 "MatrixModule.cs"
-        double* solution = csharp2cuda_pointer_add(augmented, csharp2cuda_i32_mul(eliminated, csharp2cuda_i32_add(eliminated, 1)));
+        float* solution = csharp2cuda_pointer_add(augmented, csharp2cuda_i32_mul(eliminated, csharp2cuda_i32_add(eliminated, 1)));
 #line 1266 "MatrixModule.cs"
-        double* upper_inverse = csharp2cuda_pointer_add(solution, eliminated);
+        float* upper_inverse = csharp2cuda_pointer_add(solution, eliminated);
 #line 1267 "MatrixModule.cs"
-        double* product = csharp2cuda_pointer_add(upper_inverse, csharp2cuda_i32_mul(retained, eliminated));
+        float* product = csharp2cuda_pointer_add(upper_inverse, csharp2cuda_i32_mul(retained, eliminated));
 #line 1268 "MatrixModule.cs"
         {
 #line 1268 "MatrixModule.cs"
@@ -5046,7 +5046,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 1271 "MatrixModule.cs"
                             {
 #line 1272 "MatrixModule.cs"
-                                double value = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
+                                float value = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
 #line 1273 "MatrixModule.cs"
 #line 1273 "MatrixModule.cs"
                                 bool csharp2cuda_temp_561;
@@ -5065,7 +5065,7 @@ __device__ void mathblocks_matrix_dispatch(
                                 {
 #line 1274 "MatrixModule.cs"
 #line 1274 "MatrixModule.cs"
-                                    double* csharp2cuda_temp_562 = &((leading)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, retained), column)]);
+                                    float* csharp2cuda_temp_562 = &((leading)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, retained), column)]);
                                     (*(csharp2cuda_temp_562) = value);
                                 }
                                 else
@@ -5075,7 +5075,7 @@ __device__ void mathblocks_matrix_dispatch(
                                     {
 #line 1276 "MatrixModule.cs"
 #line 1276 "MatrixModule.cs"
-                                        double* csharp2cuda_temp_563 = &((upper)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), column), retained)]);
+                                        float* csharp2cuda_temp_563 = &((upper)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), column), retained)]);
                                         (*(csharp2cuda_temp_563) = value);
                                     }
                                     else
@@ -5085,14 +5085,14 @@ __device__ void mathblocks_matrix_dispatch(
                                         {
 #line 1278 "MatrixModule.cs"
 #line 1278 "MatrixModule.cs"
-                                            double* csharp2cuda_temp_564 = &((lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, retained), retained), column)]);
+                                            float* csharp2cuda_temp_564 = &((lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, retained), retained), column)]);
                                             (*(csharp2cuda_temp_564) = value);
                                         }
                                         else
                                         {
 #line 1280 "MatrixModule.cs"
 #line 1280 "MatrixModule.cs"
-                                            double* csharp2cuda_temp_565 = &((trailing)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, retained), eliminated), column), retained)]);
+                                            float* csharp2cuda_temp_565 = &((trailing)[csharp2cuda_i32_sub(csharp2cuda_i32_add(csharp2cuda_i32_mul(csharp2cuda_i32_sub(row, retained), eliminated), column), retained)]);
                                             (*(csharp2cuda_temp_565) = value);
                                         }
                                     }
@@ -5142,9 +5142,9 @@ __device__ void mathblocks_matrix_dispatch(
                                 break;
 #line 1296 "MatrixModule.cs"
 #line 1296 "MatrixModule.cs"
-                            double* csharp2cuda_temp_570 = &((inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), column)]);
+                            float* csharp2cuda_temp_570 = &((inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), column)]);
 #line 1296 "MatrixModule.cs"
-                            double csharp2cuda_temp_571 = (solution)[row];
+                            float csharp2cuda_temp_571 = (solution)[row];
                             (*(csharp2cuda_temp_570) = csharp2cuda_temp_571);
 #line 1295 "MatrixModule.cs"
                             int* csharp2cuda_temp_569 = &(row);
@@ -5178,7 +5178,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 1301 "MatrixModule.cs"
                             {
 #line 1302 "MatrixModule.cs"
-                                double sum = 0.0;
+                                float sum = 0.0f;
 #line 1303 "MatrixModule.cs"
                                 {
 #line 1303 "MatrixModule.cs"
@@ -5189,14 +5189,14 @@ __device__ void mathblocks_matrix_dispatch(
                                             break;
 #line 1304 "MatrixModule.cs"
 #line 1304 "MatrixModule.cs"
-                                        double* csharp2cuda_temp_575 = &(sum);
+                                        float* csharp2cuda_temp_575 = &(sum);
 #line 1304 "MatrixModule.cs"
-                                        double csharp2cuda_temp_576 = *(csharp2cuda_temp_575);
+                                        float csharp2cuda_temp_576 = *(csharp2cuda_temp_575);
 #line 1304 "MatrixModule.cs"
-                                        double csharp2cuda_temp_577 = (upper)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), inner)];
+                                        float csharp2cuda_temp_577 = (upper)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), inner)];
 #line 1305 "MatrixModule.cs"
-                                        double csharp2cuda_temp_578 = (inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, eliminated), column)];
-                                        (*(csharp2cuda_temp_575) = __dadd_rn(csharp2cuda_temp_576, __dmul_rn(csharp2cuda_temp_577, csharp2cuda_temp_578)));
+                                        float csharp2cuda_temp_578 = (inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, eliminated), column)];
+                                        (*(csharp2cuda_temp_575) = __fadd_rn(csharp2cuda_temp_576, __fmul_rn(csharp2cuda_temp_577, csharp2cuda_temp_578)));
 #line 1303 "MatrixModule.cs"
                                         int* csharp2cuda_temp_574 = &(inner);
                                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_574));
@@ -5204,7 +5204,7 @@ __device__ void mathblocks_matrix_dispatch(
                                 }
 #line 1306 "MatrixModule.cs"
 #line 1306 "MatrixModule.cs"
-                                double* csharp2cuda_temp_579 = &((upper_inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), column)]);
+                                float* csharp2cuda_temp_579 = &((upper_inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), column)]);
                                 (*(csharp2cuda_temp_579) = sum);
                             }
 #line 1300 "MatrixModule.cs"
@@ -5239,7 +5239,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 1312 "MatrixModule.cs"
                             {
 #line 1313 "MatrixModule.cs"
-                                double sum = 0.0;
+                                float sum = 0.0f;
 #line 1314 "MatrixModule.cs"
                                 {
 #line 1314 "MatrixModule.cs"
@@ -5250,14 +5250,14 @@ __device__ void mathblocks_matrix_dispatch(
                                             break;
 #line 1315 "MatrixModule.cs"
 #line 1315 "MatrixModule.cs"
-                                        double* csharp2cuda_temp_583 = &(sum);
+                                        float* csharp2cuda_temp_583 = &(sum);
 #line 1315 "MatrixModule.cs"
-                                        double csharp2cuda_temp_584 = *(csharp2cuda_temp_583);
+                                        float csharp2cuda_temp_584 = *(csharp2cuda_temp_583);
 #line 1315 "MatrixModule.cs"
-                                        double csharp2cuda_temp_585 = (upper_inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), inner)];
+                                        float csharp2cuda_temp_585 = (upper_inverse)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, eliminated), inner)];
 #line 1316 "MatrixModule.cs"
-                                        double csharp2cuda_temp_586 = (lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, retained), column)];
-                                        (*(csharp2cuda_temp_583) = __dadd_rn(csharp2cuda_temp_584, __dmul_rn(csharp2cuda_temp_585, csharp2cuda_temp_586)));
+                                        float csharp2cuda_temp_586 = (lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, retained), column)];
+                                        (*(csharp2cuda_temp_583) = __fadd_rn(csharp2cuda_temp_584, __fmul_rn(csharp2cuda_temp_585, csharp2cuda_temp_586)));
 #line 1314 "MatrixModule.cs"
                                         int* csharp2cuda_temp_582 = &(inner);
                                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_582));
@@ -5265,7 +5265,7 @@ __device__ void mathblocks_matrix_dispatch(
                                 }
 #line 1317 "MatrixModule.cs"
 #line 1317 "MatrixModule.cs"
-                                double* csharp2cuda_temp_587 = &((product)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, retained), column)]);
+                                float* csharp2cuda_temp_587 = &((product)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, retained), column)]);
                                 (*(csharp2cuda_temp_587) = sum);
                             }
 #line 1311 "MatrixModule.cs"
@@ -5293,15 +5293,15 @@ __device__ void mathblocks_matrix_dispatch(
                 {
 #line 1323 "MatrixModule.cs"
 #line 1323 "MatrixModule.cs"
-                    double* csharp2cuda_temp_589 = &((result)[index]);
+                    float* csharp2cuda_temp_589 = &((result)[index]);
 #line 1323 "MatrixModule.cs"
-                    double csharp2cuda_temp_590 = (leading)[index];
+                    float csharp2cuda_temp_590 = (leading)[index];
 #line 1323 "MatrixModule.cs"
-                    double csharp2cuda_temp_591 = (product)[index];
-                    (*(csharp2cuda_temp_589) = __dsub_rn(csharp2cuda_temp_590, csharp2cuda_temp_591));
+                    float csharp2cuda_temp_591 = (product)[index];
+                    (*(csharp2cuda_temp_589) = __fsub_rn(csharp2cuda_temp_590, csharp2cuda_temp_591));
 #line 1324 "MatrixModule.cs"
 #line 1324 "MatrixModule.cs"
-                    double csharp2cuda_temp_592 = (result)[index];
+                    float csharp2cuda_temp_592 = (result)[index];
                     if ((!(isfinite(csharp2cuda_temp_592))))
                     {
 #line 1324 "MatrixModule.cs"
@@ -5388,7 +5388,7 @@ __device__ void mathblocks_matrix_dispatch(
         int iterations = 0;
 #line 1346 "MatrixModule.cs"
 #line 1346 "MatrixModule.cs"
-        double csharp2cuda_temp_601 = (second)->scalar_value;
+        float csharp2cuda_temp_601 = (second)->scalar_value;
 #line 1346 "MatrixModule.cs"
         int* csharp2cuda_temp_602 = &(iterations);
 #line 1346 "MatrixModule.cs"
@@ -5445,11 +5445,11 @@ __device__ void mathblocks_matrix_dispatch(
 #line 1352 "MatrixModule.cs"
         int size = (first)->columns;
 #line 1353 "MatrixModule.cs"
-        double* gram = scratch;
+        float* gram = scratch;
 #line 1354 "MatrixModule.cs"
-        double* work = csharp2cuda_pointer_add(gram, csharp2cuda_i32_mul(size, size));
+        float* work = csharp2cuda_pointer_add(gram, csharp2cuda_i32_mul(size, size));
 #line 1355 "MatrixModule.cs"
-        double* eigenvalues = csharp2cuda_pointer_add(work, csharp2cuda_i32_mul(size, size));
+        float* eigenvalues = csharp2cuda_pointer_add(work, csharp2cuda_i32_mul(size, size));
 #line 1356 "MatrixModule.cs"
         {
 #line 1356 "MatrixModule.cs"
@@ -5471,7 +5471,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 1359 "MatrixModule.cs"
                             {
 #line 1360 "MatrixModule.cs"
-                                double sum = 0.0;
+                                float sum = 0.0f;
 #line 1361 "MatrixModule.cs"
                                 {
 #line 1361 "MatrixModule.cs"
@@ -5484,18 +5484,18 @@ __device__ void mathblocks_matrix_dispatch(
                                             break;
 #line 1362 "MatrixModule.cs"
 #line 1362 "MatrixModule.cs"
-                                        double* csharp2cuda_temp_612 = &(sum);
+                                        float* csharp2cuda_temp_612 = &(sum);
 #line 1362 "MatrixModule.cs"
-                                        double csharp2cuda_temp_613 = *(csharp2cuda_temp_612);
+                                        float csharp2cuda_temp_613 = *(csharp2cuda_temp_612);
 #line 1362 "MatrixModule.cs"
                                         int csharp2cuda_temp_614 = (first)->columns;
 #line 1362 "MatrixModule.cs"
-                                        double csharp2cuda_temp_615 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_614), row)];
+                                        float csharp2cuda_temp_615 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_614), row)];
 #line 1363 "MatrixModule.cs"
                                         int csharp2cuda_temp_616 = (first)->columns;
 #line 1363 "MatrixModule.cs"
-                                        double csharp2cuda_temp_617 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_616), column)];
-                                        (*(csharp2cuda_temp_612) = __dadd_rn(csharp2cuda_temp_613, __dmul_rn(csharp2cuda_temp_615, csharp2cuda_temp_617)));
+                                        float csharp2cuda_temp_617 = (a)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, csharp2cuda_temp_616), column)];
+                                        (*(csharp2cuda_temp_612) = __fadd_rn(csharp2cuda_temp_613, __fmul_rn(csharp2cuda_temp_615, csharp2cuda_temp_617)));
 #line 1361 "MatrixModule.cs"
                                         int* csharp2cuda_temp_610 = &(inner);
                                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_610));
@@ -5514,7 +5514,7 @@ __device__ void mathblocks_matrix_dispatch(
                                 }
 #line 1370 "MatrixModule.cs"
 #line 1370 "MatrixModule.cs"
-                                double* csharp2cuda_temp_619 = &((gram)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
+                                float* csharp2cuda_temp_619 = &((gram)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
                                 (*(csharp2cuda_temp_619) = sum);
                             }
 #line 1358 "MatrixModule.cs"
@@ -5549,18 +5549,18 @@ __device__ void mathblocks_matrix_dispatch(
             }
         }
 #line 1383 "MatrixModule.cs"
-        double largest = (eigenvalues)[csharp2cuda_i32_sub(size, 1)];
+        float largest = (eigenvalues)[csharp2cuda_i32_sub(size, 1)];
 #line 1385 "MatrixModule.cs"
 #line 1385 "MatrixModule.cs"
-        double* csharp2cuda_temp_621 = &(largest);
-        (*(csharp2cuda_temp_621) = mathblocks_maximum(0.0, largest));
+        float* csharp2cuda_temp_621 = &(largest);
+        (*(csharp2cuda_temp_621) = mathblocks_maximum(0.0f, largest));
 #line 1386 "MatrixModule.cs"
 #line 1386 "MatrixModule.cs"
-        double* csharp2cuda_temp_622 = &((output)->scalar_value);
+        float* csharp2cuda_temp_622 = &((output)->scalar_value);
         (*(csharp2cuda_temp_622) = mathblocks_square_root(largest));
 #line 1387 "MatrixModule.cs"
 #line 1387 "MatrixModule.cs"
-        double csharp2cuda_temp_623 = (output)->scalar_value;
+        float csharp2cuda_temp_623 = (output)->scalar_value;
         if ((!(isfinite(csharp2cuda_temp_623))))
         {
 #line 1387 "MatrixModule.cs"
@@ -5573,9 +5573,9 @@ __device__ void mathblocks_matrix_dispatch(
 
 #line 271 "MatrixModule.cs"
 __device__ bool mathblocks_matrix_is_positive_definite(
-    const double* values,
+    const float* values,
     int size,
-    double* lower)
+    float* lower)
 #line 276 "MatrixModule.cs"
 {
 #line 277 "MatrixModule.cs"
@@ -5596,8 +5596,8 @@ __device__ bool mathblocks_matrix_is_positive_definite(
                 break;
 #line 280 "MatrixModule.cs"
 #line 280 "MatrixModule.cs"
-            double* csharp2cuda_temp_2 = &((lower)[index]);
-            (*(csharp2cuda_temp_2) = 0.0);
+            float* csharp2cuda_temp_2 = &((lower)[index]);
+            (*(csharp2cuda_temp_2) = 0.0f);
 #line 279 "MatrixModule.cs"
             int* csharp2cuda_temp_1 = &(index);
             csharp2cuda_i32_post_increment(*(csharp2cuda_temp_1));
@@ -5624,7 +5624,7 @@ __device__ bool mathblocks_matrix_is_positive_definite(
 #line 284 "MatrixModule.cs"
                         {
 #line 285 "MatrixModule.cs"
-                            double sum = (values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
+                            float sum = (values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
 #line 286 "MatrixModule.cs"
                             {
 #line 286 "MatrixModule.cs"
@@ -5635,14 +5635,14 @@ __device__ bool mathblocks_matrix_is_positive_definite(
                                         break;
 #line 287 "MatrixModule.cs"
 #line 287 "MatrixModule.cs"
-                                    double* csharp2cuda_temp_6 = &(sum);
+                                    float* csharp2cuda_temp_6 = &(sum);
 #line 287 "MatrixModule.cs"
-                                    double csharp2cuda_temp_7 = *(csharp2cuda_temp_6);
+                                    float csharp2cuda_temp_7 = *(csharp2cuda_temp_6);
 #line 287 "MatrixModule.cs"
-                                    double csharp2cuda_temp_8 = (lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), inner)];
+                                    float csharp2cuda_temp_8 = (lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), inner)];
 #line 287 "MatrixModule.cs"
-                                    double csharp2cuda_temp_9 = (lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(column, size), inner)];
-                                    (*(csharp2cuda_temp_6) = __dsub_rn(csharp2cuda_temp_7, __dmul_rn(csharp2cuda_temp_8, csharp2cuda_temp_9)));
+                                    float csharp2cuda_temp_9 = (lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(column, size), inner)];
+                                    (*(csharp2cuda_temp_6) = __fsub_rn(csharp2cuda_temp_7, __fmul_rn(csharp2cuda_temp_8, csharp2cuda_temp_9)));
 #line 286 "MatrixModule.cs"
                                     int* csharp2cuda_temp_5 = &(inner);
                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_5));
@@ -5653,14 +5653,14 @@ __device__ bool mathblocks_matrix_is_positive_definite(
 #line 289 "MatrixModule.cs"
                             {
 #line 290 "MatrixModule.cs"
-                                if (((sum) <= (0.0)))
+                                if (((sum) <= (0.0f)))
                                 {
 #line 291 "MatrixModule.cs"
                                     return false;
                                 }
 #line 292 "MatrixModule.cs"
 #line 292 "MatrixModule.cs"
-                                double* csharp2cuda_temp_10 = &((lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
+                                float* csharp2cuda_temp_10 = &((lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
                                 (*(csharp2cuda_temp_10) = mathblocks_square_root(sum));
                             }
                             else
@@ -5668,11 +5668,11 @@ __device__ bool mathblocks_matrix_is_positive_definite(
                             {
 #line 296 "MatrixModule.cs"
 #line 296 "MatrixModule.cs"
-                                double* csharp2cuda_temp_11 = &((lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
+                                float* csharp2cuda_temp_11 = &((lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
 #line 296 "MatrixModule.cs"
-                                double csharp2cuda_temp_12 = (lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(column, size), column)];
+                                float csharp2cuda_temp_12 = (lower)[csharp2cuda_i32_add(csharp2cuda_i32_mul(column, size), column)];
 #line 296 "MatrixModule.cs"
-                                double csharp2cuda_temp_13 = __ddiv_rn(sum, csharp2cuda_temp_12);
+                                float csharp2cuda_temp_13 = __fdiv_rn(sum, csharp2cuda_temp_12);
                                 (*(csharp2cuda_temp_11) = csharp2cuda_temp_13);
                             }
                         }
@@ -5692,7 +5692,7 @@ __device__ bool mathblocks_matrix_is_positive_definite(
 }
 
 #line 259 "MatrixModule.cs"
-__device__ bool mathblocks_matrix_is_symmetric(const double* values, int rows, int columns)
+__device__ bool mathblocks_matrix_is_symmetric(const float* values, int rows, int columns)
 #line 261 "MatrixModule.cs"
 {
 #line 262 "MatrixModule.cs"
@@ -5719,9 +5719,9 @@ __device__ bool mathblocks_matrix_is_symmetric(const double* values, int rows, i
                         break;
 #line 266 "MatrixModule.cs"
 #line 266 "MatrixModule.cs"
-                    double csharp2cuda_temp_2 = (values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)];
+                    float csharp2cuda_temp_2 = (values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)];
 #line 266 "MatrixModule.cs"
-                    double csharp2cuda_temp_3 = (values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(column, columns), row)];
+                    float csharp2cuda_temp_3 = (values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(column, columns), row)];
                     if (((csharp2cuda_temp_2) != (csharp2cuda_temp_3)))
                     {
 #line 267 "MatrixModule.cs"
@@ -5743,10 +5743,10 @@ __device__ bool mathblocks_matrix_is_symmetric(const double* values, int rows, i
 
 #line 416 "MatrixModule.cs"
 __device__ void mathblocks_matrix_multiply_square(
-    const double* left,
-    const double* right,
+    const float* left,
+    const float* right,
     int size,
-    double* destination)
+    float* destination)
 #line 422 "MatrixModule.cs"
 {
 #line 423 "MatrixModule.cs"
@@ -5770,7 +5770,7 @@ __device__ void mathblocks_matrix_multiply_square(
 #line 426 "MatrixModule.cs"
                         {
 #line 427 "MatrixModule.cs"
-                            double sum = 0.0;
+                            float sum = 0.0f;
 #line 428 "MatrixModule.cs"
                             {
 #line 428 "MatrixModule.cs"
@@ -5781,14 +5781,14 @@ __device__ void mathblocks_matrix_multiply_square(
                                         break;
 #line 429 "MatrixModule.cs"
 #line 429 "MatrixModule.cs"
-                                    double* csharp2cuda_temp_3 = &(sum);
+                                    float* csharp2cuda_temp_3 = &(sum);
 #line 429 "MatrixModule.cs"
-                                    double csharp2cuda_temp_4 = *(csharp2cuda_temp_3);
+                                    float csharp2cuda_temp_4 = *(csharp2cuda_temp_3);
 #line 429 "MatrixModule.cs"
-                                    double csharp2cuda_temp_5 = (left)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), inner)];
+                                    float csharp2cuda_temp_5 = (left)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), inner)];
 #line 429 "MatrixModule.cs"
-                                    double csharp2cuda_temp_6 = (right)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, size), column)];
-                                    (*(csharp2cuda_temp_3) = __dadd_rn(csharp2cuda_temp_4, __dmul_rn(csharp2cuda_temp_5, csharp2cuda_temp_6)));
+                                    float csharp2cuda_temp_6 = (right)[csharp2cuda_i32_add(csharp2cuda_i32_mul(inner, size), column)];
+                                    (*(csharp2cuda_temp_3) = __fadd_rn(csharp2cuda_temp_4, __fmul_rn(csharp2cuda_temp_5, csharp2cuda_temp_6)));
 #line 428 "MatrixModule.cs"
                                     int* csharp2cuda_temp_2 = &(inner);
                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_2));
@@ -5796,7 +5796,7 @@ __device__ void mathblocks_matrix_multiply_square(
                             }
 #line 430 "MatrixModule.cs"
 #line 430 "MatrixModule.cs"
-                            double* csharp2cuda_temp_7 = &((destination)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
+                            float* csharp2cuda_temp_7 = &((destination)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)]);
                             (*(csharp2cuda_temp_7) = sum);
                         }
 #line 425 "MatrixModule.cs"
@@ -5813,7 +5813,7 @@ __device__ void mathblocks_matrix_multiply_square(
 }
 
 #line 382 "MatrixModule.cs"
-__device__ int mathblocks_matrix_rank(const double* source, int rows, int columns, double* work)
+__device__ int mathblocks_matrix_rank(const float* source, int rows, int columns, float* work)
 #line 384 "MatrixModule.cs"
 {
 #line 385 "MatrixModule.cs"
@@ -5854,10 +5854,10 @@ __device__ int mathblocks_matrix_rank(const double* source, int rows, int column
                         break;
 #line 392 "MatrixModule.cs"
 #line 392 "MatrixModule.cs"
-                    double csharp2cuda_temp_2 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), pivot_column)];
+                    float csharp2cuda_temp_2 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), pivot_column)];
 #line 393 "MatrixModule.cs"
-                    double csharp2cuda_temp_3 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, columns), pivot_column)];
-                    if (((fabs(csharp2cuda_temp_2)) > (fabs(csharp2cuda_temp_3))))
+                    float csharp2cuda_temp_3 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, columns), pivot_column)];
+                    if (((fabsf(csharp2cuda_temp_2)) > (fabsf(csharp2cuda_temp_3))))
 #line 394 "MatrixModule.cs"
                     {
 #line 395 "MatrixModule.cs"
@@ -5872,8 +5872,8 @@ __device__ int mathblocks_matrix_rank(const double* source, int rows, int column
             }
 #line 397 "MatrixModule.cs"
 #line 397 "MatrixModule.cs"
-            double csharp2cuda_temp_5 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, columns), pivot_column)];
-            if (((csharp2cuda_temp_5) == (0.0)))
+            float csharp2cuda_temp_5 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, columns), pivot_column)];
+            if (((csharp2cuda_temp_5) == (0.0f)))
 #line 398 "MatrixModule.cs"
             {
 #line 399 "MatrixModule.cs"
@@ -5886,7 +5886,7 @@ __device__ int mathblocks_matrix_rank(const double* source, int rows, int column
 #line 402 "MatrixModule.cs"
             mathblocks_matrix_swap_rows(work, columns, rank, pivot_row);
 #line 403 "MatrixModule.cs"
-            double pivot = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(rank, columns), pivot_column)];
+            float pivot = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(rank, columns), pivot_column)];
 #line 404 "MatrixModule.cs"
             {
 #line 404 "MatrixModule.cs"
@@ -5898,9 +5898,9 @@ __device__ int mathblocks_matrix_rank(const double* source, int rows, int column
 #line 405 "MatrixModule.cs"
                     {
 #line 406 "MatrixModule.cs"
-                        double csharp2cuda_temp_8 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), pivot_column)];
+                        float csharp2cuda_temp_8 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), pivot_column)];
 #line 406 "MatrixModule.cs"
-                        double scale = __ddiv_rn(csharp2cuda_temp_8, pivot);
+                        float scale = __fdiv_rn(csharp2cuda_temp_8, pivot);
 #line 407 "MatrixModule.cs"
                         {
 #line 407 "MatrixModule.cs"
@@ -5911,12 +5911,12 @@ __device__ int mathblocks_matrix_rank(const double* source, int rows, int column
                                     break;
 #line 408 "MatrixModule.cs"
 #line 408 "MatrixModule.cs"
-                                double* csharp2cuda_temp_10 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)]);
+                                float* csharp2cuda_temp_10 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)]);
 #line 408 "MatrixModule.cs"
-                                double csharp2cuda_temp_11 = *(csharp2cuda_temp_10);
+                                float csharp2cuda_temp_11 = *(csharp2cuda_temp_10);
 #line 408 "MatrixModule.cs"
-                                double csharp2cuda_temp_12 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(rank, columns), column)];
-                                (*(csharp2cuda_temp_10) = __dsub_rn(csharp2cuda_temp_11, __dmul_rn(scale, csharp2cuda_temp_12)));
+                                float csharp2cuda_temp_12 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(rank, columns), column)];
+                                (*(csharp2cuda_temp_10) = __fsub_rn(csharp2cuda_temp_11, __fmul_rn(scale, csharp2cuda_temp_12)));
 #line 407 "MatrixModule.cs"
                                 int* csharp2cuda_temp_9 = &(column);
                                 csharp2cuda_i32_post_increment(*(csharp2cuda_temp_9));
@@ -6013,12 +6013,12 @@ __device__ void mathblocks_matrix_shape(MathBlockSlot* output, int rows, int col
 
 #line 447 "MatrixModule.cs"
 __device__ void mathblocks_matrix_submatrix_from_masks(
-    const double* source,
+    const float* source,
     int source_columns,
     int row_mask,
     int column_mask,
     int order,
-    double* destination)
+    float* destination)
 #line 455 "MatrixModule.cs"
 {
 #line 456 "MatrixModule.cs"
@@ -6059,9 +6059,9 @@ __device__ void mathblocks_matrix_submatrix_from_masks(
                             }
 #line 466 "MatrixModule.cs"
 #line 466 "MatrixModule.cs"
-                            double* csharp2cuda_temp_2 = &((destination)[csharp2cuda_i32_add(csharp2cuda_i32_mul(output_row, order), output_column)]);
+                            float* csharp2cuda_temp_2 = &((destination)[csharp2cuda_i32_add(csharp2cuda_i32_mul(output_row, order), output_column)]);
 #line 467 "MatrixModule.cs"
-                            double csharp2cuda_temp_3 = (source)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, source_columns), column)];
+                            float csharp2cuda_temp_3 = (source)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, source_columns), column)];
                             (*(csharp2cuda_temp_2) = csharp2cuda_temp_3);
 #line 468 "MatrixModule.cs"
 #line 468 "MatrixModule.cs"
@@ -6089,7 +6089,7 @@ __device__ void mathblocks_matrix_submatrix_from_masks(
 
 #line 109 "MatrixModule.cs"
 __device__ void mathblocks_matrix_swap_rows(
-    double* values,
+    float* values,
     int columns,
     int left,
     int right)
@@ -6112,16 +6112,16 @@ __device__ void mathblocks_matrix_swap_rows(
 #line 119 "MatrixModule.cs"
             {
 #line 120 "MatrixModule.cs"
-                double temporary = (values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, columns), column)];
+                float temporary = (values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, columns), column)];
 #line 121 "MatrixModule.cs"
 #line 121 "MatrixModule.cs"
-                double* csharp2cuda_temp_1 = &((values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, columns), column)]);
+                float* csharp2cuda_temp_1 = &((values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(left, columns), column)]);
 #line 121 "MatrixModule.cs"
-                double csharp2cuda_temp_2 = (values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(right, columns), column)];
+                float csharp2cuda_temp_2 = (values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(right, columns), column)];
                 (*(csharp2cuda_temp_1) = csharp2cuda_temp_2);
 #line 122 "MatrixModule.cs"
 #line 122 "MatrixModule.cs"
-                double* csharp2cuda_temp_3 = &((values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(right, columns), column)]);
+                float* csharp2cuda_temp_3 = &((values)[csharp2cuda_i32_add(csharp2cuda_i32_mul(right, columns), column)]);
                 (*(csharp2cuda_temp_3) = temporary);
             }
 #line 118 "MatrixModule.cs"
@@ -6133,11 +6133,11 @@ __device__ void mathblocks_matrix_swap_rows(
 
 #line 306 "MatrixModule.cs"
 __device__ bool mathblocks_matrix_symmetric_eigenvalues(
-    const double* source,
+    const float* source,
     int size,
-    double* work,
-    double* eigenvalues,
-    double* buffer)
+    float* work,
+    float* eigenvalues,
+    float* buffer)
 #line 313 "MatrixModule.cs"
 {
 #line 314 "MatrixModule.cs"
@@ -6161,7 +6161,7 @@ __device__ bool mathblocks_matrix_symmetric_eigenvalues(
 #line 322 "MatrixModule.cs"
                 int pivot_column = 0;
 #line 323 "MatrixModule.cs"
-                double largest = 0.0;
+                float largest = 0.0f;
 #line 324 "MatrixModule.cs"
                 {
 #line 324 "MatrixModule.cs"
@@ -6183,9 +6183,9 @@ __device__ bool mathblocks_matrix_symmetric_eigenvalues(
 #line 327 "MatrixModule.cs"
                                     {
 #line 328 "MatrixModule.cs"
-                                        double csharp2cuda_temp_3 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
+                                        float csharp2cuda_temp_3 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
 #line 328 "MatrixModule.cs"
-                                        double magnitude = fabs(csharp2cuda_temp_3);
+                                        float magnitude = fabsf(csharp2cuda_temp_3);
 #line 329 "MatrixModule.cs"
                                         if (((magnitude) <= (largest)))
                                         {
@@ -6194,7 +6194,7 @@ __device__ bool mathblocks_matrix_symmetric_eigenvalues(
                                         }
 #line 331 "MatrixModule.cs"
 #line 331 "MatrixModule.cs"
-                                        double* csharp2cuda_temp_4 = &(largest);
+                                        float* csharp2cuda_temp_4 = &(largest);
                                         (*(csharp2cuda_temp_4) = magnitude);
 #line 332 "MatrixModule.cs"
 #line 332 "MatrixModule.cs"
@@ -6218,7 +6218,7 @@ __device__ bool mathblocks_matrix_symmetric_eigenvalues(
                     }
                 }
 #line 336 "MatrixModule.cs"
-                if (((largest) == (0.0)))
+                if (((largest) == (0.0f)))
 #line 337 "MatrixModule.cs"
                 {
 #line 338 "MatrixModule.cs"
@@ -6235,39 +6235,39 @@ __device__ bool mathblocks_matrix_symmetric_eigenvalues(
                     break;
                 }
 #line 344 "MatrixModule.cs"
-                double csharp2cuda_temp_8 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot_column)];
+                float csharp2cuda_temp_8 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot_column)];
 #line 345 "MatrixModule.cs"
-                double csharp2cuda_temp_9 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_column, size), pivot_column)];
+                float csharp2cuda_temp_9 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_column, size), pivot_column)];
 #line 346 "MatrixModule.cs"
-                double csharp2cuda_temp_10 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot_row)];
+                float csharp2cuda_temp_10 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot_row)];
 #line 343 "MatrixModule.cs"
-                double angle = __dmul_rn(0.5, mathblocks_arc_tangent_2(__dmul_rn(2.0, csharp2cuda_temp_8), __dsub_rn(csharp2cuda_temp_9, csharp2cuda_temp_10)));
+                float angle = __fmul_rn(0.5f, mathblocks_arc_tangent_2(__fmul_rn(2.0f, csharp2cuda_temp_8), __fsub_rn(csharp2cuda_temp_9, csharp2cuda_temp_10)));
 #line 347 "MatrixModule.cs"
-                double cosine = mathblocks_cosine(angle);
+                float cosine = mathblocks_cosine(angle);
 #line 348 "MatrixModule.cs"
-                double sine = mathblocks_sine(angle);
+                float sine = mathblocks_sine(angle);
 #line 349 "MatrixModule.cs"
-                double aa = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot_row)];
+                float aa = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot_row)];
 #line 350 "MatrixModule.cs"
-                double bb = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_column, size), pivot_column)];
+                float bb = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_column, size), pivot_column)];
 #line 351 "MatrixModule.cs"
-                double ab = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot_column)];
+                float ab = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot_column)];
 #line 352 "MatrixModule.cs"
 #line 352 "MatrixModule.cs"
-                double* csharp2cuda_temp_11 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot_row)]);
-                (*(csharp2cuda_temp_11) = __dadd_rn(__dsub_rn(__dmul_rn(__dmul_rn(cosine, cosine), aa), __dmul_rn(__dmul_rn(__dmul_rn(2.0, sine), cosine), ab)), __dmul_rn(__dmul_rn(sine, sine), bb)));
+                float* csharp2cuda_temp_11 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot_row)]);
+                (*(csharp2cuda_temp_11) = __fadd_rn(__fsub_rn(__fmul_rn(__fmul_rn(cosine, cosine), aa), __fmul_rn(__fmul_rn(__fmul_rn(2.0f, sine), cosine), ab)), __fmul_rn(__fmul_rn(sine, sine), bb)));
 #line 354 "MatrixModule.cs"
 #line 354 "MatrixModule.cs"
-                double* csharp2cuda_temp_12 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_column, size), pivot_column)]);
-                (*(csharp2cuda_temp_12) = __dadd_rn(__dadd_rn(__dmul_rn(__dmul_rn(sine, sine), aa), __dmul_rn(__dmul_rn(__dmul_rn(2.0, sine), cosine), ab)), __dmul_rn(__dmul_rn(cosine, cosine), bb)));
+                float* csharp2cuda_temp_12 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_column, size), pivot_column)]);
+                (*(csharp2cuda_temp_12) = __fadd_rn(__fadd_rn(__fmul_rn(__fmul_rn(sine, sine), aa), __fmul_rn(__fmul_rn(__fmul_rn(2.0f, sine), cosine), ab)), __fmul_rn(__fmul_rn(cosine, cosine), bb)));
 #line 356 "MatrixModule.cs"
 #line 356 "MatrixModule.cs"
-                double* csharp2cuda_temp_13 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot_column)]);
-                (*(csharp2cuda_temp_13) = 0.0);
+                float* csharp2cuda_temp_13 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), pivot_column)]);
+                (*(csharp2cuda_temp_13) = 0.0f);
 #line 357 "MatrixModule.cs"
 #line 357 "MatrixModule.cs"
-                double* csharp2cuda_temp_14 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_column, size), pivot_row)]);
-                (*(csharp2cuda_temp_14) = 0.0);
+                float* csharp2cuda_temp_14 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_column, size), pivot_row)]);
+                (*(csharp2cuda_temp_14) = 0.0f);
 #line 358 "MatrixModule.cs"
                 {
 #line 358 "MatrixModule.cs"
@@ -6298,28 +6298,28 @@ __device__ bool mathblocks_matrix_symmetric_eigenvalues(
                                 goto csharp2cuda_for_continue_2;
                             }
 #line 362 "MatrixModule.cs"
-                            double first = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(other, size), pivot_row)];
+                            float first = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(other, size), pivot_row)];
 #line 363 "MatrixModule.cs"
-                            double second = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(other, size), pivot_column)];
+                            float second = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(other, size), pivot_column)];
 #line 364 "MatrixModule.cs"
-                            double first_value = __dsub_rn(__dmul_rn(cosine, first), __dmul_rn(sine, second));
+                            float first_value = __fsub_rn(__fmul_rn(cosine, first), __fmul_rn(sine, second));
 #line 365 "MatrixModule.cs"
-                            double second_value = __dadd_rn(__dmul_rn(sine, first), __dmul_rn(cosine, second));
+                            float second_value = __fadd_rn(__fmul_rn(sine, first), __fmul_rn(cosine, second));
 #line 366 "MatrixModule.cs"
 #line 366 "MatrixModule.cs"
-                            double* csharp2cuda_temp_17 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(other, size), pivot_row)]);
+                            float* csharp2cuda_temp_17 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(other, size), pivot_row)]);
                             (*(csharp2cuda_temp_17) = first_value);
 #line 367 "MatrixModule.cs"
 #line 367 "MatrixModule.cs"
-                            double* csharp2cuda_temp_18 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), other)]);
+                            float* csharp2cuda_temp_18 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, size), other)]);
                             (*(csharp2cuda_temp_18) = first_value);
 #line 368 "MatrixModule.cs"
 #line 368 "MatrixModule.cs"
-                            double* csharp2cuda_temp_19 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(other, size), pivot_column)]);
+                            float* csharp2cuda_temp_19 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(other, size), pivot_column)]);
                             (*(csharp2cuda_temp_19) = second_value);
 #line 369 "MatrixModule.cs"
 #line 369 "MatrixModule.cs"
-                            double* csharp2cuda_temp_20 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_column, size), other)]);
+                            float* csharp2cuda_temp_20 = &((work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_column, size), other)]);
                             (*(csharp2cuda_temp_20) = second_value);
                         }
                         csharp2cuda_for_continue_2:
@@ -6344,9 +6344,9 @@ __device__ bool mathblocks_matrix_symmetric_eigenvalues(
                 break;
 #line 373 "MatrixModule.cs"
 #line 373 "MatrixModule.cs"
-            double* csharp2cuda_temp_22 = &((eigenvalues)[index]);
+            float* csharp2cuda_temp_22 = &((eigenvalues)[index]);
 #line 373 "MatrixModule.cs"
-            double csharp2cuda_temp_23 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)];
+            float csharp2cuda_temp_23 = (work)[csharp2cuda_i32_add(csharp2cuda_i32_mul(index, size), index)];
             (*(csharp2cuda_temp_22) = csharp2cuda_temp_23);
 #line 372 "MatrixModule.cs"
             int* csharp2cuda_temp_21 = &(index);
@@ -6354,7 +6354,7 @@ __device__ bool mathblocks_matrix_symmetric_eigenvalues(
         }
     }
 #line 375 "MatrixModule.cs"
-    double* sorted = mathblocks_stable_merge_sort(eigenvalues, buffer, size, false);
+    float* sorted = mathblocks_stable_merge_sort(eigenvalues, buffer, size, false);
 #line 376 "MatrixModule.cs"
     if (((((void*)(sorted))) != (((void*)(eigenvalues)))))
     {
@@ -6368,9 +6368,9 @@ __device__ bool mathblocks_matrix_symmetric_eigenvalues(
                     break;
 #line 378 "MatrixModule.cs"
 #line 378 "MatrixModule.cs"
-                double* csharp2cuda_temp_25 = &((eigenvalues)[index]);
+                float* csharp2cuda_temp_25 = &((eigenvalues)[index]);
 #line 378 "MatrixModule.cs"
-                double csharp2cuda_temp_26 = (sorted)[index];
+                float csharp2cuda_temp_26 = (sorted)[index];
                 (*(csharp2cuda_temp_25) = csharp2cuda_temp_26);
 #line 377 "MatrixModule.cs"
                 int* csharp2cuda_temp_24 = &(index);
@@ -6384,11 +6384,11 @@ __device__ bool mathblocks_matrix_symmetric_eigenvalues(
 
 #line 159 "MatrixModule.cs"
 __device__ bool mathblocks_matrix_try_solve(
-    const double* matrix,
-    const double* right,
+    const float* matrix,
+    const float* right,
     int size,
-    double* augmented,
-    double* solution)
+    float* augmented,
+    float* solution)
 #line 166 "MatrixModule.cs"
 {
 #line 167 "MatrixModule.cs"
@@ -6413,9 +6413,9 @@ __device__ bool mathblocks_matrix_try_solve(
                             break;
 #line 171 "MatrixModule.cs"
 #line 171 "MatrixModule.cs"
-                        double* csharp2cuda_temp_2 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)]);
+                        float* csharp2cuda_temp_2 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)]);
 #line 171 "MatrixModule.cs"
-                        double csharp2cuda_temp_3 = (matrix)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
+                        float csharp2cuda_temp_3 = (matrix)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
                         (*(csharp2cuda_temp_2) = csharp2cuda_temp_3);
 #line 170 "MatrixModule.cs"
                         int* csharp2cuda_temp_1 = &(column);
@@ -6424,9 +6424,9 @@ __device__ bool mathblocks_matrix_try_solve(
                 }
 #line 172 "MatrixModule.cs"
 #line 172 "MatrixModule.cs"
-                double* csharp2cuda_temp_4 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), size)]);
+                float* csharp2cuda_temp_4 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), size)]);
 #line 172 "MatrixModule.cs"
-                double csharp2cuda_temp_5 = (right)[row];
+                float csharp2cuda_temp_5 = (right)[row];
                 (*(csharp2cuda_temp_4) = csharp2cuda_temp_5);
             }
 #line 168 "MatrixModule.cs"
@@ -6456,10 +6456,10 @@ __device__ bool mathblocks_matrix_try_solve(
                             break;
 #line 178 "MatrixModule.cs"
 #line 178 "MatrixModule.cs"
-                        double csharp2cuda_temp_8 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), pivot)];
+                        float csharp2cuda_temp_8 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), pivot)];
 #line 179 "MatrixModule.cs"
-                        double csharp2cuda_temp_9 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, columns), pivot)];
-                        if (((fabs(csharp2cuda_temp_8)) > (fabs(csharp2cuda_temp_9))))
+                        float csharp2cuda_temp_9 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, columns), pivot)];
+                        if (((fabsf(csharp2cuda_temp_8)) > (fabsf(csharp2cuda_temp_9))))
 #line 180 "MatrixModule.cs"
                         {
 #line 181 "MatrixModule.cs"
@@ -6474,8 +6474,8 @@ __device__ bool mathblocks_matrix_try_solve(
                 }
 #line 183 "MatrixModule.cs"
 #line 183 "MatrixModule.cs"
-                double csharp2cuda_temp_11 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, columns), pivot)];
-                if (((csharp2cuda_temp_11) == (0.0)))
+                float csharp2cuda_temp_11 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, columns), pivot)];
+                if (((csharp2cuda_temp_11) == (0.0f)))
                 {
 #line 184 "MatrixModule.cs"
                     return false;
@@ -6487,7 +6487,7 @@ __device__ bool mathblocks_matrix_try_solve(
                     mathblocks_matrix_swap_rows(augmented, columns, pivot, pivot_row);
                 }
 #line 187 "MatrixModule.cs"
-                double diagonal = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, columns), pivot)];
+                float diagonal = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, columns), pivot)];
 #line 188 "MatrixModule.cs"
                 {
 #line 188 "MatrixModule.cs"
@@ -6498,10 +6498,10 @@ __device__ bool mathblocks_matrix_try_solve(
                             break;
 #line 189 "MatrixModule.cs"
 #line 189 "MatrixModule.cs"
-                        double* csharp2cuda_temp_13 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, columns), column)]);
+                        float* csharp2cuda_temp_13 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, columns), column)]);
 #line 189 "MatrixModule.cs"
-                        double csharp2cuda_temp_14 = *(csharp2cuda_temp_13);
-                        (*(csharp2cuda_temp_13) = __ddiv_rn(csharp2cuda_temp_14, diagonal));
+                        float csharp2cuda_temp_14 = *(csharp2cuda_temp_13);
+                        (*(csharp2cuda_temp_13) = __fdiv_rn(csharp2cuda_temp_14, diagonal));
 #line 188 "MatrixModule.cs"
                         int* csharp2cuda_temp_12 = &(column);
                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_12));
@@ -6524,7 +6524,7 @@ __device__ bool mathblocks_matrix_try_solve(
                                 goto csharp2cuda_for_continue_5;
                             }
 #line 194 "MatrixModule.cs"
-                            double scale = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), pivot)];
+                            float scale = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), pivot)];
 #line 195 "MatrixModule.cs"
                             {
 #line 195 "MatrixModule.cs"
@@ -6535,12 +6535,12 @@ __device__ bool mathblocks_matrix_try_solve(
                                         break;
 #line 196 "MatrixModule.cs"
 #line 196 "MatrixModule.cs"
-                                    double* csharp2cuda_temp_17 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)]);
+                                    float* csharp2cuda_temp_17 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)]);
 #line 196 "MatrixModule.cs"
-                                    double csharp2cuda_temp_18 = *(csharp2cuda_temp_17);
+                                    float csharp2cuda_temp_18 = *(csharp2cuda_temp_17);
 #line 197 "MatrixModule.cs"
-                                    double csharp2cuda_temp_19 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, columns), column)];
-                                    (*(csharp2cuda_temp_17) = __dsub_rn(csharp2cuda_temp_18, __dmul_rn(scale, csharp2cuda_temp_19)));
+                                    float csharp2cuda_temp_19 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, columns), column)];
+                                    (*(csharp2cuda_temp_17) = __fsub_rn(csharp2cuda_temp_18, __fmul_rn(scale, csharp2cuda_temp_19)));
 #line 195 "MatrixModule.cs"
                                     int* csharp2cuda_temp_16 = &(column);
                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_16));
@@ -6571,13 +6571,13 @@ __device__ bool mathblocks_matrix_try_solve(
             {
 #line 202 "MatrixModule.cs"
 #line 202 "MatrixModule.cs"
-                double* csharp2cuda_temp_21 = &((solution)[row]);
+                float* csharp2cuda_temp_21 = &((solution)[row]);
 #line 202 "MatrixModule.cs"
-                double csharp2cuda_temp_22 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), size)];
+                float csharp2cuda_temp_22 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), size)];
                 (*(csharp2cuda_temp_21) = csharp2cuda_temp_22);
 #line 203 "MatrixModule.cs"
 #line 203 "MatrixModule.cs"
-                double csharp2cuda_temp_23 = (solution)[row];
+                float csharp2cuda_temp_23 = (solution)[row];
                 if ((!(isfinite(csharp2cuda_temp_23))))
                 {
 #line 204 "MatrixModule.cs"
@@ -6595,11 +6595,11 @@ __device__ bool mathblocks_matrix_try_solve(
 
 #line 209 "MatrixModule.cs"
 __device__ bool mathblocks_matrix_try_solve_basis(
-    const double* matrix,
+    const float* matrix,
     int size,
     int basis,
-    double* augmented,
-    double* solution)
+    float* augmented,
+    float* solution)
 #line 216 "MatrixModule.cs"
 {
 #line 217 "MatrixModule.cs"
@@ -6624,9 +6624,9 @@ __device__ bool mathblocks_matrix_try_solve_basis(
                             break;
 #line 221 "MatrixModule.cs"
 #line 221 "MatrixModule.cs"
-                        double* csharp2cuda_temp_2 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)]);
+                        float* csharp2cuda_temp_2 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)]);
 #line 221 "MatrixModule.cs"
-                        double csharp2cuda_temp_3 = (matrix)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
+                        float csharp2cuda_temp_3 = (matrix)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, size), column)];
                         (*(csharp2cuda_temp_2) = csharp2cuda_temp_3);
 #line 220 "MatrixModule.cs"
                         int* csharp2cuda_temp_1 = &(column);
@@ -6635,19 +6635,19 @@ __device__ bool mathblocks_matrix_try_solve_basis(
                 }
 #line 222 "MatrixModule.cs"
 #line 222 "MatrixModule.cs"
-                double* csharp2cuda_temp_4 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), size)]);
+                float* csharp2cuda_temp_4 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), size)]);
 #line 222 "MatrixModule.cs"
-                double csharp2cuda_temp_5;
+                float csharp2cuda_temp_5;
 #line 222 "MatrixModule.cs"
                 if (((row) == (basis)))
                 {
 #line 222 "MatrixModule.cs"
-                    csharp2cuda_temp_5 = 1.0;
+                    csharp2cuda_temp_5 = 1.0f;
                 }
                 else
                 {
 #line 222 "MatrixModule.cs"
-                    csharp2cuda_temp_5 = 0.0;
+                    csharp2cuda_temp_5 = 0.0f;
                 }
                 (*(csharp2cuda_temp_4) = csharp2cuda_temp_5);
             }
@@ -6678,10 +6678,10 @@ __device__ bool mathblocks_matrix_try_solve_basis(
                             break;
 #line 228 "MatrixModule.cs"
 #line 228 "MatrixModule.cs"
-                        double csharp2cuda_temp_8 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), pivot)];
+                        float csharp2cuda_temp_8 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), pivot)];
 #line 229 "MatrixModule.cs"
-                        double csharp2cuda_temp_9 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, columns), pivot)];
-                        if (((fabs(csharp2cuda_temp_8)) > (fabs(csharp2cuda_temp_9))))
+                        float csharp2cuda_temp_9 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, columns), pivot)];
+                        if (((fabsf(csharp2cuda_temp_8)) > (fabsf(csharp2cuda_temp_9))))
 #line 230 "MatrixModule.cs"
                         {
 #line 231 "MatrixModule.cs"
@@ -6696,8 +6696,8 @@ __device__ bool mathblocks_matrix_try_solve_basis(
                 }
 #line 233 "MatrixModule.cs"
 #line 233 "MatrixModule.cs"
-                double csharp2cuda_temp_11 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, columns), pivot)];
-                if (((csharp2cuda_temp_11) == (0.0)))
+                float csharp2cuda_temp_11 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot_row, columns), pivot)];
+                if (((csharp2cuda_temp_11) == (0.0f)))
                 {
 #line 234 "MatrixModule.cs"
                     return false;
@@ -6709,7 +6709,7 @@ __device__ bool mathblocks_matrix_try_solve_basis(
                     mathblocks_matrix_swap_rows(augmented, columns, pivot, pivot_row);
                 }
 #line 237 "MatrixModule.cs"
-                double diagonal = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, columns), pivot)];
+                float diagonal = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, columns), pivot)];
 #line 238 "MatrixModule.cs"
                 {
 #line 238 "MatrixModule.cs"
@@ -6720,10 +6720,10 @@ __device__ bool mathblocks_matrix_try_solve_basis(
                             break;
 #line 239 "MatrixModule.cs"
 #line 239 "MatrixModule.cs"
-                        double* csharp2cuda_temp_13 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, columns), column)]);
+                        float* csharp2cuda_temp_13 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, columns), column)]);
 #line 239 "MatrixModule.cs"
-                        double csharp2cuda_temp_14 = *(csharp2cuda_temp_13);
-                        (*(csharp2cuda_temp_13) = __ddiv_rn(csharp2cuda_temp_14, diagonal));
+                        float csharp2cuda_temp_14 = *(csharp2cuda_temp_13);
+                        (*(csharp2cuda_temp_13) = __fdiv_rn(csharp2cuda_temp_14, diagonal));
 #line 238 "MatrixModule.cs"
                         int* csharp2cuda_temp_12 = &(column);
                         csharp2cuda_i32_post_increment(*(csharp2cuda_temp_12));
@@ -6746,7 +6746,7 @@ __device__ bool mathblocks_matrix_try_solve_basis(
                                 goto csharp2cuda_for_continue_5;
                             }
 #line 244 "MatrixModule.cs"
-                            double scale = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), pivot)];
+                            float scale = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), pivot)];
 #line 245 "MatrixModule.cs"
                             {
 #line 245 "MatrixModule.cs"
@@ -6757,12 +6757,12 @@ __device__ bool mathblocks_matrix_try_solve_basis(
                                         break;
 #line 246 "MatrixModule.cs"
 #line 246 "MatrixModule.cs"
-                                    double* csharp2cuda_temp_17 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)]);
+                                    float* csharp2cuda_temp_17 = &((augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), column)]);
 #line 246 "MatrixModule.cs"
-                                    double csharp2cuda_temp_18 = *(csharp2cuda_temp_17);
+                                    float csharp2cuda_temp_18 = *(csharp2cuda_temp_17);
 #line 247 "MatrixModule.cs"
-                                    double csharp2cuda_temp_19 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, columns), column)];
-                                    (*(csharp2cuda_temp_17) = __dsub_rn(csharp2cuda_temp_18, __dmul_rn(scale, csharp2cuda_temp_19)));
+                                    float csharp2cuda_temp_19 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(pivot, columns), column)];
+                                    (*(csharp2cuda_temp_17) = __fsub_rn(csharp2cuda_temp_18, __fmul_rn(scale, csharp2cuda_temp_19)));
 #line 245 "MatrixModule.cs"
                                     int* csharp2cuda_temp_16 = &(column);
                                     csharp2cuda_i32_post_increment(*(csharp2cuda_temp_16));
@@ -6793,13 +6793,13 @@ __device__ bool mathblocks_matrix_try_solve_basis(
             {
 #line 252 "MatrixModule.cs"
 #line 252 "MatrixModule.cs"
-                double* csharp2cuda_temp_21 = &((solution)[row]);
+                float* csharp2cuda_temp_21 = &((solution)[row]);
 #line 252 "MatrixModule.cs"
-                double csharp2cuda_temp_22 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), size)];
+                float csharp2cuda_temp_22 = (augmented)[csharp2cuda_i32_add(csharp2cuda_i32_mul(row, columns), size)];
                 (*(csharp2cuda_temp_21) = csharp2cuda_temp_22);
 #line 253 "MatrixModule.cs"
 #line 253 "MatrixModule.cs"
-                double csharp2cuda_temp_23 = (solution)[row];
+                float csharp2cuda_temp_23 = (solution)[row];
                 if ((!(isfinite(csharp2cuda_temp_23))))
                 {
 #line 254 "MatrixModule.cs"
