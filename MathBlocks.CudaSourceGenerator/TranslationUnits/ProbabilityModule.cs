@@ -431,20 +431,20 @@ internal static unsafe class ProbabilityModule
             }
             else if (opcode == 25)
             {
-                // The sum of terms 0..count in index order. A term whose exponent is below -800 is exactly +0.0
-                // (the exponential returns 0.0 below -745.13), and adding +0.0 leaves the sum unchanged, so those
+                // The sum of terms 0..count in index order. A term whose exponent is below -104 is exactly +0.0
+                // (the exponential returns 0.0 below -103.98), and adding +0.0 leaves the sum unchanged, so those
                 // terms are skipped: the exponent rises with the index up to the rate and falls after it.
                 float log_rate = mathblocks_natural_logarithm(rate);
                 int peak = rate < count ? (int)rate : count;
                 int first = 0;
-                bool reached = -rate + peak * log_rate - mathblocks_probability_log_gamma(peak + 1.0f) >= -800.0f;
+                bool reached = -rate + peak * log_rate - mathblocks_probability_log_gamma(peak + 1.0f) >= -104.0f;
                 if (reached)
                 {
                     int high = peak;
                     while (first < high)
                     {
                         int middle = first + (high - first) / 2;
-                        if (-rate + middle * log_rate - mathblocks_probability_log_gamma(middle + 1.0f) >= -800.0f)
+                        if (-rate + middle * log_rate - mathblocks_probability_log_gamma(middle + 1.0f) >= -104.0f)
                             high = middle;
                         else
                             first = middle + 1;
@@ -452,7 +452,7 @@ internal static unsafe class ProbabilityModule
                     for (int index = first; index <= count; index++)
                     {
                         float exponent = -rate + index * log_rate - mathblocks_probability_log_gamma(index + 1.0f);
-                        if (index > rate && exponent < -800.0f)
+                        if (index > rate && exponent < -104.0f)
                             break;
                         // Past the peak the terms only fall, so once one leaves the sum unchanged every later one does too.
                         float next_sum = sum + mathblocks_exponential(exponent);

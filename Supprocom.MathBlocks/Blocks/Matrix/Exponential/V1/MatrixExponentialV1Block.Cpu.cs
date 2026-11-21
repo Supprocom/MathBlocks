@@ -29,7 +29,7 @@ public static partial class MathBlockAdvanced
         var trace = 0f;
         for (var index = 0; index < matrix.Rows; index++)
             trace += matrix[index, index];
-        if (trace / matrix.Rows > 709.782712893383973096f + 0.5f * (Math.Log2(matrix.Rows) * 0.693147180559945309417f))
+        if (trace / matrix.Rows > 88.72283905206835f + 0.5f * (Math.Log2(matrix.Rows) * 0.693147180559945309417f))
             return new MathBlockMatrix(matrix.Rows, matrix.Columns, MathBlockCollectionPrimitives.Repeat(float.NaN, matrix.Rows * matrix.Columns), true);
         var scaling = norm > 1f ? Math.Max(0, (int)Math.Ceiling(Math.Log2(norm))) : 0;
         var scaled = MathBlockLinearAlgebra.Scale(matrix, Math.Pow(2f, -scaling));

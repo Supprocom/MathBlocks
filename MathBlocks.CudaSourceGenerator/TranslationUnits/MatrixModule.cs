@@ -918,7 +918,7 @@ internal static unsafe class MatrixModule
             float trace = 0.0f;
             for (int index = 0; index < size; index++)
                 trace += a[index * size + index];
-            if (trace / size > 709.782712893383973096f + 0.5f * (mathblocks_binary_logarithm((float)size) * 0.693147180559945309417f))
+            if (trace / size > 88.72283905206835f + 0.5f * (mathblocks_binary_logarithm((float)size) * 0.693147180559945309417f))
             {
                 output->valid = 0;
                 return;
