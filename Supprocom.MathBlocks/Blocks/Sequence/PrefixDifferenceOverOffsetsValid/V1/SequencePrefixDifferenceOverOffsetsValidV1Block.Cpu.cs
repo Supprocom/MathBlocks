@@ -11,7 +11,9 @@ public static partial class MathBlockVectorMath
             inputs[2].AsVector(),
             inputs[3].AsScalar(),
             inputs[4].AsScalar(),
-            0d);
+            0d,
+            false,
+            true);
         return rows.Reason is { } reason
             ? MathBlockOperationFactory.Invalid(PrefixDifferenceValidityType, inputs, reason)
             : MathBlockValue.BooleanVector(rows.Valid, true);

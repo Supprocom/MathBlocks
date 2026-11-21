@@ -14,13 +14,16 @@ public static partial class MathBlockVectorMath
     // rows are empty, when the whole call is invalid.
     internal readonly record struct PrefixDifferenceRows(double[] Values, bool[] Valid, string? Reason);
 
+    // The form needs the value rows only and its validity sibling the validity rows only, so each asks for just the rows it reads.
     internal static PrefixDifferenceRows PrefixDifferenceCompute(
         MathBlockVector values,
         MathBlockBooleanVector available,
         MathBlockVector counts,
         double start,
         double end,
-        double fill)
+        double fill,
+        bool wantValues,
+        bool wantValid)
     {
         var count = values.Count;
         if (available.Count != count || counts.Count != count)
@@ -29,71 +32,9 @@ public static partial class MathBlockVectorMath
             return PrefixDifferenceWhole("The start and end offsets must be integers.");
         if (start > end)
             return PrefixDifferenceWhole("The start offset must not exceed the end offset.");
-        for (var row = 0; row < count; row++)
-        {
-            var rowCount = counts[row];
-            if (!double.IsFinite(rowCount) || rowCount < 0d || rowCount != Math.Floor(rowCount))
-                return PrefixDifferenceWhole("Every count must be a non-negative integer.");
-        }
-
-        var segmentStart = new int[count];
-        var segmentEnd = new int[count];
-        var before = new double[count];
-        var after = new double[count];
-        var missingBefore = new int[count];
-        var missingAfter = new int[count];
-        var sum = 0d;
-        var missing = 0;
-        var first = 0;
-        for (var row = 0; row < count; row++)
-        {
-            if (row == 0 || counts[row] == 0d)
-            {
-                first = row;
-                sum = 0d;
-                missing = 0;
-            }
-
-            segmentStart[row] = first;
-            before[row] = sum;
-            missingBefore[row] = missing;
-            if (available[row])
-                sum += values[row];
-            else
-                missing++;
-            after[row] = sum;
-            missingAfter[row] = missing;
-        }
-
-        var last = count;
-        for (var row = count - 1; row >= 0; row--)
-        {
-            segmentEnd[row] = last;
-            if (row == segmentStart[row])
-                last = row;
-        }
-
-        var result = new double[count];
-        var valid = new bool[count];
-        for (var row = 0; row < count; row++)
-        {
-            result[row] = fill;
-            var low = row + start;
-            var high = row + end;
-            if (low < segmentStart[row] || high >= segmentEnd[row])
-                continue;
-            var lowRow = (int)low;
-            var highRow = (int)high;
-            if (missingBefore[lowRow] != missingAfter[highRow])
-                continue;
-            var difference = after[highRow] - before[lowRow];
-            if (!double.IsFinite(difference))
-                continue;
-            result[row] = difference;
-            valid[row] = true;
-        }
-
-        return new PrefixDifferenceRows(result, valid, null);
+        if (!CountsAreValid(counts.Span))
+            return PrefixDifferenceWhole("Every count must be a non-negative integer.");
+        return PrefixDifferenceRowsOf(values.Span, available.Span, counts.Span, start, end, fill, wantValues, wantValid);
     }
 
     // The type of the form (validity false) and of its validity sibling: the series length is the first one any of the three
@@ -130,7 +71,9 @@ public static partial class MathBlockVectorMath
             inputs[2].AsVector(),
             inputs[3].AsScalar(),
             inputs[4].AsScalar(),
-            inputs[5].AsScalar());
+            inputs[5].AsScalar(),
+            true,
+            false);
         return rows.Reason is { } reason
             ? MathBlockOperationFactory.Invalid(PrefixDifferenceFormType, inputs, reason)
             : MathBlockValue.Vector(rows.Values, inputs[0].Type.Unit, true);

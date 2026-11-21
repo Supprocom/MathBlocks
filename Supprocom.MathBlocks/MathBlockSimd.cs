@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 
 namespace Supprocom.MathBlocks;
@@ -111,5 +112,95 @@ internal static class MathBlockSimd
             (Vector256.Create<double>(values[index..]) * multiplier).CopyTo(result[index..]);
         for (; index < result.Length; index++)
             result[index] = values[index] * scalar;
+    }
+
+    // The scaled domain: a double x with |x| below TinyLimit is held as x * 2^1074, which is an integer count of the smallest subnormal (2^-1074). Scaling by a power of two commutes with
+    // a correctly rounded addition or subtraction as long as nothing overflows, and a sum that lands in the subnormal range is exact in both domains, so a sum or difference done on
+    // scaled operands and scaled back gives, bit for bit, the double the unscaled operation gives. In the scaled domain no operand and no result is subnormal (every nonzero value is at
+    // least 1), so the hardware never takes its microcode assist for a subnormal operand or result, which costs more than a hundred cycles per operation on x86. The scaling is done on
+    // the bit pattern (an integer-to-double conversion for a subnormal, an exponent increment for a normal value), never with a multiplication that would itself be subnormal.
+    // Shared by every operation that adds or subtracts doubles of an unknown range; the first user is the prefix difference (MathBlockVectorMath.PrefixDifferenceCompute).
+    internal static readonly double TinyLimit = BitConverter.Int64BitsToDouble((long)(1023 - 900) << 52);
+
+    private const ulong SignBit = 0x8000_0000_0000_0000ul;
+    private const ulong ExponentOne = 1ul << 52;
+    private const ulong ScaleExponent = 1074ul << 52;
+    private const ulong TwoToThe52Bits = 0x4330_0000_0000_0000ul;
+    private const ulong MantissaMask = 0x000F_FFFF_FFFF_FFFFul;
+    private const double TwoToThe52 = 4503599627370496d;
+
+    // True when every element has a magnitude below TinyLimit (a NaN is not below it).
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    internal static bool AllTiny(ReadOnlySpan<double> values)
+    {
+        var index = 0;
+        var limit = TinyLimit;
+        if (UseBlocks && values.Length >= BlockWidth)
+        {
+            var below = Vector256<double>.AllBitsSet;
+            var bound = Vector256.Create(limit);
+            ref var start = ref System.Runtime.InteropServices.MemoryMarshal.GetReference(values);
+            for (; index <= values.Length - BlockWidth; index += BlockWidth)
+                below &= Vector256.LessThan(Vector256.Abs(Vector256.LoadUnsafe(ref start, (nuint)index)), bound);
+            if (below.ExtractMostSignificantBits() != 0b1111u)
+                return false;
+        }
+
+        for (; index < values.Length; index++)
+            if (!(Math.Abs(values[index]) < limit))
+                return false;
+        return true;
+    }
+
+    // x * 2^1074 for |x| < TinyLimit, exactly, with the sign of x (including the sign of a zero).
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static double ScaleUp(double value)
+    {
+        var bits = (ulong)BitConverter.DoubleToInt64Bits(value);
+        var sign = bits & SignBit;
+        var magnitude = bits ^ sign;
+        var scaled = magnitude < ExponentOne
+            ? (double)(long)magnitude
+            : BitConverter.UInt64BitsToDouble(magnitude + ScaleExponent);
+        return BitConverter.UInt64BitsToDouble(BitConverter.DoubleToUInt64Bits(scaled) | sign);
+    }
+
+    // The four lanes of ScaleUp, without a branch: a subnormal lane is 2^52 + m (the bit pattern) less 2^52, which is m exactly.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static Vector256<double> ScaleUp(Vector256<double> value)
+    {
+        var bits = value.AsUInt64();
+        var sign = bits & Vector256.Create(SignBit);
+        var magnitude = bits ^ sign;
+        var subnormal = Vector256.LessThan(magnitude.AsInt64(), Vector256.Create((long)ExponentOne)).AsDouble();
+        var fromSubnormal = (magnitude | Vector256.Create(TwoToThe52Bits)).AsDouble() - Vector256.Create(TwoToThe52);
+        var fromNormal = (magnitude + Vector256.Create(ScaleExponent)).AsDouble();
+        return (Vector256.ConditionalSelect(subnormal, fromSubnormal, fromNormal).AsUInt64() | sign).AsDouble();
+    }
+
+    // value * 2^-1074 for a value that is a finite scaled count (an integer below 2^52 gives a subnormal or zero, anything larger a normal double).
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static double ScaleDown(double value)
+    {
+        var bits = (ulong)BitConverter.DoubleToInt64Bits(value);
+        var sign = bits & SignBit;
+        var magnitude = BitConverter.UInt64BitsToDouble(bits ^ sign);
+        var scaled = magnitude < TwoToThe52
+            ? (ulong)(long)magnitude
+            : BitConverter.DoubleToUInt64Bits(magnitude) - ScaleExponent;
+        return BitConverter.UInt64BitsToDouble(scaled | sign);
+    }
+
+    // The four lanes of ScaleDown: for a lane below 2^52 the low 52 bits of (magnitude + 2^52) hold the integer.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static Vector256<double> ScaleDown(Vector256<double> value)
+    {
+        var bits = value.AsUInt64();
+        var sign = bits & Vector256.Create(SignBit);
+        var magnitude = (bits ^ sign).AsDouble();
+        var large = Vector256.GreaterThanOrEqual(magnitude, Vector256.Create(TwoToThe52)).AsUInt64();
+        var fromInteger = (magnitude + Vector256.Create(TwoToThe52)).AsUInt64() & Vector256.Create(MantissaMask);
+        var fromLarge = magnitude.AsUInt64() - Vector256.Create(ScaleExponent);
+        return (Vector256.ConditionalSelect(large, fromLarge, fromInteger) | sign).AsDouble();
     }
 }
