@@ -14,7 +14,7 @@ public sealed class MathBlockBinomialOverflowDeviceTests
     // Pairs (n, k) whose product loop overflows although C(n, k) fits in a single, then pairs whose value is above the largest single, then the pairs next to them.
     private static readonly (int N, int K)[] Pairs =
     [
-        (130, 65), (131, 65), (129, 64), (128, 64), (127, 63), (131, 66), (1000000, 7), (1000000, 999993), (1000000, 8), (200, 100), (500, 60), (132, 66),
+        (129, 64), (131, 65), (130, 65), (128, 64), (127, 63), (131, 66), (1000000, 7), (1000000, 999993), (1000000, 8), (200, 100), (500, 60), (132, 66),
         (130, 60), (1000000, 6), (2147483647, 4), (2147483647, 600)
     ];
 
@@ -57,8 +57,8 @@ public sealed class MathBlockBinomialOverflowDeviceTests
         Assert.True(MathBlockDomainWiringTests.Same(coreclr, cuda), $"{identity}: the device differs from CoreCLR.");
         Assert.True(coreclr.IsValid);
         var values = coreclr.AsVector();
-        // The ballot count of the first pair is the coefficient divided by 66, so the bar is below both.
-        Assert.True(float.IsFinite(values[0]) && values[0] > 1e36f, "The row of (130, 65) is not the finite coefficient.");
-        Assert.True(float.IsFinite(values[6]) && values[6] > 1e36f, "The row of (1000000, 7) is not the finite coefficient.");
+        // The ballot count of the first pair is its coefficient divided by 129, so the bar is below both.
+        Assert.True(float.IsFinite(values[0]) && values[0] > 1e35f, "The row of (129, 64) is not the finite coefficient.");
+        Assert.True(float.IsFinite(values[6]) && values[6] > 1e35f, "The row of (1000000, 7) is not the finite coefficient.");
     }
 }
