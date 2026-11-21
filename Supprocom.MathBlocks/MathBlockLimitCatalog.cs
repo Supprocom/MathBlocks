@@ -87,27 +87,27 @@ internal static class MathBlockLimitCatalog
         limits.Add(Fixed("cuda.slot.maximum-count", MathBlockLimitDevice.Cuda, int.MaxValue, "elements",
             "rows, columns, count and capacity of a slot are 32-bit ints, so no value holds more than 2,147,483,647 elements"));
         limits.Add(Fixed("cuda.run.size-bytes", MathBlockLimitDevice.Cuda, MathBlockCudaRunLayout.Size, "bytes",
-            "one run descriptor is 16 bytes: start, length and value"));
+            "one run descriptor is 12 bytes: start, length and value"));
         limits.Add(Fixed("cuda.graph-edge.size-bytes", MathBlockLimitDevice.Cuda, MathBlockCudaGraphEdgeLayout.Size, "bytes",
-            "one graph edge descriptor is 16 bytes: from, to and weight"));
+            "one graph edge descriptor is 12 bytes: from, to and weight"));
     }
 
     private static void AddAccumulator(List<MathBlockLimit> limits)
     {
-        limits.Add(Fixed("cuda.window-accurate.accumulator-chunks", MathBlockLimitDevice.Cuda, 141, "words",
-            "141 chunks of 32 bits count units of 2^(-2208 + 32 i), a range of 2^-2208 to 2^2304 that holds the exact sum of the squares of finite doubles (2^-2148 to 2^2048)"));
-        limits.Add(Fixed("cuda.window-accurate.accumulator-words", MathBlockLimitDevice.Cuda, 285, "words",
-            "285 = 141 chunks + 141 read-scratch chunks + 3 bookkeeping words (lowest and highest chunk touched, additions since the last carry)"));
-        limits.Add(Fixed("cuda.window-accurate.variance-accumulator-words", MathBlockLimitDevice.Cuda, 570, "words",
-            "the variance and deviation forms keep two accumulators of 285 words each, whatever the width"));
+        limits.Add(Fixed("cuda.window-accurate.accumulator-chunks", MathBlockLimitDevice.Cuda, 28, "words",
+            "28 chunks of 32 bits count units of 2^(-352 + 32 i), a range of 2^-352 to 2^544 that holds the exact sum of the squares of finite single-precision values (2^-298 to 2^256)"));
+        limits.Add(Fixed("cuda.window-accurate.accumulator-words", MathBlockLimitDevice.Cuda, 59, "words",
+            "59 = 28 chunks + 28 read-scratch chunks + 3 bookkeeping words (lowest and highest chunk touched, additions since the last carry)"));
+        limits.Add(Fixed("cuda.window-accurate.variance-accumulator-words", MathBlockLimitDevice.Cuda, 118, "words",
+            "the variance and deviation forms keep two accumulators of 59 words each, whatever the width"));
         limits.Add(Fixed("cuda.window-accurate.carry-flush-additions", MathBlockLimitDevice.Cuda, 1L << 27, "additions",
-            "each addition puts a piece below 2^33 into a 64-bit chunk, so a carry flush every 2^27 additions keeps every chunk below 2^60 < 2^63"));
+            "each addition puts a piece below 2^32 into a 64-bit chunk, so a carry flush every 2^27 additions keeps every chunk below 2^59 < 2^63"));
     }
 
     private static void AddElementwiseLayout(List<MathBlockLimit> limits)
     {
         limits.Add(Fixed("cuda.elementwise.value-element-bytes", MathBlockLimitDevice.Cuda, Cuda.MathBlockCudaDeviceModule.ElementwiseValueElementBytes, "bytes",
-            "the values form elementwise.<source> writes a double per row at an 8-byte stride in data_pointer; a row that is not computed holds the fill"));
+            "the values form elementwise.<source> writes a single-precision value per row at a 4-byte stride in data_pointer; a row that is not computed holds the fill"));
         limits.Add(Fixed("cuda.elementwise.validity-element-bytes", MathBlockLimitDevice.Cuda, Cuda.MathBlockCudaDeviceModule.ElementwiseValidityElementBytes, "bytes",
             "the validity form elementwise-valid.<source> writes an int32 0 or 1 per row at a 4-byte stride in data_pointer"));
         limits.Add(Fixed("cuda.elementwise.invalid-result-rows", MathBlockLimitDevice.Cuda, 0, "rows",
@@ -140,11 +140,11 @@ internal static class MathBlockLimitCatalog
             limits.Add(new MathBlockLimit(
                 "cuda.window.maximum-width", feature.Identity, MathBlockLimitKind.Derived, MathBlockLimitDevice.Cuda,
                 1, maximum, maximum, "rows", null, ["cuda.block-size"],
-                "the largest width whose scratch doubles x 8 bytes x block size fit int byte offsets, floor((2^31 - 1) / (8 x block size)) doubles per thread; the plan throws above it"));
+                "the largest width whose scratch values x 4 bytes x block size fit int byte offsets, floor((2^31 - 1) / (4 x block size)) values per thread; the plan throws above it"));
         }
     }
 
-    // The width limit of the plan: the scratch doubles of one thread times 8 bytes times the block size must not
+    // The width limit of the plan: the scratch values of one thread times 4 bytes times the block size must not
     // exceed int.MaxValue.
     internal static long MaximumWindowWidth(int source, int blockSize) => WindowCudaBlockCatalog.MaximumWidth(source, blockSize);
 

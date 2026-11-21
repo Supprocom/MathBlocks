@@ -2015,7 +2015,8 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         var bytes = 0;
         for (var index = 0; index < inputTypes.Length; index++)
         {
-            var inputBytes = ResolvePayloadBytes(inputTypes[index].Kind, inputCapacities[index]);
+            // Twice the payload: a reduction's scratch holds one unit of ScratchUnitBytes per element (an order key of 64 bits, for one), not one value.
+            var inputBytes = checked(ResolvePayloadBytes(inputTypes[index].Kind, inputCapacities[index]) * 2);
             if (inputBytes > bytes)
                 bytes = inputBytes;
         }
@@ -2047,7 +2048,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         while (low < high)
         {
             var middle = low + ((high - low + 1) / 2);
-            if (ScratchDoublesOfRows(identity, middle) is { } doubles && doubles <= int.MaxValue / sizeof(float))
+            if (ScratchDoublesOfRows(identity, middle) is { } doubles && doubles <= int.MaxValue / ScratchUnitBytes)
                 low = middle;
             else
                 high = middle - 1;
@@ -2056,9 +2057,13 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         return low;
     }
 
+    // The scratch of a family kernel is counted in units of eight bytes, whatever the size of a value: the kernels keep 64-bit order keys, edge and
+    // run descriptors, integers and values in it, and none of these is larger than the unit its count was written for.
+    private const int ScratchUnitBytes = 8;
+
     private static int ToScratchBytes(string identity, long doubleCount, long rows)
     {
-        var bytes = checked(doubleCount * sizeof(float));
+        var bytes = checked(doubleCount * ScratchUnitBytes);
         if (bytes <= int.MaxValue)
             return (int)bytes;
         throw MaximumScratchRows(identity) is { } maximum
