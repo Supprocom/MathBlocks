@@ -67,7 +67,8 @@ public static partial class MathBlockVectorMath
     internal static long OverflowBandRows;
 
     // The widest span whose rows are decided by adding every valid row's span left to right in vector lanes (four rows per vector, thirty-two rows at a time): the lanes hold
-    // independent rows, each added in the order of the sequential sum, so the answer is the sequential one exactly and costs a few vector additions per row whatever the data.
+    // independent rows, each added in the order of the sequential sum, so the answer is the sequential one exactly and costs a few vector additions per row whatever the values
+    // (thirty-two rows without a valid row among them are passed over).
     private const int LaneWidthLimit = 64;
 
     // Runs of valid rows up to this long are added row by row; longer runs of a wider span are decided from prefix sums.
@@ -123,6 +124,14 @@ public static partial class MathBlockVectorMath
         var row = (int)Math.Min(first, (long)length);
         for (; row + 28L <= lastBlock; row += 32)
         {
+            // Thirty-two rows that the reach and the availability left without a valid row have nothing to decide.
+            ref var block = ref Unsafe.Add(ref flags, row);
+            if ((Unsafe.ReadUnaligned<ulong>(ref block) | Unsafe.ReadUnaligned<ulong>(ref Unsafe.Add(ref block, 8))
+                | Unsafe.ReadUnaligned<ulong>(ref Unsafe.Add(ref block, 16)) | Unsafe.ReadUnaligned<ulong>(ref Unsafe.Add(ref block, 24))) == 0UL)
+            {
+                continue;
+            }
+
             var at = (nuint)(row + (long)start);
             Vector256<double> s0 = default, s1 = default, s2 = default, s3 = default, s4 = default, s5 = default, s6 = default, s7 = default;
             for (var step = 0; step < width; step++, at++)
