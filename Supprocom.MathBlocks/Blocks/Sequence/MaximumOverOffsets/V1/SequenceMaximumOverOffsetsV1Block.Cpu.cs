@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics;
 
 namespace Supprocom.MathBlocks;
 
@@ -35,8 +36,9 @@ public static partial class MathBlockVectorMath
     // MaximumOverOffsetsRow, decided by OffsetValidityRows) take the maximum of their span from two block tables at a cost per row that does not
     // depend on the data or the width of the span (van Herk and Gil-Werman): the spans are cut into blocks of the span's width, and a span is
     // the end of one block and the start of the next, so its maximum is the larger of the maximum from its first row to the end of its
-    // block and the maximum from the start of the next block to its last row. Math.Max is exact for the values of a vector (they are never NaN)
-    // and does not depend on the order it is applied in, so the result has the bits of the left to right maximum, a negative zero included.
+    // block and the maximum from the start of the next block to its last row. For values that are not NaN Math.Max is exact and does not depend on the
+    // order it is applied in, so the result has the bits of the left to right maximum, a negative zero included. A vector never holds a NaN, but a series that does
+    // (a direct call) takes the scan of MaximumOverOffsetsRow, which decides which NaN payload the row keeps.
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     internal static void MaximumOverOffsetsValues(
         ReadOnlySpan<double> x,
@@ -49,6 +51,17 @@ public static partial class MathBlockVectorMath
         Span<bool> rowValid)
     {
         var length = values.Length;
+        if (ContainsNaN(x))
+        {
+            for (var row = 0; row < length; row++)
+            {
+                rowValid[row] = MaximumOverOffsetsRow(x, xValid, counts, row, start, end, out var value);
+                values[row] = rowValid[row] ? value : fill;
+            }
+
+            return;
+        }
+
         OffsetValidityRows(x, xValid, counts, start, end, false, rowValid);
         var width = (long)end - start + 1;
         if (width > length)
@@ -91,5 +104,27 @@ public static partial class MathBlockVectorMath
             ArrayPool<double>.Shared.Return(fromStart);
             ArrayPool<double>.Shared.Return(toEnd);
         }
+    }
+
+    private static bool ContainsNaN(ReadOnlySpan<double> values)
+    {
+        var index = 0;
+        if (MathBlockSimd.UseBlocks && values.Length >= MathBlockSimd.BlockWidth)
+        {
+            for (; index <= values.Length - MathBlockSimd.BlockWidth; index += MathBlockSimd.BlockWidth)
+            {
+                var block = Vector256.Create<double>(values[index..]);
+                if (!Vector256.EqualsAll(block, block))
+                    return true;
+            }
+        }
+
+        for (; index < values.Length; index++)
+        {
+            if (double.IsNaN(values[index]))
+                return true;
+        }
+
+        return false;
     }
 }
