@@ -153,7 +153,7 @@ public sealed class PrefixDifferenceEquivalenceTests
         ProofBar.Fail("Scaled domain", failures);
     }
 
-    /// <summary>Verifies the calls that are invalid as a whole: unequal lengths, a fractional or infinite offset, start above end, and a count that is negative or not an integer.</summary>
+    /// <summary>Verifies the calls that are invalid as a whole (a fractional or infinite offset, start above end, a count that is negative or not an integer) and that inputs of unequal lengths are refused by the type rules, as for the other offset operations.</summary>
     [Fact]
     public void CallsInvalidAsAWholeStayInvalid()
     {
@@ -163,10 +163,20 @@ public sealed class PrefixDifferenceEquivalenceTests
         var form = MathBlockCudaDeviceModule.GetOperation(Form);
         var valid = MathBlockCudaDeviceModule.GetOperation(Valid);
         Assert.True(form.EvaluateCoreCLR(series, flags, counts, MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d), MathBlockValue.Scalar(-1d)).IsValid);
-        MathBlockValue[][] broken =
+        MathBlockValue[][] unequal =
         [
             [series, MathBlockValue.BooleanVector([true, true]), counts, MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d)],
-            [series, flags, MathBlockValue.Vector([0d, 1d]), MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d)],
+            [series, flags, MathBlockValue.Vector([0d, 1d]), MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d)]
+        ];
+        for (var index = 0; index < unequal.Length; index++)
+        {
+            var inputs = unequal[index];
+            Assert.Throws<InvalidOperationException>(() => valid.EvaluateCoreCLR(inputs));
+            Assert.Throws<InvalidOperationException>(() => form.EvaluateCoreCLR([.. inputs, MathBlockValue.Scalar(-1d)]));
+        }
+
+        MathBlockValue[][] broken =
+        [
             [series, flags, counts, MathBlockValue.Scalar(0.5d), MathBlockValue.Scalar(1d)],
             [series, flags, counts, MathBlockValue.Scalar(0d), MathBlockValue.Scalar(double.PositiveInfinity)],
             [series, flags, counts, MathBlockValue.Scalar(2d), MathBlockValue.Scalar(1d)],
@@ -184,15 +194,21 @@ public sealed class PrefixDifferenceEquivalenceTests
     private static double MathBlockSimdLimit() => BitConverter.Int64BitsToDouble((long)(1023 - 900) << 52);
 
     // A value of the scale: ordinary random, or now and then an exact zero, a negative zero, the previous kind of edge, or a value ten magnitudes up (a large one among small ones).
-    private static double Value(Random random, double scale, int round) =>
-        random.Next(0, 12) switch
+    private static double Value(Random random, double scale, int round)
+    {
+        var ordinary = (random.NextDouble() * 2d - 1d) * scale;
+        var value = random.Next(0, 12) switch
         {
             0 => 0d,
             1 => -0d,
             2 => scale * 1e6d * (random.NextDouble() - 0.5d),
             3 when round % 7 == 0 => scale * 1e30d * (random.NextDouble() - 0.5d),
-            _ => (random.NextDouble() * 2d - 1d) * scale
+            _ => ordinary
         };
+
+        // A vector holds finite values only: at the largest scales the wider kinds overflow, and the ordinary value of the scale stands in.
+        return double.IsFinite(value) ? value : ordinary;
+    }
 
     // Counts of kind 0: segments cut at random zeros; 1: arbitrary non-negative integers with many zeros; 2: one segment.
     private static double[] RandomCounts(Random random, int length, int kind)

@@ -259,6 +259,7 @@ public sealed class MaximumOverOffsetsKernelTests
     }
 
     // The scan that the van Herk kernel replaced: the maximum of the span of each reachable row from negative infinity by Math.Max, the row invalid at the first unavailable row.
+    // The first NaN of a span keeps its bits (Larger): Math.Max leaves the bits of the NaN it returns to the runtime, so the scan's rule is written out.
     private static void OldScan(double[] x, bool[] available, double[] counts, int start, int end, double[] values, bool[] valid)
     {
         for (var row = 0; row < x.Length; row++)
@@ -270,13 +271,15 @@ public sealed class MaximumOverOffsetsKernelTests
                 if (!available[(int)index])
                     ok = false;
                 else
-                    maximum = Math.Max(maximum, x[(int)index]);
+                    maximum = Larger(maximum, x[(int)index]);
             }
 
             valid[row] = ok;
             values[row] = ok ? maximum : Fill;
         }
     }
+
+    private static double Larger(double maximum, double value) => double.IsNaN(maximum) ? maximum : double.IsNaN(value) ? value : Math.Max(maximum, value);
 
     private static bool Reachable(double[] counts, int row, int start, int end)
     {
