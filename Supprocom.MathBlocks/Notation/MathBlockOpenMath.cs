@@ -428,7 +428,7 @@ public static partial class MathBlockOpenMath
         writer.WriteStartElement("OMF", NamespaceUri);
         writer.WriteAttributeString(
             "hex",
-            BitConverter.SingleToUInt32Bits(value).ToString("X16", CultureInfo.InvariantCulture));
+            BitConverter.DoubleToUInt64Bits(value).ToString("X16", CultureInfo.InvariantCulture));
         writer.WriteFullEndElement();
     }
 

@@ -1373,7 +1373,8 @@ public static partial class MathBlockFormulaInterchange
     {
         if (!float.IsFinite(value))
             throw new InvalidOperationException("A formula float must be finite.");
-        var bits = BitConverter.SingleToUInt32Bits(value)
+        // The interchange text holds a binary64 pattern: the single is widened, which is exact.
+        var bits = BitConverter.DoubleToUInt64Bits(value)
             .ToString("X16", CultureInfo.InvariantCulture);
         if (format == MathBlockFormulaFormat.OpenMath)
         {

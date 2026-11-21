@@ -8,11 +8,11 @@ namespace Supprocom.MathBlocks;
 //
 // - sum: RN(S1), the exact window sum correctly rounded (ties to even).
 // - mean: RN(S1 / w), the exact window sum divided by w and correctly rounded, by exact long division.
-// - variance: S1 and S2 rounded to double-doubles (h = RN(S), l = RN(S - h)), M = S2 - S1^2 / w evaluated in
-//   double-double and rounded once, then M / w (population) or M / (w - 1) (sample).
+// - variance: S1 and S2 rounded to high-low pairs of singles (h = RN(S), l = RN(S - h)), M = S2 - S1^2 / w evaluated in
+//   that pair arithmetic and rounded once, then M / w (population) or M / (w - 1) (sample).
 // - standard deviation: the square root of that variance.
-// A window whose values all compare equal has variance +0 exactly. The double-double steps don't cancel to 0 on
-// their own (w x^2 needs up to 108 bits), so a sliding count of value changes identifies those windows. M at or below
+// A window whose values all compare equal has variance +0 exactly. The pair steps don't cancel to 0 on
+// their own (w x^2 needs up to 50 bits), so a sliding count of value changes identifies those windows. M at or below
 // 0, possible only when kappa > 1 / (13 u^2), is set to 0.
 //
 // No shift is applied. With exact sums the only cancellation left is in S2 - S1^2 / w, which kappa below measures;
@@ -20,20 +20,20 @@ namespace Supprocom.MathBlocks;
 // would need exact products of the shift with S1.
 //
 // Rows are computed when the result is finite, so a window whose sum overflows holds the fill. The sample forms need
-// w >= 2. The double-double steps keep their accuracy only while every value they round is 0 or at least 2^-968, so
+// w >= 2. The pair steps keep their accuracy only while every value they round is 0 or at least 2^-101, so
 // that its low part and its Dekker error term are normal numbers, and every value Dekker's split takes is at most
-// 2^996, so that the split doesn't overflow. A variance or deviation row is not computed unless S2 and S1^2 are 0
-// (exactly, not by rounding) or within [2^-968, the largest double], S1^2 / w is 0 or within [2^-968, 2^996] and M
-// is 0 or at least 2^-968: roughly, unless the window's values lie between 1e-146 and 1e149 in magnitude. Outside the range an overflow
+// 2^115, so that the split doesn't overflow. A variance or deviation row is not computed unless S2 and S1^2 are 0
+// (exactly, not by rounding) or within [2^-101, the largest single], S1^2 / w is 0 or within [2^-101, 2^115] and M
+// is 0 or at least 2^-101: roughly, unless the window's values lie between 4e-16 and 2e17 in magnitude. Outside the range an overflow
 // already gives NaN, but an underflow would give a finite, inaccurate value. The check is a few comparisons per row.
 //
-// Guarantees (u = 2^-53; v the exact window variance, population or sample; m the exact window mean;
+// Guarantees (u = 2^-24; v the exact window variance, population or sample; m the exact window mean;
 // kappa = 1 + m^2 / v_population):
 // - sum and mean: correctly rounded.
 // - variance: v = 0 gives +0; otherwise |v^ - v| <= 2u v + 18 u^2 kappa v. The u^2 kappa terms, relative to
-//   S2 = w v_population kappa: 1 from rounding S2 to a double-double, 2 from S1 (squared), 6 for the double-double
+//   S2 = w v_population kappa: 1 from rounding S2 to a high-low pair, 2 from S1 (squared), 6 for the pair
 //   square (Square), 4 for the division by w (DivideByInteger), total 13; then 3 u^2 v for the accurate
-//   double-double subtraction (Joldes, Muller and Popescu, ACM TOMS 44(2), 2017, Algorithm 6) and u^2 v from the two
+//   pair subtraction (Joldes, Muller and Popescu, ACM TOMS 44(2), 2017, Algorithm 6) and u^2 v from the two
 //   final roundings, 4 <= 4 kappa; 17, and 1 more for the O(u^3 kappa) products of these.
 // - standard deviation, B the variance bound and a correctly rounded square root:
 //   |sigma^ - sigma| <= min(B / (sqrt(max(v - B, 0)) + sqrt(v)), sqrt(B)) + u sqrt(v + B).
@@ -43,14 +43,14 @@ namespace Supprocom.MathBlocks;
 // The code is plain loops with no allocation inside a loop and no FMA, so a per-thread CUDA function can mirror it.
 internal static class MathBlockWindowAccurate
 {
-    // 2^27 + 1, Dekker's (Veltkamp's) splitting constant for binary64.
-    private const float Splitter = 134_217_729f;
+    // 2^12 + 1, Dekker's (Veltkamp's) splitting constant for binary32.
+    private const float Splitter = 4097f;
 
-    // 2^-968: from here up, a double-double's low part (2^-54 below its high part) is a normal number.
-    private static readonly float SmallestAccurate = BitConverter.Int32BitsToSingle(55L << 52);
+    // 2^-101: from here up, a high-low pair's low part (2^-25 below its high part) is a normal number.
+    private static readonly float SmallestAccurate = BitConverter.Int32BitsToSingle(26 << 23);
 
-    // 2^996: up to here, Dekker's split (a times 2^27 + 1) doesn't overflow.
-    private static readonly float LargestSplit = BitConverter.Int32BitsToSingle(2019L << 52);
+    // 2^115: up to here, Dekker's split (a times 2^12 + 1) doesn't overflow.
+    private static readonly float LargestSplit = BitConverter.Int32BitsToSingle(242 << 23);
 
     internal static void RunSum(
         ReadOnlySpan<float> x,
@@ -76,7 +76,7 @@ internal static class MathBlockWindowAccurate
             if (mean)
                 result = sum.ReadQuotient(width);
             else
-                sum.ReadDoubleDouble(out result, out _);
+                sum.ReadHighLow(out result, out _);
             Store(values, valid, row, fill, result, float.IsFinite(result));
         }
     }
@@ -121,13 +121,13 @@ internal static class MathBlockWindowAccurate
             }
             else
             {
-                first.ReadDoubleDouble(out var s1h, out var s1l);
-                second.ReadDoubleDouble(out var s2h, out var s2l, out var s2Zero);
+                first.ReadHighLow(out var s1h, out var s1l);
+                second.ReadHighLow(out var s2h, out var s2l, out var s2Zero);
                 Square(s1h, s1l, out var qh, out var ql);
                 DivideByInteger(qh, ql, width, out var rh, out var rl);
                 moment = SubtractRounded(s2h, s2l, rh, rl);
                 // A nonzero S2 or S1^2 that rounds to 0 is below the range like a tiny nonzero one. S1 is a sum of
-                // doubles, so it is 0 exactly when s1h is.
+                // singles, so it is 0 exactly when s1h is.
                 if (!InRange(s2h, float.MaxValue) || !InRange(qh, float.MaxValue) || !InRange(rh, LargestSplit) ||
                     (s2h == 0f && !s2Zero) || (qh == 0f && s1h != 0f) ||
                     (moment > 0f && moment < SmallestAccurate))
@@ -142,7 +142,7 @@ internal static class MathBlockWindowAccurate
         }
     }
 
-    // Whether value is 0 or within [2^-968, largest]; false for an infinity or NaN.
+    // Whether value is 0 or within [2^-101, largest]; false for an infinity or NaN.
     private static bool InRange(float value, float largest) =>
         value == 0f || (Math.Abs(value) >= SmallestAccurate && Math.Abs(value) <= largest);
 
@@ -196,8 +196,8 @@ internal static class MathBlockWindowAccurate
         FastTwoSum(high, low, out qh, out ql);
     }
 
-    // (ah + al) - (bh + bl) by the accurate double-double addition (Joldes, Muller and Popescu 2017, Algorithm 6),
-    // rounded once to double: the normalized high part is the double nearest the double-double result.
+    // (ah + al) - (bh + bl) by the accurate addition of high-low pairs (Joldes, Muller and Popescu 2017, Algorithm 6),
+    // rounded once to single: the normalized high part is the single nearest the pair result.
     private static float SubtractRounded(float ah, float al, float bh, float bl)
     {
         TwoSum(ah, -bh, out var sh, out var sl);

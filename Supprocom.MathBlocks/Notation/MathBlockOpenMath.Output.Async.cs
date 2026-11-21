@@ -482,7 +482,7 @@ public static partial class MathBlockOpenMath
                 null,
                 "hex",
                 null,
-                BitConverter.SingleToUInt32Bits(value).ToString("X16", CultureInfo.InvariantCulture))
+                BitConverter.DoubleToUInt64Bits(value).ToString("X16", CultureInfo.InvariantCulture))
             .ConfigureAwait(false);
         await writer.WriteFullEndElementAsync().ConfigureAwait(false);
     }

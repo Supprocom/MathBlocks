@@ -343,13 +343,13 @@ internal sealed class MathBlockElementwiseForm
         float[]? values,
         bool[]? valid)
     {
-        var firstConstant = Vector256.Create(constants[0]);
-        var secondConstant = Vector256.Create(constants[1]);
+        var firstConstant = Vector128.Create(constants[0]);
+        var secondConstant = Vector128.Create(constants[1]);
         var row = 0;
         for (; row <= count - MathBlockSimd.BlockWidth; row += MathBlockSimd.BlockWidth)
         {
-            var left = firstIsVector ? Vector256.Create<float>(first[row..]) : firstConstant;
-            var right = secondIsVector ? Vector256.Create<float>(second[row..]) : secondConstant;
+            var left = firstIsVector ? Vector128.Create<float>(first[row..]) : firstConstant;
+            var right = secondIsVector ? Vector128.Create<float>(second[row..]) : secondConstant;
             if (MathBlockSimd.BlockIsFinite(left) && MathBlockSimd.BlockIsFinite(right))
             {
                 var block = kind == 1

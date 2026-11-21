@@ -23,8 +23,8 @@ internal static class MathBlockCudaValueCodecCorpus
     private const float Maximum = float.MaxValue;
     private const float Minimum = float.MinValue;
 
-    private static readonly float LargestSubnormal = BitConverter.Int32BitsToSingle(0x000FFFFFFFFFFFFFL);
-    private static readonly float SmallestNormal = BitConverter.Int32BitsToSingle(0x0010000000000000L);
+    private static readonly float LargestSubnormal = BitConverter.Int32BitsToSingle(0x007FFFFF);
+    private static readonly float SmallestNormal = BitConverter.Int32BitsToSingle(0x00800000);
 
     // Written with WriteValue, then read back with ReadValue and written again. The spare capacity is added to the
     // element count of a valid value to make the slot capacity; a negative spare capacity makes it smaller than the

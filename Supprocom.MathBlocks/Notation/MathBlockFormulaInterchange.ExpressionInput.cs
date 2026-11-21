@@ -983,9 +983,11 @@ string.Equals(symbol.ContentDictionaryBase, OfficialContentDictionaryBase, Strin
         {
             throw new FormatException("A formula hexadecimal binary64 value is invalid.");
         }
-        var value = BitConverter.Int32BitsToSingle(unchecked((long)bits));
-        if (!float.IsFinite(value))
-            throw new FormatException("A formula binary64 value must be finite.");
+        // The interchange text holds a binary64 pattern; a single written by this library is widened exactly, and any other value is rounded to the nearest single.
+        var wide = BitConverter.Int64BitsToDouble(unchecked((long)bits));
+        var value = (float)wide;
+        if (!double.IsFinite(wide) || !float.IsFinite(value))
+            throw new FormatException("A formula binary64 value must be finite and within the single-precision range.");
         return value;
     }
 

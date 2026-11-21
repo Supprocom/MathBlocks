@@ -1354,9 +1354,11 @@ public static partial class MathBlockOpenMath
         {
             throw InvalidFormat("An OpenMath float has an invalid hexadecimal value.");
         }
-        var value = BitConverter.Int32BitsToSingle(unchecked((long)bits));
-        if (!float.IsFinite(value))
-            throw InvalidFormat("An OpenMath float must be finite.");
+        // An OpenMath float is a binary64 pattern; a single written by this library is widened exactly, and any other value is rounded to the nearest single.
+        var wide = BitConverter.Int64BitsToDouble(unchecked((long)bits));
+        var value = (float)wide;
+        if (!double.IsFinite(wide) || !float.IsFinite(value))
+            throw InvalidFormat("An OpenMath float must be finite and within the single-precision range.");
         return value;
     }
 

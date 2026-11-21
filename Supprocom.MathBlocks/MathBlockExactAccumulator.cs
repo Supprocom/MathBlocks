@@ -1,13 +1,14 @@
 namespace Supprocom.MathBlocks;
 
-// An exact sum of doubles that supports adding and subtracting terms: the small superaccumulator of Neal, "Fast exact
-// summation using small and large superaccumulators", arXiv:1505.05571, 2015. Chunk i holds a signed 64-bit integer
-// whose value counts in units of 2^(BaseExponent + 32 i). A term's 53-bit integer significand is added to the (at
-// most three) chunks under its bits, in pieces below 2^33, so no addition rounds and no carry is propagated until
-// a value is read. The 31 spare bits per chunk absorb 2^27 additions before an in-place carry pass is needed.
+// An exact sum of single-precision values that supports adding and subtracting terms: the small superaccumulator of
+// Neal, "Fast exact summation using small and large superaccumulators", arXiv:1505.05571, 2015. Chunk i holds a
+// signed 64-bit integer whose value counts in units of 2^(BaseExponent + 32 i). A term's 24-bit integer significand
+// is added to the (at most two) chunks under its bits, in pieces below 2^32, so no addition rounds and no carry is
+// propagated until a value is read. The spare bits per chunk absorb 2^27 additions before an in-place carry pass is
+// needed.
 //
-// The range covers every double and every exact square of one (2^-2148 .. 2^2048), the significand bits of the
-// smallest terms down to 2^-2200, and room for 2^31 terms, so sums of x and of x^2 use the same layout. The
+// The range covers every single and every exact square of one (2^-298 .. 2^256), the significand bits of the
+// smallest terms down to 2^-321, and room for 2^31 terms, so sums of x and of x^2 use the same layout. The
 // accumulated value is exact and does not depend on the order or history of the additions; only its chunk
 // representation does, and every read first carries the chunks into the canonical form, so a read depends only on
 // the value.
@@ -16,25 +17,25 @@ namespace Supprocom.MathBlocks;
 // mirror it.
 internal sealed class MathBlockExactAccumulator
 {
-    internal const int ChunkCount = 141;
+    internal const int ChunkCount = 28;
 
-    // Bit 0 of chunk 0 has the weight 2^BaseExponent. Every nonzero term is at least 2^-2148 in magnitude (a square
-    // of a multiple of 2^-1074, or its error term), so the lowest bit of its 53-bit significand weighs at least
-    // 2^-2200, and 2^-2208 is the chunk boundary below that.
-    internal const int BaseExponent = -2208;
+    // Bit 0 of chunk 0 has the weight 2^BaseExponent. Every nonzero term is at least 2^-298 in magnitude (a square
+    // of a multiple of 2^-149, or its error term), so the lowest bit of its 24-bit significand weighs at least
+    // 2^-321, and 2^-352 is a chunk boundary below that.
+    internal const int BaseExponent = -352;
 
     private const long ChunkMask = 0xFFFF_FFFFL;
     private const int CarryInterval = 1 << 27;
 
-    // Splits the scaled square into the range where Dekker's product is exact (no overflow in the split, no underflow
-    // in the error term): |x| below 2^-400 or above 2^400 is scaled by 2^600 or 2^-600 first.
-    private static readonly float SquareScaleUp = PowerOfTwo(600);
-    private static readonly float SquareScaleDown = PowerOfTwo(-600);
-    private static readonly float SquareSmall = PowerOfTwo(-400);
-    private static readonly float SquareLarge = PowerOfTwo(400);
+    // Brings the square into the range where Dekker's product is exact (no overflow in the split or in the product,
+    // no underflow in the error term): |x| below 2^-40 is scaled by 2^90 first, |x| above 2^40 by 2^-70.
+    private static readonly float SquareScaleUp = PowerOfTwo(90);
+    private static readonly float SquareScaleDown = PowerOfTwo(-70);
+    private static readonly float SquareSmall = PowerOfTwo(-40);
+    private static readonly float SquareLarge = PowerOfTwo(40);
 
-    // 2^27 + 1, Dekker's (Veltkamp's) splitting constant for binary64.
-    private const float Splitter = 134_217_729f;
+    // 2^12 + 1, Dekker's (Veltkamp's) splitting constant for binary32.
+    private const float Splitter = 4097f;
 
     private readonly long[] chunks = new long[ChunkCount];
     private readonly long[] scratch = new long[ChunkCount];
@@ -57,24 +58,24 @@ internal sealed class MathBlockExactAccumulator
         if (magnitude < SquareSmall)
         {
             scaled = value * SquareScaleUp;
-            shift = -1200;
+            shift = -180;
         }
         else if (magnitude > SquareLarge)
         {
             scaled = value * SquareScaleDown;
-            shift = 1200;
+            shift = 140;
         }
         TwoProduct(scaled, scaled, out var product, out var error);
         Add(product, shift, subtract);
         Add(error, shift, subtract);
     }
 
-    // The window value rounded to the nearest double, ties to even, and the rounded remainder:
+    // The window value rounded to the nearest single, ties to even, and the rounded remainder:
     // high = RN(S) and low = RN(S - high). An overflow gives an infinite high and a zero low.
-    internal void ReadDoubleDouble(out float high, out float low) => ReadDoubleDouble(out high, out low, out _);
+    internal void ReadHighLow(out float high, out float low) => ReadHighLow(out high, out low, out _);
 
     // As above; zero tells whether the exact value is 0, which a high of 0 alone doesn't (S may round to 0).
-    internal void ReadDoubleDouble(out float high, out float low, out bool zero)
+    internal void ReadHighLow(out float high, out float low, out bool zero)
     {
         zero = true;
         if (highest < 0)
@@ -145,8 +146,8 @@ internal sealed class MathBlockExactAccumulator
         var index = AddTo(chunks, value, shift, subtract);
         if (index < lowest)
             lowest = index;
-        if (index + 2 > highest)
-            highest = index + 2;
+        if (index + 1 > highest)
+            highest = index + 1;
         if (++operations == CarryInterval)
         {
             _ = Carry(chunks, lowest, highest);
@@ -159,38 +160,34 @@ internal sealed class MathBlockExactAccumulator
     private static int AddTo(long[] target, float value, int shift, bool subtract)
     {
         var bits = BitConverter.SingleToInt32Bits(value);
-        var negative = (bits < 0L) != subtract;
-        var biased = (int)((bits >> 52) & 0x7FFL);
-        var significand = bits & 0xF_FFFF_FFFF_FFFFL;
+        var negative = (bits < 0) != subtract;
+        var biased = (bits >> 23) & 0xFF;
+        long significand = bits & 0x7F_FFFF;
         int exponent;
         if (biased == 0)
         {
-            exponent = -1074;
+            exponent = -149;
         }
         else
         {
-            significand |= 1L << 52;
-            exponent = biased - 1075;
+            significand |= 1L << 23;
+            exponent = biased - 150;
         }
         var position = exponent + shift - BaseExponent;
         var index = position >> 5;
         var offset = position & 31;
-        var lowPart = (significand & ChunkMask) << offset;
-        var highPart = (significand >> 32) << offset;
-        var first = lowPart & ChunkMask;
-        var second = (lowPart >> 32) + (highPart & ChunkMask);
-        var third = highPart >> 32;
+        var shifted = significand << offset;
+        var first = shifted & ChunkMask;
+        var second = shifted >> 32;
         if (negative)
         {
             target[index] -= first;
             target[index + 1] -= second;
-            target[index + 2] -= third;
         }
         else
         {
             target[index] += first;
             target[index + 1] += second;
-            target[index + 2] += third;
         }
         return index;
     }
@@ -235,7 +232,7 @@ internal sealed class MathBlockExactAccumulator
     }
 
     // Rounds a nonnegative value in canonical chunks (lowest .. top in [0, 2^32), zero above top) to the nearest
-    // double, ties to even, with sticky an extra nonzero part below every chunk bit. Builds the result's bits
+    // single, ties to even, with sticky an extra nonzero part below every chunk bit. Builds the result's bits
     // directly, so no step of the conversion rounds.
     private static float RoundMagnitude(long[] value, int lowest, int top, bool sticky)
     {
@@ -248,29 +245,29 @@ internal sealed class MathBlockExactAccumulator
         while (((value[chunk] >> bit) & 1L) == 0L)
             bit--;
         var most = BaseExponent + 32 * chunk + bit;
-        var least = most - 52 < -1074 ? -1074 : most - 52;
+        var least = most - 23 < -149 ? -149 : most - 23;
         var count = most - least + 1;
         var significand = count > 0 ? Bits(value, least, count) : 0L;
         var round = Bits(value, least - 1, 1) != 0L;
         var below = sticky || AnyBitBelow(value, lowest, least - 1);
         if (round && (below || (significand & 1L) != 0L))
             significand++;
-        if (significand == 1L << 53)
+        if (significand == 1L << 24)
         {
-            significand = 1L << 52;
+            significand = 1L << 23;
             least++;
         }
-        if (significand >= 1L << 52)
+        if (significand >= 1L << 23)
         {
-            var biased = least + 1075;
-            if (biased >= 2047)
+            var biased = least + 150;
+            if (biased >= 255)
                 return float.PositiveInfinity;
-            return BitConverter.Int32BitsToSingle(((long)biased << 52) | (significand - (1L << 52)));
+            return BitConverter.Int32BitsToSingle((biased << 23) | (int)(significand - (1L << 23)));
         }
-        return BitConverter.Int32BitsToSingle(significand);
+        return BitConverter.Int32BitsToSingle((int)significand);
     }
 
-    // count (1 .. 53) bits of the value starting at the bit with weight 2^position.
+    // count (1 .. 24) bits of the value starting at the bit with weight 2^position.
     private static long Bits(long[] value, int position, int count)
     {
         var relative = position - BaseExponent;
@@ -297,7 +294,7 @@ internal sealed class MathBlockExactAccumulator
         return false;
     }
 
-    private static float PowerOfTwo(int exponent) => BitConverter.Int32BitsToSingle((long)(exponent + 1023) << 52);
+    private static float PowerOfTwo(int exponent) => BitConverter.Int32BitsToSingle((exponent + 127) << 23);
 
     private static void TwoProduct(float a, float b, out float p, out float e)
     {

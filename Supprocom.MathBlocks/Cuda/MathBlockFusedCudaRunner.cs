@@ -145,7 +145,7 @@ internal static class MathBlockFusedCudaRunner
         var watch = Stopwatch.StartNew();
         if (rows > 0)
             Launch(function, (uint)blocks, options.FusedBlockSize, inputTable, scalarTable, validityTable, rowCount, outputTable, outputValidityTable, mask);
-        launchMilliseconds = watch.Elapsed.TotalMilliseconds;
+        launchMilliseconds = (float)watch.Elapsed.TotalMilliseconds;
 
         var outputs = new Array[outputCount];
         var validityOutputs = new int[outputCount][];
