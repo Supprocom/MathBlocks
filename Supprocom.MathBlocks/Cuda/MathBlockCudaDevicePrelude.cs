@@ -40,66 +40,66 @@ internal static class MathBlockCudaDevicePrelude
 // Each returns whether the row is valid (every argument finite and the value finite), and writes the value, or fill when the row is invalid, to *result.
 // No fused multiply-add, no flushing, no slot access and no synchronization.
 // The generated units define mathblocks_square_root; it is declared here so the row function can call it.
-__device__ double mathblocks_square_root(double value);
-static __device__ __forceinline__ bool mathblocks_row_finish(bool valid, double value, double fill, double* result) { *result = valid ? value : fill; return valid; }
+__device__ float mathblocks_square_root(float value);
+static __device__ __forceinline__ bool mathblocks_row_finish(bool valid, float value, float fill, float* result) { *result = valid ? value : fill; return valid; }
 
 // The value of each operation on its arguments, as the dispatch computes it: the dispatch and the row functions both call these.
 // a + b, rounded to nearest
-static __device__ __forceinline__ double mathblocks_row_value_add(double a, double b) { return __dadd_rn(a, b); }
+static __device__ __forceinline__ float mathblocks_row_value_add(float a, float b) { return __fadd_rn(a, b); }
 // a - b, rounded to nearest
-static __device__ __forceinline__ double mathblocks_row_value_subtract(double a, double b) { return __dsub_rn(a, b); }
+static __device__ __forceinline__ float mathblocks_row_value_subtract(float a, float b) { return __fsub_rn(a, b); }
 // a * b, rounded to nearest
-static __device__ __forceinline__ double mathblocks_row_value_multiply(double a, double b) { return __dmul_rn(a, b); }
+static __device__ __forceinline__ float mathblocks_row_value_multiply(float a, float b) { return __fmul_rn(a, b); }
 // a / b, rounded to nearest
-static __device__ __forceinline__ double mathblocks_row_value_divide(double a, double b) { return __ddiv_rn(a, b); }
+static __device__ __forceinline__ float mathblocks_row_value_divide(float a, float b) { return __fdiv_rn(a, b); }
 // |a|
-static __device__ __forceinline__ double mathblocks_row_value_absolute(double a) { return fabs(a); }
+static __device__ __forceinline__ float mathblocks_row_value_absolute(float a) { return fabsf(a); }
 
 // The row functions. Valid when the arguments and the value are finite.
 // a + b; invalid when the sum overflows
-static __device__ __forceinline__ bool mathblocks_row_add(double a, double b, double fill, double* result)
+static __device__ __forceinline__ bool mathblocks_row_add(float a, float b, float fill, float* result)
 {
-    double value = mathblocks_row_value_add(a, b);
+    float value = mathblocks_row_value_add(a, b);
     return mathblocks_row_finish(isfinite(a) && isfinite(b) && isfinite(value), value, fill, result);
 }
 // a - b; invalid when the difference overflows
-static __device__ __forceinline__ bool mathblocks_row_subtract(double a, double b, double fill, double* result)
+static __device__ __forceinline__ bool mathblocks_row_subtract(float a, float b, float fill, float* result)
 {
-    double value = mathblocks_row_value_subtract(a, b);
+    float value = mathblocks_row_value_subtract(a, b);
     return mathblocks_row_finish(isfinite(a) && isfinite(b) && isfinite(value), value, fill, result);
 }
 // a * b; invalid when the product overflows
-static __device__ __forceinline__ bool mathblocks_row_multiply(double a, double b, double fill, double* result)
+static __device__ __forceinline__ bool mathblocks_row_multiply(float a, float b, float fill, float* result)
 {
-    double value = mathblocks_row_value_multiply(a, b);
+    float value = mathblocks_row_value_multiply(a, b);
     return mathblocks_row_finish(isfinite(a) && isfinite(b) && isfinite(value), value, fill, result);
 }
-// a / b; invalid when b is 0.0 or the quotient overflows
-static __device__ __forceinline__ bool mathblocks_row_divide(double a, double b, double fill, double* result)
+// a / b; invalid when b is 0.0f or the quotient overflows
+static __device__ __forceinline__ bool mathblocks_row_divide(float a, float b, float fill, float* result)
 {
-    double value = mathblocks_row_value_divide(a, b);
+    float value = mathblocks_row_value_divide(a, b);
     return mathblocks_row_finish(isfinite(a) && isfinite(b) && isfinite(value), value, fill, result);
 }
 // |a|
-static __device__ __forceinline__ bool mathblocks_row_absolute(double a, double fill, double* result)
+static __device__ __forceinline__ bool mathblocks_row_absolute(float a, float fill, float* result)
 {
-    double value = mathblocks_row_value_absolute(a);
+    float value = mathblocks_row_value_absolute(a);
     return mathblocks_row_finish(isfinite(a) && isfinite(value), value, fill, result);
 }
 // the square root of a; invalid when a is negative
-static __device__ __forceinline__ bool mathblocks_row_square_root(double a, double fill, double* result)
+static __device__ __forceinline__ bool mathblocks_row_square_root(float a, float fill, float* result)
 {
-    double value = mathblocks_square_root(a);
+    float value = mathblocks_square_root(a);
     return mathblocks_row_finish(isfinite(a) && isfinite(value), value, fill, result);
 }
-// The sum of values[0..count) added left to right from 0.0 with mathblocks_row_add's rule; stops at the first invalid step and gives false with fill. A count of 0 gives 0.0.
-static __device__ __forceinline__ bool mathblocks_row_sum(const double* values, int count, double fill, double* result)
+// The sum of values[0..count) added left to right from 0.0f with mathblocks_row_add's rule; stops at the first invalid step and gives false with fill. A count of 0 gives 0.0.
+static __device__ __forceinline__ bool mathblocks_row_sum(const float* values, int count, float fill, float* result)
 {
-    double sum = 0.0;
+    float sum = 0.0f;
     for (int index = 0; index < count; index++)
     {
         if (!mathblocks_row_add(sum, values[index], fill, &sum))
-            return mathblocks_row_finish(false, 0.0, fill, result);
+            return mathblocks_row_finish(false, 0.0f, fill, result);
     }
     return mathblocks_row_finish(true, sum, fill, result);
 }
@@ -136,8 +136,8 @@ static __device__ __forceinline__ bool mathblocks_row_sum(const double* values, 
         Limit(text, "matrix_size", domain.MaximumMatrixSize);
         Limit(text, "iteration_count", domain.MaximumIterationCount);
         Limit(text, "incomplete_beta_maximum_iterations", domain.IncompleteBetaMaximumIterations);
-        text.Append("static __device__ __forceinline__ double mathblocks_limit_incomplete_beta_tolerance() { return ")
-            .Append(DoubleLiteral(domain.IncompleteBetaTolerance)).Append("; }\n");
+        text.Append("static __device__ __forceinline__ float mathblocks_limit_incomplete_beta_tolerance() { return ")
+            .Append(SingleLiteral(domain.IncompleteBetaTolerance)).Append("; }\n");
         Limit(text, "incomplete_beta_policy", (int)domain.IncompleteBetaNonConvergence);
         Limit(text, "matrix_exponential_taylor_terms", domain.MatrixExponentialTaylorTerms);
         Limit(text, "cube_root_newton_steps", domain.CubeRootNewtonSteps);
@@ -152,11 +152,11 @@ static __device__ __forceinline__ bool mathblocks_row_sum(const double* values, 
             .Append(MathBlockCudaDeviceModule.NonConvergenceCountsSymbol).Append("[slot], 1ull); }\n");
         // The binomial table and its accessors: the translation unit reaches the table through these two functions only, so the generator's
         // default prelude can define them as a load that returns 0 and a store that does nothing.
-        text.Append("__device__ double ").Append(MathBlockCudaDeviceModule.BinomialTableSymbol).Append('[')
+        text.Append("__device__ float ").Append(MathBlockCudaDeviceModule.BinomialTableSymbol).Append('[')
             .Append(MathBlockCudaDeviceModule.BinomialTableEntryCount.ToString(CultureInfo.InvariantCulture)).Append("];\n");
-        text.Append("static __device__ __forceinline__ double mathblocks_binomial_table_load(int index) { return ")
+        text.Append("static __device__ __forceinline__ float mathblocks_binomial_table_load(int index) { return ")
             .Append(MathBlockCudaDeviceModule.BinomialTableSymbol).Append("[index]; }\n");
-        text.Append("static __device__ __forceinline__ void mathblocks_binomial_table_store(int index, double value) { ")
+        text.Append("static __device__ __forceinline__ void mathblocks_binomial_table_store(int index, float value) { ")
             .Append(MathBlockCudaDeviceModule.BinomialTableSymbol).Append("[index] = value; }\n");
         foreach (var (suffix, family, identities) in Recorders)
             AppendRecorder(text, suffix, family, identities, operations);
@@ -200,10 +200,10 @@ static __device__ __forceinline__ bool mathblocks_row_sum(const double* values, 
         throw new InvalidOperationException($"CUDA operation '{identity}' is not registered.");
     }
 
-    // A C++ double literal that reads back as the same double.
-    private static string DoubleLiteral(float value)
+    // A C++ single-precision literal that reads back as the same value.
+    private static string SingleLiteral(float value)
     {
         var text = value.ToString("R", CultureInfo.InvariantCulture);
-        return text.AsSpan().IndexOfAny('.', 'E') < 0 ? text + ".0" : text;
+        return (text.AsSpan().IndexOfAny('.', 'E') < 0 ? text + ".0" : text) + "f";
     }
 }

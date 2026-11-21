@@ -182,7 +182,7 @@ internal static partial class MatrixMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Matrix(function(inputs[0].AsMatrix()), type.Unit);
         },
-        [sample ?? matrixA], MathBlockValue.Matrix(expected), 1e-9f, 8);
+        [sample ?? matrixA], MathBlockValue.Matrix(expected), 3e-5f, 8);
 
     private static MathBlockOperation CreateBinaryMatrix(
         string identifier,
@@ -195,7 +195,7 @@ internal static partial class MatrixMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Matrix(function(inputs[0].AsMatrix(), inputs[1].AsMatrix()), type.Unit);
         },
-        [matrixA, matrixB], MathBlockValue.Matrix(expected), 1e-9f, 8);
+        [matrixA, matrixB], MathBlockValue.Matrix(expected), 3e-5f, 8);
 
     // A scalar reduction of a symmetric matrix through Jacobi eigenvalues: the function reads the eigenvalues, ascending.
     private static MathBlockOperation CreateEigenvalueReduction(
@@ -213,7 +213,7 @@ internal static partial class MatrixMathBlocks
                 ? MathBlockValue.Invalid(type, "The Jacobi iteration did not converge.")
                 : MathBlockValue.Scalar(function(eigenvalues), type.Unit);
         },
-        [sample], MathBlockValue.Scalar(expected), 1e-9f, 8);
+        [sample], MathBlockValue.Scalar(expected), 3e-5f, 8);
 
     private static MathBlockOperation CreateScalarMatrixReduction(
         string identifier,
@@ -227,7 +227,7 @@ internal static partial class MatrixMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Scalar(function(inputs[0].AsMatrix()), type.Unit);
         },
-        [sample], MathBlockValue.Scalar(expected), 1e-9f, 8);
+        [sample], MathBlockValue.Scalar(expected), 3e-5f, 8);
 
     private static MathBlockOperation CreateBooleanMatrix(
         string identifier,

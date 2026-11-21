@@ -59,9 +59,10 @@ public static partial class MathBlockScalar
             sign = -sign;
             octant -= 4;
         }
-        var reduced = ((x - octantValue * 0.785398125648498535156f) -
-                       octantValue * 0.0000000377489470793079817668f) -
-                      octantValue * 0.00000000000000269515142907905952645f;
+        // A quarter of pi in three parts for single precision: the first has eight bits, so its product with the octant is exact.
+        var reduced = ((x - octantValue * 0.78515625f) -
+                       octantValue * 0.00024187564849853515625f) -
+                      octantValue * 0.0000000377489497744594108f;
         var square = reduced * reduced;
         if (octant is 1 or 2)
         {
@@ -103,9 +104,10 @@ public static partial class MathBlockScalar
         }
         if (octant > 1)
             sign = -sign;
-        var reduced = ((x - octantValue * 0.785398125648498535156f) -
-                       octantValue * 0.0000000377489470793079817668f) -
-                      octantValue * 0.00000000000000269515142907905952645f;
+        // A quarter of pi in three parts for single precision: the first has eight bits, so its product with the octant is exact.
+        var reduced = ((x - octantValue * 0.78515625f) -
+                       octantValue * 0.00024187564849853515625f) -
+                      octantValue * 0.0000000377489497744594108f;
         var square = reduced * reduced;
         if (octant is 1 or 2)
         {
@@ -130,9 +132,10 @@ public static partial class MathBlockScalar
 
     private static float DeterministicExponential(float value)
     {
-        if (value > 709.782712893383973096f)
+        // Above the logarithm of the largest single the result is infinite; below the logarithm of half the smallest subnormal it is zero.
+        if (value > 88.72283905206835f)
             return Math.PositiveInfinity;
-        if (value < -745.13321910194110842f)
+        if (value < -103.97208065307015f)
             return 0f;
 
         var result = ReduceExponential(value, out var exponent);

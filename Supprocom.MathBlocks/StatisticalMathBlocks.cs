@@ -50,7 +50,7 @@ internal static partial class StatisticalMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Scalar(function(inputs[0].AsVector()), type.Unit);
         },
-        [sample], MathBlockValue.Scalar(expected), 1e-9f, 32);
+        [sample], MathBlockValue.Scalar(expected), 3e-5f, 32);
 
     private static MathBlockOperation CreateBinary(
         string identifier,
@@ -72,7 +72,7 @@ internal static partial class StatisticalMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Scalar(function(inputs[0].AsVector(), inputs[1].AsVector()), type.Unit);
         },
-        [left, right], MathBlockValue.Scalar(expected), 1e-8f, 16);
+        [left, right], MathBlockValue.Scalar(expected), 1e-4f, 16);
 
     private static MathBlockOperation CreateWeighted(
         string identifier,
@@ -86,7 +86,7 @@ internal static partial class StatisticalMathBlocks
             return MathBlockValue.Scalar(function(inputs[0].AsVector(), inputs[1].AsVector()), type.Unit);
         },
         [MathBlockValue.Vector([2f, 4f]), MathBlockValue.Vector([1f, 1f])],
-        MathBlockValue.Scalar(expected), 1e-9f, 32);
+        MathBlockValue.Scalar(expected), 3e-5f, 32);
 
     private static MathBlockType VarianceType(IReadOnlyList<MathBlockType> types)
     {

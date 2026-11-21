@@ -33,7 +33,7 @@ internal static partial class PathMathBlocks
                 ? MathBlockValue.Scalar(function(inputs[0].AsVector()), type.Unit)
                 : MathBlockValue.Invalid(type, "The path is empty.");
         },
-        [sample], MathBlockValue.Scalar(expected), 1e-9f, 16);
+        [sample], MathBlockValue.Scalar(expected), 3e-5f, 16);
 
     private static MathBlockOperation CreatePathVector(
         string identifier,
@@ -49,7 +49,7 @@ internal static partial class PathMathBlocks
                 ? MathBlockValue.Vector(function(inputs[0].AsVector()), type.Unit, true)
                 : MathBlockValue.Invalid(type, "The path is empty.");
         },
-        [sample], MathBlockValue.Vector(expected), 1e-9f, 16);
+        [sample], MathBlockValue.Vector(expected), 3e-5f, 16);
 
     private static MathBlockOperation CreateComplexProjection(
         string identifier,
@@ -66,7 +66,7 @@ internal static partial class PathMathBlocks
             inputs[0].Type.Unit,
             true),
         [MathBlockValue.ComplexVector([new(1f, 2f), new(3f, 4f)])], MathBlockValue.Vector(expected),
-        1e-9f, 16);
+        3e-5f, 16);
 
     private static MathBlockType SameUnitScalar(IReadOnlyList<MathBlockType> types) =>
         MathBlockTypeRules.VectorReduction(types);

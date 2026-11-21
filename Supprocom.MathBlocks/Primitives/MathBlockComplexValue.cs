@@ -34,9 +34,7 @@ public readonly struct MathBlockComplexValue : IEquatable<MathBlockComplexValue>
     {
         var real = Math.ToBits(Real);
         var imaginary = Math.ToBits(Imaginary);
-        return unchecked(
-            ((int)real ^ (int)(real >> 32)) * 397 ^
-            (int)imaginary ^ (int)(imaginary >> 32));
+        return unchecked(((int)real * 397) ^ (int)imaginary);
     }
 
     /// <summary>Applies the <c>==</c> operator to MathBlocks values.</summary>

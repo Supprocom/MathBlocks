@@ -168,7 +168,7 @@ internal static class ElementwiseMathBlocks
             form.EvaluateForm,
             sample,
             MathBlockValue.Vector(expected, outputUnit),
-            1e-12f,
+            2e-6f,
             64,
             MathBlockCausalityInfo.Pointwise);
         if (form.Source.DomainEvaluator is not null)

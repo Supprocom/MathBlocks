@@ -19,7 +19,7 @@ internal static class MathBlockSequenceShift
             inputs => Evaluate(inputs, resolver, lead, validity),
             sample,
             CreateExpected(lead, validity),
-            1e-12f,
+            2e-6f,
             64,
             causality);
         return operation;

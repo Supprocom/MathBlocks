@@ -31,6 +31,6 @@ internal static partial class ProbabilityMathBlocks
             return options.IncompleteBetaNonConvergence == MathBlockNonConvergencePolicy.Invalid
                 ? MathBlockValue.Invalid(MathBlockType.Scalar(), "The continued fraction did not converge.")
                 : MathBlockValue.Scalar(value);
-        }, [MathBlockValue.Scalar(0.5f), MathBlockValue.Scalar(1f), MathBlockValue.Scalar(1f)], MathBlockValue.Scalar(0.5f), 1e-9f, 32);
+        }, [MathBlockValue.Scalar(0.5f), MathBlockValue.Scalar(1f), MathBlockValue.Scalar(1f)], MathBlockValue.Scalar(0.5f), 3e-5f, 32);
     }
 }

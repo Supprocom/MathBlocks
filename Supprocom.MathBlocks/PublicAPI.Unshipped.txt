@@ -313,7 +313,7 @@ static Supprocom.MathBlocks.MathBlockEvaluation.operator ==(Supprocom.MathBlocks
 Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.EvaluateCoreCLR(System.ReadOnlySpan<Supprocom.MathBlocks.MathBlockValue> inputs, System.Span<float> output, System.Span<bool> rowValid, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> Supprocom.MathBlocks.MathBlockEvaluation
 static Supprocom.MathBlocks.MathBlockCatalog.TryGetElementwiseTwin(string! scalarIdentity, out string! elementwiseIdentity) -> bool
 const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.ElementwiseValidityElementBytes = 4 -> int
-const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.ElementwiseValueElementBytes = 8 -> int
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.ElementwiseValueElementBytes = 4 -> int
 Supprocom.MathBlocks.MathBlockDomainOptions.CubeRootNewtonSteps.get -> int
 Supprocom.MathBlocks.MathBlockDomainOptions.CubeRootNewtonSteps.init -> void
 Supprocom.MathBlocks.MathBlockDomainOptions.MatrixExponentialTaylorTerms.get -> int

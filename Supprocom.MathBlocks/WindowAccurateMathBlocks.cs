@@ -91,7 +91,7 @@ internal static class WindowAccurateMathBlocks
             form.EvaluateForm,
             [Level, MathBlockValue.Scalar(WindowMathBlocks.SampleWidth), MathBlockValue.Scalar(WindowMathBlocks.SampleFill, unit)],
             MathBlockValue.Vector(expected, unit),
-            1e-12f,
+            2e-6f,
             64,
             MathBlockCausalityInfo.Trailing(form.FormArity - 2));
         operation.TypeSignatureFactory = () => form.CreateSignature(operation.Identity, validity: false);

@@ -9,7 +9,7 @@ internal static class MathBlockOperationFactory
         MathBlockEvaluator evaluator,
         IReadOnlyList<MathBlockValue> sampleInputs,
         MathBlockValue sampleOutput,
-        float tolerance = 1e-10f,
+        float tolerance = 1e-5f,
         int performanceIterations = 64,
         MathBlockCausalityInfo? causality = null) =>
         new(
@@ -30,7 +30,7 @@ internal static class MathBlockOperationFactory
         MathBlockDomainEvaluator evaluator,
         IReadOnlyList<MathBlockValue> sampleInputs,
         MathBlockValue sampleOutput,
-        float tolerance = 1e-10f,
+        float tolerance = 1e-5f,
         int performanceIterations = 64,
         MathBlockCausalityInfo? causality = null)
     {
@@ -54,7 +54,7 @@ internal static class MathBlockOperationFactory
         float sample,
         float expected,
         MathBlockTypeResolver? resolver = null,
-        float tolerance = 1e-10f)
+        float tolerance = 1e-5f)
     {
         var operation = Create(
             identifier,
@@ -81,7 +81,7 @@ internal static class MathBlockOperationFactory
         float right,
         float expected,
         MathBlockTypeResolver resolver,
-        float tolerance = 1e-10f)
+        float tolerance = 1e-5f)
     {
         var operation = Create(
             identifier,

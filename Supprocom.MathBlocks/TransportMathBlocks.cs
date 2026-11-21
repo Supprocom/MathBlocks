@@ -63,5 +63,5 @@ internal static partial class TransportMathBlocks
 
     private static bool IsDistribution(IReadOnlyList<float> values) =>
         values.Count > 0 && MathBlockCollectionPrimitives.All(values, value => value >= 0f) &&
-        Math.Abs(MathBlockVectorMath.Sum(values) - 1f) <= 1e-10f;
+        Math.Abs(MathBlockVectorMath.Sum(values) - 1f) <= 1e-5f;
 }

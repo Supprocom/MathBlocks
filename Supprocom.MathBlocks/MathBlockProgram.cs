@@ -297,8 +297,8 @@ public sealed class MathBlockProgram
     private static void AppendDouble(StringBuilder builder, float value)
     {
         var bits = Math.ToBits(value);
-        for (var shift = 60; shift >= 0; shift -= 4)
-            builder.Append(HexDigit((int)((bits >> shift) & 0x0ful)));
+        for (var shift = 28; shift >= 0; shift -= 4)
+            builder.Append(HexDigit((int)((bits >> shift) & 0x0fu)));
         builder.Append(',');
     }
 

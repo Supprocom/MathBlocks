@@ -8,7 +8,7 @@ public sealed class MathBlockRegressionCase
         string name,
         IEnumerable<MathBlockValue> inputs,
         MathBlockValue expected,
-        float tolerance = 1e-10f)
+        float tolerance = 1e-5f)
     {
         Name = RequireText(name, nameof(name));
         ArgumentNullException.ThrowIfNull(inputs);

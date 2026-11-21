@@ -6,6 +6,6 @@ internal static partial class ProbabilityMathBlocks
     {
         internal const string Identity = "special.beta@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => MathBlockOperationFactory.ScalarBinary("special.beta", MathBlockProbability.Beta, 2f, 3f, 1f / 12f, MathBlockTypeRules.DimensionlessBinaryScalar, 1e-9f);
+        internal static MathBlockOperation Create() => MathBlockOperationFactory.ScalarBinary("special.beta", MathBlockProbability.Beta, 2f, 3f, 1f / 12f, MathBlockTypeRules.DimensionlessBinaryScalar, 3e-5f);
     }
 }

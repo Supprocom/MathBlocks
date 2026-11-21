@@ -31,7 +31,7 @@ public static class MathBlockCudaDeviceModule
     /// same array. Read it with <c>cuModuleGetGlobal</c> after a launch, and zero it before.
     /// </remarks>
     public const string NonConvergenceCountsSymbol = "mathblocks_nonconvergence_counts";
-    /// <summary>The name of the module-global table of binomial coefficients, <see cref="BinomialTableEntryCount"/> doubles.</summary>
+    /// <summary>The name of the module-global table of binomial coefficients, <see cref="BinomialTableEntryCount"/> single-precision values.</summary>
     /// <remarks>
     /// The table holds <c>C(n, k)</c> for <c>0 &lt;= k &lt;= n &lt;= 1023</c> on the symmetric half <c>k &lt;= n / 2</c>: row <c>n</c> starts at entry
     /// <c>(n / 2) * ((n - 1) / 2) + n</c> and has <c>n / 2 + 1</c> entries. An entry is 0 until a device thread evaluates its pair, which stores the result of the
@@ -39,43 +39,43 @@ public static class MathBlockCudaDeviceModule
     /// that calls the ballot-count or binomial-coefficient operations fills the same table.
     /// </remarks>
     public const string BinomialTableSymbol = "mathblocks_binomial_table";
-    /// <summary>The number of doubles in the module-global table named by <see cref="BinomialTableSymbol"/>: the sum of <c>n / 2 + 1</c> over <c>n</c> from 0 to 1023, which is 2,101,248 bytes.</summary>
+    /// <summary>The number of values in the module-global table named by <see cref="BinomialTableSymbol"/>: the sum of <c>n / 2 + 1</c> over <c>n</c> from 0 to 1023, which is 1,050,624 bytes.</summary>
     public const int BinomialTableEntryCount = 262656;
-    /// <summary>Gets the byte stride of one row of the values form <c>elementwise.&lt;source&gt;</c>: a double, written at <c>data_pointer</c>.</summary>
+    /// <summary>Gets the byte stride of one row of the values form <c>elementwise.&lt;source&gt;</c>: a single-precision value, written at <c>data_pointer</c>.</summary>
     /// <remarks>
     /// The elementwise device layout, as <c>mathblocks_elementwise_run</c> in the generated source implements it:
     /// <list type="bullet">
-    /// <item>The values form <c>elementwise.&lt;source&gt;</c> writes one double per row at an 8-byte stride from the output slot's <c>data_pointer</c>; a row that is not computed holds the fill.</item>
+    /// <item>The values form <c>elementwise.&lt;source&gt;</c> writes one single-precision value per row at a 4-byte stride from the output slot's <c>data_pointer</c>; a row that is not computed holds the fill.</item>
     /// <item>The validity form <c>elementwise-valid.&lt;source&gt;</c> writes one int32, 0 or 1, per row at a 4-byte stride from <c>data_pointer</c>.</item>
     /// <item>Both set <c>rows</c> and <c>count</c> of the output slot to the row count, and to 0 when the whole result is invalid; <c>columns</c> is 0.</item>
     /// <item>The opcode is <c>2 * source + sibling</c>, plus <c>128 * mask</c> for a source below 64 (<c>1024 + 2 * source + sibling + 65536 * mask</c> above), when the consumer passes the vector-argument mask (bit i set when argument i is a vector); without a mask the device derives it from the input slots, a slot with <c>count</c> above 0 being a vector.</item>
     /// <item>The inputs are the source's arguments; the values form has one more input, the fill, at <c>inputs[arity]</c>. CUDA reads only the fill slot's <c>scalar_value</c>; the host gives the slot the unit of the source result. The validity form has no fill input.</item>
     /// </list>
     /// </remarks>
-    public const int ElementwiseValueElementBytes = 8;
+    public const int ElementwiseValueElementBytes = 4;
     /// <summary>Gets the byte stride of one row of the validity form <c>elementwise-valid.&lt;source&gt;</c>: an int32, written at <c>data_pointer</c>; see <see cref="ElementwiseValueElementBytes"/>.</summary>
     public const int ElementwiseValidityElementBytes = 4;
     /// <summary>Gets the signature of <c>mathblocks_row_add</c>: a + b; see <see cref="RowFunctionSignatures"/>.</summary>
     public const string RowAddSignature =
-        "static __device__ __forceinline__ bool mathblocks_row_add(double a, double b, double fill, double* result)";
+        "static __device__ __forceinline__ bool mathblocks_row_add(float a, float b, float fill, float* result)";
     /// <summary>Gets the signature of <c>mathblocks_row_subtract</c>: a - b; see <see cref="RowFunctionSignatures"/>.</summary>
     public const string RowSubtractSignature =
-        "static __device__ __forceinline__ bool mathblocks_row_subtract(double a, double b, double fill, double* result)";
+        "static __device__ __forceinline__ bool mathblocks_row_subtract(float a, float b, float fill, float* result)";
     /// <summary>Gets the signature of <c>mathblocks_row_multiply</c>: a * b; see <see cref="RowFunctionSignatures"/>.</summary>
     public const string RowMultiplySignature =
-        "static __device__ __forceinline__ bool mathblocks_row_multiply(double a, double b, double fill, double* result)";
+        "static __device__ __forceinline__ bool mathblocks_row_multiply(float a, float b, float fill, float* result)";
     /// <summary>Gets the signature of <c>mathblocks_row_divide</c>: a / b; see <see cref="RowFunctionSignatures"/>.</summary>
     public const string RowDivideSignature =
-        "static __device__ __forceinline__ bool mathblocks_row_divide(double a, double b, double fill, double* result)";
+        "static __device__ __forceinline__ bool mathblocks_row_divide(float a, float b, float fill, float* result)";
     /// <summary>Gets the signature of <c>mathblocks_row_absolute</c>: |a|; see <see cref="RowFunctionSignatures"/>.</summary>
     public const string RowAbsoluteSignature =
-        "static __device__ __forceinline__ bool mathblocks_row_absolute(double a, double fill, double* result)";
+        "static __device__ __forceinline__ bool mathblocks_row_absolute(float a, float fill, float* result)";
     /// <summary>Gets the signature of <c>mathblocks_row_square_root</c>: the square root of a; see <see cref="RowFunctionSignatures"/>.</summary>
     public const string RowSquareRootSignature =
-        "static __device__ __forceinline__ bool mathblocks_row_square_root(double a, double fill, double* result)";
+        "static __device__ __forceinline__ bool mathblocks_row_square_root(float a, float fill, float* result)";
     /// <summary>Gets the signature of <c>mathblocks_row_sum</c>: the sum of <c>values[0..count)</c> added left to right from 0.0 with the rule of <see cref="RowAddSignature"/>; it stops at the first invalid step, and a count of 0 gives 0.0; see <see cref="RowFunctionSignatures"/>.</summary>
     public const string RowSumSignature =
-        "static __device__ __forceinline__ bool mathblocks_row_sum(const double* values, int count, double fill, double* result)";
+        "static __device__ __forceinline__ bool mathblocks_row_sum(const float* values, int count, float fill, float* result)";
     /// <summary>Gets the signatures of the per-row functions <c>mathblocks_row_&lt;operation&gt;</c> of <see cref="Source"/>, separated by semicolons, in the order of the <c>Row...Signature</c> constants.</summary>
     /// <remarks>
     /// Each function evaluates one row of a simple scalar operation with the bits of the dispatch's scalar case, in the same inline device function the case calls:
@@ -124,7 +124,7 @@ public static class MathBlockCudaDeviceModule
     /// </list>
     /// </remarks>
     public const string ElementwiseRowSignature =
-        "__device__ bool mathblocks_elementwise_row(int opcode, double a, double b, double c, double fill, double* result)";
+        "__device__ bool mathblocks_elementwise_row(int opcode, float a, float b, float c, float fill, float* result)";
 
     // CA1721: GetSource(MathBlockDomainOptions) and GetSourceFingerprint(MathBlockDomainOptions) are the names the 0.7.0 interface fixes, and Source and
     // SourceFingerprint are the shipped properties of the default options.

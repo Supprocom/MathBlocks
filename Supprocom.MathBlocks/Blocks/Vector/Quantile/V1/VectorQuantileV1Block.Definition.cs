@@ -11,6 +11,6 @@ internal static partial class VectorMathBlocks
         {
             var probability = inputs[1].AsScalar();
             return probability is >= 0f and <= 1f && inputs[0].AsVector().Count > 0 ? MathBlockValue.Scalar(MathBlockVectorMath.Quantile(inputs[0].AsVector(), probability), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Scalar(inputs[0].Type.Unit), "The probability or vector is outside the operation domain.");
-        }, [sampleVector, MathBlockValue.Scalar(0.25f)], MathBlockValue.Scalar(1.75f), 1e-9f, 64);
+        }, [sampleVector, MathBlockValue.Scalar(0.25f)], MathBlockValue.Scalar(1.75f), 3e-5f, 64);
     }
 }

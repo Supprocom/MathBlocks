@@ -15,6 +15,6 @@ internal static partial class PathMathBlocks
             return count > 0 && (count & (count - 1)) == 0
                 ? MathBlockValue.Vector(MathBlockPath.HaarTransform(inputs[0].AsVector()), inputs[0].Type.Unit, true)
                 : MathBlockOperationFactory.Invalid(SameUnitVector, inputs, "The length is not a power of two.");
-        }, [MathBlockValue.Vector([1f, 1f, 1f, 1f])], MathBlockValue.Vector([2f, 0f, 0f, 0f]), 1e-9f, 16);
+        }, [MathBlockValue.Vector([1f, 1f, 1f, 1f])], MathBlockValue.Vector([2f, 0f, 0f, 0f]), 3e-5f, 16);
     }
 }

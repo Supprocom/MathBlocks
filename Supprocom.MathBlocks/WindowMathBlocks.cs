@@ -241,7 +241,7 @@ internal static class WindowMathBlocks
             form.EvaluateForm,
             sample,
             MathBlockValue.Vector(expected, outputUnit),
-            1e-12f,
+            2e-6f,
             16,
             MathBlockCausalityInfo.Trailing(form.FormArity - 2));
         operation.TypeSignatureFactory = () => form.CreateSignature(operation.Identity, validity: false);

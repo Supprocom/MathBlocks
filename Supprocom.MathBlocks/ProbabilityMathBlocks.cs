@@ -94,7 +94,7 @@ internal static partial class ProbabilityMathBlocks
             }
             return MathBlockValue.Vector(function(values), default, true);
         },
-        [sample], MathBlockValue.Vector(expected), 1e-9f, 32);
+        [sample], MathBlockValue.Vector(expected), 3e-5f, 32);
 
     private static MathBlockOperation CreateScalarUnary(
         string identifier,
@@ -110,7 +110,7 @@ internal static partial class ProbabilityMathBlocks
                 return MathBlockValue.Invalid(MathBlockType.Scalar(), "The vector is outside the operation domain.");
             return MathBlockValue.Scalar(function(values));
         },
-        [sample], MathBlockValue.Scalar(expected), 1e-9f, 32);
+        [sample], MathBlockValue.Scalar(expected), 3e-5f, 32);
 
     private static MathBlockOperation CreateDistributionBinary(
         string identifier,
@@ -132,7 +132,7 @@ internal static partial class ProbabilityMathBlocks
                         return MathBlockValue.Invalid(MathBlockType.Scalar(), "The reference distribution has zero support.");
             return MathBlockValue.Scalar(function(leftValues, rightValues));
         },
-        [left, right], MathBlockValue.Scalar(expected), 1e-9f, 16);
+        [left, right], MathBlockValue.Scalar(expected), 3e-5f, 16);
 
     private static MathBlockOperation CreateOrderedEntropy(
         string identifier,
@@ -148,7 +148,7 @@ internal static partial class ProbabilityMathBlocks
                 ? MathBlockValue.Scalar(function(probabilities, requestedOrder))
                 : MathBlockValue.Invalid(MathBlockType.Scalar(), "The inputs are outside the entropy domain.");
         },
-        [fair, MathBlockValue.Scalar(order)], MathBlockValue.Scalar(expected), 1e-9f, 16);
+        [fair, MathBlockValue.Scalar(order)], MathBlockValue.Scalar(expected), 3e-5f, 16);
 
     private static MathBlockType DimensionlessVectorType(
         IReadOnlyList<MathBlockType> types,
@@ -190,7 +190,7 @@ internal static partial class ProbabilityMathBlocks
 
     private static bool IsDistributionCore(IReadOnlyList<float> values) =>
         values.Count > 0 && MathBlockCollectionPrimitives.All(values, value => value >= 0f) &&
-        Math.Abs(MathBlockVectorMath.Sum(values) - 1f) <= 1e-10f;
+        Math.Abs(MathBlockVectorMath.Sum(values) - 1f) <= 1e-5f;
 
     private static bool TryInteger(float value, out int result)
     {

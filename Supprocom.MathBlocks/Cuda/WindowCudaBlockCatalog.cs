@@ -152,16 +152,16 @@ internal static class WindowCudaBlockCatalog
     // Scratch doubles one thread needs for one window: the sorted copy (interquartile range, median, quantile),
     // the logarithms (geometric mean), two rows of means (distance correlation), the sorted copy and deviations
     // (median absolute deviation), two rank vectors (Spearman), or the pair values and a merge buffer of equal
-    // size (Theil-Sen, pseudomedian). The window-accurate sources (53 .. 58) need one exact accumulator of 285
-    // 64-bit words for the sum and mean, two for the variances and deviations, whatever the width.
+    // size (Theil-Sen, pseudomedian). The window-accurate sources (53 .. 58) need one exact accumulator of 59
+    // 64-bit words (118 values of scratch) for the sum and mean, two for the variances and deviations, whatever the width.
     internal static long ScratchDoubles(int source, long width) => source switch
     {
         44 or 47 or 48 => width,
         2 or 3 or 8 or 21 => width * 2,
         22 => width * (width - 1),
         15 => width * (width + 1),
-        53 or 54 => 285,
-        55 or 56 or 57 or 58 => 570,
+        53 or 54 => 118,
+        55 or 56 or 57 or 58 => 236,
         _ => 0
     };
 

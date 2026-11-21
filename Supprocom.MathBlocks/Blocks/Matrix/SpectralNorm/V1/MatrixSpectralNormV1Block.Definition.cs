@@ -7,7 +7,7 @@ internal static partial class AdvancedMathBlocks
         internal const string Identity = "matrix.spectral-norm@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateSpectralNorm();
-        private static MathBlockOperation CreateSpectralNorm() => MathBlockOperationFactory.CreateDomain("matrix.spectral-norm", 2, PerronValueType, Evaluate, [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [3f, 0f, 0f, 2f])), MathBlockValue.Scalar(32f)], MathBlockValue.Scalar(3f), 1e-8f, 2);
+        private static MathBlockOperation CreateSpectralNorm() => MathBlockOperationFactory.CreateDomain("matrix.spectral-norm", 2, PerronValueType, Evaluate, [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [3f, 0f, 0f, 2f])), MathBlockValue.Scalar(32f)], MathBlockValue.Scalar(3f), 1e-4f, 2);
 
         private static MathBlockValue Evaluate(IReadOnlyList<MathBlockValue> inputs, MathBlockDomainContext domain)
         {

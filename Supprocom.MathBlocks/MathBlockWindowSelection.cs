@@ -121,11 +121,11 @@ internal static class MathBlockWindowSelection
         }
     }
 
-    // Maps a finite double to an integer key whose signed order is the IEEE 754 total order, with -0 before +0.
+    // Maps a finite single to an integer key whose signed order is the IEEE 754 total order, with -0 before +0.
     internal static long TotalOrderKey(float value)
     {
         var bits = BitConverter.SingleToInt32Bits(value);
-        return bits >= 0 ? bits : bits ^ long.MaxValue;
+        return bits >= 0 ? bits : bits ^ int.MaxValue;
     }
 
     private static void Store(float[]? values, bool[]? valid, int row, float fill, float value, bool computed)

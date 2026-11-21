@@ -1113,7 +1113,7 @@ Supprocom.MathBlocks.MathBlockRegistry.Operations.get -> System.Collections.Gene
 Supprocom.MathBlocks.MathBlockRegressionCase
 Supprocom.MathBlocks.MathBlockRegressionCase.Expected.get -> Supprocom.MathBlocks.MathBlockValue
 Supprocom.MathBlocks.MathBlockRegressionCase.Inputs.get -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
-Supprocom.MathBlocks.MathBlockRegressionCase.MathBlockRegressionCase(string! name, System.Collections.Generic.IEnumerable<Supprocom.MathBlocks.MathBlockValue>! inputs, Supprocom.MathBlocks.MathBlockValue expected, float tolerance = 1E-10) -> void
+Supprocom.MathBlocks.MathBlockRegressionCase.MathBlockRegressionCase(string! name, System.Collections.Generic.IEnumerable<Supprocom.MathBlocks.MathBlockValue>! inputs, Supprocom.MathBlocks.MathBlockValue expected, float tolerance = 1E-05) -> void
 Supprocom.MathBlocks.MathBlockRegressionCase.Name.get -> string!
 Supprocom.MathBlocks.MathBlockRegressionCase.Tolerance.get -> float
 Supprocom.MathBlocks.MathBlockRun
@@ -1175,7 +1175,7 @@ Supprocom.MathBlocks.MathBlockUnit.MathBlockUnit(Supprocom.MathBlocks.MathRation
 Supprocom.MathBlocks.MathBlockUnit.Multiply(Supprocom.MathBlocks.MathBlockUnit other) -> Supprocom.MathBlocks.MathBlockUnit
 Supprocom.MathBlocks.MathBlockUnit.Pow(Supprocom.MathBlocks.MathRational exponent) -> Supprocom.MathBlocks.MathBlockUnit
 Supprocom.MathBlocks.MathBlockValue
-Supprocom.MathBlocks.MathBlockValue.ApproximatelyEquals(Supprocom.MathBlocks.MathBlockValue other, float tolerance = 1E-12) -> bool
+Supprocom.MathBlocks.MathBlockValue.ApproximatelyEquals(Supprocom.MathBlocks.MathBlockValue other, float tolerance = 2E-06) -> bool
 Supprocom.MathBlocks.MathBlockValue.AsBoolean() -> bool
 Supprocom.MathBlocks.MathBlockValue.AsBooleanVector() -> Supprocom.MathBlocks.MathBlockBooleanVector!
 Supprocom.MathBlocks.MathBlockValue.AsComplex() -> Supprocom.MathBlocks.MathBlockComplexValue

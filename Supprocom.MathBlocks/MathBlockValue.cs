@@ -160,7 +160,7 @@ public readonly struct MathBlockValue
     public MathBlockRunSet AsRunSet() => RequireReference<MathBlockRunSet>(MathBlockValueKind.RunSet);
 
     /// <summary>Compares valid numeric payloads within a relative tolerance.</summary>
-    public bool ApproximatelyEquals(MathBlockValue other, float tolerance = 1e-12f)
+    public bool ApproximatelyEquals(MathBlockValue other, float tolerance = 2e-6f)
     {
         if (Type != other.Type || IsValid != other.IsValid)
             return false;

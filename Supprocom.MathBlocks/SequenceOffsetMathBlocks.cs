@@ -72,7 +72,7 @@ internal static partial class VectorMathBlocks
         inputs => EvaluateOffsets(inputs, kind, validity),
         sample,
         expected,
-        1e-12f,
+        2e-6f,
         64);
 
     // The operands are x (or the predicate p), its validity, the counts, start and end; a value operation then takes the fill, and

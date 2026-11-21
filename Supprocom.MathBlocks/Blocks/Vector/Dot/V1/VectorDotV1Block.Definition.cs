@@ -7,6 +7,6 @@ internal static partial class VectorMathBlocks
         internal const string Identity = "vector.dot@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
         internal static MathBlockOperation Create() => CreateDot();
-        private static MathBlockOperation CreateDot() => MathBlockOperationFactory.Create("vector.dot", 2, DotType, inputs => MathBlockValue.Scalar(MathBlockVectorMath.Dot(inputs[0].AsVector(), inputs[1].AsVector()), inputs[0].Type.Unit.Multiply(inputs[1].Type.Unit)), [sampleVector, secondVector], MathBlockValue.Scalar(20f), 1e-9f, 64);
+        private static MathBlockOperation CreateDot() => MathBlockOperationFactory.Create("vector.dot", 2, DotType, inputs => MathBlockValue.Scalar(MathBlockVectorMath.Dot(inputs[0].AsVector(), inputs[1].AsVector()), inputs[0].Type.Unit.Multiply(inputs[1].Type.Unit)), [sampleVector, secondVector], MathBlockValue.Scalar(20f), 3e-5f, 64);
     }
 }

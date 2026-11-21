@@ -19,7 +19,7 @@ internal static partial class AdvancedMathBlocks
                 ? MathBlockValue.Vector(function(values), type.Unit, true)
                 : MathBlockValue.Invalid(type, "The vector is empty.");
         },
-        [sample], MathBlockValue.Vector(expected), 1e-8f, 8);
+        [sample], MathBlockValue.Vector(expected), 1e-4f, 8);
 
     private static MathBlockOperation CreateVectorScalar(
         string identifier,
@@ -35,7 +35,7 @@ internal static partial class AdvancedMathBlocks
                 ? MathBlockValue.Scalar(function(inputs[0].AsVector()), type.Unit)
                 : MathBlockValue.Invalid(type, "The vector is empty.");
         },
-        [sample], MathBlockValue.Scalar(expected), 1e-8f, 8);
+        [sample], MathBlockValue.Scalar(expected), 1e-4f, 8);
 
     private static MathBlockOperation CreateStructuredMatrix(
         string identifier,
@@ -51,7 +51,7 @@ internal static partial class AdvancedMathBlocks
                       : inputs[0].AsVector()[0] == inputs[1].AsVector()[0])
             ? MathBlockValue.Matrix(function(inputs[0].AsVector(), inputs[1].AsVector()), inputs[0].Type.Unit)
             : MathBlockOperationFactory.Invalid(StructuredMatrixType, inputs, "The boundary vectors are incompatible."),
-        [first, second], MathBlockValue.Matrix(expected), 1e-9f, 8);
+        [first, second], MathBlockValue.Matrix(expected), 3e-5f, 8);
 
     private static MathBlockType StructuredMatrixType(IReadOnlyList<MathBlockType> types)
     {
@@ -112,7 +112,7 @@ internal static partial class AdvancedMathBlocks
         inputs => IsPositivePair(inputs[0].AsVector(), inputs[1].AsVector(), distribution)
             ? MathBlockValue.Scalar(function(inputs[0].AsVector(), inputs[1].AsVector()))
             : MathBlockValue.Invalid(MathBlockType.Scalar(), "The vectors are outside the operation domain."),
-        [left, right], MathBlockValue.Scalar(expected), 1e-8f, 8);
+        [left, right], MathBlockValue.Scalar(expected), 1e-4f, 8);
 
     private static MathBlockOperation CreatePoisson(
         string identifier,
@@ -124,7 +124,7 @@ internal static partial class AdvancedMathBlocks
             ? MathBlockValue.Scalar(function(inputs[0].AsScalar(), requested))
             : MathBlockValue.Invalid(MathBlockType.Scalar(), "The inputs are outside the operation domain."),
         [MathBlockValue.Scalar(2f), MathBlockValue.Scalar(count)], MathBlockValue.Scalar(expected),
-        1e-9f, 16);
+        3e-5f, 16);
 
     private static MathBlockOperation CreateMoment(
         string identifier,
@@ -271,7 +271,7 @@ internal static partial class AdvancedMathBlocks
 
     private static bool IsDistribution(MathBlockVector values) =>
         values.Count > 0 && MathBlockCollectionPrimitives.All(values, value => value >= 0f) &&
-        Math.Abs(MathBlockVectorMath.Sum(values) - 1f) <= 1e-10f;
+        Math.Abs(MathBlockVectorMath.Sum(values) - 1f) <= 1e-5f;
 
     private static bool IsTransitionMatrix(MathBlockMatrix matrix)
     {
@@ -286,7 +286,7 @@ internal static partial class AdvancedMathBlocks
                     return false;
                 sum += matrix[row, column];
             }
-            if (Math.Abs(sum - 1f) > 1e-10f)
+            if (Math.Abs(sum - 1f) > 1e-5f)
                 return false;
         }
         return true;

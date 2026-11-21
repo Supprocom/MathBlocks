@@ -73,7 +73,7 @@ internal static partial class GeometryMathBlocks
                 ? MathBlockValue.Scalar(function(inputs[0].AsPointSet()), type.Unit)
                 : MathBlockValue.Invalid(type, "The point set is empty.");
         },
-        [sample], MathBlockValue.Scalar(expected), 1e-9f, 8);
+        [sample], MathBlockValue.Scalar(expected), 3e-5f, 8);
 
     private static MathBlockOperation CreatePointPairScalar(
         string identifier,
@@ -85,7 +85,7 @@ internal static partial class GeometryMathBlocks
         inputs => inputs[0].AsPointSet().Count > 0 && inputs[1].AsPointSet().Count > 0
             ? MathBlockValue.Scalar(function(inputs[0].AsPointSet(), inputs[1].AsPointSet()), inputs[0].Type.Unit)
             : MathBlockValue.Invalid(MathBlockType.Scalar(inputs[0].Type.Unit), "A point set is empty."),
-        [left, right], MathBlockValue.Scalar(expected), 1e-9f, 4);
+        [left, right], MathBlockValue.Scalar(expected), 3e-5f, 4);
 
     private static MathBlockValue Singleton(float x, float y) =>
         MathBlockValue.PointSet(new MathBlockPointSet([new MathBlockPoint(x, y)]));

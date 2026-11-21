@@ -17,10 +17,10 @@ internal static class MathBlockFusedCudaSource
 
         builder.Append("__device__ void ").Append(expression.CudaFunctionName).Append("(\n")
             .Append("    const void* const* inputs,\n")
-            .Append("    const double* scalars,\n")
+            .Append("    const float* scalars,\n")
             .Append("    const int* const* validity,\n")
             .Append("    long long row,\n")
-            .Append("    double* outputs,\n")
+            .Append("    float* outputs,\n")
             .Append("    int* output_validity,\n")
             .Append("    unsigned long long* invalid_mask)\n")
             .Append("{\n")
@@ -29,11 +29,11 @@ internal static class MathBlockFusedCudaSource
         var scalarOrdinal = 0;
         foreach (var node in expression.ScalarNodes)
         {
-            builder.Append("    const double n").Append(Number(node)).Append(" = ");
+            builder.Append("    const float n").Append(Number(node)).Append(" = ");
             if (nodes[node].Kind == MathBlockProgramBuilder.NodeKind.Input)
                 builder.Append("scalars[").Append(Number(scalarOrdinal++)).Append("];\n");
             else
-                builder.Append(FormatDouble(nodes[node].Value.AsScalar())).Append(";\n");
+                builder.Append(FormatSingle(nodes[node].Value.AsScalar())).Append(";\n");
         }
 
         for (var ordinal = 0; ordinal < expression.VectorInputNodes.Length; ordinal++)
@@ -41,8 +41,8 @@ internal static class MathBlockFusedCudaSource
             var node = expression.VectorInputNodes[ordinal];
             var index = Number(ordinal);
             if (expression.Kinds[node] == MathBlockFusedKind.Number)
-                builder.Append("    const double n").Append(Number(node))
-                    .Append(" = ((const double*)inputs[").Append(index).Append("])[row];\n");
+                builder.Append("    const float n").Append(Number(node))
+                    .Append(" = ((const float*)inputs[").Append(index).Append("])[row];\n");
             else
                 builder.Append("    const int b").Append(Number(node))
                     .Append(" = ((const int*)inputs[").Append(index).Append("])[row] != 0;\n");
@@ -60,7 +60,7 @@ internal static class MathBlockFusedCudaSource
             builder.Append("    outputs[").Append(Number(index)).Append("] = ")
                 .Append(expression.Kinds[node] == MathBlockFusedKind.Number
                     ? "n" + Number(node)
-                    : "b" + Number(node) + " ? 1.0 : 0.0")
+                    : "b" + Number(node) + " ? 1.0f : 0.0f")
                 .Append(";\n");
             builder.Append("    output_validity[").Append(Number(index)).Append("] = ")
                 .Append(RowValidity(expression, node)).Append(";\n");
@@ -83,7 +83,7 @@ internal static class MathBlockFusedCudaSource
             .Append("// MathBlocks CUDA source fingerprint ").Append(MathBlockCudaDeviceModule.SourceFingerprint)
             .Append(".\n")
             .Append("// Compile after the MathBlocks CUDA source (MathBlockCudaDeviceModule.Source).\n")
-            .Append("// inputs[i]: const double* (Vector) or const int* of 0 and 1 (BooleanVector), one per vector\n")
+            .Append("// inputs[i]: const float* (Vector) or const int* of 0 and 1 (BooleanVector), one per vector\n")
             .Append("// input; pass a readable buffer for an invalid input. validity[i]: const int* of 0 and 1, or\n")
             .Append("// null when input i is valid in every row; validity itself may be null.\n");
         for (var ordinal = 0; ordinal < expression.VectorInputNodes.Length; ordinal++)
@@ -96,7 +96,7 @@ internal static class MathBlockFusedCudaSource
         for (var ordinal = 0; ordinal < expression.ScalarInputNames.Count; ordinal++)
             builder.Append("//   scalars[").Append(Number(ordinal)).Append("] '")
                 .Append(expression.ScalarInputNames[ordinal]).Append("'\n");
-        builder.Append("// outputs[k] (1.0 or 0.0 for a BooleanVector output) and output_validity[k], per row:\n");
+        builder.Append("// outputs[k] (1.0f or 0.0f for a BooleanVector output) and output_validity[k], per row:\n");
         for (var index = 0; index < expression.OutputNodes.Length; index++)
         {
             var node = expression.OutputNodes[index];
@@ -129,7 +129,7 @@ internal static class MathBlockFusedCudaSource
         switch (step.Operation.Result)
         {
             case MathBlockFusedKind.Number:
-                builder.Append("    const double n").Append(node).Append(" = ").Append(expressionText).Append(";\n")
+                builder.Append("    const float n").Append(node).Append(" = ").Append(expressionText).Append(";\n")
                     .Append("    if (!isfinite(n").Append(node).Append(")) invalid |= ").Append(bit).Append(";\n");
                 break;
             case MathBlockFusedKind.Flag:
@@ -159,12 +159,12 @@ internal static class MathBlockFusedCudaSource
         var sourceArity = step.Lift!.Source.Arity;
         var sourceArguments = new string[3];
         for (var index = 0; index < sourceArguments.Length; index++)
-            sourceArguments[index] = index < sourceArity ? arguments[index] : "0.0";
+            sourceArguments[index] = index < sourceArity ? arguments[index] : "0.0f";
         // The converged flag is the kernel's: a row that does not converge is recorded under the form's contract opcode (2 * source +
         // sibling), as mathblocks_elementwise_run records it, so the module's counters hold the same counts as CoreCLR's.
         var sibling = step.Operation.Opcode == MathBlockFusedOpcode.ElementwiseValidity;
         var form = 2 * step.Operation.ElementwiseSource + (sibling ? 1 : 0);
-        builder.Append("    double v").Append(node).Append(" = 0.0;\n")
+        builder.Append("    float v").Append(node).Append(" = 0.0f;\n")
             .Append("    bool g").Append(node).Append(" = true;\n")
             .Append("    const int k").Append(node).Append(" = ")
             .Append(MathBlockFusedOperations.CudaElementwiseRow(
@@ -183,7 +183,7 @@ internal static class MathBlockFusedCudaSource
         }
         else
         {
-            builder.Append("    const double n").Append(node).Append(" = ")
+            builder.Append("    const float n").Append(node).Append(" = ")
                 .Append(MathBlockFusedOperations.CudaFillSelect("k" + node, "v" + node, arguments[^1]))
                 .Append(";\n");
             AppendRowValidity(builder, expression, step, "k" + node);
@@ -219,7 +219,7 @@ internal static class MathBlockFusedCudaSource
         var outputCount = Number(expression.OutputNodes.Length);
         builder.Append("extern \"C\" __global__ void ").Append(expression.CudaKernelName).Append("(\n")
             .Append("    const void* const* inputs,\n")
-            .Append("    const double* scalars,\n")
+            .Append("    const float* scalars,\n")
             .Append("    const int* const* validity,\n")
             .Append("    long long rows,\n")
             .Append("    void* const* outputs,\n")
@@ -229,7 +229,7 @@ internal static class MathBlockFusedCudaSource
             .Append("    for (long long row = (long long)blockIdx.x * blockDim.x + threadIdx.x; row < rows;\n")
             .Append("         row += (long long)gridDim.x * blockDim.x)\n")
             .Append("    {\n")
-            .Append("        double values[").Append(outputCount).Append("];\n")
+            .Append("        float values[").Append(outputCount).Append("];\n")
             .Append("        int row_validity[").Append(outputCount).Append("];\n")
             .Append("        ").Append(expression.CudaFunctionName)
             .Append("(inputs, scalars, validity, row, values, row_validity, invalid_mask);\n");
@@ -237,8 +237,8 @@ internal static class MathBlockFusedCudaSource
         {
             var output = Number(index);
             builder.Append(expression.Kinds[expression.OutputNodes[index]] == MathBlockFusedKind.Number
-                    ? "        ((double*)outputs[" + output + "])[row] = values[" + output + "];\n"
-                    : "        ((int*)outputs[" + output + "])[row] = values[" + output + "] != 0.0;\n")
+                    ? "        ((float*)outputs[" + output + "])[row] = values[" + output + "];\n"
+                    : "        ((int*)outputs[" + output + "])[row] = values[" + output + "] != 0.0f;\n")
                 .Append("        output_validity[").Append(output).Append("][row] = row_validity[")
                 .Append(output).Append("];\n");
         }
@@ -258,9 +258,9 @@ internal static class MathBlockFusedCudaSource
     private static string RowValidity(MathBlockFusedExpression expression, int node) =>
         expression.ContributingInputs(node) != 0 ? "r" + Number(node) : "1";
 
-    private static string FormatDouble(float value) =>
-        "__longlong_as_double((long long)0x" +
-        Math.ToBits(value).ToString("x16", CultureInfo.InvariantCulture) + "ULL)";
+    private static string FormatSingle(float value) =>
+        "__int_as_float((int)0x" +
+        Math.ToBits(value).ToString("x8", CultureInfo.InvariantCulture) + "U)";
 
     private static string Number(int value) => value.ToString(CultureInfo.InvariantCulture);
 }

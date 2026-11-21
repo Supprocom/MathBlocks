@@ -54,7 +54,7 @@ public sealed class MathBlockDomainOptions
     public int IncompleteBetaMaximumIterations { get; init; } = 256;
 
     /// <summary>Gets the relative step size at which the incomplete beta continued fraction counts as converged. The range is 0 to 1 and finite.</summary>
-    public float IncompleteBetaTolerance { get; init; } = 3e-14f;
+    public float IncompleteBetaTolerance { get; init; } = 2e-6f;
 
     /// <summary>Gets what the incomplete beta function returns when the continued fraction has not converged at its iteration budget.</summary>
     public MathBlockNonConvergencePolicy IncompleteBetaNonConvergence { get; init; } = MathBlockNonConvergencePolicy.Estimate;

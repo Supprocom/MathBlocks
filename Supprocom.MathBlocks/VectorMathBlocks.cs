@@ -114,7 +114,7 @@ internal static partial class VectorMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Vector(function(inputs[0].AsVector()), type.Unit, true);
         },
-        [MathBlockValue.Vector(sample)], MathBlockValue.Vector(expected), 1e-9f, 64);
+        [MathBlockValue.Vector(sample)], MathBlockValue.Vector(expected), 3e-5f, 64);
 
     private static MathBlockOperation CreateVectorBinary(
         string identifier,
@@ -131,7 +131,7 @@ internal static partial class VectorMathBlocks
                 return MathBlockValue.Invalid(type, RowCountsDiffer);
             return MathBlockValue.Vector(function(inputs[0].AsVector(), inputs[1].AsVector()), type.Unit, true);
         },
-        [sampleVector, secondVector], MathBlockValue.Vector(expected), 1e-9f, 64);
+        [sampleVector, secondVector], MathBlockValue.Vector(expected), 3e-5f, 64);
 
     private static MathBlockOperation CreateVectorScalar(
         string identifier,
@@ -145,7 +145,7 @@ internal static partial class VectorMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Vector(function(inputs[0].AsVector(), inputs[1].AsScalar()), type.Unit, true);
         },
-        [sampleVector, MathBlockValue.Scalar(scalar)], MathBlockValue.Vector(expected), 1e-9f, 64);
+        [sampleVector, MathBlockValue.Scalar(scalar)], MathBlockValue.Vector(expected), 3e-5f, 64);
 
     private static MathBlockOperation CreateReduction(
         string identifier,
@@ -158,7 +158,7 @@ internal static partial class VectorMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Scalar(function(inputs[0].AsVector()), type.Unit);
         },
-        [sampleVector], MathBlockValue.Scalar(expected), 1e-9f, 64);
+        [sampleVector], MathBlockValue.Scalar(expected), 3e-5f, 64);
 
     private static MathBlockOperation CreateRolling(
         string identifier,
@@ -178,7 +178,7 @@ internal static partial class VectorMathBlocks
                     ? MathBlockValue.Vector(function(values, width), unit, true)
                     : MathBlockOperationFactory.Invalid(resolver, inputs, "The width is outside the sequence domain.");
             },
-            [sampleVector, MathBlockValue.Scalar(2f)], MathBlockValue.Vector(expected), 1e-9f, 32), retainedRows: 1);
+            [sampleVector, MathBlockValue.Scalar(2f)], MathBlockValue.Vector(expected), 3e-5f, 32), retainedRows: 1);
     }
 
     // A rolling operation over n rows with width w returns n - w + 1 rows, and a difference with lag w returns

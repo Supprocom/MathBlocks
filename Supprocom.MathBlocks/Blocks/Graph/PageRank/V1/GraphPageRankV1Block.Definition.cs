@@ -33,6 +33,6 @@ internal static partial class GraphMathBlocks
                     MathBlockGraphMath.PageRank(graph, damping, (int)iterations),
                     default,
                     true);
-        }, [MathBlockValue.Graph(new MathBlockGraph(2, [new(0, 1, 1f), new(1, 0, 1f)])), MathBlockValue.Scalar(0.85f), MathBlockValue.Scalar(20f)], MathBlockValue.Vector([0.5f, 0.5f]), 1e-9f, 2);
+        }, [MathBlockValue.Graph(new MathBlockGraph(2, [new(0, 1, 1f), new(1, 0, 1f)])), MathBlockValue.Scalar(0.85f), MathBlockValue.Scalar(20f)], MathBlockValue.Vector([0.5f, 0.5f]), 3e-5f, 2);
     }
 }
