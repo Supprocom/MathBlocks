@@ -62,6 +62,42 @@ internal static unsafe class ScalarModule
         return MathF.Sqrt(value);
     }
 
+    // value * 2^exponent rounded once to nearest, the result of the CoreCLR primitive. Every multiplication before the last is by a power of two
+    // that leaves the product exact (2^127 going up; 2^-102 going down, which keeps 24 bits above the smallest normal), so only the last one
+    // rounds (the method of musl's scalbnf). The device's own ldexpf is not used: it compiles to an approximate instruction.
+    [CudaDevice]
+    private static float mathblocks_scale_binary(float value, int exponent)
+    {
+        float scaled = value;
+        int remaining = exponent;
+        if (remaining > 127)
+        {
+            scaled *= 1.7014118346046923e38f;
+            remaining -= 127;
+            if (remaining > 127)
+            {
+                scaled *= 1.7014118346046923e38f;
+                remaining -= 127;
+                if (remaining > 127)
+                    remaining = 127;
+            }
+        }
+        else if (remaining < -126)
+        {
+            scaled *= 1.9721522630525295e-31f;
+            remaining += 102;
+            if (remaining < -126)
+            {
+                scaled *= 1.9721522630525295e-31f;
+                remaining += 102;
+                if (remaining < -126)
+                    remaining = -126;
+            }
+        }
+
+        return scaled * BitConverter.Int32BitsToSingle((remaining + 127) << 23);
+    }
+
     [CudaDevice]
     private static float mathblocks_exponential(float value)
     {
@@ -81,7 +117,7 @@ internal static unsafe class ScalarModule
             0.00000300198505138664455042f * square + 0.00252448340349684104192f) * square +
             0.227265548208155028766f) * square + 2.0f);
         float result = 1.0f + 2.0f * numerator / (denominator - numerator);
-        return MathF.ScaleB(result, exponent);
+        return mathblocks_scale_binary(result, exponent);
     }
 
     [CudaDevice]
@@ -95,7 +131,7 @@ internal static unsafe class ScalarModule
             return mathblocks_positive_infinity();
 
         int exponent = MathF.ILogB(value) + 1;
-        float reduced = MathF.ScaleB(value, -exponent);
+        float reduced = mathblocks_scale_binary(value, -exponent);
         if (reduced < 0.70710678118654752440f)
         {
             exponent--;
