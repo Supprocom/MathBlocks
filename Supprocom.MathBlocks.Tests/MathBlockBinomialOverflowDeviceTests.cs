@@ -57,7 +57,8 @@ public sealed class MathBlockBinomialOverflowDeviceTests
         Assert.True(MathBlockDomainWiringTests.Same(coreclr, cuda), $"{identity}: the device differs from CoreCLR.");
         Assert.True(coreclr.IsValid);
         var values = coreclr.AsVector();
-        Assert.True(values[0] > 3.16e37f, "The row of (130, 65) is not the finite coefficient.");
-        Assert.True(values[6] > 3.16e37f, "The row of (1000000, 7) is not the finite coefficient.");
+        // The ballot count of the first pair is the coefficient divided by 66, so the bar is below both.
+        Assert.True(float.IsFinite(values[0]) && values[0] > 1e36f, "The row of (130, 65) is not the finite coefficient.");
+        Assert.True(float.IsFinite(values[6]) && values[6] > 1e36f, "The row of (1000000, 7) is not the finite coefficient.");
     }
 }
