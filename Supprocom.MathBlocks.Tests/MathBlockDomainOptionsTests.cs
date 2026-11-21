@@ -41,7 +41,7 @@ public sealed class MathBlockDomainOptionsTests
         Assert.Equal(4_096, options.MaximumMatrixSize);
         Assert.Equal(10_000, options.MaximumIterationCount);
         Assert.Equal(256, options.IncompleteBetaMaximumIterations);
-        Assert.Equal(3e-14f, options.IncompleteBetaTolerance);
+        Assert.Equal(2e-6f, options.IncompleteBetaTolerance);
         Assert.Equal(MathBlockNonConvergencePolicy.Estimate, options.IncompleteBetaNonConvergence);
         Assert.Equal(64, options.JacobiRotationMultiplier);
         Assert.Equal(MathBlockNonConvergencePolicy.Estimate, options.JacobiNonConvergence);

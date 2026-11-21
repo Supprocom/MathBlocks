@@ -31,9 +31,9 @@ public sealed class MathBlockRowFunctionTests
     // NVRTC ignores source line endings; these are not fingerprinted fixtures.
 #pragma warning disable MA0136
     private const string InlineKernel = """
-        extern "C" __global__ void mathblocks_row_inline(double* values, int* valid)
+        extern "C" __global__ void mathblocks_row_inline(float* values, int* valid)
         {
-            double value = 0.0;
+            float value = 0.0;
             valid[0] = mathblocks_row_add(1.5, 2.25, -1.0, &value) ? 1 : 0;
             values[0] = value;
             valid[1] = mathblocks_row_divide(1.0, 4.0, -1.0, &value) ? 1 : 0;
@@ -55,7 +55,7 @@ public sealed class MathBlockRowFunctionTests
     /// <summary>Gets the source of a consumer kernel that calls every row function once with its arguments read from <c>x</c>.</summary>
     internal static string CallEveryFunctionKernel()
     {
-        var text = new StringBuilder("extern \"C\" __global__ void mathblocks_row_probe(const double* x, const double* items, int count, double fill, double* y, int* v)\n{\n    double r = 0.0;\n");
+        var text = new StringBuilder("extern \"C\" __global__ void mathblocks_row_probe(const float* x, const float* items, int count, float fill, float* y, int* v)\n{\n    float r = 0.0;\n");
         for (var index = 0; index < Functions.Length; index++)
         {
             var function = Functions[index];

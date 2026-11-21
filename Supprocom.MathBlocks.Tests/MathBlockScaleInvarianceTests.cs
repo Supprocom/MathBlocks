@@ -53,12 +53,12 @@ public sealed class MathBlockScaleInvarianceTests
             var expected = operation.Evaluate(inputs);
             if (!expected.IsValid)
                 continue;
-            foreach (var k in new[] { -1000, -600, -300, -40, 40, 300, 600, 1000 })
+            foreach (var k in new[] { -120, -75, -37, -5, 5, 37, 75, 120 })
             {
                 if (!TryScale(inputs, scaled, k, out var scaledInputs) || !TryScaleScalar(ToNumbers(expected), degree * k, out var expectedScaled))
                     continue;
                 var actual = operation.Evaluate(scaledInputs);
-                if (Math.Abs(k) == 40)
+                if (Math.Abs(k) == 5)
                 {
                     moderate++;
                     if (!Same(expectedScaled, actual))
@@ -134,7 +134,7 @@ public sealed class MathBlockScaleInvarianceTests
         if (value == 0f)
             return true;
         result = MathF.ScaleB(value, exponent);
-        return float.IsFinite(result) && Math.Abs(result) >= float.Epsilon * 4.5035996273704960e15f && MathF.ScaleB(result, -exponent) == value;
+        return float.IsFinite(result) && Math.Abs(result) >= float.Epsilon * 8388608f && MathF.ScaleB(result, -exponent) == value;
     }
 
     private static bool Same(float[] expected, MathBlockValue actual)

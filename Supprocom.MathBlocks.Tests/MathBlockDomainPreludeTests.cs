@@ -7,7 +7,7 @@ namespace Supprocom.MathBlocks.Tests;
 public sealed partial class MathBlockDomainPreludeTests
 {
     [GeneratedRegex(
-        @"static __device__ __forceinline__ (?:int|double|long long) (?<name>mathblocks_limit_\w+)\([^)]*\) \{ return (?<value>[^;]+); \}",
+        @"static __device__ __forceinline__ (?:int|float|long long) (?<name>mathblocks_limit_\w+)\([^)]*\) \{ return (?<value>[^;]+); \}",
         RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture,
         matchTimeoutMilliseconds: 10_000)]
     private static partial Regex LimitFunction();
@@ -57,7 +57,7 @@ public sealed partial class MathBlockDomainPreludeTests
             ["mathblocks_limit_matrix_size"] = "5000",
             ["mathblocks_limit_iteration_count"] = "20000",
             ["mathblocks_limit_incomplete_beta_maximum_iterations"] = "1024",
-            ["mathblocks_limit_incomplete_beta_tolerance"] = "1E-10",
+            ["mathblocks_limit_incomplete_beta_tolerance"] = "1E-10f",
             ["mathblocks_limit_incomplete_beta_policy"] = "1",
             ["mathblocks_limit_jacobi_policy"] = "1",
             ["mathblocks_limit_jacobi_rotation_budget"] = "(long long)512 * size * size",

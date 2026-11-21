@@ -17,9 +17,9 @@ internal static class MathBlockElementwiseTestSupport
     [
         0f, float.NegativeZero, float.Epsilon, -float.Epsilon, 5.28e-41f, -5.28e-41f, 1.1754943e-38f,
         -1.1754943e-38f, 1.03e-37f, 1f, -1f, 0.5f, -0.5f, 1.5f, -1.5f, 2.5f, -2.5f, 2f, -2f, 3f,
-        0.9999999999999999f, 1.0000000000000002f, -0.9999999999999999f, -1.0000000000000002f,
-        MathF.PI / 2f, MathF.PI, -MathF.PI, 10f, 170f, 171f, 709.78f, 710f, -745.2f, -746f, 1e15f,
-        4503599627370495.5f, 1e25f, -1e25f, float.MaxValue, -float.MaxValue
+        0.99999994f, 1.0000001f, -0.99999994f, -1.0000001f,
+        MathF.PI / 2f, MathF.PI, -MathF.PI, 10f, 34f, 35f, 88.72f, 88.73f, -103.9f, -104f, 1e7f,
+        8388607.5f, 1e25f, -1e25f, float.MaxValue, -float.MaxValue
     ];
 
     // The 41 sources of design section 5, in catalog order.
@@ -120,7 +120,7 @@ internal static class MathBlockElementwiseTestSupport
             < 10 => random.NextSingle() * 6f - 3f,
             < 13 => random.NextSingle(),
             < 16 => random.Next(-2, 13),
-            < 18 => (random.Next(2) == 0 ? -1f : 1f) * MathF.Pow(10f, random.NextSingle() * 600f - 300f),
+            < 18 => (random.Next(2) == 0 ? -1f : 1f) * MathF.Pow(10f, random.NextSingle() * 75f - 37.5f),
             _ => (random.Next(2) == 0 ? -1f : 1f) * random.NextSingle() * 1.26e-38f
         };
     }

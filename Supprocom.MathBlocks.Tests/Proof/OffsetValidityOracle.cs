@@ -6,7 +6,7 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 /// </summary>
 internal static class OffsetValidityOracle
 {
-    private const float PrefixScale = 7.7e-38f;
+    private const float PrefixScale = 4.930380657631324e-32f;
     private const float ScaledLimit = 16777216f;
 
     /// <summary>The definition: every row's span added left to right from 0.0, checked after every step.</summary>
@@ -64,7 +64,7 @@ internal static class OffsetValidityOracle
         var magnitudes = 0f;
         for (var index = 0; index < x.Length; index++)
             magnitudes += Math.Abs(x[index]);
-        if (magnitudes <= 2.62e38f)
+        if (magnitudes <= 4.2e37f)
             return rowValid;
         DecideOverflows(x, xValid, counts, start, end, rowValid);
         return rowValid;
@@ -95,11 +95,11 @@ internal static class OffsetValidityOracle
             largestValue = Math.Max(largestValue, Math.Abs(scaled));
         }
 
-        const float Epsilon = 2.220446049250313e-16f;
+        const float Epsilon = 1.1920929e-7f;
         var margin = 2f * (length + 2f) * Epsilon * largestPrefix
             + (width + 2f) * Epsilon * width * largestValue
             + length * 1.1754943e-38f
-            + ScaledLimit * 4.5e-16f;
+            + ScaledLimit * 2.4e-7f;
         var headMaximum = 0;
         var tailMaximum = 0;
         var headMinimum = 0;

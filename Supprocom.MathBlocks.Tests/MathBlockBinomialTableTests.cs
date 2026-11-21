@@ -10,8 +10,8 @@ public sealed class MathBlockBinomialTableTests
 {
     private const int LargestRow = 1023;
     private const string Memo = "mathblocks_probability_binomial_memo(";
-    private const string Load = "static __device__ __forceinline__ double mathblocks_binomial_table_load(int index)";
-    private const string Store = "static __device__ __forceinline__ void mathblocks_binomial_table_store(int index, double value)";
+    private const string Load = "static __device__ __forceinline__ float mathblocks_binomial_table_load(int index)";
+    private const string Store = "static __device__ __forceinline__ void mathblocks_binomial_table_store(int index, float value)";
 
     // The offset of the entry of (n, k) in the table, as the memo function computes it: the rows below n hold n / 2 * ((n - 1) / 2) + n entries.
     private static int Offset(int n, int k) => (n / 2) * ((n - 1) / 2) + n + Math.Min(k, n - k);
@@ -43,7 +43,7 @@ public sealed class MathBlockBinomialTableTests
 
         Assert.Equal(262_656, entries);
         Assert.Equal(MathBlockCudaDeviceModule.BinomialTableEntryCount, entries);
-        Assert.Equal(2_101_248L, (long)entries * sizeof(float));
+        Assert.Equal(1_050_624L, (long)entries * sizeof(float));
     }
 
     /// <summary>Verifies the offset formula gives every entry of the table once: each pair 0 &lt;= k &lt;= n &lt;= 1023 lands on the entry of its symmetric pair, and no entry is left over.</summary>
@@ -74,7 +74,7 @@ public sealed class MathBlockBinomialTableTests
     [Fact]
     public void TheDeviceSourceDefinesTheTableOnceBeforeTheUnits()
     {
-        var table = $"__device__ double {MathBlockCudaDeviceModule.BinomialTableSymbol}[{MathBlockCudaDeviceModule.BinomialTableEntryCount}];";
+        var table = $"__device__ float {MathBlockCudaDeviceModule.BinomialTableSymbol}[{MathBlockCudaDeviceModule.BinomialTableEntryCount}];";
         var sources = new[]
         {
             MathBlockCudaDeviceModule.Source,

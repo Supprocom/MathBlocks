@@ -245,7 +245,7 @@ public sealed class MathBlockInvalidStateTests
         var maximum = MathBlockCatalog.Standard.Get("tropical.max-plus-multiply").Evaluate(Matrix(1, 2, 0f, -0f), Matrix(2, 1, 0f, -0f));
         Assert.Equal(0L, BitConverter.SingleToInt32Bits(maximum.AsMatrix()[0, 0]));
         var minimum = MathBlockCatalog.Standard.Get("tropical.min-plus-multiply").Evaluate(Matrix(1, 2, -0f, 0f), Matrix(2, 1, -0f, 0f));
-        Assert.Equal(long.MinValue, BitConverter.SingleToInt32Bits(minimum.AsMatrix()[0, 0]));
+        Assert.Equal(int.MinValue, BitConverter.SingleToInt32Bits(minimum.AsMatrix()[0, 0]));
     }
 
     /// <summary>Verifies the rolling variance is in the square of the input unit.</summary>

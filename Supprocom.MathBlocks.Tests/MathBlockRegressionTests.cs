@@ -25,7 +25,7 @@ public sealed class MathBlockRegressionTests
         {
             var left = random.NextSingle() * 20f - 10f;
             var addend = random.NextSingle() * 20f - 10f;
-            Assert.Equal(left, MathBlockScalar.Subtract(MathBlockScalar.Add(left, addend), addend), 11);
+            Assert.Equal(left, MathBlockScalar.Subtract(MathBlockScalar.Add(left, addend), addend), 5);
         }
 
         var matrix = new MathBlockMatrix(3, 3,
@@ -53,8 +53,8 @@ public sealed class MathBlockRegressionTests
 
         for (var index = 0; index < input.Length; index++)
         {
-            Assert.Equal(input[index], restored[index].Real, 10);
-            Assert.Equal(0f, restored[index].Imaginary, 10);
+            Assert.Equal(input[index], restored[index].Real, 5);
+            Assert.Equal(0f, restored[index].Imaginary, 5);
         }
     }
 
@@ -68,9 +68,9 @@ public sealed class MathBlockRegressionTests
         var coupling = MathBlockTransport.SinkhornCoupling(cost, left, rightMarginal, 0.7f, 500);
 
         for (var row = 0; row < coupling.Rows; row++)
-            Assert.Equal(left[row], Enumerable.Range(0, coupling.Columns).Sum(column => coupling[row, column]), 9);
+            Assert.Equal(left[row], Enumerable.Range(0, coupling.Columns).Sum(column => coupling[row, column]), 5);
         for (var column = 0; column < coupling.Columns; column++)
-            Assert.Equal(rightMarginal[column], Enumerable.Range(0, coupling.Rows).Sum(row => coupling[row, column]), 9);
+            Assert.Equal(rightMarginal[column], Enumerable.Range(0, coupling.Rows).Sum(row => coupling[row, column]), 5);
     }
 
     /// <summary>Verifies hodge potential exactly recovers agradient flow.</summary>
@@ -87,7 +87,7 @@ public sealed class MathBlockRegressionTests
 
         Assert.True(MathBlockGraphMath.TryHodgePotential(graph, out var potential));
         Assert.Equal([0f, 2f, 1f, 5f], potential, new ApproximateDoubleComparer(1e-10f));
-        Assert.Equal(0f, MathBlockGraphMath.HodgeResidualNorm(graph, potential), 10);
+        Assert.Equal(0f, MathBlockGraphMath.HodgeResidualNorm(graph, potential), 5);
     }
 
     /// <summary>Verifies geometry and path signature match closed form results.</summary>
@@ -95,8 +95,8 @@ public sealed class MathBlockRegressionTests
     public void GeometryAndPathSignatureMatchClosedFormResults()
     {
         var polygon = new MathBlockPointSet([new(0f, 0f), new(2f, 0f), new(2f, 1f), new(0f, 1f)]);
-        Assert.Equal(2f, MathBlockGeometry.PolygonArea(polygon), 12);
-        Assert.Equal(6f, MathBlockGeometry.Perimeter(polygon), 12);
+        Assert.Equal(2f, MathBlockGeometry.PolygonArea(polygon), 5);
+        Assert.Equal(6f, MathBlockGeometry.Perimeter(polygon), 5);
 
         var straightPath = new MathBlockMatrix(2, 2, [0f, 0f, 2f, 3f]);
         Assert.Equal([2f, 3f], MathBlockPath.SignatureLevelOne(straightPath), new ApproximateDoubleComparer(1e-12f));
@@ -111,9 +111,9 @@ public sealed class MathBlockRegressionTests
     public void StatisticalAndInformationResultsMatchKnownValues()
     {
         var values = new[] { 1f, 2f, 3f, 4f };
-        Assert.Equal(1.25f, MathBlockStatistics.PopulationVariance(values), 12);
-        Assert.Equal(1f, MathBlockStatistics.PearsonCorrelation(values, right), 12);
-        Assert.Equal(MathF.Log(2f), MathBlockProbability.ShannonEntropy(new[] { 0.5f, 0.5f }), 12);
+        Assert.Equal(1.25f, MathBlockStatistics.PopulationVariance(values), 5);
+        Assert.Equal(1f, MathBlockStatistics.PearsonCorrelation(values, right), 5);
+        Assert.Equal(MathF.Log(2f), MathBlockProbability.ShannonEntropy(new[] { 0.5f, 0.5f }), 5);
         Assert.Equal(0f, MathBlockProbability.JensenShannonDivergence(
             new[] { 0.25f, 0.75f }, new[] { 0.25f, 0.75f }), 12);
     }

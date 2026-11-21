@@ -25,12 +25,12 @@ public sealed class MathBlockConsumerRowFunctionSourceTests
     // is a row function that was not inlined. NVRTC ignores source line endings; this is not a fingerprinted fixture.
 #pragma warning disable MA0136
     private const string ConsumerKernel = """
-        extern "C" __global__ void consumer_rows_probe(const double* a, const double* b, double fill, double* values, int* valid, int count)
+        extern "C" __global__ void consumer_rows_probe(const float* a, const float* b, float fill, float* values, int* valid, int count)
         {
             int row = blockIdx.x * blockDim.x + threadIdx.x;
             if (row >= count)
                 return;
-            double value = 0.0;
+            float value = 0.0;
             int flags = 0;
             flags |= mathblocks_row_add(a[row], b[row], fill, &value) ? 1 : 0;
             values[row * 7] = value;

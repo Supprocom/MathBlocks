@@ -164,7 +164,7 @@ public sealed class OffsetValidityEquivalenceTests
                     series[row + 3] = shape < 2 ? -sign * second : 0f;
                     series[row + 4] = 3f;
                     series[row + 5] = sign * 3.4028235e38f;
-                    series[row + 6] = shape == 3 ? sign * MathF.Pow(2f, 970f) : 0f;
+                    series[row + 6] = shape == 3 ? sign * MathF.ScaleB(1f, 103) : 0f;
                     series[row + 7] = -0f;
                 }
 

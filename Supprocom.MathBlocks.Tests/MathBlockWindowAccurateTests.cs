@@ -47,7 +47,7 @@ public sealed class MathBlockWindowAccurateTests(ITestOutputHelper output)
         for (var row = 0; row < values.Length; row++)
         {
             if (row % 80 == 0)
-                constant = (random.NextSingle() * 2f - 1f) * MathF.Pow(10f, random.Next(-50, 51));
+                constant = (random.NextSingle() * 2f - 1f) * MathF.Pow(10f, random.Next(-12, 13));
             values[row] = row % 80 < 60 ? constant : 1_000f + random.NextSingle() * 3f;
         }
         values[160] = -1.0101787042252373e+32f;
@@ -139,7 +139,7 @@ public sealed class MathBlockWindowAccurateTests(ITestOutputHelper output)
         var tiny = MathBlockValue.Vector([1.88e-20f, 2.05e-20f, 2.15e-20f, 2.23e-20f]);
         var huge = MathBlockValue.Vector([1.63e19f, 1.63e19f, 1.63e19f, 1.63e19f]);
         var large = MathBlockValue.Vector([5.62e18f, 5.69e18f, 5.62e18f, 5.69e18f]);
-        var inside = MathBlockValue.Vector([4.69e-13f, 5.11e-13f, 4.22e18f, 4.27e18f]);
+        var inside = MathBlockValue.Vector([4.69e-13f, 5.11e-13f, 1.0e17f, 1.1e17f]);
         var width = MathBlockValue.Scalar(2f);
         foreach (var name in new[] { "population-variance", "sample-variance", "population-standard-deviation", "sample-standard-deviation" })
         {

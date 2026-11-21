@@ -31,9 +31,9 @@ public sealed class MathBlockFusedExpressionSourceTests
         var source = fused.CudaSource;
         foreach (var intrinsic in new[]
                  {
-                     "__dadd_rn(", "__dsub_rn(", "__dmul_rn(", "__ddiv_rn(", "mathblocks_exponential(",
+                     "__fadd_rn(", "__fsub_rn(", "__fmul_rn(", "__fdiv_rn(", "mathblocks_exponential(",
                      "mathblocks_natural_logarithm(", "mathblocks_square_root(", "mathblocks_power(",
-                     "mathblocks_maximum(", "mathblocks_complex_make(", "mathblocks_complex_magnitude(", "fabs(",
+                     "mathblocks_maximum(", "mathblocks_complex_make(", "mathblocks_complex_magnitude(", "fabsf(",
                      "atomicOr(invalid_mask, invalid)"
                  })
             Assert.Contains(intrinsic, source, StringComparison.Ordinal);
@@ -54,7 +54,7 @@ public sealed class MathBlockFusedExpressionSourceTests
                      "mathblocks_elementwise_source_opcode(8), n32, n3, 0.0, &v34, &g34);",
                      "bool g34 = true;",
                      "if (!g34) mathblocks_nonconvergence_record_elementwise(16);",
-                     "const double n34 = k34 ? v34 : n33;",
+                     "const float n34 = k34 ? v34 : n33;",
                      "const int r34 = r32 & k34;",
                      "mathblocks_elementwise_source_opcode(3), n34, 0.0, 0.0, &v35, &g35);",
                      "mathblocks_elementwise_source_opcode(12), n35, n4, n1, &v36, &g36);",

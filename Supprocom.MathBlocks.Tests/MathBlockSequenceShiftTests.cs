@@ -174,7 +174,7 @@ public sealed class MathBlockSequenceShiftTests
     [InlineData(-2.5f)]
     [InlineData(0.5f)]
     [InlineData(1.5f)]
-    [InlineData(2.0000000000000004f)]
+    [InlineData(2.0000002f)]
     public void BadOffsetsAreWholeCallInvalid(float k)
     {
         foreach (var identifier in new[] { "sequence.lead", "sequence.lead-valid", "sequence.lag", "sequence.lag-valid" })
@@ -194,7 +194,7 @@ public sealed class MathBlockSequenceShiftTests
     {
         Assert.False(Evaluate(identifier, Series, Available, WithCount(8, -1f), 1f, Fill).IsValid);
         Assert.False(Evaluate(identifier, Series, Available, WithCount(0, 0.5f), 1f, Fill).IsValid);
-        Assert.False(Evaluate(identifier, Series, Available, WithCount(4, 1.0000000000000002f), 1f, Fill).IsValid);
+        Assert.False(Evaluate(identifier, Series, Available, WithCount(4, 1.0000001f), 1f, Fill).IsValid);
         Assert.False(Evaluate(identifier, Series, Available, Counts[..8], 1f, Fill).IsValid);
         Assert.False(Evaluate(identifier, Series, Available, [.. Counts, 4f], 1f, Fill).IsValid);
         Assert.False(Evaluate(identifier, Series, Available[..8], Counts, 1f, Fill).IsValid);

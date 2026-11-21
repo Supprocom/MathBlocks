@@ -49,7 +49,7 @@ internal sealed class MathBlockWindowExactReference
     // The series times 2^Scale is an integer series.
     public int Scale { get; }
 
-    public static float Unit => MathF.ScaleB(1f, -53);
+    public static float Unit => MathF.ScaleB(1f, -24);
 
     public static float Gamma(float k) => k * Unit / (1f - k * Unit);
 
@@ -68,7 +68,7 @@ internal sealed class MathBlockWindowExactReference
     public float ShiftedWindowAbsoluteSum(int row, int width) =>
         ToDouble(BigInteger.Abs(WindowSum(shiftedSum, row, width)), BigInteger.One, Scale);
 
-    // The window sum and mean rounded to the nearest double, ties to even.
+    // The window sum and mean rounded to the nearest single, ties to even.
     public float RoundedSum(int row, int width) => Round(WindowSum(sum, row, width), BigInteger.One, Scale);
 
     public float RoundedMean(int row, int width) => Round(WindowSum(sum, row, width), width, Scale);
@@ -80,7 +80,7 @@ internal sealed class MathBlockWindowExactReference
         return ToDouble(s * s, (BigInteger)width * width, 2 * Scale);
     }
 
-    // numerator / (denominator 2^binaryScale) rounded to the nearest double, ties to even, including subnormals.
+    // numerator / (denominator 2^binaryScale) rounded to the nearest single, ties to even, including subnormals.
     public static float Round(BigInteger numerator, BigInteger denominator, int binaryScale)
     {
         if (numerator.IsZero)
@@ -94,7 +94,7 @@ internal sealed class MathBlockWindowExactReference
         var quotient = BigInteger.DivRem(scaled, divisor, out var remainder);
         var unitExponent = -k - binaryScale;
         var most = (int)quotient.GetBitLength() - 1 + unitExponent;
-        var least = Math.Max(most - 52, -1074);
+        var least = Math.Max(most - 23, -149);
         var drop = least - unitExponent;
         BigInteger significand;
         bool round;
@@ -186,16 +186,16 @@ internal sealed class MathBlockWindowExactReference
     {
         var bits = BitConverter.SingleToInt32Bits(value);
         var negative = bits < 0;
-        var biased = (int)((bits >> 52) & 0x7FF);
-        var fraction = bits & 0xF_FFFF_FFFF_FFFFL;
+        var biased = (bits >> 23) & 0xFF;
+        long fraction = bits & 0x7F_FFFF;
         if (biased == 0)
         {
-            exponent = -1074;
+            exponent = -149;
         }
         else
         {
-            fraction |= 1L << 52;
-            exponent = biased - 1075;
+            fraction |= 1L << 23;
+            exponent = biased - 150;
         }
         while (fraction != 0 && (fraction & 1) == 0)
         {

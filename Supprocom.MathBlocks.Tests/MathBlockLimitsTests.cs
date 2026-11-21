@@ -78,9 +78,9 @@ public sealed class MathBlockLimitsTests(ITestOutputHelper output)
         Assert.Equal(3, Value("fused.maximum-source-arity"));
         Assert.True(Value("fused.operation-count") > 26);
         Assert.Equal(48, Value("cuda.slot.size-bytes"));
-        Assert.Equal(285, Value("cuda.window-accurate.accumulator-words"));
-        Assert.Equal(141, Value("cuda.window-accurate.accumulator-chunks"));
-        Assert.Equal(570, Value("cuda.window-accurate.variance-accumulator-words"));
+        Assert.Equal(59, Value("cuda.window-accurate.accumulator-words"));
+        Assert.Equal(28, Value("cuda.window-accurate.accumulator-chunks"));
+        Assert.Equal(118, Value("cuda.window-accurate.variance-accumulator-words"));
         Assert.Equal(134_217_728, Value("cuda.window-accurate.carry-flush-additions"));
         Assert.Equal(20, Value("domain.maximum-explicit-subset-size", "matrix.principal-minors@1"));
         Assert.Equal(20, Value("domain.maximum-explicit-subset-size", "combinatorics.nonempty-subset-sums@1"));

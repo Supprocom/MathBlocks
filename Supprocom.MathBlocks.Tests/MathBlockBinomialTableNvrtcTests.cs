@@ -19,9 +19,9 @@ public sealed partial class MathBlockBinomialTableNvrtcTests
 
     // A consumer kernel that reads and writes the table through its public name, and evaluates a pair through the memo function.
     private const string Consumer =
-        "extern \"C\" __global__ void consumer_binomial(double* output, int n, int k)\n" +
+        "extern \"C\" __global__ void consumer_binomial(float* output, int n, int k)\n" +
         "{\n" +
-        "    double value = mathblocks_probability_binomial_memo(n, k);\n" +
+        "    float value = mathblocks_probability_binomial_memo(n, k);\n" +
         "    mathblocks_binomial_table_store(0, value);\n" +
         "    output[0] = value + mathblocks_binomial_table_load(1) + " + MathBlockCudaDeviceModule.BinomialTableSymbol + "[2];\n" +
         "}\n";

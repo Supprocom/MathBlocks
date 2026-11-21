@@ -85,7 +85,7 @@ public sealed class OffsetValidityOracleTests
             var largeShare = random.Next(6);
             for (var row = 0; row < length; row++)
             {
-                values[row] = random.Next(6) < largeShare ? Largest * (random.NextSingle() - 0.5f) * 2f : (random.NextSingle() - 0.5f) * MathF.Pow(10f, random.Next(-300, 300));
+                values[row] = random.Next(6) < largeShare ? Largest * (random.NextSingle() - 0.5f) * 2f : (random.NextSingle() - 0.5f) * MathF.Pow(10f, random.Next(-37, 38));
                 flags[row] = random.Next(30) != 0;
             }
 

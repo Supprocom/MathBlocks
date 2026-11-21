@@ -407,7 +407,7 @@ public sealed class MathBlockElementwiseFormTests
         var validity = Validity("scalar.clamp").Evaluate(arguments);
 
         Assert.Equal([1f, -7f, -0f], form.AsVector().ToArray());
-        Assert.Equal(long.MinValue, BitConverter.SingleToInt32Bits(form.AsVector()[2]));
+        Assert.Equal(int.MinValue, BitConverter.SingleToInt32Bits(form.AsVector()[2]));
         Assert.Equal([true, false, true], validity.AsBooleanVector().ToArray());
     }
 

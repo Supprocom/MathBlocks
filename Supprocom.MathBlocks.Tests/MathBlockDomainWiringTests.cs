@@ -252,7 +252,7 @@ public sealed class MathBlockDomainWiringTests
             ("mathblocks_limit_matrix_size() { return 5000; }", new() { MaximumMatrixSize = 5000 }),
             ("mathblocks_limit_iteration_count() { return 20000; }", new() { MaximumIterationCount = 20_000 }),
             ("mathblocks_limit_incomplete_beta_maximum_iterations() { return 1024; }", new() { IncompleteBetaMaximumIterations = 1024 }),
-            ("mathblocks_limit_incomplete_beta_tolerance() { return 1E-10; }", new() { IncompleteBetaTolerance = 1e-10f }),
+            ("mathblocks_limit_incomplete_beta_tolerance() { return 1E-10f; }", new() { IncompleteBetaTolerance = 1e-10f }),
             ("mathblocks_limit_incomplete_beta_policy() { return 1; }", new() { IncompleteBetaNonConvergence = MathBlockNonConvergencePolicy.Invalid }),
             ("mathblocks_limit_jacobi_policy() { return 1; }", new() { JacobiNonConvergence = MathBlockNonConvergencePolicy.Invalid }),
             ("mathblocks_limit_matrix_exponential_taylor_terms() { return 12; }", new() { MatrixExponentialTaylorTerms = 12 }),

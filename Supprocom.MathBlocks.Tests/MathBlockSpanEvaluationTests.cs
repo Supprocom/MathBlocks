@@ -260,7 +260,7 @@ public sealed class MathBlockSpanEvaluationTests
 
         Assert.Equal(sizeof(float), MathBlockCudaDeviceModule.ElementwiseValueElementBytes);
         Assert.Equal(sizeof(int), MathBlockCudaDeviceModule.ElementwiseValidityElementBytes);
-        Assert.Contains("double* result = ((double*)", body, StringComparison.Ordinal);
+        Assert.Contains("float* result = ((float*)", body, StringComparison.Ordinal);
         Assert.Contains("int* boolean_result = ((int*)", body, StringComparison.Ordinal);
         Assert.Contains("&((result)[row])", body, StringComparison.Ordinal);
         Assert.Contains("&((boolean_result)[row])", body, StringComparison.Ordinal);

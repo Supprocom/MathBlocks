@@ -496,18 +496,24 @@ string.Equals(match.Value, "Task", StringComparison.Ordinal))
         using var executable = new PEReader(stream);
         var metadata = executable.GetMetadataReader();
         var references = new List<string>();
+        var singleReferences = new List<string>();
         foreach (var handle in metadata.MemberReferences)
         {
             var member = metadata.GetMemberReference(handle);
             if (member.Parent.Kind != HandleKind.TypeReference)
                 continue;
             var type = metadata.GetTypeReference((TypeReferenceHandle)member.Parent);
-            if (string.Equals(metadata.GetString(type.Namespace), "System", StringComparison.Ordinal) && string.Equals(metadata.GetString(type.Name), "Math", StringComparison.Ordinal))
+            if (!string.Equals(metadata.GetString(type.Namespace), "System", StringComparison.Ordinal))
+                continue;
+            if (string.Equals(metadata.GetString(type.Name), "Math", StringComparison.Ordinal))
                 references.Add(metadata.GetString(member.Name));
+            if (string.Equals(metadata.GetString(type.Name), "MathF", StringComparison.Ordinal))
+                singleReferences.Add(metadata.GetString(member.Name));
         }
 
-        // Only the correctly rounded square root (IEEE 754), used by MathBlockPrimitives.Sqrt.
-        Assert.Equal(["Sqrt"], references);
+        // Nothing of the double-precision Math class, and of MathF only the correctly rounded square root (IEEE 754), used by MathBlockPrimitives.Sqrt.
+        Assert.Empty(references);
+        Assert.Equal(["Sqrt"], singleReferences);
     }
 
     /// <summary>Verifies production binary has no system linq enumerable member reference.</summary>

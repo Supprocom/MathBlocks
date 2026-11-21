@@ -79,7 +79,7 @@ public sealed partial class MathBlockCudaWorkerTests
                 string.Equals(source, "statistics.interquartile-range", StringComparison.Ordinal) ||
                 !coreclr.IsValid)
                 continue;
-            var negativeZeros = coreclr.AsVector().Count(value => BitConverter.SingleToInt32Bits(value) == long.MinValue);
+            var negativeZeros = coreclr.AsVector().Count(value => BitConverter.SingleToInt32Bits(value) == int.MinValue);
             var positiveZeros = coreclr.AsVector().Count(value => BitConverter.SingleToInt32Bits(value) == 0L);
             if (negativeZeros == 0 || positiveZeros == 0)
                 failures.Add($"{source}: the data gave {negativeZeros} rows of -0.0 and {positiveZeros} of +0.0.");

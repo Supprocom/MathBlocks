@@ -1071,7 +1071,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
             values.Add(nearOne);
             values.Add(-nearOne);
         }
-        for (var exponent = 1; exponent <= 1_074; exponent++)
+        for (var exponent = 1; exponent <= 149; exponent++)
         {
             var power = MathF.ScaleB(1f, -exponent);
             values.Add(power);

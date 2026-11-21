@@ -78,8 +78,8 @@ public sealed class FirstTrueOffsetEquivalenceTests
     public void ABadCountInvalidatesTheCallAtEveryPosition()
     {
         var failures = new List<string>();
-        float[] bad = [0.5f, -1f, -0.25f, 3.000000000000001f];
-        float[] fine = [-0f, 1e15f, 4_503_599_627_370_497f];
+        float[] bad = [0.5f, -1f, -0.25f, 3.0000002f];
+        float[] fine = [-0f, 1e7f, 16_777_216f];
         for (var length = 1; length <= 21; length++)
         {
             var predicate = new float[length];

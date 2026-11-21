@@ -182,7 +182,7 @@ public sealed class MathBlockFusedExpressionElementwiseTests(ITestOutputHelper o
         AssertMatchesUnfused(program, inputs, validity, result, "filled rows");
         var values = result.Outputs["logit"].AsVector();
         foreach (var row in new[] { 1, 2, 3, 4 })
-            Assert.Equal(0x8000000000000000ul, BitConverter.SingleToUInt32Bits(values[row]));
+            Assert.Equal(0x80000000u, BitConverter.SingleToUInt32Bits(values[row]));
         Assert.Equal([true, false, false, false, false, true], result.Outputs["computed"].AsBooleanVector());
         Assert.Equal([true, false, false, false, false, false], result.Validity["logit"].AsBooleanVector());
         Assert.Equal([true, false, false, false, false, false], result.Validity["absolute"].AsBooleanVector());

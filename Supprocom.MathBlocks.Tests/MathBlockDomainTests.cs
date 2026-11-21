@@ -14,7 +14,7 @@ public sealed class MathBlockDomainTests
             MathBlockValue.Vector([0f, 1f]));
 
         Assert.True(result.IsValid, result.InvalidReason);
-        Assert.Equal(MathF.Log(2f), result.AsScalar(), 12);
+        Assert.Equal(MathF.Log(2f), result.AsScalar(), 5);
     }
 
     /// <summary>Verifies invalid discrete domains fail closed without throwing.</summary>

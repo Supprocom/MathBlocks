@@ -24,7 +24,7 @@ public sealed class MathBlockCudaImplementationFingerprintTests
 
     // The SHA-256 of the full generated CUDA source (the generator checks the same value when it runs).
     private const string FullGeneratedSourceSha256 =
-        "9CDFBA793C9D5C9265169DAB8B2C59F21CCE20882F368C59EB2E8E4C977DFCEE";
+        "641345C433A94C98B021115869FE052D2A37B4B64FD6F5FB8047218C125BCC65";
 
     private const string CorpusVersion = "mathblocks-value-codec-corpus-v1";
 

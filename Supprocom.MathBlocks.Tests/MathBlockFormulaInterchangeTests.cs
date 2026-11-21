@@ -265,7 +265,7 @@ public sealed class MathBlockFormulaInterchangeTests
             {
                 ["input value"] = MathBlockValue.Scalar(0f)
             });
-            Assert.Equal(expected, result["external result"].AsScalar(), 12);
+            Assert.Equal(expected, result["external result"].AsScalar(), 5);
         }
     }
 

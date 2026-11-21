@@ -38,7 +38,7 @@ public sealed class MathBlockMaximumMinimumTests
         Assert.Equal(float.NegativeInfinity, MathBlockScalar.Minimum(1f, float.NegativeInfinity));
         Assert.Equal(0L, BitConverter.SingleToInt32Bits(MathBlockScalar.Maximum(-0f, 0f)));
         Assert.Equal(0L, BitConverter.SingleToInt32Bits(MathBlockScalar.Maximum(0f, -0f)));
-        Assert.Equal(long.MinValue, BitConverter.SingleToInt32Bits(MathBlockScalar.Minimum(-0f, 0f)));
-        Assert.Equal(long.MinValue, BitConverter.SingleToInt32Bits(MathBlockScalar.Minimum(0f, -0f)));
+        Assert.Equal(int.MinValue, BitConverter.SingleToInt32Bits(MathBlockScalar.Minimum(-0f, 0f)));
+        Assert.Equal(int.MinValue, BitConverter.SingleToInt32Bits(MathBlockScalar.Minimum(0f, -0f)));
     }
 }

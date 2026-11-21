@@ -172,7 +172,7 @@ public sealed class MathBlockNonConvergenceTests
         var result = Jacobi("matrix.symmetric-eigenvalues", new MathBlockMatrix(2, 2, [2f, 1f, 1f, 2f]), new MathBlockDomainOptions { JacobiRotationMultiplier = 1 });
 
         Assert.Empty(result.NonConvergedEvaluations);
-        Assert.Equal([1f, 3f], result.Outputs["result"].AsVector().Select(value => MathF.Round(value, 12, MidpointRounding.ToEven)).ToArray());
+        Assert.Equal([1f, 3f], result.Outputs["result"].AsVector().Select(value => MathF.Round(value, 5, MidpointRounding.ToEven)).ToArray());
     }
 
     /// <summary>Verifies the rotation budget is the multiplier times n times n, in 64 bits: a larger multiplier converges the matrix a small one does not.</summary>

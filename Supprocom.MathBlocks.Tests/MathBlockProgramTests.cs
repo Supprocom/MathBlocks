@@ -22,7 +22,7 @@ public sealed class MathBlockProgramTests
             ["right"] = MathBlockValue.Scalar(10f, unit)
         });
 
-        Assert.Equal(0.2f, output["result"].AsScalar(), 12);
+        Assert.Equal(0.2f, output["result"].AsScalar(), 5);
         Assert.True(output["result"].Type.Unit.IsDimensionless);
     }
 

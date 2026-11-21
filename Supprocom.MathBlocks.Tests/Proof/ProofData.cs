@@ -52,10 +52,10 @@ internal static class ProofData
     // A market value between 1e1 and 1e5, with a fraction.
     private static float Market(Random random) => MathF.Pow(10f, 1f + 4f * random.NextSingle());
 
-    // A magnitude between 1e250 and 1e300 or between 1e-300 and 1e-250, with a random sign.
+    // A magnitude between 1e31 and 1e37 or between 1e-37 and 1e-31, with a random sign.
     private static float Extreme(Random random)
     {
-        var exponent = 250f + 50f * random.NextSingle();
+        var exponent = 31f + 6f * random.NextSingle();
         var sign = random.Next(2) == 0 ? 1f : -1f;
         return sign * MathF.Pow(10f, random.Next(2) == 0 ? exponent : -exponent);
     }
@@ -64,7 +64,7 @@ internal static class ProofData
     // or, in every fourth row, a small divisor (a quotient overflows).
     private static float NearOverflow(int row, int operand, Random random)
     {
-        var big = (0.9f + 0.8f * random.NextSingle()) * 3.16e38f;
+        var big = (0.9f + 0.8f * random.NextSingle()) * 1.9e38f;
         var sign = (row & 1) == 0 ? 1f : -1f;
         if (operand == 0)
             return sign * big;

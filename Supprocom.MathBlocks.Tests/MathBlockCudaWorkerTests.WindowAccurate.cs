@@ -155,7 +155,7 @@ public sealed partial class MathBlockCudaWorkerTests
         for (var row = 0; row < count; row++)
         {
             if (row % 80 == 0)
-                constant = (random.NextSingle() * 2f - 1f) * MathF.Pow(10f, random.Next(-50, 51));
+                constant = (random.NextSingle() * 2f - 1f) * MathF.Pow(10f, random.Next(-12, 13));
             values[row] = string.Equals(family, "equal-runs", StringComparison.Ordinal)
                 ? row % 80 < 60 ? constant : row % 160 < 80 ? -0f : 1_000f + random.NextSingle() * 3f
                 : (row / 300 % 6) switch

@@ -95,15 +95,15 @@ public sealed class MathBlockWindowCudaPlanTests
     }
 
     /// <summary>
-    /// Verifies the window-accurate plans give each thread one exact accumulator (285 words) for the sum and mean
+    /// Verifies the window-accurate plans give each thread one exact accumulator (59 words) for the sum and mean
     /// and two for the variances and deviations, whatever the width, with one thread per block of max(2w, 32) rows.
     /// </summary>
     [Theory]
-    [InlineData("sum", 302_893, 96, 13 * 128 * 285 * 8)]
-    [InlineData("mean", 302_893, 2, 74 * 128 * 285 * 8)]
-    [InlineData("population-variance", 302_893, 96, 13 * 128 * 570 * 8)]
-    [InlineData("sample-standard-deviation", 302_893, 17, 70 * 128 * 570 * 8)]
-    [InlineData("sample-variance", 6, 3, 128 * 570 * 8)]
+    [InlineData("sum", 302_893, 96, 13 * 128 * 59 * 8)]
+    [InlineData("mean", 302_893, 2, 74 * 128 * 59 * 8)]
+    [InlineData("population-variance", 302_893, 96, 13 * 128 * 118 * 8)]
+    [InlineData("sample-standard-deviation", 302_893, 17, 70 * 128 * 118 * 8)]
+    [InlineData("sample-variance", 6, 3, 128 * 118 * 8)]
     public void WindowAccurateCUDAPlanGivesEachThreadAConstantAccumulatorScratch(
         string name,
         int count,

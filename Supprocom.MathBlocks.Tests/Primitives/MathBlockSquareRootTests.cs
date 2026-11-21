@@ -33,17 +33,17 @@ public sealed class MathBlockSquareRootTests
 
     /// <summary>Verifies the special values keep their results.</summary>
     [Theory]
-    [InlineData(0f, 0x0000000000000000L)]
-    [InlineData(-0f, unchecked((long)0x8000000000000000UL))]
-    [InlineData(float.PositiveInfinity, 0x7FF0000000000000L)]
-    [InlineData(4f, 0x4000000000000000L)]
+    [InlineData(0f, 0)]
+    [InlineData(-0f, int.MinValue)]
+    [InlineData(float.PositiveInfinity, 0x7F800000)]
+    [InlineData(4f, 0x40000000)]
     public void SpecialValuesKeepTheirResults(float value, long expectedBits) =>
         Assert.Equal(expectedBits, BitConverter.SingleToInt32Bits(MathBlockScalar.SquareRoot(value)));
 
     private static IEnumerable<float> Inputs(Random random)
     {
         // Uniform significands at every exponent, including subnormals, and values next to perfect squares.
-        for (var exponent = -1074; exponent <= 1023; exponent += 7)
+        for (var exponent = -149; exponent <= 127; exponent++)
             for (var sample = 0; sample < 300; sample++)
             {
                 var value = MathF.ScaleB(1f + random.NextSingle(), exponent);
