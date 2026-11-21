@@ -889,7 +889,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
             {
                 failures.Add(string.Create(
                     System.Globalization.CultureInfo.InvariantCulture,
-                    $"x={value:R} (0x{BitConverter.DoubleToInt64Bits(value):X16}): CoreCLR={Describe(coreclr)}, CUDA={Describe(cuda)}"));
+                    $"x={value:R} (0x{BitConverter.SingleToInt32Bits(value):X8}): CoreCLR={Describe(coreclr)}, CUDA={Describe(cuda)}"));
             }
         }
 
@@ -986,7 +986,7 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
     {
         if (!value.IsValid)
             return "invalid";
-        static string Bits(float number) => $"0x{BitConverter.DoubleToInt64Bits(number):X16}";
+        static string Bits(float number) => $"0x{BitConverter.SingleToInt32Bits(number):X8}";
         return value.Type.Kind switch
         {
             MathBlockValueKind.Scalar => Bits(value.AsScalar()),
@@ -1363,10 +1363,10 @@ string.Equals(operation.Identifier, "special.error-function", StringComparison.O
         return value.Type.Kind switch
         {
             MathBlockValueKind.Scalar =>
-                $"{value.AsScalar():R}/0x{BitConverter.DoubleToInt64Bits(value.AsScalar()):x16}",
+                $"{value.AsScalar():R}/0x{BitConverter.SingleToInt32Bits(value.AsScalar()):x8}",
             MathBlockValueKind.Boolean => value.AsBoolean().ToString(),
             MathBlockValueKind.Vector => $"[{string.Join(',', value.AsVector().Select(item =>
-                $"{item:R}/0x{BitConverter.DoubleToInt64Bits(item):x16}"))}]",
+                $"{item:R}/0x{BitConverter.SingleToInt32Bits(item):x8}"))}]",
             MathBlockValueKind.BooleanVector => $"[{string.Join(',', value.AsBooleanVector())}]",
             _ => value.Type.ToString()
         };

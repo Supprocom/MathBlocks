@@ -30,7 +30,7 @@ public sealed class MathBlockConsumerRowFunctionSourceTests
             int row = blockIdx.x * blockDim.x + threadIdx.x;
             if (row >= count)
                 return;
-            float value = 0.0;
+            float value = 0.0f;
             int flags = 0;
             flags |= mathblocks_row_add(a[row], b[row], fill, &value) ? 1 : 0;
             values[row * 7] = value;

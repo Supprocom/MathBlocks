@@ -38,8 +38,8 @@ public sealed class MathBlockSignedZeroTests
             Assert.True(result.IsValid, $"{identifier}({zero:R}) is invalid.");
             Assert.True(
                 BitConverter.SingleToInt32Bits(result.AsScalar()) == BitConverter.SingleToInt32Bits(zero),
-                $"{identifier}(0x{BitConverter.DoubleToInt64Bits(zero):X16}) gave " +
-                $"0x{BitConverter.DoubleToInt64Bits(result.AsScalar()):X16}.");
+                $"{identifier}(0x{BitConverter.SingleToInt32Bits(zero):X8}) gave " +
+                $"0x{BitConverter.SingleToInt32Bits(result.AsScalar()):X8}.");
         }
     }
 
@@ -63,8 +63,8 @@ public sealed class MathBlockSignedZeroTests
         Assert.True(result.IsValid);
         Assert.True(
             BitConverter.SingleToInt32Bits(result.AsScalar()) == BitConverter.SingleToInt32Bits(expected),
-            $"atan2(0x{BitConverter.DoubleToInt64Bits(y):X16}, 0x{BitConverter.DoubleToInt64Bits(x):X16}) gave " +
-            $"0x{BitConverter.DoubleToInt64Bits(result.AsScalar()):X16}, expected 0x{BitConverter.DoubleToInt64Bits(expected):X16}.");
+            $"atan2(0x{BitConverter.SingleToInt32Bits(y):X8}, 0x{BitConverter.SingleToInt32Bits(x):X8}) gave " +
+            $"0x{BitConverter.SingleToInt32Bits(result.AsScalar()):X8}, expected 0x{BitConverter.SingleToInt32Bits(expected):X8}.");
     }
 
     /// <summary>Verifies the complex phase on the real axis follows C99 Annex G carg, including the sign of zero.</summary>
@@ -79,7 +79,7 @@ public sealed class MathBlockSignedZeroTests
         var operation = MathBlockCatalog.Standard.Get("complex.phase");
         var result = operation.Evaluate([ComplexInput(operation, real, imaginary)]);
         Assert.True(result.IsValid);
-        AssertBits(expected, result.AsScalar(), $"carg({real:R}, 0x{BitConverter.DoubleToInt64Bits(imaginary):X16})");
+        AssertBits(expected, result.AsScalar(), $"carg({real:R}, 0x{BitConverter.SingleToInt32Bits(imaginary):X8})");
     }
 
     /// <summary>Verifies the complex logarithm on the negative real axis follows C99 Annex G clog.</summary>
@@ -94,7 +94,7 @@ public sealed class MathBlockSignedZeroTests
         var operation = MathBlockCatalog.Standard.Get("complex.natural-logarithm");
         var result = operation.Evaluate([ComplexInput(operation, real, imaginary)]);
         Assert.True(result.IsValid);
-        var label = $"clog({real:R}, 0x{BitConverter.DoubleToInt64Bits(imaginary):X16})";
+        var label = $"clog({real:R}, 0x{BitConverter.SingleToInt32Bits(imaginary):X8})";
         AssertBits(expectedReal, result.AsComplex().Real, label + " real");
         AssertBits(expectedImaginary, result.AsComplex().Imaginary, label + " imaginary");
     }
@@ -111,7 +111,7 @@ public sealed class MathBlockSignedZeroTests
         var operation = MathBlockCatalog.Standard.Get("complex.square-root");
         var result = operation.Evaluate([ComplexInput(operation, real, imaginary)]);
         Assert.True(result.IsValid);
-        var label = $"csqrt({real:R}, 0x{BitConverter.DoubleToInt64Bits(imaginary):X16})";
+        var label = $"csqrt({real:R}, 0x{BitConverter.SingleToInt32Bits(imaginary):X8})";
         AssertBits(expectedReal, result.AsComplex().Real, label + " real");
         AssertBits(expectedImaginary, result.AsComplex().Imaginary, label + " imaginary");
     }
@@ -122,7 +122,7 @@ public sealed class MathBlockSignedZeroTests
     private static void AssertBits(float expected, float actual, string label) =>
         Assert.True(
             BitConverter.SingleToInt32Bits(actual) == BitConverter.SingleToInt32Bits(expected),
-            $"{label} gave 0x{BitConverter.DoubleToInt64Bits(actual):X16}, expected 0x{BitConverter.DoubleToInt64Bits(expected):X16}.");
+            $"{label} gave 0x{BitConverter.SingleToInt32Bits(actual):X8}, expected 0x{BitConverter.SingleToInt32Bits(expected):X8}.");
 
     // InlineData cannot hold both zeros (xUnit treats 0d and -0d as duplicates), so cases use text.
     private static float Parse(string text) => text switch

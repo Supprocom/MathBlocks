@@ -35,7 +35,7 @@ public sealed class MathBlockCatalogTests
             {
                 var first = operation.Evaluate(inputs);
                 var second = operation.Evaluate(inputs);
-                if (!first.ApproximatelyEquals(second, 1e-12f))
+                if (!first.ApproximatelyEquals(second, 2e-6f))
                     failures.Add($"{operation.Identity}: repeated outputs differ");
                 for (var index = 0; index < inputs.Length; index++)
                     if (!inputs[index].ApproximatelyEquals(copies[index], 0f))

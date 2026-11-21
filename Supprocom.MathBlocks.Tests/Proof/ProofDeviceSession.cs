@@ -59,16 +59,16 @@ internal sealed class ProofDeviceSession : IDisposable
         }
     }
 
-    /// <summary>Copies the first <paramref name="count"/> doubles of the device buffer back, as their bits.</summary>
+    /// <summary>Copies the first <paramref name="count"/> single-precision values of the device buffer back, as their bits (32 bits each, widened).</summary>
     internal static long[] DownloadBits(ulong device, int count)
     {
-        var staging = Marshal.AllocHGlobal(count * sizeof(long));
+        var staging = Marshal.AllocHGlobal(count * sizeof(int));
         try
         {
-            Driver.Require(Driver.cuMemcpyDtoH(staging, device, new UIntPtr((ulong)count * sizeof(long))), "cuMemcpyDtoH");
-            var result = new long[count];
-            Marshal.Copy(staging, result, 0, count);
-            return result;
+            Driver.Require(Driver.cuMemcpyDtoH(staging, device, new UIntPtr((ulong)count * sizeof(int))), "cuMemcpyDtoH");
+            var bits = new int[count];
+            Marshal.Copy(staging, bits, 0, count);
+            return Array.ConvertAll(bits, value => (long)value);
         }
         finally
         {
@@ -108,7 +108,7 @@ internal sealed class ProofDeviceSession : IDisposable
                     Marshal.WriteInt32(box, integer);
                     break;
                 case float number:
-                    Marshal.WriteInt64(box, BitConverter.SingleToInt32Bits(number));
+                    Marshal.WriteInt32(box, BitConverter.SingleToInt32Bits(number));
                     break;
                 case ulong pointer:
                     Marshal.WriteInt64(box, unchecked((long)pointer));

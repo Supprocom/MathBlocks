@@ -236,7 +236,7 @@ public sealed class MathBlockDomainWiringTests
         Assert.Equal(MathBlockCudaDeviceModule.SourceFingerprint, MathBlockCudaDeviceModule.GetSourceFingerprint(MathBlockDomainOptions.Default));
         Assert.Contains("mathblocks_limit_state_count() { return 4096; }", defaults, StringComparison.Ordinal);
         Assert.Contains("mathblocks_limit_generated_vector_length() { return 1000000; }", defaults, StringComparison.Ordinal);
-        Assert.Contains("mathblocks_limit_incomplete_beta_tolerance() { return 3E-14; }", defaults, StringComparison.Ordinal);
+        Assert.Contains("mathblocks_limit_incomplete_beta_tolerance() { return 2E-06f; }", defaults, StringComparison.Ordinal);
         Assert.Contains("mathblocks_limit_jacobi_rotation_budget(int size) { return (long long)64 * size * size; }", defaults, StringComparison.Ordinal);
 
         var changes = new (string Fragment, MathBlockDomainOptions Options)[]
@@ -337,7 +337,7 @@ public sealed class MathBlockDomainWiringTests
 
         var assignment = MathBlockCudaDeviceModule.GetOperation("transport.minimum-assignment@1");
         MathBlockValue[] costs = [MathBlockValue.Matrix(Square(21, 1f))];
-        Assert.Equal(2 * (1 << 21) * sizeof(float), assignment.PlanCUDA(costs, new MathBlockDomainOptions { MaximumExplicitSubsetSize = 21 }, 128).ScratchBytes);
+        Assert.Equal(2 * (1 << 21) * 8, assignment.PlanCUDA(costs, new MathBlockDomainOptions { MaximumExplicitSubsetSize = 21 }, 128).ScratchBytes);
         Assert.Equal(0, assignment.PlanCUDA(costs, MathBlockDomainOptions.Default, 128).ScratchBytes);
     }
 

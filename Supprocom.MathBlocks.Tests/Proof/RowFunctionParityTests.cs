@@ -127,7 +127,7 @@ public sealed class RowFunctionParityTests
             {
                 failures.Add(string.Create(
                     CultureInfo.InvariantCulture,
-                    $"{function.Name} class {set.Name} row {row} ({set.First[row]:R}, {set.Second[row]:R}): CoreCLR {BitConverter.Int64BitsToDouble(expectedBits):R}/{expectedFlag}, row function {BitConverter.Int64BitsToDouble(result.RowBits[row]):R}/{result.RowValid[row]}, elementwise row {BitConverter.Int64BitsToDouble(result.NarrowBits[row]):R}/{result.NarrowValid[row]}, wide {BitConverter.Int64BitsToDouble(result.WideBits[row]):R}/{result.WideValid[row]}"));
+                    $"{function.Name} class {set.Name} row {row} ({set.First[row]:R}, {set.Second[row]:R}): CoreCLR {BitConverter.Int32BitsToSingle((int)expectedBits):R}/{expectedFlag}, row function {BitConverter.Int32BitsToSingle((int)result.RowBits[row]):R}/{result.RowValid[row]}, elementwise row {BitConverter.Int32BitsToSingle((int)result.NarrowBits[row]):R}/{result.NarrowValid[row]}, wide {BitConverter.Int32BitsToSingle((int)result.WideBits[row]):R}/{result.WideValid[row]}"));
             }
         }
     }
@@ -143,7 +143,7 @@ public sealed class RowFunctionParityTests
             {
                 failures.Add(string.Create(
                     CultureInfo.InvariantCulture,
-                    $"row sum class {setName} count {count} row {row}: CoreCLR {BitConverter.Int64BitsToDouble(expectedBits):R}/{valid}, device {BitConverter.Int64BitsToDouble(result.Bits[row]):R}/{result.Valid[row]}"));
+                    $"row sum class {setName} count {count} row {row}: CoreCLR {BitConverter.Int32BitsToSingle((int)expectedBits):R}/{valid}, device {BitConverter.Int32BitsToSingle((int)result.Bits[row]):R}/{result.Valid[row]}"));
             }
         }
     }
@@ -156,7 +156,7 @@ public sealed class RowFunctionParityTests
             {
                 failures.Add(string.Create(
                     CultureInfo.InvariantCulture,
-                    $"{label} row {row}: worker {formValues[row]:R}/{validity[row]}, row function {BitConverter.Int64BitsToDouble(device.RowBits[row]):R}/{device.RowValid[row]}"));
+                    $"{label} row {row}: worker {formValues[row]:R}/{validity[row]}, row function {BitConverter.Int32BitsToSingle((int)device.RowBits[row]):R}/{device.RowValid[row]}"));
             }
         }
     }

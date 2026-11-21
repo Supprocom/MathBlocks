@@ -9,14 +9,14 @@ namespace Supprocom.MathBlocks.Tests;
 /// </summary>
 public sealed class MathBlockBinomialOverflowTests
 {
-    // Pairs the product loop turned into +infinity although C(n, k) is below the largest double: the middle of the rows near 1023, and large n with k around 67.
+    // Pairs the product loop turned into +infinity although C(n, k) is below the largest single: the middle of the rows near 130, and large n with k around 7.
     private static readonly (int N, int K)[] FixedPairs =
     [
-        (1023, 511), (1023, 512), (1023, 500), (1022, 511), (1021, 496), (1024, 477), (1115, 372), (1000000, 67), (1000000, 999933)
+        (130, 65), (131, 65), (131, 66), (129, 64), (128, 64), (127, 63), (1000000, 7), (1000000, 999993)
     ];
 
-    // Pairs whose value exceeds the largest double.
-    private static readonly (int N, int K)[] OverflowPairs = [(1000000, 68), (1500, 700), (5000, 600), (1030, 515), (2147483647, 600)];
+    // Pairs whose value exceeds the largest single.
+    private static readonly (int N, int K)[] OverflowPairs = [(1000000, 8), (200, 100), (500, 60), (132, 66), (2147483647, 600)];
 
     // The product loop as it was before the fallback, copied here as the reference for the pairs that never overflowed.
     private static float ReferenceLoop(int n, int k)
@@ -45,7 +45,7 @@ public sealed class MathBlockBinomialOverflowTests
 
     private static readonly BigInteger LargestDouble = new(float.MaxValue);
 
-    /// <summary>Verifies the fixed pairs give a finite value within 2e-14 of the exact coefficient, about 90 ulps, which is the error of the loop itself at k near 500.</summary>
+    /// <summary>Verifies the fixed pairs give a finite value within 2e-6 of the exact coefficient, about 17 ulps, which bounds the error of the loop itself at k near 65.</summary>
     [Fact]
     public void PairsWhoseProductOverflowedGiveTheFiniteCoefficient()
     {
@@ -57,7 +57,7 @@ public sealed class MathBlockBinomialOverflowTests
             var exact = Exact(n, k);
             Assert.True(exact < LargestDouble, Describe(n, k, value, "does not fit in a double"));
             var relative = (float)BigInteger.Abs(new BigInteger(value) - exact) / (float)exact;
-            Assert.True(relative <= 2e-14f, Describe(n, k, value, "is off by a relative " + relative.ToString("E2", CultureInfo.InvariantCulture)));
+            Assert.True(relative <= 2e-6f, Describe(n, k, value, "is off by a relative " + relative.ToString("E2", CultureInfo.InvariantCulture)));
         }
     }
 

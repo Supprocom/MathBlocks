@@ -53,7 +53,7 @@ public sealed class MathBlockScaleInvarianceTests
             var expected = operation.Evaluate(inputs);
             if (!expected.IsValid)
                 continue;
-            foreach (var k in new[] { -120, -75, -37, -5, 5, 37, 75, 120 })
+            foreach (var k in new[] { -120, -100, -20, -5, 5, 20, 100, 120 })
             {
                 if (!TryScale(inputs, scaled, k, out var scaledInputs) || !TryScaleScalar(ToNumbers(expected), degree * k, out var expectedScaled))
                     continue;

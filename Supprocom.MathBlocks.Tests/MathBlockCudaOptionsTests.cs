@@ -202,8 +202,8 @@ public sealed class MathBlockCudaOptionsTests
     [Fact]
     public void CompileKeepsAWindowFormOverTheDefaultBudgetOnOneBlock()
     {
-        // The pseudomedian at width 1,447 needs about 2.1 GB for one block of 128 threads: over the default budget, under int.MaxValue.
-        var (program, inputs) = WindowProgram("statistics.pseudomedian", 1_500, 1_447);
+        // The pseudomedian at width 2,047 needs about 2.1 GB for one block of 128 threads: over the default budget, under int.MaxValue.
+        var (program, inputs) = WindowProgram("statistics.pseudomedian", 2_100, 2_047);
 
         var plan = Plan(program, inputs, MathBlocksCudaOptions.Default, enforce: false);
         var launch = Assert.Single(plan.Launches);
@@ -323,7 +323,7 @@ public sealed class MathBlockCudaOptionsTests
         var maximumWidth = ReflectMaximumWidth("statistics.pseudomedian", blockSize);
         var options = new MathBlocksCudaOptions { BlockSize = blockSize, WindowScratchBudgetBytes = int.MaxValue };
         if (blockSize == 128)
-            Assert.Equal(1_447L, maximumWidth);
+            Assert.Equal(2_047L, maximumWidth);
         Assert.True(maximumWidth < ReflectMaximumWidth("statistics.pseudomedian", blockSize / 2));
 
         var (accepted, acceptedInputs) = WindowProgram("statistics.pseudomedian", (int)maximumWidth + 2, (int)maximumWidth);

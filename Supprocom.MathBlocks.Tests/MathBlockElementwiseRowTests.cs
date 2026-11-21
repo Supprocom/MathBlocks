@@ -24,12 +24,12 @@ public sealed class MathBlockElementwiseRowTests
 #pragma warning disable MA0136
     internal const string RowKernel = """
         extern "C" __global__ void mathblocks_row_probe(
-            const int* opcodes, const double* a, const double* b, const double* c, double fill, double* values, int* valid, int count)
+            const int* opcodes, const float* a, const float* b, const float* c, float fill, float* values, int* valid, int count)
         {
             int row = blockIdx.x * blockDim.x + threadIdx.x;
             if (row >= count)
                 return;
-            double value = 0.0;
+            float value = 0.0f;
             valid[row] = mathblocks_elementwise_row(opcodes[row], a[row], b[row], c[row], fill, &value) ? 1 : 0;
             values[row] = value;
         }

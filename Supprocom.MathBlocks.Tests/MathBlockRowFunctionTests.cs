@@ -33,14 +33,14 @@ public sealed class MathBlockRowFunctionTests
     private const string InlineKernel = """
         extern "C" __global__ void mathblocks_row_inline(float* values, int* valid)
         {
-            float value = 0.0;
-            valid[0] = mathblocks_row_add(1.5, 2.25, -1.0, &value) ? 1 : 0;
+            float value = 0.0f;
+            valid[0] = mathblocks_row_add(1.5f, 2.25f, -1.0f, &value) ? 1 : 0;
             values[0] = value;
-            valid[1] = mathblocks_row_divide(1.0, 4.0, -1.0, &value) ? 1 : 0;
+            valid[1] = mathblocks_row_divide(1.0f, 4.0f, -1.0f, &value) ? 1 : 0;
             values[1] = value;
-            valid[2] = mathblocks_row_absolute(-2.0, -1.0, &value) ? 1 : 0;
+            valid[2] = mathblocks_row_absolute(-2.0f, -1.0f, &value) ? 1 : 0;
             values[2] = value;
-            valid[3] = mathblocks_row_multiply(3.0, 0.5, -1.0, &value) ? 1 : 0;
+            valid[3] = mathblocks_row_multiply(3.0f, 0.5f, -1.0f, &value) ? 1 : 0;
             values[3] = value;
         }
         """;

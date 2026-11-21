@@ -233,9 +233,9 @@ public sealed partial class MathBlockCudaWorkerTests
             var fraction = (index + 0.1f) / 4_000f;
             cases.Add(identifier switch
             {
-                "scalar.power" => [MathBlockValue.Scalar(0.5f), MathBlockValue.Scalar(1022f + 53f * fraction)],
-                "probability.poisson-pmf" => [MathBlockValue.Scalar(708f + 37f * fraction), MathBlockValue.Scalar(index % 4)],
-                _ => [MathBlockValue.Scalar(-745.1f + 37.5f * fraction)]
+                "scalar.power" => [MathBlockValue.Scalar(0.5f), MathBlockValue.Scalar(126f + 23.5f * fraction)],
+                "probability.poisson-pmf" => [MathBlockValue.Scalar(87.5f + 16f * fraction), MathBlockValue.Scalar(index % 4)],
+                _ => [MathBlockValue.Scalar(-103.9f + 16.6f * fraction)]
             });
         }
         var builder = new MathBlockProgramBuilder(MathBlockCatalog.Standard);

@@ -28,7 +28,7 @@ public sealed class MathBlockSquareRootTests
             failures.Count == 0,
             $"{failures.Count} of {count} inputs are not correctly rounded; first 10:{Environment.NewLine}" +
             string.Join(Environment.NewLine, failures.Take(10).Select(value =>
-                $"sqrt({value:R}) = {MathBlockScalar.SquareRoot(value):R} (0x{BitConverter.DoubleToInt64Bits(MathBlockScalar.SquareRoot(value)):X16})")));
+                $"sqrt({value:R}) = {MathBlockScalar.SquareRoot(value):R} (0x{BitConverter.SingleToInt32Bits(MathBlockScalar.SquareRoot(value)):X8})")));
     }
 
     /// <summary>Verifies the special values keep their results.</summary>
@@ -78,11 +78,11 @@ public sealed class MathBlockSquareRootTests
     private static (BigInteger Mantissa, int Exponent) Exact(float value)
     {
         var bits = BitConverter.SingleToInt32Bits(value);
-        var exponent = (int)((bits >> 52) & 0x7FF);
-        var fraction = bits & 0xFFFFFFFFFFFFFL;
+        var exponent = (bits >> 23) & 0xFF;
+        var fraction = bits & 0x7FFFFF;
         return exponent == 0
-            ? (fraction, -1074)
-            : (fraction | (1L << 52), exponent - 1075);
+            ? (fraction, -149)
+            : (fraction | (1 << 23), exponent - 150);
     }
 
     private static (BigInteger Mantissa, int Exponent) Midpoint((BigInteger Mantissa, int Exponent) left, (BigInteger Mantissa, int Exponent) right)

@@ -11,11 +11,11 @@ public sealed class MathBlockBinomialOverflowDeviceTests
     private const string BallotCount = "elementwise.combinatorics.ballot-count@1";
     private const string BinomialCoefficient = "elementwise.combinatorics.binomial-coefficient@1";
 
-    // Pairs (n, k) whose product loop overflows although C(n, k) fits in a double, then pairs whose value is above the largest double, then the pairs next to them.
+    // Pairs (n, k) whose product loop overflows although C(n, k) fits in a single, then pairs whose value is above the largest single, then the pairs next to them.
     private static readonly (int N, int K)[] Pairs =
     [
-        (1023, 511), (1023, 500), (1022, 511), (1021, 496), (1024, 477), (1115, 372), (1000000, 67), (1000000, 999933), (1000000, 68), (1500, 700), (5000, 600), (1030, 515),
-        (1023, 450), (1000000, 66), (2147483647, 33), (2147483647, 600)
+        (130, 65), (131, 65), (129, 64), (128, 64), (127, 63), (131, 66), (1000000, 7), (1000000, 999993), (1000000, 8), (200, 100), (500, 60), (132, 66),
+        (130, 60), (1000000, 6), (2147483647, 4), (2147483647, 600)
     ];
 
     private static (float[] First, float[] Second) Rows(bool ballot)
@@ -57,7 +57,7 @@ public sealed class MathBlockBinomialOverflowDeviceTests
         Assert.True(MathBlockDomainWiringTests.Same(coreclr, cuda), $"{identity}: the device differs from CoreCLR.");
         Assert.True(coreclr.IsValid);
         var values = coreclr.AsVector();
-        Assert.True(values[0] > 3.16e37f, "The row of (1023, 511) is not the finite coefficient.");
-        Assert.True(values[6] > 3.16e37f, "The row of (1000000, 67) is not the finite coefficient.");
+        Assert.True(values[0] > 3.16e37f, "The row of (130, 65) is not the finite coefficient.");
+        Assert.True(values[6] > 3.16e37f, "The row of (1000000, 7) is not the finite coefficient.");
     }
 }

@@ -277,7 +277,7 @@ public sealed class MathBlockSpanEvaluationTests
         Assert.Contains("->scalar_value", body, StringComparison.Ordinal);
 
         var limits = MathBlockLimits.Resolve();
-        Assert.Equal(8, limits.Single(limit => string.Equals(limit.Name, "cuda.elementwise.value-element-bytes", StringComparison.Ordinal)).Value);
+        Assert.Equal(4, limits.Single(limit => string.Equals(limit.Name, "cuda.elementwise.value-element-bytes", StringComparison.Ordinal)).Value);
         Assert.Equal(4, limits.Single(limit => string.Equals(limit.Name, "cuda.elementwise.validity-element-bytes", StringComparison.Ordinal)).Value);
         Assert.Equal(128, limits.Single(limit => string.Equals(limit.Name, "cuda.elementwise.opcode-mask-multiplier", StringComparison.Ordinal)).Value);
     }

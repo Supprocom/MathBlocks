@@ -589,11 +589,11 @@ internal static class Program
         return value.Type.Kind switch
         {
             MathBlockValueKind.Scalar =>
-                $"{value.AsScalar():R}/0x{BitConverter.DoubleToInt64Bits(value.AsScalar()):x16}",
+                $"{value.AsScalar():R}/0x{BitConverter.SingleToInt32Bits(value.AsScalar()):x8}",
             MathBlockValueKind.Boolean => value.AsBoolean().ToString(),
             MathBlockValueKind.Vector =>
                 $"[{string.Join(',', value.AsVector().Select(item =>
-                    $"{item:R}/0x{BitConverter.DoubleToInt64Bits(item):x16}"))}]",
+                    $"{item:R}/0x{BitConverter.SingleToInt32Bits(item):x8}"))}]",
             MathBlockValueKind.BooleanVector => $"[{string.Join(',', value.AsBooleanVector())}]",
             _ => value.Type.ToString()
         };

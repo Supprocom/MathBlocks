@@ -41,19 +41,19 @@ internal static class RowFunctionKernels
             {
                 for (int row = blockIdx.x * blockDim.x + threadIdx.x; row < rows; row += gridDim.x * blockDim.x)
                 {
-                    float value = 0.0;
-                    float ignored = 0.0;
+                    float value = 0.0f;
+                    float ignored = 0.0f;
                     bool ok = mathblocks_row_{{name}}({{arguments}});
                     row_values[row] = value;
                     row_valid[row] = ok ? 1 : 0;
-                    float narrow = 0.0;
-                    (void)mathblocks_elementwise_row(2 * source, a[row], b[row], 0.0, fill, &narrow);
+                    float narrow = 0.0f;
+                    (void)mathblocks_elementwise_row(2 * source, a[row], b[row], 0.0f, fill, &narrow);
                     narrow_values[row] = narrow;
-                    narrow_valid[row] = mathblocks_elementwise_row(2 * source + 1, a[row], b[row], 0.0, fill, &ignored) ? 1 : 0;
-                    float wide = 0.0;
-                    (void)mathblocks_elementwise_row(1024 + 2 * source, a[row], b[row], 0.0, fill, &wide);
+                    narrow_valid[row] = mathblocks_elementwise_row(2 * source + 1, a[row], b[row], 0.0f, fill, &ignored) ? 1 : 0;
+                    float wide = 0.0f;
+                    (void)mathblocks_elementwise_row(1024 + 2 * source, a[row], b[row], 0.0f, fill, &wide);
                     wide_values[row] = wide;
-                    wide_valid[row] = mathblocks_elementwise_row(1024 + 2 * source + 1, a[row], b[row], 0.0, fill, &ignored) ? 1 : 0;
+                    wide_valid[row] = mathblocks_elementwise_row(1024 + 2 * source + 1, a[row], b[row], 0.0f, fill, &ignored) ? 1 : 0;
                 }
             }
 
@@ -68,7 +68,7 @@ internal static class RowFunctionKernels
             {
                 for (int row = blockIdx.x * blockDim.x + threadIdx.x; row < rows; row += gridDim.x * blockDim.x)
                 {
-                    float value = 0.0;
+                    float value = 0.0f;
                     bool ok = mathblocks_row_{{name}}({{arguments}});
                     values[row] = value;
                     valid[row] = ok ? 1 : 0;
@@ -96,7 +96,7 @@ internal static class RowFunctionKernels
             {
                 for (int row = blockIdx.x * blockDim.x + threadIdx.x; row < rows; row += gridDim.x * blockDim.x)
                 {
-                    float value = 0.0;
+                    float value = 0.0f;
                     bool ok = mathblocks_row_sum(v + (long long)row * count, count, fill, &value);
                     values[row] = value;
                     valid[row] = ok ? 1 : 0;
@@ -107,7 +107,7 @@ internal static class RowFunctionKernels
             {
                 for (int row = blockIdx.x * blockDim.x + threadIdx.x; row < rows; row += gridDim.x * blockDim.x)
                 {
-                    float sum = 0.0;
+                    float sum = 0.0f;
                     for (int index = 0; index < count; ++index)
                         sum += v[(long long)row * count + index];
                     values[row] = sum;

@@ -18,13 +18,13 @@ public sealed class MathBlockCudaImplementationFingerprintTests
     // The pins of this library. Both values are hashes of bytes the codec writes, so they are the same in a Debug and a
     // Release build, with any compiler and for any assembly version, and they move only when the codec or the corpus does.
     private const string CodecImplementationFingerprint =
-        "5F0FB495A844D087E764092BD2375535443378A79884441051ADEBAE958AE760";
+        "BACC81DBBF4009609E36F9EADA2D1B21C45F5846C244BEA13949ACD0B76FADE0";
     private const string DeviceAbiFingerprint =
         "E047B823325F421EC116CFE8F9A24042A98508F3A09257EFFE1789D41DA4E80B";
 
     // The SHA-256 of the full generated CUDA source (the generator checks the same value when it runs).
     private const string FullGeneratedSourceSha256 =
-        "641345C433A94C98B021115869FE052D2A37B4B64FD6F5FB8047218C125BCC65";
+        "7F59E3EC85E4C3170CDDCC7B55B7575983496E31188F6A7CB7104813F19CBED7";
 
     private const string CorpusVersion = "mathblocks-value-codec-corpus-v1";
 

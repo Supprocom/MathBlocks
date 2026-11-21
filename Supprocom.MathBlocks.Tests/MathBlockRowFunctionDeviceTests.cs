@@ -29,12 +29,12 @@ public sealed class MathBlockRowFunctionDeviceTests
     {
         var text = new StringBuilder();
         text.Append("""
-            __device__ void row_scalar_slot(MathBlockSlot* slot, double value)
+            __device__ void row_scalar_slot(MathBlockSlot* slot, float value)
             {
                 slot->scalar_value = value;
                 slot->data_pointer = 0ull;
                 slot->scratch_pointer = 0ull;
-                slot->boolean_value = value != 0.0 ? 1 : 0;
+                slot->boolean_value = value != 0.0f ? 1 : 0;
                 slot->valid = isfinite(value) ? 1 : 0;
                 slot->rows = 0;
                 slot->columns = 0;
@@ -43,8 +43,8 @@ public sealed class MathBlockRowFunctionDeviceTests
             }
 
             extern "C" __global__ void row_vs_dispatch(
-                int op, int rows, double fill, const double* a, const double* b, const double* c,
-                double* dispatch_values, int* dispatch_valid, double* row_values, int* row_valid)
+                int op, int rows, float fill, const float* a, const float* b, const float* c,
+                float* dispatch_values, int* dispatch_valid, float* row_values, int* row_valid)
             {
                 if (threadIdx.x != 0 || blockIdx.x != 0)
                     return;
@@ -74,7 +74,7 @@ public sealed class MathBlockRowFunctionDeviceTests
                     row_scalar_slot(&first, a[row]);
                     row_scalar_slot(&second, b[row]);
                     row_scalar_slot(&third, c[row]);
-                    row_scalar_slot(&output, 0.0);
+                    row_scalar_slot(&output, 0.0f);
                     const MathBlockSlot* inputs[3] = { &first, &second, &third };
                     mathblocks_operation_dispatch(
             """);
@@ -83,10 +83,10 @@ public sealed class MathBlockRowFunctionDeviceTests
             , opcode, inputs, arity, &output);
                     dispatch_valid[row] = output.valid ? 1 : 0;
                     dispatch_values[row] = output.scalar_value;
-                    double value = 0.0;
-                    double x = a[row];
-                    double y = b[row];
-                    double z = c[row];
+                    float value = 0.0f;
+                    float x = a[row];
+                    float y = b[row];
+                    float z = c[row];
                     bool ok = false;
                     (void)y;
                     (void)z;
@@ -228,12 +228,13 @@ public sealed class MathBlockRowFunctionDeviceTests
         return pointer;
     }
 
+    // The values are single precision, 32 bits each; their bit patterns are returned widened.
     private static long[] DownloadLongs(ulong device, int count, IntPtr staging)
     {
-        Driver.Require(Driver.cuMemcpyDtoH(staging, device, new UIntPtr((uint)(count * sizeof(long)))), "cuMemcpyDtoH");
-        var result = new long[count];
-        Marshal.Copy(staging, result, 0, count);
-        return result;
+        Driver.Require(Driver.cuMemcpyDtoH(staging, device, new UIntPtr((uint)(count * sizeof(int)))), "cuMemcpyDtoH");
+        var bits = new int[count];
+        Marshal.Copy(staging, bits, 0, count);
+        return Array.ConvertAll(bits, value => (long)value);
     }
 
     private static int[] DownloadInts(ulong device, int count, IntPtr staging)
@@ -255,7 +256,7 @@ public sealed class MathBlockRowFunctionDeviceTests
     private static IntPtr Box(float value, List<IntPtr> host)
     {
         var pointer = Marshal.AllocHGlobal(sizeof(float));
-        Marshal.WriteInt64(pointer, BitConverter.SingleToInt32Bits(value));
+        Marshal.WriteInt32(pointer, BitConverter.SingleToInt32Bits(value));
         host.Add(pointer);
         return pointer;
     }

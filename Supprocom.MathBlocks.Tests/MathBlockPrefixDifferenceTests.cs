@@ -176,7 +176,7 @@ public sealed class MathBlockPrefixDifferenceTests
                 var direct = PrefixDifferenceCases.DirectWindowSum(values, available, row, start, end);
                 Assert.Equal(direct.HasValue, valid[row]);
                 if (direct is { } expected)
-                    Assert.True(Math.Abs(expected - result[row]) <= 1e-12f * Math.Max(1f, Math.Abs(expected)), $"row {row}: {result[row]:R} against {expected:R}");
+                    Assert.True(Math.Abs(expected - result[row]) <= 2e-6f * Math.Max(1f, Math.Abs(expected)), $"row {row}: {result[row]:R} against {expected:R}");
             }
 
             // When sum-over-offsets is in the catalog, it reads the same rows: its values may differ in the last bits.
@@ -185,7 +185,7 @@ public sealed class MathBlockPrefixDifferenceTests
                 var sumValues = sums.AsVector();
                 for (var row = 0; row < values.Length; row++)
                     if (valid[row])
-                        Assert.True(Math.Abs(sumValues[row] - result[row]) <= 1e-12f * Math.Max(1f, Math.Abs(sumValues[row])));
+                        Assert.True(Math.Abs(sumValues[row] - result[row]) <= 2e-6f * Math.Max(1f, Math.Abs(sumValues[row])));
             }
         }
     }

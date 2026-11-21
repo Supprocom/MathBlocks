@@ -18,9 +18,9 @@ public sealed class MathBlockElementwiseRowDeviceTests
     // NVRTC ignores source line endings; this is not a fingerprinted fixture.
 #pragma warning disable MA0136
     private const string Kernel = """
-        __device__ void row_probe_slot(MathBlockSlot* slot, const double* data, int rows, int valid)
+        __device__ void row_probe_slot(MathBlockSlot* slot, const float* data, int rows, int valid)
         {
-            slot->scalar_value = 0.0;
+            slot->scalar_value = 0.0f;
             slot->data_pointer = (unsigned long long)data;
             slot->scratch_pointer = 0ull;
             slot->boolean_value = 0;
@@ -32,8 +32,8 @@ public sealed class MathBlockElementwiseRowDeviceTests
         }
 
         extern "C" __global__ void row_vs_dispatch(
-            int source, int wide, double fill, int rows, const double* a, const double* b, const double* c,
-            double* dispatch_values, int* dispatch_valid, double* row_values, int* row_valid)
+            int source, int wide, float fill, int rows, const float* a, const float* b, const float* c,
+            float* dispatch_values, int* dispatch_valid, float* row_values, int* row_valid)
         {
             __shared__ MathBlockSlot slots[6];
             __shared__ const MathBlockSlot* value_inputs[4];
@@ -49,7 +49,7 @@ public sealed class MathBlockElementwiseRowDeviceTests
                 row_probe_slot(&slots[3], 0, rows, 1);
                 slots[3].scalar_value = fill;
                 row_probe_slot(&slots[4], dispatch_values, rows, 1);
-                row_probe_slot(&slots[5], (const double*)dispatch_valid, rows, 1);
+                row_probe_slot(&slots[5], (const float*)dispatch_valid, rows, 1);
                 for (int index = 0; index < arity; ++index)
                 {
                     value_inputs[index] = &slots[index];
@@ -62,8 +62,8 @@ public sealed class MathBlockElementwiseRowDeviceTests
             mathblocks_operation_dispatch(12, valid_opcode, valid_inputs, arity, &slots[5]);
             for (int row = threadIdx.x; row < rows; row += blockDim.x)
             {
-                double value = 0.0;
-                double ignored = 0.0;
+                float value = 0.0f;
+                float ignored = 0.0f;
                 (void)mathblocks_elementwise_row(values_opcode, a[row], b[row], c[row], fill, &value);
                 row_values[row] = value;
                 row_valid[row] = mathblocks_elementwise_row(valid_opcode, a[row], b[row], c[row], fill, &ignored) ? 1 : 0;
@@ -194,12 +194,13 @@ public sealed class MathBlockElementwiseRowDeviceTests
         return pointer;
     }
 
+    // The values are single precision, 32 bits each; their bit patterns are returned widened.
     private static long[] DownloadLongs(ulong device, int count, IntPtr staging)
     {
-        Driver.Require(Driver.cuMemcpyDtoH(staging, device, new UIntPtr((uint)(count * sizeof(long)))), "cuMemcpyDtoH");
-        var result = new long[count];
-        Marshal.Copy(staging, result, 0, count);
-        return result;
+        Driver.Require(Driver.cuMemcpyDtoH(staging, device, new UIntPtr((uint)(count * sizeof(int)))), "cuMemcpyDtoH");
+        var bits = new int[count];
+        Marshal.Copy(staging, bits, 0, count);
+        return Array.ConvertAll(bits, value => (long)value);
     }
 
     private static int[] DownloadInts(ulong device, int count, IntPtr staging)
@@ -221,7 +222,7 @@ public sealed class MathBlockElementwiseRowDeviceTests
     private static IntPtr Box(float value, List<IntPtr> host)
     {
         var pointer = Marshal.AllocHGlobal(sizeof(float));
-        Marshal.WriteInt64(pointer, BitConverter.SingleToInt32Bits(value));
+        Marshal.WriteInt32(pointer, BitConverter.SingleToInt32Bits(value));
         host.Add(pointer);
         return pointer;
     }

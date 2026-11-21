@@ -235,9 +235,9 @@ public sealed class MathBlockCudaWorkerTestsBaseOpcodeDispatch : IClassFixture<M
             foreach (var (input, row, value) in patches ?? [])
             {
                 if (row < 0)
-                    Marshal.WriteInt64(host, input * MathBlockCudaSlotLayout.Size + MathBlockCudaSlotLayout.ScalarValueOffset, BitConverter.SingleToInt32Bits(value));
+                    Marshal.WriteInt32(host, input * MathBlockCudaSlotLayout.Size + MathBlockCudaSlotLayout.ScalarValueOffset, BitConverter.SingleToInt32Bits(value));
                 else
-                    Marshal.WriteInt64(host, inputOffsets[input] + row * sizeof(float), BitConverter.SingleToInt32Bits(value));
+                    Marshal.WriteInt32(host, inputOffsets[input] + row * sizeof(float), BitConverter.SingleToInt32Bits(value));
             }
 
             MathBlockCudaValueCodec.WriteHeader(

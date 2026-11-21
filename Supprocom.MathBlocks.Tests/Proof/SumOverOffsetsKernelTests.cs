@@ -243,7 +243,7 @@ public sealed class SumOverOffsetsKernelTests
             else if (sibling && siblingValid[row] != expectedValid[row])
                 failures.Add(string.Create(CultureInfo.InvariantCulture, $"{label} row {row}: the -valid form gives {siblingValid[row]}, sequential sum {expectedValid[row]}"));
             else if (BitConverter.SingleToInt32Bits(actualValues[row]) != BitConverter.SingleToInt32Bits(expectedValues[row]))
-                failures.Add(string.Create(CultureInfo.InvariantCulture, $"{label} row {row}: bits {BitConverter.DoubleToInt64Bits(actualValues[row]):X16} ({actualValues[row]:R}), sequential sum {BitConverter.DoubleToInt64Bits(expectedValues[row]):X16} ({expectedValues[row]:R})"));
+                failures.Add(string.Create(CultureInfo.InvariantCulture, $"{label} row {row}: bits {BitConverter.SingleToInt32Bits(actualValues[row]):X8} ({actualValues[row]:R}), sequential sum {BitConverter.SingleToInt32Bits(expectedValues[row]):X8} ({expectedValues[row]:R})"));
         }
     }
 

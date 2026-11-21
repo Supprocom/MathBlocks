@@ -33,7 +33,7 @@ public sealed class MathBlockCudaTranspilationTests
         Assert.Equal(MathBlockCudaDeviceModule.GetSource(MathBlockDomainOptions.Default), MathBlockCudaDeviceModule.Source);
         Assert.True(
             string.Equals(
-                "15C531AC4591416406FFCE6A581FC0E558A4C280530871874B6FB71E7A7D552F",
+                "1580C0A0BFBA90F76D13724B76427AC180DDD7103026486EA79F0DE716131DE0",
                 MathBlockCudaDeviceModule.SourceFingerprint,
                 StringComparison.Ordinal),
             "The source fingerprint is " + MathBlockCudaDeviceModule.SourceFingerprint);

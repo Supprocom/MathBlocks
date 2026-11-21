@@ -37,7 +37,7 @@ public sealed class MathBlockRegressionTests
         Assert.True(MathBlockLinearAlgebra.TryInverse(matrix, out var inverse));
         var identity = MathBlockLinearAlgebra.Multiply(matrix, inverse!);
         Assert.True(MathBlockValue.Matrix(identity).ApproximatelyEquals(
-            MathBlockValue.Matrix(MathBlockLinearAlgebra.Identity(3)), 1e-10f));
+            MathBlockValue.Matrix(MathBlockLinearAlgebra.Identity(3)), 1e-5f));
         Assert.Equal(MathBlockLinearAlgebra.Trace(matrix),
             MathBlockVectorMath.Sum(MathBlockLinearAlgebra.SymmetricEigenvalues(
                 new MathBlockMatrix(3, 3, [2f, 1f, 0f, 1f, 3f, 1f, 0f, 1f, 4f]))), 9);
@@ -86,7 +86,7 @@ public sealed class MathBlockRegressionTests
         ]);
 
         Assert.True(MathBlockGraphMath.TryHodgePotential(graph, out var potential));
-        Assert.Equal([0f, 2f, 1f, 5f], potential, new ApproximateDoubleComparer(1e-10f));
+        Assert.Equal([0f, 2f, 1f, 5f], potential, new ApproximateDoubleComparer(1e-5f));
         Assert.Equal(0f, MathBlockGraphMath.HodgeResidualNorm(graph, potential), 5);
     }
 
@@ -99,9 +99,9 @@ public sealed class MathBlockRegressionTests
         Assert.Equal(6f, MathBlockGeometry.Perimeter(polygon), 5);
 
         var straightPath = new MathBlockMatrix(2, 2, [0f, 0f, 2f, 3f]);
-        Assert.Equal([2f, 3f], MathBlockPath.SignatureLevelOne(straightPath), new ApproximateDoubleComparer(1e-12f));
+        Assert.Equal([2f, 3f], MathBlockPath.SignatureLevelOne(straightPath), new ApproximateDoubleComparer(2e-6f));
         Assert.True(MathBlockValue.Matrix(MathBlockPath.SignatureLevelTwo(straightPath)).ApproximatelyEquals(
-            MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [2f, 3f, 3f, 4.5f])), 1e-12f));
+            MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [2f, 3f, 3f, 4.5f])), 2e-6f));
     }
 
     private static readonly float[] right = new[] { 3f, 5f, 7f, 9f };

@@ -139,10 +139,10 @@ public sealed class MathBlockStableSortTests
             }
         }
 
-        Plan(1_447);
-        var rejected = Assert.Throws<InvalidOperationException>(() => Plan(1_448));
+        Plan(2_047);
+        var rejected = Assert.Throws<InvalidOperationException>(() => Plan(2_048));
         Assert.Equal(
-            "window.statistics.pseudomedian@1: CUDA supports widths of at most 1,447 for this operation (scratch byte count); got 1,448.",
+            "window.statistics.pseudomedian@1: CUDA supports widths of at most 2,047 for this operation (scratch byte count); got 2,048.",
             rejected.Message);
     }
 

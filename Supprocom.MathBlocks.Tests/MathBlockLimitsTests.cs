@@ -120,10 +120,10 @@ public sealed class MathBlockLimitsTests(ITestOutputHelper output)
         Assert.Equal(118, widths.Count);
         var byValue = widths.GroupBy(limit => limit.Value!.Value).ToDictionary(group => group.Key, group => group.Count());
         Assert.Equal(5, byValue.Count);
-        Assert.Equal(6, byValue[2_097_151]);
-        Assert.Equal(8, byValue[1_048_575]);
-        Assert.Equal(2, byValue[1_448]);
-        Assert.Equal(2, byValue[1_447]);
+        Assert.Equal(6, byValue[4_194_303]);
+        Assert.Equal(8, byValue[2_097_151]);
+        Assert.Equal(2, byValue[2_048]);
+        Assert.Equal(2, byValue[2_047]);
         Assert.Equal(100, byValue[int.MaxValue]);
         Assert.All(widths, limit => Assert.Equal(limit.Maximum, limit.Value));
         Assert.All(widths.Where(limit => limit.Value != int.MaxValue), limit => Assert.Equal(MathBlockLimitKind.Derived, limit.Kind));
@@ -143,8 +143,8 @@ public sealed class MathBlockLimitsTests(ITestOutputHelper output)
         var narrow = MathBlockLimits.Resolve(new MathBlocksCudaOptions { BlockSize = 64 });
         const string form = "window.statistics.distance-correlation@1";
 
-        Assert.Equal(524_287, wide.Single(limit => Is(limit, "cuda.window.maximum-width", form)).Value);
-        Assert.Equal(2_097_151, narrow.Single(limit => Is(limit, "cuda.window.maximum-width", form)).Value);
+        Assert.Equal(1_048_575, wide.Single(limit => Is(limit, "cuda.window.maximum-width", form)).Value);
+        Assert.Equal(4_194_303, narrow.Single(limit => Is(limit, "cuda.window.maximum-width", form)).Value);
         var derived = wide.Single(limit => Is(limit, "cuda.window.maximum-width", form));
         Assert.Equal(MathBlockLimitKind.Derived, derived.Kind);
         Assert.Equal(["cuda.block-size"], derived.DrivenBy);

@@ -66,7 +66,7 @@ internal static class MathBlockWindowM2TestSupport
             {
                 return string.Create(
                     System.Globalization.CultureInfo.InvariantCulture,
-                    $"row {row}: {others[row]:R} (bits {BitConverter.DoubleToInt64Bits(others[row]):X16}), expected {values[row]:R} (bits {BitConverter.DoubleToInt64Bits(values[row]):X16})");
+                    $"row {row}: {others[row]:R} (bits {BitConverter.SingleToInt32Bits(others[row]):X8}), expected {values[row]:R} (bits {BitConverter.SingleToInt32Bits(values[row]):X8})");
             }
         }
         return null;

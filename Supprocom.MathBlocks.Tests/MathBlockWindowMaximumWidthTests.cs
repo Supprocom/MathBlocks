@@ -16,8 +16,8 @@ public sealed class MathBlockWindowMaximumWidthTests
 
         var width = (long)maximumWidth.Invoke(null, [22, 128])!;
 
-        Assert.InRange(width, 1_000L, 2_000L);
-        var limit = int.MaxValue / (8L * 128L);
+        Assert.InRange(width, 2_000L, 3_000L);
+        var limit = int.MaxValue / (4L * 128L);
         Assert.True((long)scratch.Invoke(null, [22, width])! <= limit);
         Assert.True((long)scratch.Invoke(null, [22, width + 1])! > limit);
         var record = MathBlockLimits.Resolve().Single(candidate =>

@@ -103,7 +103,7 @@ public sealed class MathBlockBinomialTableTests
         Assert.True(guard >= 0 && end > guard);
         var defaults = generated[guard..end];
 
-        Assert.Equal(1, Count(defaults, Load + " { return 0.0; }"));
+        Assert.Equal(1, Count(defaults, Load + " { return 0.0f; }"));
         Assert.Equal(1, Count(defaults, Store + " {}"));
         Assert.DoesNotContain(MathBlockCudaDeviceModule.BinomialTableSymbol + "[", defaults, StringComparison.Ordinal);
         Assert.DoesNotContain(Memo, generated[..end], StringComparison.Ordinal);
