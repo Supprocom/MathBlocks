@@ -16,7 +16,7 @@ public static partial class MathBlockLinearAlgebra
             for (var row = rank + 1; row < matrix.Rows; row++)
                 if (Math.Abs(values[row * matrix.Columns + pivotColumn]) > Math.Abs(values[pivotRow * matrix.Columns + pivotColumn]))
                     pivotRow = row;
-            if (values[pivotRow * matrix.Columns + pivotColumn] == 0d)
+            if (values[pivotRow * matrix.Columns + pivotColumn] == 0f)
             {
                 pivotColumn++;
                 continue;

@@ -18,8 +18,8 @@ public static partial class MathBlockAdvanced
         {
             for (var right = left + 1; right < points.Count; right++)
             {
-                var center = new MathBlockPoint((points[left].X + points[right].X) / 2d, (points[left].Y + points[right].Y) / 2d);
-                var radius = MathBlockGeometry.Distance(points[left], points[right]) / 2d;
+                var center = new MathBlockPoint((points[left].X + points[right].X) / 2f, (points[left].Y + points[right].Y) / 2f);
+                var radius = MathBlockGeometry.Distance(points[left], points[right]) / 2f;
                 var empty = true;
                 for (var index = 0; index < points.Count; index++)
                 {
@@ -31,7 +31,7 @@ public static partial class MathBlockAdvanced
                 }
 
                 if (empty)
-                    edges.Add(new MathBlockGraphEdge(left, right, 2d * radius));
+                    edges.Add(new MathBlockGraphEdge(left, right, 2f * radius));
             }
         }
 

@@ -15,6 +15,6 @@ internal static partial class ProbabilityMathBlocks
         {
             var values = inputs[0].AsVector();
             return values.Count <= domain.Options.MaximumExplicitSubsetSize ? MathBlockValue.Vector(MathBlockProbability.NonemptySubsetSums(values), inputs[0].Type.Unit, true) : MathBlockValue.Invalid(MathBlockType.Vector(inputs[0].Type.Unit), "The vector is too large for explicit subset enumeration.");
-        }, [MathBlockValue.Vector([1d, 2d])], MathBlockValue.Vector([1d, 2d, 3d]), performanceIterations: 4);
+        }, [MathBlockValue.Vector([1f, 2f])], MathBlockValue.Vector([1f, 2f, 3f]), performanceIterations: 4);
     }
 }

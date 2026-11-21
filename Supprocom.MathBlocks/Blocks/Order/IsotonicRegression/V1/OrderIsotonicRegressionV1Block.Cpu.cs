@@ -4,10 +4,10 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockAdvanced
 {
     /// <summary>Computes the <c>order.isotonic-regression@1</c> mathematical operation.</summary>
-    public static double[] IsotonicRegression(IReadOnlyList<double> values)
+    public static float[] IsotonicRegression(IReadOnlyList<float> values)
     {
         ArgumentNullException.ThrowIfNull(values);
-        var means = new double[values.Count];
+        var means = new float[values.Count];
         var weights = new int[values.Count];
         var starts = new int[values.Count];
         var blockCount = 0;
@@ -26,7 +26,7 @@ public static partial class MathBlockAdvanced
             }
         }
 
-        var result = new double[values.Count];
+        var result = new float[values.Count];
         for (var block = 0; block < blockCount; block++)
         {
             var end = block + 1 < blockCount ? starts[block + 1] : values.Count;

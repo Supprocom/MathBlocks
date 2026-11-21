@@ -6,6 +6,6 @@ internal static partial class MatrixMathBlocks
     {
         internal const string Identity = "matrix.trace@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => CreateScalarMatrixReduction("matrix.trace", MathBlockLinearAlgebra.Trace, matrixA, 5d, TraceType);
+        internal static MathBlockOperation Create() => CreateScalarMatrixReduction("matrix.trace", MathBlockLinearAlgebra.Trace, matrixA, 5f, TraceType);
     }
 }

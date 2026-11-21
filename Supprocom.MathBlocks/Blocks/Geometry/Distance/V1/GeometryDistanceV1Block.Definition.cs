@@ -6,6 +6,6 @@ internal static partial class GeometryMathBlocks
     {
         internal const string Identity = "geometry.distance@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => CreatePointPairScalar("geometry.distance", (left, right) => MathBlockGeometry.Distance(left[0], right[0]), Singleton(0d, 0d), Singleton(3d, 4d), 5d);
+        internal static MathBlockOperation Create() => CreatePointPairScalar("geometry.distance", (left, right) => MathBlockGeometry.Distance(left[0], right[0]), Singleton(0f, 0f), Singleton(3f, 4f), 5f);
     }
 }

@@ -15,16 +15,16 @@ public static partial class MathBlockVectorMath
     // false), or noMatch when none is. An unreachable row or an unavailable predicate row met before a match makes the row
     // invalid; the rows after the first match are never read. This is the definition; FirstTrueOffsetRows gives the same results.
     internal static bool FirstTrueOffsetRow(
-        ReadOnlySpan<double> predicate,
+        ReadOnlySpan<float> predicate,
         ReadOnlySpan<bool> predicateValid,
-        ReadOnlySpan<double> counts,
+        ReadOnlySpan<float> counts,
         int row,
         int start,
         int end,
-        double noMatch,
-        out double value)
+        float noMatch,
+        out float value)
     {
-        value = 0d;
+        value = 0f;
         for (long offset = start; offset <= end; offset++)
         {
             if (!OffsetIsReachable(counts, row, offset))
@@ -32,7 +32,7 @@ public static partial class MathBlockVectorMath
             var target = (int)(row + offset);
             if (!predicateValid[target])
                 return false;
-            if (predicate[target] != 0d)
+            if (predicate[target] != 0f)
             {
                 value = offset;
                 return true;
@@ -44,14 +44,14 @@ public static partial class MathBlockVectorMath
 
     // The values of sequence.first-true-offset@1: each invalid row holds fill.
     internal static void FirstTrueOffsetValues(
-        ReadOnlySpan<double> predicate,
+        ReadOnlySpan<float> predicate,
         ReadOnlySpan<bool> predicateValid,
-        ReadOnlySpan<double> counts,
+        ReadOnlySpan<float> counts,
         int start,
         int end,
-        double noMatch,
-        double fill,
-        Span<double> values,
+        float noMatch,
+        float fill,
+        Span<float> values,
         Span<bool> rowValid) =>
         FirstTrueOffsetRows(predicate, predicateValid, counts, start, end, noMatch, fill, values, rowValid, true);
 
@@ -68,14 +68,14 @@ public static partial class MathBlockVectorMath
     // the window is a valid row with noMatch. Counts that are not cut into segments take the row by row scan of FirstTrueOffsetRow.
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     internal static void FirstTrueOffsetRows(
-        ReadOnlySpan<double> predicate,
+        ReadOnlySpan<float> predicate,
         ReadOnlySpan<bool> predicateValid,
-        ReadOnlySpan<double> counts,
+        ReadOnlySpan<float> counts,
         int start,
         int end,
-        double noMatch,
-        double fill,
-        Span<double> values,
+        float noMatch,
+        float fill,
+        Span<float> values,
         Span<bool> rowValid,
         bool writeValues)
     {
@@ -124,18 +124,18 @@ public static partial class MathBlockVectorMath
 
     // True when counts[t] is 0 or counts[t - 1] + 1 for every t from 1 on.
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    private static bool CountsFormSegments(ReadOnlySpan<double> counts)
+    private static bool CountsFormSegments(ReadOnlySpan<float> counts)
     {
         var index = 1;
-        var broken = Vector256<double>.Zero;
+        var broken = Vector256<float>.Zero;
         if (MathBlockSimd.UseBlocks)
         {
-            var one = Vector256.Create(1d);
+            var one = Vector256.Create(1f);
             for (; index <= counts.Length - MathBlockSimd.BlockWidth; index += MathBlockSimd.BlockWidth)
             {
-                var block = Vector256.Create<double>(counts[index..]);
-                var previous = Vector256.Create<double>(counts[(index - 1)..]);
-                broken |= ~(Vector256.Equals(block, Vector256<double>.Zero) | Vector256.Equals(block, previous + one));
+                var block = Vector256.Create<float>(counts[index..]);
+                var previous = Vector256.Create<float>(counts[(index - 1)..]);
+                broken |= ~(Vector256.Equals(block, Vector256<float>.Zero) | Vector256.Equals(block, previous + one));
             }
         }
 
@@ -143,7 +143,7 @@ public static partial class MathBlockVectorMath
             return false;
         for (; index < counts.Length; index++)
         {
-            if (counts[index] != 0d && counts[index] != counts[index - 1] + 1d)
+            if (counts[index] != 0f && counts[index] != counts[index - 1] + 1f)
                 return false;
         }
 
@@ -155,7 +155,7 @@ public static partial class MathBlockVectorMath
     // time, the others four at a time: each lane takes its own tag (its stop, its segment end, or none), and two shifted selects give every
     // lane the first tag at or after it in the block, or the carry from the rows after the block.
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    private static void FillNextStops(ReadOnlySpan<double> predicate, ReadOnlySpan<bool> predicateValid, ReadOnlySpan<double> counts, int[] next)
+    private static void FillNextStops(ReadOnlySpan<float> predicate, ReadOnlySpan<bool> predicateValid, ReadOnlySpan<float> counts, int[] next)
     {
         var length = predicate.Length;
         var carry = (length << 2) | StopSegmentEnd;
@@ -163,10 +163,10 @@ public static partial class MathBlockVectorMath
         var scalarFrom = blocked ? length - (length % MathBlockSimd.BlockWidth == 0 ? MathBlockSimd.BlockWidth : length % MathBlockSimd.BlockWidth) : 0;
         for (var row = length - 1; row >= scalarFrom; row--)
         {
-            if (row == length - 1 || counts[row + 1] == 0d)
+            if (row == length - 1 || counts[row + 1] == 0f)
                 carry = ((row + 1) << 2) | StopSegmentEnd;
             var available = predicateValid[row];
-            if (!available || predicate[row] != 0d)
+            if (!available || predicate[row] != 0f)
                 carry = (row << 2) | (available ? StopTrue : StopUnavailable);
             next[row] = carry;
         }
@@ -179,12 +179,12 @@ public static partial class MathBlockVectorMath
         var carryVector = Vector128.Create(carry);
         for (var row = scalarFrom - MathBlockSimd.BlockWidth; row >= 0; row -= MathBlockSimd.BlockWidth)
         {
-            var nonzero = ~Vector256.Equals(Vector256.Create<double>(predicate[row..]), Vector256<double>.Zero);
+            var nonzero = ~Vector256.Equals(Vector256.Create<float>(predicate[row..]), Vector256<float>.Zero);
             var flagBytes = Vector128.CreateScalar(Unsafe.ReadUnaligned<uint>(ref Unsafe.As<bool, byte>(ref Unsafe.AsRef(in predicateValid[row])))).AsByte();
             var flags = Vector128.WidenLower(Vector128.WidenLower(flagBytes)).AsInt32();
             var unavailable = Vector128.Equals(flags, Vector128<int>.Zero);
             var stops = Vector128.Narrow(nonzero.GetLower().AsInt64(), nonzero.GetUpper().AsInt64()) | unavailable;
-            var segmentEnds = Vector256.Equals(Vector256.Create<double>(counts[(row + 1)..]), Vector256<double>.Zero);
+            var segmentEnds = Vector256.Equals(Vector256.Create<float>(counts[(row + 1)..]), Vector256<float>.Zero);
             var ends = Vector128.Narrow(segmentEnds.GetLower().AsInt64(), segmentEnds.GetUpper().AsInt64());
             var indices = Vector128.Create(row) + lanes;
             var tag = Vector128.ConditionalSelect(
@@ -202,13 +202,13 @@ public static partial class MathBlockVectorMath
     // Rows from up to (not including) to, one at a time, from the stops.
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private static void RowsFromNextStops(
-        ReadOnlySpan<double> counts,
+        ReadOnlySpan<float> counts,
         int[] next,
         int start,
         int end,
-        double noMatch,
-        double fill,
-        Span<double> values,
+        float noMatch,
+        float fill,
+        Span<float> values,
         Span<bool> rowValid,
         bool writeValues,
         int from,
@@ -247,20 +247,20 @@ public static partial class MathBlockVectorMath
     // RowsFromNextStops does for its row.
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private static int BlocksFromNextStops(
-        ReadOnlySpan<double> counts,
+        ReadOnlySpan<float> counts,
         int[] next,
         int start,
         int end,
-        double noMatch,
-        double fill,
-        Span<double> values,
+        float noMatch,
+        float fill,
+        Span<float> values,
         Span<bool> rowValid,
         bool writeValues,
         int row,
         long lastRow)
     {
-        var startVector = Vector256.Create((double)start);
-        var neededVector = Vector256.Create((double)(start < 0 ? -(long)start : 0L));
+        var startVector = Vector256.Create((float)start);
+        var neededVector = Vector256.Create((float)(start < 0 ? -(long)start : 0L));
         var noMatchVector = Vector256.Create(noMatch);
         var fillVector = Vector256.Create(fill);
         var lanes = Vector128.Create(0, 1, 2, 3);
@@ -270,7 +270,7 @@ public static partial class MathBlockVectorMath
         for (; row <= lastRow; row += MathBlockSimd.BlockWidth)
         {
             var index = row + start;
-            var counted = Vector256.Create<double>(counts[(start < 0 ? row : index)..]);
+            var counted = Vector256.Create<float>(counts[(start < 0 ? row : index)..]);
             var reachable = Vector256.GreaterThanOrEqual(counted, start < 0 ? neededVector : startVector);
             var stops = Vector128.Create<int>(next.AsSpan(index));
             var found = Vector128.ShiftRightArithmetic(stops, 2);
@@ -298,6 +298,6 @@ public static partial class MathBlockVectorMath
 
     // The four 32-bit lane masks as four 64-bit lane masks (each lane's all-ones or zero is kept).
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static Vector256<double> AsDoubleMask(Vector128<int> mask) =>
+    private static Vector256<float> AsDoubleMask(Vector128<int> mask) =>
         Vector256.Create(Vector128.WidenLower(mask), Vector128.WidenUpper(mask)).AsDouble();
 }

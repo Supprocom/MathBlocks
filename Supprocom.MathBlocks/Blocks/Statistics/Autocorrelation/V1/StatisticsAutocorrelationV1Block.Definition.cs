@@ -17,7 +17,7 @@ internal static partial class StatisticalMathBlocks
         {
             var lagValue = inputs[1].AsScalar();
             var values = inputs[0].AsVector();
-            return lagValue == Math.Truncate(lagValue) && lagValue > 0d && lagValue < values.Count ? MathBlockValue.Scalar(MathBlockStatistics.Autocorrelation(values, (int)lagValue)) : MathBlockValue.Invalid(MathBlockType.Scalar(), "The lag is outside the operation domain.");
-        }, [ascending, MathBlockValue.Scalar(1d)], MathBlockValue.Scalar(1d), 1e-9, 16);
+            return lagValue == Math.Truncate(lagValue) && lagValue > 0f && lagValue < values.Count ? MathBlockValue.Scalar(MathBlockStatistics.Autocorrelation(values, (int)lagValue)) : MathBlockValue.Invalid(MathBlockType.Scalar(), "The lag is outside the operation domain.");
+        }, [ascending, MathBlockValue.Scalar(1f)], MathBlockValue.Scalar(1f), 1e-9f, 16);
     }
 }

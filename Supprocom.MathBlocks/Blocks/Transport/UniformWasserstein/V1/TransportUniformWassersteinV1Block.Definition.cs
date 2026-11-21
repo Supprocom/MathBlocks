@@ -16,7 +16,7 @@ internal static partial class TransportMathBlocks
         }, inputs =>
         {
             var order = inputs[2].AsScalar();
-            return inputs[0].AsVector().Count > 0 && order >= 1d ? MathBlockValue.Scalar(MathBlockTransport.UniformWasserstein(inputs[0].AsVector(), inputs[1].AsVector(), order), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Scalar(inputs[0].Type.Unit), "The inputs are outside the operation domain.");
-        }, [left, right, MathBlockValue.Scalar(1d)], MathBlockValue.Scalar(1d), performanceIterations: 8);
+            return inputs[0].AsVector().Count > 0 && order >= 1f ? MathBlockValue.Scalar(MathBlockTransport.UniformWasserstein(inputs[0].AsVector(), inputs[1].AsVector(), order), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Scalar(inputs[0].Type.Unit), "The inputs are outside the operation domain.");
+        }, [left, right, MathBlockValue.Scalar(1f)], MathBlockValue.Scalar(1f), performanceIterations: 8);
     }
 }

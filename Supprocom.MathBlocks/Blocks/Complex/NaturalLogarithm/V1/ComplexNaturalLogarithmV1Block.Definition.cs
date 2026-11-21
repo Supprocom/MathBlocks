@@ -6,6 +6,6 @@ internal static partial class ComplexMathBlocks
     {
         internal const string Identity = "complex.natural-logarithm@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => CreateUnary("complex.natural-logarithm", MathBlockComplex.NaturalLogarithm, new Complex(1d, 0d), new Complex(0d, 0d), DimensionlessComplexUnary);
+        internal static MathBlockOperation Create() => CreateUnary("complex.natural-logarithm", MathBlockComplex.NaturalLogarithm, new Complex(1f, 0f), new Complex(0f, 0f), DimensionlessComplexUnary);
     }
 }

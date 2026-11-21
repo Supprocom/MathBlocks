@@ -11,6 +11,6 @@ internal static partial class VectorMathBlocks
         {
             var count = RequireNonnegativeInteger(inputs[1].AsScalar());
             return count <= domain.Options.MaximumGeneratedVectorLength ? MathBlockValue.Vector(MathBlockVectorMath.Repeat(inputs[0].AsScalar(), count), inputs[0].Type.Unit, true) : MathBlockValue.Invalid(MathBlockType.Vector(inputs[0].Type.Unit), "The output length exceeds the operation limit.");
-        }, [MathBlockValue.Scalar(2d), MathBlockValue.Scalar(3d)], MathBlockValue.Vector([2d, 2d, 2d]), performanceIterations: 32);
+        }, [MathBlockValue.Scalar(2f), MathBlockValue.Scalar(3f)], MathBlockValue.Vector([2f, 2f, 2f]), performanceIterations: 32);
     }
 }

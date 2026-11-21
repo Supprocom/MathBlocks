@@ -6,6 +6,6 @@ internal static partial class VectorMathBlocks
     {
         internal const string Identity = "vector.median@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateReduction("vector.median", MathBlockVectorMath.Median, 2.5d, MathBlockTypeRules.VectorReduction);
+        internal static MathBlockOperation Create() => CreateReduction("vector.median", MathBlockVectorMath.Median, 2.5f, MathBlockTypeRules.VectorReduction);
     }
 }

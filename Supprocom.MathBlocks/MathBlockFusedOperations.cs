@@ -68,7 +68,7 @@ internal static class MathBlockFusedOperations
     public static bool TryResolve(string identity, out MathBlockFusedOperation operation) =>
         byIdentity.TryGetValue(identity, out operation!);
 
-    public static double EvaluateNumber(MathBlockFusedOpcode opcode, double first, double second) => opcode switch
+    public static float EvaluateNumber(MathBlockFusedOpcode opcode, float first, float second) => opcode switch
     {
         // Each case is the function the operation's CoreCLR evaluator applies to every element.
         MathBlockFusedOpcode.VectorAbsolute => Math.Abs(first),
@@ -79,7 +79,7 @@ internal static class MathBlockFusedOperations
         MathBlockFusedOpcode.VectorDivide => MathBlockScalar.Divide(first, second),
         MathBlockFusedOpcode.VectorScale => first * second,
         MathBlockFusedOpcode.VectorSign => Math.Sign(first),
-        MathBlockFusedOpcode.VectorPositivePart => Math.Max(first, 0d),
+        MathBlockFusedOpcode.VectorPositivePart => Math.Max(first, 0f),
         MathBlockFusedOpcode.VectorSquare => first * first,
         MathBlockFusedOpcode.VectorSquareRoot => Math.Sqrt(first),
         MathBlockFusedOpcode.VectorExponential => MathBlockScalar.Exponential(first),
@@ -88,7 +88,7 @@ internal static class MathBlockFusedOperations
         _ => throw new InvalidOperationException($"Fused opcode '{opcode}' does not produce a number.")
     };
 
-    public static bool EvaluateFlag(MathBlockFusedOpcode opcode, double first, double second) => opcode switch
+    public static bool EvaluateFlag(MathBlockFusedOpcode opcode, float first, float second) => opcode switch
     {
         MathBlockFusedOpcode.VectorEqual => first == second,
         MathBlockFusedOpcode.VectorLessThan => first < second,
@@ -105,7 +105,7 @@ internal static class MathBlockFusedOperations
         _ => throw new InvalidOperationException($"Fused opcode '{opcode}' is not a Boolean operation.")
     };
 
-    public static double EvaluateProjection(MathBlockFusedOpcode opcode, Complex value) => opcode switch
+    public static float EvaluateProjection(MathBlockFusedOpcode opcode, Complex value) => opcode switch
     {
         MathBlockFusedOpcode.ComplexVectorReal => value.Real,
         MathBlockFusedOpcode.ComplexVectorImaginary => value.Imaginary,

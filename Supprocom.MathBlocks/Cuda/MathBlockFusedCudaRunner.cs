@@ -9,7 +9,7 @@ namespace Supprocom.MathBlocks.Cuda;
 internal static class MathBlockFusedCudaRunner
 {
     // The launch-to-synchronize time of each case of the latest run, in milliseconds.
-    public static IReadOnlyList<double> LaunchMilliseconds { get; private set; } = [];
+    public static IReadOnlyList<float> LaunchMilliseconds { get; private set; } = [];
 
     public static MathBlockFusedResult[] Run(
         string consumerSource,
@@ -65,7 +65,7 @@ internal static class MathBlockFusedCudaRunner
                 "cuModuleGetGlobal(mathblocks_nonconvergence_counts)");
             var counters = (countsPointer, checked((int)countsBytes));
             var results = new MathBlockFusedResult[expressions.Count];
-            var times = new double[expressions.Count];
+            var times = new float[expressions.Count];
             for (var index = 0; index < results.Length; index++)
                 results[index] = RunCase(module, expressions[index], inputs[index], validity[index], options, counters, out times[index]);
             LaunchMilliseconds = times;
@@ -84,7 +84,7 @@ internal static class MathBlockFusedCudaRunner
         IReadOnlyDictionary<string, MathBlockValue>? validity,
         MathBlocksCudaOptions options,
         (ulong Pointer, int Bytes) counters,
-        out double launchMilliseconds)
+        out float launchMilliseconds)
     {
         MathBlocksCudaNative.ThrowIfFailed(
             MathBlocksCudaNative.cuModuleGetFunction(out var function, module, expression.CudaKernelName),
@@ -111,13 +111,13 @@ internal static class MathBlockFusedCudaRunner
             var name = expression.VectorInputNames[ordinal];
             var value = inputs[name];
             inputPointers[ordinal] = program.Inputs[name].Kind == MathBlockValueKind.Vector
-                ? allocations.Upload(value.IsValid ? value.AsVector().ToArray() : new double[rows])
+                ? allocations.Upload(value.IsValid ? value.AsVector().ToArray() : new float[rows])
                 : allocations.Upload(ToFlags(value, rows));
             if (validity is not null && validity.TryGetValue(name, out var rowValidity))
                 validityPointers[ordinal] = allocations.Upload(ToFlags(rowValidity, rows));
         }
 
-        var scalars = new double[Math.Max(1, expression.ScalarInputNames.Count)];
+        var scalars = new float[Math.Max(1, expression.ScalarInputNames.Count)];
         for (var ordinal = 0; ordinal < expression.ScalarInputNames.Count; ordinal++)
             if (inputs[expression.ScalarInputNames[ordinal]] is { IsValid: true } scalar)
                 scalars[ordinal] = scalar.AsScalar();
@@ -128,7 +128,7 @@ internal static class MathBlockFusedCudaRunner
         for (var index = 0; index < outputCount; index++)
         {
             var isNumber = program.Outputs[expression.OutputNames[index]].Kind == MathBlockValueKind.Vector;
-            outputPointers[index] = allocations.Allocate(checked(rows * (isNumber ? sizeof(double) : sizeof(int))));
+            outputPointers[index] = allocations.Allocate(checked(rows * (isNumber ? sizeof(float) : sizeof(int))));
             outputValidityPointers[index] = allocations.Allocate(checked(rows * sizeof(int)));
         }
 
@@ -152,7 +152,7 @@ internal static class MathBlockFusedCudaRunner
         for (var index = 0; index < outputCount; index++)
         {
             outputs[index] = program.Outputs[expression.OutputNames[index]].Kind == MathBlockValueKind.Vector
-                ? Download<double>(outputPointers[index], rows)
+                ? Download<float>(outputPointers[index], rows)
                 : Download<int>(outputPointers[index], rows);
             validityOutputs[index] = Download<int>(outputValidityPointers[index], rows);
         }

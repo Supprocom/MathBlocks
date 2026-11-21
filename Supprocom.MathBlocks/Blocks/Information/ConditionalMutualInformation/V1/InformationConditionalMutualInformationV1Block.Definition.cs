@@ -9,7 +9,7 @@ internal static partial class ProbabilityMathBlocks
         internal static MathBlockOperation Create() => CreateConditionalMutualInformation();
         private static MathBlockOperation CreateConditionalMutualInformation()
         {
-            var joint = MathBlockValue.Vector([0.25d, 0.25d, 0.25d, 0.25d]);
+            var joint = MathBlockValue.Vector([0.25f, 0.25f, 0.25f, 0.25f]);
             return MathBlockOperationFactory.Create("information.conditional-mutual-information", 4, types =>
             {
                 MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Vector);
@@ -30,7 +30,7 @@ internal static partial class ProbabilityMathBlocks
                 }
 
                 return MathBlockValue.Scalar(MathBlockProbability.ConditionalMutualInformation(values, firstCount, secondCount, conditionCount));
-            }, [joint, MathBlockValue.Scalar(2d), MathBlockValue.Scalar(2d), MathBlockValue.Scalar(1d)], MathBlockValue.Scalar(0d), performanceIterations: 8);
+            }, [joint, MathBlockValue.Scalar(2f), MathBlockValue.Scalar(2f), MathBlockValue.Scalar(1f)], MathBlockValue.Scalar(0f), performanceIterations: 8);
         }
     }
 }

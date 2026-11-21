@@ -6,6 +6,6 @@ internal static partial class AdvancedMathBlocks
     {
         internal const string Identity = "geometry.fisher-rao-distance@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreatePositiveVectorMetric("geometry.fisher-rao-distance", MathBlockAdvanced.FisherRaoDistance, MathBlockValue.Vector([0.5d, 0.5d]), MathBlockValue.Vector([1d, 0d]), Math.PI / 2d, distribution: true);
+        internal static MathBlockOperation Create() => CreatePositiveVectorMetric("geometry.fisher-rao-distance", MathBlockAdvanced.FisherRaoDistance, MathBlockValue.Vector([0.5f, 0.5f]), MathBlockValue.Vector([1f, 0f]), Math.PI / 2f, distribution: true);
     }
 }

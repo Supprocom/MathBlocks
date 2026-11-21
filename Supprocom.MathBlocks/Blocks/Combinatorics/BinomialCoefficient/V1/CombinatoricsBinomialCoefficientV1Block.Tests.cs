@@ -20,8 +20,8 @@ public sealed class CombinatoricsBinomialCoefficientV1BlockTests
         {
             foreach (var n in new[] { 2 * k, 2 * k + 1, 3 * k, 100_000 })
             {
-                Assert.True(double.IsPositiveInfinity(CombinatoricsCostGuardReference.Today(n, k)), $"The loop is finite at ({n}, {k}).");
-                Assert.True(double.IsPositiveInfinity(MathBlockProbability.BinomialCoefficient(n, k)), $"BinomialCoefficient({n}, {k}) is finite.");
+                Assert.True(float.IsPositiveInfinity(CombinatoricsCostGuardReference.Today(n, k)), $"The loop is finite at ({n}, {k}).");
+                Assert.True(float.IsPositiveInfinity(MathBlockProbability.BinomialCoefficient(n, k)), $"BinomialCoefficient({n}, {k}) is finite.");
             }
         }
     }
@@ -36,8 +36,8 @@ public sealed class CombinatoricsBinomialCoefficientV1BlockTests
         for (var index = 0; index < pairs.Length; index++)
         {
             var (n, k) = pairs[index];
-            var expected = BitConverter.DoubleToInt64Bits(CombinatoricsCostGuardReference.Today(n, k));
-            var actual = BitConverter.DoubleToInt64Bits(MathBlockProbability.BinomialCoefficient(n, k));
+            var expected = BitConverter.SingleToInt32Bits(CombinatoricsCostGuardReference.Today(n, k));
+            var actual = BitConverter.SingleToInt32Bits(MathBlockProbability.BinomialCoefficient(n, k));
             if (expected != actual)
                 mismatches.Add($"({n}, {k})");
         }
@@ -60,8 +60,8 @@ public sealed class CombinatoricsBinomialCoefficientV1BlockTests
             MathBlockValue[] inputs = [MathBlockValue.Scalar(n), MathBlockValue.Scalar(k)];
             var result = operation.Evaluate(inputs);
             var reference = CombinatoricsCostGuardReference.Today(n, k);
-            var expectedValid = double.IsFinite(reference);
-            if (result.IsValid != expectedValid || (expectedValid && BitConverter.DoubleToInt64Bits(result.AsScalar()) != BitConverter.DoubleToInt64Bits(reference)))
+            var expectedValid = float.IsFinite(reference);
+            if (result.IsValid != expectedValid || (expectedValid && BitConverter.SingleToInt32Bits(result.AsScalar()) != BitConverter.SingleToInt32Bits(reference)))
                 disagreements.Add($"({n}, {k})");
         }
 
@@ -83,10 +83,10 @@ public sealed class CombinatoricsBinomialCoefficientV1BlockTests
             foreach (var n in new[] { 2 * k, 2 * k + 1, 3 * k, 10 * k, 100_000, 1_000_000 })
             {
                 var today = CombinatoricsCostGuardReference.Today(n, k);
-                if (double.IsPositiveInfinity(today))
+                if (float.IsPositiveInfinity(today))
                     infinite++;
                 var expected = CombinatoricsCostGuardReference.TodayOrFallback(n, k);
-                if (BitConverter.DoubleToInt64Bits(expected) != BitConverter.DoubleToInt64Bits(MathBlockProbability.BinomialCoefficient(n, k)))
+                if (BitConverter.SingleToInt32Bits(expected) != BitConverter.SingleToInt32Bits(MathBlockProbability.BinomialCoefficient(n, k)))
                     mismatches.Add($"({n}, {k})");
             }
         }

@@ -19,13 +19,13 @@ internal static partial class PathMathBlocks
             var states = inputs[0].AsVector();
             var countValue = inputs[1].AsScalar();
             if (countValue != Math.Truncate(countValue) ||
-                countValue <= 0d ||
+                countValue <= 0f ||
                 countValue > domain.Options.MaximumStateCount ||
                 MathBlockCollectionPrimitives.Any(
                     states,
-                    value => value != Math.Truncate(value) || value < 0d || value >= countValue))
+                    value => value != Math.Truncate(value) || value < 0f || value >= countValue))
                 return MathBlockValue.Invalid(MathBlockType.Matrix(), "The state inputs are outside the operation domain.");
             return MathBlockValue.Matrix(MathBlockPath.TransitionCounts(states, (int)countValue));
-        }, [MathBlockValue.Vector([0d, 1d, 1d, 0d]), MathBlockValue.Scalar(2d)], MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0d, 1d, 1d, 1d])), performanceIterations: 8);
+        }, [MathBlockValue.Vector([0f, 1f, 1f, 0f]), MathBlockValue.Scalar(2f)], MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0f, 1f, 1f, 1f])), performanceIterations: 8);
     }
 }

@@ -6,6 +6,6 @@ internal static partial class ProbabilityMathBlocks
     {
         internal const string Identity = "information.cross-entropy@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateDistributionBinary("information.cross-entropy", MathBlockProbability.CrossEntropy, fair, fair, Math.Log(2d), requireReferenceSupport: true);
+        internal static MathBlockOperation Create() => CreateDistributionBinary("information.cross-entropy", MathBlockProbability.CrossEntropy, fair, fair, Math.Log(2f), requireReferenceSupport: true);
     }
 }

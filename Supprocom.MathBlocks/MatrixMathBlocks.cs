@@ -9,7 +9,7 @@ public static partial class MathBlockLinearAlgebra
     {
         ArgumentNullException.ThrowIfNull(left);
         ArgumentNullException.ThrowIfNull(right);
-        var result = new double[left.Rows * right.Columns];
+        var result = new float[left.Rows * right.Columns];
         for (var row = 0; row < left.Rows; row++)
         {
             for (var inner = 0; inner < left.Columns; inner++)
@@ -23,14 +23,14 @@ public static partial class MathBlockLinearAlgebra
     }
 
     /// <summary>Multiplies a matrix by a compatible vector.</summary>
-    public static double[] Multiply(MathBlockMatrix matrix, IReadOnlyList<double> vector)
+    public static float[] Multiply(MathBlockMatrix matrix, IReadOnlyList<float> vector)
     {
         ArgumentNullException.ThrowIfNull(matrix);
         ArgumentNullException.ThrowIfNull(vector);
-        var result = new double[matrix.Rows];
+        var result = new float[matrix.Rows];
         for (var row = 0; row < matrix.Rows; row++)
         {
-            var sum = 0d;
+            var sum = 0f;
             for (var column = 0; column < matrix.Columns; column++)
                 sum += matrix[row, column] * vector[column];
             result[row] = sum;
@@ -52,11 +52,11 @@ public static partial class MathBlockLinearAlgebra
     }
 
     /// <summary>Computes eigenvalues of a symmetric matrix.</summary>
-    public static double[] SymmetricEigenvalues(MathBlockMatrix matrix) => SymmetricEigenvalues(matrix, 64, out _);
+    public static float[] SymmetricEigenvalues(MathBlockMatrix matrix) => SymmetricEigenvalues(matrix, 64, out _);
 
     // Jacobi under the context's options. An evaluation that stops at the rotation budget with off-diagonal entries left is
     // counted; under the Invalid policy it returns null.
-    internal static double[]? SymmetricEigenvalues(MathBlockMatrix matrix, MathBlockDomainContext domain)
+    internal static float[]? SymmetricEigenvalues(MathBlockMatrix matrix, MathBlockDomainContext domain)
     {
         var eigenvalues = SymmetricEigenvalues(matrix, domain.Options.JacobiRotationMultiplier, out var converged);
         if (converged)
@@ -67,7 +67,7 @@ public static partial class MathBlockLinearAlgebra
 
     // The rotation budget is rotationMultiplier * n * n, counted in 64-bit integers. converged is false when the budget ended
     // the sweep with a nonzero off-diagonal entry; the scan that finds the pivot is also the convergence test.
-    internal static double[] SymmetricEigenvalues(MathBlockMatrix matrix, int rotationMultiplier, out bool converged)
+    internal static float[] SymmetricEigenvalues(MathBlockMatrix matrix, int rotationMultiplier, out bool converged)
     {
         ArgumentNullException.ThrowIfNull(matrix);
         var size = matrix.Rows;
@@ -78,7 +78,7 @@ public static partial class MathBlockLinearAlgebra
         {
             var pivotRow = 0;
             var pivotColumn = 0;
-            var largest = 0d;
+            var largest = 0f;
             for (var row = 0; row < size; row++)
             {
                 for (var column = row + 1; column < size; column++)
@@ -91,25 +91,25 @@ public static partial class MathBlockLinearAlgebra
                     pivotColumn = column;
                 }
             }
-            if (largest == 0d)
+            if (largest == 0f)
             {
                 converged = true;
                 break;
             }
             if (iteration >= budget)
                 break;
-            var angle = 0.5d * Math.Atan2(
-                2d * values[pivotRow * size + pivotColumn],
+            var angle = 0.5f * Math.Atan2(
+                2f * values[pivotRow * size + pivotColumn],
                 values[pivotColumn * size + pivotColumn] - values[pivotRow * size + pivotRow]);
             var cosine = Math.Cos(angle);
             var sine = Math.Sin(angle);
             var aa = values[pivotRow * size + pivotRow];
             var bb = values[pivotColumn * size + pivotColumn];
             var ab = values[pivotRow * size + pivotColumn];
-            values[pivotRow * size + pivotRow] = cosine * cosine * aa - 2d * sine * cosine * ab + sine * sine * bb;
-            values[pivotColumn * size + pivotColumn] = sine * sine * aa + 2d * sine * cosine * ab + cosine * cosine * bb;
-            values[pivotRow * size + pivotColumn] = 0d;
-            values[pivotColumn * size + pivotRow] = 0d;
+            values[pivotRow * size + pivotRow] = cosine * cosine * aa - 2f * sine * cosine * ab + sine * sine * bb;
+            values[pivotColumn * size + pivotColumn] = sine * sine * aa + 2f * sine * cosine * ab + cosine * cosine * bb;
+            values[pivotRow * size + pivotColumn] = 0f;
+            values[pivotColumn * size + pivotRow] = 0f;
             for (var other = 0; other < size; other++)
             {
                 if (other == pivotRow || other == pivotColumn)
@@ -120,7 +120,7 @@ public static partial class MathBlockLinearAlgebra
                 values[other * size + pivotColumn] = values[pivotColumn * size + other] = sine * first + cosine * second;
             }
         }
-        var result = new double[size];
+        var result = new float[size];
         for (var index = 0; index < size; index++)
             result[index] = values[index * size + index];
         MathBlockCollectionPrimitives.StableMergeSort(
@@ -132,7 +132,7 @@ public static partial class MathBlockLinearAlgebra
     private static MathBlockMatrix Elementwise(
         MathBlockMatrix left,
         MathBlockMatrix right,
-        Func<double, double, double> function)
+        Func<float, float, float> function)
     {
         var leftValues = left.ToArray();
         var rightValues = right.ToArray();
@@ -141,7 +141,7 @@ public static partial class MathBlockLinearAlgebra
         return new MathBlockMatrix(left.Rows, left.Columns, leftValues, true);
     }
 
-    private static void SwapRows(double[] values, int columns, int left, int right)
+    private static void SwapRows(float[] values, int columns, int left, int right)
     {
         if (left == right)
             return;
@@ -154,21 +154,21 @@ public static partial class MathBlockLinearAlgebra
 public static partial class MathBlockPolynomial
 {
 
-    private static Complex ComplexCubeRoot(Complex value) => value.Real == 0d && value.Imaginary == 0d
-        ? new Complex(0d, 0d)
+    private static Complex ComplexCubeRoot(Complex value) => value.Real == 0f && value.Imaginary == 0f
+        ? new Complex(0f, 0f)
         : MathBlockComplex.FromPolar(
             Math.Cbrt(MathBlockComplex.Magnitude(value)),
-            MathBlockComplex.Phase(value) / 3d);
+            MathBlockComplex.Phase(value) / 3f);
 }
 
 internal static partial class MatrixMathBlocks
 {
     private static readonly MathBlockValue matrixA = MathBlockValue.Matrix(
-        new MathBlockMatrix(2, 2, [1d, 2d, 3d, 4d]));
+        new MathBlockMatrix(2, 2, [1f, 2f, 3f, 4f]));
     private static readonly MathBlockValue matrixB = MathBlockValue.Matrix(
-        new MathBlockMatrix(2, 2, [2d, 0d, 1d, 2d]));
+        new MathBlockMatrix(2, 2, [2f, 0f, 1f, 2f]));
     private static readonly MathBlockValue symmetric = MathBlockValue.Matrix(
-        new MathBlockMatrix(2, 2, [2d, 1d, 1d, 2d]));
+        new MathBlockMatrix(2, 2, [2f, 1f, 1f, 2f]));
 
     private static MathBlockOperation CreateUnaryMatrix(
         string identifier,
@@ -182,7 +182,7 @@ internal static partial class MatrixMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Matrix(function(inputs[0].AsMatrix()), type.Unit);
         },
-        [sample ?? matrixA], MathBlockValue.Matrix(expected), 1e-9, 8);
+        [sample ?? matrixA], MathBlockValue.Matrix(expected), 1e-9f, 8);
 
     private static MathBlockOperation CreateBinaryMatrix(
         string identifier,
@@ -195,14 +195,14 @@ internal static partial class MatrixMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Matrix(function(inputs[0].AsMatrix(), inputs[1].AsMatrix()), type.Unit);
         },
-        [matrixA, matrixB], MathBlockValue.Matrix(expected), 1e-9, 8);
+        [matrixA, matrixB], MathBlockValue.Matrix(expected), 1e-9f, 8);
 
     // A scalar reduction of a symmetric matrix through Jacobi eigenvalues: the function reads the eigenvalues, ascending.
     private static MathBlockOperation CreateEigenvalueReduction(
         string identifier,
-        Func<double[], double> function,
+        Func<float[], float> function,
         MathBlockValue sample,
-        double expected,
+        float expected,
         MathBlockTypeResolver resolver) => MathBlockOperationFactory.CreateDomain(
         identifier, 1, resolver,
         (inputs, domain) =>
@@ -213,13 +213,13 @@ internal static partial class MatrixMathBlocks
                 ? MathBlockValue.Invalid(type, "The Jacobi iteration did not converge.")
                 : MathBlockValue.Scalar(function(eigenvalues), type.Unit);
         },
-        [sample], MathBlockValue.Scalar(expected), 1e-9, 8);
+        [sample], MathBlockValue.Scalar(expected), 1e-9f, 8);
 
     private static MathBlockOperation CreateScalarMatrixReduction(
         string identifier,
-        Func<MathBlockMatrix, double> function,
+        Func<MathBlockMatrix, float> function,
         MathBlockValue sample,
-        double expected,
+        float expected,
         MathBlockTypeResolver resolver) => MathBlockOperationFactory.Create(
         identifier, 1, resolver,
         inputs =>
@@ -227,7 +227,7 @@ internal static partial class MatrixMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Scalar(function(inputs[0].AsMatrix()), type.Unit);
         },
-        [sample], MathBlockValue.Scalar(expected), 1e-9, 8);
+        [sample], MathBlockValue.Scalar(expected), 1e-9f, 8);
 
     private static MathBlockOperation CreateBooleanMatrix(
         string identifier,

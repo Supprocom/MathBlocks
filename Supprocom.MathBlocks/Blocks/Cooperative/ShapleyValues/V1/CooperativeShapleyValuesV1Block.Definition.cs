@@ -11,6 +11,6 @@ internal static partial class AdvancedMathBlocks
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Vector);
             return MathBlockType.Vector(types[0].Unit);
-        }, (inputs, domain) => IsPowerOfTwo(inputs[0].AsVector().Count) && inputs[0].AsVector().Count <= domain.Options.MaximumShapleyCoalitionValues ? MathBlockValue.Vector(MathBlockAdvanced.ShapleyValues(inputs[0].AsVector()), inputs[0].Type.Unit, true) : MathBlockValue.Invalid(MathBlockType.Vector(inputs[0].Type.Unit), "The coalition vector length is invalid."), [MathBlockValue.Vector([0d, 1d, 2d, 4d])], MathBlockValue.Vector([1.5d, 2.5d]), performanceIterations: 4);
+        }, (inputs, domain) => IsPowerOfTwo(inputs[0].AsVector().Count) && inputs[0].AsVector().Count <= domain.Options.MaximumShapleyCoalitionValues ? MathBlockValue.Vector(MathBlockAdvanced.ShapleyValues(inputs[0].AsVector()), inputs[0].Type.Unit, true) : MathBlockValue.Invalid(MathBlockType.Vector(inputs[0].Type.Unit), "The coalition vector length is invalid."), [MathBlockValue.Vector([0f, 1f, 2f, 4f])], MathBlockValue.Vector([1.5f, 2.5f]), performanceIterations: 4);
     }
 }

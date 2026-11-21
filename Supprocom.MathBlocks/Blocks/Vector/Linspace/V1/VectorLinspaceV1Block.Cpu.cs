@@ -3,9 +3,9 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockVectorMath
 {
     /// <summary>Computes the <c>vector.linspace@1</c> mathematical operation.</summary>
-    public static double[] Linspace(double start, double end, int count)
+    public static float[] Linspace(float start, float end, int count)
     {
-        var result = new double[count];
+        var result = new float[count];
         if (count == 1)
         {
             result[0] = start;

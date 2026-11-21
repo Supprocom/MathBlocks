@@ -6,6 +6,6 @@ internal static partial class VectorMathBlocks
     {
         internal const string Identity = "vector.square@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Pointwise;
-        internal static MathBlockOperation Create() => CreateVectorUnary("vector.square", MathBlockVectorMath.Square, [1d, 2d, 3d], [1d, 4d, 9d], SquareVector);
+        internal static MathBlockOperation Create() => CreateVectorUnary("vector.square", MathBlockVectorMath.Square, [1f, 2f, 3f], [1f, 4f, 9f], SquareVector);
     }
 }

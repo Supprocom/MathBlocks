@@ -13,7 +13,7 @@ public static partial class MathBlockGeometry
             var previous = current == 0 ? polygon.Count - 1 : current - 1;
             var left = polygon[current];
             var right = polygon[previous];
-            if (PointToSegmentDistance(point, left, right) == 0d)
+            if (PointToSegmentDistance(point, left, right) == 0f)
                 return true;
             if ((left.Y > point.Y) != (right.Y > point.Y))
             {

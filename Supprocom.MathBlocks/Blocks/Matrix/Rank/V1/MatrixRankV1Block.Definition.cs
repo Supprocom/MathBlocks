@@ -6,7 +6,7 @@ internal static partial class MatrixMathBlocks
     {
         internal const string Identity = "matrix.rank@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => CreateScalarMatrixReduction("matrix.rank", value => MathBlockLinearAlgebra.Rank(value), matrixA, 2d, types =>
+        internal static MathBlockOperation Create() => CreateScalarMatrixReduction("matrix.rank", value => MathBlockLinearAlgebra.Rank(value), matrixA, 2f, types =>
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Matrix);
             return MathBlockType.Scalar();

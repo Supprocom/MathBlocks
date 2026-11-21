@@ -6,6 +6,6 @@ internal static partial class VectorMathBlocks
     {
         internal const string Identity = "vector.minimum@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateReduction("vector.minimum", MathBlockVectorMath.Minimum, 1d, MathBlockTypeRules.VectorReduction);
+        internal static MathBlockOperation Create() => CreateReduction("vector.minimum", MathBlockVectorMath.Minimum, 1f, MathBlockTypeRules.VectorReduction);
     }
 }

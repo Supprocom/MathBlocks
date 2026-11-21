@@ -45,12 +45,12 @@ public sealed class MathBlocksCUDAWorker
     public MathBlockRollingOrderStatisticWorkPlan PlanRollingOrderStatisticWork(
         int inputCount,
         int windowWidth,
-        double probability)
+        float probability)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(inputCount);
         if (windowWidth <= 0 || windowWidth > inputCount)
             throw new ArgumentOutOfRangeException(nameof(windowWidth));
-        if (!double.IsFinite(probability) || probability is < 0d or > 1d)
+        if (!float.IsFinite(probability) || probability is < 0f or > 1f)
             throw new ArgumentOutOfRangeException(nameof(probability));
         var outputCount = checked(inputCount - windowWidth + 1);
         if (windowWidth == 1)
@@ -68,7 +68,7 @@ public sealed class MathBlocksCUDAWorker
                 0,
                 inputCount);
         }
-        if (probability is 0d or 1d)
+        if (probability is 0f or 1f)
         {
             var linearBound = checked((long)inputCount * 3);
             return new MathBlockRollingOrderStatisticWorkPlan(

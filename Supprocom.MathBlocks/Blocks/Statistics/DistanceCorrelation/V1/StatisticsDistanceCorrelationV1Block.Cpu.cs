@@ -3,18 +3,18 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockStatistics
 {
     /// <summary>Computes the <c>statistics.distance-correlation@1</c> mathematical operation.</summary>
-    public static double DistanceCorrelation(IReadOnlyList<double> left, IReadOnlyList<double> right)
+    public static float DistanceCorrelation(IReadOnlyList<float> left, IReadOnlyList<float> right)
     {
         ArgumentNullException.ThrowIfNull(left);
         ArgumentNullException.ThrowIfNull(right);
         var count = left.Count;
-        var leftDistances = new double[count * count];
-        var rightDistances = new double[count * count];
+        var leftDistances = new float[count * count];
+        var rightDistances = new float[count * count];
         CenterDistanceMatrix(left, leftDistances);
         CenterDistanceMatrix(right, rightDistances);
-        var covarianceSquare = 0d;
-        var leftVarianceSquare = 0d;
-        var rightVarianceSquare = 0d;
+        var covarianceSquare = 0f;
+        var leftVarianceSquare = 0f;
+        var rightVarianceSquare = 0f;
         for (var index = 0; index < leftDistances.Length; index++)
         {
             covarianceSquare += leftDistances[index] * rightDistances[index];

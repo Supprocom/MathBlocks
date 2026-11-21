@@ -4,15 +4,15 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockPath
 {
     /// <summary>Computes the <c>path.dynamic-time-warping@1</c> mathematical operation.</summary>
-    public static double DynamicTimeWarpingDistance(IReadOnlyList<double> left, IReadOnlyList<double> right)
+    public static float DynamicTimeWarpingDistance(IReadOnlyList<float> left, IReadOnlyList<float> right)
     {
         ArgumentNullException.ThrowIfNull(left);
         ArgumentNullException.ThrowIfNull(right);
         var previous = MathBlockCollectionPrimitives.Repeat(
             Math.PositiveInfinity,
             right.Count + 1);
-        var current = new double[right.Count + 1];
-        previous[0] = 0d;
+        var current = new float[right.Count + 1];
+        previous[0] = 0f;
         for (var leftIndex = 0; leftIndex < left.Count; leftIndex++)
         {
             current[0] = Math.PositiveInfinity;

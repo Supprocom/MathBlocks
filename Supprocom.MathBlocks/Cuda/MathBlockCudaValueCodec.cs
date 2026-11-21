@@ -56,11 +56,11 @@ public static class MathBlockCudaValueCodec
         {
             MathBlockValueKind.Scalar or MathBlockValueKind.Boolean => 0,
             MathBlockValueKind.Vector or MathBlockValueKind.Matrix =>
-                checked(capacity * sizeof(double)),
+                checked(capacity * sizeof(float)),
             MathBlockValueKind.BooleanVector => checked(capacity * sizeof(int)),
             MathBlockValueKind.Complex or MathBlockValueKind.ComplexVector or
                 MathBlockValueKind.ComplexMatrix or MathBlockValueKind.PointSet =>
-                checked(capacity * 2 * sizeof(double)),
+                checked(capacity * 2 * sizeof(float)),
             MathBlockValueKind.Graph =>
                 checked(capacity * sizeof(MathBlockCudaGraphEdgeDescriptor)),
             MathBlockValueKind.RunSet =>
@@ -153,7 +153,7 @@ public static class MathBlockCudaValueCodec
         {
             ScalarValue = value.IsValid && value.Type.Kind == MathBlockValueKind.Scalar
                 ? value.AsScalar()
-                : 0d,
+                : 0f,
             DataPointer = payloadPointer,
             ScratchPointer = scratchPointer,
             BooleanValue = value.IsValid &&
@@ -236,7 +236,7 @@ public static class MathBlockCudaValueCodec
         RequirePayload(payloadOffset);
         if (value.Type.Kind is MathBlockValueKind.Vector or MathBlockValueKind.Matrix)
         {
-            var destination = (double*)((byte*)arena + payloadOffset);
+            var destination = (float*)((byte*)arena + payloadOffset);
             if (value.Type.Kind == MathBlockValueKind.Vector)
             {
                 var source = value.AsVector();
@@ -262,14 +262,14 @@ public static class MathBlockCudaValueCodec
         else if (value.Type.Kind == MathBlockValueKind.Complex)
         {
             var source = value.AsComplex();
-            var destination = (double*)((byte*)arena + payloadOffset);
+            var destination = (float*)((byte*)arena + payloadOffset);
             destination[0] = source.Real;
             destination[1] = source.Imaginary;
         }
         else if (value.Type.Kind is MathBlockValueKind.ComplexVector or
                  MathBlockValueKind.ComplexMatrix)
         {
-            var destination = (double*)((byte*)arena + payloadOffset);
+            var destination = (float*)((byte*)arena + payloadOffset);
             if (value.Type.Kind == MathBlockValueKind.ComplexVector)
             {
                 var source = value.AsComplexVector();
@@ -296,7 +296,7 @@ public static class MathBlockCudaValueCodec
         else if (value.Type.Kind == MathBlockValueKind.PointSet)
         {
             var source = value.AsPointSet();
-            var destination = (double*)((byte*)arena + payloadOffset);
+            var destination = (float*)((byte*)arena + payloadOffset);
             for (var index = 0; index < count; index++)
             {
                 destination[index * 2] = source[index].X;
@@ -362,7 +362,7 @@ public static class MathBlockCudaValueCodec
     private static unsafe Complex ReadComplex(IntPtr arena, int payloadOffset)
     {
         RequirePayload(payloadOffset);
-        var source = (double*)((byte*)arena + payloadOffset);
+        var source = (float*)((byte*)arena + payloadOffset);
         return new Complex(source[0], source[1]);
     }
 
@@ -372,7 +372,7 @@ public static class MathBlockCudaValueCodec
         if (count == 0)
             return values;
         RequirePayload(payloadOffset);
-        var source = (double*)((byte*)arena + payloadOffset);
+        var source = (float*)((byte*)arena + payloadOffset);
         for (var index = 0; index < count; index++)
             values[index] = new Complex(source[index * 2], source[index * 2 + 1]);
         return values;
@@ -384,7 +384,7 @@ public static class MathBlockCudaValueCodec
         if (count == 0)
             return values;
         RequirePayload(payloadOffset);
-        var source = (double*)((byte*)arena + payloadOffset);
+        var source = (float*)((byte*)arena + payloadOffset);
         for (var index = 0; index < count; index++)
             values[index] = new MathBlockPoint(source[index * 2], source[index * 2 + 1]);
         return values;
@@ -417,13 +417,13 @@ public static class MathBlockCudaValueCodec
         return values;
     }
 
-    private static unsafe double[] ReadDoubles(IntPtr arena, int payloadOffset, int count)
+    private static unsafe float[] ReadDoubles(IntPtr arena, int payloadOffset, int count)
     {
-        var values = new double[count];
+        var values = new float[count];
         if (count == 0)
             return values;
         RequirePayload(payloadOffset);
-        var source = (double*)((byte*)arena + payloadOffset);
+        var source = (float*)((byte*)arena + payloadOffset);
         for (var index = 0; index < count; index++)
             values[index] = source[index];
         return values;

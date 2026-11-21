@@ -14,6 +14,6 @@ internal static partial class VectorMathBlocks
             return inputs[0].AsVector().Count > 0 && inputs[1].AsVector().Count > 0
                 ? MathBlockValue.Vector(MathBlockVectorMath.Convolution(inputs[0].AsVector(), inputs[1].AsVector()), unit, true)
                 : MathBlockValue.Invalid(MathBlockType.Vector(unit), "The vector is empty.");
-        }, [MathBlockValue.Vector([1d, 2d]), MathBlockValue.Vector([1d, 1d])], MathBlockValue.Vector([1d, 3d, 2d]), performanceIterations: 32);
+        }, [MathBlockValue.Vector([1f, 2f]), MathBlockValue.Vector([1f, 1f])], MathBlockValue.Vector([1f, 3f, 2f]), performanceIterations: 32);
     }
 }

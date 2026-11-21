@@ -6,6 +6,6 @@ internal static partial class ProbabilityMathBlocks
     {
         internal const string Identity = "information.gini-impurity@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateScalarUnary("information.gini-impurity", MathBlockProbability.GiniImpurity, fair, 0.5d);
+        internal static MathBlockOperation Create() => CreateScalarUnary("information.gini-impurity", MathBlockProbability.GiniImpurity, fair, 0.5f);
     }
 }

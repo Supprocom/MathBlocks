@@ -6,6 +6,6 @@ internal static partial class VectorMathBlocks
     {
         internal const string Identity = "vector.geometric-mean@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateReduction("vector.geometric-mean", MathBlockVectorMath.GeometricMean, Math.Pow(24d, 0.25d), MathBlockTypeRules.VectorReduction);
+        internal static MathBlockOperation Create() => CreateReduction("vector.geometric-mean", MathBlockVectorMath.GeometricMean, Math.Pow(24f, 0.25f), MathBlockTypeRules.VectorReduction);
     }
 }

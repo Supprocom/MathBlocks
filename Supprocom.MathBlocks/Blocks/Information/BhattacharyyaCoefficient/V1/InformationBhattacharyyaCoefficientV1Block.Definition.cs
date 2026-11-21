@@ -6,6 +6,6 @@ internal static partial class ProbabilityMathBlocks
     {
         internal const string Identity = "information.bhattacharyya-coefficient@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateDistributionBinary("information.bhattacharyya-coefficient", MathBlockProbability.BhattacharyyaCoefficient, certain, fair, 1d / Math.Sqrt(2d));
+        internal static MathBlockOperation Create() => CreateDistributionBinary("information.bhattacharyya-coefficient", MathBlockProbability.BhattacharyyaCoefficient, certain, fair, 1f / Math.Sqrt(2f));
     }
 }

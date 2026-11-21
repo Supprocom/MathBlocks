@@ -6,7 +6,7 @@ public static partial class MathBlockGraphMath
     public static MathBlockMatrix UndirectedLaplacian(MathBlockGraph graph)
     {
         ArgumentNullException.ThrowIfNull(graph);
-        var result = new double[graph.VertexCount * graph.VertexCount];
+        var result = new float[graph.VertexCount * graph.VertexCount];
         foreach (var edge in graph)
         {
             result[edge.From * graph.VertexCount + edge.From] += edge.Weight;

@@ -4,13 +4,13 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockPath
 {
     /// <summary>Computes the <c>transform.haar@1</c> mathematical operation.</summary>
-    public static double[] HaarTransform(IReadOnlyList<double> values)
+    public static float[] HaarTransform(IReadOnlyList<float> values)
     {
         ArgumentNullException.ThrowIfNull(values);
         var result = MathBlockCollectionPrimitives.Copy(values);
-        var work = new double[values.Count];
+        var work = new float[values.Count];
         var length = values.Count;
-        var scale = 1d / Math.Sqrt(2d);
+        var scale = 1f / Math.Sqrt(2f);
         while (length > 1)
         {
             var half = length / 2;

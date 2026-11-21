@@ -77,7 +77,7 @@ internal sealed class MathBlockElementwiseForm
         var type = FormTypeResolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
         if (!TryResolveCount(inputs, type, out var count, out var invalid))
             return invalid;
-        var values = new double[count];
+        var values = new float[count];
         Run(inputs, count, inputs[source.Arity].AsScalar(), values, null, domain);
         return MathBlockValue.Vector(values, type.Unit, true);
     }
@@ -90,7 +90,7 @@ internal sealed class MathBlockElementwiseForm
         if (!TryResolveCount(inputs, type, out var count, out var invalid))
             return invalid;
         var valid = new bool[count];
-        Run(inputs, count, 0d, null, valid, domain);
+        Run(inputs, count, 0f, null, valid, domain);
         return MathBlockValue.BooleanVector(valid, true);
     }
 
@@ -161,8 +161,8 @@ internal sealed class MathBlockElementwiseForm
     private void Run(
         IReadOnlyList<MathBlockValue> inputs,
         int count,
-        double fill,
-        double[]? values,
+        float fill,
+        float[]? values,
         bool[]? valid,
         MathBlockDomainContext domain)
     {
@@ -226,8 +226,8 @@ internal sealed class MathBlockElementwiseForm
     private bool TryRunKernel(
         IReadOnlyList<MathBlockValue> inputs,
         int count,
-        double fill,
-        double[]? values,
+        float fill,
+        float[]? values,
         bool[]? valid)
     {
         var arity = source.Arity;
@@ -238,7 +238,7 @@ internal sealed class MathBlockElementwiseForm
 
         var types = new MathBlockType[arity];
         var vectors = new MathBlockVector?[arity];
-        var constants = new double[arity];
+        var constants = new float[arity];
         for (var index = 0; index < arity; index++)
         {
             var input = inputs[index];
@@ -270,8 +270,8 @@ internal sealed class MathBlockElementwiseForm
         // separate method so that the loop below, which every other kernel runs, stays small.
         if (arity == 2 && MathBlockSimd.UseBlocks && count >= MathBlockSimd.BlockWidth)
         {
-            var kind = binary!.Equals((Func<double, double, double>)MathBlockScalar.Minimum) ? 1
-                : binary.Equals((Func<double, double, double>)MathBlockScalar.Maximum) ? 2
+            var kind = binary!.Equals((Func<float, float, float>)MathBlockScalar.Minimum) ? 1
+                : binary.Equals((Func<float, float, float>)MathBlockScalar.Maximum) ? 2
                 : 0;
             if (kind != 0)
             {
@@ -286,16 +286,16 @@ internal sealed class MathBlockElementwiseForm
 
     // The per-row loop for every kernel that has no block path, one row per iteration.
     private static void RunRows(
-        Func<double, double>? unary,
-        Func<double, double, double>? binary,
-        ReadOnlySpan<double> first,
-        ReadOnlySpan<double> second,
+        Func<float, float>? unary,
+        Func<float, float, float>? binary,
+        ReadOnlySpan<float> first,
+        ReadOnlySpan<float> second,
         bool firstIsVector,
         bool secondIsVector,
-        double[] constants,
+        float[] constants,
         int count,
-        double fill,
-        double[]? values,
+        float fill,
+        float[]? values,
         bool[]? valid)
     {
         var arity = binary is null ? 1 : 2;
@@ -307,9 +307,9 @@ internal sealed class MathBlockElementwiseForm
                 for (; row < count; row++)
                 {
                     var x = firstIsVector ? first[row] : constants[0];
-                    var y = secondIsVector ? second[row] : arity == 2 ? constants[1] : 0d;
+                    var y = secondIsVector ? second[row] : arity == 2 ? constants[1] : 0f;
                     var computed = Math.IsFinite(x) && (arity == 1 || Math.IsFinite(y));
-                    var result = 0d;
+                    var result = 0f;
                     if (computed)
                     {
                         result = arity == 1 ? unary!(x) : binary!(x, y);
@@ -320,7 +320,7 @@ internal sealed class MathBlockElementwiseForm
             }
             catch (Exception exception) when (exception is ArithmeticException or ArgumentOutOfRangeException or IndexOutOfRangeException)
             {
-                Store(row, false, 0d, fill, values, valid);
+                Store(row, false, 0f, fill, values, valid);
                 row++;
             }
         }
@@ -333,14 +333,14 @@ internal sealed class MathBlockElementwiseForm
     // throws, so there is no exception handling here.
     private static void RunBlocks(
         int kind,
-        ReadOnlySpan<double> first,
-        ReadOnlySpan<double> second,
+        ReadOnlySpan<float> first,
+        ReadOnlySpan<float> second,
         bool firstIsVector,
         bool secondIsVector,
-        double[] constants,
+        float[] constants,
         int count,
-        double fill,
-        double[]? values,
+        float fill,
+        float[]? values,
         bool[]? valid)
     {
         var firstConstant = Vector256.Create(constants[0]);
@@ -348,8 +348,8 @@ internal sealed class MathBlockElementwiseForm
         var row = 0;
         for (; row <= count - MathBlockSimd.BlockWidth; row += MathBlockSimd.BlockWidth)
         {
-            var left = firstIsVector ? Vector256.Create<double>(first[row..]) : firstConstant;
-            var right = secondIsVector ? Vector256.Create<double>(second[row..]) : secondConstant;
+            var left = firstIsVector ? Vector256.Create<float>(first[row..]) : firstConstant;
+            var right = secondIsVector ? Vector256.Create<float>(second[row..]) : secondConstant;
             if (MathBlockSimd.BlockIsFinite(left) && MathBlockSimd.BlockIsFinite(right))
             {
                 var block = kind == 1
@@ -372,24 +372,24 @@ internal sealed class MathBlockElementwiseForm
 
     private static void RunRow(
         int kind,
-        ReadOnlySpan<double> first,
-        ReadOnlySpan<double> second,
+        ReadOnlySpan<float> first,
+        ReadOnlySpan<float> second,
         bool firstIsVector,
         bool secondIsVector,
-        double[] constants,
+        float[] constants,
         int row,
-        double fill,
-        double[]? values,
+        float fill,
+        float[]? values,
         bool[]? valid)
     {
         var x = firstIsVector ? first[row] : constants[0];
         var y = secondIsVector ? second[row] : constants[1];
         var computed = Math.IsFinite(x) && Math.IsFinite(y);
-        var result = computed ? (kind == 1 ? Math.Min(x, y) : Math.Max(x, y)) : 0d;
+        var result = computed ? (kind == 1 ? Math.Min(x, y) : Math.Max(x, y)) : 0f;
         Store(row, computed, result, fill, values, valid);
     }
 
-    private static void Store(int row, bool computed, double result, double fill, double[]? values, bool[]? valid)
+    private static void Store(int row, bool computed, float result, float fill, float[]? values, bool[]? valid)
     {
         if (valid is not null)
             valid[row] = computed;
@@ -400,13 +400,13 @@ internal sealed class MathBlockElementwiseForm
     // One row: the source operation's own CoreCLR evaluation on the row's scalar arguments. Returns whether the
     // source result is valid (the row is computed) and its value, or 0 when it is not. The form, the sibling and the
     // fused expression's elementwise rows all evaluate their rows here.
-    internal bool EvaluateRow(MathBlockValue[] rowInputs, out double value) => EvaluateRow(rowInputs, out value, MathBlockDomainContext.Default);
+    internal bool EvaluateRow(MathBlockValue[] rowInputs, out float value) => EvaluateRow(rowInputs, out value, MathBlockDomainContext.Default);
 
     // The row under the context's domain options, which count the source's non-converged evaluations.
-    internal bool EvaluateRow(MathBlockValue[] rowInputs, out double value, MathBlockDomainContext domain)
+    internal bool EvaluateRow(MathBlockValue[] rowInputs, out float value, MathBlockDomainContext domain)
     {
         var result = source.Evaluate(rowInputs, domain);
-        value = result.IsValid ? result.AsScalar() : 0d;
+        value = result.IsValid ? result.AsScalar() : 0f;
         return result.IsValid;
     }
 }

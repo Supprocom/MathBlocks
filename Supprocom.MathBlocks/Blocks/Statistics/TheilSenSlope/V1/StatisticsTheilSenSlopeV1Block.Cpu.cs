@@ -3,11 +3,11 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockStatistics
 {
     /// <summary>Computes the <c>statistics.theil-sen-slope@1</c> mathematical operation.</summary>
-    public static double TheilSenSlope(IReadOnlyList<double> x, IReadOnlyList<double> y)
+    public static float TheilSenSlope(IReadOnlyList<float> x, IReadOnlyList<float> y)
     {
         ArgumentNullException.ThrowIfNull(x);
         ArgumentNullException.ThrowIfNull(y);
-        var slopes = new List<double>(x.Count * (x.Count - 1) / 2);
+        var slopes = new List<float>(x.Count * (x.Count - 1) / 2);
         for (var first = 0; first < x.Count; first++)
         {
             for (var second = first + 1; second < x.Count; second++)
@@ -16,7 +16,7 @@ public static partial class MathBlockStatistics
                 // An overflowing difference, rise or slope would divide by an infinity (a zero slope) or put an infinity in the median; the result is not finite.
                 if (!Math.IsFinite(difference))
                     return Math.NaN;
-                if (difference != 0d)
+                if (difference != 0f)
                 {
                     var rise = y[second] - y[first];
                     var slope = rise / difference;

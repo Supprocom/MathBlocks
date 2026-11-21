@@ -23,6 +23,6 @@ internal static partial class GeometryMathBlocks
         {
             PointPairLengthType(types);
             return MathBlockType.Boolean;
-        }, inputs => inputs[0].AsPointSet().Count >= 3 && inputs[1].AsPointSet().Count == 1 ? ContainsOrInvalid(inputs) : MathBlockValue.Invalid(MathBlockType.Boolean, "The operation requires a polygon and one point."), [square, Singleton(0.5d, 0.5d)], MathBlockValue.Boolean(true), performanceIterations: 8);
+        }, inputs => inputs[0].AsPointSet().Count >= 3 && inputs[1].AsPointSet().Count == 1 ? ContainsOrInvalid(inputs) : MathBlockValue.Invalid(MathBlockType.Boolean, "The operation requires a polygon and one point."), [square, Singleton(0.5f, 0.5f)], MathBlockValue.Boolean(true), performanceIterations: 8);
     }
 }

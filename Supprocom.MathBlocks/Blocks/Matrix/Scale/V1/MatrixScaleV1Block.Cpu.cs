@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockLinearAlgebra
 {
     /// <summary>Computes the <c>matrix.scale@1</c> mathematical operation.</summary>
-    public static MathBlockMatrix Scale(MathBlockMatrix matrix, double scalar)
+    public static MathBlockMatrix Scale(MathBlockMatrix matrix, float scalar)
     {
         ArgumentNullException.ThrowIfNull(matrix);
         var result = matrix.ToArray();

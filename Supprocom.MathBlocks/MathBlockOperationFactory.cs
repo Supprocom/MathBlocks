@@ -9,7 +9,7 @@ internal static class MathBlockOperationFactory
         MathBlockEvaluator evaluator,
         IReadOnlyList<MathBlockValue> sampleInputs,
         MathBlockValue sampleOutput,
-        double tolerance = 1e-10,
+        float tolerance = 1e-10f,
         int performanceIterations = 64,
         MathBlockCausalityInfo? causality = null) =>
         new(
@@ -30,7 +30,7 @@ internal static class MathBlockOperationFactory
         MathBlockDomainEvaluator evaluator,
         IReadOnlyList<MathBlockValue> sampleInputs,
         MathBlockValue sampleOutput,
-        double tolerance = 1e-10,
+        float tolerance = 1e-10f,
         int performanceIterations = 64,
         MathBlockCausalityInfo? causality = null)
     {
@@ -50,11 +50,11 @@ internal static class MathBlockOperationFactory
 
     public static MathBlockOperation ScalarUnary(
         string identifier,
-        Func<double, double> function,
-        double sample,
-        double expected,
+        Func<float, float> function,
+        float sample,
+        float expected,
         MathBlockTypeResolver? resolver = null,
-        double tolerance = 1e-10)
+        float tolerance = 1e-10f)
     {
         var operation = Create(
             identifier,
@@ -76,12 +76,12 @@ internal static class MathBlockOperationFactory
 
     public static MathBlockOperation ScalarBinary(
         string identifier,
-        Func<double, double, double> function,
-        double left,
-        double right,
-        double expected,
+        Func<float, float, float> function,
+        float left,
+        float right,
+        float expected,
         MathBlockTypeResolver resolver,
-        double tolerance = 1e-10)
+        float tolerance = 1e-10f)
     {
         var operation = Create(
             identifier,
@@ -102,9 +102,9 @@ internal static class MathBlockOperationFactory
 
     public static MathBlockOperation ScalarComparison(
         string identifier,
-        Func<double, double, bool> function,
-        double left,
-        double right,
+        Func<float, float, bool> function,
+        float left,
+        float right,
         bool expected) =>
         Create(
             identifier,

@@ -6,6 +6,6 @@ internal static partial class VectorMathBlocks
     {
         internal const string Identity = "vector.exponential@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Pointwise;
-        internal static MathBlockOperation Create() => CreateVectorUnary("vector.exponential", MathBlockVectorMath.Exponential, [0d, 1d], [1d, Math.E], DimensionlessVector);
+        internal static MathBlockOperation Create() => CreateVectorUnary("vector.exponential", MathBlockVectorMath.Exponential, [0f, 1f], [1f, Math.E], DimensionlessVector);
     }
 }

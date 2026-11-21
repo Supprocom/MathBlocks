@@ -4,12 +4,12 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockLinearAlgebra
 {
     /// <summary>Computes the <c>matrix.solve@1</c> mathematical operation.</summary>
-    public static bool TrySolve(MathBlockMatrix matrix, IReadOnlyList<double> right, out double[] solution)
+    public static bool TrySolve(MathBlockMatrix matrix, IReadOnlyList<float> right, out float[] solution)
     {
         ArgumentNullException.ThrowIfNull(matrix);
         ArgumentNullException.ThrowIfNull(right);
         var size = matrix.Rows;
-        var augmented = new double[size * (size + 1)];
+        var augmented = new float[size * (size + 1)];
         for (var row = 0; row < size; row++)
         {
             for (var column = 0; column < size; column++)
@@ -23,7 +23,7 @@ public static partial class MathBlockLinearAlgebra
             for (var row = pivot + 1; row < size; row++)
                 if (Math.Abs(augmented[row * (size + 1) + pivot]) > Math.Abs(augmented[pivotRow * (size + 1) + pivot]))
                     pivotRow = row;
-            if (augmented[pivotRow * (size + 1) + pivot] == 0d)
+            if (augmented[pivotRow * (size + 1) + pivot] == 0f)
             {
                 solution = [];
                 return false;
@@ -44,7 +44,7 @@ public static partial class MathBlockLinearAlgebra
             }
         }
 
-        solution = new double[size];
+        solution = new float[size];
         for (var row = 0; row < size; row++)
             solution[row] = augmented[row * (size + 1) + size];
         return MathBlockCollectionPrimitives.All(solution, Math.IsFinite);

@@ -3,7 +3,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockVectorMath
 {
     /// <summary>Computes the <c>vector.arg-minimum@1</c> mathematical operation.</summary>
-    public static int ArgMinimum(IReadOnlyList<double> values)
+    public static int ArgMinimum(IReadOnlyList<float> values)
     {
         ArgumentNullException.ThrowIfNull(values);
         var result = 0;

@@ -9,24 +9,24 @@ public static partial class MathBlockVectorMath
     // Row row of sequence.sum-over-offsets@1: 0.0 plus x[row + start] .. x[row + end] added left to right, so 0.0 + -0.0 is 0.0.
     // The row is invalid when a row of the span is unreachable or unavailable, or when a running sum is not finite.
     internal static bool SumOverOffsetsRow(
-        ReadOnlySpan<double> x,
+        ReadOnlySpan<float> x,
         ReadOnlySpan<bool> xValid,
-        ReadOnlySpan<double> counts,
+        ReadOnlySpan<float> counts,
         int row,
         int start,
         int end,
-        out double value)
+        out float value)
     {
-        value = 0d;
+        value = 0f;
         if (!OffsetSpanIsReachable(counts, row, start, end))
             return false;
-        var sum = 0d;
+        var sum = 0f;
         for (long index = row + (long)start; index <= row + (long)end; index++)
         {
             if (!xValid[(int)index])
                 return false;
             sum += x[(int)index];
-            if (!double.IsFinite(sum))
+            if (!float.IsFinite(sum))
                 return false;
         }
         value = sum;
@@ -42,13 +42,13 @@ public static partial class MathBlockVectorMath
     // sum of a span at a cost that does not depend on its width.
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     internal static void SumOverOffsetsValues(
-        ReadOnlySpan<double> x,
+        ReadOnlySpan<float> x,
         ReadOnlySpan<bool> xValid,
-        ReadOnlySpan<double> counts,
+        ReadOnlySpan<float> counts,
         int start,
         int end,
-        double fill,
-        Span<double> values,
+        float fill,
+        Span<float> values,
         Span<bool> rowValid)
     {
         var length = values.Length;
@@ -76,7 +76,7 @@ public static partial class MathBlockVectorMath
 
     // The blocks of rows from row on whose spans lie in the series; returns the first row not done.
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    private static int SumOverOffsetsLanes(ReadOnlySpan<double> x, int start, int end, double fill, Span<double> values, Span<bool> rowValid, int row)
+    private static int SumOverOffsetsLanes(ReadOnlySpan<float> x, int start, int end, float fill, Span<float> values, Span<bool> rowValid, int row)
     {
         // The last row at which a block of four may start: its last span ends in the series.
         var lastBlock = values.Length - (long)MathBlockSimd.BlockWidth - (end > 0 ? end : 0L);
@@ -84,7 +84,7 @@ public static partial class MathBlockVectorMath
             return row;
         // A span that lies in the series is not wider than it.
         var width = end - start + 1;
-        var limit = Vector256.Create(double.MaxValue);
+        var limit = Vector256.Create(float.MaxValue);
         var fillBlock = Vector256.Create(fill);
         ref var origin = ref MemoryMarshal.GetReference(x);
         ref var output = ref MemoryMarshal.GetReference(values);
@@ -92,7 +92,7 @@ public static partial class MathBlockVectorMath
         for (; row + 28L <= lastBlock; row += 32)
         {
             var at = (nuint)(row + (long)start);
-            Vector256<double> s0 = default, s1 = default, s2 = default, s3 = default, s4 = default, s5 = default, s6 = default, s7 = default;
+            Vector256<float> s0 = default, s1 = default, s2 = default, s3 = default, s4 = default, s5 = default, s6 = default, s7 = default;
             for (var step = 0; step < width; step++, at++)
             {
                 s0 += Vector256.LoadUnsafe(ref origin, at);
@@ -118,7 +118,7 @@ public static partial class MathBlockVectorMath
         for (; row <= lastBlock; row += MathBlockSimd.BlockWidth)
         {
             var at = (nuint)(row + (long)start);
-            var sum = Vector256<double>.Zero;
+            var sum = Vector256<float>.Zero;
             for (var step = 0; step < width; step++)
                 sum += Vector256.LoadUnsafe(ref origin, at + (nuint)step);
             StoreFiniteSums(ref flags, ref output, row, sum, limit, fillBlock);
@@ -129,7 +129,7 @@ public static partial class MathBlockVectorMath
 
     // Four rows: a row that was valid and whose sum is finite keeps the sum and stays valid (a NaN fails the comparison too); every other row takes the fill and is invalid.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void StoreFiniteSums(ref byte flags, ref double output, int row, Vector256<double> sum, Vector256<double> limit, Vector256<double> fill)
+    private static void StoreFiniteSums(ref byte flags, ref float output, int row, Vector256<float> sum, Vector256<float> limit, Vector256<float> fill)
     {
         ref var cell = ref Unsafe.Add(ref flags, row);
         var valid = Vector128.WidenLower(Vector128.WidenLower(Vector128.CreateScalar(Unsafe.ReadUnaligned<uint>(ref cell)).AsByte())).AsInt32();

@@ -8,13 +8,13 @@ public sealed class MathBlockRegressionCase
         string name,
         IEnumerable<MathBlockValue> inputs,
         MathBlockValue expected,
-        double tolerance = 1e-10)
+        float tolerance = 1e-10f)
     {
         Name = RequireText(name, nameof(name));
         ArgumentNullException.ThrowIfNull(inputs);
         Inputs = Array.AsReadOnly(MathBlockCollectionPrimitives.CopyEnumerable(inputs));
         Expected = expected;
-        if (!Math.IsFinite(tolerance) || tolerance < 0d)
+        if (!Math.IsFinite(tolerance) || tolerance < 0f)
             throw new ArgumentOutOfRangeException(nameof(tolerance));
         Tolerance = tolerance;
     }
@@ -26,7 +26,7 @@ public sealed class MathBlockRegressionCase
     /// <summary>Gets the expected value.</summary>
     public MathBlockValue Expected { get; }
     /// <summary>Gets the tolerance value.</summary>
-    public double Tolerance { get; }
+    public float Tolerance { get; }
 
     private static string RequireText(string value, string parameterName) =>
         string.IsNullOrWhiteSpace(value)

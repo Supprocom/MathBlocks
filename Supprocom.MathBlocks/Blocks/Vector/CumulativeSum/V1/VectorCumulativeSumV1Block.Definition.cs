@@ -6,6 +6,6 @@ internal static partial class VectorMathBlocks
     {
         internal const string Identity = "vector.cumulative-sum@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Expanding;
-        internal static MathBlockOperation Create() => CreateVectorUnary("vector.cumulative-sum", MathBlockVectorMath.CumulativeSum, [1d, 2d, 3d], [1d, 3d, 6d], SameVectorUnary);
+        internal static MathBlockOperation Create() => CreateVectorUnary("vector.cumulative-sum", MathBlockVectorMath.CumulativeSum, [1f, 2f, 3f], [1f, 3f, 6f], SameVectorUnary);
     }
 }

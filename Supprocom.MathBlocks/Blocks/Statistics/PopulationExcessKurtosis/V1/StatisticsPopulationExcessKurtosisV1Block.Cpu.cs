@@ -3,12 +3,12 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockStatistics
 {
     /// <summary>Computes the <c>statistics.population-excess-kurtosis@1</c> mathematical operation.</summary>
-    public static double PopulationExcessKurtosis(IReadOnlyList<double> values)
+    public static float PopulationExcessKurtosis(IReadOnlyList<float> values)
     {
         ArgumentNullException.ThrowIfNull(values);
         var mean = MathBlockVectorMath.Mean(values);
-        var second = 0d;
-        var fourth = 0d;
+        var second = 0f;
+        var fourth = 0f;
         for (var index = 0; index < values.Count; index++)
         {
             var difference = values[index] - mean;
@@ -19,6 +19,6 @@ public static partial class MathBlockStatistics
 
         second /= values.Count;
         fourth /= values.Count;
-        return fourth / (second * second) - 3d;
+        return fourth / (second * second) - 3f;
     }
 }

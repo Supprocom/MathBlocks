@@ -44,21 +44,21 @@ namespace Supprocom.MathBlocks;
 internal static class MathBlockWindowAccurate
 {
     // 2^27 + 1, Dekker's (Veltkamp's) splitting constant for binary64.
-    private const double Splitter = 134_217_729d;
+    private const float Splitter = 134_217_729f;
 
     // 2^-968: from here up, a double-double's low part (2^-54 below its high part) is a normal number.
-    private static readonly double SmallestAccurate = BitConverter.Int64BitsToDouble(55L << 52);
+    private static readonly float SmallestAccurate = BitConverter.Int32BitsToSingle(55L << 52);
 
     // 2^996: up to here, Dekker's split (a times 2^27 + 1) doesn't overflow.
-    private static readonly double LargestSplit = BitConverter.Int64BitsToDouble(2019L << 52);
+    private static readonly float LargestSplit = BitConverter.Int32BitsToSingle(2019L << 52);
 
     internal static void RunSum(
-        ReadOnlySpan<double> x,
+        ReadOnlySpan<float> x,
         int count,
         int width,
         bool mean,
-        double fill,
-        double[]? values,
+        float fill,
+        float[]? values,
         bool[]? valid)
     {
         var sum = new MathBlockExactAccumulator();
@@ -69,31 +69,31 @@ internal static class MathBlockWindowAccurate
                 sum.Add(x[row - width], true);
             if (row < width - 1)
             {
-                Store(values, valid, row, fill, 0d, false);
+                Store(values, valid, row, fill, 0f, false);
                 continue;
             }
-            double result;
+            float result;
             if (mean)
                 result = sum.ReadQuotient(width);
             else
                 sum.ReadDoubleDouble(out result, out _);
-            Store(values, valid, row, fill, result, double.IsFinite(result));
+            Store(values, valid, row, fill, result, float.IsFinite(result));
         }
     }
 
     internal static void RunVariance(
-        ReadOnlySpan<double> x,
+        ReadOnlySpan<float> x,
         int count,
         int width,
         bool sample,
         bool deviation,
-        double fill,
-        double[]? values,
+        float fill,
+        float[]? values,
         bool[]? valid)
     {
         var first = new MathBlockExactAccumulator();
         var second = new MathBlockExactAccumulator();
-        var divisor = sample ? width - 1d : width;
+        var divisor = sample ? width - 1f : width;
         // The number of rows i in the window, after its first row, with x[i] != x[i - 1].
         var changes = 0;
         for (var row = 0; row < count; row++)
@@ -111,13 +111,13 @@ internal static class MathBlockWindowAccurate
             }
             if (row < width - 1)
             {
-                Store(values, valid, row, fill, 0d, false);
+                Store(values, valid, row, fill, 0f, false);
                 continue;
             }
-            double moment;
+            float moment;
             if (changes == 0)
             {
-                moment = 0d;
+                moment = 0f;
             }
             else
             {
@@ -128,26 +128,26 @@ internal static class MathBlockWindowAccurate
                 moment = SubtractRounded(s2h, s2l, rh, rl);
                 // A nonzero S2 or S1^2 that rounds to 0 is below the range like a tiny nonzero one. S1 is a sum of
                 // doubles, so it is 0 exactly when s1h is.
-                if (!InRange(s2h, double.MaxValue) || !InRange(qh, double.MaxValue) || !InRange(rh, LargestSplit) ||
-                    (s2h == 0d && !s2Zero) || (qh == 0d && s1h != 0d) ||
-                    (moment > 0d && moment < SmallestAccurate))
-                    moment = double.NaN;
-                else if (moment <= 0d)
-                    moment = 0d;
+                if (!InRange(s2h, float.MaxValue) || !InRange(qh, float.MaxValue) || !InRange(rh, LargestSplit) ||
+                    (s2h == 0f && !s2Zero) || (qh == 0f && s1h != 0f) ||
+                    (moment > 0f && moment < SmallestAccurate))
+                    moment = float.NaN;
+                else if (moment <= 0f)
+                    moment = 0f;
             }
             var result = moment / divisor;
             if (deviation)
                 result = Math.Sqrt(result);
-            Store(values, valid, row, fill, result, double.IsFinite(result));
+            Store(values, valid, row, fill, result, float.IsFinite(result));
         }
     }
 
     // Whether value is 0 or within [2^-968, largest]; false for an infinity or NaN.
-    private static bool InRange(double value, double largest) =>
-        value == 0d || (Math.Abs(value) >= SmallestAccurate && Math.Abs(value) <= largest);
+    private static bool InRange(float value, float largest) =>
+        value == 0f || (Math.Abs(value) >= SmallestAccurate && Math.Abs(value) <= largest);
 
     // Knuth's TwoSum: s = fl(a + b) and s + e = a + b exactly, for any finite a and b whose sum doesn't overflow.
-    private static void TwoSum(double a, double b, out double s, out double e)
+    private static void TwoSum(float a, float b, out float s, out float e)
     {
         s = a + b;
         var bVirtual = s - a;
@@ -156,13 +156,13 @@ internal static class MathBlockWindowAccurate
     }
 
     // Dekker's FastTwoSum: exact when |a| >= |b| (or a = 0).
-    private static void FastTwoSum(double a, double b, out double s, out double e)
+    private static void FastTwoSum(float a, float b, out float s, out float e)
     {
         s = a + b;
         e = b - (s - a);
     }
 
-    private static void Split(double a, out double high, out double low)
+    private static void Split(float a, out float high, out float low)
     {
         var c = Splitter * a;
         high = c - (c - a);
@@ -170,7 +170,7 @@ internal static class MathBlockWindowAccurate
     }
 
     // Dekker's product: p = fl(a b) and p + e = a b exactly, barring overflow and underflow.
-    private static void TwoProduct(double a, double b, out double p, out double e)
+    private static void TwoProduct(float a, float b, out float p, out float e)
     {
         p = a * b;
         Split(a, out var ah, out var al);
@@ -179,7 +179,7 @@ internal static class MathBlockWindowAccurate
     }
 
     // (h + l)^2 for |l| <= u |h|: h^2 exactly, plus the rounded cross term 2 h l. The omitted l^2 is below u^2 h^2.
-    private static void Square(double h, double l, out double sh, out double sl)
+    private static void Square(float h, float l, out float sh, out float sl)
     {
         TwoProduct(h, h, out var p, out var e);
         var low = e + (h + h) * l;
@@ -187,9 +187,9 @@ internal static class MathBlockWindowAccurate
     }
 
     // (h + l) / w for an integer w >= 1: the quotient's high part, then the exact remainder h - q w plus l, over w.
-    private static void DivideByInteger(double h, double l, int width, out double qh, out double ql)
+    private static void DivideByInteger(float h, float l, int width, out float qh, out float ql)
     {
-        var divisor = (double)width;
+        var divisor = (float)width;
         var high = h / divisor;
         TwoProduct(high, divisor, out var p, out var e);
         var low = ((h - p) - e + l) / divisor;
@@ -198,7 +198,7 @@ internal static class MathBlockWindowAccurate
 
     // (ah + al) - (bh + bl) by the accurate double-double addition (Joldes, Muller and Popescu 2017, Algorithm 6),
     // rounded once to double: the normalized high part is the double nearest the double-double result.
-    private static double SubtractRounded(double ah, double al, double bh, double bl)
+    private static float SubtractRounded(float ah, float al, float bh, float bl)
     {
         TwoSum(ah, -bh, out var sh, out var sl);
         TwoSum(al, -bl, out var th, out var tl);
@@ -209,7 +209,7 @@ internal static class MathBlockWindowAccurate
         return zh;
     }
 
-    private static void Store(double[]? values, bool[]? valid, int row, double fill, double value, bool computed)
+    private static void Store(float[]? values, bool[]? valid, int row, float fill, float value, bool computed)
     {
         if (values is not null)
             values[row] = computed ? value : fill;

@@ -6,6 +6,6 @@ internal static partial class GraphMathBlocks
     {
         internal const string Identity = "graph.connected-component-count@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => CreateScalar("graph.connected-component-count", graph => MathBlockGraphMath.ConnectedComponentCount(graph), path, 1d, DimensionlessGraphScalar);
+        internal static MathBlockOperation Create() => CreateScalar("graph.connected-component-count", graph => MathBlockGraphMath.ConnectedComponentCount(graph), path, 1f, DimensionlessGraphScalar);
     }
 }

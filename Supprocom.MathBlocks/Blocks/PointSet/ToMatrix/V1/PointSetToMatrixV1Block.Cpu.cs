@@ -7,7 +7,7 @@ public static partial class MathBlockStructure
     public static MathBlockMatrix PointSetToMatrix(IReadOnlyList<MathBlockPoint> points)
     {
         ArgumentNullException.ThrowIfNull(points);
-        var values = new double[points.Count * 2];
+        var values = new float[points.Count * 2];
         for (var index = 0; index < points.Count; index++)
         {
             values[2 * index] = points[index].X;

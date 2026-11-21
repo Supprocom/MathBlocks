@@ -3,7 +3,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockStatistics
 {
     /// <summary>Computes the <c>statistics.kendall-tau-b@1</c> mathematical operation.</summary>
-    public static double KendallTauB(IReadOnlyList<double> left, IReadOnlyList<double> right)
+    public static float KendallTauB(IReadOnlyList<float> left, IReadOnlyList<float> right)
     {
         ArgumentNullException.ThrowIfNull(left);
         ArgumentNullException.ThrowIfNull(right);
@@ -30,6 +30,6 @@ public static partial class MathBlockStatistics
             }
         }
 
-        return (concordant - discordant) / Math.Sqrt((double)(concordant + discordant + leftTies) * (concordant + discordant + rightTies));
+        return (concordant - discordant) / Math.Sqrt((float)(concordant + discordant + leftTies) * (concordant + discordant + rightTies));
     }
 }

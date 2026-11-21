@@ -11,7 +11,7 @@ internal static partial class VectorMathBlocks
         {
             var alpha = inputs[1].AsScalar();
             var values = inputs[0].AsVector();
-            return values.Count > 0 && alpha is > 0d and <= 1d ? MathBlockValue.Vector(MathBlockVectorMath.ExponentialMovingAverage(values, alpha), inputs[0].Type.Unit, true) : MathBlockValue.Invalid(MathBlockType.Vector(inputs[0].Type.Unit), "The smoothing input is outside the operation domain.");
-        }, [sampleVector, MathBlockValue.Scalar(0.5d)], MathBlockValue.Vector([1d, 1.5d, 2.25d, 3.125d]), performanceIterations: 64);
+            return values.Count > 0 && alpha is > 0f and <= 1f ? MathBlockValue.Vector(MathBlockVectorMath.ExponentialMovingAverage(values, alpha), inputs[0].Type.Unit, true) : MathBlockValue.Invalid(MathBlockType.Vector(inputs[0].Type.Unit), "The smoothing input is outside the operation domain.");
+        }, [sampleVector, MathBlockValue.Scalar(0.5f)], MathBlockValue.Vector([1f, 1.5f, 2.25f, 3.125f]), performanceIterations: 64);
     }
 }

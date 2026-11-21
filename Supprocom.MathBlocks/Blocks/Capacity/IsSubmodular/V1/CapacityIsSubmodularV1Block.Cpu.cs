@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockAdvanced
 {
     /// <summary>Computes the <c>capacity.is-submodular@1</c> mathematical operation.</summary>
-    public static bool IsSubmodular(IReadOnlyList<double> setFunction)
+    public static bool IsSubmodular(IReadOnlyList<float> setFunction)
     {
         ArgumentNullException.ThrowIfNull(setFunction);
         for (var left = 0; left < setFunction.Count; left++)

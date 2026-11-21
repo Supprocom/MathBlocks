@@ -9,7 +9,7 @@ internal static partial class ScalarMathBlocks
         internal static MathBlockOperation Create()
         {
             var operations = new List<MathBlockOperation>(1);
-            AddDimensionlessUnary(operations, "scalar.cosine", MathBlockScalar.Cosine, Math.PI, -1d);
+            AddDimensionlessUnary(operations, "scalar.cosine", MathBlockScalar.Cosine, Math.PI, -1f);
             return operations[0];
         }
     }

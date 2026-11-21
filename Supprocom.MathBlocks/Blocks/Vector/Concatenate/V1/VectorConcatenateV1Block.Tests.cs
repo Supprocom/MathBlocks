@@ -12,8 +12,8 @@ public sealed class VectorConcatenateV1BlockTests
     [Fact]
     public void CoreCLRWorkerConcatenatesUnequalVectorLengths()
     {
-        var leftValue = MathBlockValue.Vector([1d, 2d, 3d]);
-        var rightValue = MathBlockValue.Vector([4d]);
+        var leftValue = MathBlockValue.Vector([1f, 2f, 3f]);
+        var rightValue = MathBlockValue.Vector([4f]);
         var inputs = new Dictionary<string, MathBlockValue>(StringComparer.Ordinal)
         {
             ["left"] = leftValue,
@@ -29,6 +29,6 @@ public sealed class VectorConcatenateV1BlockTests
 
         Assert.True(result.IsValid);
         Assert.Equal(4, result.AsVector().Count);
-        Assert.Equal([1d, 2d, 3d, 4d], result.AsVector());
+        Assert.Equal([1f, 2f, 3f, 4f], result.AsVector());
     }
 }

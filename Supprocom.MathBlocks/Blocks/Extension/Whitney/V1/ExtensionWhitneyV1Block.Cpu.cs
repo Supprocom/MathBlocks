@@ -4,12 +4,12 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockAdvanced
 {
     /// <summary>Computes the <c>extension.whitney@1</c> mathematical operation.</summary>
-    public static double[] WhitneyExtension(IReadOnlyList<double> locations, IReadOnlyList<double> values, IReadOnlyList<double> queries, double lipschitz)
+    public static float[] WhitneyExtension(IReadOnlyList<float> locations, IReadOnlyList<float> values, IReadOnlyList<float> queries, float lipschitz)
     {
         ArgumentNullException.ThrowIfNull(locations);
         ArgumentNullException.ThrowIfNull(queries);
         ArgumentNullException.ThrowIfNull(values);
-        var result = new double[queries.Count];
+        var result = new float[queries.Count];
         for (var query = 0; query < queries.Count; query++)
         {
             result[query] = Math.NegativeInfinity;

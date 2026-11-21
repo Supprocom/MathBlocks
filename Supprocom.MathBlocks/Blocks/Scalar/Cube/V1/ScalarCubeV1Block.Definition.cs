@@ -6,6 +6,6 @@ internal static partial class ScalarMathBlocks
     {
         internal const string Identity = "scalar.cube@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => MathBlockOperationFactory.ScalarUnary("scalar.cube", MathBlockScalar.Cube, 3d, 27d, MathBlockTypeRules.CubeScalar);
+        internal static MathBlockOperation Create() => MathBlockOperationFactory.ScalarUnary("scalar.cube", MathBlockScalar.Cube, 3f, 27f, MathBlockTypeRules.CubeScalar);
     }
 }

@@ -6,6 +6,6 @@ internal static partial class StatisticalMathBlocks
     {
         internal const string Identity = "statistics.pearson-correlation@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateBinary("statistics.pearson-correlation", MathBlockStatistics.PearsonCorrelation, 1d, CorrelationType);
+        internal static MathBlockOperation Create() => CreateBinary("statistics.pearson-correlation", MathBlockStatistics.PearsonCorrelation, 1f, CorrelationType);
     }
 }

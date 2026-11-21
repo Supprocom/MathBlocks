@@ -6,6 +6,6 @@ internal static partial class ComplexMathBlocks
     {
         internal const string Identity = "complex.multiply@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => CreateBinary("complex.multiply", MathBlockComplex.Multiply, new(1d, 2d), new(3d, 4d), new(-5d, 10d), ComplexProduct);
+        internal static MathBlockOperation Create() => CreateBinary("complex.multiply", MathBlockComplex.Multiply, new(1f, 2f), new(3f, 4f), new(-5f, 10f), ComplexProduct);
     }
 }

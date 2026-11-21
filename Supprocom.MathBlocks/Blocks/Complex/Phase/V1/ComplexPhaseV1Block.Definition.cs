@@ -6,6 +6,6 @@ internal static partial class ComplexMathBlocks
     {
         internal const string Identity = "complex.phase@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => MathBlockOperationFactory.Create("complex.phase", 1, ComplexPhaseType, inputs => MathBlockValue.Scalar(MathBlockComplex.Phase(inputs[0].AsComplex())), [MathBlockValue.Complex(new Complex(0d, 1d))], MathBlockValue.Scalar(Math.PI / 2d), performanceIterations: 256);
+        internal static MathBlockOperation Create() => MathBlockOperationFactory.Create("complex.phase", 1, ComplexPhaseType, inputs => MathBlockValue.Scalar(MathBlockComplex.Phase(inputs[0].AsComplex())), [MathBlockValue.Complex(new Complex(0f, 1f))], MathBlockValue.Scalar(Math.PI / 2f), performanceIterations: 256);
     }
 }

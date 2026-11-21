@@ -4,6 +4,6 @@ internal static partial class PathMathBlocks
 {
     internal static class ComplexVectorMagnitudeV1BlockCpu
     {
-        internal static MathBlockOperation Create() => CreateComplexProjection("complex-vector.magnitude", MathBlockComplex.Magnitude, [Math.Sqrt(5d), 5d]);
+        internal static MathBlockOperation Create() => CreateComplexProjection("complex-vector.magnitude", MathBlockComplex.Magnitude, [Math.Sqrt(5f), 5f]);
     }
 }

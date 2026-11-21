@@ -9,8 +9,8 @@ internal sealed class MathBlockWindowAccurateKernel(MathBlockWindowAccurateStati
         IReadOnlyList<MathBlockValue> inputs,
         int count,
         int width,
-        double fill,
-        double[]? values,
+        float fill,
+        float[]? values,
         bool[]? valid)
     {
         var x = inputs[0].AsVector().Span;

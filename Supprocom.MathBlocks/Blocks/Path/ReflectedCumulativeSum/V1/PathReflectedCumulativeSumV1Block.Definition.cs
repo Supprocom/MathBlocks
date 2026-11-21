@@ -6,6 +6,6 @@ internal static partial class PathMathBlocks
     {
         internal const string Identity = "path.reflected-cumulative-sum@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Expanding;
-        internal static MathBlockOperation Create() => CreatePathVector("path.reflected-cumulative-sum", MathBlockPath.ReflectedCumulativeSum, MathBlockValue.Vector([-2d, 1d, 2d]), [0d, 1d, 3d], SameUnitVector);
+        internal static MathBlockOperation Create() => CreatePathVector("path.reflected-cumulative-sum", MathBlockPath.ReflectedCumulativeSum, MathBlockValue.Vector([-2f, 1f, 2f]), [0f, 1f, 3f], SameUnitVector);
     }
 }

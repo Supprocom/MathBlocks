@@ -9,9 +9,9 @@ namespace Supprocom.MathBlocks;
 // same function to the same doubles as the operation's own evaluator, so the rows are bit-identical.
 internal static class MathBlockSpanKernels
 {
-    internal delegate bool Kernel(ReadOnlySpan<MathBlockValue> inputs, Span<double> output, out int rows, out bool valid);
+    internal delegate bool Kernel(ReadOnlySpan<MathBlockValue> inputs, Span<float> output, out int rows, out bool valid);
 
-    internal delegate bool RowKernel(ReadOnlySpan<MathBlockValue> inputs, Span<double> output, Span<bool> rowValid, out int rows);
+    internal delegate bool RowKernel(ReadOnlySpan<MathBlockValue> inputs, Span<float> output, Span<bool> rowValid, out int rows);
 
     private static readonly ConcurrentDictionary<string, Kernel?> cache = new(StringComparer.Ordinal);
     private static readonly ConcurrentDictionary<string, RowKernel?> rowCache = new(StringComparer.Ordinal);
@@ -28,7 +28,7 @@ internal static class MathBlockSpanKernels
     {
         "vector.absolute@1" => Unary(static x => Math.Abs(x)),
         "vector.sign@1" => Unary(static x => Math.Sign(x)),
-        "vector.positive-part@1" => Unary(static x => Math.Max(x, 0d)),
+        "vector.positive-part@1" => Unary(static x => Math.Max(x, 0f)),
         "vector.square@1" => Unary(static x => x * x),
         "vector.square-root@1" => Unary(static x => Math.Sqrt(x)),
         "vector.exponential@1" => Unary(MathBlockScalar.Exponential),
@@ -52,7 +52,7 @@ internal static class MathBlockSpanKernels
     };
 
     // A vector input of the common case: valid, a vector, dimensionless.
-    private static bool TryVector(in MathBlockValue value, out ReadOnlySpan<double> span)
+    private static bool TryVector(in MathBlockValue value, out ReadOnlySpan<float> span)
     {
         if (value.IsValid && value.Type.Kind == MathBlockValueKind.Vector && value.Type.Unit.IsDimensionless)
         {
@@ -64,7 +64,7 @@ internal static class MathBlockSpanKernels
         return false;
     }
 
-    private static bool TryScalar(in MathBlockValue value, out double scalar)
+    private static bool TryScalar(in MathBlockValue value, out float scalar)
     {
         if (value.IsValid && value.Type.Kind == MathBlockValueKind.Scalar && value.Type.Unit.IsDimensionless)
         {
@@ -72,7 +72,7 @@ internal static class MathBlockSpanKernels
             return true;
         }
 
-        scalar = 0d;
+        scalar = 0f;
         return false;
     }
 
@@ -88,7 +88,7 @@ internal static class MathBlockSpanKernels
         return false;
     }
 
-    private static void RequireLength(Span<double> output, int rows)
+    private static void RequireLength(Span<float> output, int rows)
     {
         if (output.Length < rows)
         {
@@ -98,8 +98,8 @@ internal static class MathBlockSpanKernels
         }
     }
 
-    private static Kernel Unary(Func<double, double> function) =>
-        (ReadOnlySpan<MathBlockValue> inputs, Span<double> output, out int rows, out bool valid) =>
+    private static Kernel Unary(Func<float, float> function) =>
+        (ReadOnlySpan<MathBlockValue> inputs, Span<float> output, out int rows, out bool valid) =>
         {
             rows = 0;
             valid = false;
@@ -113,8 +113,8 @@ internal static class MathBlockSpanKernels
             return true;
         };
 
-    private static Kernel Arithmetic(Action<ReadOnlySpan<double>, ReadOnlySpan<double>, Span<double>> block) =>
-        (ReadOnlySpan<MathBlockValue> inputs, Span<double> output, out int rows, out bool valid) =>
+    private static Kernel Arithmetic(Action<ReadOnlySpan<float>, ReadOnlySpan<float>, Span<float>> block) =>
+        (ReadOnlySpan<MathBlockValue> inputs, Span<float> output, out int rows, out bool valid) =>
         {
             rows = 0;
             valid = false;
@@ -131,8 +131,8 @@ internal static class MathBlockSpanKernels
             return true;
         };
 
-    private static Kernel WithScalar(Func<double, double, double> function) =>
-        (ReadOnlySpan<MathBlockValue> inputs, Span<double> output, out int rows, out bool valid) =>
+    private static Kernel WithScalar(Func<float, float, float> function) =>
+        (ReadOnlySpan<MathBlockValue> inputs, Span<float> output, out int rows, out bool valid) =>
         {
             rows = 0;
             valid = false;
@@ -150,8 +150,8 @@ internal static class MathBlockSpanKernels
             return true;
         };
 
-    private static Kernel Comparison(Func<double, double, bool> function) =>
-        (ReadOnlySpan<MathBlockValue> inputs, Span<double> output, out int rows, out bool valid) =>
+    private static Kernel Comparison(Func<float, float, bool> function) =>
+        (ReadOnlySpan<MathBlockValue> inputs, Span<float> output, out int rows, out bool valid) =>
         {
             rows = 0;
             valid = false;
@@ -164,13 +164,13 @@ internal static class MathBlockSpanKernels
             rows = left.Length;
             RequireLength(output, rows);
             for (var index = 0; index < rows; index++)
-                output[index] = function(left[index], right[index]) ? 1d : 0d;
+                output[index] = function(left[index], right[index]) ? 1f : 0f;
             valid = true;
             return true;
         };
 
     private static Kernel BooleanBinary(Func<bool, bool, bool> function) =>
-        (ReadOnlySpan<MathBlockValue> inputs, Span<double> output, out int rows, out bool valid) =>
+        (ReadOnlySpan<MathBlockValue> inputs, Span<float> output, out int rows, out bool valid) =>
         {
             rows = 0;
             valid = false;
@@ -183,13 +183,13 @@ internal static class MathBlockSpanKernels
             rows = left.Length;
             RequireLength(output, rows);
             for (var index = 0; index < rows; index++)
-                output[index] = function(left[index], right[index]) ? 1d : 0d;
+                output[index] = function(left[index], right[index]) ? 1f : 0f;
             valid = true;
             return true;
         };
 
     private static Kernel BooleanNot() =>
-        (ReadOnlySpan<MathBlockValue> inputs, Span<double> output, out int rows, out bool valid) =>
+        (ReadOnlySpan<MathBlockValue> inputs, Span<float> output, out int rows, out bool valid) =>
         {
             rows = 0;
             valid = false;
@@ -198,13 +198,13 @@ internal static class MathBlockSpanKernels
             rows = flags.Length;
             RequireLength(output, rows);
             for (var index = 0; index < rows; index++)
-                output[index] = flags[index] ? 0d : 1d;
+                output[index] = flags[index] ? 0f : 1f;
             valid = true;
             return true;
         };
 
     private static Kernel Select() =>
-        (ReadOnlySpan<MathBlockValue> inputs, Span<double> output, out int rows, out bool valid) =>
+        (ReadOnlySpan<MathBlockValue> inputs, Span<float> output, out int rows, out bool valid) =>
         {
             rows = 0;
             valid = false;
@@ -254,7 +254,7 @@ internal static class MathBlockSpanKernels
         var unary = source.UnaryKernel;
         var binary = source.BinaryKernel;
         var formArity = validity ? arity : arity + 1;
-        return (ReadOnlySpan<MathBlockValue> inputs, Span<double> output, out int rows, out bool valid) =>
+        return (ReadOnlySpan<MathBlockValue> inputs, Span<float> output, out int rows, out bool valid) =>
         {
             rows = 0;
             valid = false;
@@ -262,12 +262,12 @@ internal static class MathBlockSpanKernels
                 return false;
             if (!TryArgument(in inputs[0], out var first, out var constantFirst, out var firstIsVector))
                 return false;
-            ReadOnlySpan<double> second = default;
-            var constantSecond = 0d;
+            ReadOnlySpan<float> second = default;
+            var constantSecond = 0f;
             var secondIsVector = false;
             if (arity == 2 && !TryArgument(in inputs[1], out second, out constantSecond, out secondIsVector))
                 return false;
-            var fill = 0d;
+            var fill = 0f;
             if (!validity && !TryScalar(in inputs[arity], out fill))
                 return false;
             var count = firstIsVector ? first.Length : secondIsVector ? second.Length : -1;
@@ -286,12 +286,12 @@ internal static class MathBlockSpanKernels
                         var y = secondIsVector ? second[row] : constantSecond;
                         var result = arity == 1 ? unary!(x) : binary!(x, y);
                         var computed = Math.IsFinite(result);
-                        output[row] = validity ? (computed ? 1d : 0d) : (computed ? result : fill);
+                        output[row] = validity ? (computed ? 1f : 0f) : (computed ? result : fill);
                     }
                 }
                 catch (Exception exception) when (exception is ArithmeticException or ArgumentOutOfRangeException or IndexOutOfRangeException)
                 {
-                    output[row] = validity ? 0d : fill;
+                    output[row] = validity ? 0f : fill;
                     row++;
                 }
             }
@@ -312,15 +312,15 @@ internal static class MathBlockSpanKernels
         var arity = source.Arity;
         var unary = source.UnaryKernel;
         var binary = source.BinaryKernel;
-        return (ReadOnlySpan<MathBlockValue> inputs, Span<double> output, Span<bool> rowValid, out int rows) =>
+        return (ReadOnlySpan<MathBlockValue> inputs, Span<float> output, Span<bool> rowValid, out int rows) =>
         {
             rows = 0;
             if (inputs.Length != arity + 1)
                 return false;
             if (!TryArgument(in inputs[0], out var first, out var constantFirst, out var firstIsVector))
                 return false;
-            ReadOnlySpan<double> second = default;
-            var constantSecond = 0d;
+            ReadOnlySpan<float> second = default;
+            var constantSecond = 0f;
             var secondIsVector = false;
             if (arity == 2 && !TryArgument(in inputs[1], out second, out constantSecond, out secondIsVector))
                 return false;
@@ -380,10 +380,10 @@ internal static class MathBlockSpanKernels
         return null;
     }
 
-    private static bool TryArgument(in MathBlockValue value, out ReadOnlySpan<double> span, out double constant, out bool isVector)
+    private static bool TryArgument(in MathBlockValue value, out ReadOnlySpan<float> span, out float constant, out bool isVector)
     {
         span = default;
-        constant = 0d;
+        constant = 0f;
         isVector = TryVector(in value, out span);
         return isVector || TryScalar(in value, out constant);
     }

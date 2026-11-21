@@ -6,6 +6,6 @@ internal static partial class MatrixMathBlocks
     {
         internal const string Identity = "matrix.hadamard-product@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => CreateBinaryMatrix("matrix.hadamard-product", MathBlockLinearAlgebra.HadamardProduct, new MathBlockMatrix(2, 2, [2d, 0d, 3d, 8d]), HadamardType);
+        internal static MathBlockOperation Create() => CreateBinaryMatrix("matrix.hadamard-product", MathBlockLinearAlgebra.HadamardProduct, new MathBlockMatrix(2, 2, [2f, 0f, 3f, 8f]), HadamardType);
     }
 }

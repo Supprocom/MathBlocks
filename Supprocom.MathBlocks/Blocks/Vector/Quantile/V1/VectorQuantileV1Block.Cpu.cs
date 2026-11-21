@@ -3,7 +3,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockVectorMath
 {
     /// <summary>Computes the <c>vector.quantile@1</c> mathematical operation.</summary>
-    public static double Quantile(IReadOnlyList<double> values, double probability)
+    public static float Quantile(IReadOnlyList<float> values, float probability)
     {
         var sorted = MathBlockCollectionPrimitives.SortedCopy(
             values,
@@ -14,6 +14,6 @@ public static partial class MathBlockVectorMath
         var lower = (int)Math.Floor(position);
         var upper = (int)Math.Ceiling(position);
         var weight = position - lower;
-        return sorted[lower] * (1d - weight) + sorted[upper] * weight;
+        return sorted[lower] * (1f - weight) + sorted[upper] * weight;
     }
 }

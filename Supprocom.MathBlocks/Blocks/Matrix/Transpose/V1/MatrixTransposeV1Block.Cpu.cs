@@ -7,7 +7,7 @@ public static partial class MathBlockLinearAlgebra
     public static MathBlockMatrix Transpose(MathBlockMatrix matrix)
     {
         ArgumentNullException.ThrowIfNull(matrix);
-        var result = new double[matrix.Rows * matrix.Columns];
+        var result = new float[matrix.Rows * matrix.Columns];
         for (var row = 0; row < matrix.Rows; row++)
             for (var column = 0; column < matrix.Columns; column++)
                 result[column * matrix.Rows + row] = matrix[row, column];

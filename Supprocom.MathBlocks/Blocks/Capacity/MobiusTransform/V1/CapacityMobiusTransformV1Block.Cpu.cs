@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockAdvanced
 {
     /// <summary>Computes the <c>capacity.mobius-transform@1</c> mathematical operation.</summary>
-    public static double[] MobiusTransform(IReadOnlyList<double> setFunction)
+    public static float[] MobiusTransform(IReadOnlyList<float> setFunction)
     {
         ArgumentNullException.ThrowIfNull(setFunction);
         var result = MathBlockCollectionPrimitives.Copy(setFunction);

@@ -13,7 +13,7 @@ public sealed class CapacityMobiusTransformV1BlockTests
     public void NonPowerOfTwoLengthIsInvalidWithTheDeclaredType()
     {
         var operation = MathBlockCatalog.Standard.Get("capacity.mobius-transform");
-        var input = MathBlockValue.Vector([0d, 0.4d, 0.6d, 1d, 0.2d]);
+        var input = MathBlockValue.Vector([0f, 0.4f, 0.6f, 1f, 0.2f]);
 
         var result = operation.Evaluate(input);
 

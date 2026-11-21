@@ -8,8 +8,8 @@ internal sealed class MathBlockWindowExtremeKernel(bool maximum, bool position) 
         IReadOnlyList<MathBlockValue> inputs,
         int count,
         int width,
-        double fill,
-        double[]? values,
+        float fill,
+        float[]? values,
         bool[]? valid) =>
         MathBlockWindowSelection.RunExtreme(
             inputs[0].AsVector().Span, count, width, fill, maximum, position, values, valid);

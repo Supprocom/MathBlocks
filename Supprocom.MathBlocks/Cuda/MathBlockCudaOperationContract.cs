@@ -159,7 +159,7 @@ public sealed class MathBlockCudaOperationContract
     /// empty or unequal vector), take that allocating evaluation and copy its rows.
     /// </remarks>
     /// <exception cref="ArgumentException">The output span is shorter than the rows of the result; the message names the needed length.</exception>
-    public MathBlockEvaluation EvaluateCoreCLR(ReadOnlySpan<MathBlockValue> inputs, Span<double> output, MathBlockDomainOptions domainOptions)
+    public MathBlockEvaluation EvaluateCoreCLR(ReadOnlySpan<MathBlockValue> inputs, Span<float> output, MathBlockDomainOptions domainOptions)
     {
         ArgumentNullException.ThrowIfNull(domainOptions);
         domainOptions.Validate();
@@ -180,7 +180,7 @@ public sealed class MathBlockCudaOperationContract
     /// </remarks>
     /// <exception cref="InvalidOperationException">The operation is not an <c>elementwise.*</c> form.</exception>
     /// <exception cref="ArgumentException">A span is shorter than the rows of the result; the message names the needed length.</exception>
-    public MathBlockEvaluation EvaluateCoreCLR(ReadOnlySpan<MathBlockValue> inputs, Span<double> output, Span<bool> rowValid, MathBlockDomainOptions domainOptions)
+    public MathBlockEvaluation EvaluateCoreCLR(ReadOnlySpan<MathBlockValue> inputs, Span<float> output, Span<bool> rowValid, MathBlockDomainOptions domainOptions)
     {
         ArgumentNullException.ThrowIfNull(domainOptions);
         domainOptions.Validate();
@@ -236,7 +236,7 @@ public sealed class MathBlockCudaOperationContract
         return spanRowKernel;
     }
 
-    private static MathBlockEvaluation CopyResult(MathBlockValue result, Span<double> output, long nonConverged)
+    private static MathBlockEvaluation CopyResult(MathBlockValue result, Span<float> output, long nonConverged)
     {
         if (!result.IsValid)
             return new MathBlockEvaluation(false, result.Type.Rows, nonConverged);
@@ -251,14 +251,14 @@ public sealed class MathBlockCudaOperationContract
                 var flags = result.AsBooleanVector();
                 RequireOutput(output, flags.Count);
                 for (var index = 0; index < flags.Count; index++)
-                    output[index] = flags[index] ? 1d : 0d;
+                    output[index] = flags[index] ? 1f : 0f;
                 return new MathBlockEvaluation(true, flags.Count, nonConverged);
             default:
                 throw new InvalidOperationException("The operation does not return a vector or a Boolean vector.");
         }
     }
 
-    private static void RequireOutput(Span<double> output, int rows)
+    private static void RequireOutput(Span<float> output, int rows)
     {
         if (output.Length < rows)
         {

@@ -6,6 +6,6 @@ internal static partial class ScalarMathBlocks
     {
         internal const string Identity = "scalar.maximum@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => MathBlockOperationFactory.ScalarBinary("scalar.maximum", MathBlockScalar.Maximum, 2d, 3d, 3d, MathBlockTypeRules.SameBinaryScalar);
+        internal static MathBlockOperation Create() => MathBlockOperationFactory.ScalarBinary("scalar.maximum", MathBlockScalar.Maximum, 2f, 3f, 3f, MathBlockTypeRules.SameBinaryScalar);
     }
 }

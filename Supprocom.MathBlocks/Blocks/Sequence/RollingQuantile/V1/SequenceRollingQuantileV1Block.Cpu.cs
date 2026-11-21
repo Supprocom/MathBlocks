@@ -3,22 +3,22 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockVectorMath
 {
     /// <summary>Computes the <c>sequence.rolling-quantile@1</c> mathematical operation.</summary>
-    public static double[] RollingQuantile(IReadOnlyList<double> values, int width, double probability)
+    public static float[] RollingQuantile(IReadOnlyList<float> values, int width, float probability)
     {
         ArgumentNullException.ThrowIfNull(values);
-        var result = new double[values.Count - width + 1];
+        var result = new float[values.Count - width + 1];
         if (width == 1)
         {
             for (var index = 0; index < result.Length; index++)
                 result[index] = values[index];
             return result;
         }
-        if (probability is 0d or 1d)
+        if (probability is 0f or 1f)
         {
             var deque = new int[values.Count];
             var head = 0;
             var tail = 0;
-            var minimum = probability == 0d;
+            var minimum = probability == 0f;
             for (var index = 0; index < values.Count; index++)
             {
                 while (head < tail && deque[head] <= index - width)
@@ -45,7 +45,7 @@ public static partial class MathBlockVectorMath
         {
             var lower = heaps.LowerValue;
             var upper = lowerIndex == upperIndex ? lower : heaps.UpperValue;
-            result[start] = lower * (1d - weight) + upper * weight;
+            result[start] = lower * (1f - weight) + upper * weight;
             if (start + 1 != result.Length)
                 heaps.Slide(start, start + width);
         }
@@ -54,7 +54,7 @@ public static partial class MathBlockVectorMath
 
     private sealed class RollingOrderStatisticHeaps
     {
-        private readonly IReadOnlyList<double> values;
+        private readonly IReadOnlyList<float> values;
         private readonly int targetLowerCount;
         private readonly int[] lower;
         private readonly int[] upper;
@@ -64,7 +64,7 @@ public static partial class MathBlockVectorMath
         private int upperCount;
 
         public RollingOrderStatisticHeaps(
-            IReadOnlyList<double> values,
+            IReadOnlyList<float> values,
             int width,
             int targetLowerCount)
         {
@@ -86,8 +86,8 @@ public static partial class MathBlockVectorMath
             }
         }
 
-        public double LowerValue => values[lower[0]];
-        public double UpperValue => values[upper[0]];
+        public float LowerValue => values[lower[0]];
+        public float UpperValue => values[upper[0]];
 
         public void Slide(int outgoing, int incoming)
         {

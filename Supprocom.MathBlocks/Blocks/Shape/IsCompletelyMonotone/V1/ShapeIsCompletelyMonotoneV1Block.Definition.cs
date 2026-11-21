@@ -6,6 +6,6 @@ internal static partial class AdvancedMathBlocks
     {
         internal const string Identity = "shape.is-completely-monotone@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateVectorBoolean("shape.is-completely-monotone", MathBlockAdvanced.IsCompletelyMonotone, MathBlockValue.Vector([1d, 0.5d, 0.25d]), true);
+        internal static MathBlockOperation Create() => CreateVectorBoolean("shape.is-completely-monotone", MathBlockAdvanced.IsCompletelyMonotone, MathBlockValue.Vector([1f, 0.5f, 0.25f]), true);
     }
 }

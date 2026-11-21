@@ -6,6 +6,6 @@ internal static partial class MatrixMathBlocks
     {
         internal const string Identity = "matrix.frobenius-norm@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => CreateScalarMatrixReduction("matrix.frobenius-norm", MathBlockLinearAlgebra.FrobeniusNorm, matrixA, Math.Sqrt(30d), TraceType);
+        internal static MathBlockOperation Create() => CreateScalarMatrixReduction("matrix.frobenius-norm", MathBlockLinearAlgebra.FrobeniusNorm, matrixA, Math.Sqrt(30f), TraceType);
     }
 }

@@ -99,64 +99,64 @@ static Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.operator
 static Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.operator ==(Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan left, Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan right) -> bool
 static Supprocom.MathBlocks.Cuda.MathBlocksCUDAWorker.IsAvailable.get -> bool
 static Supprocom.MathBlocks.Cuda.MathBlocksCUDAWorker.SupportedBlockIdentities.get -> System.Collections.Generic.IReadOnlyCollection<string!>!
-static Supprocom.MathBlocks.MathBlockAdvanced.BallotCount(int leadingCount, int trailingCount) -> double
-static Supprocom.MathBlocks.MathBlockAdvanced.BernsteinEvaluate(System.Collections.Generic.IReadOnlyList<double>! coefficients, double parameter) -> double
-static Supprocom.MathBlocks.MathBlockAdvanced.CentralMoment(System.Collections.Generic.IReadOnlyList<double>! values, int order) -> double
-static Supprocom.MathBlocks.MathBlockAdvanced.ChoquetIntegral(System.Collections.Generic.IReadOnlyList<double>! values, System.Collections.Generic.IReadOnlyList<double>! capacity) -> double
-static Supprocom.MathBlocks.MathBlockAdvanced.DiscreteHazard(System.Collections.Generic.IReadOnlyList<double>! probabilities) -> double[]!
-static Supprocom.MathBlocks.MathBlockAdvanced.EntropyProduction(Supprocom.MathBlocks.MathBlockMatrix! transition, System.Collections.Generic.IReadOnlyList<double>! stationary) -> double
-static Supprocom.MathBlocks.MathBlockAdvanced.FisherRaoDistance(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double
+static Supprocom.MathBlocks.MathBlockAdvanced.BallotCount(int leadingCount, int trailingCount) -> float
+static Supprocom.MathBlocks.MathBlockAdvanced.BernsteinEvaluate(System.Collections.Generic.IReadOnlyList<float>! coefficients, float parameter) -> float
+static Supprocom.MathBlocks.MathBlockAdvanced.CentralMoment(System.Collections.Generic.IReadOnlyList<float>! values, int order) -> float
+static Supprocom.MathBlocks.MathBlockAdvanced.ChoquetIntegral(System.Collections.Generic.IReadOnlyList<float>! values, System.Collections.Generic.IReadOnlyList<float>! capacity) -> float
+static Supprocom.MathBlocks.MathBlockAdvanced.DiscreteHazard(System.Collections.Generic.IReadOnlyList<float>! probabilities) -> float[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.EntropyProduction(Supprocom.MathBlocks.MathBlockMatrix! transition, System.Collections.Generic.IReadOnlyList<float>! stationary) -> float
+static Supprocom.MathBlocks.MathBlockAdvanced.FisherRaoDistance(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float
 static Supprocom.MathBlocks.MathBlockAdvanced.GabrielGraph(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! points) -> Supprocom.MathBlocks.MathBlockGraph!
-static Supprocom.MathBlocks.MathBlockAdvanced.GiniCoefficient(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockAdvanced.GreatestConvexMinorant(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockAdvanced.Hankel(System.Collections.Generic.IReadOnlyList<double>! firstColumn, System.Collections.Generic.IReadOnlyList<double>! lastRow) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockAdvanced.HilbertProjectiveDistance(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double
-static Supprocom.MathBlocks.MathBlockAdvanced.IsCompletelyMonotone(System.Collections.Generic.IReadOnlyList<double>! values) -> bool
-static Supprocom.MathBlocks.MathBlockAdvanced.IsLogConcave(System.Collections.Generic.IReadOnlyList<double>! values) -> bool
-static Supprocom.MathBlocks.MathBlockAdvanced.IsotonicRegression(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockAdvanced.IsSubmodular(System.Collections.Generic.IReadOnlyList<double>! setFunction) -> bool
+static Supprocom.MathBlocks.MathBlockAdvanced.GiniCoefficient(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockAdvanced.GreatestConvexMinorant(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.Hankel(System.Collections.Generic.IReadOnlyList<float>! firstColumn, System.Collections.Generic.IReadOnlyList<float>! lastRow) -> Supprocom.MathBlocks.MathBlockMatrix!
+static Supprocom.MathBlocks.MathBlockAdvanced.HilbertProjectiveDistance(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float
+static Supprocom.MathBlocks.MathBlockAdvanced.IsCompletelyMonotone(System.Collections.Generic.IReadOnlyList<float>! values) -> bool
+static Supprocom.MathBlocks.MathBlockAdvanced.IsLogConcave(System.Collections.Generic.IReadOnlyList<float>! values) -> bool
+static Supprocom.MathBlocks.MathBlockAdvanced.IsotonicRegression(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.IsSubmodular(System.Collections.Generic.IReadOnlyList<float>! setFunction) -> bool
 static Supprocom.MathBlocks.MathBlockAdvanced.IsTotallyNonnegative(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> bool
-static Supprocom.MathBlocks.MathBlockAdvanced.LeastConcaveMajorant(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockAdvanced.LorenzCurve(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockAdvanced.Majorizes(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> bool
+static Supprocom.MathBlocks.MathBlockAdvanced.LeastConcaveMajorant(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.LorenzCurve(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.Majorizes(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> bool
 static Supprocom.MathBlocks.MathBlockAdvanced.MatrixCommutator(Supprocom.MathBlocks.MathBlockMatrix! left, Supprocom.MathBlocks.MathBlockMatrix! right) -> Supprocom.MathBlocks.MathBlockMatrix!
 static Supprocom.MathBlocks.MathBlockAdvanced.MatrixExponential(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> Supprocom.MathBlocks.MathBlockMatrix!
 static Supprocom.MathBlocks.MathBlockAdvanced.MatrixPower(Supprocom.MathBlocks.MathBlockMatrix! matrix, int exponent) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockAdvanced.MaximalMinors(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> double[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.MaximalMinors(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> float[]!
 static Supprocom.MathBlocks.MathBlockAdvanced.MaxPlusMultiply(Supprocom.MathBlocks.MathBlockMatrix! left, Supprocom.MathBlocks.MathBlockMatrix! right) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockAdvanced.McShaneExtension(System.Collections.Generic.IReadOnlyList<double>! locations, System.Collections.Generic.IReadOnlyList<double>! values, System.Collections.Generic.IReadOnlyList<double>! queries, double lipschitz) -> double[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.McShaneExtension(System.Collections.Generic.IReadOnlyList<float>! locations, System.Collections.Generic.IReadOnlyList<float>! values, System.Collections.Generic.IReadOnlyList<float>! queries, float lipschitz) -> float[]!
 static Supprocom.MathBlocks.MathBlockAdvanced.MinPlusMultiply(Supprocom.MathBlocks.MathBlockMatrix! left, Supprocom.MathBlocks.MathBlockMatrix! right) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockAdvanced.MobiusTransform(System.Collections.Generic.IReadOnlyList<double>! setFunction) -> double[]!
-static Supprocom.MathBlocks.MathBlockAdvanced.PerronValue(Supprocom.MathBlocks.MathBlockMatrix! matrix, int iterations) -> double
-static Supprocom.MathBlocks.MathBlockAdvanced.PerronVector(Supprocom.MathBlocks.MathBlockMatrix! matrix, int iterations) -> double[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.MobiusTransform(System.Collections.Generic.IReadOnlyList<float>! setFunction) -> float[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.PerronValue(Supprocom.MathBlocks.MathBlockMatrix! matrix, int iterations) -> float
+static Supprocom.MathBlocks.MathBlockAdvanced.PerronVector(Supprocom.MathBlocks.MathBlockMatrix! matrix, int iterations) -> float[]!
 static Supprocom.MathBlocks.MathBlockAdvanced.PickMatrix(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockComplexValue>! nodes, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockComplexValue>! values) -> Supprocom.MathBlocks.MathBlockComplexMatrix!
-static Supprocom.MathBlocks.MathBlockAdvanced.PoissonCdf(double rate, int count) -> double
-static Supprocom.MathBlocks.MathBlockAdvanced.PoissonPmf(double rate, int count) -> double
-static Supprocom.MathBlocks.MathBlockAdvanced.PrincipalMinors(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> double[]!
-static Supprocom.MathBlocks.MathBlockAdvanced.ProductLimitSurvival(System.Collections.Generic.IReadOnlyList<double>! occurrences, System.Collections.Generic.IReadOnlyList<double>! atRisk) -> double[]!
-static Supprocom.MathBlocks.MathBlockAdvanced.Pseudomedian(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockAdvanced.RawMoment(System.Collections.Generic.IReadOnlyList<double>! values, int order) -> double
+static Supprocom.MathBlocks.MathBlockAdvanced.PoissonCdf(float rate, int count) -> float
+static Supprocom.MathBlocks.MathBlockAdvanced.PoissonPmf(float rate, int count) -> float
+static Supprocom.MathBlocks.MathBlockAdvanced.PrincipalMinors(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> float[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.ProductLimitSurvival(System.Collections.Generic.IReadOnlyList<float>! occurrences, System.Collections.Generic.IReadOnlyList<float>! atRisk) -> float[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.Pseudomedian(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockAdvanced.RawMoment(System.Collections.Generic.IReadOnlyList<float>! values, int order) -> float
 static Supprocom.MathBlocks.MathBlockAdvanced.SchurComplement(Supprocom.MathBlocks.MathBlockMatrix! matrix, int retainedSize) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockAdvanced.ShapleyValues(System.Collections.Generic.IReadOnlyList<double>! coalitionValues) -> double[]!
-static Supprocom.MathBlocks.MathBlockAdvanced.SignatureLevelThree(Supprocom.MathBlocks.MathBlockMatrix! path) -> double[]!
-static Supprocom.MathBlocks.MathBlockAdvanced.SimplicialDepth(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! sample, Supprocom.MathBlocks.MathBlockPoint point) -> double
-static Supprocom.MathBlocks.MathBlockAdvanced.SpectralNorm(Supprocom.MathBlocks.MathBlockMatrix! matrix, int _) -> double
-static Supprocom.MathBlocks.MathBlockAdvanced.StationaryDistribution(Supprocom.MathBlocks.MathBlockMatrix! transition, int iterations) -> double[]!
-static Supprocom.MathBlocks.MathBlockAdvanced.Toeplitz(System.Collections.Generic.IReadOnlyList<double>! firstColumn, System.Collections.Generic.IReadOnlyList<double>! firstRow) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockAdvanced.WalshHadamard(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockAdvanced.WhitneyExtension(System.Collections.Generic.IReadOnlyList<double>! locations, System.Collections.Generic.IReadOnlyList<double>! values, System.Collections.Generic.IReadOnlyList<double>! queries, double lipschitz) -> double[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.ShapleyValues(System.Collections.Generic.IReadOnlyList<float>! coalitionValues) -> float[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.SignatureLevelThree(Supprocom.MathBlocks.MathBlockMatrix! path) -> float[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.SimplicialDepth(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! sample, Supprocom.MathBlocks.MathBlockPoint point) -> float
+static Supprocom.MathBlocks.MathBlockAdvanced.SpectralNorm(Supprocom.MathBlocks.MathBlockMatrix! matrix, int _) -> float
+static Supprocom.MathBlocks.MathBlockAdvanced.StationaryDistribution(Supprocom.MathBlocks.MathBlockMatrix! transition, int iterations) -> float[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.Toeplitz(System.Collections.Generic.IReadOnlyList<float>! firstColumn, System.Collections.Generic.IReadOnlyList<float>! firstRow) -> Supprocom.MathBlocks.MathBlockMatrix!
+static Supprocom.MathBlocks.MathBlockAdvanced.WalshHadamard(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockAdvanced.WhitneyExtension(System.Collections.Generic.IReadOnlyList<float>! locations, System.Collections.Generic.IReadOnlyList<float>! values, System.Collections.Generic.IReadOnlyList<float>! queries, float lipschitz) -> float[]!
 static Supprocom.MathBlocks.MathBlockCatalog.Standard.get -> Supprocom.MathBlocks.MathBlockRegistry!
 static Supprocom.MathBlocks.MathBlockComplex.Add(Supprocom.MathBlocks.MathBlockComplexValue left, Supprocom.MathBlocks.MathBlockComplexValue right) -> Supprocom.MathBlocks.MathBlockComplexValue
 static Supprocom.MathBlocks.MathBlockComplex.Conjugate(Supprocom.MathBlocks.MathBlockComplexValue value) -> Supprocom.MathBlocks.MathBlockComplexValue
-static Supprocom.MathBlocks.MathBlockComplex.Create(double real, double imaginary) -> Supprocom.MathBlocks.MathBlockComplexValue
+static Supprocom.MathBlocks.MathBlockComplex.Create(float real, float imaginary) -> Supprocom.MathBlocks.MathBlockComplexValue
 static Supprocom.MathBlocks.MathBlockComplex.Divide(Supprocom.MathBlocks.MathBlockComplexValue left, Supprocom.MathBlocks.MathBlockComplexValue right) -> Supprocom.MathBlocks.MathBlockComplexValue
 static Supprocom.MathBlocks.MathBlockComplex.Exponential(Supprocom.MathBlocks.MathBlockComplexValue value) -> Supprocom.MathBlocks.MathBlockComplexValue
-static Supprocom.MathBlocks.MathBlockComplex.FromPolar(double magnitude, double phase) -> Supprocom.MathBlocks.MathBlockComplexValue
-static Supprocom.MathBlocks.MathBlockComplex.Magnitude(Supprocom.MathBlocks.MathBlockComplexValue value) -> double
+static Supprocom.MathBlocks.MathBlockComplex.FromPolar(float magnitude, float phase) -> Supprocom.MathBlocks.MathBlockComplexValue
+static Supprocom.MathBlocks.MathBlockComplex.Magnitude(Supprocom.MathBlocks.MathBlockComplexValue value) -> float
 static Supprocom.MathBlocks.MathBlockComplex.Multiply(Supprocom.MathBlocks.MathBlockComplexValue left, Supprocom.MathBlocks.MathBlockComplexValue right) -> Supprocom.MathBlocks.MathBlockComplexValue
 static Supprocom.MathBlocks.MathBlockComplex.NaturalLogarithm(Supprocom.MathBlocks.MathBlockComplexValue value) -> Supprocom.MathBlocks.MathBlockComplexValue
 static Supprocom.MathBlocks.MathBlockComplex.Negate(Supprocom.MathBlocks.MathBlockComplexValue value) -> Supprocom.MathBlocks.MathBlockComplexValue
-static Supprocom.MathBlocks.MathBlockComplex.Phase(Supprocom.MathBlocks.MathBlockComplexValue value) -> double
+static Supprocom.MathBlocks.MathBlockComplex.Phase(Supprocom.MathBlocks.MathBlockComplexValue value) -> float
 static Supprocom.MathBlocks.MathBlockComplex.Power(Supprocom.MathBlocks.MathBlockComplexValue value, Supprocom.MathBlocks.MathBlockComplexValue exponent) -> Supprocom.MathBlocks.MathBlockComplexValue
 static Supprocom.MathBlocks.MathBlockComplex.SquareRoot(Supprocom.MathBlocks.MathBlockComplexValue value) -> Supprocom.MathBlocks.MathBlockComplexValue
 static Supprocom.MathBlocks.MathBlockComplex.Subtract(Supprocom.MathBlocks.MathBlockComplexValue left, Supprocom.MathBlocks.MathBlockComplexValue right) -> Supprocom.MathBlocks.MathBlockComplexValue
@@ -195,60 +195,60 @@ static Supprocom.MathBlocks.MathBlockFormulaInterchange.WriteUtf8(Supprocom.Math
 static Supprocom.MathBlocks.MathBlockFormulaInterchange.WriteUtf8Async(Supprocom.MathBlocks.MathBlockProgram! program, string! outputName, Supprocom.MathBlocks.MathBlockFormulaFormat format, System.IO.Stream! destination, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 static Supprocom.MathBlocks.MathBlockFormulaSymbol.operator !=(Supprocom.MathBlocks.MathBlockFormulaSymbol left, Supprocom.MathBlocks.MathBlockFormulaSymbol right) -> bool
 static Supprocom.MathBlocks.MathBlockFormulaSymbol.operator ==(Supprocom.MathBlocks.MathBlockFormulaSymbol left, Supprocom.MathBlocks.MathBlockFormulaSymbol right) -> bool
-static Supprocom.MathBlocks.MathBlockGeometry.BarycentricCoordinates(Supprocom.MathBlocks.MathBlockPoint point, Supprocom.MathBlocks.MathBlockPoint first, Supprocom.MathBlocks.MathBlockPoint second, Supprocom.MathBlocks.MathBlockPoint third) -> double[]!
+static Supprocom.MathBlocks.MathBlockGeometry.BarycentricCoordinates(Supprocom.MathBlocks.MathBlockPoint point, Supprocom.MathBlocks.MathBlockPoint first, Supprocom.MathBlocks.MathBlockPoint second, Supprocom.MathBlocks.MathBlockPoint third) -> float[]!
 static Supprocom.MathBlocks.MathBlockGeometry.Centroid(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! points) -> Supprocom.MathBlocks.MathBlockPoint
-static Supprocom.MathBlocks.MathBlockGeometry.Circumradius(Supprocom.MathBlocks.MathBlockPoint first, Supprocom.MathBlocks.MathBlockPoint second, Supprocom.MathBlocks.MathBlockPoint third) -> double
+static Supprocom.MathBlocks.MathBlockGeometry.Circumradius(Supprocom.MathBlocks.MathBlockPoint first, Supprocom.MathBlocks.MathBlockPoint second, Supprocom.MathBlocks.MathBlockPoint third) -> float
 static Supprocom.MathBlocks.MathBlockGeometry.ContainsPoint(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! polygon, Supprocom.MathBlocks.MathBlockPoint point) -> bool
 static Supprocom.MathBlocks.MathBlockGeometry.ConvexHull(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! points) -> Supprocom.MathBlocks.MathBlockPoint[]!
-static Supprocom.MathBlocks.MathBlockGeometry.Cross(Supprocom.MathBlocks.MathBlockPoint origin, Supprocom.MathBlocks.MathBlockPoint left, Supprocom.MathBlocks.MathBlockPoint right) -> double
+static Supprocom.MathBlocks.MathBlockGeometry.Cross(Supprocom.MathBlocks.MathBlockPoint origin, Supprocom.MathBlocks.MathBlockPoint left, Supprocom.MathBlocks.MathBlockPoint right) -> float
 static Supprocom.MathBlocks.MathBlockGeometry.DelaunayGraph(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! points) -> Supprocom.MathBlocks.MathBlockGraph!
-static Supprocom.MathBlocks.MathBlockGeometry.Diameter(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! points) -> double
-static Supprocom.MathBlocks.MathBlockGeometry.DiscreteFrechetDistance(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! left, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! right) -> double
-static Supprocom.MathBlocks.MathBlockGeometry.Distance(Supprocom.MathBlocks.MathBlockPoint left, Supprocom.MathBlocks.MathBlockPoint right) -> double
-static Supprocom.MathBlocks.MathBlockGeometry.HalfspaceDepth(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! sample, Supprocom.MathBlocks.MathBlockPoint point) -> double
-static Supprocom.MathBlocks.MathBlockGeometry.HausdorffDistance(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! left, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! right) -> double
-static Supprocom.MathBlocks.MathBlockGeometry.PathLength(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! path) -> double
-static Supprocom.MathBlocks.MathBlockGeometry.Perimeter(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! polygon) -> double
-static Supprocom.MathBlocks.MathBlockGeometry.PointToSegmentDistance(Supprocom.MathBlocks.MathBlockPoint point, Supprocom.MathBlocks.MathBlockPoint start, Supprocom.MathBlocks.MathBlockPoint end) -> double
-static Supprocom.MathBlocks.MathBlockGeometry.PolygonArea(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! polygon) -> double
-static Supprocom.MathBlocks.MathBlockGeometry.SignedPolygonArea(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! polygon) -> double
-static Supprocom.MathBlocks.MathBlockGeometry.ZeroDimensionalPersistence(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! points) -> double[]!
+static Supprocom.MathBlocks.MathBlockGeometry.Diameter(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! points) -> float
+static Supprocom.MathBlocks.MathBlockGeometry.DiscreteFrechetDistance(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! left, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! right) -> float
+static Supprocom.MathBlocks.MathBlockGeometry.Distance(Supprocom.MathBlocks.MathBlockPoint left, Supprocom.MathBlocks.MathBlockPoint right) -> float
+static Supprocom.MathBlocks.MathBlockGeometry.HalfspaceDepth(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! sample, Supprocom.MathBlocks.MathBlockPoint point) -> float
+static Supprocom.MathBlocks.MathBlockGeometry.HausdorffDistance(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! left, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! right) -> float
+static Supprocom.MathBlocks.MathBlockGeometry.PathLength(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! path) -> float
+static Supprocom.MathBlocks.MathBlockGeometry.Perimeter(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! polygon) -> float
+static Supprocom.MathBlocks.MathBlockGeometry.PointToSegmentDistance(Supprocom.MathBlocks.MathBlockPoint point, Supprocom.MathBlocks.MathBlockPoint start, Supprocom.MathBlocks.MathBlockPoint end) -> float
+static Supprocom.MathBlocks.MathBlockGeometry.PolygonArea(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! polygon) -> float
+static Supprocom.MathBlocks.MathBlockGeometry.SignedPolygonArea(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! polygon) -> float
+static Supprocom.MathBlocks.MathBlockGeometry.ZeroDimensionalPersistence(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! points) -> float[]!
 static Supprocom.MathBlocks.MathBlockGraphEdge.operator !=(Supprocom.MathBlocks.MathBlockGraphEdge left, Supprocom.MathBlocks.MathBlockGraphEdge right) -> bool
 static Supprocom.MathBlocks.MathBlockGraphEdge.operator ==(Supprocom.MathBlocks.MathBlockGraphEdge left, Supprocom.MathBlocks.MathBlockGraphEdge right) -> bool
-static Supprocom.MathBlocks.MathBlockGraphMath.AlgebraicConnectivity(Supprocom.MathBlocks.MathBlockGraph! graph) -> double
-static Supprocom.MathBlocks.MathBlockGraphMath.Conductance(Supprocom.MathBlocks.MathBlockGraph! graph, System.Collections.Generic.IReadOnlyList<bool>! subset) -> double
+static Supprocom.MathBlocks.MathBlockGraphMath.AlgebraicConnectivity(Supprocom.MathBlocks.MathBlockGraph! graph) -> float
+static Supprocom.MathBlocks.MathBlockGraphMath.Conductance(Supprocom.MathBlocks.MathBlockGraph! graph, System.Collections.Generic.IReadOnlyList<bool>! subset) -> float
 static Supprocom.MathBlocks.MathBlockGraphMath.ConnectedComponentCount(Supprocom.MathBlocks.MathBlockGraph! graph) -> int
-static Supprocom.MathBlocks.MathBlockGraphMath.Degree(Supprocom.MathBlocks.MathBlockGraph! graph) -> double[]!
-static Supprocom.MathBlocks.MathBlockGraphMath.HodgeResidualNorm(Supprocom.MathBlocks.MathBlockGraph! graph, System.Collections.Generic.IReadOnlyList<double>! potential) -> double
+static Supprocom.MathBlocks.MathBlockGraphMath.Degree(Supprocom.MathBlocks.MathBlockGraph! graph) -> float[]!
+static Supprocom.MathBlocks.MathBlockGraphMath.HodgeResidualNorm(Supprocom.MathBlocks.MathBlockGraph! graph, System.Collections.Generic.IReadOnlyList<float>! potential) -> float
 static Supprocom.MathBlocks.MathBlockGraphMath.IsConnected(Supprocom.MathBlocks.MathBlockGraph! graph) -> bool
 static Supprocom.MathBlocks.MathBlockGraphMath.MinimumSpanningForest(Supprocom.MathBlocks.MathBlockGraph! graph) -> Supprocom.MathBlocks.MathBlockGraph!
-static Supprocom.MathBlocks.MathBlockGraphMath.PageRank(Supprocom.MathBlocks.MathBlockGraph! graph, double damping, int iterations) -> double[]!
+static Supprocom.MathBlocks.MathBlockGraphMath.PageRank(Supprocom.MathBlocks.MathBlockGraph! graph, float damping, int iterations) -> float[]!
 static Supprocom.MathBlocks.MathBlockGraphMath.TriangleCount(Supprocom.MathBlocks.MathBlockGraph! graph) -> int
-static Supprocom.MathBlocks.MathBlockGraphMath.TryHodgePotential(Supprocom.MathBlocks.MathBlockGraph! graph, out double[]! potential) -> bool
+static Supprocom.MathBlocks.MathBlockGraphMath.TryHodgePotential(Supprocom.MathBlocks.MathBlockGraph! graph, out float[]! potential) -> bool
 static Supprocom.MathBlocks.MathBlockGraphMath.UndirectedAdjacencyMatrix(Supprocom.MathBlocks.MathBlockGraph! graph) -> Supprocom.MathBlocks.MathBlockMatrix!
 static Supprocom.MathBlocks.MathBlockGraphMath.UndirectedLaplacian(Supprocom.MathBlocks.MathBlockGraph! graph) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockGraphMath.UndirectedShortestPaths(Supprocom.MathBlocks.MathBlockGraph! graph, int source) -> double[]!
-static Supprocom.MathBlocks.MathBlockGraphMath.WeightedDegree(Supprocom.MathBlocks.MathBlockGraph! graph) -> double[]!
+static Supprocom.MathBlocks.MathBlockGraphMath.UndirectedShortestPaths(Supprocom.MathBlocks.MathBlockGraph! graph, int source) -> float[]!
+static Supprocom.MathBlocks.MathBlockGraphMath.WeightedDegree(Supprocom.MathBlocks.MathBlockGraph! graph) -> float[]!
 static Supprocom.MathBlocks.MathBlockLinearAlgebra.Add(Supprocom.MathBlocks.MathBlockMatrix! left, Supprocom.MathBlocks.MathBlockMatrix! right) -> Supprocom.MathBlocks.MathBlockMatrix!
 static Supprocom.MathBlocks.MathBlockLinearAlgebra.CovarianceMatrix(Supprocom.MathBlocks.MathBlockMatrix! observations) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockLinearAlgebra.Determinant(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> double
-static Supprocom.MathBlocks.MathBlockLinearAlgebra.FrobeniusNorm(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> double
+static Supprocom.MathBlocks.MathBlockLinearAlgebra.Determinant(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> float
+static Supprocom.MathBlocks.MathBlockLinearAlgebra.FrobeniusNorm(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> float
 static Supprocom.MathBlocks.MathBlockLinearAlgebra.Gram(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> Supprocom.MathBlocks.MathBlockMatrix!
 static Supprocom.MathBlocks.MathBlockLinearAlgebra.HadamardProduct(Supprocom.MathBlocks.MathBlockMatrix! left, Supprocom.MathBlocks.MathBlockMatrix! right) -> Supprocom.MathBlocks.MathBlockMatrix!
 static Supprocom.MathBlocks.MathBlockLinearAlgebra.Identity(int size) -> Supprocom.MathBlocks.MathBlockMatrix!
 static Supprocom.MathBlocks.MathBlockLinearAlgebra.IsPositiveDefinite(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> bool
 static Supprocom.MathBlocks.MathBlockLinearAlgebra.IsSymmetric(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> bool
 static Supprocom.MathBlocks.MathBlockLinearAlgebra.Multiply(Supprocom.MathBlocks.MathBlockMatrix! left, Supprocom.MathBlocks.MathBlockMatrix! right) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockLinearAlgebra.Multiply(Supprocom.MathBlocks.MathBlockMatrix! matrix, System.Collections.Generic.IReadOnlyList<double>! vector) -> double[]!
-static Supprocom.MathBlocks.MathBlockLinearAlgebra.OuterProduct(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> Supprocom.MathBlocks.MathBlockMatrix!
+static Supprocom.MathBlocks.MathBlockLinearAlgebra.Multiply(Supprocom.MathBlocks.MathBlockMatrix! matrix, System.Collections.Generic.IReadOnlyList<float>! vector) -> float[]!
+static Supprocom.MathBlocks.MathBlockLinearAlgebra.OuterProduct(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> Supprocom.MathBlocks.MathBlockMatrix!
 static Supprocom.MathBlocks.MathBlockLinearAlgebra.Rank(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> int
-static Supprocom.MathBlocks.MathBlockLinearAlgebra.Scale(Supprocom.MathBlocks.MathBlockMatrix! matrix, double scalar) -> Supprocom.MathBlocks.MathBlockMatrix!
+static Supprocom.MathBlocks.MathBlockLinearAlgebra.Scale(Supprocom.MathBlocks.MathBlockMatrix! matrix, float scalar) -> Supprocom.MathBlocks.MathBlockMatrix!
 static Supprocom.MathBlocks.MathBlockLinearAlgebra.Subtract(Supprocom.MathBlocks.MathBlockMatrix! left, Supprocom.MathBlocks.MathBlockMatrix! right) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockLinearAlgebra.SymmetricEigenvalues(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> double[]!
-static Supprocom.MathBlocks.MathBlockLinearAlgebra.Trace(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> double
+static Supprocom.MathBlocks.MathBlockLinearAlgebra.SymmetricEigenvalues(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> float[]!
+static Supprocom.MathBlocks.MathBlockLinearAlgebra.Trace(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> float
 static Supprocom.MathBlocks.MathBlockLinearAlgebra.Transpose(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> Supprocom.MathBlocks.MathBlockMatrix!
 static Supprocom.MathBlocks.MathBlockLinearAlgebra.TryInverse(Supprocom.MathBlocks.MathBlockMatrix! matrix, out Supprocom.MathBlocks.MathBlockMatrix? inverse) -> bool
-static Supprocom.MathBlocks.MathBlockLinearAlgebra.TrySolve(Supprocom.MathBlocks.MathBlockMatrix! matrix, System.Collections.Generic.IReadOnlyList<double>! right, out double[]! solution) -> bool
+static Supprocom.MathBlocks.MathBlockLinearAlgebra.TrySolve(Supprocom.MathBlocks.MathBlockMatrix! matrix, System.Collections.Generic.IReadOnlyList<float>! right, out float[]! solution) -> bool
 static Supprocom.MathBlocks.MathBlockOpenMath.Export(Supprocom.MathBlocks.MathBlockProgram! program) -> string!
 static Supprocom.MathBlocks.MathBlockOpenMath.ExportUtf8(Supprocom.MathBlocks.MathBlockProgram! program) -> byte[]!
 static Supprocom.MathBlocks.MathBlockOpenMath.GetUtf8ByteCount(Supprocom.MathBlocks.MathBlockProgram! program) -> int
@@ -290,156 +290,156 @@ static Supprocom.MathBlocks.MathBlockOpenMath.WriteUtf8Async(Supprocom.MathBlock
 static Supprocom.MathBlocks.MathBlockOpenMathImportOptions.Default.get -> Supprocom.MathBlocks.MathBlockOpenMathImportOptions!
 static Supprocom.MathBlocks.MathBlockOpenMathOperationSymbol.operator !=(Supprocom.MathBlocks.MathBlockOpenMathOperationSymbol left, Supprocom.MathBlocks.MathBlockOpenMathOperationSymbol right) -> bool
 static Supprocom.MathBlocks.MathBlockOpenMathOperationSymbol.operator ==(Supprocom.MathBlocks.MathBlockOpenMathOperationSymbol left, Supprocom.MathBlocks.MathBlockOpenMathOperationSymbol right) -> bool
-static Supprocom.MathBlocks.MathBlockPath.CumulativeDeviation(System.Collections.Generic.IReadOnlyList<double>! values, double reference) -> double[]!
-static Supprocom.MathBlocks.MathBlockPath.DiscreteFourierTransform(System.Collections.Generic.IReadOnlyList<double>! values) -> Supprocom.MathBlocks.MathBlockComplexValue[]!
-static Supprocom.MathBlocks.MathBlockPath.DynamicTimeWarpingDistance(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double
-static Supprocom.MathBlocks.MathBlockPath.FirstPassageIndex(System.Collections.Generic.IReadOnlyList<double>! values, double threshold, bool atOrAbove) -> int
-static Supprocom.MathBlocks.MathBlockPath.HaarTransform(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockPath.Hysteresis(System.Collections.Generic.IReadOnlyList<double>! values, double lower, double upper) -> double[]!
+static Supprocom.MathBlocks.MathBlockPath.CumulativeDeviation(System.Collections.Generic.IReadOnlyList<float>! values, float reference) -> float[]!
+static Supprocom.MathBlocks.MathBlockPath.DiscreteFourierTransform(System.Collections.Generic.IReadOnlyList<float>! values) -> Supprocom.MathBlocks.MathBlockComplexValue[]!
+static Supprocom.MathBlocks.MathBlockPath.DynamicTimeWarpingDistance(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float
+static Supprocom.MathBlocks.MathBlockPath.FirstPassageIndex(System.Collections.Generic.IReadOnlyList<float>! values, float threshold, bool atOrAbove) -> int
+static Supprocom.MathBlocks.MathBlockPath.HaarTransform(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockPath.Hysteresis(System.Collections.Generic.IReadOnlyList<float>! values, float lower, float upper) -> float[]!
 static Supprocom.MathBlocks.MathBlockPath.InverseDiscreteFourierTransform(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockComplexValue>! values) -> Supprocom.MathBlocks.MathBlockComplexValue[]!
-static Supprocom.MathBlocks.MathBlockPath.LeadLagTransform(System.Collections.Generic.IReadOnlyList<double>! values) -> Supprocom.MathBlocks.MathBlockMatrix!
+static Supprocom.MathBlocks.MathBlockPath.LeadLagTransform(System.Collections.Generic.IReadOnlyList<float>! values) -> Supprocom.MathBlocks.MathBlockMatrix!
 static Supprocom.MathBlocks.MathBlockPath.LongestTrueRun(System.Collections.Generic.IReadOnlyList<bool>! values) -> int
-static Supprocom.MathBlocks.MathBlockPath.MaximumDecline(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockPath.MaximumRelativeDecline(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockPath.PowerVariation(System.Collections.Generic.IReadOnlyList<double>! values, double order) -> double
-static Supprocom.MathBlocks.MathBlockPath.RecurrenceRate(System.Collections.Generic.IReadOnlyList<double>! values, double threshold) -> double
-static Supprocom.MathBlocks.MathBlockPath.ReflectedCumulativeSum(System.Collections.Generic.IReadOnlyList<double>! increments) -> double[]!
-static Supprocom.MathBlocks.MathBlockPath.RunLengthEncode(System.Collections.Generic.IReadOnlyList<double>! values) -> Supprocom.MathBlocks.MathBlockRunSet!
-static Supprocom.MathBlocks.MathBlockPath.SignatureLevelOne(Supprocom.MathBlocks.MathBlockMatrix! path) -> double[]!
+static Supprocom.MathBlocks.MathBlockPath.MaximumDecline(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockPath.MaximumRelativeDecline(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockPath.PowerVariation(System.Collections.Generic.IReadOnlyList<float>! values, float order) -> float
+static Supprocom.MathBlocks.MathBlockPath.RecurrenceRate(System.Collections.Generic.IReadOnlyList<float>! values, float threshold) -> float
+static Supprocom.MathBlocks.MathBlockPath.ReflectedCumulativeSum(System.Collections.Generic.IReadOnlyList<float>! increments) -> float[]!
+static Supprocom.MathBlocks.MathBlockPath.RunLengthEncode(System.Collections.Generic.IReadOnlyList<float>! values) -> Supprocom.MathBlocks.MathBlockRunSet!
+static Supprocom.MathBlocks.MathBlockPath.SignatureLevelOne(Supprocom.MathBlocks.MathBlockMatrix! path) -> float[]!
 static Supprocom.MathBlocks.MathBlockPath.SignatureLevelTwo(Supprocom.MathBlocks.MathBlockMatrix! path) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockPath.TotalVariation(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockPath.TransitionCounts(System.Collections.Generic.IReadOnlyList<double>! states, int stateCount) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockPath.TurningPointCount(System.Collections.Generic.IReadOnlyList<double>! values) -> int
-static Supprocom.MathBlocks.MathBlockPath.ZeroCrossingCount(System.Collections.Generic.IReadOnlyList<double>! values) -> int
+static Supprocom.MathBlocks.MathBlockPath.TotalVariation(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockPath.TransitionCounts(System.Collections.Generic.IReadOnlyList<float>! states, int stateCount) -> Supprocom.MathBlocks.MathBlockMatrix!
+static Supprocom.MathBlocks.MathBlockPath.TurningPointCount(System.Collections.Generic.IReadOnlyList<float>! values) -> int
+static Supprocom.MathBlocks.MathBlockPath.ZeroCrossingCount(System.Collections.Generic.IReadOnlyList<float>! values) -> int
 static Supprocom.MathBlocks.MathBlockPoint.operator !=(Supprocom.MathBlocks.MathBlockPoint left, Supprocom.MathBlocks.MathBlockPoint right) -> bool
 static Supprocom.MathBlocks.MathBlockPoint.operator ==(Supprocom.MathBlocks.MathBlockPoint left, Supprocom.MathBlocks.MathBlockPoint right) -> bool
-static Supprocom.MathBlocks.MathBlockPolynomial.CubicRoots(double constant, double linear, double quadratic, double leading) -> Supprocom.MathBlocks.MathBlockComplexValue[]!
-static Supprocom.MathBlocks.MathBlockPolynomial.Derivative(System.Collections.Generic.IReadOnlyList<double>! coefficients) -> double[]!
-static Supprocom.MathBlocks.MathBlockPolynomial.Evaluate(System.Collections.Generic.IReadOnlyList<double>! coefficients, double value) -> double
-static Supprocom.MathBlocks.MathBlockProbability.Beta(double left, double right) -> double
-static Supprocom.MathBlocks.MathBlockProbability.BhattacharyyaCoefficient(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double
-static Supprocom.MathBlocks.MathBlockProbability.BinaryShannonEntropy(System.Collections.Generic.IReadOnlyList<double>! probabilities) -> double
-static Supprocom.MathBlocks.MathBlockProbability.BinomialCoefficient(int n, int k) -> double
-static Supprocom.MathBlocks.MathBlockProbability.ConditionalMutualInformation(System.Collections.Generic.IReadOnlyList<double>! jointProbabilities, int firstCount, int secondCount, int conditionCount) -> double
-static Supprocom.MathBlocks.MathBlockProbability.CrossEntropy(System.Collections.Generic.IReadOnlyList<double>! probabilities, System.Collections.Generic.IReadOnlyList<double>! reference) -> double
-static Supprocom.MathBlocks.MathBlockProbability.ElementarySymmetricPolynomial(System.Collections.Generic.IReadOnlyList<double>! values, int order) -> double
-static Supprocom.MathBlocks.MathBlockProbability.Factorial(int value) -> double
-static Supprocom.MathBlocks.MathBlockProbability.GiniImpurity(System.Collections.Generic.IReadOnlyList<double>! probabilities) -> double
-static Supprocom.MathBlocks.MathBlockProbability.HellingerDistance(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double
-static Supprocom.MathBlocks.MathBlockProbability.JensenShannonDivergence(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double
-static Supprocom.MathBlocks.MathBlockProbability.KullbackLeiblerDivergence(System.Collections.Generic.IReadOnlyList<double>! probabilities, System.Collections.Generic.IReadOnlyList<double>! reference) -> double
-static Supprocom.MathBlocks.MathBlockProbability.LogGamma(double value) -> double
-static Supprocom.MathBlocks.MathBlockProbability.LogSumExp(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockProbability.MutualInformation(Supprocom.MathBlocks.MathBlockMatrix! jointProbabilities) -> double
-static Supprocom.MathBlocks.MathBlockProbability.NonemptySubsetSums(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockProbability.NormalCdf(double value) -> double
-static Supprocom.MathBlocks.MathBlockProbability.Normalize(System.Collections.Generic.IReadOnlyList<double>! weights) -> double[]!
-static Supprocom.MathBlocks.MathBlockProbability.RegularizedIncompleteBeta(double x, double left, double right) -> double
-static Supprocom.MathBlocks.MathBlockProbability.RenyiEntropy(System.Collections.Generic.IReadOnlyList<double>! probabilities, double order) -> double
-static Supprocom.MathBlocks.MathBlockProbability.ShannonEntropy(System.Collections.Generic.IReadOnlyList<double>! probabilities) -> double
-static Supprocom.MathBlocks.MathBlockProbability.Softmax(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockProbability.TotalVariationDistance(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double
-static Supprocom.MathBlocks.MathBlockProbability.TsallisEntropy(System.Collections.Generic.IReadOnlyList<double>! probabilities, double order) -> double
+static Supprocom.MathBlocks.MathBlockPolynomial.CubicRoots(float constant, float linear, float quadratic, float leading) -> Supprocom.MathBlocks.MathBlockComplexValue[]!
+static Supprocom.MathBlocks.MathBlockPolynomial.Derivative(System.Collections.Generic.IReadOnlyList<float>! coefficients) -> float[]!
+static Supprocom.MathBlocks.MathBlockPolynomial.Evaluate(System.Collections.Generic.IReadOnlyList<float>! coefficients, float value) -> float
+static Supprocom.MathBlocks.MathBlockProbability.Beta(float left, float right) -> float
+static Supprocom.MathBlocks.MathBlockProbability.BhattacharyyaCoefficient(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float
+static Supprocom.MathBlocks.MathBlockProbability.BinaryShannonEntropy(System.Collections.Generic.IReadOnlyList<float>! probabilities) -> float
+static Supprocom.MathBlocks.MathBlockProbability.BinomialCoefficient(int n, int k) -> float
+static Supprocom.MathBlocks.MathBlockProbability.ConditionalMutualInformation(System.Collections.Generic.IReadOnlyList<float>! jointProbabilities, int firstCount, int secondCount, int conditionCount) -> float
+static Supprocom.MathBlocks.MathBlockProbability.CrossEntropy(System.Collections.Generic.IReadOnlyList<float>! probabilities, System.Collections.Generic.IReadOnlyList<float>! reference) -> float
+static Supprocom.MathBlocks.MathBlockProbability.ElementarySymmetricPolynomial(System.Collections.Generic.IReadOnlyList<float>! values, int order) -> float
+static Supprocom.MathBlocks.MathBlockProbability.Factorial(int value) -> float
+static Supprocom.MathBlocks.MathBlockProbability.GiniImpurity(System.Collections.Generic.IReadOnlyList<float>! probabilities) -> float
+static Supprocom.MathBlocks.MathBlockProbability.HellingerDistance(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float
+static Supprocom.MathBlocks.MathBlockProbability.JensenShannonDivergence(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float
+static Supprocom.MathBlocks.MathBlockProbability.KullbackLeiblerDivergence(System.Collections.Generic.IReadOnlyList<float>! probabilities, System.Collections.Generic.IReadOnlyList<float>! reference) -> float
+static Supprocom.MathBlocks.MathBlockProbability.LogGamma(float value) -> float
+static Supprocom.MathBlocks.MathBlockProbability.LogSumExp(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockProbability.MutualInformation(Supprocom.MathBlocks.MathBlockMatrix! jointProbabilities) -> float
+static Supprocom.MathBlocks.MathBlockProbability.NonemptySubsetSums(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockProbability.NormalCdf(float value) -> float
+static Supprocom.MathBlocks.MathBlockProbability.Normalize(System.Collections.Generic.IReadOnlyList<float>! weights) -> float[]!
+static Supprocom.MathBlocks.MathBlockProbability.RegularizedIncompleteBeta(float x, float left, float right) -> float
+static Supprocom.MathBlocks.MathBlockProbability.RenyiEntropy(System.Collections.Generic.IReadOnlyList<float>! probabilities, float order) -> float
+static Supprocom.MathBlocks.MathBlockProbability.ShannonEntropy(System.Collections.Generic.IReadOnlyList<float>! probabilities) -> float
+static Supprocom.MathBlocks.MathBlockProbability.Softmax(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockProbability.TotalVariationDistance(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float
+static Supprocom.MathBlocks.MathBlockProbability.TsallisEntropy(System.Collections.Generic.IReadOnlyList<float>! probabilities, float order) -> float
 static Supprocom.MathBlocks.MathBlockRun.operator !=(Supprocom.MathBlocks.MathBlockRun left, Supprocom.MathBlocks.MathBlockRun right) -> bool
 static Supprocom.MathBlocks.MathBlockRun.operator ==(Supprocom.MathBlocks.MathBlockRun left, Supprocom.MathBlocks.MathBlockRun right) -> bool
-static Supprocom.MathBlocks.MathBlockScalar.Absolute(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Add(double left, double right) -> double
-static Supprocom.MathBlocks.MathBlockScalar.ArcCosine(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.ArcSine(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.ArcTangent(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.ArcTangent2(double y, double x) -> double
-static Supprocom.MathBlocks.MathBlockScalar.BinaryLogarithm(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Ceiling(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Clamp(double value, double lower, double upper) -> double
-static Supprocom.MathBlocks.MathBlockScalar.CommonLogarithm(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Cosine(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Cube(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.CubeRoot(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Divide(double left, double right) -> double
-static Supprocom.MathBlocks.MathBlockScalar.ErrorFunction(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Exponential(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Floor(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.HyperbolicCosine(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.HyperbolicSine(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.HyperbolicTangent(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.InverseHyperbolicCosine(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.InverseHyperbolicSine(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.InverseHyperbolicTangent(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Logistic(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Logit(double probability) -> double
-static Supprocom.MathBlocks.MathBlockScalar.LogOnePlus(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Maximum(double left, double right) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Minimum(double left, double right) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Modulo(double value, double modulus) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Multiply(double left, double right) -> double
-static Supprocom.MathBlocks.MathBlockScalar.NaturalLogarithm(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Negate(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.PositivePart(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Power(double value, double exponent) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Reciprocal(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Round(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Sign(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Sine(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Softplus(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Square(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.SquareRoot(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Subtract(double left, double right) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Tangent(double value) -> double
-static Supprocom.MathBlocks.MathBlockScalar.Truncate(double value) -> double
+static Supprocom.MathBlocks.MathBlockScalar.Absolute(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Add(float left, float right) -> float
+static Supprocom.MathBlocks.MathBlockScalar.ArcCosine(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.ArcSine(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.ArcTangent(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.ArcTangent2(float y, float x) -> float
+static Supprocom.MathBlocks.MathBlockScalar.BinaryLogarithm(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Ceiling(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Clamp(float value, float lower, float upper) -> float
+static Supprocom.MathBlocks.MathBlockScalar.CommonLogarithm(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Cosine(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Cube(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.CubeRoot(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Divide(float left, float right) -> float
+static Supprocom.MathBlocks.MathBlockScalar.ErrorFunction(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Exponential(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Floor(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.HyperbolicCosine(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.HyperbolicSine(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.HyperbolicTangent(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.InverseHyperbolicCosine(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.InverseHyperbolicSine(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.InverseHyperbolicTangent(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Logistic(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Logit(float probability) -> float
+static Supprocom.MathBlocks.MathBlockScalar.LogOnePlus(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Maximum(float left, float right) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Minimum(float left, float right) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Modulo(float value, float modulus) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Multiply(float left, float right) -> float
+static Supprocom.MathBlocks.MathBlockScalar.NaturalLogarithm(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Negate(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.PositivePart(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Power(float value, float exponent) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Reciprocal(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Round(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Sign(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Sine(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Softplus(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Square(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.SquareRoot(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Subtract(float left, float right) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Tangent(float value) -> float
+static Supprocom.MathBlocks.MathBlockScalar.Truncate(float value) -> float
 static Supprocom.MathBlocks.MathBlocksCPUWorker.Shared.get -> Supprocom.MathBlocks.MathBlocksCPUWorker!
-static Supprocom.MathBlocks.MathBlockStatistics.Autocorrelation(System.Collections.Generic.IReadOnlyList<double>! values, int lag) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.DistanceCorrelation(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.Histogram(System.Collections.Generic.IReadOnlyList<double>! values, System.Collections.Generic.IReadOnlyList<double>! boundaries) -> double[]!
-static Supprocom.MathBlocks.MathBlockStatistics.InterquartileRange(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.KendallTauB(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.LinearIntercept(System.Collections.Generic.IReadOnlyList<double>! x, System.Collections.Generic.IReadOnlyList<double>! y) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.LinearRSquared(System.Collections.Generic.IReadOnlyList<double>! x, System.Collections.Generic.IReadOnlyList<double>! y) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.LinearSlope(System.Collections.Generic.IReadOnlyList<double>! x, System.Collections.Generic.IReadOnlyList<double>! y) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.MedianAbsoluteDeviation(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.PearsonCorrelation(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.PopulationCovariance(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.PopulationExcessKurtosis(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.PopulationSkewness(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.PopulationStandardDeviation(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.PopulationVariance(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.RootMeanSquare(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.SampleCovariance(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.SampleStandardDeviation(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.SampleVariance(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.SpearmanCorrelation(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.TheilSenSlope(System.Collections.Generic.IReadOnlyList<double>! x, System.Collections.Generic.IReadOnlyList<double>! y) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.WeightedMean(System.Collections.Generic.IReadOnlyList<double>! values, System.Collections.Generic.IReadOnlyList<double>! weights) -> double
-static Supprocom.MathBlocks.MathBlockStatistics.WeightedPopulationVariance(System.Collections.Generic.IReadOnlyList<double>! values, System.Collections.Generic.IReadOnlyList<double>! weights) -> double
-static Supprocom.MathBlocks.MathBlockStructure.Append(System.Collections.Generic.IReadOnlyList<double>! values, double value) -> double[]!
-static Supprocom.MathBlocks.MathBlockStructure.AppendRow(Supprocom.MathBlocks.MathBlockMatrix! matrix, System.Collections.Generic.IReadOnlyList<double>! row) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockStructure.Column(Supprocom.MathBlocks.MathBlockMatrix! matrix, int column) -> double[]!
-static Supprocom.MathBlocks.MathBlockStructure.ColumnSums(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> double[]!
-static Supprocom.MathBlocks.MathBlockStructure.ComplexVector(System.Collections.Generic.IReadOnlyList<double>! real, System.Collections.Generic.IReadOnlyList<double>! imaginary) -> Supprocom.MathBlocks.MathBlockComplexValue[]!
-static Supprocom.MathBlocks.MathBlockStructure.Diagonal(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> double[]!
-static Supprocom.MathBlocks.MathBlockStructure.DiagonalMatrix(System.Collections.Generic.IReadOnlyList<double>! diagonal) -> Supprocom.MathBlocks.MathBlockMatrix!
+static Supprocom.MathBlocks.MathBlockStatistics.Autocorrelation(System.Collections.Generic.IReadOnlyList<float>! values, int lag) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.DistanceCorrelation(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.Histogram(System.Collections.Generic.IReadOnlyList<float>! values, System.Collections.Generic.IReadOnlyList<float>! boundaries) -> float[]!
+static Supprocom.MathBlocks.MathBlockStatistics.InterquartileRange(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.KendallTauB(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.LinearIntercept(System.Collections.Generic.IReadOnlyList<float>! x, System.Collections.Generic.IReadOnlyList<float>! y) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.LinearRSquared(System.Collections.Generic.IReadOnlyList<float>! x, System.Collections.Generic.IReadOnlyList<float>! y) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.LinearSlope(System.Collections.Generic.IReadOnlyList<float>! x, System.Collections.Generic.IReadOnlyList<float>! y) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.MedianAbsoluteDeviation(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.PearsonCorrelation(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.PopulationCovariance(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.PopulationExcessKurtosis(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.PopulationSkewness(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.PopulationStandardDeviation(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.PopulationVariance(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.RootMeanSquare(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.SampleCovariance(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.SampleStandardDeviation(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.SampleVariance(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.SpearmanCorrelation(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.TheilSenSlope(System.Collections.Generic.IReadOnlyList<float>! x, System.Collections.Generic.IReadOnlyList<float>! y) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.WeightedMean(System.Collections.Generic.IReadOnlyList<float>! values, System.Collections.Generic.IReadOnlyList<float>! weights) -> float
+static Supprocom.MathBlocks.MathBlockStatistics.WeightedPopulationVariance(System.Collections.Generic.IReadOnlyList<float>! values, System.Collections.Generic.IReadOnlyList<float>! weights) -> float
+static Supprocom.MathBlocks.MathBlockStructure.Append(System.Collections.Generic.IReadOnlyList<float>! values, float value) -> float[]!
+static Supprocom.MathBlocks.MathBlockStructure.AppendRow(Supprocom.MathBlocks.MathBlockMatrix! matrix, System.Collections.Generic.IReadOnlyList<float>! row) -> Supprocom.MathBlocks.MathBlockMatrix!
+static Supprocom.MathBlocks.MathBlockStructure.Column(Supprocom.MathBlocks.MathBlockMatrix! matrix, int column) -> float[]!
+static Supprocom.MathBlocks.MathBlockStructure.ColumnSums(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> float[]!
+static Supprocom.MathBlocks.MathBlockStructure.ComplexVector(System.Collections.Generic.IReadOnlyList<float>! real, System.Collections.Generic.IReadOnlyList<float>! imaginary) -> Supprocom.MathBlocks.MathBlockComplexValue[]!
+static Supprocom.MathBlocks.MathBlockStructure.Diagonal(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> float[]!
+static Supprocom.MathBlocks.MathBlockStructure.DiagonalMatrix(System.Collections.Generic.IReadOnlyList<float>! diagonal) -> Supprocom.MathBlocks.MathBlockMatrix!
 static Supprocom.MathBlocks.MathBlockStructure.DirectedAdjacencyFromGraph(Supprocom.MathBlocks.MathBlockGraph! graph) -> Supprocom.MathBlocks.MathBlockMatrix!
 static Supprocom.MathBlocks.MathBlockStructure.DirectedGraphFromAdjacency(Supprocom.MathBlocks.MathBlockMatrix! adjacency) -> Supprocom.MathBlocks.MathBlockGraph!
-static Supprocom.MathBlocks.MathBlockStructure.Gather(System.Collections.Generic.IReadOnlyList<double>! values, System.Collections.Generic.IReadOnlyList<double>! indices) -> double[]!
+static Supprocom.MathBlocks.MathBlockStructure.Gather(System.Collections.Generic.IReadOnlyList<float>! values, System.Collections.Generic.IReadOnlyList<float>! indices) -> float[]!
 static Supprocom.MathBlocks.MathBlockStructure.KroneckerProduct(Supprocom.MathBlocks.MathBlockMatrix! left, Supprocom.MathBlocks.MathBlockMatrix! right) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockStructure.Pair(double first, double second) -> double[]!
+static Supprocom.MathBlocks.MathBlockStructure.Pair(float first, float second) -> float[]!
 static Supprocom.MathBlocks.MathBlockStructure.PointSetFromMatrix(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> Supprocom.MathBlocks.MathBlockPointSet!
 static Supprocom.MathBlocks.MathBlockStructure.PointSetToMatrix(System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockPoint>! points) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockStructure.Prepend(double value, System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockStructure.Reshape(System.Collections.Generic.IReadOnlyList<double>! values, int rows, int columns) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockStructure.Row(Supprocom.MathBlocks.MathBlockMatrix! matrix, int row) -> double[]!
-static Supprocom.MathBlocks.MathBlockStructure.RowSums(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> double[]!
-static Supprocom.MathBlocks.MathBlockStructure.StackRows(System.Collections.Generic.IReadOnlyList<double>! first, System.Collections.Generic.IReadOnlyList<double>! second) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockStructure.TrueIndices(System.Collections.Generic.IReadOnlyList<bool>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockStructure.Unique(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockTransport.AssignmentCost(Supprocom.MathBlocks.MathBlockMatrix! cost, System.Collections.Generic.IReadOnlyList<double>! assignment) -> double
-static Supprocom.MathBlocks.MathBlockTransport.CouplingCost(Supprocom.MathBlocks.MathBlockMatrix! coupling, Supprocom.MathBlocks.MathBlockMatrix! cost) -> double
-static Supprocom.MathBlocks.MathBlockTransport.EnergyDistance(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double
-static Supprocom.MathBlocks.MathBlockTransport.MinimumAssignment(Supprocom.MathBlocks.MathBlockMatrix! cost) -> double[]!
-static Supprocom.MathBlocks.MathBlockTransport.MonotoneCoupling(System.Collections.Generic.IReadOnlyList<double>! leftWeights, System.Collections.Generic.IReadOnlyList<double>! rightWeights) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockTransport.OrderedEarthMoverDistance(System.Collections.Generic.IReadOnlyList<double>! leftMass, System.Collections.Generic.IReadOnlyList<double>! rightMass) -> double
-static Supprocom.MathBlocks.MathBlockTransport.SinkhornCoupling(Supprocom.MathBlocks.MathBlockMatrix! cost, System.Collections.Generic.IReadOnlyList<double>! leftMass, System.Collections.Generic.IReadOnlyList<double>! rightMass, double regularization, int iterations) -> Supprocom.MathBlocks.MathBlockMatrix!
-static Supprocom.MathBlocks.MathBlockTransport.UniformWasserstein(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right, double order) -> double
-static Supprocom.MathBlocks.MathBlockTransport.WeightedWasserstein1(System.Collections.Generic.IReadOnlyList<double>! leftLocations, System.Collections.Generic.IReadOnlyList<double>! leftWeights, System.Collections.Generic.IReadOnlyList<double>! rightLocations, System.Collections.Generic.IReadOnlyList<double>! rightWeights) -> double
+static Supprocom.MathBlocks.MathBlockStructure.Prepend(float value, System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockStructure.Reshape(System.Collections.Generic.IReadOnlyList<float>! values, int rows, int columns) -> Supprocom.MathBlocks.MathBlockMatrix!
+static Supprocom.MathBlocks.MathBlockStructure.Row(Supprocom.MathBlocks.MathBlockMatrix! matrix, int row) -> float[]!
+static Supprocom.MathBlocks.MathBlockStructure.RowSums(Supprocom.MathBlocks.MathBlockMatrix! matrix) -> float[]!
+static Supprocom.MathBlocks.MathBlockStructure.StackRows(System.Collections.Generic.IReadOnlyList<float>! first, System.Collections.Generic.IReadOnlyList<float>! second) -> Supprocom.MathBlocks.MathBlockMatrix!
+static Supprocom.MathBlocks.MathBlockStructure.TrueIndices(System.Collections.Generic.IReadOnlyList<bool>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockStructure.Unique(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockTransport.AssignmentCost(Supprocom.MathBlocks.MathBlockMatrix! cost, System.Collections.Generic.IReadOnlyList<float>! assignment) -> float
+static Supprocom.MathBlocks.MathBlockTransport.CouplingCost(Supprocom.MathBlocks.MathBlockMatrix! coupling, Supprocom.MathBlocks.MathBlockMatrix! cost) -> float
+static Supprocom.MathBlocks.MathBlockTransport.EnergyDistance(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float
+static Supprocom.MathBlocks.MathBlockTransport.MinimumAssignment(Supprocom.MathBlocks.MathBlockMatrix! cost) -> float[]!
+static Supprocom.MathBlocks.MathBlockTransport.MonotoneCoupling(System.Collections.Generic.IReadOnlyList<float>! leftWeights, System.Collections.Generic.IReadOnlyList<float>! rightWeights) -> Supprocom.MathBlocks.MathBlockMatrix!
+static Supprocom.MathBlocks.MathBlockTransport.OrderedEarthMoverDistance(System.Collections.Generic.IReadOnlyList<float>! leftMass, System.Collections.Generic.IReadOnlyList<float>! rightMass) -> float
+static Supprocom.MathBlocks.MathBlockTransport.SinkhornCoupling(Supprocom.MathBlocks.MathBlockMatrix! cost, System.Collections.Generic.IReadOnlyList<float>! leftMass, System.Collections.Generic.IReadOnlyList<float>! rightMass, float regularization, int iterations) -> Supprocom.MathBlocks.MathBlockMatrix!
+static Supprocom.MathBlocks.MathBlockTransport.UniformWasserstein(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right, float order) -> float
+static Supprocom.MathBlocks.MathBlockTransport.WeightedWasserstein1(System.Collections.Generic.IReadOnlyList<float>! leftLocations, System.Collections.Generic.IReadOnlyList<float>! leftWeights, System.Collections.Generic.IReadOnlyList<float>! rightLocations, System.Collections.Generic.IReadOnlyList<float>! rightWeights) -> float
 static Supprocom.MathBlocks.MathBlockType.Boolean.get -> Supprocom.MathBlocks.MathBlockType
 static Supprocom.MathBlocks.MathBlockType.BooleanVector(int length = 0) -> Supprocom.MathBlocks.MathBlockType
 static Supprocom.MathBlocks.MathBlockType.Complex(Supprocom.MathBlocks.MathBlockUnit unit = default(Supprocom.MathBlocks.MathBlockUnit)) -> Supprocom.MathBlocks.MathBlockType
@@ -470,62 +470,62 @@ static Supprocom.MathBlocks.MathBlockValue.Invalid(Supprocom.MathBlocks.MathBloc
 static Supprocom.MathBlocks.MathBlockValue.Matrix(Supprocom.MathBlocks.MathBlockMatrix! value, Supprocom.MathBlocks.MathBlockUnit unit = default(Supprocom.MathBlocks.MathBlockUnit)) -> Supprocom.MathBlocks.MathBlockValue
 static Supprocom.MathBlocks.MathBlockValue.PointSet(Supprocom.MathBlocks.MathBlockPointSet! value, Supprocom.MathBlocks.MathBlockUnit unit = default(Supprocom.MathBlocks.MathBlockUnit)) -> Supprocom.MathBlocks.MathBlockValue
 static Supprocom.MathBlocks.MathBlockValue.RunSet(Supprocom.MathBlocks.MathBlockRunSet! value, Supprocom.MathBlocks.MathBlockUnit unit = default(Supprocom.MathBlocks.MathBlockUnit)) -> Supprocom.MathBlocks.MathBlockValue
-static Supprocom.MathBlocks.MathBlockValue.Scalar(double value, Supprocom.MathBlocks.MathBlockUnit unit = default(Supprocom.MathBlocks.MathBlockUnit)) -> Supprocom.MathBlocks.MathBlockValue
-static Supprocom.MathBlocks.MathBlockValue.Vector(System.Collections.Generic.IEnumerable<double>! values, Supprocom.MathBlocks.MathBlockUnit unit = default(Supprocom.MathBlocks.MathBlockUnit)) -> Supprocom.MathBlocks.MathBlockValue
-static Supprocom.MathBlocks.MathBlockVectorMath.Absolute(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Add(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.AddScalar(System.Collections.Generic.IReadOnlyList<double>! values, double scalar) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.ArgMaximum(System.Collections.Generic.IReadOnlyList<double>! values) -> int
-static Supprocom.MathBlocks.MathBlockVectorMath.ArgMinimum(System.Collections.Generic.IReadOnlyList<double>! values) -> int
-static Supprocom.MathBlocks.MathBlockVectorMath.Concatenate(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Convolution(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.CumulativeProduct(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.CumulativeSum(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Difference(System.Collections.Generic.IReadOnlyList<double>! values, int lag = 1) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Divide(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Dot(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double
-static Supprocom.MathBlocks.MathBlockVectorMath.Equal(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> bool[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Exponential(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.ExponentialMovingAverage(System.Collections.Generic.IReadOnlyList<double>! values, double alpha) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.GeometricMean(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockVectorMath.GreaterThan(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> bool[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.L1Norm(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockVectorMath.L2Norm(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockVectorMath.LessThan(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> bool[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Linspace(double start, double end, int count) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Maximum(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockVectorMath.Mean(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockVectorMath.Median(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockVectorMath.Minimum(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockVectorMath.Multiply(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.NaturalLogarithm(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.NormalizeL1(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.NormalizeL2(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.PositivePart(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Power(System.Collections.Generic.IReadOnlyList<double>! values, double exponent) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Product(System.Collections.Generic.IReadOnlyList<double>! values) -> double
-static Supprocom.MathBlocks.MathBlockVectorMath.Quantile(System.Collections.Generic.IReadOnlyList<double>! values, double probability) -> double
-static Supprocom.MathBlocks.MathBlockVectorMath.Rank(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Repeat(double value, int count) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Reverse(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.RollingMaximum(System.Collections.Generic.IReadOnlyList<double>! values, int width) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.RollingMean(System.Collections.Generic.IReadOnlyList<double>! values, int width) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.RollingMedian(System.Collections.Generic.IReadOnlyList<double>! values, int width) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.RollingMinimum(System.Collections.Generic.IReadOnlyList<double>! values, int width) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.RollingQuantile(System.Collections.Generic.IReadOnlyList<double>! values, int width, double probability) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.RollingStandardDeviation(System.Collections.Generic.IReadOnlyList<double>! values, int width) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.RollingSum(System.Collections.Generic.IReadOnlyList<double>! values, int width) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.RollingVariance(System.Collections.Generic.IReadOnlyList<double>! values, int width) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Scale(System.Collections.Generic.IReadOnlyList<double>! values, double scalar) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Select(System.Collections.Generic.IReadOnlyList<bool>! condition, System.Collections.Generic.IReadOnlyList<double>! whenTrue, System.Collections.Generic.IReadOnlyList<double>! whenFalse) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Sign(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Slice(System.Collections.Generic.IReadOnlyList<double>! values, int start, int length) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Sort(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Square(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.SquareRoot(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Standardize(System.Collections.Generic.IReadOnlyList<double>! values) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Subtract(System.Collections.Generic.IReadOnlyList<double>! left, System.Collections.Generic.IReadOnlyList<double>! right) -> double[]!
-static Supprocom.MathBlocks.MathBlockVectorMath.Sum(System.Collections.Generic.IReadOnlyList<double>! values) -> double
+static Supprocom.MathBlocks.MathBlockValue.Scalar(float value, Supprocom.MathBlocks.MathBlockUnit unit = default(Supprocom.MathBlocks.MathBlockUnit)) -> Supprocom.MathBlocks.MathBlockValue
+static Supprocom.MathBlocks.MathBlockValue.Vector(System.Collections.Generic.IEnumerable<float>! values, Supprocom.MathBlocks.MathBlockUnit unit = default(Supprocom.MathBlocks.MathBlockUnit)) -> Supprocom.MathBlocks.MathBlockValue
+static Supprocom.MathBlocks.MathBlockVectorMath.Absolute(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Add(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.AddScalar(System.Collections.Generic.IReadOnlyList<float>! values, float scalar) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.ArgMaximum(System.Collections.Generic.IReadOnlyList<float>! values) -> int
+static Supprocom.MathBlocks.MathBlockVectorMath.ArgMinimum(System.Collections.Generic.IReadOnlyList<float>! values) -> int
+static Supprocom.MathBlocks.MathBlockVectorMath.Concatenate(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Convolution(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.CumulativeProduct(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.CumulativeSum(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Difference(System.Collections.Generic.IReadOnlyList<float>! values, int lag = 1) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Divide(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Dot(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float
+static Supprocom.MathBlocks.MathBlockVectorMath.Equal(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> bool[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Exponential(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.ExponentialMovingAverage(System.Collections.Generic.IReadOnlyList<float>! values, float alpha) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.GeometricMean(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockVectorMath.GreaterThan(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> bool[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.L1Norm(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockVectorMath.L2Norm(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockVectorMath.LessThan(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> bool[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Linspace(float start, float end, int count) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Maximum(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockVectorMath.Mean(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockVectorMath.Median(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockVectorMath.Minimum(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockVectorMath.Multiply(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.NaturalLogarithm(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.NormalizeL1(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.NormalizeL2(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.PositivePart(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Power(System.Collections.Generic.IReadOnlyList<float>! values, float exponent) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Product(System.Collections.Generic.IReadOnlyList<float>! values) -> float
+static Supprocom.MathBlocks.MathBlockVectorMath.Quantile(System.Collections.Generic.IReadOnlyList<float>! values, float probability) -> float
+static Supprocom.MathBlocks.MathBlockVectorMath.Rank(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Repeat(float value, int count) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Reverse(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.RollingMaximum(System.Collections.Generic.IReadOnlyList<float>! values, int width) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.RollingMean(System.Collections.Generic.IReadOnlyList<float>! values, int width) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.RollingMedian(System.Collections.Generic.IReadOnlyList<float>! values, int width) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.RollingMinimum(System.Collections.Generic.IReadOnlyList<float>! values, int width) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.RollingQuantile(System.Collections.Generic.IReadOnlyList<float>! values, int width, float probability) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.RollingStandardDeviation(System.Collections.Generic.IReadOnlyList<float>! values, int width) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.RollingSum(System.Collections.Generic.IReadOnlyList<float>! values, int width) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.RollingVariance(System.Collections.Generic.IReadOnlyList<float>! values, int width) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Scale(System.Collections.Generic.IReadOnlyList<float>! values, float scalar) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Select(System.Collections.Generic.IReadOnlyList<bool>! condition, System.Collections.Generic.IReadOnlyList<float>! whenTrue, System.Collections.Generic.IReadOnlyList<float>! whenFalse) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Sign(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Slice(System.Collections.Generic.IReadOnlyList<float>! values, int start, int length) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Sort(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Square(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.SquareRoot(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Standardize(System.Collections.Generic.IReadOnlyList<float>! values) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Subtract(System.Collections.Generic.IReadOnlyList<float>! left, System.Collections.Generic.IReadOnlyList<float>! right) -> float[]!
+static Supprocom.MathBlocks.MathBlockVectorMath.Sum(System.Collections.Generic.IReadOnlyList<float>! values) -> float
 static Supprocom.MathBlocks.MathRational.One.get -> Supprocom.MathBlocks.MathRational
 static Supprocom.MathBlocks.MathRational.operator !=(Supprocom.MathBlocks.MathRational left, Supprocom.MathBlocks.MathRational right) -> bool
 static Supprocom.MathBlocks.MathRational.operator *(Supprocom.MathBlocks.MathRational left, Supprocom.MathBlocks.MathRational right) -> Supprocom.MathBlocks.MathRational
@@ -587,7 +587,7 @@ Supprocom.MathBlocks.Cuda.MathBlockCudaGraphEdgeDescriptor
 Supprocom.MathBlocks.Cuda.MathBlockCudaGraphEdgeDescriptor.From -> int
 Supprocom.MathBlocks.Cuda.MathBlockCudaGraphEdgeDescriptor.MathBlockCudaGraphEdgeDescriptor() -> void
 Supprocom.MathBlocks.Cuda.MathBlockCudaGraphEdgeDescriptor.To -> int
-Supprocom.MathBlocks.Cuda.MathBlockCudaGraphEdgeDescriptor.Weight -> double
+Supprocom.MathBlocks.Cuda.MathBlockCudaGraphEdgeDescriptor.Weight -> float
 Supprocom.MathBlocks.Cuda.MathBlockCudaGraphEdgeLayout
 Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract
 Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.Arity.get -> int
@@ -660,7 +660,7 @@ Supprocom.MathBlocks.Cuda.MathBlockCudaRunDescriptor
 Supprocom.MathBlocks.Cuda.MathBlockCudaRunDescriptor.Length -> int
 Supprocom.MathBlocks.Cuda.MathBlockCudaRunDescriptor.MathBlockCudaRunDescriptor() -> void
 Supprocom.MathBlocks.Cuda.MathBlockCudaRunDescriptor.Start -> int
-Supprocom.MathBlocks.Cuda.MathBlockCudaRunDescriptor.Value -> double
+Supprocom.MathBlocks.Cuda.MathBlockCudaRunDescriptor.Value -> float
 Supprocom.MathBlocks.Cuda.MathBlockCudaRunLayout
 Supprocom.MathBlocks.Cuda.MathBlockCudaSlotAbi
 Supprocom.MathBlocks.Cuda.MathBlockCudaSlotAbi.BooleanValueOffset.get -> int
@@ -695,7 +695,7 @@ Supprocom.MathBlocks.Cuda.MathBlockCudaSlotDescriptor.Count -> int
 Supprocom.MathBlocks.Cuda.MathBlockCudaSlotDescriptor.DataPointer -> ulong
 Supprocom.MathBlocks.Cuda.MathBlockCudaSlotDescriptor.MathBlockCudaSlotDescriptor() -> void
 Supprocom.MathBlocks.Cuda.MathBlockCudaSlotDescriptor.Rows -> int
-Supprocom.MathBlocks.Cuda.MathBlockCudaSlotDescriptor.ScalarValue -> double
+Supprocom.MathBlocks.Cuda.MathBlockCudaSlotDescriptor.ScalarValue -> float
 Supprocom.MathBlocks.Cuda.MathBlockCudaSlotDescriptor.ScratchPointer -> ulong
 Supprocom.MathBlocks.Cuda.MathBlockCudaSlotDescriptor.Valid -> int
 Supprocom.MathBlocks.Cuda.MathBlockCudaSlotLayout
@@ -711,19 +711,19 @@ Supprocom.MathBlocks.Cuda.MathBlockCudaValueCodecSchema.MathBlockCudaValueCodecS
 Supprocom.MathBlocks.Cuda.MathBlockCudaValueCodecSchema.Version.get -> int
 Supprocom.MathBlocks.Cuda.MathBlockCudaValueCodecSchema.Version.init -> void
 Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan
-Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.Deconstruct(out int InputCount, out int WindowWidth, out int OutputCount, out double Probability, out bool UsesLinearExtremeDeque, out bool UsesParallelRadixPreparation, out int RadixPassCount, out long ParallelKeyVisitCount, out long HeapOperationBound, out long SelectionOperationBound, out long TotalOperationBound) -> void
+Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.Deconstruct(out int InputCount, out int WindowWidth, out int OutputCount, out float Probability, out bool UsesLinearExtremeDeque, out bool UsesParallelRadixPreparation, out int RadixPassCount, out long ParallelKeyVisitCount, out long HeapOperationBound, out long SelectionOperationBound, out long TotalOperationBound) -> void
 Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.Equals(Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan other) -> bool
 Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.HeapOperationBound.get -> long
 Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.HeapOperationBound.init -> void
 Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.InputCount.get -> int
 Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.InputCount.init -> void
 Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.MathBlockRollingOrderStatisticWorkPlan() -> void
-Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.MathBlockRollingOrderStatisticWorkPlan(int InputCount, int WindowWidth, int OutputCount, double Probability, bool UsesLinearExtremeDeque, bool UsesParallelRadixPreparation, int RadixPassCount, long ParallelKeyVisitCount, long HeapOperationBound, long SelectionOperationBound, long TotalOperationBound) -> void
+Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.MathBlockRollingOrderStatisticWorkPlan(int InputCount, int WindowWidth, int OutputCount, float Probability, bool UsesLinearExtremeDeque, bool UsesParallelRadixPreparation, int RadixPassCount, long ParallelKeyVisitCount, long HeapOperationBound, long SelectionOperationBound, long TotalOperationBound) -> void
 Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.OutputCount.get -> int
 Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.OutputCount.init -> void
 Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.ParallelKeyVisitCount.get -> long
 Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.ParallelKeyVisitCount.init -> void
-Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.Probability.get -> double
+Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.Probability.get -> float
 Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.Probability.init -> void
 Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.RadixPassCount.get -> int
 Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan.RadixPassCount.init -> void
@@ -760,7 +760,7 @@ Supprocom.MathBlocks.Cuda.MathBlocksCUDAProgram.UploadInputs(System.Collections.
 Supprocom.MathBlocks.Cuda.MathBlocksCUDAWorker
 Supprocom.MathBlocks.Cuda.MathBlocksCUDAWorker.Compile(Supprocom.MathBlocks.MathBlockProgram! program, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>? prototypeInputs = null) -> Supprocom.MathBlocks.Cuda.MathBlocksCUDAProgram!
 Supprocom.MathBlocks.Cuda.MathBlocksCUDAWorker.MathBlocksCUDAWorker() -> void
-Supprocom.MathBlocks.Cuda.MathBlocksCUDAWorker.PlanRollingOrderStatisticWork(int inputCount, int windowWidth, double probability) -> Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan
+Supprocom.MathBlocks.Cuda.MathBlocksCUDAWorker.PlanRollingOrderStatisticWork(int inputCount, int windowWidth, float probability) -> Supprocom.MathBlocks.Cuda.MathBlockRollingOrderStatisticWorkPlan
 Supprocom.MathBlocks.MathBlockAdvanced
 Supprocom.MathBlocks.MathBlockBooleanVector
 Supprocom.MathBlocks.MathBlockBooleanVector.Count.get -> int
@@ -778,10 +778,10 @@ Supprocom.MathBlocks.MathBlockComplexMatrix.this[int row, int column].get -> Sup
 Supprocom.MathBlocks.MathBlockComplexMatrix.ToArray() -> Supprocom.MathBlocks.MathBlockComplexValue[]!
 Supprocom.MathBlocks.MathBlockComplexValue
 Supprocom.MathBlocks.MathBlockComplexValue.Equals(Supprocom.MathBlocks.MathBlockComplexValue other) -> bool
-Supprocom.MathBlocks.MathBlockComplexValue.Imaginary.get -> double
+Supprocom.MathBlocks.MathBlockComplexValue.Imaginary.get -> float
 Supprocom.MathBlocks.MathBlockComplexValue.MathBlockComplexValue() -> void
-Supprocom.MathBlocks.MathBlockComplexValue.MathBlockComplexValue(double real, double imaginary) -> void
-Supprocom.MathBlocks.MathBlockComplexValue.Real.get -> double
+Supprocom.MathBlocks.MathBlockComplexValue.MathBlockComplexValue(float real, float imaginary) -> void
+Supprocom.MathBlocks.MathBlockComplexValue.Real.get -> float
 Supprocom.MathBlocks.MathBlockComplexVector
 Supprocom.MathBlocks.MathBlockComplexVector.Count.get -> int
 Supprocom.MathBlocks.MathBlockComplexVector.GetEnumerator() -> System.Collections.Generic.IEnumerator<Supprocom.MathBlocks.MathBlockComplexValue>!
@@ -886,25 +886,25 @@ Supprocom.MathBlocks.MathBlockGraph.this[int index].get -> Supprocom.MathBlocks.
 Supprocom.MathBlocks.MathBlockGraph.ToArray() -> Supprocom.MathBlocks.MathBlockGraphEdge[]!
 Supprocom.MathBlocks.MathBlockGraph.VertexCount.get -> int
 Supprocom.MathBlocks.MathBlockGraphEdge
-Supprocom.MathBlocks.MathBlockGraphEdge.Deconstruct(out int From, out int To, out double Weight) -> void
+Supprocom.MathBlocks.MathBlockGraphEdge.Deconstruct(out int From, out int To, out float Weight) -> void
 Supprocom.MathBlocks.MathBlockGraphEdge.Equals(Supprocom.MathBlocks.MathBlockGraphEdge other) -> bool
 Supprocom.MathBlocks.MathBlockGraphEdge.From.get -> int
 Supprocom.MathBlocks.MathBlockGraphEdge.From.init -> void
 Supprocom.MathBlocks.MathBlockGraphEdge.MathBlockGraphEdge() -> void
-Supprocom.MathBlocks.MathBlockGraphEdge.MathBlockGraphEdge(int From, int To, double Weight) -> void
+Supprocom.MathBlocks.MathBlockGraphEdge.MathBlockGraphEdge(int From, int To, float Weight) -> void
 Supprocom.MathBlocks.MathBlockGraphEdge.To.get -> int
 Supprocom.MathBlocks.MathBlockGraphEdge.To.init -> void
 Supprocom.MathBlocks.MathBlockGraphEdge.Validate(int vertexCount) -> Supprocom.MathBlocks.MathBlockGraphEdge
-Supprocom.MathBlocks.MathBlockGraphEdge.Weight.get -> double
+Supprocom.MathBlocks.MathBlockGraphEdge.Weight.get -> float
 Supprocom.MathBlocks.MathBlockGraphEdge.Weight.init -> void
 Supprocom.MathBlocks.MathBlockGraphMath
 Supprocom.MathBlocks.MathBlockLinearAlgebra
 Supprocom.MathBlocks.MathBlockMatrix
 Supprocom.MathBlocks.MathBlockMatrix.Columns.get -> int
-Supprocom.MathBlocks.MathBlockMatrix.MathBlockMatrix(int rows, int columns, System.Collections.Generic.IEnumerable<double>! values) -> void
+Supprocom.MathBlocks.MathBlockMatrix.MathBlockMatrix(int rows, int columns, System.Collections.Generic.IEnumerable<float>! values) -> void
 Supprocom.MathBlocks.MathBlockMatrix.Rows.get -> int
-Supprocom.MathBlocks.MathBlockMatrix.this[int row, int column].get -> double
-Supprocom.MathBlocks.MathBlockMatrix.ToArray() -> double[]!
+Supprocom.MathBlocks.MathBlockMatrix.this[int row, int column].get -> float
+Supprocom.MathBlocks.MathBlockMatrix.ToArray() -> float[]!
 Supprocom.MathBlocks.MathBlockOpenMath
 Supprocom.MathBlocks.MathBlockOpenMathCanonicality
 Supprocom.MathBlocks.MathBlockOpenMathCanonicality.Canonical = 0 -> Supprocom.MathBlocks.MathBlockOpenMathCanonicality
@@ -1060,17 +1060,17 @@ Supprocom.MathBlocks.MathBlockPath
 Supprocom.MathBlocks.MathBlockPerformanceCase
 Supprocom.MathBlocks.MathBlockPerformanceCase.Inputs.get -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
 Supprocom.MathBlocks.MathBlockPerformanceCase.Iterations.get -> int
-Supprocom.MathBlocks.MathBlockPerformanceCase.MathBlockPerformanceCase(System.Collections.Generic.IEnumerable<Supprocom.MathBlocks.MathBlockValue>! inputs, int iterations = 64, double maximumWarmLatencyMicroseconds = 1000) -> void
-Supprocom.MathBlocks.MathBlockPerformanceCase.MaximumWarmLatencyMicroseconds.get -> double
+Supprocom.MathBlocks.MathBlockPerformanceCase.MathBlockPerformanceCase(System.Collections.Generic.IEnumerable<Supprocom.MathBlocks.MathBlockValue>! inputs, int iterations = 64, float maximumWarmLatencyMicroseconds = 1000) -> void
+Supprocom.MathBlocks.MathBlockPerformanceCase.MaximumWarmLatencyMicroseconds.get -> float
 Supprocom.MathBlocks.MathBlockPoint
-Supprocom.MathBlocks.MathBlockPoint.Deconstruct(out double X, out double Y) -> void
+Supprocom.MathBlocks.MathBlockPoint.Deconstruct(out float X, out float Y) -> void
 Supprocom.MathBlocks.MathBlockPoint.Equals(Supprocom.MathBlocks.MathBlockPoint other) -> bool
 Supprocom.MathBlocks.MathBlockPoint.MathBlockPoint() -> void
-Supprocom.MathBlocks.MathBlockPoint.MathBlockPoint(double X, double Y) -> void
+Supprocom.MathBlocks.MathBlockPoint.MathBlockPoint(float X, float Y) -> void
 Supprocom.MathBlocks.MathBlockPoint.Validate() -> Supprocom.MathBlocks.MathBlockPoint
-Supprocom.MathBlocks.MathBlockPoint.X.get -> double
+Supprocom.MathBlocks.MathBlockPoint.X.get -> float
 Supprocom.MathBlocks.MathBlockPoint.X.init -> void
-Supprocom.MathBlocks.MathBlockPoint.Y.get -> double
+Supprocom.MathBlocks.MathBlockPoint.Y.get -> float
 Supprocom.MathBlocks.MathBlockPoint.Y.init -> void
 Supprocom.MathBlocks.MathBlockPointSet
 Supprocom.MathBlocks.MathBlockPointSet.Count.get -> int
@@ -1113,20 +1113,20 @@ Supprocom.MathBlocks.MathBlockRegistry.Operations.get -> System.Collections.Gene
 Supprocom.MathBlocks.MathBlockRegressionCase
 Supprocom.MathBlocks.MathBlockRegressionCase.Expected.get -> Supprocom.MathBlocks.MathBlockValue
 Supprocom.MathBlocks.MathBlockRegressionCase.Inputs.get -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
-Supprocom.MathBlocks.MathBlockRegressionCase.MathBlockRegressionCase(string! name, System.Collections.Generic.IEnumerable<Supprocom.MathBlocks.MathBlockValue>! inputs, Supprocom.MathBlocks.MathBlockValue expected, double tolerance = 1E-10) -> void
+Supprocom.MathBlocks.MathBlockRegressionCase.MathBlockRegressionCase(string! name, System.Collections.Generic.IEnumerable<Supprocom.MathBlocks.MathBlockValue>! inputs, Supprocom.MathBlocks.MathBlockValue expected, float tolerance = 1E-10) -> void
 Supprocom.MathBlocks.MathBlockRegressionCase.Name.get -> string!
-Supprocom.MathBlocks.MathBlockRegressionCase.Tolerance.get -> double
+Supprocom.MathBlocks.MathBlockRegressionCase.Tolerance.get -> float
 Supprocom.MathBlocks.MathBlockRun
-Supprocom.MathBlocks.MathBlockRun.Deconstruct(out int Start, out int Length, out double Value) -> void
+Supprocom.MathBlocks.MathBlockRun.Deconstruct(out int Start, out int Length, out float Value) -> void
 Supprocom.MathBlocks.MathBlockRun.Equals(Supprocom.MathBlocks.MathBlockRun other) -> bool
 Supprocom.MathBlocks.MathBlockRun.Length.get -> int
 Supprocom.MathBlocks.MathBlockRun.Length.init -> void
 Supprocom.MathBlocks.MathBlockRun.MathBlockRun() -> void
-Supprocom.MathBlocks.MathBlockRun.MathBlockRun(int Start, int Length, double Value) -> void
+Supprocom.MathBlocks.MathBlockRun.MathBlockRun(int Start, int Length, float Value) -> void
 Supprocom.MathBlocks.MathBlockRun.Start.get -> int
 Supprocom.MathBlocks.MathBlockRun.Start.init -> void
 Supprocom.MathBlocks.MathBlockRun.Validate() -> Supprocom.MathBlocks.MathBlockRun
-Supprocom.MathBlocks.MathBlockRun.Value.get -> double
+Supprocom.MathBlocks.MathBlockRun.Value.get -> float
 Supprocom.MathBlocks.MathBlockRun.Value.init -> void
 Supprocom.MathBlocks.MathBlockRunSet
 Supprocom.MathBlocks.MathBlockRunSet.Count.get -> int
@@ -1175,7 +1175,7 @@ Supprocom.MathBlocks.MathBlockUnit.MathBlockUnit(Supprocom.MathBlocks.MathRation
 Supprocom.MathBlocks.MathBlockUnit.Multiply(Supprocom.MathBlocks.MathBlockUnit other) -> Supprocom.MathBlocks.MathBlockUnit
 Supprocom.MathBlocks.MathBlockUnit.Pow(Supprocom.MathBlocks.MathRational exponent) -> Supprocom.MathBlocks.MathBlockUnit
 Supprocom.MathBlocks.MathBlockValue
-Supprocom.MathBlocks.MathBlockValue.ApproximatelyEquals(Supprocom.MathBlocks.MathBlockValue other, double tolerance = 1E-12) -> bool
+Supprocom.MathBlocks.MathBlockValue.ApproximatelyEquals(Supprocom.MathBlocks.MathBlockValue other, float tolerance = 1E-12) -> bool
 Supprocom.MathBlocks.MathBlockValue.AsBoolean() -> bool
 Supprocom.MathBlocks.MathBlockValue.AsBooleanVector() -> Supprocom.MathBlocks.MathBlockBooleanVector!
 Supprocom.MathBlocks.MathBlockValue.AsComplex() -> Supprocom.MathBlocks.MathBlockComplexValue
@@ -1185,7 +1185,7 @@ Supprocom.MathBlocks.MathBlockValue.AsGraph() -> Supprocom.MathBlocks.MathBlockG
 Supprocom.MathBlocks.MathBlockValue.AsMatrix() -> Supprocom.MathBlocks.MathBlockMatrix!
 Supprocom.MathBlocks.MathBlockValue.AsPointSet() -> Supprocom.MathBlocks.MathBlockPointSet!
 Supprocom.MathBlocks.MathBlockValue.AsRunSet() -> Supprocom.MathBlocks.MathBlockRunSet!
-Supprocom.MathBlocks.MathBlockValue.AsScalar() -> double
+Supprocom.MathBlocks.MathBlockValue.AsScalar() -> float
 Supprocom.MathBlocks.MathBlockValue.AsVector() -> Supprocom.MathBlocks.MathBlockVector!
 Supprocom.MathBlocks.MathBlockValue.InvalidReason.get -> string?
 Supprocom.MathBlocks.MathBlockValue.IsValid.get -> bool
@@ -1205,10 +1205,10 @@ Supprocom.MathBlocks.MathBlockValueKind.Scalar = 1 -> Supprocom.MathBlocks.MathB
 Supprocom.MathBlocks.MathBlockValueKind.Vector = 4 -> Supprocom.MathBlocks.MathBlockValueKind
 Supprocom.MathBlocks.MathBlockVector
 Supprocom.MathBlocks.MathBlockVector.Count.get -> int
-Supprocom.MathBlocks.MathBlockVector.GetEnumerator() -> System.Collections.Generic.IEnumerator<double>!
-Supprocom.MathBlocks.MathBlockVector.MathBlockVector(System.Collections.Generic.IEnumerable<double>! values) -> void
-Supprocom.MathBlocks.MathBlockVector.this[int index].get -> double
-Supprocom.MathBlocks.MathBlockVector.ToArray() -> double[]!
+Supprocom.MathBlocks.MathBlockVector.GetEnumerator() -> System.Collections.Generic.IEnumerator<float>!
+Supprocom.MathBlocks.MathBlockVector.MathBlockVector(System.Collections.Generic.IEnumerable<float>! values) -> void
+Supprocom.MathBlocks.MathBlockVector.this[int index].get -> float
+Supprocom.MathBlocks.MathBlockVector.ToArray() -> float[]!
 Supprocom.MathBlocks.MathBlockVectorMath
 Supprocom.MathBlocks.MathRational
 Supprocom.MathBlocks.MathRational.Denominator.get -> int

@@ -6,6 +6,6 @@ internal static partial class StatisticalMathBlocks
     {
         internal const string Identity = "statistics.sample-variance@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateUnary("statistics.sample-variance", MathBlockStatistics.SampleVariance, 5d / 3d, VarianceType);
+        internal static MathBlockOperation Create() => CreateUnary("statistics.sample-variance", MathBlockStatistics.SampleVariance, 5f / 3f, VarianceType);
     }
 }

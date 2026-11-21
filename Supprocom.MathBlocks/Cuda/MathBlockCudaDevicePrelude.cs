@@ -201,7 +201,7 @@ static __device__ __forceinline__ bool mathblocks_row_sum(const double* values, 
     }
 
     // A C++ double literal that reads back as the same double.
-    private static string DoubleLiteral(double value)
+    private static string DoubleLiteral(float value)
     {
         var text = value.ToString("R", CultureInfo.InvariantCulture);
         return text.AsSpan().IndexOfAny('.', 'E') < 0 ? text + ".0" : text;

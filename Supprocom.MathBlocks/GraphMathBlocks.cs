@@ -31,21 +31,21 @@ internal static partial class GraphMathBlocks
 {
     private static readonly MathBlockValue path = MathBlockValue.Graph(new MathBlockGraph(3,
     [
-        new(0, 1, 1d),
-        new(1, 2, 2d)
+        new(0, 1, 1f),
+        new(1, 2, 2f)
     ]));
     private static readonly MathBlockValue triangle = MathBlockValue.Graph(new MathBlockGraph(3,
     [
-        new(0, 1, 1d),
-        new(0, 2, 1d),
-        new(1, 2, 1d)
+        new(0, 1, 1f),
+        new(0, 2, 1f),
+        new(1, 2, 1f)
     ]));
 
     private static MathBlockOperation CreateScalar(
         string identifier,
-        Func<MathBlockGraph, double> function,
+        Func<MathBlockGraph, float> function,
         MathBlockValue sample,
-        double expected,
+        float expected,
         MathBlockTypeResolver resolver) => MathBlockOperationFactory.Create(
         identifier, 1, resolver,
         inputs =>
@@ -53,14 +53,14 @@ internal static partial class GraphMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Scalar(function(inputs[0].AsGraph()), type.Unit);
         },
-        [sample], MathBlockValue.Scalar(expected), 1e-8, 4);
+        [sample], MathBlockValue.Scalar(expected), 1e-8f, 4);
 
     // A scalar of the Jacobi eigenvalues of a graph: the function returns null for an evaluation the Invalid policy rejects.
     private static MathBlockOperation CreateJacobiScalar(
         string identifier,
-        Func<MathBlockGraph, MathBlockDomainContext, double?> function,
+        Func<MathBlockGraph, MathBlockDomainContext, float?> function,
         MathBlockValue sample,
-        double expected,
+        float expected,
         MathBlockTypeResolver resolver) => MathBlockOperationFactory.CreateDomain(
         identifier, 1, resolver,
         (inputs, domain) =>
@@ -70,13 +70,13 @@ internal static partial class GraphMathBlocks
                 ? MathBlockValue.Scalar(value, type.Unit)
                 : MathBlockValue.Invalid(type, "The Jacobi iteration did not converge.");
         },
-        [sample], MathBlockValue.Scalar(expected), 1e-8, 4);
+        [sample], MathBlockValue.Scalar(expected), 1e-8f, 4);
 
     private static MathBlockOperation CreateVector(
         string identifier,
-        Func<MathBlockGraph, double[]> function,
+        Func<MathBlockGraph, float[]> function,
         MathBlockValue sample,
-        double[] expected,
+        float[] expected,
         MathBlockTypeResolver resolver) => MathBlockOperationFactory.Create(
         identifier, 1, resolver,
         inputs =>
@@ -84,7 +84,7 @@ internal static partial class GraphMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Vector(function(inputs[0].AsGraph()), type.Unit, true);
         },
-        [sample], MathBlockValue.Vector(expected), 1e-8, 4);
+        [sample], MathBlockValue.Vector(expected), 1e-8f, 4);
 
     private static MathBlockOperation CreateMatrix(
         string identifier,
@@ -93,7 +93,7 @@ internal static partial class GraphMathBlocks
         MathBlockMatrix expected) => MathBlockOperationFactory.Create(
         identifier, 1, WeightedGraphMatrix,
         inputs => MathBlockValue.Matrix(function(inputs[0].AsGraph()), inputs[0].Type.Unit),
-        [sample], MathBlockValue.Matrix(expected), 1e-9, 4);
+        [sample], MathBlockValue.Matrix(expected), 1e-9f, 4);
 
     private static MathBlockType DimensionlessGraphScalar(IReadOnlyList<MathBlockType> types)
     {

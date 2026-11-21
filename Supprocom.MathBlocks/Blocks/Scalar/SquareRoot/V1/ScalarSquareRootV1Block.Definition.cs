@@ -6,6 +6,6 @@ internal static partial class ScalarMathBlocks
     {
         internal const string Identity = "scalar.square-root@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => MathBlockOperationFactory.ScalarUnary("scalar.square-root", MathBlockScalar.SquareRoot, 9d, 3d, MathBlockTypeRules.SquareRootScalar);
+        internal static MathBlockOperation Create() => MathBlockOperationFactory.ScalarUnary("scalar.square-root", MathBlockScalar.SquareRoot, 9f, 3f, MathBlockTypeRules.SquareRootScalar);
     }
 }

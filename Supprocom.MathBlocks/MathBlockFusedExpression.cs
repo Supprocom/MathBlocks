@@ -322,7 +322,7 @@ public sealed class MathBlockFusedExpression
         {
             var name = OutputNames[index];
             columns[index] = kinds[outputNodes[index]] == MathBlockFusedKind.Number
-                ? outputs[index] is double[] numbers && numbers.Length == rows
+                ? outputs[index] is float[] numbers && numbers.Length == rows
                     ? MathBlockCollectionPrimitives.Copy(numbers)
                     : throw new ArgumentException($"Output '{name}' requires {rows} double values.", nameof(outputs))
                 : outputs[index] is int[] flags && flags.Length == rows
@@ -520,7 +520,7 @@ public sealed class MathBlockFusedExpression
 
         for (var index = 0; index < outputNodes.Length; index++)
         {
-            columns[index] = kinds[outputNodes[index]] == MathBlockFusedKind.Number ? new double[rows] : new bool[rows];
+            columns[index] = kinds[outputNodes[index]] == MathBlockFusedKind.Number ? new float[rows] : new bool[rows];
             validityColumns[index] = new bool[rows];
         }
 
@@ -554,7 +554,7 @@ public sealed class MathBlockFusedExpression
         MathBlockDomainContext?[] contexts)
     {
         var count = values.Length;
-        var number = new double[count];
+        var number = new float[count];
         var flag = new bool[count];
         var complex = new Complex[count];
         var rowValid = new bool[count];
@@ -564,7 +564,7 @@ public sealed class MathBlockFusedExpression
                 rowArguments[stepIndex] = new MathBlockValue[lift.Source.Arity];
         foreach (var node in scalarNodes)
         {
-            number[node] = values[node].IsValid ? values[node].AsScalar() : 0d;
+            number[node] = values[node].IsValid ? values[node].AsScalar() : 0f;
             rowValid[node] = true;
         }
         foreach (var node in vectorInputNodes)
@@ -596,7 +596,7 @@ public sealed class MathBlockFusedExpression
             for (var index = 0; index < outputNodes.Length; index++)
             {
                 var node = outputNodes[index];
-                if (columns[index] is double[] numbers)
+                if (columns[index] is float[] numbers)
                     numbers[row] = number[node];
                 else
                     ((bool[])columns[index])[row] = flag[node];
@@ -607,7 +607,7 @@ public sealed class MathBlockFusedExpression
     }
 
     // Evaluates one operation node for the current row and returns whether its value is finite.
-    private static bool EvaluateStep(Step step, double[] number, bool[] flag, Complex[] complex, bool[] rowValid)
+    private static bool EvaluateStep(Step step, float[] number, bool[] flag, Complex[] complex, bool[] rowValid)
     {
         var arguments = step.Arguments;
         var node = step.Node;
@@ -624,7 +624,7 @@ public sealed class MathBlockFusedExpression
                     number[node] = MathBlockFusedOperations.EvaluateNumber(
                         opcode,
                         number[arguments[0]],
-                        arguments.Length > 1 ? number[arguments[1]] : 0d);
+                        arguments.Length > 1 ? number[arguments[1]] : 0f);
                 finite = Math.IsFinite(number[node]);
                 break;
             case MathBlockFusedKind.Flag:
@@ -655,7 +655,7 @@ public sealed class MathBlockFusedExpression
     private static void EvaluateElementwiseStep(
         Step step,
         MathBlockValue[] rowArguments,
-        double[] number,
+        float[] number,
         bool[] flag,
         bool[] rowValid,
         MathBlockDomainContext domain)
@@ -746,7 +746,7 @@ public sealed class MathBlockFusedExpression
                 output = values[node];
             else if (!valid[node])
                 output = program.PlannedOutput(node, MathBlockValue.Invalid(types[node], reasons[node]!));
-            else if (columns[index] is double[] numbers)
+            else if (columns[index] is float[] numbers)
                 output = MathBlockValue.Vector(numbers, types[node].Unit, true);
             else
                 output = MathBlockValue.BooleanVector((bool[])columns[index], true);

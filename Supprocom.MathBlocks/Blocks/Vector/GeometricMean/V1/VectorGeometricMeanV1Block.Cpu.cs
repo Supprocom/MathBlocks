@@ -3,10 +3,10 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockVectorMath
 {
     /// <summary>Computes the <c>vector.geometric-mean@1</c> mathematical operation.</summary>
-    public static double GeometricMean(IReadOnlyList<double> values)
+    public static float GeometricMean(IReadOnlyList<float> values)
     {
         ArgumentNullException.ThrowIfNull(values);
-        var logarithms = new double[values.Count];
+        var logarithms = new float[values.Count];
         for (var index = 0; index < values.Count; index++)
             logarithms[index] = MathBlockScalar.NaturalLogarithm(values[index]);
         return MathBlockScalar.Exponential(Mean(logarithms));

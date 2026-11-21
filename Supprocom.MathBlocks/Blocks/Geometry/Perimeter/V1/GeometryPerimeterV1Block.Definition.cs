@@ -6,6 +6,6 @@ internal static partial class GeometryMathBlocks
     {
         internal const string Identity = "geometry.perimeter@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => CreatePointSetScalar("geometry.perimeter", MathBlockGeometry.Perimeter, square, 4d, LengthType);
+        internal static MathBlockOperation Create() => CreatePointSetScalar("geometry.perimeter", MathBlockGeometry.Perimeter, square, 4f, LengthType);
     }
 }

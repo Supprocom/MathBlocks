@@ -12,6 +12,6 @@ internal static partial class TransportMathBlocks
             MathBlockTypeRules.SameBinary(types, MathBlockValueKind.Vector);
             MathBlockTypeRules.RequireDimensionless(types[0]);
             return MathBlockType.Scalar();
-        }, inputs => IsDistribution(inputs[0].AsVector()) && IsDistribution(inputs[1].AsVector()) ? MathBlockValue.Scalar(MathBlockTransport.OrderedEarthMoverDistance(inputs[0].AsVector(), inputs[1].AsVector())) : MathBlockValue.Invalid(MathBlockType.Scalar(), "An input is not a distribution."), [MathBlockValue.Vector([1d, 0d]), MathBlockValue.Vector([0d, 1d])], MathBlockValue.Scalar(1d), performanceIterations: 8);
+        }, inputs => IsDistribution(inputs[0].AsVector()) && IsDistribution(inputs[1].AsVector()) ? MathBlockValue.Scalar(MathBlockTransport.OrderedEarthMoverDistance(inputs[0].AsVector(), inputs[1].AsVector())) : MathBlockValue.Invalid(MathBlockType.Scalar(), "An input is not a distribution."), [MathBlockValue.Vector([1f, 0f]), MathBlockValue.Vector([0f, 1f])], MathBlockValue.Scalar(1f), performanceIterations: 8);
     }
 }

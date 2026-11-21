@@ -6,6 +6,6 @@ internal static partial class VectorMathBlocks
     {
         internal const string Identity = "vector.add@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Pointwise;
-        internal static MathBlockOperation Create() => CreateVectorBinary("vector.add", MathBlockVectorMath.Add, [5d, 5d, 5d, 5d], SameVectors);
+        internal static MathBlockOperation Create() => CreateVectorBinary("vector.add", MathBlockVectorMath.Add, [5f, 5f, 5f, 5f], SameVectors);
     }
 }

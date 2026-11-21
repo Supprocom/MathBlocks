@@ -6,7 +6,7 @@ namespace Supprocom.MathBlocks;
 // non-negative integer. Otherwise every row is either available (the shifted value and true) or unavailable (the fill and false).
 internal static class MathBlockSequenceShift
 {
-    private const double SampleFill = -1d;
+    private const float SampleFill = -1f;
 
     internal static MathBlockOperation Create(string identifier, bool lead, bool validity, MathBlockCausalityInfo causality)
     {
@@ -19,7 +19,7 @@ internal static class MathBlockSequenceShift
             inputs => Evaluate(inputs, resolver, lead, validity),
             sample,
             CreateExpected(lead, validity),
-            1e-12,
+            1e-12f,
             64,
             causality);
         return operation;
@@ -30,10 +30,10 @@ internal static class MathBlockSequenceShift
     {
         var inputs = new List<MathBlockValue>(5)
         {
-            MathBlockValue.Vector([10d, 20d, 30d, 40d, 50d, 60d]),
+            MathBlockValue.Vector([10f, 20f, 30f, 40f, 50f, 60f]),
             MathBlockValue.BooleanVector([true, true, false, true, false, true]),
-            MathBlockValue.Vector([0d, 1d, 2d, 0d, 1d, 2d]),
-            MathBlockValue.Scalar(1d)
+            MathBlockValue.Vector([0f, 1f, 2f, 0f, 1f, 2f]),
+            MathBlockValue.Scalar(1f)
         };
         if (!validity)
             inputs.Add(MathBlockValue.Scalar(SampleFill));
@@ -46,11 +46,11 @@ internal static class MathBlockSequenceShift
         {
             return validity
                 ? MathBlockValue.BooleanVector([true, false, false, false, true, false])
-                : MathBlockValue.Vector([20d, SampleFill, SampleFill, SampleFill, 60d, SampleFill]);
+                : MathBlockValue.Vector([20f, SampleFill, SampleFill, SampleFill, 60f, SampleFill]);
         }
         return validity
             ? MathBlockValue.BooleanVector([false, true, true, false, true, false])
-            : MathBlockValue.Vector([SampleFill, 10d, 20d, SampleFill, 40d, SampleFill]);
+            : MathBlockValue.Vector([SampleFill, 10f, 20f, SampleFill, 40f, SampleFill]);
     }
 
     private static MathBlockType ResolveType(IReadOnlyList<MathBlockType> types, bool validity)
@@ -82,13 +82,13 @@ internal static class MathBlockSequenceShift
         var count = x.Count;
         if (flags.Count != count || counts.Count != count)
             return MathBlockOperationFactory.Invalid(resolver, inputs, "The series, its availability and its counts differ in length.");
-        if (!(offset >= 1d) || offset != Math.Truncate(offset))
+        if (!(offset >= 1f) || offset != Math.Truncate(offset))
             return MathBlockOperationFactory.Invalid(resolver, inputs, "The offset is not an integer of at least 1.");
         var countSpan = counts.Span;
         for (var index = 0; index < countSpan.Length; index++)
         {
             var steps = countSpan[index];
-            if (!(steps >= 0d) || steps != Math.Truncate(steps))
+            if (!(steps >= 0f) || steps != Math.Truncate(steps))
                 return MathBlockOperationFactory.Invalid(resolver, inputs, "A count is not a non-negative integer.");
         }
 
@@ -105,7 +105,7 @@ internal static class MathBlockSequenceShift
         }
 
         var fill = inputs[4].AsScalar();
-        var values = new double[count];
+        var values = new float[count];
         if (lead)
             MathBlockVectorMath.SequenceLead(x.Span, flags.Span, countSpan, distance, fill, values, valid);
         else

@@ -6,6 +6,6 @@ internal static partial class ScalarMathBlocks
     {
         internal const string Identity = "scalar.reciprocal@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => MathBlockOperationFactory.ScalarUnary("scalar.reciprocal", MathBlockScalar.Reciprocal, 4d, 0.25d, MathBlockTypeRules.ReciprocalScalar);
+        internal static MathBlockOperation Create() => MathBlockOperationFactory.ScalarUnary("scalar.reciprocal", MathBlockScalar.Reciprocal, 4f, 0.25f, MathBlockTypeRules.ReciprocalScalar);
     }
 }

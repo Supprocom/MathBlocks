@@ -6,6 +6,6 @@ internal static partial class StatisticalMathBlocks
     {
         internal const string Identity = "statistics.population-covariance@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateBinary("statistics.population-covariance", MathBlockStatistics.PopulationCovariance, 2.5d, CovarianceType);
+        internal static MathBlockOperation Create() => CreateBinary("statistics.population-covariance", MathBlockStatistics.PopulationCovariance, 2.5f, CovarianceType);
     }
 }

@@ -4,126 +4,126 @@ internal static class WindowMathBlocks
 {
     internal const string FormFamily = "window";
     internal const string ValidityFamily = "window-valid";
-    internal const double SampleWidth = 3d;
-    internal const double SampleFill = -1d;
+    internal const float SampleWidth = 3f;
+    internal const float SampleFill = -1f;
 
-    private static readonly MathBlockValue Level = MathBlockValue.Vector([2d, 2d, 2d, 5d, 1d, 4d]);
-    private static readonly MathBlockValue Response = MathBlockValue.Vector([1d, 3d, 2d, 6d, 2d, 7d]);
-    private static readonly MathBlockValue Weights = MathBlockValue.Vector([1d, 2d, 1d, 3d, 1d, 2d]);
-    private static readonly MathBlockValue Signed = MathBlockValue.Vector([-1d, 2d, -3d, 1d, 1d, -2d]);
-    private static readonly MathBlockValue Probabilities = MathBlockValue.Vector([0.5d, 0.25d, 0.25d, 0.5d, 0.25d, 0.5d]);
+    private static readonly MathBlockValue Level = MathBlockValue.Vector([2f, 2f, 2f, 5f, 1f, 4f]);
+    private static readonly MathBlockValue Response = MathBlockValue.Vector([1f, 3f, 2f, 6f, 2f, 7f]);
+    private static readonly MathBlockValue Weights = MathBlockValue.Vector([1f, 2f, 1f, 3f, 1f, 2f]);
+    private static readonly MathBlockValue Signed = MathBlockValue.Vector([-1f, 2f, -3f, 1f, 1f, -2f]);
+    private static readonly MathBlockValue Probabilities = MathBlockValue.Vector([0.5f, 0.25f, 0.25f, 0.5f, 0.25f, 0.5f]);
     private static readonly MathBlockValue Flags = MathBlockValue.BooleanVector([true, true, false, true, true, true]);
 
     // The M1 source list, in design order: 25 statistics, 10 path, 5 information, 9 vector reductions,
     // 2 window positions and 2 last-row lifts.
     private static readonly WindowSource[] Sources =
     [
-        new(StatisticalMathBlocks.StatisticsAutocorrelationV1Block.Create, MathBlockWindowLift.Scalar, [Level, MathBlockValue.Scalar(1d)],
-            [double.NaN, double.NaN, double.NaN, double.NaN, -1.0d, -1.0d]),
-        new(AdvancedMathBlocks.StatisticsCentralMomentV1Block.Create, MathBlockWindowLift.Scalar, [Level, MathBlockValue.Scalar(2d)],
-            [double.NaN, double.NaN, 0.0d, 2.0d, 2.8888888888888893d, 2.8888888888888893d]),
+        new(StatisticalMathBlocks.StatisticsAutocorrelationV1Block.Create, MathBlockWindowLift.Scalar, [Level, MathBlockValue.Scalar(1f)],
+            [float.NaN, float.NaN, float.NaN, float.NaN, -1.0f, -1.0f]),
+        new(AdvancedMathBlocks.StatisticsCentralMomentV1Block.Create, MathBlockWindowLift.Scalar, [Level, MathBlockValue.Scalar(2f)],
+            [float.NaN, float.NaN, 0.0f, 2.0f, 2.8888888888888893f, 2.8888888888888893f]),
         new(StatisticalMathBlocks.StatisticsDistanceCorrelationV1Block.Create, MathBlockWindowLift.Scalar, [Level, Response],
-            [double.NaN, double.NaN, double.NaN, 0.9789651245099754d, 0.9789651245099753d, 0.9731978874249747d]),
+            [float.NaN, float.NaN, float.NaN, 0.9789651245099754f, 0.9789651245099753f, 0.9731978874249747f]),
         new(StatisticalMathBlocks.StatisticsInterquartileRangeV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 0.0d, 1.5d, 2.0d, 2.0d]),
+            [float.NaN, float.NaN, 0.0f, 1.5f, 2.0f, 2.0f]),
         new(StatisticalMathBlocks.StatisticsKendallTauBV1Block.Create, MathBlockWindowLift.Scalar, [Level, Response],
-            [double.NaN, double.NaN, double.NaN, 0.8164965809277261d, 0.8164965809277261d, 0.3333333333333333d]),
+            [float.NaN, float.NaN, float.NaN, 0.8164965809277261f, 0.8164965809277261f, 0.3333333333333333f]),
         new(StatisticalMathBlocks.StatisticsLinearInterceptV1Block.Create, MathBlockWindowLift.Scalar, [Level, Response],
-            [double.NaN, double.NaN, double.NaN, 0.16666666666666652d, 0.46153846153846256d, 1.1538461538461542d]),
+            [float.NaN, float.NaN, float.NaN, 0.16666666666666652f, 0.46153846153846256f, 1.1538461538461542f]),
         new(StatisticalMathBlocks.StatisticsLinearRSquaredV1Block.Create, MathBlockWindowLift.Scalar, [Level, Response],
-            [double.NaN, double.NaN, double.NaN, 0.9423076923076925d, 0.9423076923076918d, 0.8241758241758245d]),
+            [float.NaN, float.NaN, float.NaN, 0.9423076923076925f, 0.9423076923076918f, 0.8241758241758245f]),
         new(StatisticalMathBlocks.StatisticsLinearSlopeV1Block.Create, MathBlockWindowLift.Scalar, [Level, Response],
-            [double.NaN, double.NaN, double.NaN, 1.1666666666666667d, 1.0769230769230766d, 1.1538461538461537d]),
+            [float.NaN, float.NaN, float.NaN, 1.1666666666666667f, 1.0769230769230766f, 1.1538461538461537f]),
         new(StatisticalMathBlocks.StatisticsMedianAbsoluteDeviationV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 0.0d, 0.0d, 1.0d, 1.0d]),
+            [float.NaN, float.NaN, 0.0f, 0.0f, 1.0f, 1.0f]),
         new(StatisticalMathBlocks.StatisticsPearsonCorrelationV1Block.Create, MathBlockWindowLift.Scalar, [Level, Response],
-            [double.NaN, double.NaN, double.NaN, 0.9707253433941511d, 0.9707253433941507d, 0.9078412990032038d]),
+            [float.NaN, float.NaN, float.NaN, 0.9707253433941511f, 0.9707253433941507f, 0.9078412990032038f]),
         new(StatisticalMathBlocks.StatisticsPopulationCovarianceV1Block.Create, MathBlockWindowLift.Scalar, [Level, Response],
-            [double.NaN, double.NaN, 0.0d, 2.3333333333333335d, 3.1111111111111107d, 3.3333333333333335d]),
+            [float.NaN, float.NaN, 0.0f, 2.3333333333333335f, 3.1111111111111107f, 3.3333333333333335f]),
         new(StatisticalMathBlocks.StatisticsPopulationExcessKurtosisV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, double.NaN, -1.5d, -1.5d, -1.5d]),
+            [float.NaN, float.NaN, float.NaN, -1.5f, -1.5f, -1.5f]),
         new(StatisticalMathBlocks.StatisticsPopulationSkewnessV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, double.NaN, 0.7071067811865476d, 0.5280049792181881d, -0.5280049792181881d]),
+            [float.NaN, float.NaN, float.NaN, 0.7071067811865476f, 0.5280049792181881f, -0.5280049792181881f]),
         new(StatisticalMathBlocks.StatisticsPopulationStandardDeviationV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 0.0d, 1.414213562373095d, 1.699673171197595d, 1.699673171197595d]),
+            [float.NaN, float.NaN, 0.0f, 1.414213562373095f, 1.699673171197595f, 1.699673171197595f]),
         new(StatisticalMathBlocks.StatisticsPopulationVarianceV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 0.0d, 2.0d, 2.8888888888888893d, 2.8888888888888893d]),
+            [float.NaN, float.NaN, 0.0f, 2.0f, 2.8888888888888893f, 2.8888888888888893f]),
         new(AdvancedMathBlocks.StatisticsPseudomedianV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 2.0d, 2.75d, 2.5d, 3.5d]),
-        new(AdvancedMathBlocks.StatisticsRawMomentV1Block.Create, MathBlockWindowLift.Scalar, [Level, MathBlockValue.Scalar(2d)],
-            [double.NaN, double.NaN, 4.0d, 11.0d, 10.0d, 14.0d]),
+            [float.NaN, float.NaN, 2.0f, 2.75f, 2.5f, 3.5f]),
+        new(AdvancedMathBlocks.StatisticsRawMomentV1Block.Create, MathBlockWindowLift.Scalar, [Level, MathBlockValue.Scalar(2f)],
+            [float.NaN, float.NaN, 4.0f, 11.0f, 10.0f, 14.0f]),
         new(StatisticalMathBlocks.StatisticsRootMeanSquareV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 2.0d, 3.3166247903554d, 3.162277660168379d, 3.7416573867739413d]),
+            [float.NaN, float.NaN, 2.0f, 3.3166247903554f, 3.162277660168379f, 3.7416573867739413f]),
         new(StatisticalMathBlocks.StatisticsSampleCovarianceV1Block.Create, MathBlockWindowLift.Scalar, [Level, Response],
-            [double.NaN, double.NaN, 0.0d, 3.5d, 4.666666666666666d, 5.0d]),
+            [float.NaN, float.NaN, 0.0f, 3.5f, 4.666666666666666f, 5.0f]),
         new(StatisticalMathBlocks.StatisticsSampleStandardDeviationV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 0.0d, 1.7320508075688772d, 2.081665999466133d, 2.081665999466133d]),
+            [float.NaN, float.NaN, 0.0f, 1.7320508075688772f, 2.081665999466133f, 2.081665999466133f]),
         new(StatisticalMathBlocks.StatisticsSampleVarianceV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 0.0d, 3.0d, 4.333333333333334d, 4.333333333333334d]),
+            [float.NaN, float.NaN, 0.0f, 3.0f, 4.333333333333334f, 4.333333333333334f]),
         new(StatisticalMathBlocks.StatisticsSpearmanCorrelationV1Block.Create, MathBlockWindowLift.Scalar, [Level, Response],
-            [double.NaN, double.NaN, double.NaN, 0.8660254037844387d, 0.8660254037844387d, 0.5d]),
+            [float.NaN, float.NaN, float.NaN, 0.8660254037844387f, 0.8660254037844387f, 0.5f]),
         new(StatisticalMathBlocks.StatisticsTheilSenSlopeV1Block.Create, MathBlockWindowLift.Scalar, [Level, Response],
-            [double.NaN, double.NaN, double.NaN, 1.1666666666666665d, 1.0d, 1.0d]),
+            [float.NaN, float.NaN, float.NaN, 1.1666666666666665f, 1.0f, 1.0f]),
         new(StatisticalMathBlocks.StatisticsWeightedMeanV1Block.Create, MathBlockWindowLift.Scalar, [Level, Weights],
-            [double.NaN, double.NaN, 2.0d, 3.5d, 3.6d, 4.0d]),
+            [float.NaN, float.NaN, 2.0f, 3.5f, 3.6f, 4.0f]),
         new(StatisticalMathBlocks.StatisticsWeightedPopulationVarianceV1Block.Create, MathBlockWindowLift.Scalar, [Level, Weights],
-            [double.NaN, double.NaN, 0.0d, 2.25d, 3.04d, 2.0d]),
+            [float.NaN, float.NaN, 0.0f, 2.25f, 3.04f, 2.0f]),
         new(PathMathBlocks.PathLongestTrueRunV1Block.Create, MathBlockWindowLift.Scalar, [Flags],
-            [double.NaN, double.NaN, 2.0d, 1.0d, 2.0d, 3.0d]),
+            [float.NaN, float.NaN, 2.0f, 1.0f, 2.0f, 3.0f]),
         new(PathMathBlocks.PathMaximumDeclineV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 0.0d, 0.0d, 4.0d, 4.0d]),
+            [float.NaN, float.NaN, 0.0f, 0.0f, 4.0f, 4.0f]),
         new(PathMathBlocks.PathMaximumRelativeDeclineV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 0.0d, 0.0d, 0.8d, 0.8d]),
-        new(PathMathBlocks.PathPowerVariationV1Block.Create, MathBlockWindowLift.Scalar, [Level, MathBlockValue.Scalar(2d)],
-            [double.NaN, double.NaN, 0.0d, 9.0d, 25.0d, 25.0d]),
+            [float.NaN, float.NaN, 0.0f, 0.0f, 0.8f, 0.8f]),
+        new(PathMathBlocks.PathPowerVariationV1Block.Create, MathBlockWindowLift.Scalar, [Level, MathBlockValue.Scalar(2f)],
+            [float.NaN, float.NaN, 0.0f, 9.0f, 25.0f, 25.0f]),
         new(PathMathBlocks.PathQuadraticVariationV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 0.0d, 9.0d, 25.0d, 25.0d]),
-        new(PathMathBlocks.PathRecurrenceRateV1Block.Create, MathBlockWindowLift.Scalar, [Level, MathBlockValue.Scalar(1d)],
-            [double.NaN, double.NaN, 1.0d, 0.5555555555555556d, 0.5555555555555556d, 0.5555555555555556d]),
+            [float.NaN, float.NaN, 0.0f, 9.0f, 25.0f, 25.0f]),
+        new(PathMathBlocks.PathRecurrenceRateV1Block.Create, MathBlockWindowLift.Scalar, [Level, MathBlockValue.Scalar(1f)],
+            [float.NaN, float.NaN, 1.0f, 0.5555555555555556f, 0.5555555555555556f, 0.5555555555555556f]),
         new(PathMathBlocks.PathTotalVariationV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 0.0d, 3.0d, 7.0d, 7.0d]),
+            [float.NaN, float.NaN, 0.0f, 3.0f, 7.0f, 7.0f]),
         new(PathMathBlocks.PathTurningPointCountV1Block.Create, MathBlockWindowLift.Scalar, [Signed],
-            [double.NaN, double.NaN, 1.0d, 1.0d, 0.0d, 0.0d]),
+            [float.NaN, float.NaN, 1.0f, 1.0f, 0.0f, 0.0f]),
         new(PathMathBlocks.PathZeroCrossingCountV1Block.Create, MathBlockWindowLift.Scalar, [Signed],
-            [double.NaN, double.NaN, 2.0d, 2.0d, 1.0d, 1.0d]),
-        new(PathMathBlocks.PathFirstPassageIndexV1Block.Create, MathBlockWindowLift.Scalar, [Level, MathBlockValue.Scalar(4d), MathBlockValue.Boolean(true)],
-            [double.NaN, double.NaN, -1.0d, 2.0d, 1.0d, 0.0d]),
+            [float.NaN, float.NaN, 2.0f, 2.0f, 1.0f, 1.0f]),
+        new(PathMathBlocks.PathFirstPassageIndexV1Block.Create, MathBlockWindowLift.Scalar, [Level, MathBlockValue.Scalar(4f), MathBlockValue.Boolean(true)],
+            [float.NaN, float.NaN, -1.0f, 2.0f, 1.0f, 0.0f]),
         new(ProbabilityMathBlocks.InformationShannonEntropyV1Block.Create, MathBlockWindowLift.Scalar, [Probabilities],
-            [double.NaN, double.NaN, 1.0397207708399179d, 1.0397207708399179d, 1.0397207708399179d, double.NaN]),
-        new(ProbabilityMathBlocks.InformationRenyiEntropyV1Block.Create, MathBlockWindowLift.Scalar, [Probabilities, MathBlockValue.Scalar(2d)],
-            [double.NaN, double.NaN, 0.9808292530117262d, 0.9808292530117262d, 0.9808292530117262d, double.NaN]),
-        new(ProbabilityMathBlocks.InformationTsallisEntropyV1Block.Create, MathBlockWindowLift.Scalar, [Probabilities, MathBlockValue.Scalar(2d)],
-            [double.NaN, double.NaN, 0.625d, 0.625d, 0.625d, double.NaN]),
+            [float.NaN, float.NaN, 1.0397207708399179f, 1.0397207708399179f, 1.0397207708399179f, float.NaN]),
+        new(ProbabilityMathBlocks.InformationRenyiEntropyV1Block.Create, MathBlockWindowLift.Scalar, [Probabilities, MathBlockValue.Scalar(2f)],
+            [float.NaN, float.NaN, 0.9808292530117262f, 0.9808292530117262f, 0.9808292530117262f, float.NaN]),
+        new(ProbabilityMathBlocks.InformationTsallisEntropyV1Block.Create, MathBlockWindowLift.Scalar, [Probabilities, MathBlockValue.Scalar(2f)],
+            [float.NaN, float.NaN, 0.625f, 0.625f, 0.625f, float.NaN]),
         new(ProbabilityMathBlocks.InformationGiniImpurityV1Block.Create, MathBlockWindowLift.Scalar, [Probabilities],
-            [double.NaN, double.NaN, 0.625d, 0.625d, 0.625d, double.NaN]),
+            [float.NaN, float.NaN, 0.625f, 0.625f, 0.625f, float.NaN]),
         new(ProbabilityMathBlocks.InformationBinaryShannonEntropyV1Block.Create, MathBlockWindowLift.Scalar, [Probabilities],
-            [double.NaN, double.NaN, 1.5d, 1.5d, 1.5d, double.NaN]),
+            [float.NaN, float.NaN, 1.5f, 1.5f, 1.5f, float.NaN]),
         new(VectorMathBlocks.VectorSumV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 6.0d, 9.0d, 8.0d, 10.0d]),
+            [float.NaN, float.NaN, 6.0f, 9.0f, 8.0f, 10.0f]),
         new(VectorMathBlocks.VectorMeanV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 2.0d, 3.0d, 2.6666666666666665d, 3.3333333333333335d]),
+            [float.NaN, float.NaN, 2.0f, 3.0f, 2.6666666666666665f, 3.3333333333333335f]),
         new(VectorMathBlocks.VectorMinimumV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 2.0d, 2.0d, 1.0d, 1.0d]),
+            [float.NaN, float.NaN, 2.0f, 2.0f, 1.0f, 1.0f]),
         new(VectorMathBlocks.VectorMaximumV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 2.0d, 5.0d, 5.0d, 5.0d]),
+            [float.NaN, float.NaN, 2.0f, 5.0f, 5.0f, 5.0f]),
         new(VectorMathBlocks.VectorGeometricMeanV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 2.0d, 2.7144176165949063d, 2.154434690031884d, 2.7144176165949063d]),
+            [float.NaN, float.NaN, 2.0f, 2.7144176165949063f, 2.154434690031884f, 2.7144176165949063f]),
         new(VectorMathBlocks.VectorL1NormV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 6.0d, 9.0d, 8.0d, 10.0d]),
+            [float.NaN, float.NaN, 6.0f, 9.0f, 8.0f, 10.0f]),
         new(VectorMathBlocks.VectorL2NormV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 3.4641016151377544d, 5.744562646538029d, 5.477225575051661d, 6.48074069840786d]),
+            [float.NaN, float.NaN, 3.4641016151377544f, 5.744562646538029f, 5.477225575051661f, 6.48074069840786f]),
         new(VectorMathBlocks.VectorMedianV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 2.0d, 2.0d, 2.0d, 4.0d]),
-        new(VectorMathBlocks.VectorQuantileV1Block.Create, MathBlockWindowLift.Scalar, [Level, MathBlockValue.Scalar(0.25d)],
-            [double.NaN, double.NaN, 2.0d, 2.0d, 1.5d, 2.5d]),
+            [float.NaN, float.NaN, 2.0f, 2.0f, 2.0f, 4.0f]),
+        new(VectorMathBlocks.VectorQuantileV1Block.Create, MathBlockWindowLift.Scalar, [Level, MathBlockValue.Scalar(0.25f)],
+            [float.NaN, float.NaN, 2.0f, 2.0f, 1.5f, 2.5f]),
         new(VectorMathBlocks.VectorArgMaximumV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 0.0d, 2.0d, 1.0d, 0.0d]),
+            [float.NaN, float.NaN, 0.0f, 2.0f, 1.0f, 0.0f]),
         new(VectorMathBlocks.VectorArgMinimumV1Block.Create, MathBlockWindowLift.Scalar, [Level],
-            [double.NaN, double.NaN, 0.0d, 0.0d, 2.0d, 1.0d]),
+            [float.NaN, float.NaN, 0.0f, 0.0f, 2.0f, 1.0f]),
         new(VectorMathBlocks.VectorRankV1Block.Create, MathBlockWindowLift.LastRow, [Level],
-            [double.NaN, double.NaN, 2.0d, 3.0d, 1.0d, 2.0d]),
+            [float.NaN, float.NaN, 2.0f, 3.0f, 1.0f, 2.0f]),
         new(VectorMathBlocks.VectorStandardizeV1Block.Create, MathBlockWindowLift.LastRow, [Level],
-            [double.NaN, double.NaN, double.NaN, 1.4142135623730951d, -0.98058067569092d, 0.392232270276368d])
+            [float.NaN, float.NaN, float.NaN, 1.4142135623730951f, -0.98058067569092f, 0.392232270276368f])
     ];
 
     private static readonly Lazy<MathBlockWindowEntry[]> entries = new(CreateEntries);
@@ -227,9 +227,9 @@ internal static class WindowMathBlocks
         for (var index = 0; index < definition.Sample.Length; index++)
             sample[index] = definition.Sample[index];
         sample[^2] = MathBlockValue.Scalar(SampleWidth);
-        var expected = new double[definition.Expected.Length];
+        var expected = new float[definition.Expected.Length];
         for (var index = 0; index < expected.Length; index++)
-            expected[index] = double.IsNaN(definition.Expected[index]) ? SampleFill : definition.Expected[index];
+            expected[index] = float.IsNaN(definition.Expected[index]) ? SampleFill : definition.Expected[index];
         var outputUnit = form.Source
             .ResolveOutputType(MathBlockCollectionPrimitives.Map(definition.Sample, value => value.Type))
             .Unit;
@@ -241,7 +241,7 @@ internal static class WindowMathBlocks
             form.EvaluateForm,
             sample,
             MathBlockValue.Vector(expected, outputUnit),
-            1e-12,
+            1e-12f,
             16,
             MathBlockCausalityInfo.Trailing(form.FormArity - 2));
         operation.TypeSignatureFactory = () => form.CreateSignature(operation.Identity, validity: false);
@@ -256,7 +256,7 @@ internal static class WindowMathBlocks
         sample[^1] = MathBlockValue.Scalar(SampleWidth);
         var expected = new bool[definition.Expected.Length];
         for (var index = 0; index < expected.Length; index++)
-            expected[index] = !double.IsNaN(definition.Expected[index]);
+            expected[index] = !float.IsNaN(definition.Expected[index]);
         var operation = MathBlockOperationFactory.Create(
             $"{ValidityFamily}.{form.Source.Identifier}",
             form.ValidityArity,
@@ -277,5 +277,5 @@ internal static class WindowMathBlocks
         Func<MathBlockOperation> Create,
         MathBlockWindowLift Lift,
         MathBlockValue[] Sample,
-        double[] Expected);
+        float[] Expected);
 }

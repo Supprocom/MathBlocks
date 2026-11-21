@@ -3,9 +3,9 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockTransport
 {
 
-    private static double MeanPairwiseDistance(IReadOnlyList<double> left, IReadOnlyList<double> right)
+    private static float MeanPairwiseDistance(IReadOnlyList<float> left, IReadOnlyList<float> right)
     {
-        var sum = 0d;
+        var sum = 0f;
         for (var leftIndex = 0; leftIndex < left.Count; leftIndex++)
             for (var rightIndex = 0; rightIndex < right.Count; rightIndex++)
                 sum += Math.Abs(left[leftIndex] - right[rightIndex]);
@@ -15,9 +15,9 @@ public static partial class MathBlockTransport
 
 internal static partial class TransportMathBlocks
 {
-    private static readonly MathBlockValue left = MathBlockValue.Vector([0d, 1d]);
-    private static readonly MathBlockValue right = MathBlockValue.Vector([1d, 2d]);
-    private static readonly MathBlockValue fair = MathBlockValue.Vector([0.5d, 0.5d]);
+    private static readonly MathBlockValue left = MathBlockValue.Vector([0f, 1f]);
+    private static readonly MathBlockValue right = MathBlockValue.Vector([1f, 2f]);
+    private static readonly MathBlockValue fair = MathBlockValue.Vector([0.5f, 0.5f]);
 
     private static MathBlockType SinkhornType(IReadOnlyList<MathBlockType> types)
     {
@@ -61,7 +61,7 @@ internal static partial class TransportMathBlocks
             throw new InvalidOperationException("The matrix must be square.");
     }
 
-    private static bool IsDistribution(IReadOnlyList<double> values) =>
-        values.Count > 0 && MathBlockCollectionPrimitives.All(values, value => value >= 0d) &&
-        Math.Abs(MathBlockVectorMath.Sum(values) - 1d) <= 1e-10;
+    private static bool IsDistribution(IReadOnlyList<float> values) =>
+        values.Count > 0 && MathBlockCollectionPrimitives.All(values, value => value >= 0f) &&
+        Math.Abs(MathBlockVectorMath.Sum(values) - 1f) <= 1e-10f;
 }

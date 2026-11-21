@@ -6,6 +6,6 @@ internal static partial class VectorMathBlocks
     {
         internal const string Identity = "vector.l2-norm@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateReduction("vector.l2-norm", MathBlockVectorMath.L2Norm, Math.Sqrt(30d), MathBlockTypeRules.VectorReduction);
+        internal static MathBlockOperation Create() => CreateReduction("vector.l2-norm", MathBlockVectorMath.L2Norm, Math.Sqrt(30f), MathBlockTypeRules.VectorReduction);
     }
 }

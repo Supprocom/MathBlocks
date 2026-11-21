@@ -11,9 +11,9 @@ internal static partial class VectorMathBlocks
             6,
             MathBlockVectorMath.PrefixDifferenceFormType,
             MathBlockVectorMath.PrefixDifferenceForm,
-            [MathBlockValue.Vector([1d, 2d, 3d, 4d, 5d, 6d]), MathBlockValue.BooleanVector([true, true, true, true, true, true]), MathBlockValue.Vector([0d, 1d, 2d, 3d, 4d, 5d]), MathBlockValue.Scalar(-1d), MathBlockValue.Scalar(1d), MathBlockValue.Scalar(-1d)],
-            MathBlockValue.Vector([-1d, 6d, 9d, 12d, 15d, -1d]),
-            1e-9,
+            [MathBlockValue.Vector([1f, 2f, 3f, 4f, 5f, 6f]), MathBlockValue.BooleanVector([true, true, true, true, true, true]), MathBlockValue.Vector([0f, 1f, 2f, 3f, 4f, 5f]), MathBlockValue.Scalar(-1f), MathBlockValue.Scalar(1f), MathBlockValue.Scalar(-1f)],
+            MathBlockValue.Vector([-1f, 6f, 9f, 12f, 15f, -1f]),
+            1e-9f,
             64);
     }
 }

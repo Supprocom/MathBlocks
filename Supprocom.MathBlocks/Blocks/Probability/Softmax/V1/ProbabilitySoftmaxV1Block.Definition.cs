@@ -6,6 +6,6 @@ internal static partial class ProbabilityMathBlocks
     {
         internal const string Identity = "probability.softmax@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateVectorUnary("probability.softmax", MathBlockProbability.Softmax, MathBlockValue.Vector([0d, 0d]), [0.5d, 0.5d], requireDistribution: false, requireDimensionlessInput: true);
+        internal static MathBlockOperation Create() => CreateVectorUnary("probability.softmax", MathBlockProbability.Softmax, MathBlockValue.Vector([0f, 0f]), [0.5f, 0.5f], requireDistribution: false, requireDimensionlessInput: true);
     }
 }

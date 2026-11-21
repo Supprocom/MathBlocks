@@ -4,20 +4,20 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockLinearAlgebra
 {
     /// <summary>Computes the <c>matrix.determinant@1</c> mathematical operation.</summary>
-    public static double Determinant(MathBlockMatrix matrix)
+    public static float Determinant(MathBlockMatrix matrix)
     {
         ArgumentNullException.ThrowIfNull(matrix);
         var values = matrix.ToArray();
         var size = matrix.Rows;
-        var determinant = 1d;
+        var determinant = 1f;
         for (var pivot = 0; pivot < size; pivot++)
         {
             var pivotRow = pivot;
             for (var row = pivot + 1; row < size; row++)
                 if (Math.Abs(values[row * size + pivot]) > Math.Abs(values[pivotRow * size + pivot]))
                     pivotRow = row;
-            if (values[pivotRow * size + pivot] == 0d)
-                return 0d;
+            if (values[pivotRow * size + pivot] == 0f)
+                return 0f;
             if (pivotRow != pivot)
             {
                 SwapRows(values, size, pivot, pivotRow);

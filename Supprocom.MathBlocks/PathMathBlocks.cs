@@ -5,10 +5,10 @@ public static partial class MathBlockPath
 {
 
     /// <summary>Sums powered absolute increments along a sampled path.</summary>
-    public static double PowerVariation(IReadOnlyList<double> values, double order)
+    public static float PowerVariation(IReadOnlyList<float> values, float order)
     {
         ArgumentNullException.ThrowIfNull(values);
-        var result = 0d;
+        var result = 0f;
         for (var index = 1; index < values.Count; index++)
             result += Math.Pow(Math.Abs(values[index] - values[index - 1]), order);
         return result;
@@ -17,13 +17,13 @@ public static partial class MathBlockPath
 
 internal static partial class PathMathBlocks
 {
-    private static readonly MathBlockValue path = MathBlockValue.Vector([1d, 3d, 2d, 5d]);
+    private static readonly MathBlockValue path = MathBlockValue.Vector([1f, 3f, 2f, 5f]);
 
     private static MathBlockOperation CreatePathScalar(
         string identifier,
-        Func<IReadOnlyList<double>, double> function,
+        Func<IReadOnlyList<float>, float> function,
         MathBlockValue sample,
-        double expected,
+        float expected,
         MathBlockTypeResolver resolver) => MathBlockOperationFactory.Create(
         identifier, 1, resolver,
         inputs =>
@@ -33,13 +33,13 @@ internal static partial class PathMathBlocks
                 ? MathBlockValue.Scalar(function(inputs[0].AsVector()), type.Unit)
                 : MathBlockValue.Invalid(type, "The path is empty.");
         },
-        [sample], MathBlockValue.Scalar(expected), 1e-9, 16);
+        [sample], MathBlockValue.Scalar(expected), 1e-9f, 16);
 
     private static MathBlockOperation CreatePathVector(
         string identifier,
-        Func<IReadOnlyList<double>, double[]> function,
+        Func<IReadOnlyList<float>, float[]> function,
         MathBlockValue sample,
-        double[] expected,
+        float[] expected,
         MathBlockTypeResolver resolver) => MathBlockOperationFactory.Create(
         identifier, 1, resolver,
         inputs =>
@@ -49,12 +49,12 @@ internal static partial class PathMathBlocks
                 ? MathBlockValue.Vector(function(inputs[0].AsVector()), type.Unit, true)
                 : MathBlockValue.Invalid(type, "The path is empty.");
         },
-        [sample], MathBlockValue.Vector(expected), 1e-9, 16);
+        [sample], MathBlockValue.Vector(expected), 1e-9f, 16);
 
     private static MathBlockOperation CreateComplexProjection(
         string identifier,
-        Func<Complex, double> function,
-        double[] expected) => MathBlockOperationFactory.Create(
+        Func<Complex, float> function,
+        float[] expected) => MathBlockOperationFactory.Create(
         identifier, 1,
         types =>
         {
@@ -65,8 +65,8 @@ internal static partial class PathMathBlocks
             MathBlockCollectionPrimitives.Map(inputs[0].AsComplexVector(), function),
             inputs[0].Type.Unit,
             true),
-        [MathBlockValue.ComplexVector([new(1d, 2d), new(3d, 4d)])], MathBlockValue.Vector(expected),
-        1e-9, 16);
+        [MathBlockValue.ComplexVector([new(1f, 2f), new(3f, 4f)])], MathBlockValue.Vector(expected),
+        1e-9f, 16);
 
     private static MathBlockType SameUnitScalar(IReadOnlyList<MathBlockType> types) =>
         MathBlockTypeRules.VectorReduction(types);

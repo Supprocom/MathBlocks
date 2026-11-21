@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockLinearAlgebra
 {
     /// <summary>Computes the <c>matrix.frobenius-norm@1</c> mathematical operation.</summary>
-    public static double FrobeniusNorm(MathBlockMatrix matrix)
+    public static float FrobeniusNorm(MathBlockMatrix matrix)
     {
         ArgumentNullException.ThrowIfNull(matrix);
         var values = matrix.ToArray();

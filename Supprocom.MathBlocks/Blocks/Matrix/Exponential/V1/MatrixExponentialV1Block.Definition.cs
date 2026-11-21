@@ -12,6 +12,6 @@ internal static partial class AdvancedMathBlocks
             RequireSquareMatrix(types[0]);
             MathBlockTypeRules.RequireDimensionless(types[0]);
             return types[0];
-        }, (inputs, domain) => MathBlockValue.Matrix(MathBlockAdvanced.MatrixExponential(inputs[0].AsMatrix(), domain.Options.MatrixExponentialTaylorTerms)), [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0d, 0d, 0d, Math.Log(2d)]))], MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1d, 0d, 0d, 2d])), 1e-8, 2);
+        }, (inputs, domain) => MathBlockValue.Matrix(MathBlockAdvanced.MatrixExponential(inputs[0].AsMatrix(), domain.Options.MatrixExponentialTaylorTerms)), [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0f, 0f, 0f, Math.Log(2f)]))], MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1f, 0f, 0f, 2f])), 1e-8f, 2);
     }
 }

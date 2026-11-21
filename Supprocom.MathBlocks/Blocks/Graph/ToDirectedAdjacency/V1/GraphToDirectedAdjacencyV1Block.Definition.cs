@@ -11,6 +11,6 @@ internal static partial class StructuralMathBlocks
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Graph);
             return MathBlockType.Matrix(types[0].Unit, types[0].Rows, types[0].Rows);
-        }, inputs => MathBlockValue.Matrix(MathBlockStructure.DirectedAdjacencyFromGraph(inputs[0].AsGraph()), inputs[0].Type.Unit), [MathBlockValue.Graph(new MathBlockGraph(2, [new(0, 1, 2d)]))], MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0d, 2d, 0d, 0d])), performanceIterations: 16);
+        }, inputs => MathBlockValue.Matrix(MathBlockStructure.DirectedAdjacencyFromGraph(inputs[0].AsGraph()), inputs[0].Type.Unit), [MathBlockValue.Graph(new MathBlockGraph(2, [new(0, 1, 2f)]))], MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0f, 2f, 0f, 0f])), performanceIterations: 16);
     }
 }

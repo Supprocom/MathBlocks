@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockPath
 {
     /// <summary>Computes the <c>path.turning-point-count@1</c> mathematical operation.</summary>
-    public static int TurningPointCount(IReadOnlyList<double> values)
+    public static int TurningPointCount(IReadOnlyList<float> values)
     {
         ArgumentNullException.ThrowIfNull(values);
         var count = 0;

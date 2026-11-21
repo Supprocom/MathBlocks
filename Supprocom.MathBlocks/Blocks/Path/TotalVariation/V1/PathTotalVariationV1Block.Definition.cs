@@ -6,6 +6,6 @@ internal static partial class PathMathBlocks
     {
         internal const string Identity = "path.total-variation@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreatePathScalar("path.total-variation", MathBlockPath.TotalVariation, path, 6d, SameUnitScalar);
+        internal static MathBlockOperation Create() => CreatePathScalar("path.total-variation", MathBlockPath.TotalVariation, path, 6f, SameUnitScalar);
     }
 }

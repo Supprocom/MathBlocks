@@ -37,7 +37,7 @@ public static partial class MathBlockGeometry
         var cross = Cross(origin, left, right);
         if (Math.IsNaN(cross))
             throw new OverflowException("A cross product of the hull construction overflowed.");
-        return cross <= 0d;
+        return cross <= 0f;
     }
 
     private static int CompareHullPoints(MathBlockPoint left, MathBlockPoint right)

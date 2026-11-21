@@ -6,6 +6,6 @@ internal static partial class VectorMathBlocks
     {
         internal const string Identity = "vector.normalize-l1@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateVectorUnary("vector.normalize-l1", MathBlockVectorMath.NormalizeL1, [1d, 1d, 2d], [0.25d, 0.25d, 0.5d], DimensionlessVectorFromVector);
+        internal static MathBlockOperation Create() => CreateVectorUnary("vector.normalize-l1", MathBlockVectorMath.NormalizeL1, [1f, 1f, 2f], [0.25f, 0.25f, 0.5f], DimensionlessVectorFromVector);
     }
 }

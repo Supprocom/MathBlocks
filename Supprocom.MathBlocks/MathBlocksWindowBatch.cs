@@ -33,7 +33,7 @@ public static class MathBlocksWindowBatch
         MathBlockValue series,
         string formIdentity,
         IReadOnlyList<int> widths,
-        double fill) =>
+        float fill) =>
         Evaluate(series, formIdentity, [], widths, fill);
 
     /// <summary>Evaluates a window form at each width, on CoreCLR.</summary>
@@ -57,7 +57,7 @@ public static class MathBlocksWindowBatch
         string formIdentity,
         IReadOnlyList<MathBlockValue> parameters,
         IReadOnlyList<int> widths,
-        double fill)
+        float fill)
     {
         ArgumentNullException.ThrowIfNull(formIdentity);
         ArgumentNullException.ThrowIfNull(parameters);
@@ -141,7 +141,7 @@ public static class MathBlocksWindowBatch
         MathBlockValue series,
         string formIdentity,
         IReadOnlyList<int> widths,
-        double fill) =>
+        float fill) =>
         EvaluateCUDA(worker, series, formIdentity, [], widths, fill);
 
     /// <summary>Evaluates a window form at each width, on CUDA, in one graph launch.</summary>
@@ -166,7 +166,7 @@ public static class MathBlocksWindowBatch
         string formIdentity,
         IReadOnlyList<MathBlockValue> parameters,
         IReadOnlyList<int> widths,
-        double fill)
+        float fill)
     {
         ArgumentNullException.ThrowIfNull(worker);
         ArgumentNullException.ThrowIfNull(formIdentity);

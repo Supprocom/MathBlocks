@@ -17,6 +17,6 @@ internal static partial class MatrixMathBlocks
             var sizeValue = inputs[0].AsScalar();
             var size = (int)sizeValue;
             return sizeValue == Math.Truncate(sizeValue) && size > 0 && size <= domain.Options.MaximumMatrixSize ? MathBlockValue.Matrix(MathBlockLinearAlgebra.Identity(size)) : MathBlockValue.Invalid(MathBlockType.Matrix(), "The matrix size is outside the operation domain.");
-        }, [MathBlockValue.Scalar(2d)], MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1d, 0d, 0d, 1d])), performanceIterations: 16);
+        }, [MathBlockValue.Scalar(2f)], MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1f, 0f, 0f, 1f])), performanceIterations: 16);
     }
 }

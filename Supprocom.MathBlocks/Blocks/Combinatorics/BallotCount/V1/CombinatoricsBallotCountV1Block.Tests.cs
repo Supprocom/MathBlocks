@@ -27,16 +27,16 @@ public sealed class CombinatoricsBallotCountV1BlockTests
             if ((long)leading + trailing > int.MaxValue)
                 continue;
             var reference = CombinatoricsCostGuardReference.TodayBallot(leading, trailing);
-            if (BitConverter.DoubleToInt64Bits(MathBlockAdvanced.BallotCount(leading, trailing)) != BitConverter.DoubleToInt64Bits(reference))
+            if (BitConverter.SingleToInt32Bits(MathBlockAdvanced.BallotCount(leading, trailing)) != BitConverter.SingleToInt32Bits(reference))
                 disagreements.Add($"bits ({leading}, {trailing})");
             MathBlockValue[] inputs = [MathBlockValue.Scalar(leading), MathBlockValue.Scalar(trailing)];
             var result = operation.Evaluate(inputs);
-            var expectedValid = CombinatoricsCostGuardReference.InBallotDomain(leading, trailing) && double.IsFinite(reference);
+            var expectedValid = CombinatoricsCostGuardReference.InBallotDomain(leading, trailing) && float.IsFinite(reference);
             if (result.IsValid != expectedValid)
                 disagreements.Add($"valid ({leading}, {trailing})");
             else if (expectedValid)
                 validRows++;
-            if (CombinatoricsCostGuardReference.InBallotDomain(leading, trailing) && double.IsPositiveInfinity(reference))
+            if (CombinatoricsCostGuardReference.InBallotDomain(leading, trailing) && float.IsPositiveInfinity(reference))
                 overflowRows++;
         }
 
@@ -69,21 +69,21 @@ public sealed class CombinatoricsBallotCountV1BlockTests
                 var actual = MathBlockAdvanced.BallotCount(leading, trailing);
                 var reference = CombinatoricsCostGuardReference.WideBallot(leading, trailing);
                 if (reference is { } expected)
-                    Assert.Equal(BitConverter.DoubleToInt64Bits(expected), BitConverter.DoubleToInt64Bits(actual));
+                    Assert.Equal(BitConverter.SingleToInt32Bits(expected), BitConverter.SingleToInt32Bits(actual));
                 else
-                    Assert.True(double.IsPositiveInfinity(actual), $"BallotCount({leading}, {trailing}) = {actual}.");
+                    Assert.True(float.IsPositiveInfinity(actual), $"BallotCount({leading}, {trailing}) = {actual}.");
                 MathBlockValue[] inputs = [MathBlockValue.Scalar(leading), MathBlockValue.Scalar(trailing)];
                 var result = operation.Evaluate(inputs);
-                Assert.Equal(double.IsFinite(actual), result.IsValid);
+                Assert.Equal(float.IsFinite(actual), result.IsValid);
                 if (result.IsValid)
                     finite++;
             }
         }
 
         Assert.True(wrapped > 20 && finite > 5, $"{wrapped} wrapped rows, {finite} finite.");
-        MathBlockValue[] sampleInputs = [MathBlockValue.Scalar(2_000_000_000d), MathBlockValue.Scalar(1d)];
+        MathBlockValue[] sampleInputs = [MathBlockValue.Scalar(2_000_000_000f), MathBlockValue.Scalar(1f)];
         var sample = operation.Evaluate(sampleInputs);
         Assert.True(sample.IsValid);
-        Assert.Equal(2_000_000_000d - 1d, sample.AsScalar(), 3);
+        Assert.Equal(2_000_000_000f - 1f, sample.AsScalar(), 3);
     }
 }

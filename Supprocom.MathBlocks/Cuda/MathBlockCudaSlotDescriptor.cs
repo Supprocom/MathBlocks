@@ -8,7 +8,7 @@ public struct MathBlockCudaSlotDescriptor
 {
     /// <summary>Gets the scalar value value.</summary>
     [FieldOffset(MathBlockCudaSlotLayout.ScalarValueOffset)]
-    public double ScalarValue;
+    public float ScalarValue;
 
     /// <summary>Gets the data pointer value.</summary>
     [FieldOffset(MathBlockCudaSlotLayout.DataPointerOffset)]

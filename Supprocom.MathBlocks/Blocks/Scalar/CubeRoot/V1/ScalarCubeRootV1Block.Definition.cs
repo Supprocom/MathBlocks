@@ -8,7 +8,7 @@ internal static partial class ScalarMathBlocks
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create()
         {
-            var operation = MathBlockOperationFactory.ScalarUnary("scalar.cube-root", MathBlockScalar.CubeRoot, -8d, -2d, MathBlockTypeRules.CubeRootScalar);
+            var operation = MathBlockOperationFactory.ScalarUnary("scalar.cube-root", MathBlockScalar.CubeRoot, -8f, -2f, MathBlockTypeRules.CubeRootScalar);
             // The same evaluation with the Newton step count of the domain options; the unary kernel is the default's.
             operation.DomainEvaluator = (inputs, domain) =>
             {

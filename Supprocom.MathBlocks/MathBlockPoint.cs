@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 
 /// <summary>Defines the Math Block Point contract.</summary>
 [StructLayout(LayoutKind.Sequential)]
-public readonly record struct MathBlockPoint(double X, double Y)
+public readonly record struct MathBlockPoint(float X, float Y)
 {
     /// <summary>Validates the supplied MathBlocks value or interchange document.</summary>
     public MathBlockPoint Validate()

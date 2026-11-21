@@ -3,11 +3,11 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockVectorMath
 {
     /// <summary>Computes the <c>vector.standardize@1</c> mathematical operation.</summary>
-    public static double[] Standardize(IReadOnlyList<double> values)
+    public static float[] Standardize(IReadOnlyList<float> values)
     {
         ArgumentNullException.ThrowIfNull(values);
         var mean = Mean(values);
-        var variance = 0d;
+        var variance = 0f;
         for (var index = 0; index < values.Count; index++)
         {
             var difference = values[index] - mean;

@@ -9,13 +9,13 @@ internal static partial class ProbabilityMathBlocks
         internal static MathBlockOperation Create() => CreateMutualInformation();
         private static MathBlockOperation CreateMutualInformation()
         {
-            var independent = new MathBlockMatrix(2, 2, [0.25d, 0.25d, 0.25d, 0.25d]);
+            var independent = new MathBlockMatrix(2, 2, [0.25f, 0.25f, 0.25f, 0.25f]);
             return MathBlockOperationFactory.Create("information.mutual-information", 1, types =>
             {
                 MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Matrix);
                 MathBlockTypeRules.RequireDimensionless(types[0]);
                 return MathBlockType.Scalar();
-            }, inputs => IsDistribution(inputs[0].AsMatrix().ToArray()) ? MathBlockValue.Scalar(MathBlockProbability.MutualInformation(inputs[0].AsMatrix())) : MathBlockValue.Invalid(MathBlockType.Scalar(), "The matrix is not a joint probability distribution."), [MathBlockValue.Matrix(independent)], MathBlockValue.Scalar(0d), performanceIterations: 16);
+            }, inputs => IsDistribution(inputs[0].AsMatrix().ToArray()) ? MathBlockValue.Scalar(MathBlockProbability.MutualInformation(inputs[0].AsMatrix())) : MathBlockValue.Invalid(MathBlockType.Scalar(), "The matrix is not a joint probability distribution."), [MathBlockValue.Matrix(independent)], MathBlockValue.Scalar(0f), performanceIterations: 16);
         }
     }
 }

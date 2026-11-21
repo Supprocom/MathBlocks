@@ -10,7 +10,7 @@ public static partial class MathBlockLinearAlgebra
         if (!IsSymmetric(matrix))
             return false;
         var size = matrix.Rows;
-        var lower = new double[size * size];
+        var lower = new float[size * size];
         for (var row = 0; row < size; row++)
         {
             for (var column = 0; column <= row; column++)
@@ -20,7 +20,7 @@ public static partial class MathBlockLinearAlgebra
                     sum -= lower[row * size + inner] * lower[column * size + inner];
                 if (row == column)
                 {
-                    if (sum <= 0d)
+                    if (sum <= 0f)
                         return false;
                     lower[row * size + column] = Math.Sqrt(sum);
                 }

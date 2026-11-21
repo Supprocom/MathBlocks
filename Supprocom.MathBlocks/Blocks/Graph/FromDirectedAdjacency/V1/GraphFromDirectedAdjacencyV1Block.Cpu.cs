@@ -10,7 +10,7 @@ public static partial class MathBlockStructure
         var edges = new List<MathBlockGraphEdge>();
         for (var row = 0; row < adjacency.Rows; row++)
             for (var column = 0; column < adjacency.Columns; column++)
-                if (row != column && adjacency[row, column] != 0d)
+                if (row != column && adjacency[row, column] != 0f)
                     edges.Add(new MathBlockGraphEdge(row, column, adjacency[row, column]));
         return new MathBlockGraph(adjacency.Rows, edges);
     }

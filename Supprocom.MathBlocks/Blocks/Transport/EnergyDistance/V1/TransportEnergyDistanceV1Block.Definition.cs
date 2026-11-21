@@ -11,6 +11,6 @@ internal static partial class TransportMathBlocks
         {
             SameSupportPair(types[0], types[1], requireEqualLength: false);
             return MathBlockType.Scalar(types[0].Unit.Pow(new MathRational(1, 2)));
-        }, inputs => inputs[0].AsVector().Count > 0 && inputs[1].AsVector().Count > 0 ? MathBlockValue.Scalar(MathBlockTransport.EnergyDistance(inputs[0].AsVector(), inputs[1].AsVector()), inputs[0].Type.Unit.Pow(new MathRational(1, 2))) : MathBlockValue.Invalid(MathBlockType.Scalar(inputs[0].Type.Unit.Pow(new MathRational(1, 2))), "A sample is empty."), [MathBlockValue.Vector([0d]), MathBlockValue.Vector([1d])], MathBlockValue.Scalar(Math.Sqrt(2d)), performanceIterations: 4);
+        }, inputs => inputs[0].AsVector().Count > 0 && inputs[1].AsVector().Count > 0 ? MathBlockValue.Scalar(MathBlockTransport.EnergyDistance(inputs[0].AsVector(), inputs[1].AsVector()), inputs[0].Type.Unit.Pow(new MathRational(1, 2))) : MathBlockValue.Invalid(MathBlockType.Scalar(inputs[0].Type.Unit.Pow(new MathRational(1, 2))), "A sample is empty."), [MathBlockValue.Vector([0f]), MathBlockValue.Vector([1f])], MathBlockValue.Scalar(Math.Sqrt(2f)), performanceIterations: 4);
     }
 }

@@ -1056,19 +1056,19 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             TryGetExactScalar(inputExactValues, 2, out var rollingProbability))
         {
             RequireDomain(
-                rollingProbability is >= 0d and <= 1d,
+                rollingProbability is >= 0f and <= 1f,
                 node,
                 "rolling probability");
         }
         if (string.Equals(identity, "sequence.exponential-moving-average@1", StringComparison.Ordinal) &&
             TryGetExactScalar(inputExactValues, 1, out var alpha))
         {
-            RequireDomain(alpha is > 0d and <= 1d, node, "smoothing input");
+            RequireDomain(alpha is > 0f and <= 1f, node, "smoothing input");
         }
         if (string.Equals(identity, "vector.quantile@1", StringComparison.Ordinal) &&
             TryGetExactScalar(inputExactValues, 1, out var probability))
         {
-            RequireDomain(probability is >= 0d and <= 1d, node, "probability");
+            RequireDomain(probability is >= 0f and <= 1f, node, "probability");
             RequireDomain(inputCapacities[0] > 0, node, "vector length");
         }
         if ((string.Equals(identity, "vector.repeat@1", StringComparison.Ordinal) || string.Equals(identity, "vector.linspace@1", StringComparison.Ordinal)))
@@ -1146,7 +1146,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         if (string.Equals(identity, "path.recurrence-rate@1", StringComparison.Ordinal) &&
             TryGetExactScalar(inputExactValues, 1, out var threshold))
         {
-            RequireDomain(inputCapacities[0] > 0 && threshold >= 0d, node, "recurrence threshold");
+            RequireDomain(inputCapacities[0] > 0 && threshold >= 0f, node, "recurrence threshold");
         }
         if (string.Equals(identity, "path.hysteresis@1", StringComparison.Ordinal) &&
             TryGetExactScalar(inputExactValues, 1, out var lower) &&
@@ -1158,7 +1158,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             TryGetExactScalar(inputExactValues, 1, out var bernsteinInput))
         {
             RequireDomain(
-                inputCapacities[0] > 0 && bernsteinInput is >= 0d and <= 1d,
+                inputCapacities[0] > 0 && bernsteinInput is >= 0f and <= 1f,
                 node,
                 "Bernstein input");
         }
@@ -1170,7 +1170,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         if (string.Equals(identity, "transport.uniform-wasserstein@1", StringComparison.Ordinal) &&
             TryGetExactScalar(inputExactValues, 2, out var transportOrder))
         {
-            RequireDomain(inputCapacities[0] > 0 && transportOrder >= 1d, node, "transport order");
+            RequireDomain(inputCapacities[0] > 0 && transportOrder >= 1f, node, "transport order");
         }
         if (string.Equals(identity, "special.regularized-incomplete-beta@1", StringComparison.Ordinal) &&
             TryGetExactScalar(inputExactValues, 0, out var betaInput) &&
@@ -1178,7 +1178,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             TryGetExactScalar(inputExactValues, 2, out var betaRight))
         {
             RequireDomain(
-                betaInput is >= 0d and <= 1d && betaLeft > 0d && betaRight > 0d,
+                betaInput is >= 0f and <= 1f && betaLeft > 0f && betaRight > 0f,
                 node,
                 "beta inputs");
         }
@@ -1239,7 +1239,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
     private static bool TryGetExactScalar(
         IReadOnlyList<MathBlockValue?> values,
         int index,
-        out double result)
+        out float result)
     {
         if ((uint)index < (uint)values.Count &&
             values[index] is { } value &&
@@ -1248,7 +1248,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             result = value.AsScalar();
             return true;
         }
-        result = 0d;
+        result = 0f;
         return false;
     }
 
@@ -1866,7 +1866,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             throw new InvalidOperationException($"CUDA shape input for node {node.Index} is unavailable.");
 
         var scalar = value.AsScalar();
-        if (scalar < 0d || scalar > int.MaxValue || scalar != Math.Truncate(scalar))
+        if (scalar < 0f || scalar > int.MaxValue || scalar != Math.Truncate(scalar))
             throw new InvalidOperationException($"CUDA shape input for node {node.Index} is not a nonnegative integer.");
         return (int)scalar;
     }
@@ -1939,7 +1939,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             widthValue.Type.Kind == MathBlockValueKind.Scalar)
         {
             var width = widthValue.AsScalar();
-            if (width > 0d && width <= int.MaxValue && width == Math.Truncate(width))
+            if (width > 0f && width <= int.MaxValue && width == Math.Truncate(width))
             {
                 var inputCount = payloadLayout.Capacities[node.Inputs[0]];
                 if ((int)width == 1)
@@ -1948,7 +1948,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                     node.Inputs.Count is >= 3 &&
                     payloadLayout.ExactValues[node.Inputs[2]] is { } probabilityValue &&
                     probabilityValue.Type.Kind == MathBlockValueKind.Scalar &&
-                    probabilityValue.AsScalar() is 0d or 1d)
+                    probabilityValue.AsScalar() is 0f or 1f)
                 {
                     return checked(inputCount * sizeof(int));
                 }
@@ -2047,7 +2047,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
         while (low < high)
         {
             var middle = low + ((high - low + 1) / 2);
-            if (ScratchDoublesOfRows(identity, middle) is { } doubles && doubles <= int.MaxValue / sizeof(double))
+            if (ScratchDoublesOfRows(identity, middle) is { } doubles && doubles <= int.MaxValue / sizeof(float))
                 low = middle;
             else
                 high = middle - 1;
@@ -2058,7 +2058,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
 
     private static int ToScratchBytes(string identity, long doubleCount, long rows)
     {
-        var bytes = checked(doubleCount * sizeof(double));
+        var bytes = checked(doubleCount * sizeof(float));
         if (bytes <= int.MaxValue)
             return (int)bytes;
         throw MaximumScratchRows(identity) is { } maximum
@@ -2207,7 +2207,7 @@ public sealed class MathBlocksCUDAProgram : IDisposable
             widthValue.Type.Kind == MathBlockValueKind.Scalar)
         {
             var exact = widthValue.AsScalar();
-            width = exact >= 1d && exact <= int.MaxValue && exact == Math.Truncate(exact) ? (long)exact : 0L;
+            width = exact >= 1f && exact <= int.MaxValue && exact == Math.Truncate(exact) ? (long)exact : 0L;
             plannedWidth = width;
         }
         else if (WindowCudaBlockCatalog.RequiresPlanTimeWidth(source))
@@ -2232,13 +2232,13 @@ public sealed class MathBlocksCUDAProgram : IDisposable
                 wantedBlocks,
                 0L,
                 rowBlocks < wantedBlocks ? ClampedByMaximumGridX : null);
-        if (perThread > int.MaxValue / (sizeof(double) * blockSize))
+        if (perThread > int.MaxValue / (sizeof(float) * blockSize))
         {
             throw new InvalidOperationException(string.Create(
                 System.Globalization.CultureInfo.InvariantCulture,
                 $"{identity}: CUDA supports widths of at most {WindowCudaBlockCatalog.MaximumWidth(source, options.BlockSize):N0} for this operation (scratch byte count); got {width:N0}."));
         }
-        var blockBytes = perThread * sizeof(double) * blockSize;
+        var blockBytes = perThread * sizeof(float) * blockSize;
         if (enforceWindowBudget)
             MathBlocksCudaOptionsValidator.ValidateWindowBudget(options, identity, perThread, blockBytes);
         var budgetBlocks = options.WindowScratchBudgetBytes / blockBytes;

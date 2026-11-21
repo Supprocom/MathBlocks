@@ -16,5 +16,5 @@ public struct MathBlockCudaGraphEdgeDescriptor
 
     /// <summary>Gets the weight value.</summary>
     [FieldOffset(MathBlockCudaGraphEdgeLayout.WeightOffset)]
-    public double Weight;
+    public float Weight;
 }

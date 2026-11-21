@@ -21,7 +21,7 @@ internal static partial class ProbabilityMathBlocks
             var x = inputs[0].AsScalar();
             var left = inputs[1].AsScalar();
             var right = inputs[2].AsScalar();
-            if (!(x is >= 0d and <= 1d && left > 0d && right > 0d))
+            if (!(x is >= 0f and <= 1f && left > 0f && right > 0f))
                 return MathBlockValue.Invalid(MathBlockType.Scalar(), "The inputs are outside the beta domain.");
             var options = domain.Options;
             var value = MathBlockProbability.RegularizedIncompleteBeta(x, left, right, options.IncompleteBetaMaximumIterations, options.IncompleteBetaTolerance, out var converged);
@@ -31,6 +31,6 @@ internal static partial class ProbabilityMathBlocks
             return options.IncompleteBetaNonConvergence == MathBlockNonConvergencePolicy.Invalid
                 ? MathBlockValue.Invalid(MathBlockType.Scalar(), "The continued fraction did not converge.")
                 : MathBlockValue.Scalar(value);
-        }, [MathBlockValue.Scalar(0.5d), MathBlockValue.Scalar(1d), MathBlockValue.Scalar(1d)], MathBlockValue.Scalar(0.5d), 1e-9, 32);
+        }, [MathBlockValue.Scalar(0.5f), MathBlockValue.Scalar(1f), MathBlockValue.Scalar(1f)], MathBlockValue.Scalar(0.5f), 1e-9f, 32);
     }
 }

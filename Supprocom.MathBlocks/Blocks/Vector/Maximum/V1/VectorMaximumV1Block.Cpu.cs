@@ -3,7 +3,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockVectorMath
 {
     /// <summary>Computes the <c>vector.maximum@1</c> mathematical operation.</summary>
-    public static double Maximum(IReadOnlyList<double> values)
+    public static float Maximum(IReadOnlyList<float> values)
     {
         ArgumentNullException.ThrowIfNull(values);
         var result = values[0];

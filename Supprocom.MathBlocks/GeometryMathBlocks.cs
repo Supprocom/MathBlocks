@@ -4,15 +4,15 @@ public static partial class MathBlockGeometry
 {
 
     /// <summary>Computes the signed two-dimensional cross product around an origin.</summary>
-    public static double Cross(MathBlockPoint origin, MathBlockPoint left, MathBlockPoint right) =>
+    public static float Cross(MathBlockPoint origin, MathBlockPoint left, MathBlockPoint right) =>
         (left.X - origin.X) * (right.Y - origin.Y) -
         (left.Y - origin.Y) * (right.X - origin.X);
 
-    private static double DirectedHausdorff(
+    private static float DirectedHausdorff(
         IReadOnlyList<MathBlockPoint> left,
         IReadOnlyList<MathBlockPoint> right)
     {
-        var maximum = 0d;
+        var maximum = 0f;
         for (var leftIndex = 0; leftIndex < left.Count; leftIndex++)
         {
             var minimum = Math.PositiveInfinity;
@@ -28,15 +28,15 @@ public static partial class MathBlockGeometry
         MathBlockPoint second,
         MathBlockPoint third,
         out MathBlockPoint center,
-        out double radiusSquare)
+        out float radiusSquare)
     {
-        var denominator = 2d * (first.X * (second.Y - third.Y) +
+        var denominator = 2f * (first.X * (second.Y - third.Y) +
                                 second.X * (third.Y - first.Y) +
                                 third.X * (first.Y - second.Y));
-        if (denominator == 0d)
+        if (denominator == 0f)
         {
             center = default;
-            radiusSquare = 0d;
+            radiusSquare = 0f;
             return false;
         }
         var firstSquare = first.X * first.X + first.Y * first.Y;
@@ -57,13 +57,13 @@ public static partial class MathBlockGeometry
 internal static partial class GeometryMathBlocks
 {
     private static readonly MathBlockValue square = MathBlockValue.PointSet(
-        new MathBlockPointSet([new(0d, 0d), new(1d, 0d), new(1d, 1d), new(0d, 1d)]));
+        new MathBlockPointSet([new(0f, 0f), new(1f, 0f), new(1f, 1f), new(0f, 1f)]));
 
     private static MathBlockOperation CreatePointSetScalar(
         string identifier,
-        Func<IReadOnlyList<MathBlockPoint>, double> function,
+        Func<IReadOnlyList<MathBlockPoint>, float> function,
         MathBlockValue sample,
-        double expected,
+        float expected,
         MathBlockTypeResolver resolver) => MathBlockOperationFactory.Create(
         identifier, 1, resolver,
         inputs =>
@@ -73,21 +73,21 @@ internal static partial class GeometryMathBlocks
                 ? MathBlockValue.Scalar(function(inputs[0].AsPointSet()), type.Unit)
                 : MathBlockValue.Invalid(type, "The point set is empty.");
         },
-        [sample], MathBlockValue.Scalar(expected), 1e-9, 8);
+        [sample], MathBlockValue.Scalar(expected), 1e-9f, 8);
 
     private static MathBlockOperation CreatePointPairScalar(
         string identifier,
-        Func<IReadOnlyList<MathBlockPoint>, IReadOnlyList<MathBlockPoint>, double> function,
+        Func<IReadOnlyList<MathBlockPoint>, IReadOnlyList<MathBlockPoint>, float> function,
         MathBlockValue left,
         MathBlockValue right,
-        double expected) => MathBlockOperationFactory.Create(
+        float expected) => MathBlockOperationFactory.Create(
         identifier, 2, PointPairLengthType,
         inputs => inputs[0].AsPointSet().Count > 0 && inputs[1].AsPointSet().Count > 0
             ? MathBlockValue.Scalar(function(inputs[0].AsPointSet(), inputs[1].AsPointSet()), inputs[0].Type.Unit)
             : MathBlockValue.Invalid(MathBlockType.Scalar(inputs[0].Type.Unit), "A point set is empty."),
-        [left, right], MathBlockValue.Scalar(expected), 1e-9, 4);
+        [left, right], MathBlockValue.Scalar(expected), 1e-9f, 4);
 
-    private static MathBlockValue Singleton(double x, double y) =>
+    private static MathBlockValue Singleton(float x, float y) =>
         MathBlockValue.PointSet(new MathBlockPointSet([new MathBlockPoint(x, y)]));
 
     private static MathBlockType SamePointSet(IReadOnlyList<MathBlockType> types)

@@ -10,17 +10,17 @@ public static partial class MathBlockVectorMath
 {
     // The counts are non-negative integers (a Vector never holds a non-finite value).
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    internal static bool CountsAreValid(ReadOnlySpan<double> counts)
+    internal static bool CountsAreValid(ReadOnlySpan<float> counts)
     {
         var index = 0;
         if (MathBlockSimd.UseBlocks)
         {
             // Four counts at a time, with the same test as the loop below: negative, or not equal to its own truncation (which a NaN is not).
-            var broken = Vector256<double>.Zero;
+            var broken = Vector256<float>.Zero;
             for (; index <= counts.Length - MathBlockSimd.BlockWidth; index += MathBlockSimd.BlockWidth)
             {
-                var block = Vector256.Create<double>(counts[index..]);
-                broken |= Vector256.LessThan(block, Vector256<double>.Zero) | ~Vector256.Equals(block, Vector256.Truncate(block));
+                var block = Vector256.Create<float>(counts[index..]);
+                broken |= Vector256.LessThan(block, Vector256<float>.Zero) | ~Vector256.Equals(block, Vector256.Truncate(block));
             }
 
             if (broken.ExtractMostSignificantBits() != 0u)
@@ -30,14 +30,14 @@ public static partial class MathBlockVectorMath
         for (; index < counts.Length; index++)
         {
             var count = counts[index];
-            if (count < 0d || count != Math.Truncate(count))
+            if (count < 0f || count != Math.Truncate(count))
                 return false;
         }
         return true;
     }
 
     // An offset is an integer scalar that fits an int32 without its extreme negative value.
-    internal static bool TryReadOffset(double value, out int offset)
+    internal static bool TryReadOffset(float value, out int offset)
     {
         offset = 0;
         if (value != Math.Truncate(value) || Math.Abs(value) > int.MaxValue)
@@ -47,7 +47,7 @@ public static partial class MathBlockVectorMath
     }
 
     // Row row + offset exists and is chained to row: for a later row by the counts at that row, for an earlier row by the counts at row.
-    internal static bool OffsetIsReachable(ReadOnlySpan<double> counts, int row, long offset)
+    internal static bool OffsetIsReachable(ReadOnlySpan<float> counts, int row, long offset)
     {
         var target = row + offset;
         if (target < 0 || target >= counts.Length)
@@ -57,7 +57,7 @@ public static partial class MathBlockVectorMath
 
     // Every row from row + start to row + end exists and is chained to row: counts[row] covers the rows before it, and the last
     // later row (row + end, or row itself when end is negative) covers every row up to it.
-    internal static bool OffsetSpanIsReachable(ReadOnlySpan<double> counts, int row, int start, int end)
+    internal static bool OffsetSpanIsReachable(ReadOnlySpan<float> counts, int row, int start, int end)
     {
         long before = start < 0 ? -(long)start : 0L;
         long after = end > 0 ? end : 0L;

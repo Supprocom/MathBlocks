@@ -6,6 +6,6 @@ internal static partial class GraphMathBlocks
     {
         internal const string Identity = "graph.weighted-degree@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => CreateVector("graph.weighted-degree", MathBlockGraphMath.WeightedDegree, path, [1d, 3d, 2d], WeightedGraphVector);
+        internal static MathBlockOperation Create() => CreateVector("graph.weighted-degree", MathBlockGraphMath.WeightedDegree, path, [1f, 3f, 2f], WeightedGraphVector);
     }
 }

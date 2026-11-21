@@ -6,6 +6,6 @@ internal static partial class StatisticalMathBlocks
     {
         internal const string Identity = "statistics.population-skewness@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateUnaryWithSample("statistics.population-skewness", MathBlockStatistics.PopulationSkewness, MathBlockValue.Vector([-1d, 0d, 1d]), 0d, DimensionlessStatisticType);
+        internal static MathBlockOperation Create() => CreateUnaryWithSample("statistics.population-skewness", MathBlockStatistics.PopulationSkewness, MathBlockValue.Vector([-1f, 0f, 1f]), 0f, DimensionlessStatisticType);
     }
 }

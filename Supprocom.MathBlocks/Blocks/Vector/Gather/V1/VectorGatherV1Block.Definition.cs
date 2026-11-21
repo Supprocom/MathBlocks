@@ -18,8 +18,8 @@ internal static partial class StructuralMathBlocks
                 GatherType,
                 inputs,
                 "An index is outside the vector domain."),
-            [vector, MathBlockValue.Vector([3d, 1d])],
-            MathBlockValue.Vector([4d, 2d]),
+            [vector, MathBlockValue.Vector([3f, 1f])],
+            MathBlockValue.Vector([4f, 2f]),
             performanceIterations: 16);
 
         private static MathBlockType GatherType(IReadOnlyList<MathBlockType> types)

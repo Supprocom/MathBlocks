@@ -6,6 +6,6 @@ internal static partial class VectorMathBlocks
     {
         internal const string Identity = "sequence.rolling-standard-deviation@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Trailing(1);
-        internal static MathBlockOperation Create() => CreateRolling("sequence.rolling-standard-deviation", MathBlockVectorMath.RollingStandardDeviation, [0.5d, 0.5d, 0.5d], squaredOutput: false);
+        internal static MathBlockOperation Create() => CreateRolling("sequence.rolling-standard-deviation", MathBlockVectorMath.RollingStandardDeviation, [0.5f, 0.5f, 0.5f], squaredOutput: false);
     }
 }

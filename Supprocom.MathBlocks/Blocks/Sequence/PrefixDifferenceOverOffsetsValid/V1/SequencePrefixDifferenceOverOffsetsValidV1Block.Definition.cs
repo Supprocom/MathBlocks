@@ -11,7 +11,7 @@ internal static partial class VectorMathBlocks
             5,
             MathBlockVectorMath.PrefixDifferenceValidityType,
             MathBlockVectorMath.PrefixDifferenceValidity,
-            [MathBlockValue.Vector([1d, 2d, 3d, 4d, 5d, 6d]), MathBlockValue.BooleanVector([true, true, true, true, true, true]), MathBlockValue.Vector([0d, 1d, 2d, 3d, 4d, 5d]), MathBlockValue.Scalar(-1d), MathBlockValue.Scalar(1d)],
+            [MathBlockValue.Vector([1f, 2f, 3f, 4f, 5f, 6f]), MathBlockValue.BooleanVector([true, true, true, true, true, true]), MathBlockValue.Vector([0f, 1f, 2f, 3f, 4f, 5f]), MathBlockValue.Scalar(-1f), MathBlockValue.Scalar(1f)],
             MathBlockValue.BooleanVector([false, true, true, true, true, false]),
             performanceIterations: 64);
     }

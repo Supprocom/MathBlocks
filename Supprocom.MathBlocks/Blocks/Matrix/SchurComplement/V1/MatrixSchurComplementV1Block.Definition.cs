@@ -12,6 +12,6 @@ internal static partial class AdvancedMathBlocks
             RequireSquareMatrix(types[0]);
             RequireDimensionlessScalar(types[1]);
             return MathBlockType.Matrix(types[0].Unit);
-        }, inputs => TryInteger(inputs[1].AsScalar(), out var size) && size > 0 && size < inputs[0].AsMatrix().Rows ? MathBlockValue.Matrix(MathBlockAdvanced.SchurComplement(inputs[0].AsMatrix(), size), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Matrix(inputs[0].Type.Unit), "The retained size is outside the operation domain."), [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [3d, 1d, 1d, 1d])), MathBlockValue.Scalar(1d)], MathBlockValue.Matrix(new MathBlockMatrix(1, 1, [2d])), performanceIterations: 4);
+        }, inputs => TryInteger(inputs[1].AsScalar(), out var size) && size > 0 && size < inputs[0].AsMatrix().Rows ? MathBlockValue.Matrix(MathBlockAdvanced.SchurComplement(inputs[0].AsMatrix(), size), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Matrix(inputs[0].Type.Unit), "The retained size is outside the operation domain."), [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [3f, 1f, 1f, 1f])), MathBlockValue.Scalar(1f)], MathBlockValue.Matrix(new MathBlockMatrix(1, 1, [2f])), performanceIterations: 4);
     }
 }

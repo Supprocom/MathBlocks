@@ -17,13 +17,13 @@ internal static partial class GraphMathBlocks
         {
             var graph = inputs[0].AsGraph();
             var subset = inputs[1].AsBooleanVector();
-            return MathBlockCollectionPrimitives.Any(graph, edge => edge.Weight < 0d) ||
+            return MathBlockCollectionPrimitives.Any(graph, edge => edge.Weight < 0f) ||
                    MathBlockCollectionPrimitives.All(subset, value => value) ||
                    MathBlockCollectionPrimitives.All(subset, value => !value)
                 ? MathBlockValue.Invalid(
                     MathBlockType.Scalar(),
                     "The graph or subset is outside the operation domain.")
                 : MathBlockValue.Scalar(MathBlockGraphMath.Conductance(graph, subset));
-        }, [path, MathBlockValue.BooleanVector([true, false, false])], MathBlockValue.Scalar(1d), performanceIterations: 4);
+        }, [path, MathBlockValue.BooleanVector([true, false, false])], MathBlockValue.Scalar(1f), performanceIterations: 4);
     }
 }

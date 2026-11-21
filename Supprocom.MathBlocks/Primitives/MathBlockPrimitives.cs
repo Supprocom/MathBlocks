@@ -2,14 +2,14 @@ namespace Supprocom.MathBlocks;
 
 internal static class MathBlockPrimitives
 {
-    public const double PI = 3.141592653589793238462643383279502884d;
-    public const double E = 2.718281828459045235360287471352662498d;
+    public const float PI = 3.141592653589793238462643383279502884f;
+    public const float E = 2.718281828459045235360287471352662498f;
 
-    public static double PositiveInfinity => FromBits(0x7ff0_0000_0000_0000ul);
-    public static double NegativeInfinity => FromBits(0xfff0_0000_0000_0000ul);
-    public static double NaN => FromBits(0x7ff8_0000_0000_0000ul);
+    public static float PositiveInfinity => FromBits(0x7ff0_0000_0000_0000ul);
+    public static float NegativeInfinity => FromBits(0xfff0_0000_0000_0000ul);
+    public static float NaN => FromBits(0x7ff8_0000_0000_0000ul);
 
-    public static double Abs(double value) => FromBits(ToBits(value) & 0x7fff_ffff_ffff_fffful);
+    public static float Abs(float value) => FromBits(ToBits(value) & 0x7fff_ffff_ffff_fffful);
 
     public static int Abs(int value)
     {
@@ -29,13 +29,13 @@ internal static class MathBlockPrimitives
         return -value;
     }
 
-    public static double CopySign(double magnitude, double sign) =>
+    public static float CopySign(float magnitude, float sign) =>
         FromBits((ToBits(magnitude) & 0x7fff_ffff_ffff_fffful) | (ToBits(sign) & 0x8000_0000_0000_0000ul));
 
-    public static int Sign(double value) => value > 0d ? 1 : value < 0d ? -1 : 0;
+    public static int Sign(float value) => value > 0f ? 1 : value < 0f ? -1 : 0;
 
     // IEEE 754-2019 minimum and maximum: a NaN operand gives NaN, and -0 is less than +0.
-    public static double Min(double left, double right)
+    public static float Min(float left, float right)
     {
         if (IsNaN(left) || IsNaN(right))
             return NaN;
@@ -43,14 +43,14 @@ internal static class MathBlockPrimitives
             return left;
         if (right < left)
             return right;
-        if (left == 0d)
+        if (left == 0f)
             return IsNegative(left) ? left : right;
         return left;
     }
 
     public static int Min(int left, int right) => left < right ? left : right;
 
-    public static double Max(double left, double right)
+    public static float Max(float left, float right)
     {
         if (IsNaN(left) || IsNaN(right))
             return NaN;
@@ -58,21 +58,21 @@ internal static class MathBlockPrimitives
             return left;
         if (right > left)
             return right;
-        if (left == 0d)
+        if (left == 0f)
             return IsNegative(left) ? right : left;
         return left;
     }
 
     public static int Max(int left, int right) => left > right ? left : right;
 
-    public static double Clamp(double value, double lower, double upper)
+    public static float Clamp(float value, float lower, float upper)
     {
         if (lower > upper)
             throw new ArgumentException("The lower limit exceeds the upper limit.");
         return value < lower ? lower : value > upper ? upper : value;
     }
 
-    public static double Truncate(double value)
+    public static float Truncate(float value)
     {
         var bits = ToBits(value);
         var exponent = (int)((bits >> 52) & 0x7fful) - 1023;
@@ -84,31 +84,31 @@ internal static class MathBlockPrimitives
         return FromBits(bits & ~fractionMask);
     }
 
-    public static double Floor(double value)
+    public static float Floor(float value)
     {
         var truncated = Truncate(value);
-        return value < truncated ? truncated - 1d : truncated;
+        return value < truncated ? truncated - 1f : truncated;
     }
 
-    public static double Ceiling(double value)
+    public static float Ceiling(float value)
     {
         var truncated = Truncate(value);
-        return value > truncated ? truncated + 1d : truncated;
+        return value > truncated ? truncated + 1f : truncated;
     }
 
-    public static double Round(double value)
+    public static float Round(float value)
     {
-        if (!IsFinite(value) || Abs(value) >= 4_503_599_627_370_496d)
+        if (!IsFinite(value) || Abs(value) >= 4_503_599_627_370_496f)
             return value;
         var magnitude = Abs(value);
         var integral = Truncate(magnitude);
         var fraction = magnitude - integral;
-        if (fraction > 0.5d || (fraction == 0.5d && (((long)integral & 1L) != 0L)))
-            integral += 1d;
+        if (fraction > 0.5f || (fraction == 0.5f && (((long)integral & 1L) != 0L)))
+            integral += 1f;
         return CopySign(integral, value);
     }
 
-    public static double Round(double value, MidpointRounding mode)
+    public static float Round(float value, MidpointRounding mode)
     {
         if (mode != MidpointRounding.ToEven)
             throw new ArgumentOutOfRangeException(nameof(mode));
@@ -118,16 +118,16 @@ internal static class MathBlockPrimitives
     // IEEE 754 requires the square root to be correctly rounded, so the base library's Math.Sqrt (the hardware
     // instruction) and CUDA's double sqrt give the same bits for every input. It is the one member of the base
     // library's Math class that the library calls.
-    public static double Sqrt(double value)
+    public static float Sqrt(float value)
     {
-        if (value == 0d || IsPositiveInfinity(value))
+        if (value == 0f || IsPositiveInfinity(value))
             return value;
-        if (value < 0d || IsNaN(value))
+        if (value < 0f || IsNaN(value))
             return QuietNaN();
         return System.Math.Sqrt(value);
     }
 
-    public static int ILogB(double value)
+    public static int ILogB(float value)
     {
         var bits = ToBits(Abs(value));
         var exponent = (int)((bits >> 52) & 0x7fful);
@@ -147,9 +147,9 @@ internal static class MathBlockPrimitives
 
     // value * 2^exponent rounded once to nearest, ties to even (IEEE 754 scaleB, C ldexp), including subnormal
     // results: the significand is shifted to the result's last bit and rounded there.
-    public static double ScaleB(double value, int exponent)
+    public static float ScaleB(float value, int exponent)
     {
-        if (value == 0d || !IsFinite(value))
+        if (value == 0f || !IsFinite(value))
             return value;
         var bits = ToBits(value);
         var sign = bits & 0x8000_0000_0000_0000ul;
@@ -191,36 +191,36 @@ internal static class MathBlockPrimitives
         return FromBits(sign | quotient);
     }
 
-    public static double Exp(double value) => MathBlockScalar.Exponential(value);
-    public static double Log(double value) => MathBlockScalar.NaturalLogarithm(value);
-    public static double Log2(double value) => MathBlockScalar.BinaryLogarithm(value);
-    public static double Pow(double value, double exponent) => MathBlockScalar.Power(value, exponent);
-    public static double Sin(double value) => MathBlockScalar.Sine(value);
-    public static double Cos(double value) => MathBlockScalar.Cosine(value);
-    public static double Atan2(double y, double x) => MathBlockScalar.ArcTangent2(y, x);
-    public static double Cbrt(double value) => MathBlockScalar.CubeRoot(value);
+    public static float Exp(float value) => MathBlockScalar.Exponential(value);
+    public static float Log(float value) => MathBlockScalar.NaturalLogarithm(value);
+    public static float Log2(float value) => MathBlockScalar.BinaryLogarithm(value);
+    public static float Pow(float value, float exponent) => MathBlockScalar.Power(value, exponent);
+    public static float Sin(float value) => MathBlockScalar.Sine(value);
+    public static float Cos(float value) => MathBlockScalar.Cosine(value);
+    public static float Atan2(float y, float x) => MathBlockScalar.ArcTangent2(y, x);
+    public static float Cbrt(float value) => MathBlockScalar.CubeRoot(value);
 
-    public static double Asin(double value)
+    public static float Asin(float value)
     {
-        if (value < -1d || value > 1d || IsNaN(value))
+        if (value < -1f || value > 1f || IsNaN(value))
             return QuietNaN();
-        return Atan2(value, Sqrt((1d - value) * (1d + value)));
+        return Atan2(value, Sqrt((1f - value) * (1f + value)));
     }
 
-    public static double Acos(double value)
+    public static float Acos(float value)
     {
-        if (value < -1d || value > 1d || IsNaN(value))
+        if (value < -1f || value > 1f || IsNaN(value))
             return QuietNaN();
-        return Atan2(Sqrt((1d - value) * (1d + value)), value);
+        return Atan2(Sqrt((1f - value) * (1f + value)), value);
     }
 
-    public static bool IsFinite(double value) =>
+    public static bool IsFinite(float value) =>
         (ToBits(value) & 0x7ff0_0000_0000_0000ul) != 0x7ff0_0000_0000_0000ul;
 
-    public static bool IsNaN(double value) =>
+    public static bool IsNaN(float value) =>
         (ToBits(value) & 0x7fff_ffff_ffff_fffful) > 0x7ff0_0000_0000_0000ul;
 
-    public static bool IsPositiveInfinity(double value) => ToBits(value) == 0x7ff0_0000_0000_0000ul;
+    public static bool IsPositiveInfinity(float value) => ToBits(value) == 0x7ff0_0000_0000_0000ul;
 
     public static int FloorLog2(uint value)
     {
@@ -242,9 +242,9 @@ internal static class MathBlockPrimitives
         return result;
     }
 
-    private static bool IsNegative(double value) => (ToBits(value) & 0x8000_0000_0000_0000ul) != 0ul;
-    private static double QuietNaN() => FromBits(0x7ff8_0000_0000_0000ul);
+    private static bool IsNegative(float value) => (ToBits(value) & 0x8000_0000_0000_0000ul) != 0ul;
+    private static float QuietNaN() => FromBits(0x7ff8_0000_0000_0000ul);
 
-    internal static unsafe ulong ToBits(double value) => *(ulong*)&value;
-    internal static unsafe double FromBits(ulong value) => *(double*)&value;
+    internal static unsafe ulong ToBits(float value) => *(ulong*)&value;
+    internal static unsafe float FromBits(ulong value) => *(float*)&value;
 }

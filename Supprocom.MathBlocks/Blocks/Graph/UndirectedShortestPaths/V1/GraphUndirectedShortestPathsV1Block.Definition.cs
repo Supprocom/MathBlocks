@@ -17,12 +17,12 @@ internal static partial class GraphMathBlocks
         {
             var graph = inputs[0].AsGraph();
             var source = inputs[1].AsScalar();
-            if (MathBlockCollectionPrimitives.Any(graph, edge => edge.Weight < 0d) ||
+            if (MathBlockCollectionPrimitives.Any(graph, edge => edge.Weight < 0f) ||
                 source != Math.Truncate(source) ||
-                source < 0d ||
+                source < 0f ||
                 source >= graph.VertexCount)
                 return MathBlockValue.Invalid(MathBlockType.Vector(inputs[0].Type.Unit, graph.VertexCount), "The graph or source is outside the operation domain.");
             return MathBlockValue.Vector(MathBlockGraphMath.UndirectedShortestPaths(graph, (int)source), inputs[0].Type.Unit, true);
-        }, [path, MathBlockValue.Scalar(0d)], MathBlockValue.Vector([0d, 1d, 3d]), performanceIterations: 4);
+        }, [path, MathBlockValue.Scalar(0f)], MathBlockValue.Vector([0f, 1f, 3f]), performanceIterations: 4);
     }
 }

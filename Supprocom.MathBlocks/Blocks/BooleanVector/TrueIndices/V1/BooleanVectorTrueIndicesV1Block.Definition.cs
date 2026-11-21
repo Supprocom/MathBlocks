@@ -11,6 +11,6 @@ internal static partial class StructuralMathBlocks
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.BooleanVector);
             return MathBlockType.Vector();
-        }, inputs => MathBlockValue.Vector(MathBlockStructure.TrueIndices(inputs[0].AsBooleanVector()), default, true), [MathBlockValue.BooleanVector([false, true, false, true])], MathBlockValue.Vector([1d, 3d]), performanceIterations: 16);
+        }, inputs => MathBlockValue.Vector(MathBlockStructure.TrueIndices(inputs[0].AsBooleanVector()), default, true), [MathBlockValue.BooleanVector([false, true, false, true])], MathBlockValue.Vector([1f, 3f]), performanceIterations: 16);
     }
 }

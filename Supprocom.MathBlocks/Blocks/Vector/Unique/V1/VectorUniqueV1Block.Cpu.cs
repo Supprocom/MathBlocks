@@ -4,10 +4,10 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockStructure
 {
     /// <summary>Computes the <c>vector.unique@1</c> mathematical operation.</summary>
-    public static double[] Unique(IReadOnlyList<double> values)
+    public static float[] Unique(IReadOnlyList<float> values)
     {
         ArgumentNullException.ThrowIfNull(values);
-        var result = new double[values.Count];
+        var result = new float[values.Count];
         var count = 0;
         for (var index = 0; index < values.Count; index++)
         {
@@ -22,7 +22,7 @@ public static partial class MathBlockStructure
             if (!found)
                 result[count++] = values[index];
         }
-        var exact = new double[count];
+        var exact = new float[count];
         for (var index = 0; index < count; index++)
             exact[index] = result[index];
         return exact;

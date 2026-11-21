@@ -19,6 +19,6 @@ internal static partial class GeometryMathBlocks
             }
         }
 
-        private static MathBlockOperation CreateConvexHull() => MathBlockOperationFactory.Create("geometry.convex-hull", 1, SamePointSet, inputs => inputs[0].AsPointSet().Count > 0 ? HullOrInvalid(inputs) : MathBlockValue.Invalid(MathBlockType.PointSet(inputs[0].Type.Unit), "The point set is empty."), [MathBlockValue.PointSet(new MathBlockPointSet([new(0d, 0d), new(1d, 0d), new(0.5d, 0.5d), new(1d, 1d), new(0d, 1d)]))], square, performanceIterations: 4);
+        private static MathBlockOperation CreateConvexHull() => MathBlockOperationFactory.Create("geometry.convex-hull", 1, SamePointSet, inputs => inputs[0].AsPointSet().Count > 0 ? HullOrInvalid(inputs) : MathBlockValue.Invalid(MathBlockType.PointSet(inputs[0].Type.Unit), "The point set is empty."), [MathBlockValue.PointSet(new MathBlockPointSet([new(0f, 0f), new(1f, 0f), new(0.5f, 0.5f), new(1f, 1f), new(0f, 1f)]))], square, performanceIterations: 4);
     }
 }

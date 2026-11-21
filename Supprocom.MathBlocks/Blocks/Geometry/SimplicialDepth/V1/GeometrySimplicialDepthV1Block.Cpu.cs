@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockAdvanced
 {
     /// <summary>Computes the <c>geometry.simplicial-depth@1</c> mathematical operation.</summary>
-    public static double SimplicialDepth(IReadOnlyList<MathBlockPoint> sample, MathBlockPoint point)
+    public static float SimplicialDepth(IReadOnlyList<MathBlockPoint> sample, MathBlockPoint point)
     {
         ArgumentNullException.ThrowIfNull(sample);
         var containing = 0;
@@ -18,17 +18,17 @@ public static partial class MathBlockAdvanced
                     total++;
                     // A degenerate triangle holds no point. For any other triangle a coordinate that is not finite (an overflowing
                     // denominator or numerator) makes the depth not finite (invalid); a NaN would fail both bounds and count as outside.
-                    if (MathBlockGeometry.BarycentricDenominator(sample[first], sample[second], sample[third]) == 0d)
+                    if (MathBlockGeometry.BarycentricDenominator(sample[first], sample[second], sample[third]) == 0f)
                         continue;
                     var coordinates = MathBlockGeometry.BarycentricCoordinates(point, sample[first], sample[second], sample[third]);
                     if (!MathBlockCollectionPrimitives.All(coordinates, Math.IsFinite))
                         return Math.NaN;
-                    if (MathBlockCollectionPrimitives.All(coordinates, value => value >= 0d && value <= 1d))
+                    if (MathBlockCollectionPrimitives.All(coordinates, value => value >= 0f && value <= 1f))
                         containing++;
                 }
             }
         }
 
-        return (double)containing / total;
+        return (float)containing / total;
     }
 }

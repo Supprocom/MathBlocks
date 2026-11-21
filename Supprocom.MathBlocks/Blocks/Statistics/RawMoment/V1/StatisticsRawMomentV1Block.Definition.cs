@@ -6,6 +6,6 @@ internal static partial class AdvancedMathBlocks
     {
         internal const string Identity = "statistics.raw-moment@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateMoment("statistics.raw-moment", MathBlockAdvanced.RawMoment, 14d / 3d);
+        internal static MathBlockOperation Create() => CreateMoment("statistics.raw-moment", MathBlockAdvanced.RawMoment, 14f / 3f);
     }
 }

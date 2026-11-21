@@ -4,11 +4,11 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockStructure
 {
     /// <summary>Computes the <c>matrix.append-row@1</c> mathematical operation.</summary>
-    public static MathBlockMatrix AppendRow(MathBlockMatrix matrix, IReadOnlyList<double> row)
+    public static MathBlockMatrix AppendRow(MathBlockMatrix matrix, IReadOnlyList<float> row)
     {
         ArgumentNullException.ThrowIfNull(matrix);
         ArgumentNullException.ThrowIfNull(row);
-        var result = new double[(matrix.Rows + 1) * matrix.Columns];
+        var result = new float[(matrix.Rows + 1) * matrix.Columns];
         for (var rowIndex = 0; rowIndex < matrix.Rows; rowIndex++)
             for (var column = 0; column < matrix.Columns; column++)
                 result[rowIndex * matrix.Columns + column] = matrix[rowIndex, column];

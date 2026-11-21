@@ -3,7 +3,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockVectorMath
 {
     /// <summary>Computes the <c>vector.add@1</c> mathematical operation.</summary>
-    public static double[] Add(IReadOnlyList<double> left, IReadOnlyList<double> right)
+    public static float[] Add(IReadOnlyList<float> left, IReadOnlyList<float> right)
     {
         ArgumentNullException.ThrowIfNull(left);
         ArgumentNullException.ThrowIfNull(right);

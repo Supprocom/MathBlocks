@@ -5,10 +5,10 @@ public static partial class MathBlockStructure
 {
 
     /// <summary>Returns a copy of the sequence with a value appended.</summary>
-    public static double[] Append(IReadOnlyList<double> values, double value)
+    public static float[] Append(IReadOnlyList<float> values, float value)
     {
         ArgumentNullException.ThrowIfNull(values);
-        var result = new double[values.Count + 1];
+        var result = new float[values.Count + 1];
         for (var index = 0; index < values.Count; index++)
             result[index] = values[index];
         result[^1] = value;
@@ -16,10 +16,10 @@ public static partial class MathBlockStructure
     }
 
     /// <summary>Returns a copy of the sequence with a value prepended.</summary>
-    public static double[] Prepend(double value, IReadOnlyList<double> values)
+    public static float[] Prepend(float value, IReadOnlyList<float> values)
     {
         ArgumentNullException.ThrowIfNull(values);
-        var result = new double[values.Count + 1];
+        var result = new float[values.Count + 1];
         result[0] = value;
         for (var index = 0; index < values.Count; index++)
             result[index + 1] = values[index];
@@ -27,20 +27,20 @@ public static partial class MathBlockStructure
     }
 
     /// <summary>Copies one row from a matrix.</summary>
-    public static double[] Row(MathBlockMatrix matrix, int row)
+    public static float[] Row(MathBlockMatrix matrix, int row)
     {
         ArgumentNullException.ThrowIfNull(matrix);
-        var result = new double[matrix.Columns];
+        var result = new float[matrix.Columns];
         for (var column = 0; column < matrix.Columns; column++)
             result[column] = matrix[row, column];
         return result;
     }
 
     /// <summary>Copies one column from a matrix.</summary>
-    public static double[] Column(MathBlockMatrix matrix, int column)
+    public static float[] Column(MathBlockMatrix matrix, int column)
     {
         ArgumentNullException.ThrowIfNull(matrix);
-        var result = new double[matrix.Rows];
+        var result = new float[matrix.Rows];
         for (var row = 0; row < matrix.Rows; row++)
             result[row] = matrix[row, column];
         return result;
@@ -49,8 +49,8 @@ public static partial class MathBlockStructure
 
 internal static partial class StructuralMathBlocks
 {
-    private static readonly MathBlockValue vector = MathBlockValue.Vector([1d, 2d, 3d, 4d]);
-    private static readonly MathBlockValue matrix = MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1d, 2d, 3d, 4d]));
+    private static readonly MathBlockValue vector = MathBlockValue.Vector([1f, 2f, 3f, 4f]);
+    private static readonly MathBlockValue matrix = MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1f, 2f, 3f, 4f]));
 
     private static MathBlockOperation CreateAppend(string identifier, bool prepend) => MathBlockOperationFactory.Create(
         identifier, 2,
@@ -67,8 +67,8 @@ internal static partial class StructuralMathBlocks
                 ? MathBlockStructure.Prepend(inputs[1].AsScalar(), inputs[0].AsVector())
                 : MathBlockStructure.Append(inputs[0].AsVector(), inputs[1].AsScalar()),
             inputs[0].Type.Unit, true),
-        [MathBlockValue.Vector([1d, 2d]), MathBlockValue.Scalar(3d)],
-        MathBlockValue.Vector(prepend ? [3d, 1d, 2d] : [1d, 2d, 3d]), performanceIterations: 32);
+        [MathBlockValue.Vector([1f, 2f]), MathBlockValue.Scalar(3f)],
+        MathBlockValue.Vector(prepend ? [3f, 1f, 2f] : [1f, 2f, 3f]), performanceIterations: 32);
 
     private static MathBlockOperation CreateMatrixIndex(string identifier, bool row)
     {
@@ -91,14 +91,14 @@ internal static partial class StructuralMathBlocks
                 return MathBlockValue.Vector(row ? MathBlockStructure.Row(source, index) : MathBlockStructure.Column(source, index),
                     inputs[0].Type.Unit, true);
             },
-            [matrix, MathBlockValue.Scalar(1d)], MathBlockValue.Vector(row ? [3d, 4d] : [2d, 4d]),
+            [matrix, MathBlockValue.Scalar(1f)], MathBlockValue.Vector(row ? [3f, 4f] : [2f, 4f]),
             performanceIterations: 32);
     }
 
     private static MathBlockOperation CreateMatrixReduction(
         string identifier,
-        Func<MathBlockMatrix, double[]> function,
-        double[] expected,
+        Func<MathBlockMatrix, float[]> function,
+        float[] expected,
         bool rows) => MathBlockOperationFactory.Create(
         identifier, 1,
         types =>
@@ -130,9 +130,9 @@ internal static partial class StructuralMathBlocks
 
     private static int ProductOrUnknown(int left, int right) => left == 0 || right == 0 ? 0 : left * right;
 
-    private static bool TryNonnegativeInteger(double value, out int result)
+    private static bool TryNonnegativeInteger(float value, out int result)
     {
-        if (value is >= 0d and <= int.MaxValue && value == Math.Truncate(value))
+        if (value is >= 0f and <= int.MaxValue && value == Math.Truncate(value))
         {
             result = (int)value;
             return true;

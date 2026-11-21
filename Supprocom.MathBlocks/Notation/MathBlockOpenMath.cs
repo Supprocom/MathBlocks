@@ -421,14 +421,14 @@ public static partial class MathBlockOpenMath
         writer.WriteEndElement();
     }
 
-    private static void WriteDouble(XmlWriter writer, double value)
+    private static void WriteDouble(XmlWriter writer, float value)
     {
-        if (!double.IsFinite(value))
+        if (!float.IsFinite(value))
             throw new InvalidOperationException("An OpenMath float must be finite.");
         writer.WriteStartElement("OMF", NamespaceUri);
         writer.WriteAttributeString(
             "hex",
-            BitConverter.DoubleToUInt64Bits(value).ToString("X16", CultureInfo.InvariantCulture));
+            BitConverter.SingleToUInt32Bits(value).ToString("X16", CultureInfo.InvariantCulture));
         writer.WriteFullEndElement();
     }
 

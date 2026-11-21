@@ -6,6 +6,6 @@ internal static partial class ProbabilityMathBlocks
     {
         internal const string Identity = "probability.normalize@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateVectorUnary("probability.normalize", MathBlockProbability.Normalize, MathBlockValue.Vector([1d, 3d]), [0.25d, 0.75d], requireDistribution: false);
+        internal static MathBlockOperation Create() => CreateVectorUnary("probability.normalize", MathBlockProbability.Normalize, MathBlockValue.Vector([1f, 3f]), [0.25f, 0.75f], requireDistribution: false);
     }
 }

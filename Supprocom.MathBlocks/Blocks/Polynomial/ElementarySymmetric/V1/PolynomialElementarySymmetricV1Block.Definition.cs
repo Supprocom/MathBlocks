@@ -18,6 +18,6 @@ internal static partial class ProbabilityMathBlocks
         {
             var values = inputs[0].AsVector();
             return TryInteger(inputs[1].AsScalar(), out var order) && order >= 0 && order <= values.Count ? MathBlockValue.Scalar(MathBlockProbability.ElementarySymmetricPolynomial(values, order)) : MathBlockValue.Invalid(MathBlockType.Scalar(), "The order is outside the polynomial domain.");
-        }, [MathBlockValue.Vector([1d, 2d, 3d]), MathBlockValue.Scalar(2d)], MathBlockValue.Scalar(11d), performanceIterations: 16);
+        }, [MathBlockValue.Vector([1f, 2f, 3f]), MathBlockValue.Scalar(2f)], MathBlockValue.Scalar(11f), performanceIterations: 16);
     }
 }

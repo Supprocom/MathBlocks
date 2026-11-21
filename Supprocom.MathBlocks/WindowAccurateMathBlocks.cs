@@ -32,27 +32,27 @@ internal static class WindowAccurateMathBlocks
     internal const string FormFamily = "window-accurate";
     internal const string ValidityFamily = "window-accurate-valid";
 
-    private static readonly MathBlockValue Level = MathBlockValue.Vector([2d, 2d, 2d, 5d, 1d, 4d]);
+    private static readonly MathBlockValue Level = MathBlockValue.Vector([2f, 2f, 2f, 5f, 1f, 4f]);
 
     // Name, type source and regression rows for the sample Level at width 3; NaN marks a filled row.
     private static readonly AccurateDefinition[] Definitions =
     [
         new("sum", MathBlockWindowAccurateStatistic.Sum, VectorMathBlocks.VectorSumV1Block.Create,
-            [double.NaN, double.NaN, 6d, 9d, 8d, 10d]),
+            [float.NaN, float.NaN, 6f, 9f, 8f, 10f]),
         new("mean", MathBlockWindowAccurateStatistic.Mean, VectorMathBlocks.VectorMeanV1Block.Create,
-            [double.NaN, double.NaN, 2d, 3d, 8d / 3d, 10d / 3d]),
+            [float.NaN, float.NaN, 2f, 3f, 8f / 3f, 10f / 3f]),
         new("population-variance", MathBlockWindowAccurateStatistic.PopulationVariance,
             StatisticalMathBlocks.StatisticsPopulationVarianceV1Block.Create,
-            [double.NaN, double.NaN, 0d, 2d, 78d / 27d, 78d / 27d]),
+            [float.NaN, float.NaN, 0f, 2f, 78f / 27f, 78f / 27f]),
         new("sample-variance", MathBlockWindowAccurateStatistic.SampleVariance,
             StatisticalMathBlocks.StatisticsSampleVarianceV1Block.Create,
-            [double.NaN, double.NaN, 0d, 3d, 78d / 18d, 78d / 18d]),
+            [float.NaN, float.NaN, 0f, 3f, 78f / 18f, 78f / 18f]),
         new("population-standard-deviation", MathBlockWindowAccurateStatistic.PopulationStandardDeviation,
             StatisticalMathBlocks.StatisticsPopulationStandardDeviationV1Block.Create,
-            [double.NaN, double.NaN, 0d, Math.Sqrt(2d), Math.Sqrt(78d / 27d), Math.Sqrt(78d / 27d)]),
+            [float.NaN, float.NaN, 0f, Math.Sqrt(2f), Math.Sqrt(78f / 27f), Math.Sqrt(78f / 27f)]),
         new("sample-standard-deviation", MathBlockWindowAccurateStatistic.SampleStandardDeviation,
             StatisticalMathBlocks.StatisticsSampleStandardDeviationV1Block.Create,
-            [double.NaN, double.NaN, 0d, Math.Sqrt(3d), Math.Sqrt(78d / 18d), Math.Sqrt(78d / 18d)])
+            [float.NaN, float.NaN, 0f, Math.Sqrt(3f), Math.Sqrt(78f / 18f), Math.Sqrt(78f / 18f)])
     ];
 
     internal static MathBlockWindowEntry[] CreateEntries()
@@ -77,10 +77,10 @@ internal static class WindowAccurateMathBlocks
     private static MathBlockOperation CreateForm(AccurateDefinition definition, MathBlockWindowForm form)
     {
         var unit = form.ResolveResultUnit([Level.Type]);
-        var expected = new double[definition.Expected.Length];
+        var expected = new float[definition.Expected.Length];
         for (var index = 0; index < expected.Length; index++)
         {
-            expected[index] = double.IsNaN(definition.Expected[index])
+            expected[index] = float.IsNaN(definition.Expected[index])
                 ? WindowMathBlocks.SampleFill
                 : definition.Expected[index];
         }
@@ -91,7 +91,7 @@ internal static class WindowAccurateMathBlocks
             form.EvaluateForm,
             [Level, MathBlockValue.Scalar(WindowMathBlocks.SampleWidth), MathBlockValue.Scalar(WindowMathBlocks.SampleFill, unit)],
             MathBlockValue.Vector(expected, unit),
-            1e-12,
+            1e-12f,
             64,
             MathBlockCausalityInfo.Trailing(form.FormArity - 2));
         operation.TypeSignatureFactory = () => form.CreateSignature(operation.Identity, validity: false);
@@ -102,7 +102,7 @@ internal static class WindowAccurateMathBlocks
     {
         var expected = new bool[definition.Expected.Length];
         for (var index = 0; index < expected.Length; index++)
-            expected[index] = !double.IsNaN(definition.Expected[index]);
+            expected[index] = !float.IsNaN(definition.Expected[index]);
         var operation = MathBlockOperationFactory.Create(
             $"{ValidityFamily}.{definition.Name}",
             form.ValidityArity,
@@ -120,5 +120,5 @@ internal static class WindowAccurateMathBlocks
         string Name,
         MathBlockWindowAccurateStatistic Statistic,
         Func<MathBlockOperation> TypeSource,
-        double[] Expected);
+        float[] Expected);
 }

@@ -6,6 +6,6 @@ internal static partial class MatrixMathBlocks
     {
         internal const string Identity = "matrix.determinant@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => CreateScalarMatrixReduction("matrix.determinant", MathBlockLinearAlgebra.Determinant, matrixA, -2d, DeterminantType);
+        internal static MathBlockOperation Create() => CreateScalarMatrixReduction("matrix.determinant", MathBlockLinearAlgebra.Determinant, matrixA, -2f, DeterminantType);
     }
 }

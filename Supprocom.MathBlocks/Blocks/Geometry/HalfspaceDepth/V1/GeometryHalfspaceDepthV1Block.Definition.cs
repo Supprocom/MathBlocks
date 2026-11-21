@@ -11,6 +11,6 @@ internal static partial class GeometryMathBlocks
         {
             PointPairLengthType(types);
             return MathBlockType.Scalar();
-        }, inputs => inputs[0].AsPointSet().Count > 0 && inputs[1].AsPointSet().Count == 1 ? MathBlockValue.Scalar(MathBlockGeometry.HalfspaceDepth(inputs[0].AsPointSet(), inputs[1].AsPointSet()[0])) : MathBlockValue.Invalid(MathBlockType.Scalar(), "The operation requires a sample and one point."), [square, Singleton(0.5d, 0.5d)], MathBlockValue.Scalar(0.5d), performanceIterations: 4);
+        }, inputs => inputs[0].AsPointSet().Count > 0 && inputs[1].AsPointSet().Count == 1 ? MathBlockValue.Scalar(MathBlockGeometry.HalfspaceDepth(inputs[0].AsPointSet(), inputs[1].AsPointSet()[0])) : MathBlockValue.Invalid(MathBlockType.Scalar(), "The operation requires a sample and one point."), [square, Singleton(0.5f, 0.5f)], MathBlockValue.Scalar(0.5f), performanceIterations: 4);
     }
 }

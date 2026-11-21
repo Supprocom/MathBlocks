@@ -1367,13 +1367,13 @@ public static partial class MathBlockFormulaInterchange
 
     private static void WriteDouble(
         XmlWriter writer,
-        double value,
+        float value,
         string? id,
         MathBlockFormulaFormat format)
     {
-        if (!double.IsFinite(value))
+        if (!float.IsFinite(value))
             throw new InvalidOperationException("A formula float must be finite.");
-        var bits = BitConverter.DoubleToUInt64Bits(value)
+        var bits = BitConverter.SingleToUInt32Bits(value)
             .ToString("X16", CultureInfo.InvariantCulture);
         if (format == MathBlockFormulaFormat.OpenMath)
         {

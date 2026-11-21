@@ -12,7 +12,7 @@ internal static partial class VectorMathBlocks
             var width = RequirePositiveInteger(inputs[1].AsScalar());
             var probability = inputs[2].AsScalar();
             var values = inputs[0].AsVector();
-            return width <= values.Count && probability is >= 0d and <= 1d ? MathBlockValue.Vector(MathBlockVectorMath.RollingQuantile(values, width, probability), inputs[0].Type.Unit, true) : MathBlockValue.Invalid(MathBlockType.Vector(inputs[0].Type.Unit), "The inputs are outside the operation domain.");
-        }, [sampleVector, MathBlockValue.Scalar(2d), MathBlockValue.Scalar(0.25d)], MathBlockValue.Vector([1.25d, 2.25d, 3.25d]), performanceIterations: 16), retainedRows: 1);
+            return width <= values.Count && probability is >= 0f and <= 1f ? MathBlockValue.Vector(MathBlockVectorMath.RollingQuantile(values, width, probability), inputs[0].Type.Unit, true) : MathBlockValue.Invalid(MathBlockType.Vector(inputs[0].Type.Unit), "The inputs are outside the operation domain.");
+        }, [sampleVector, MathBlockValue.Scalar(2f), MathBlockValue.Scalar(0.25f)], MathBlockValue.Vector([1.25f, 2.25f, 3.25f]), performanceIterations: 16), retainedRows: 1);
     }
 }

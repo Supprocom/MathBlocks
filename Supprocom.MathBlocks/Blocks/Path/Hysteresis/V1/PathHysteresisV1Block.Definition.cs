@@ -7,7 +7,7 @@ internal static partial class PathMathBlocks
         internal const string Identity = "path.hysteresis@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Expanding;
         internal static MathBlockOperation Create() => CreateHysteresis();
-        private static MathBlockOperation CreateHysteresis() => MathBlockOperationFactory.Create("path.hysteresis", 3, HysteresisType, inputs => inputs[1].AsScalar() < inputs[2].AsScalar() ? MathBlockValue.Vector(MathBlockPath.Hysteresis(inputs[0].AsVector(), inputs[1].AsScalar(), inputs[2].AsScalar()), default, true) : MathBlockOperationFactory.Invalid(HysteresisType, inputs, "The lower threshold must be less than the upper threshold."), [MathBlockValue.Vector([-2d, 0d, 2d, 0d, -2d]), MathBlockValue.Scalar(-1d), MathBlockValue.Scalar(1d)], MathBlockValue.Vector([-1d, -1d, 1d, 1d, -1d]), performanceIterations: 16);
+        private static MathBlockOperation CreateHysteresis() => MathBlockOperationFactory.Create("path.hysteresis", 3, HysteresisType, inputs => inputs[1].AsScalar() < inputs[2].AsScalar() ? MathBlockValue.Vector(MathBlockPath.Hysteresis(inputs[0].AsVector(), inputs[1].AsScalar(), inputs[2].AsScalar()), default, true) : MathBlockOperationFactory.Invalid(HysteresisType, inputs, "The lower threshold must be less than the upper threshold."), [MathBlockValue.Vector([-2f, 0f, 2f, 0f, -2f]), MathBlockValue.Scalar(-1f), MathBlockValue.Scalar(1f)], MathBlockValue.Vector([-1f, -1f, 1f, 1f, -1f]), performanceIterations: 16);
 
         private static MathBlockType HysteresisType(IReadOnlyList<MathBlockType> types)
         {

@@ -10,7 +10,7 @@ public static partial class MathBlockStructure
         ArgumentNullException.ThrowIfNull(right);
         var rows = left.Rows * right.Rows;
         var columns = left.Columns * right.Columns;
-        var result = new double[rows * columns];
+        var result = new float[rows * columns];
         for (var leftRow = 0; leftRow < left.Rows; leftRow++)
         {
             for (var leftColumn = 0; leftColumn < left.Columns; leftColumn++)

@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockAdvanced
 {
     /// <summary>Computes the <c>transform.walsh-hadamard@1</c> mathematical operation.</summary>
-    public static double[] WalshHadamard(IReadOnlyList<double> values)
+    public static float[] WalshHadamard(IReadOnlyList<float> values)
     {
         ArgumentNullException.ThrowIfNull(values);
         var result = MathBlockCollectionPrimitives.Copy(values);
@@ -22,7 +22,7 @@ public static partial class MathBlockAdvanced
             }
         }
 
-        var scale = 1d / Math.Sqrt(result.Length);
+        var scale = 1f / Math.Sqrt(result.Length);
         for (var index = 0; index < result.Length; index++)
             result[index] *= scale;
         return result;

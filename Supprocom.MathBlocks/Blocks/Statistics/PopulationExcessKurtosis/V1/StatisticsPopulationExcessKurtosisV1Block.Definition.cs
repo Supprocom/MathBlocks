@@ -6,6 +6,6 @@ internal static partial class StatisticalMathBlocks
     {
         internal const string Identity = "statistics.population-excess-kurtosis@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateUnaryWithSample("statistics.population-excess-kurtosis", MathBlockStatistics.PopulationExcessKurtosis, MathBlockValue.Vector([-1d, 1d]), -2d, DimensionlessStatisticType);
+        internal static MathBlockOperation Create() => CreateUnaryWithSample("statistics.population-excess-kurtosis", MathBlockStatistics.PopulationExcessKurtosis, MathBlockValue.Vector([-1f, 1f]), -2f, DimensionlessStatisticType);
     }
 }

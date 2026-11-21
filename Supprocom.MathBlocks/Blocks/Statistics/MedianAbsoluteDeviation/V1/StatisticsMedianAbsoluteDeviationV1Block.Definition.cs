@@ -6,6 +6,6 @@ internal static partial class StatisticalMathBlocks
     {
         internal const string Identity = "statistics.median-absolute-deviation@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateUnary("statistics.median-absolute-deviation", MathBlockStatistics.MedianAbsoluteDeviation, 1d, StandardDeviationType);
+        internal static MathBlockOperation Create() => CreateUnary("statistics.median-absolute-deviation", MathBlockStatistics.MedianAbsoluteDeviation, 1f, StandardDeviationType);
     }
 }

@@ -6,7 +6,7 @@ internal static partial class AdvancedMathBlocks
     {
         internal const string Identity = "matrix.is-totally-nonnegative@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => CreateMatrixBoolean("matrix.is-totally-nonnegative", MathBlockAdvanced.IsTotallyNonnegative, MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1d, 1d, 1d, 2d])), true);
+        internal static MathBlockOperation Create() => CreateMatrixBoolean("matrix.is-totally-nonnegative", MathBlockAdvanced.IsTotallyNonnegative, MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1f, 1f, 1f, 2f])), true);
         private static MathBlockOperation CreateMatrixBoolean(string identifier, Func<MathBlockMatrix, bool> function, MathBlockValue sample, bool expected) => MathBlockOperationFactory.CreateDomain(identifier, 1, types =>
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Matrix);

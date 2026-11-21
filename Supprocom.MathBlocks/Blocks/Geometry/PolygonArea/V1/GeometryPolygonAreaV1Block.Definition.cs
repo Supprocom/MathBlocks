@@ -6,6 +6,6 @@ internal static partial class GeometryMathBlocks
     {
         internal const string Identity = "geometry.polygon-area@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => CreatePointSetScalar("geometry.polygon-area", MathBlockGeometry.PolygonArea, square, 1d, AreaType);
+        internal static MathBlockOperation Create() => CreatePointSetScalar("geometry.polygon-area", MathBlockGeometry.PolygonArea, square, 1f, AreaType);
     }
 }

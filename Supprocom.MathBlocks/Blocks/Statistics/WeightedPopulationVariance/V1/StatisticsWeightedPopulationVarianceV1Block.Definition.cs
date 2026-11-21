@@ -6,6 +6,6 @@ internal static partial class StatisticalMathBlocks
     {
         internal const string Identity = "statistics.weighted-population-variance@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateWeighted("statistics.weighted-population-variance", MathBlockStatistics.WeightedPopulationVariance, 1d, VarianceType);
+        internal static MathBlockOperation Create() => CreateWeighted("statistics.weighted-population-variance", MathBlockStatistics.WeightedPopulationVariance, 1f, VarianceType);
     }
 }

@@ -21,6 +21,6 @@ internal static partial class StatisticalMathBlocks
                 if (boundaries[index] <= boundaries[index - 1])
                     return MathBlockValue.Invalid(MathBlockType.Vector(), "The boundaries must increase strictly.");
             return MathBlockValue.Vector(MathBlockStatistics.Histogram(inputs[0].AsVector(), boundaries), default, true);
-        }, [ascending, MathBlockValue.Vector([1.5d, 3.5d])], MathBlockValue.Vector([1d, 2d, 1d]), performanceIterations: 16);
+        }, [ascending, MathBlockValue.Vector([1.5f, 3.5f])], MathBlockValue.Vector([1f, 2f, 1f]), performanceIterations: 16);
     }
 }

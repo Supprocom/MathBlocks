@@ -6,6 +6,6 @@ internal static partial class ProbabilityMathBlocks
     {
         internal const string Identity = "probability.log-sum-exp@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateScalarUnary("probability.log-sum-exp", MathBlockProbability.LogSumExp, MathBlockValue.Vector([0d, 0d]), Math.Log(2d), requireDistribution: false);
+        internal static MathBlockOperation Create() => CreateScalarUnary("probability.log-sum-exp", MathBlockProbability.LogSumExp, MathBlockValue.Vector([0f, 0f]), Math.Log(2f), requireDistribution: false);
     }
 }

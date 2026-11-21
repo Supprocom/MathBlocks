@@ -20,8 +20,8 @@ public sealed class SequenceConvolutionV1BlockTests
     {
         var operation = MathBlockCatalog.Standard.Get("sequence.convolution");
         var result = operation.Evaluate([
-            MathBlockValue.Vector(new double[leftCount]),
-            MathBlockValue.Vector(new double[rightCount])]);
+            MathBlockValue.Vector(new float[leftCount]),
+            MathBlockValue.Vector(new float[rightCount])]);
         Assert.False(result.IsValid);
         Assert.Equal(MathBlockValueKind.Vector, result.Type.Kind);
     }
@@ -32,8 +32,8 @@ public sealed class SequenceConvolutionV1BlockTests
     public void NonEmptyOperandsGiveTheFullConvolution()
     {
         var result = MathBlockCatalog.Standard.Get("sequence.convolution")
-            .Evaluate([MathBlockValue.Vector([1d, 2d]), MathBlockValue.Vector([1d, 1d, -0d])]);
+            .Evaluate([MathBlockValue.Vector([1f, 2f]), MathBlockValue.Vector([1f, 1f, -0f])]);
         Assert.True(result.IsValid);
-        Assert.Equal([1d, 3d, 2d, -0d], result.AsVector().ToArray());
+        Assert.Equal([1f, 3f, 2f, -0f], result.AsVector().ToArray());
     }
 }

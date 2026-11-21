@@ -9,7 +9,7 @@ internal static partial class ScalarMathBlocks
         internal static MathBlockOperation Create()
         {
             var operations = new List<MathBlockOperation>(1);
-            AddDimensionlessUnary(operations, "scalar.arc-tangent", MathBlockScalar.ArcTangent, 1d, Math.PI / 4d);
+            AddDimensionlessUnary(operations, "scalar.arc-tangent", MathBlockScalar.ArcTangent, 1f, Math.PI / 4f);
             return operations[0];
         }
     }

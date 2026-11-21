@@ -6,6 +6,6 @@ internal static partial class ScalarMathBlocks
     {
         internal const string Identity = "scalar.subtract@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
-        internal static MathBlockOperation Create() => MathBlockOperationFactory.ScalarBinary("scalar.subtract", MathBlockScalar.Subtract, 7d, 2d, 5d, MathBlockTypeRules.SameBinaryScalar);
+        internal static MathBlockOperation Create() => MathBlockOperationFactory.ScalarBinary("scalar.subtract", MathBlockScalar.Subtract, 7f, 2f, 5f, MathBlockTypeRules.SameBinaryScalar);
     }
 }

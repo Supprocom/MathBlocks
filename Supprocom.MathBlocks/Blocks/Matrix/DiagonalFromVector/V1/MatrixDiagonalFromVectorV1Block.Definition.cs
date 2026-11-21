@@ -11,6 +11,6 @@ internal static partial class StructuralMathBlocks
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Vector);
             return MathBlockType.Matrix(types[0].Unit, types[0].Rows, types[0].Rows);
-        }, inputs => inputs[0].AsVector().Count > 0 ? MathBlockValue.Matrix(MathBlockStructure.DiagonalMatrix(inputs[0].AsVector()), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Matrix(inputs[0].Type.Unit), "The vector is empty."), [MathBlockValue.Vector([1d, 2d])], MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1d, 0d, 0d, 2d])), performanceIterations: 16);
+        }, inputs => inputs[0].AsVector().Count > 0 ? MathBlockValue.Matrix(MathBlockStructure.DiagonalMatrix(inputs[0].AsVector()), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Matrix(inputs[0].Type.Unit), "The vector is empty."), [MathBlockValue.Vector([1f, 2f])], MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1f, 0f, 0f, 2f])), performanceIterations: 16);
     }
 }

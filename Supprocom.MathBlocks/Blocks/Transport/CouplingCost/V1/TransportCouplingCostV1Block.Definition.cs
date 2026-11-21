@@ -14,6 +14,6 @@ internal static partial class TransportMathBlocks
             MathBlockTypeRules.RequireCompatibleShape(types[0], types[1]);
             MathBlockTypeRules.RequireDimensionless(types[0]);
             return MathBlockType.Scalar(types[1].Unit);
-        }, inputs => MathBlockValue.Scalar(MathBlockTransport.CouplingCost(inputs[0].AsMatrix(), inputs[1].AsMatrix()), inputs[1].Type.Unit), [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0.5d, 0d, 0d, 0.5d])), MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0d, 1d, 1d, 0d]))], MathBlockValue.Scalar(0d), performanceIterations: 8);
+        }, inputs => MathBlockValue.Scalar(MathBlockTransport.CouplingCost(inputs[0].AsMatrix(), inputs[1].AsMatrix()), inputs[1].Type.Unit), [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0.5f, 0f, 0f, 0.5f])), MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [0f, 1f, 1f, 0f]))], MathBlockValue.Scalar(0f), performanceIterations: 8);
     }
 }

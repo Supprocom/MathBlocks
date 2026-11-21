@@ -7,7 +7,7 @@ internal static partial class AdvancedMathBlocks
         internal const string Identity = "matrix.spectral-norm@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
         internal static MathBlockOperation Create() => CreateSpectralNorm();
-        private static MathBlockOperation CreateSpectralNorm() => MathBlockOperationFactory.CreateDomain("matrix.spectral-norm", 2, PerronValueType, Evaluate, [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [3d, 0d, 0d, 2d])), MathBlockValue.Scalar(32d)], MathBlockValue.Scalar(3d), 1e-8, 2);
+        private static MathBlockOperation CreateSpectralNorm() => MathBlockOperationFactory.CreateDomain("matrix.spectral-norm", 2, PerronValueType, Evaluate, [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [3f, 0f, 0f, 2f])), MathBlockValue.Scalar(32f)], MathBlockValue.Scalar(3f), 1e-8f, 2);
 
         private static MathBlockValue Evaluate(IReadOnlyList<MathBlockValue> inputs, MathBlockDomainContext domain)
         {
@@ -20,7 +20,7 @@ internal static partial class AdvancedMathBlocks
             var norm = MathBlockAdvanced.SpectralNorm(inputs[0].AsMatrix(), domain, out var nonconverged);
             if (nonconverged)
                 return MathBlockValue.Invalid(type, "The Jacobi iteration did not converge.");
-            return double.IsFinite(norm) ? MathBlockValue.Scalar(norm, inputs[0].Type.Unit) : MathBlockValue.Invalid(type, "The squared entries overflow.");
+            return float.IsFinite(norm) ? MathBlockValue.Scalar(norm, inputs[0].Type.Unit) : MathBlockValue.Invalid(type, "The squared entries overflow.");
         }
     }
 }

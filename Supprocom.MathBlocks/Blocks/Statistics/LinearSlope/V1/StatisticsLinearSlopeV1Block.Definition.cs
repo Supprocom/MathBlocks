@@ -6,6 +6,6 @@ internal static partial class StatisticalMathBlocks
     {
         internal const string Identity = "statistics.linear-slope@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateBinary("statistics.linear-slope", MathBlockStatistics.LinearSlope, 2d, SlopeType);
+        internal static MathBlockOperation Create() => CreateBinary("statistics.linear-slope", MathBlockStatistics.LinearSlope, 2f, SlopeType);
     }
 }

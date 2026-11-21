@@ -6,9 +6,9 @@ internal static partial class AdvancedMathBlocks
 
     private static MathBlockOperation CreateVectorUnary(
         string identifier,
-        Func<IReadOnlyList<double>, double[]> function,
+        Func<IReadOnlyList<float>, float[]> function,
         MathBlockValue sample,
-        double[] expected,
+        float[] expected,
         MathBlockTypeResolver resolver) => MathBlockOperationFactory.Create(
         identifier, 1, resolver,
         inputs =>
@@ -19,13 +19,13 @@ internal static partial class AdvancedMathBlocks
                 ? MathBlockValue.Vector(function(values), type.Unit, true)
                 : MathBlockValue.Invalid(type, "The vector is empty.");
         },
-        [sample], MathBlockValue.Vector(expected), 1e-8, 8);
+        [sample], MathBlockValue.Vector(expected), 1e-8f, 8);
 
     private static MathBlockOperation CreateVectorScalar(
         string identifier,
-        Func<IReadOnlyList<double>, double> function,
+        Func<IReadOnlyList<float>, float> function,
         MathBlockValue sample,
-        double expected,
+        float expected,
         MathBlockTypeResolver resolver) => MathBlockOperationFactory.Create(
         identifier, 1, resolver,
         inputs =>
@@ -35,11 +35,11 @@ internal static partial class AdvancedMathBlocks
                 ? MathBlockValue.Scalar(function(inputs[0].AsVector()), type.Unit)
                 : MathBlockValue.Invalid(type, "The vector is empty.");
         },
-        [sample], MathBlockValue.Scalar(expected), 1e-8, 8);
+        [sample], MathBlockValue.Scalar(expected), 1e-8f, 8);
 
     private static MathBlockOperation CreateStructuredMatrix(
         string identifier,
-        Func<IReadOnlyList<double>, IReadOnlyList<double>, MathBlockMatrix> function,
+        Func<IReadOnlyList<float>, IReadOnlyList<float>, MathBlockMatrix> function,
         MathBlockValue first,
         MathBlockValue second,
         MathBlockMatrix expected) => MathBlockOperationFactory.Create(
@@ -51,7 +51,7 @@ internal static partial class AdvancedMathBlocks
                       : inputs[0].AsVector()[0] == inputs[1].AsVector()[0])
             ? MathBlockValue.Matrix(function(inputs[0].AsVector(), inputs[1].AsVector()), inputs[0].Type.Unit)
             : MathBlockOperationFactory.Invalid(StructuredMatrixType, inputs, "The boundary vectors are incompatible."),
-        [first, second], MathBlockValue.Matrix(expected), 1e-9, 8);
+        [first, second], MathBlockValue.Matrix(expected), 1e-9f, 8);
 
     private static MathBlockType StructuredMatrixType(IReadOnlyList<MathBlockType> types)
     {
@@ -68,13 +68,13 @@ internal static partial class AdvancedMathBlocks
         MathBlockMatrix expected) => MathBlockOperationFactory.Create(
         identifier, 2, AdditiveMatrixProductType,
         inputs => MathBlockValue.Matrix(function(inputs[0].AsMatrix(), inputs[1].AsMatrix()), inputs[0].Type.Unit),
-        [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1d, 2d, 3d, 4d])),
-         MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [5d, 6d, 7d, 8d]))],
+        [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1f, 2f, 3f, 4f])),
+         MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [5f, 6f, 7f, 8f]))],
         MathBlockValue.Matrix(expected), performanceIterations: 8);
 
     private static MathBlockOperation CreateVectorBoolean(
         string identifier,
-        Func<IReadOnlyList<double>, bool> function,
+        Func<IReadOnlyList<float>, bool> function,
         MathBlockValue sample,
         bool expected) => MathBlockOperationFactory.Create(
         identifier, 1,
@@ -84,24 +84,24 @@ internal static partial class AdvancedMathBlocks
 
     private static MathBlockOperation CreateLipschitzExtension(
         string identifier,
-        Func<IReadOnlyList<double>, IReadOnlyList<double>, IReadOnlyList<double>, double, double[]> function) =>
+        Func<IReadOnlyList<float>, IReadOnlyList<float>, IReadOnlyList<float>, float, float[]> function) =>
         MathBlockOperationFactory.Create(
             identifier, 4, LipschitzType,
             inputs => inputs[0].AsVector().Count > 0 && inputs[0].AsVector().Count == inputs[1].AsVector().Count &&
-                      inputs[3].AsScalar() >= 0d
+                      inputs[3].AsScalar() >= 0f
                 ? MathBlockValue.Vector(function(inputs[0].AsVector(), inputs[1].AsVector(), inputs[2].AsVector(),
                     inputs[3].AsScalar()), inputs[1].Type.Unit, true)
                 : MathBlockOperationFactory.Invalid(LipschitzType, inputs, "The inputs are outside the operation domain."),
-            [MathBlockValue.Vector([0d, 2d]), MathBlockValue.Vector([0d, 2d]),
-             MathBlockValue.Vector([1d]), MathBlockValue.Scalar(1d)],
-            MathBlockValue.Vector([1d]), performanceIterations: 8);
+            [MathBlockValue.Vector([0f, 2f]), MathBlockValue.Vector([0f, 2f]),
+             MathBlockValue.Vector([1f]), MathBlockValue.Scalar(1f)],
+            MathBlockValue.Vector([1f]), performanceIterations: 8);
 
     private static MathBlockOperation CreatePositiveVectorMetric(
         string identifier,
-        Func<IReadOnlyList<double>, IReadOnlyList<double>, double> function,
+        Func<IReadOnlyList<float>, IReadOnlyList<float>, float> function,
         MathBlockValue left,
         MathBlockValue right,
-        double expected,
+        float expected,
         bool distribution) => MathBlockOperationFactory.Create(
         identifier, 2,
         types =>
@@ -112,24 +112,24 @@ internal static partial class AdvancedMathBlocks
         inputs => IsPositivePair(inputs[0].AsVector(), inputs[1].AsVector(), distribution)
             ? MathBlockValue.Scalar(function(inputs[0].AsVector(), inputs[1].AsVector()))
             : MathBlockValue.Invalid(MathBlockType.Scalar(), "The vectors are outside the operation domain."),
-        [left, right], MathBlockValue.Scalar(expected), 1e-8, 8);
+        [left, right], MathBlockValue.Scalar(expected), 1e-8f, 8);
 
     private static MathBlockOperation CreatePoisson(
         string identifier,
-        Func<double, int, double> function,
-        double expected,
+        Func<float, int, float> function,
+        float expected,
         int count = 0) => MathBlockOperationFactory.Create(
         identifier, 2, MathBlockTypeRules.DimensionlessBinaryScalar,
-        inputs => TryInteger(inputs[1].AsScalar(), out var requested) && requested >= 0 && inputs[0].AsScalar() >= 0d
+        inputs => TryInteger(inputs[1].AsScalar(), out var requested) && requested >= 0 && inputs[0].AsScalar() >= 0f
             ? MathBlockValue.Scalar(function(inputs[0].AsScalar(), requested))
             : MathBlockValue.Invalid(MathBlockType.Scalar(), "The inputs are outside the operation domain."),
-        [MathBlockValue.Scalar(2d), MathBlockValue.Scalar(count)], MathBlockValue.Scalar(expected),
-        1e-9, 16);
+        [MathBlockValue.Scalar(2f), MathBlockValue.Scalar(count)], MathBlockValue.Scalar(expected),
+        1e-9f, 16);
 
     private static MathBlockOperation CreateMoment(
         string identifier,
-        Func<IReadOnlyList<double>, int, double> function,
-        double expected) => MathBlockOperationFactory.Create(
+        Func<IReadOnlyList<float>, int, float> function,
+        float expected) => MathBlockOperationFactory.Create(
         identifier, 2,
         types =>
         {
@@ -141,7 +141,7 @@ internal static partial class AdvancedMathBlocks
         inputs => inputs[0].AsVector().Count > 0 && TryInteger(inputs[1].AsScalar(), out var order) && order >= 0
             ? MathBlockValue.Scalar(function(inputs[0].AsVector(), order))
             : MathBlockValue.Invalid(MathBlockType.Scalar(), "The inputs are outside the operation domain."),
-        [MathBlockValue.Vector([1d, 2d, 3d]), MathBlockValue.Scalar(2d)], MathBlockValue.Scalar(expected),
+        [MathBlockValue.Vector([1f, 2f, 3f]), MathBlockValue.Scalar(2f)], MathBlockValue.Scalar(expected),
         performanceIterations: 8);
 
     private static MathBlockType SameVector(IReadOnlyList<MathBlockType> types) =>
@@ -236,7 +236,7 @@ internal static partial class AdvancedMathBlocks
         MathBlockTypeRules.RequireDimensionless(type);
     }
 
-    private static bool TryInteger(double value, out int result)
+    private static bool TryInteger(float value, out int result)
     {
         if (value is >= int.MinValue and <= int.MaxValue && value == Math.Truncate(value))
         {
@@ -251,7 +251,7 @@ internal static partial class AdvancedMathBlocks
     {
         for (var row = 0; row < matrix.Rows; row++)
             for (var column = 0; column < matrix.Columns; column++)
-                if (matrix[row, column] < 0d)
+                if (matrix[row, column] < 0f)
                     return false;
         return true;
     }
@@ -265,13 +265,13 @@ internal static partial class AdvancedMathBlocks
             return false;
         if (distribution)
             return IsDistribution(left) && IsDistribution(right);
-        return MathBlockCollectionPrimitives.All(left, value => value > 0d) &&
-               MathBlockCollectionPrimitives.All(right, value => value > 0d);
+        return MathBlockCollectionPrimitives.All(left, value => value > 0f) &&
+               MathBlockCollectionPrimitives.All(right, value => value > 0f);
     }
 
     private static bool IsDistribution(MathBlockVector values) =>
-        values.Count > 0 && MathBlockCollectionPrimitives.All(values, value => value >= 0d) &&
-        Math.Abs(MathBlockVectorMath.Sum(values) - 1d) <= 1e-10;
+        values.Count > 0 && MathBlockCollectionPrimitives.All(values, value => value >= 0f) &&
+        Math.Abs(MathBlockVectorMath.Sum(values) - 1f) <= 1e-10f;
 
     private static bool IsTransitionMatrix(MathBlockMatrix matrix)
     {
@@ -279,14 +279,14 @@ internal static partial class AdvancedMathBlocks
             return false;
         for (var row = 0; row < matrix.Rows; row++)
         {
-            var sum = 0d;
+            var sum = 0f;
             for (var column = 0; column < matrix.Columns; column++)
             {
-                if (matrix[row, column] < 0d)
+                if (matrix[row, column] < 0f)
                     return false;
                 sum += matrix[row, column];
             }
-            if (Math.Abs(sum - 1d) > 1e-10)
+            if (Math.Abs(sum - 1f) > 1e-10f)
                 return false;
         }
         return true;

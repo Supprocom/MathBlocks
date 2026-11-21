@@ -3,33 +3,33 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockGraphMath
 {
     /// <summary>Computes the <c>graph.hodge-potential@1</c> mathematical operation.</summary>
-    public static bool TryHodgePotential(MathBlockGraph graph, out double[] potential)
+    public static bool TryHodgePotential(MathBlockGraph graph, out float[] potential)
     {
         ArgumentNullException.ThrowIfNull(graph);
-        potential = new double[graph.VertexCount];
+        potential = new float[graph.VertexCount];
         if (graph.VertexCount == 1)
             return true;
         var reducedSize = graph.VertexCount - 1;
-        var matrixValues = new double[reducedSize * reducedSize];
-        var right = new double[reducedSize];
+        var matrixValues = new float[reducedSize * reducedSize];
+        var right = new float[reducedSize];
         foreach (var edge in graph)
         {
             if (edge.From != 0)
             {
-                matrixValues[(edge.From - 1) * reducedSize + edge.From - 1] += 1d;
+                matrixValues[(edge.From - 1) * reducedSize + edge.From - 1] += 1f;
                 right[edge.From - 1] -= edge.Weight;
             }
 
             if (edge.To != 0)
             {
-                matrixValues[(edge.To - 1) * reducedSize + edge.To - 1] += 1d;
+                matrixValues[(edge.To - 1) * reducedSize + edge.To - 1] += 1f;
                 right[edge.To - 1] += edge.Weight;
             }
 
             if (edge.From != 0 && edge.To != 0)
             {
-                matrixValues[(edge.From - 1) * reducedSize + edge.To - 1] -= 1d;
-                matrixValues[(edge.To - 1) * reducedSize + edge.From - 1] -= 1d;
+                matrixValues[(edge.From - 1) * reducedSize + edge.To - 1] -= 1f;
+                matrixValues[(edge.To - 1) * reducedSize + edge.From - 1] -= 1f;
             }
         }
 

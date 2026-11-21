@@ -8,13 +8,13 @@ public static partial class MathBlockLinearAlgebra
     {
         ArgumentNullException.ThrowIfNull(matrix);
         var size = matrix.Rows;
-        var values = new double[size * size];
-        var right = new double[size];
+        var values = new float[size * size];
+        var right = new float[size];
         for (var column = 0; column < size; column++)
         {
             for (var row = 0; row < right.Length; row++)
-                right[row] = 0d;
-            right[column] = 1d;
+                right[row] = 0f;
+            right[column] = 1f;
             if (!TrySolve(matrix, right, out var solution))
             {
                 inverse = null;

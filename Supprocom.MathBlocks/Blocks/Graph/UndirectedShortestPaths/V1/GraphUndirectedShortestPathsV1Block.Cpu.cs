@@ -3,12 +3,12 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockGraphMath
 {
     /// <summary>Computes the <c>graph.undirected-shortest-paths@1</c> mathematical operation.</summary>
-    public static double[] UndirectedShortestPaths(MathBlockGraph graph, int source)
+    public static float[] UndirectedShortestPaths(MathBlockGraph graph, int source)
     {
         ArgumentNullException.ThrowIfNull(graph);
         var distances = MathBlockCollectionPrimitives.Repeat(Math.PositiveInfinity, graph.VertexCount);
         var visited = new bool[graph.VertexCount];
-        distances[source] = 0d;
+        distances[source] = 0f;
         for (var iteration = 0; iteration < graph.VertexCount; iteration++)
         {
             var vertex = -1;

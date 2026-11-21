@@ -8,10 +8,10 @@ public static partial class MathBlockAdvanced
     {
         ArgumentNullException.ThrowIfNull(matrix);
         var eliminatedSize = matrix.Rows - retainedSize;
-        var leading = new double[retainedSize * retainedSize];
-        var upper = new double[retainedSize * eliminatedSize];
-        var lower = new double[eliminatedSize * retainedSize];
-        var trailing = new double[eliminatedSize * eliminatedSize];
+        var leading = new float[retainedSize * retainedSize];
+        var upper = new float[retainedSize * eliminatedSize];
+        var lower = new float[eliminatedSize * retainedSize];
+        var trailing = new float[eliminatedSize * eliminatedSize];
         for (var row = 0; row < matrix.Rows; row++)
         {
             for (var column = 0; column < matrix.Columns; column++)

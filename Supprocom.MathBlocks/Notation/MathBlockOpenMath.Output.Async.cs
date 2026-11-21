@@ -473,16 +473,16 @@ public static partial class MathBlockOpenMath
         await writer.WriteEndElementAsync().ConfigureAwait(false);
     }
 
-    private static async Task WriteDoubleAsync(XmlWriter writer, double value)
+    private static async Task WriteDoubleAsync(XmlWriter writer, float value)
     {
-        if (!double.IsFinite(value))
+        if (!float.IsFinite(value))
             throw new InvalidOperationException("An OpenMath float must be finite.");
         await writer.WriteStartElementAsync(null, "OMF", NamespaceUri).ConfigureAwait(false);
         await writer.WriteAttributeStringAsync(
                 null,
                 "hex",
                 null,
-                BitConverter.DoubleToUInt64Bits(value).ToString("X16", CultureInfo.InvariantCulture))
+                BitConverter.SingleToUInt32Bits(value).ToString("X16", CultureInfo.InvariantCulture))
             .ConfigureAwait(false);
         await writer.WriteFullEndElementAsync().ConfigureAwait(false);
     }

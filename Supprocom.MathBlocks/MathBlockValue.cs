@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 /// <summary>Represents a typed result, including an explicit invalid-result state.</summary>
 public readonly struct MathBlockValue
 {
-    private readonly double scalar;
+    private readonly float scalar;
     private readonly bool boolean;
     private readonly Complex complex;
     private readonly object? reference;
@@ -13,7 +13,7 @@ public readonly struct MathBlockValue
         MathBlockType type,
         bool isValid,
         string? invalidReason,
-        double scalar = default,
+        float scalar = default,
         bool boolean = default,
         Complex complex = default,
         object? reference = null)
@@ -39,7 +39,7 @@ public readonly struct MathBlockValue
         new(type, false, RequireReason(reason));
 
     /// <summary>Creates a finite scalar value with the specified unit.</summary>
-    public static MathBlockValue Scalar(double value, MathBlockUnit unit = default) =>
+    public static MathBlockValue Scalar(float value, MathBlockUnit unit = default) =>
         Math.IsFinite(value)
             ? new(MathBlockType.Scalar(unit), true, null, scalar: value)
             : Invalid(MathBlockType.Scalar(unit), "The scalar result is not finite.");
@@ -55,13 +55,13 @@ public readonly struct MathBlockValue
             : Invalid(MathBlockType.Complex(unit), "The complex result is not finite.");
 
     /// <summary>Copies finite numbers into a typed vector value.</summary>
-    public static MathBlockValue Vector(IEnumerable<double> values, MathBlockUnit unit = default)
+    public static MathBlockValue Vector(IEnumerable<float> values, MathBlockUnit unit = default)
     {
         var vector = new MathBlockVector(values);
         return new MathBlockValue(MathBlockType.Vector(unit, vector.Count), true, null, reference: vector);
     }
 
-    internal static MathBlockValue Vector(double[] values, MathBlockUnit unit, bool takeOwnership) =>
+    internal static MathBlockValue Vector(float[] values, MathBlockUnit unit, bool takeOwnership) =>
         MathBlockSimd.AllFinite(values)
             ? new(MathBlockType.Vector(unit, values.Length), true, null,
                 reference: new MathBlockVector(values, takeOwnership))
@@ -137,7 +137,7 @@ public readonly struct MathBlockValue
     }
 
     /// <summary>Gets the scalar payload, requiring a valid scalar type.</summary>
-    public double AsScalar() => Require<double>(MathBlockValueKind.Scalar, scalar);
+    public float AsScalar() => Require<float>(MathBlockValueKind.Scalar, scalar);
     /// <summary>Gets the Boolean payload, requiring a valid Boolean type.</summary>
     public bool AsBoolean() => Require<bool>(MathBlockValueKind.Boolean, boolean);
     /// <summary>Gets the complex payload, requiring a valid complex type.</summary>
@@ -160,7 +160,7 @@ public readonly struct MathBlockValue
     public MathBlockRunSet AsRunSet() => RequireReference<MathBlockRunSet>(MathBlockValueKind.RunSet);
 
     /// <summary>Compares valid numeric payloads within a relative tolerance.</summary>
-    public bool ApproximatelyEquals(MathBlockValue other, double tolerance = 1e-12)
+    public bool ApproximatelyEquals(MathBlockValue other, float tolerance = 1e-12f)
     {
         if (Type != other.Type || IsValid != other.IsValid)
             return false;
@@ -210,10 +210,10 @@ public readonly struct MathBlockValue
             ? throw new ArgumentException("An invalid value reason is required.", nameof(reason))
             : reason.Trim();
 
-    private static bool Near(double left, double right, double tolerance) =>
-        Math.Abs(left - right) <= tolerance * Math.Max(1d, Math.Max(Math.Abs(left), Math.Abs(right)));
+    private static bool Near(float left, float right, float tolerance) =>
+        Math.Abs(left - right) <= tolerance * Math.Max(1f, Math.Max(Math.Abs(left), Math.Abs(right)));
 
-    private static bool SequenceNear(Supprocom.MathBlocks.MathBlockVector left, Supprocom.MathBlocks.MathBlockVector right, double tolerance)
+    private static bool SequenceNear(Supprocom.MathBlocks.MathBlockVector left, Supprocom.MathBlocks.MathBlockVector right, float tolerance)
     {
         if (left.Count != right.Count)
             return false;
@@ -223,7 +223,7 @@ public readonly struct MathBlockValue
         return true;
     }
 
-    private static bool MatrixNear(MathBlockMatrix left, MathBlockMatrix right, double tolerance)
+    private static bool MatrixNear(MathBlockMatrix left, MathBlockMatrix right, float tolerance)
     {
         if (left.Rows != right.Rows || left.Columns != right.Columns)
             return false;
@@ -237,7 +237,7 @@ public readonly struct MathBlockValue
     private static bool ComplexSequenceNear(
         Supprocom.MathBlocks.MathBlockComplexVector left,
         Supprocom.MathBlocks.MathBlockComplexVector right,
-        double tolerance)
+        float tolerance)
     {
         if (left.Count != right.Count)
             return false;
@@ -251,7 +251,7 @@ public readonly struct MathBlockValue
     private static bool ComplexMatrixNear(
         MathBlockComplexMatrix left,
         MathBlockComplexMatrix right,
-        double tolerance)
+        float tolerance)
     {
         if (left.Rows != right.Rows || left.Columns != right.Columns)
             return false;
@@ -263,7 +263,7 @@ public readonly struct MathBlockValue
         return true;
     }
 
-    private static bool PointSetNear(MathBlockPointSet left, MathBlockPointSet right, double tolerance)
+    private static bool PointSetNear(MathBlockPointSet left, MathBlockPointSet right, float tolerance)
     {
         if (left.Count != right.Count)
             return false;
@@ -274,7 +274,7 @@ public readonly struct MathBlockValue
         return true;
     }
 
-    private static bool GraphNear(MathBlockGraph left, MathBlockGraph right, double tolerance)
+    private static bool GraphNear(MathBlockGraph left, MathBlockGraph right, float tolerance)
     {
         if (left.VertexCount != right.VertexCount || left.Count != right.Count)
             return false;
@@ -285,7 +285,7 @@ public readonly struct MathBlockValue
         return true;
     }
 
-    private static bool RunSetNear(MathBlockRunSet left, MathBlockRunSet right, double tolerance)
+    private static bool RunSetNear(MathBlockRunSet left, MathBlockRunSet right, float tolerance)
     {
         if (left.Count != right.Count)
             return false;

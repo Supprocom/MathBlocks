@@ -5,9 +5,9 @@ public static partial class MathBlockVectorMath
 
     // A MathBlockVector argument is read through its backing span, with the same function on the same elements in
     // the same order, so every element is the same IEEE result. Any other list keeps the indexer loop.
-    private static double[] Map(IReadOnlyList<double> values, Func<double, double> function)
+    private static float[] Map(IReadOnlyList<float> values, Func<float, float> function)
     {
-        var result = new double[values.Count];
+        var result = new float[values.Count];
         if (values is MathBlockVector vector)
         {
             var span = vector.Span;
@@ -20,32 +20,32 @@ public static partial class MathBlockVectorMath
         return result;
     }
 
-    private delegate void BlockZip(ReadOnlySpan<double> left, ReadOnlySpan<double> right, Span<double> result);
+    private delegate void BlockZip(ReadOnlySpan<float> left, ReadOnlySpan<float> right, Span<float> result);
 
     // The block form of Zip for an arithmetic operation whose packed result equals its scalar result (see
     // MathBlockSimd). It applies when both lists are vectors and the right one has at least as many elements; any
     // other call, including a shorter right list that must throw at its first missing element, takes Zip.
-    private static double[] Zip(
-        IReadOnlyList<double> left,
-        IReadOnlyList<double> right,
-        Func<double, double, double> function,
+    private static float[] Zip(
+        IReadOnlyList<float> left,
+        IReadOnlyList<float> right,
+        Func<float, float, float> function,
         BlockZip block)
     {
         if (left is MathBlockVector leftVector && right is MathBlockVector rightVector && rightVector.Count >= leftVector.Count)
         {
-            var result = new double[leftVector.Count];
+            var result = new float[leftVector.Count];
             block(leftVector.Span, rightVector.Span, result);
             return result;
         }
         return Zip(left, right, function);
     }
 
-    private static double[] Zip(
-        IReadOnlyList<double> left,
-        IReadOnlyList<double> right,
-        Func<double, double, double> function)
+    private static float[] Zip(
+        IReadOnlyList<float> left,
+        IReadOnlyList<float> right,
+        Func<float, float, float> function)
     {
-        var result = new double[left.Count];
+        var result = new float[left.Count];
         if (left is MathBlockVector leftVector && right is MathBlockVector rightVector)
         {
             // A shorter right span throws IndexOutOfRangeException at the same element, as its indexer does.
@@ -61,9 +61,9 @@ public static partial class MathBlockVectorMath
     }
 
     private static bool[] Compare(
-        IReadOnlyList<double> left,
-        IReadOnlyList<double> right,
-        Func<double, double, bool> function)
+        IReadOnlyList<float> left,
+        IReadOnlyList<float> right,
+        Func<float, float, bool> function)
     {
         var result = new bool[left.Count];
         for (var index = 0; index < result.Length; index++)
@@ -71,9 +71,9 @@ public static partial class MathBlockVectorMath
         return result;
     }
 
-    private static double[] RollingExtreme(IReadOnlyList<double> values, int width, bool minimum)
+    private static float[] RollingExtreme(IReadOnlyList<float> values, int width, bool minimum)
     {
-        var result = new double[values.Count - width + 1];
+        var result = new float[values.Count - width + 1];
         var deque = new int[values.Count];
         var head = 0;
         var tail = 0;
@@ -99,14 +99,14 @@ internal static partial class VectorMathBlocks
 {
     private const string RowCountsDiffer = "The input row counts must be equal.";
 
-    private static readonly MathBlockValue sampleVector = MathBlockValue.Vector([1d, 2d, 3d, 4d]);
-    private static readonly MathBlockValue secondVector = MathBlockValue.Vector([4d, 3d, 2d, 1d]);
+    private static readonly MathBlockValue sampleVector = MathBlockValue.Vector([1f, 2f, 3f, 4f]);
+    private static readonly MathBlockValue secondVector = MathBlockValue.Vector([4f, 3f, 2f, 1f]);
 
     private static MathBlockOperation CreateVectorUnary(
         string identifier,
-        Func<IReadOnlyList<double>, double[]> function,
-        double[] sample,
-        double[] expected,
+        Func<IReadOnlyList<float>, float[]> function,
+        float[] sample,
+        float[] expected,
         MathBlockTypeResolver resolver) => MathBlockOperationFactory.Create(
         identifier, 1, resolver,
         inputs =>
@@ -114,12 +114,12 @@ internal static partial class VectorMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Vector(function(inputs[0].AsVector()), type.Unit, true);
         },
-        [MathBlockValue.Vector(sample)], MathBlockValue.Vector(expected), 1e-9, 64);
+        [MathBlockValue.Vector(sample)], MathBlockValue.Vector(expected), 1e-9f, 64);
 
     private static MathBlockOperation CreateVectorBinary(
         string identifier,
-        Func<IReadOnlyList<double>, IReadOnlyList<double>, double[]> function,
-        double[] expected,
+        Func<IReadOnlyList<float>, IReadOnlyList<float>, float[]> function,
+        float[] expected,
         MathBlockTypeResolver resolver,
         bool sameLength = true) => MathBlockOperationFactory.Create(
         identifier, 2, resolver,
@@ -131,13 +131,13 @@ internal static partial class VectorMathBlocks
                 return MathBlockValue.Invalid(type, RowCountsDiffer);
             return MathBlockValue.Vector(function(inputs[0].AsVector(), inputs[1].AsVector()), type.Unit, true);
         },
-        [sampleVector, secondVector], MathBlockValue.Vector(expected), 1e-9, 64);
+        [sampleVector, secondVector], MathBlockValue.Vector(expected), 1e-9f, 64);
 
     private static MathBlockOperation CreateVectorScalar(
         string identifier,
-        Func<IReadOnlyList<double>, double, double[]> function,
-        double scalar,
-        double[] expected,
+        Func<IReadOnlyList<float>, float, float[]> function,
+        float scalar,
+        float[] expected,
         MathBlockTypeResolver resolver) => MathBlockOperationFactory.Create(
         identifier, 2, resolver,
         inputs =>
@@ -145,12 +145,12 @@ internal static partial class VectorMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Vector(function(inputs[0].AsVector(), inputs[1].AsScalar()), type.Unit, true);
         },
-        [sampleVector, MathBlockValue.Scalar(scalar)], MathBlockValue.Vector(expected), 1e-9, 64);
+        [sampleVector, MathBlockValue.Scalar(scalar)], MathBlockValue.Vector(expected), 1e-9f, 64);
 
     private static MathBlockOperation CreateReduction(
         string identifier,
-        Func<IReadOnlyList<double>, double> function,
-        double expected,
+        Func<IReadOnlyList<float>, float> function,
+        float expected,
         MathBlockTypeResolver resolver) => MathBlockOperationFactory.Create(
         identifier, 1, resolver,
         inputs =>
@@ -158,12 +158,12 @@ internal static partial class VectorMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Scalar(function(inputs[0].AsVector()), type.Unit);
         },
-        [sampleVector], MathBlockValue.Scalar(expected), 1e-9, 64);
+        [sampleVector], MathBlockValue.Scalar(expected), 1e-9f, 64);
 
     private static MathBlockOperation CreateRolling(
         string identifier,
-        Func<IReadOnlyList<double>, int, double[]> function,
-        double[] expected,
+        Func<IReadOnlyList<float>, int, float[]> function,
+        float[] expected,
         bool squaredOutput)
     {
         MathBlockTypeResolver resolver = squaredOutput ? VectorScalarSquaredVectorType : VectorScalarVectorType;
@@ -178,7 +178,7 @@ internal static partial class VectorMathBlocks
                     ? MathBlockValue.Vector(function(values, width), unit, true)
                     : MathBlockOperationFactory.Invalid(resolver, inputs, "The width is outside the sequence domain.");
             },
-            [sampleVector, MathBlockValue.Scalar(2d)], MathBlockValue.Vector(expected), 1e-9, 32), retainedRows: 1);
+            [sampleVector, MathBlockValue.Scalar(2f)], MathBlockValue.Vector(expected), 1e-9f, 32), retainedRows: 1);
     }
 
     // A rolling operation over n rows with width w returns n - w + 1 rows, and a difference with lag w returns
@@ -193,7 +193,7 @@ internal static partial class VectorMathBlocks
             if (count <= 0 || constants[1] is not { } constant)
                 return type;
             var width = constant.AsScalar();
-            if (width < 1d || width > count || width != Math.Truncate(width))
+            if (width < 1f || width > count || width != Math.Truncate(width))
                 return type;
             var rows = count - (int)width + retainedRows;
             return rows > 0 ? type with { Rows = rows } : type;
@@ -203,7 +203,7 @@ internal static partial class VectorMathBlocks
 
     private static MathBlockOperation CreateVectorComparison(
         string identifier,
-        Func<IReadOnlyList<double>, IReadOnlyList<double>, bool[]> function,
+        Func<IReadOnlyList<float>, IReadOnlyList<float>, bool[]> function,
         bool[] expected) => MathBlockOperationFactory.Create(
         identifier, 2, VectorComparisonType,
         inputs => inputs[0].AsVector().Count == inputs[1].AsVector().Count
@@ -406,15 +406,15 @@ internal static partial class VectorMathBlocks
     private static int MergedLength(MathBlockType left, MathBlockType right) =>
         left.Rows == 0 ? right.Rows : left.Rows;
 
-    internal static int RequirePositiveInteger(double value)
+    internal static int RequirePositiveInteger(float value)
     {
         var integer = RequireNonnegativeInteger(value);
         return integer > 0 ? integer : throw new ArgumentOutOfRangeException(nameof(value));
     }
 
-    private static int RequireNonnegativeInteger(double value)
+    private static int RequireNonnegativeInteger(float value)
     {
-        if (value < 0d || value > int.MaxValue || value != Math.Truncate(value))
+        if (value < 0f || value > int.MaxValue || value != Math.Truncate(value))
             throw new ArgumentOutOfRangeException(nameof(value));
         return (int)value;
     }

@@ -258,7 +258,7 @@ internal static class MathBlockFusedCudaSource
     private static string RowValidity(MathBlockFusedExpression expression, int node) =>
         expression.ContributingInputs(node) != 0 ? "r" + Number(node) : "1";
 
-    private static string FormatDouble(double value) =>
+    private static string FormatDouble(float value) =>
         "__longlong_as_double((long long)0x" +
         Math.ToBits(value).ToString("x16", CultureInfo.InvariantCulture) + "ULL)";
 

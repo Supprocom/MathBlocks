@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 
 /// <summary>Defines the Math Block Run contract.</summary>
 [StructLayout(LayoutKind.Sequential)]
-public readonly record struct MathBlockRun(int Start, int Length, double Value)
+public readonly record struct MathBlockRun(int Start, int Length, float Value)
 {
     /// <summary>Validates the supplied MathBlocks value or interchange document.</summary>
     public MathBlockRun Validate()

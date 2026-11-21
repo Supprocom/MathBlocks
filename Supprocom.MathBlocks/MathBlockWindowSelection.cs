@@ -16,13 +16,13 @@ internal static class MathBlockWindowSelection
     // with -0 equal to +0. The position deques pop only strictly worse values, so among equal values the earliest
     // stays at the head.
     internal static void RunExtreme(
-        ReadOnlySpan<double> x,
+        ReadOnlySpan<float> x,
         int count,
         int width,
-        double fill,
+        float fill,
         bool maximum,
         bool position,
-        double[]? values,
+        float[]? values,
         bool[]? valid)
     {
         var deque = new int[width];
@@ -61,7 +61,7 @@ internal static class MathBlockWindowSelection
             size++;
             if (row < width - 1)
             {
-                Store(values, valid, row, fill, 0d, false);
+                Store(values, valid, row, fill, 0f, false);
                 continue;
             }
             var extreme = deque[head];
@@ -77,22 +77,22 @@ internal static class MathBlockWindowSelection
     // Heap entries are input indexes; an index's heap position and side are stored at index % width, because the
     // live indexes of one window are width consecutive integers.
     internal static void RunQuantile(
-        ReadOnlySpan<double> x,
+        ReadOnlySpan<float> x,
         int count,
         int width,
-        double probability,
-        double fill,
-        double[]? values,
+        float probability,
+        float fill,
+        float[]? values,
         bool[]? valid)
     {
-        if (probability is not (>= 0d and <= 1d))
+        if (probability is not (>= 0f and <= 1f))
         {
             for (var row = 0; row < count; row++)
-                Store(values, valid, row, fill, 0d, false);
+                Store(values, valid, row, fill, 0f, false);
             return;
         }
         for (var row = 0; row < width - 1; row++)
-            Store(values, valid, row, fill, 0d, false);
+            Store(values, valid, row, fill, 0f, false);
         if (width == 1)
         {
             for (var row = 0; row < count; row++)
@@ -116,19 +116,19 @@ internal static class MathBlockWindowSelection
                 continue;
             var lower = x[heaps.Lower[0]];
             var upper = lowerIndex == upperIndex ? lower : x[heaps.Upper[0]];
-            var result = lower * (1d - weight) + upper * weight;
-            Store(values, valid, row, fill, result, double.IsFinite(result));
+            var result = lower * (1f - weight) + upper * weight;
+            Store(values, valid, row, fill, result, float.IsFinite(result));
         }
     }
 
     // Maps a finite double to an integer key whose signed order is the IEEE 754 total order, with -0 before +0.
-    internal static long TotalOrderKey(double value)
+    internal static long TotalOrderKey(float value)
     {
-        var bits = BitConverter.DoubleToInt64Bits(value);
+        var bits = BitConverter.SingleToInt32Bits(value);
         return bits >= 0 ? bits : bits ^ long.MaxValue;
     }
 
-    private static void Store(double[]? values, bool[]? valid, int row, double fill, double value, bool computed)
+    private static void Store(float[]? values, bool[]? valid, int row, float fill, float value, bool computed)
     {
         if (values is not null)
             values[row] = computed ? value : fill;
@@ -159,7 +159,7 @@ internal static class MathBlockWindowSelection
 
         internal int[] Upper { get; }
 
-        internal void Insert(ReadOnlySpan<double> x, int item)
+        internal void Insert(ReadOnlySpan<float> x, int item)
         {
             if (lowerCount == 0 && upperCount == 0)
                 Push(x, Lower, ref lowerCount, item, 0, true);
@@ -171,7 +171,7 @@ internal static class MathBlockWindowSelection
                 Push(x, Upper, ref upperCount, item, 1, false);
         }
 
-        internal void Remove(ReadOnlySpan<double> x, int item)
+        internal void Remove(ReadOnlySpan<float> x, int item)
         {
             if (sides[item % width] == 0)
                 Remove(x, Lower, ref lowerCount, item, true);
@@ -179,7 +179,7 @@ internal static class MathBlockWindowSelection
                 Remove(x, Upper, ref upperCount, item, false);
         }
 
-        internal void Rebalance(ReadOnlySpan<double> x, int lowerTarget)
+        internal void Rebalance(ReadOnlySpan<float> x, int lowerTarget)
         {
             while (lowerCount > lowerTarget)
             {
@@ -195,19 +195,19 @@ internal static class MathBlockWindowSelection
             }
         }
 
-        private static int Compare(ReadOnlySpan<double> x, int left, int right)
+        private static int Compare(ReadOnlySpan<float> x, int left, int right)
         {
             var comparison = MathBlockCollectionPrimitives.CompareDoubleAscending(x[left], x[right]);
             return comparison != 0 ? comparison : left.CompareTo(right);
         }
 
-        private static bool Precedes(ReadOnlySpan<double> x, int left, int right, bool maximum)
+        private static bool Precedes(ReadOnlySpan<float> x, int left, int right, bool maximum)
         {
             var comparison = Compare(x, left, right);
             return maximum ? comparison > 0 : comparison < 0;
         }
 
-        private void Push(ReadOnlySpan<double> x, int[] heap, ref int heapCount, int item, int side, bool maximum)
+        private void Push(ReadOnlySpan<float> x, int[] heap, ref int heapCount, int item, int side, bool maximum)
         {
             var position = heapCount++;
             heap[position] = item;
@@ -216,7 +216,7 @@ internal static class MathBlockWindowSelection
             SiftUp(x, heap, position, maximum);
         }
 
-        private void Remove(ReadOnlySpan<double> x, int[] heap, ref int heapCount, int item, bool maximum)
+        private void Remove(ReadOnlySpan<float> x, int[] heap, ref int heapCount, int item, bool maximum)
         {
             var position = positions[item % width];
             var replacement = heap[--heapCount];
@@ -230,7 +230,7 @@ internal static class MathBlockWindowSelection
                 SiftDown(x, heap, heapCount, position, maximum);
         }
 
-        private void SiftUp(ReadOnlySpan<double> x, int[] heap, int position, bool maximum)
+        private void SiftUp(ReadOnlySpan<float> x, int[] heap, int position, bool maximum)
         {
             while (position > 0)
             {
@@ -242,7 +242,7 @@ internal static class MathBlockWindowSelection
             }
         }
 
-        private void SiftDown(ReadOnlySpan<double> x, int[] heap, int heapCount, int position, bool maximum)
+        private void SiftDown(ReadOnlySpan<float> x, int[] heap, int heapCount, int position, bool maximum)
         {
             while (true)
             {

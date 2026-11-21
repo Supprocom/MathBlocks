@@ -11,6 +11,6 @@ internal static partial class StructuralMathBlocks
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Vector);
             return MathBlockType.Vector(types[0].Unit);
-        }, inputs => MathBlockValue.Vector(MathBlockStructure.Unique(inputs[0].AsVector()), inputs[0].Type.Unit, true), [MathBlockValue.Vector([1d, 2d, 1d])], MathBlockValue.Vector([1d, 2d]), performanceIterations: 16);
+        }, inputs => MathBlockValue.Vector(MathBlockStructure.Unique(inputs[0].AsVector()), inputs[0].Type.Unit, true), [MathBlockValue.Vector([1f, 2f, 1f])], MathBlockValue.Vector([1f, 2f]), performanceIterations: 16);
     }
 }

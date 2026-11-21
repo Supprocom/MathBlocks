@@ -8,18 +8,18 @@ public static partial class MathBlockPath
     {
         ArgumentNullException.ThrowIfNull(path);
         var dimension = path.Columns;
-        var result = new double[dimension * dimension];
-        var cumulative = new double[dimension];
+        var result = new float[dimension * dimension];
+        var cumulative = new float[dimension];
         for (var row = 1; row < path.Rows; row++)
         {
-            var increment = new double[dimension];
+            var increment = new float[dimension];
             for (var column = 0; column < dimension; column++)
                 increment[column] = path[row, column] - path[row - 1, column];
             for (var left = 0; left < dimension; left++)
             {
                 for (var right = 0; right < dimension; right++)
                 {
-                    result[left * dimension + right] += cumulative[left] * increment[right] + 0.5d * increment[left] * increment[right];
+                    result[left * dimension + right] += cumulative[left] * increment[right] + 0.5f * increment[left] * increment[right];
                 }
             }
 

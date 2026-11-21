@@ -11,6 +11,6 @@ internal static partial class StructuralMathBlocks
         {
             var scalar = MathBlockTypeRules.SameBinary(types, MathBlockValueKind.Scalar);
             return MathBlockType.Vector(scalar.Unit, 2);
-        }, inputs => MathBlockValue.Vector(MathBlockStructure.Pair(inputs[0].AsScalar(), inputs[1].AsScalar()), inputs[0].Type.Unit, true), [MathBlockValue.Scalar(1d), MathBlockValue.Scalar(2d)], MathBlockValue.Vector([1d, 2d]), performanceIterations: 64);
+        }, inputs => MathBlockValue.Vector(MathBlockStructure.Pair(inputs[0].AsScalar(), inputs[1].AsScalar()), inputs[0].Type.Unit, true), [MathBlockValue.Scalar(1f), MathBlockValue.Scalar(2f)], MathBlockValue.Vector([1f, 2f]), performanceIterations: 64);
     }
 }

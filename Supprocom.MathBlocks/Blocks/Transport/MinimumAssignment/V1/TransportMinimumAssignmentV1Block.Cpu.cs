@@ -3,7 +3,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockTransport
 {
     /// <summary>Computes the <c>transport.minimum-assignment@1</c> mathematical operation.</summary>
-    public static double[] MinimumAssignment(MathBlockMatrix cost)
+    public static float[] MinimumAssignment(MathBlockMatrix cost)
     {
         ArgumentNullException.ThrowIfNull(cost);
         var size = cost.Rows;
@@ -11,7 +11,7 @@ public static partial class MathBlockTransport
         var values = MathBlockCollectionPrimitives.Repeat(Math.PositiveInfinity, stateCount);
         var previousMask = new int[stateCount];
         var chosenColumn = new int[stateCount];
-        values[0] = 0d;
+        values[0] = 0f;
         for (var mask = 0; mask < stateCount; mask++)
         {
             var row = Math.PopulationCount((uint)mask);
@@ -31,7 +31,7 @@ public static partial class MathBlockTransport
             }
         }
 
-        var result = new double[size];
+        var result = new float[size];
         var current = stateCount - 1;
         for (var row = size - 1; row >= 0; row--)
         {

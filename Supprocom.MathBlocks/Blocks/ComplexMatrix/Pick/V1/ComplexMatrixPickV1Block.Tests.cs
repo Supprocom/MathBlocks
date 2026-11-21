@@ -14,9 +14,9 @@ public sealed class ComplexMatrixPickV1BlockTests
     {
         var operation = MathBlockCatalog.Standard.Get("complex-matrix.pick");
         var nodes = MathBlockValue.ComplexVector(
-            [new Complex(1d, 0d), new Complex(0d, 0d), new Complex(0.1d, 0d), new Complex(0.2d, 0d), new Complex(0.3d, 0d)]);
+            [new Complex(1f, 0f), new Complex(0f, 0f), new Complex(0.1f, 0f), new Complex(0.2f, 0f), new Complex(0.3f, 0f)]);
         var values = MathBlockValue.ComplexVector(
-            [new Complex(0d, 0d), new Complex(0d, 0d), new Complex(0d, 0d), new Complex(0d, 0d), new Complex(0d, 0d)]);
+            [new Complex(0f, 0f), new Complex(0f, 0f), new Complex(0f, 0f), new Complex(0f, 0f), new Complex(0f, 0f)]);
 
         var result = operation.Evaluate(nodes, values);
 

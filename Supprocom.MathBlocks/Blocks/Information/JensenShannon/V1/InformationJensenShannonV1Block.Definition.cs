@@ -6,6 +6,6 @@ internal static partial class ProbabilityMathBlocks
     {
         internal const string Identity = "information.jensen-shannon@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateDistributionBinary("information.jensen-shannon", MathBlockProbability.JensenShannonDivergence, certain, fair, 0.21576155433883565d);
+        internal static MathBlockOperation Create() => CreateDistributionBinary("information.jensen-shannon", MathBlockProbability.JensenShannonDivergence, certain, fair, 0.21576155433883565f);
     }
 }

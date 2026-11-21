@@ -12,7 +12,7 @@ internal static partial class StructuralMathBlocks
         }, inputs => MathBlockValue.Scalar(
             MathBlockCollectionPrimitives.Count(inputs[0].AsBooleanVector(), value => value)),
             [MathBlockValue.BooleanVector([true, false, true])],
-            MathBlockValue.Scalar(2d),
+            MathBlockValue.Scalar(2f),
             performanceIterations: 32);
     }
 }

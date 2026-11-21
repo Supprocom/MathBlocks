@@ -7,16 +7,16 @@ namespace Supprocom.MathBlocks;
 public readonly struct MathBlockComplexValue : IEquatable<MathBlockComplexValue>
 {
     /// <summary>Creates a complex value from real and imaginary components.</summary>
-    public MathBlockComplexValue(double real, double imaginary)
+    public MathBlockComplexValue(float real, float imaginary)
     {
         Real = real;
         Imaginary = imaginary;
     }
 
     /// <summary>Gets the real value.</summary>
-    public double Real { get; }
+    public float Real { get; }
     /// <summary>Gets the imaginary value.</summary>
-    public double Imaginary { get; }
+    public float Imaginary { get; }
 
     /// <summary>Compares both complex components for equality.</summary>
     public bool Equals(MathBlockComplexValue other) =>

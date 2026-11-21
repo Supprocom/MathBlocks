@@ -4,28 +4,28 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockProbability
 {
     /// <summary>Computes the <c>combinatorics.binomial-coefficient@1</c> mathematical operation.</summary>
-    public static double BinomialCoefficient(int n, int k) => BinomialCoefficientWide(n, k);
+    public static float BinomialCoefficient(int n, int k) => BinomialCoefficientWide(n, k);
 
     // The coefficient with n in 64 bits, so that the sum of two int32 values does not wrap. After the symmetry step n is
     // at least 2k, so from k = 600 on the coefficient exceeds 1e359 and the loop ends at +Infinity; that value is
     // returned without running the loop. A smaller k that overflows part way stops at the first +Infinity as well.
-    internal static double BinomialCoefficientWide(long n, int k)
+    internal static float BinomialCoefficientWide(long n, int k)
     {
         if (k < 0 || k > n)
-            return 0d;
+            return 0f;
         k = (int)Math.Min(k, n - k);
         if (k >= 600)
-            return double.PositiveInfinity;
-        var result = 1d;
+            return float.PositiveInfinity;
+        var result = 1f;
         for (var index = 1; index <= k; index++)
         {
-            result = result * (double)(n - k + index) / index;
+            result = result * (float)(n - k + index) / index;
             // Every multiplier and divisor from here on is at least 1, so +Infinity stays +Infinity.
-            if (double.IsInfinity(result))
+            if (float.IsInfinity(result))
                 break;
         }
 
-        if (double.IsPositiveInfinity(result))
+        if (float.IsPositiveInfinity(result))
             return BinomialCoefficientOrdered(n, k);
         return result;
     }
@@ -38,11 +38,11 @@ public static partial class MathBlockProbability
     /// <param name="n">The set size.</param>
     /// <param name="k">The reduced choice count, at most <c>n - k</c>.</param>
     /// <returns>C(n, k), or positive infinity when it is not representable.</returns>
-    internal static double BinomialCoefficientOrdered(long n, int k)
+    internal static float BinomialCoefficientOrdered(long n, int k)
     {
-        var result = 1d;
+        var result = 1f;
         for (var index = 1; index <= k; index++)
-            result = result * ((double)(n - k + index) / index);
+            result = result * ((float)(n - k + index) / index);
         return result;
     }
 }

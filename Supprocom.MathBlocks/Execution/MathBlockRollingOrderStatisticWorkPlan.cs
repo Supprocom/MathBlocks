@@ -16,7 +16,7 @@ public readonly record struct MathBlockRollingOrderStatisticWorkPlan(
     int InputCount,
     int WindowWidth,
     int OutputCount,
-    double Probability,
+    float Probability,
     bool UsesLinearExtremeDeque,
     bool UsesParallelRadixPreparation,
     int RadixPassCount,

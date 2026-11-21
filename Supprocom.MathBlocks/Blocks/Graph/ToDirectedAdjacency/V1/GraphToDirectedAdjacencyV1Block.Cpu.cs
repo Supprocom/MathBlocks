@@ -7,7 +7,7 @@ public static partial class MathBlockStructure
     public static MathBlockMatrix DirectedAdjacencyFromGraph(MathBlockGraph graph)
     {
         ArgumentNullException.ThrowIfNull(graph);
-        var values = new double[graph.VertexCount * graph.VertexCount];
+        var values = new float[graph.VertexCount * graph.VertexCount];
         foreach (var edge in graph)
             values[edge.From * graph.VertexCount + edge.To] += edge.Weight;
         return new MathBlockMatrix(graph.VertexCount, graph.VertexCount, values, true);

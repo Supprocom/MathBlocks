@@ -4,5 +4,5 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockScalar
 {
     /// <summary>Computes the <c>scalar.absolute@1</c> mathematical operation.</summary>
-    public static double Absolute(double value) => Math.Abs(value);
+    public static float Absolute(float value) => Math.Abs(value);
 }

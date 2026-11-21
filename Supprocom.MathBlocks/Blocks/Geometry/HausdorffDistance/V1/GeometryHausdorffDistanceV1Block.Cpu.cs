@@ -3,7 +3,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockGeometry
 {
     /// <summary>Computes the <c>geometry.hausdorff-distance@1</c> mathematical operation.</summary>
-    public static double HausdorffDistance(IReadOnlyList<MathBlockPoint> left, IReadOnlyList<MathBlockPoint> right)
+    public static float HausdorffDistance(IReadOnlyList<MathBlockPoint> left, IReadOnlyList<MathBlockPoint> right)
     {
         ArgumentNullException.ThrowIfNull(left);
         ArgumentNullException.ThrowIfNull(right);

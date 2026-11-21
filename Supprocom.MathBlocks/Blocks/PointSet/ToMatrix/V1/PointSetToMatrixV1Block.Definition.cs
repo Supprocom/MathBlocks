@@ -11,6 +11,6 @@ internal static partial class StructuralMathBlocks
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.PointSet);
             return MathBlockType.Matrix(types[0].Unit, types[0].Rows, 2);
-        }, inputs => inputs[0].AsPointSet().Count > 0 ? MathBlockValue.Matrix(MathBlockStructure.PointSetToMatrix(inputs[0].AsPointSet()), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Matrix(inputs[0].Type.Unit, columns: 2), "The point set is empty."), [MathBlockValue.PointSet(new MathBlockPointSet([new(1d, 2d), new(3d, 4d)]))], matrix, performanceIterations: 16);
+        }, inputs => inputs[0].AsPointSet().Count > 0 ? MathBlockValue.Matrix(MathBlockStructure.PointSetToMatrix(inputs[0].AsPointSet()), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Matrix(inputs[0].Type.Unit, columns: 2), "The point set is empty."), [MathBlockValue.PointSet(new MathBlockPointSet([new(1f, 2f), new(3f, 4f)]))], matrix, performanceIterations: 16);
     }
 }

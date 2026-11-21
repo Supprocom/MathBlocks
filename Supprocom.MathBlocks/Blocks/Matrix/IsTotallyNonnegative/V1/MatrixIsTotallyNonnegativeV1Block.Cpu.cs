@@ -14,7 +14,7 @@ public static partial class MathBlockAdvanced
             {
                 foreach (var columns in Combinations(matrix.Columns, order))
                 {
-                    if (MathBlockLinearAlgebra.Determinant(Submatrix(matrix, rows, columns)) < 0d)
+                    if (MathBlockLinearAlgebra.Determinant(Submatrix(matrix, rows, columns)) < 0f)
                         return false;
                 }
             }

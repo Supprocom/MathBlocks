@@ -6,6 +6,6 @@ internal static partial class StatisticalMathBlocks
     {
         internal const string Identity = "statistics.linear-r-squared@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateBinary("statistics.linear-r-squared", MathBlockStatistics.LinearRSquared, 1d, CorrelationType);
+        internal static MathBlockOperation Create() => CreateBinary("statistics.linear-r-squared", MathBlockStatistics.LinearRSquared, 1f, CorrelationType);
     }
 }

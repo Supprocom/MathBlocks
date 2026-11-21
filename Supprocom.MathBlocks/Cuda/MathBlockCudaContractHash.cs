@@ -95,11 +95,11 @@ internal static class MathBlockCudaContractHash
     public static unsafe byte[] EncodeRead(
         MathBlockType type,
         MathBlockCudaSlotDescriptor slot,
-        double[] payload,
+        float[] payload,
         ulong dataPointer,
         ulong scratchPointer)
     {
-        var byteCount = checked(MathBlockCudaSlotLayout.Size + (payload.Length * sizeof(double)));
+        var byteCount = checked(MathBlockCudaSlotLayout.Size + (payload.Length * sizeof(float)));
         var arena = Marshal.AllocHGlobal(byteCount);
         try
         {

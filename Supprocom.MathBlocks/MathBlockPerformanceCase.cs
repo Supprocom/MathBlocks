@@ -7,14 +7,14 @@ public sealed class MathBlockPerformanceCase
     public MathBlockPerformanceCase(
         IEnumerable<MathBlockValue> inputs,
         int iterations = 64,
-        double maximumWarmLatencyMicroseconds = 1_000d)
+        float maximumWarmLatencyMicroseconds = 1_000f)
     {
         ArgumentNullException.ThrowIfNull(inputs);
         Inputs = Array.AsReadOnly(MathBlockCollectionPrimitives.CopyEnumerable(inputs));
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(iterations);
         if (!Math.IsFinite(maximumWarmLatencyMicroseconds) ||
-            maximumWarmLatencyMicroseconds <= 0d ||
-            maximumWarmLatencyMicroseconds > 1_000d)
+            maximumWarmLatencyMicroseconds <= 0f ||
+            maximumWarmLatencyMicroseconds > 1_000f)
         {
             throw new ArgumentOutOfRangeException(nameof(maximumWarmLatencyMicroseconds));
         }
@@ -27,5 +27,5 @@ public sealed class MathBlockPerformanceCase
     /// <summary>Gets the iterations value.</summary>
     public int Iterations { get; }
     /// <summary>Gets the maximum warm latency microseconds value.</summary>
-    public double MaximumWarmLatencyMicroseconds { get; }
+    public float MaximumWarmLatencyMicroseconds { get; }
 }

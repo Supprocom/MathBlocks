@@ -6,6 +6,6 @@ internal static partial class PathMathBlocks
     {
         internal const string Identity = "path.zero-crossing-count@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreatePathScalar("path.zero-crossing-count", values => MathBlockPath.ZeroCrossingCount(values), MathBlockValue.Vector([-1d, 2d, -3d]), 2d, DimensionlessPathScalar);
+        internal static MathBlockOperation Create() => CreatePathScalar("path.zero-crossing-count", values => MathBlockPath.ZeroCrossingCount(values), MathBlockValue.Vector([-1f, 2f, -3f]), 2f, DimensionlessPathScalar);
     }
 }

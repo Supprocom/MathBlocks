@@ -6,6 +6,6 @@ internal static partial class VectorMathBlocks
     {
         internal const string Identity = "vector.maximum@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateReduction("vector.maximum", MathBlockVectorMath.Maximum, 4d, MathBlockTypeRules.VectorReduction);
+        internal static MathBlockOperation Create() => CreateReduction("vector.maximum", MathBlockVectorMath.Maximum, 4f, MathBlockTypeRules.VectorReduction);
     }
 }

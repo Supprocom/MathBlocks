@@ -2,10 +2,10 @@ namespace Supprocom.MathBlocks;
 
 internal static class MathBlockCollectionPrimitives
 {
-    public static int CompareDoubleAscending(double left, double right) =>
+    public static int CompareDoubleAscending(float left, float right) =>
         left < right ? -1 : left > right ? 1 : 0;
 
-    public static int CompareDoubleDescending(double left, double right) =>
+    public static int CompareDoubleDescending(float left, float right) =>
         left > right ? -1 : left < right ? 1 : 0;
 
     public static T[] Copy<T>(IReadOnlyList<T> values)

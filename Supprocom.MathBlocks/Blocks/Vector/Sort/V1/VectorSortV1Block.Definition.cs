@@ -6,6 +6,6 @@ internal static partial class VectorMathBlocks
     {
         internal const string Identity = "vector.sort@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateVectorUnary("vector.sort", MathBlockVectorMath.Sort, [3d, 1d, 2d], [1d, 2d, 3d], SameVectorUnary);
+        internal static MathBlockOperation Create() => CreateVectorUnary("vector.sort", MathBlockVectorMath.Sort, [3f, 1f, 2f], [1f, 2f, 3f], SameVectorUnary);
     }
 }

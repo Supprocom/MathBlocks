@@ -54,7 +54,7 @@ public sealed class MathBlockDomainOptions
     public int IncompleteBetaMaximumIterations { get; init; } = 256;
 
     /// <summary>Gets the relative step size at which the incomplete beta continued fraction counts as converged. The range is 0 to 1 and finite.</summary>
-    public double IncompleteBetaTolerance { get; init; } = 3e-14;
+    public float IncompleteBetaTolerance { get; init; } = 3e-14f;
 
     /// <summary>Gets what the incomplete beta function returns when the continued fraction has not converged at its iteration budget.</summary>
     public MathBlockNonConvergencePolicy IncompleteBetaNonConvergence { get; init; } = MathBlockNonConvergencePolicy.Estimate;
@@ -87,7 +87,7 @@ public sealed class MathBlockDomainOptions
         Require(MaximumMatrixSize, 1, MaximumSquareMatrixSizeInIntBytes, nameof(MaximumMatrixSize), "the matrix holds n * n doubles addressed with int byte offsets");
         Require(MaximumIterationCount, 1, int.MaxValue, nameof(MaximumIterationCount), "the count and its loop counter are ints");
         Require(IncompleteBetaMaximumIterations, 1, int.MaxValue - 1, nameof(IncompleteBetaMaximumIterations), "the loop counter is an int that must not wrap");
-        if (!(IncompleteBetaTolerance >= 0d && IncompleteBetaTolerance <= 1d))
+        if (!(IncompleteBetaTolerance >= 0f && IncompleteBetaTolerance <= 1f))
         {
             throw new ArgumentOutOfRangeException(
                 nameof(IncompleteBetaTolerance),

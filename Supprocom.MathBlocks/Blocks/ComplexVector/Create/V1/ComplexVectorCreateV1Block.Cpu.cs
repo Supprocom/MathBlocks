@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockStructure
 {
     /// <summary>Computes the <c>complex-vector.create@1</c> mathematical operation.</summary>
-    public static Complex[] ComplexVector(IReadOnlyList<double> real, IReadOnlyList<double> imaginary)
+    public static Complex[] ComplexVector(IReadOnlyList<float> real, IReadOnlyList<float> imaginary)
     {
         ArgumentNullException.ThrowIfNull(imaginary);
         ArgumentNullException.ThrowIfNull(real);

@@ -8,9 +8,9 @@ internal sealed class MathBlockWindowQuantileKernel(bool median) : MathBlockWind
         IReadOnlyList<MathBlockValue> inputs,
         int count,
         int width,
-        double fill,
-        double[]? values,
+        float fill,
+        float[]? values,
         bool[]? valid) =>
         MathBlockWindowSelection.RunQuantile(
-            inputs[0].AsVector().Span, count, width, median ? 0.5d : inputs[1].AsScalar(), fill, values, valid);
+            inputs[0].AsVector().Span, count, width, median ? 0.5f : inputs[1].AsScalar(), fill, values, valid);
 }

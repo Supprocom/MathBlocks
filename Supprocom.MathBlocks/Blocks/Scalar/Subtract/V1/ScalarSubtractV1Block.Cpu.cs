@@ -3,5 +3,5 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockScalar
 {
     /// <summary>Computes the <c>scalar.subtract@1</c> mathematical operation.</summary>
-    public static double Subtract(double left, double right) => left - right;
+    public static float Subtract(float left, float right) => left - right;
 }

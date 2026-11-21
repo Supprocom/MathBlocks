@@ -15,6 +15,6 @@ internal static partial class GraphMathBlocks
                 throw new InvalidOperationException("The input units must be equal.");
             MathBlockTypeRules.RequireCompatibleShape(types[0], types[1]);
             return MathBlockType.Scalar(types[0].Unit);
-        }, inputs => MathBlockValue.Scalar(MathBlockGraphMath.HodgeResidualNorm(inputs[0].AsGraph(), inputs[1].AsVector()), inputs[0].Type.Unit), [MathBlockValue.Graph(new MathBlockGraph(3, [new(0, 1, 1d), new(1, 2, 2d)])), MathBlockValue.Vector([0d, 1d, 3d])], MathBlockValue.Scalar(0d), performanceIterations: 4);
+        }, inputs => MathBlockValue.Scalar(MathBlockGraphMath.HodgeResidualNorm(inputs[0].AsGraph(), inputs[1].AsVector()), inputs[0].Type.Unit), [MathBlockValue.Graph(new MathBlockGraph(3, [new(0, 1, 1f), new(1, 2, 2f)])), MathBlockValue.Vector([0f, 1f, 3f])], MathBlockValue.Scalar(0f), performanceIterations: 4);
     }
 }

@@ -11,6 +11,6 @@ internal static partial class PathMathBlocks
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Vector);
             return MathBlockType.Matrix(types[0].Unit, columns: 2);
-        }, inputs => inputs[0].AsVector().Count > 0 ? MathBlockValue.Matrix(MathBlockPath.LeadLagTransform(inputs[0].AsVector()), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Matrix(inputs[0].Type.Unit, columns: 2), "The path is empty."), [MathBlockValue.Vector([1d, 2d])], MathBlockValue.Matrix(new MathBlockMatrix(3, 2, [1d, 1d, 2d, 1d, 2d, 2d])), performanceIterations: 8);
+        }, inputs => inputs[0].AsVector().Count > 0 ? MathBlockValue.Matrix(MathBlockPath.LeadLagTransform(inputs[0].AsVector()), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Matrix(inputs[0].Type.Unit, columns: 2), "The path is empty."), [MathBlockValue.Vector([1f, 2f])], MathBlockValue.Matrix(new MathBlockMatrix(3, 2, [1f, 1f, 2f, 1f, 2f, 2f])), performanceIterations: 8);
     }
 }

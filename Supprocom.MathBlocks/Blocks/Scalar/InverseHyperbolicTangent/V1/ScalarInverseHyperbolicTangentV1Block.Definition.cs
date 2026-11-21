@@ -9,7 +9,7 @@ internal static partial class ScalarMathBlocks
         internal static MathBlockOperation Create()
         {
             var operations = new List<MathBlockOperation>(1);
-            AddDimensionlessUnary(operations, "scalar.inverse-hyperbolic-tangent", MathBlockScalar.InverseHyperbolicTangent, 0d, 0d);
+            AddDimensionlessUnary(operations, "scalar.inverse-hyperbolic-tangent", MathBlockScalar.InverseHyperbolicTangent, 0f, 0f);
             return operations[0];
         }
     }

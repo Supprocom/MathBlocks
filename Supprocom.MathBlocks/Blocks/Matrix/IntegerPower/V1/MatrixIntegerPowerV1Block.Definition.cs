@@ -13,6 +13,6 @@ internal static partial class AdvancedMathBlocks
             MathBlockTypeRules.RequireDimensionless(types[0]);
             RequireDimensionlessScalar(types[1]);
             return types[0];
-        }, inputs => TryInteger(inputs[1].AsScalar(), out var exponent) && exponent >= 0 ? MathBlockValue.Matrix(MathBlockAdvanced.MatrixPower(inputs[0].AsMatrix(), exponent)) : MathBlockValue.Invalid(inputs[0].Type, "The exponent is not a nonnegative integer."), [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1d, 1d, 0d, 1d])), MathBlockValue.Scalar(3d)], MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1d, 3d, 0d, 1d])), performanceIterations: 4);
+        }, inputs => TryInteger(inputs[1].AsScalar(), out var exponent) && exponent >= 0 ? MathBlockValue.Matrix(MathBlockAdvanced.MatrixPower(inputs[0].AsMatrix(), exponent)) : MathBlockValue.Invalid(inputs[0].Type, "The exponent is not a nonnegative integer."), [MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1f, 1f, 0f, 1f])), MathBlockValue.Scalar(3f)], MathBlockValue.Matrix(new MathBlockMatrix(2, 2, [1f, 3f, 0f, 1f])), performanceIterations: 4);
     }
 }

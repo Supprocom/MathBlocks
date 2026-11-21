@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockPath
 {
     /// <summary>Computes the <c>path.zero-crossing-count@1</c> mathematical operation.</summary>
-    public static int ZeroCrossingCount(IReadOnlyList<double> values)
+    public static int ZeroCrossingCount(IReadOnlyList<float> values)
     {
         ArgumentNullException.ThrowIfNull(values);
         var count = 0;

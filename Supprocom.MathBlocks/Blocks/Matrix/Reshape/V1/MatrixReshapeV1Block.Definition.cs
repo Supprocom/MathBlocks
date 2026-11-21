@@ -13,6 +13,6 @@ internal static partial class StructuralMathBlocks
             RequireDimensionlessScalar(types[1]);
             RequireDimensionlessScalar(types[2]);
             return MathBlockType.Matrix(types[0].Unit);
-        }, inputs => TryNonnegativeInteger(inputs[1].AsScalar(), out var rows) && TryNonnegativeInteger(inputs[2].AsScalar(), out var columns) && rows > 0 && columns > 0 && rows * (long)columns == inputs[0].AsVector().Count ? MathBlockValue.Matrix(MathBlockStructure.Reshape(inputs[0].AsVector(), rows, columns), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Matrix(inputs[0].Type.Unit), "The requested shape does not match the vector."), [vector, MathBlockValue.Scalar(2d), MathBlockValue.Scalar(2d)], matrix, performanceIterations: 16);
+        }, inputs => TryNonnegativeInteger(inputs[1].AsScalar(), out var rows) && TryNonnegativeInteger(inputs[2].AsScalar(), out var columns) && rows > 0 && columns > 0 && rows * (long)columns == inputs[0].AsVector().Count ? MathBlockValue.Matrix(MathBlockStructure.Reshape(inputs[0].AsVector(), rows, columns), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Matrix(inputs[0].Type.Unit), "The requested shape does not match the vector."), [vector, MathBlockValue.Scalar(2f), MathBlockValue.Scalar(2f)], matrix, performanceIterations: 16);
     }
 }

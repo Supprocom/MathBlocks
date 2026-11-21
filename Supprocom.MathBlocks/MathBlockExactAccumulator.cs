@@ -28,13 +28,13 @@ internal sealed class MathBlockExactAccumulator
 
     // Splits the scaled square into the range where Dekker's product is exact (no overflow in the split, no underflow
     // in the error term): |x| below 2^-400 or above 2^400 is scaled by 2^600 or 2^-600 first.
-    private static readonly double SquareScaleUp = PowerOfTwo(600);
-    private static readonly double SquareScaleDown = PowerOfTwo(-600);
-    private static readonly double SquareSmall = PowerOfTwo(-400);
-    private static readonly double SquareLarge = PowerOfTwo(400);
+    private static readonly float SquareScaleUp = PowerOfTwo(600);
+    private static readonly float SquareScaleDown = PowerOfTwo(-600);
+    private static readonly float SquareSmall = PowerOfTwo(-400);
+    private static readonly float SquareLarge = PowerOfTwo(400);
 
     // 2^27 + 1, Dekker's (Veltkamp's) splitting constant for binary64.
-    private const double Splitter = 134_217_729d;
+    private const float Splitter = 134_217_729f;
 
     private readonly long[] chunks = new long[ChunkCount];
     private readonly long[] scratch = new long[ChunkCount];
@@ -43,13 +43,13 @@ internal sealed class MathBlockExactAccumulator
     private int operations;
 
     // Adds (or subtracts) value exactly.
-    internal void Add(double value, bool subtract) => Add(value, 0, subtract);
+    internal void Add(float value, bool subtract) => Add(value, 0, subtract);
 
     // Adds (or subtracts) value^2 exactly, as the error-free product pair p + e = value^2 (Dekker 1971, no FMA),
     // computed on value scaled by a power of two when needed and added back at that scale.
-    internal void AddSquare(double value, bool subtract)
+    internal void AddSquare(float value, bool subtract)
     {
-        if (value == 0d)
+        if (value == 0f)
             return;
         var magnitude = Math.Abs(value);
         var scaled = value;
@@ -71,24 +71,24 @@ internal sealed class MathBlockExactAccumulator
 
     // The window value rounded to the nearest double, ties to even, and the rounded remainder:
     // high = RN(S) and low = RN(S - high). An overflow gives an infinite high and a zero low.
-    internal void ReadDoubleDouble(out double high, out double low) => ReadDoubleDouble(out high, out low, out _);
+    internal void ReadDoubleDouble(out float high, out float low) => ReadDoubleDouble(out high, out low, out _);
 
     // As above; zero tells whether the exact value is 0, which a high of 0 alone doesn't (S may round to 0).
-    internal void ReadDoubleDouble(out double high, out double low, out bool zero)
+    internal void ReadDoubleDouble(out float high, out float low, out bool zero)
     {
         zero = true;
         if (highest < 0)
         {
-            high = 0d;
-            low = 0d;
+            high = 0f;
+            low = 0f;
             return;
         }
         var top = LoadMagnitude(out var negative);
         for (var index = lowest; index <= top; index++)
             zero &= scratch[index] == 0L;
         high = RoundMagnitude(scratch, lowest, top, false);
-        low = 0d;
-        if (!double.IsFinite(high))
+        low = 0f;
+        if (!float.IsFinite(high))
         {
             high = negative ? -high : high;
             return;
@@ -114,10 +114,10 @@ internal sealed class MathBlockExactAccumulator
     // nonzero remainder as the sticky bit of the rounding. The division continues four chunks below the leading
     // chunk (at least 96 bits), so the quotient's significand and rounding bit are digits, not remainder; the chunks
     // below lowest that it writes are cleared again afterwards.
-    internal double ReadQuotient(int divisor)
+    internal float ReadQuotient(int divisor)
     {
         if (highest < 0)
-            return 0d;
+            return 0f;
         var top = LoadMagnitude(out var negative);
         var leading = top;
         while (leading > lowest && scratch[leading] == 0L)
@@ -138,9 +138,9 @@ internal sealed class MathBlockExactAccumulator
         return negative ? -result : result;
     }
 
-    private void Add(double value, int shift, bool subtract)
+    private void Add(float value, int shift, bool subtract)
     {
-        if (value == 0d)
+        if (value == 0f)
             return;
         var index = AddTo(chunks, value, shift, subtract);
         if (index < lowest)
@@ -156,9 +156,9 @@ internal sealed class MathBlockExactAccumulator
     }
 
     // Adds value * 2^shift to the chunks and returns the lowest chunk index it touched.
-    private static int AddTo(long[] target, double value, int shift, bool subtract)
+    private static int AddTo(long[] target, float value, int shift, bool subtract)
     {
-        var bits = BitConverter.DoubleToInt64Bits(value);
+        var bits = BitConverter.SingleToInt32Bits(value);
         var negative = (bits < 0L) != subtract;
         var biased = (int)((bits >> 52) & 0x7FFL);
         var significand = bits & 0xF_FFFF_FFFF_FFFFL;
@@ -237,13 +237,13 @@ internal sealed class MathBlockExactAccumulator
     // Rounds a nonnegative value in canonical chunks (lowest .. top in [0, 2^32), zero above top) to the nearest
     // double, ties to even, with sticky an extra nonzero part below every chunk bit. Builds the result's bits
     // directly, so no step of the conversion rounds.
-    private static double RoundMagnitude(long[] value, int lowest, int top, bool sticky)
+    private static float RoundMagnitude(long[] value, int lowest, int top, bool sticky)
     {
         var chunk = top;
         while (chunk >= lowest && value[chunk] == 0L)
             chunk--;
         if (chunk < lowest)
-            return 0d;
+            return 0f;
         var bit = 31;
         while (((value[chunk] >> bit) & 1L) == 0L)
             bit--;
@@ -264,10 +264,10 @@ internal sealed class MathBlockExactAccumulator
         {
             var biased = least + 1075;
             if (biased >= 2047)
-                return double.PositiveInfinity;
-            return BitConverter.Int64BitsToDouble(((long)biased << 52) | (significand - (1L << 52)));
+                return float.PositiveInfinity;
+            return BitConverter.Int32BitsToSingle(((long)biased << 52) | (significand - (1L << 52)));
         }
-        return BitConverter.Int64BitsToDouble(significand);
+        return BitConverter.Int32BitsToSingle(significand);
     }
 
     // count (1 .. 53) bits of the value starting at the bit with weight 2^position.
@@ -297,9 +297,9 @@ internal sealed class MathBlockExactAccumulator
         return false;
     }
 
-    private static double PowerOfTwo(int exponent) => BitConverter.Int64BitsToDouble((long)(exponent + 1023) << 52);
+    private static float PowerOfTwo(int exponent) => BitConverter.Int32BitsToSingle((long)(exponent + 1023) << 52);
 
-    private static void TwoProduct(double a, double b, out double p, out double e)
+    private static void TwoProduct(float a, float b, out float p, out float e)
     {
         p = a * b;
         Split(a, out var ah, out var al);
@@ -307,7 +307,7 @@ internal sealed class MathBlockExactAccumulator
         e = ((ah * bh - p) + ah * bl + al * bh) + al * bl;
     }
 
-    private static void Split(double a, out double high, out double low)
+    private static void Split(float a, out float high, out float low)
     {
         var c = Splitter * a;
         high = c - (c - a);

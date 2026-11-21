@@ -41,12 +41,12 @@ public static partial class MathBlockVectorMath
 
     // The counts are valid, the offsets are integers with start not above end, and the three series have equal length.
     internal static PrefixDifferenceRows PrefixDifferenceRowsOf(
-        ReadOnlySpan<double> values,
+        ReadOnlySpan<float> values,
         ReadOnlySpan<bool> available,
-        ReadOnlySpan<double> counts,
-        double start,
-        double end,
-        double fill,
+        ReadOnlySpan<float> counts,
+        float start,
+        float end,
+        float fill,
         bool wantValues,
         bool wantValid)
     {
@@ -55,15 +55,15 @@ public static partial class MathBlockVectorMath
             throw new ArgumentException("The three series must have equal length.", nameof(counts));
         if (count == 0)
             return new PrefixDifferenceRows([], [], null);
-        var result = wantValues ? GC.AllocateUninitializedArray<double>(count) : ArrayPool<double>.Shared.Rent(count);
+        var result = wantValues ? GC.AllocateUninitializedArray<float>(count) : ArrayPool<float>.Shared.Rent(count);
         var valid = wantValid ? new bool[count] : ArrayPool<bool>.Shared.Rent(count);
-        var prefix = ArrayPool<double>.Shared.Rent(count + 1);
+        var prefix = ArrayPool<float>.Shared.Rent(count + 1);
         var segment = ArrayPool<int>.Shared.Rent(count + 1);
         var lastGap = ArrayPool<int>.Shared.Rent(count);
         try
         {
             // A start below minus the row count, or an end at or above it, leaves every row without its rows in the series.
-            if (start < -(double)count || end >= count)
+            if (start < -(float)count || end >= count)
             {
                 result.AsSpan(0, count).Fill(fill);
                 valid.AsSpan(0, count).Clear();
@@ -80,10 +80,10 @@ public static partial class MathBlockVectorMath
         finally
         {
             if (!wantValues)
-                ArrayPool<double>.Shared.Return(result);
+                ArrayPool<float>.Shared.Return(result);
             if (!wantValid)
                 ArrayPool<bool>.Shared.Return(valid);
-            ArrayPool<double>.Shared.Return(prefix);
+            ArrayPool<float>.Shared.Return(prefix);
             ArrayPool<int>.Shared.Return(segment);
             ArrayPool<int>.Shared.Return(lastGap);
         }
@@ -93,10 +93,10 @@ public static partial class MathBlockVectorMath
     // to row i (-1 when none). With tiny values the prefix is in the scaled domain.
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private static void PrefixPass(
-        ReadOnlySpan<double> values,
+        ReadOnlySpan<float> values,
         ReadOnlySpan<bool> available,
-        ReadOnlySpan<double> counts,
-        double[] prefix,
+        ReadOnlySpan<float> counts,
+        float[] prefix,
         int[] segment,
         int[] lastGap,
         bool tiny)
@@ -109,9 +109,9 @@ public static partial class MathBlockVectorMath
             source = prefix.AsSpan(1, count);
         }
 
-        prefix[0] = 0d;
+        prefix[0] = 0f;
         segment[0] = -1;
-        var sum = 0d;
+        var sum = 0f;
         var number = 0;
         var gap = -1;
         // The three series have the row count's length and the arrays at least one more (the caller guarantees both), so the references stay in range.
@@ -123,15 +123,15 @@ public static partial class MathBlockVectorMath
         ref var gapRef = ref MemoryMarshal.GetArrayDataReference(lastGap);
         for (var row = 0; row < count; row++)
         {
-            if (Unsafe.Add(ref rowCounts, row) == 0d)
+            if (Unsafe.Add(ref rowCounts, row) == 0f)
             {
-                sum = 0d;
+                sum = 0f;
                 number++;
             }
 
             // +0 for an unavailable row, the value for an available one (the flag is 0 or 1).
             long keep = -(long)Unsafe.Add(ref flags, row);
-            sum += BitConverter.Int64BitsToDouble(BitConverter.DoubleToInt64Bits(Unsafe.Add(ref input, row)) & keep);
+            sum += BitConverter.Int32BitsToSingle(BitConverter.SingleToInt32Bits(Unsafe.Add(ref input, row)) & keep);
             gap = keep != 0L ? gap : row;
             Unsafe.Add(ref prefixRef, row + 1) = sum;
             Unsafe.Add(ref segmentRef, row + 1) = number;
@@ -139,7 +139,7 @@ public static partial class MathBlockVectorMath
         }
     }
 
-    private static void ScaleSeries(ReadOnlySpan<double> values, Span<double> scaled)
+    private static void ScaleSeries(ReadOnlySpan<float> values, Span<float> scaled)
     {
         var row = 0;
         if (MathBlockSimd.UseBlocks)
@@ -158,15 +158,15 @@ public static partial class MathBlockVectorMath
     // and end < count.
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private static void PrefixRowsPass(
-        double[] prefix,
+        float[] prefix,
         int[] segment,
         int[] lastGap,
-        double[] result,
+        float[] result,
         bool[] valid,
         int count,
         int start,
         int end,
-        double fill,
+        float fill,
         bool tiny)
     {
         var first = Math.Max(0, -start);
@@ -235,9 +235,9 @@ public static partial class MathBlockVectorMath
             var low = row + start;
             var high = row + end;
             var inRange = segment[row + lowReach + 1] == segment[row + highReach + 1] && lastGap[high] < low;
-            var before = segment[low] == segment[low + 1] ? prefix[low] : 0d;
+            var before = segment[low] == segment[low + 1] ? prefix[low] : 0f;
             var difference = prefix[high + 1] - before;
-            if (inRange && double.IsFinite(difference))
+            if (inRange && float.IsFinite(difference))
             {
                 result[row] = tiny ? MathBlockSimd.ScaleDown(difference) : difference;
                 valid[row] = true;

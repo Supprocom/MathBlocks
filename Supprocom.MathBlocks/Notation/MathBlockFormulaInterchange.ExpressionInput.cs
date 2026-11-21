@@ -722,7 +722,7 @@ public static partial class MathBlockFormulaInterchange
 
     private static MathBlockValue ParseFormulaVector(FormulaXmlElement[] children)
     {
-        var values = new double[children.Length - 1];
+        var values = new float[children.Length - 1];
         for (var index = 0; index < values.Length; index++)
             values[index] = ParseFormulaDouble(children[index + 1]);
         return MathBlockValue.Vector(values);
@@ -739,7 +739,7 @@ public static partial class MathBlockFormulaInterchange
         {
             throw new FormatException("A formula matrix shape is invalid.");
         }
-        var values = new double[rows * columns];
+        var values = new float[rows * columns];
         for (var index = 0; index < values.Length; index++)
             values[index] = ParseFormulaDouble(children[index + 3]);
         return MathBlockValue.Matrix(new MathBlockMatrix(rows, columns, values));
@@ -907,7 +907,7 @@ string.Equals(symbol.ContentDictionaryBase, OfficialContentDictionaryBase, Strin
         IsFormulaElement(element, "OMI", OpenMathNamespace) ||
         IsFormulaElement(element, "cn", MathMlNamespace);
 
-    private static double ParseFormulaDouble(FormulaXmlElement element)
+    private static float ParseFormulaDouble(FormulaXmlElement element)
     {
         if (element.Children.Length != 0)
             throw new FormatException("A formula number is invalid.");
@@ -920,12 +920,12 @@ string.Equals(symbol.ContentDictionaryBase, OfficialContentDictionaryBase, Strin
                 throw new FormatException("An OpenMath formula float is invalid.");
             if (hexadecimal is not null)
                 return ParseFormulaHexDouble(hexadecimal);
-            if (!double.TryParse(
+            if (!float.TryParse(
                     decimalValue,
                     NumberStyles.Float,
                     CultureInfo.InvariantCulture,
                     out var openMathValue) ||
-                !double.IsFinite(openMathValue))
+                !float.IsFinite(openMathValue))
             {
                 throw new FormatException("An OpenMath formula float is invalid.");
             }
@@ -942,15 +942,15 @@ string.Equals(symbol.ContentDictionaryBase, OfficialContentDictionaryBase, Strin
         if (string.Equals(type, "integer", StringComparison.Ordinal))
             return ParseFormulaArbitraryInteger(text, "A Content MathML integer is invalid.");
         if (type is not ("real" or "double") ||
-            !double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value) ||
-            !double.IsFinite(value))
+            !float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value) ||
+            !float.IsFinite(value))
         {
             throw new FormatException("A Content MathML number is invalid.");
         }
         return value;
     }
 
-    private static double ParseFormulaArbitraryInteger(string text, string message)
+    private static float ParseFormulaArbitraryInteger(string text, string message)
     {
         var firstDigit = text.Length > 0 && text[0] is '+' or '-' ? 1 : 0;
         if (firstDigit == text.Length)
@@ -960,19 +960,19 @@ string.Equals(symbol.ContentDictionaryBase, OfficialContentDictionaryBase, Strin
             if (text[index] is < '0' or > '9')
                 throw new FormatException(message);
         }
-        if (!double.TryParse(
+        if (!float.TryParse(
                 text,
                 NumberStyles.AllowLeadingSign,
                 CultureInfo.InvariantCulture,
                 out var value) ||
-            !double.IsFinite(value))
+            !float.IsFinite(value))
         {
             throw new FormatException(message);
         }
         return value;
     }
 
-    private static double ParseFormulaHexDouble(string text)
+    private static float ParseFormulaHexDouble(string text)
     {
         if (text.Length != 16 || !string.Equals(text, text.ToUpperInvariant(), StringComparison.Ordinal) ||
             !ulong.TryParse(
@@ -983,8 +983,8 @@ string.Equals(symbol.ContentDictionaryBase, OfficialContentDictionaryBase, Strin
         {
             throw new FormatException("A formula hexadecimal binary64 value is invalid.");
         }
-        var value = BitConverter.Int64BitsToDouble(unchecked((long)bits));
-        if (!double.IsFinite(value))
+        var value = BitConverter.Int32BitsToSingle(unchecked((long)bits));
+        if (!float.IsFinite(value))
             throw new FormatException("A formula binary64 value must be finite.");
         return value;
     }

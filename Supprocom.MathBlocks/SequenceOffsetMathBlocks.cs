@@ -9,10 +9,10 @@ internal static partial class VectorMathBlocks
     private const string OffsetRowCountsDiffer = "The input row counts must be equal.";
     private const string OffsetCountsInvalid = "The contiguity counts must be non-negative integers.";
     private const string OffsetRangeInvalid = "The offsets must be integers with start not above end.";
-    private const double OffsetSampleFill = -1d;
+    private const float OffsetSampleFill = -1f;
 
     private static readonly MathBlockValue offsetSampleValidity = MathBlockValue.BooleanVector([true, true, true, true, true]);
-    private static readonly MathBlockValue offsetSampleCounts = MathBlockValue.Vector([0d, 1d, 2d, 3d, 4d]);
+    private static readonly MathBlockValue offsetSampleCounts = MathBlockValue.Vector([0f, 1f, 2f, 3f, 4f]);
 
     private enum OffsetKind
     {
@@ -24,39 +24,39 @@ internal static partial class VectorMathBlocks
     // With start 0 and end 1, row 0 and row 3 find no match, row 1 matches at offset 1, row 2 at offset 0, and row 4 reaches past the series.
     internal static MathBlockOperation CreateFirstTrueOffset(bool validity)
     {
-        var series = MathBlockValue.Vector([0d, 0d, 1d, 0d, 0d]);
+        var series = MathBlockValue.Vector([0f, 0f, 1f, 0f, 0f]);
         MathBlockValue[] sample = validity
-            ? [series, offsetSampleValidity, offsetSampleCounts, MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d)]
-            : [series, offsetSampleValidity, offsetSampleCounts, MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d), MathBlockValue.Scalar(99d), MathBlockValue.Scalar(OffsetSampleFill)];
+            ? [series, offsetSampleValidity, offsetSampleCounts, MathBlockValue.Scalar(0f), MathBlockValue.Scalar(1f)]
+            : [series, offsetSampleValidity, offsetSampleCounts, MathBlockValue.Scalar(0f), MathBlockValue.Scalar(1f), MathBlockValue.Scalar(99f), MathBlockValue.Scalar(OffsetSampleFill)];
         var expected = validity
             ? MathBlockValue.BooleanVector([true, true, true, true, false])
-            : MathBlockValue.Vector([99d, 1d, 0d, 99d, OffsetSampleFill]);
+            : MathBlockValue.Vector([99f, 1f, 0f, 99f, OffsetSampleFill]);
         return CreateOffsetOperation("sequence.first-true-offset", OffsetKind.FirstTrue, validity, sample, expected);
     }
 
     // The sum of x[t] and x[t + 1], with no row after the last.
     internal static MathBlockOperation CreateSumOverOffsets(bool validity)
     {
-        var series = MathBlockValue.Vector([1d, 2d, 3d, 4d, 5d]);
+        var series = MathBlockValue.Vector([1f, 2f, 3f, 4f, 5f]);
         MathBlockValue[] sample = validity
-            ? [series, offsetSampleValidity, offsetSampleCounts, MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d)]
-            : [series, offsetSampleValidity, offsetSampleCounts, MathBlockValue.Scalar(0d), MathBlockValue.Scalar(1d), MathBlockValue.Scalar(OffsetSampleFill)];
+            ? [series, offsetSampleValidity, offsetSampleCounts, MathBlockValue.Scalar(0f), MathBlockValue.Scalar(1f)]
+            : [series, offsetSampleValidity, offsetSampleCounts, MathBlockValue.Scalar(0f), MathBlockValue.Scalar(1f), MathBlockValue.Scalar(OffsetSampleFill)];
         var expected = validity
             ? MathBlockValue.BooleanVector([true, true, true, true, false])
-            : MathBlockValue.Vector([3d, 5d, 7d, 9d, OffsetSampleFill]);
+            : MathBlockValue.Vector([3f, 5f, 7f, 9f, OffsetSampleFill]);
         return CreateOffsetOperation("sequence.sum-over-offsets", OffsetKind.Sum, validity, sample, expected);
     }
 
     // The maximum of x[t - 1], x[t] and x[t + 1], with no row before the first or after the last.
     internal static MathBlockOperation CreateMaximumOverOffsets(bool validity)
     {
-        var series = MathBlockValue.Vector([1d, 5d, 2d, 4d, 3d]);
+        var series = MathBlockValue.Vector([1f, 5f, 2f, 4f, 3f]);
         MathBlockValue[] sample = validity
-            ? [series, offsetSampleValidity, offsetSampleCounts, MathBlockValue.Scalar(-1d), MathBlockValue.Scalar(1d)]
-            : [series, offsetSampleValidity, offsetSampleCounts, MathBlockValue.Scalar(-1d), MathBlockValue.Scalar(1d), MathBlockValue.Scalar(OffsetSampleFill)];
+            ? [series, offsetSampleValidity, offsetSampleCounts, MathBlockValue.Scalar(-1f), MathBlockValue.Scalar(1f)]
+            : [series, offsetSampleValidity, offsetSampleCounts, MathBlockValue.Scalar(-1f), MathBlockValue.Scalar(1f), MathBlockValue.Scalar(OffsetSampleFill)];
         var expected = validity
             ? MathBlockValue.BooleanVector([false, true, true, true, false])
-            : MathBlockValue.Vector([OffsetSampleFill, 5d, 5d, 4d, OffsetSampleFill]);
+            : MathBlockValue.Vector([OffsetSampleFill, 5f, 5f, 4f, OffsetSampleFill]);
         return CreateOffsetOperation("sequence.maximum-over-offsets", OffsetKind.Maximum, validity, sample, expected);
     }
 
@@ -72,7 +72,7 @@ internal static partial class VectorMathBlocks
         inputs => EvaluateOffsets(inputs, kind, validity),
         sample,
         expected,
-        1e-12,
+        1e-12f,
         64);
 
     // The operands are x (or the predicate p), its validity, the counts, start and end; a value operation then takes the fill, and
@@ -162,7 +162,7 @@ internal static partial class VectorMathBlocks
         var counts = inputs[2].AsVector().Span;
         var fill = inputs[inputs.Count - 1].AsScalar();
         // first-true-offset writes every row of both arrays, so its value array needs no clearing.
-        var values = kind == OffsetKind.FirstTrue ? GC.AllocateUninitializedArray<double>(x.Length) : new double[x.Length];
+        var values = kind == OffsetKind.FirstTrue ? GC.AllocateUninitializedArray<float>(x.Length) : new float[x.Length];
         var rowValid = new bool[x.Length];
         if (kind == OffsetKind.FirstTrue)
         {

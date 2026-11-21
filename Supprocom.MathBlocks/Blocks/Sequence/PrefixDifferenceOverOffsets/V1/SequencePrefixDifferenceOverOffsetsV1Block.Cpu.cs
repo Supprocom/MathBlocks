@@ -12,23 +12,23 @@ public static partial class MathBlockVectorMath
 
     // The result of one call: the values with the fill on unavailable rows, and the per-row validity. Reason is set, and the
     // rows are empty, when the whole call is invalid.
-    internal readonly record struct PrefixDifferenceRows(double[] Values, bool[] Valid, string? Reason);
+    internal readonly record struct PrefixDifferenceRows(float[] Values, bool[] Valid, string? Reason);
 
     // The form needs the value rows only and its validity sibling the validity rows only, so each asks for just the rows it reads.
     internal static PrefixDifferenceRows PrefixDifferenceCompute(
         MathBlockVector values,
         MathBlockBooleanVector available,
         MathBlockVector counts,
-        double start,
-        double end,
-        double fill,
+        float start,
+        float end,
+        float fill,
         bool wantValues,
         bool wantValid)
     {
         var count = values.Count;
         if (available.Count != count || counts.Count != count)
             return PrefixDifferenceWhole(PrefixDifferenceRowCountsDiffer);
-        if (!double.IsFinite(start) || !double.IsFinite(end) || start != Math.Floor(start) || end != Math.Floor(end))
+        if (!float.IsFinite(start) || !float.IsFinite(end) || start != Math.Floor(start) || end != Math.Floor(end))
             return PrefixDifferenceWhole("The start and end offsets must be integers.");
         if (start > end)
             return PrefixDifferenceWhole("The start offset must not exceed the end offset.");

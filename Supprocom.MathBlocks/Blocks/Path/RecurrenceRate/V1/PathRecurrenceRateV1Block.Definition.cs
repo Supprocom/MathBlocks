@@ -14,6 +14,6 @@ internal static partial class PathMathBlocks
             if (types[0].Unit != types[1].Unit)
                 throw new InvalidOperationException("The path and threshold units must be equal.");
             return MathBlockType.Scalar();
-        }, inputs => inputs[0].AsVector().Count > 0 && inputs[1].AsScalar() >= 0d ? MathBlockValue.Scalar(MathBlockPath.RecurrenceRate(inputs[0].AsVector(), inputs[1].AsScalar())) : MathBlockValue.Invalid(MathBlockType.Scalar(), "The inputs are outside the operation domain."), [MathBlockValue.Vector([1d, 1d]), MathBlockValue.Scalar(0d)], MathBlockValue.Scalar(1d), performanceIterations: 8);
+        }, inputs => inputs[0].AsVector().Count > 0 && inputs[1].AsScalar() >= 0f ? MathBlockValue.Scalar(MathBlockPath.RecurrenceRate(inputs[0].AsVector(), inputs[1].AsScalar())) : MathBlockValue.Invalid(MathBlockType.Scalar(), "The inputs are outside the operation domain."), [MathBlockValue.Vector([1f, 1f]), MathBlockValue.Scalar(0f)], MathBlockValue.Scalar(1f), performanceIterations: 8);
     }
 }

@@ -13,8 +13,8 @@ internal static partial class AdvancedMathBlocks
                 default,
                 true)
             : MathBlockOperationFactory.Invalid(ProductLimitType, inputs, "The vectors are outside the operation domain."),
-            [MathBlockValue.Vector([1d, 1d]), MathBlockValue.Vector([4d, 3d])],
-            MathBlockValue.Vector([0.75d, 0.5d]),
+            [MathBlockValue.Vector([1f, 1f]), MathBlockValue.Vector([4f, 3f])],
+            MathBlockValue.Vector([0.75f, 0.5f]),
             performanceIterations: 8);
 
         private static MathBlockType ProductLimitType(IReadOnlyList<MathBlockType> types)
@@ -30,7 +30,7 @@ internal static partial class AdvancedMathBlocks
             if (events.Count != atRisk.Count)
                 return false;
             for (var index = 0; index < events.Count; index++)
-                if (events[index] < 0d || atRisk[index] <= 0d || events[index] > atRisk[index])
+                if (events[index] < 0f || atRisk[index] <= 0f || events[index] > atRisk[index])
                     return false;
             return true;
         }

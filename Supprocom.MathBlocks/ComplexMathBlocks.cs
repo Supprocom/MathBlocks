@@ -4,16 +4,16 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockComplex
 {
     /// <summary>Computes the magnitude of a finite complex number.</summary>
-    public static double Magnitude(Complex value)
+    public static float Magnitude(Complex value)
     {
         var real = Math.Abs(value.Real);
         var imaginary = Math.Abs(value.Imaginary);
         if (real < imaginary)
             (real, imaginary) = (imaginary, real);
-        if (real == 0d)
-            return 0d;
+        if (real == 0f)
+            return 0f;
         var ratio = imaginary / real;
-        return real * Math.Sqrt(1d + ratio * ratio);
+        return real * Math.Sqrt(1f + ratio * ratio);
     }
 }
 
@@ -32,7 +32,7 @@ internal static partial class ComplexMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Complex(function(inputs[0].AsComplex()), type.Unit);
         },
-        [MathBlockValue.Complex(sample)], MathBlockValue.Complex(expected), 1e-9, 256);
+        [MathBlockValue.Complex(sample)], MathBlockValue.Complex(expected), 1e-9f, 256);
 
     private static MathBlockOperation CreateBinary(
         string identifier,
@@ -47,7 +47,7 @@ internal static partial class ComplexMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Complex(function(inputs[0].AsComplex(), inputs[1].AsComplex()), type.Unit);
         },
-        [MathBlockValue.Complex(left), MathBlockValue.Complex(right)], MathBlockValue.Complex(expected), 1e-9, 256);
+        [MathBlockValue.Complex(left), MathBlockValue.Complex(right)], MathBlockValue.Complex(expected), 1e-9f, 256);
 
     private static MathBlockType ResolveCreate(IReadOnlyList<MathBlockType> types)
     {

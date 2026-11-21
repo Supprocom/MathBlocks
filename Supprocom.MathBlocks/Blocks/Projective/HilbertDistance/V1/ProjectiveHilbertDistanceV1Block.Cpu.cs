@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockAdvanced
 {
     /// <summary>Computes the <c>projective.hilbert-distance@1</c> mathematical operation.</summary>
-    public static double HilbertProjectiveDistance(IReadOnlyList<double> left, IReadOnlyList<double> right)
+    public static float HilbertProjectiveDistance(IReadOnlyList<float> left, IReadOnlyList<float> right)
     {
         ArgumentNullException.ThrowIfNull(left);
         ArgumentNullException.ThrowIfNull(right);

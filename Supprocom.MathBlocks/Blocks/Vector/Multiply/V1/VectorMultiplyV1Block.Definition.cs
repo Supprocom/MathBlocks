@@ -6,6 +6,6 @@ internal static partial class VectorMathBlocks
     {
         internal const string Identity = "vector.multiply@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Pointwise;
-        internal static MathBlockOperation Create() => CreateVectorBinary("vector.multiply", MathBlockVectorMath.Multiply, [4d, 6d, 6d, 4d], ProductVectors);
+        internal static MathBlockOperation Create() => CreateVectorBinary("vector.multiply", MathBlockVectorMath.Multiply, [4f, 6f, 6f, 4f], ProductVectors);
     }
 }

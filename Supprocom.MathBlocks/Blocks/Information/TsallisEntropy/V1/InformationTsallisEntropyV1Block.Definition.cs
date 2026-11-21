@@ -6,6 +6,6 @@ internal static partial class ProbabilityMathBlocks
     {
         internal const string Identity = "information.tsallis-entropy@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateOrderedEntropy("information.tsallis-entropy", MathBlockProbability.TsallisEntropy, 2d, 0.5d);
+        internal static MathBlockOperation Create() => CreateOrderedEntropy("information.tsallis-entropy", MathBlockProbability.TsallisEntropy, 2f, 0.5f);
     }
 }

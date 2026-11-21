@@ -14,6 +14,6 @@ internal static partial class StructuralMathBlocks
             if (types[0].Unit != types[1].Unit || types[0].Columns != 0 && types[1].Rows != 0 && types[0].Columns != types[1].Rows)
                 throw new InvalidOperationException("The matrix and row must have compatible types.");
             return MathBlockType.Matrix(types[0].Unit, types[0].Rows == 0 ? 0 : types[0].Rows + 1, types[0].Columns);
-        }, inputs => MathBlockValue.Matrix(MathBlockStructure.AppendRow(inputs[0].AsMatrix(), inputs[1].AsVector()), inputs[0].Type.Unit), [matrix, MathBlockValue.Vector([5d, 6d])], MathBlockValue.Matrix(new MathBlockMatrix(3, 2, [1d, 2d, 3d, 4d, 5d, 6d])), performanceIterations: 16);
+        }, inputs => MathBlockValue.Matrix(MathBlockStructure.AppendRow(inputs[0].AsMatrix(), inputs[1].AsVector()), inputs[0].Type.Unit), [matrix, MathBlockValue.Vector([5f, 6f])], MathBlockValue.Matrix(new MathBlockMatrix(3, 2, [1f, 2f, 3f, 4f, 5f, 6f])), performanceIterations: 16);
     }
 }

@@ -7,16 +7,16 @@ public static partial class MathBlockLinearAlgebra
     public static MathBlockMatrix CovarianceMatrix(MathBlockMatrix observations)
     {
         ArgumentNullException.ThrowIfNull(observations);
-        var means = new double[observations.Columns];
+        var means = new float[observations.Columns];
         for (var column = 0; column < observations.Columns; column++)
             for (var row = 0; row < observations.Rows; row++)
                 means[column] += observations[row, column] / observations.Rows;
-        var result = new double[observations.Columns * observations.Columns];
+        var result = new float[observations.Columns * observations.Columns];
         for (var left = 0; left < observations.Columns; left++)
         {
             for (var right = left; right < observations.Columns; right++)
             {
-                var sum = 0d;
+                var sum = 0f;
                 for (var row = 0; row < observations.Rows; row++)
                     sum += (observations[row, left] - means[left]) * (observations[row, right] - means[right]);
                 var covariance = sum / observations.Rows;

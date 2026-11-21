@@ -3,7 +3,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockGeometry
 {
     /// <summary>Computes the <c>topology.zero-dimensional-persistence@1</c> mathematical operation.</summary>
-    public static double[] ZeroDimensionalPersistence(IReadOnlyList<MathBlockPoint> points)
+    public static float[] ZeroDimensionalPersistence(IReadOnlyList<MathBlockPoint> points)
     {
         ArgumentNullException.ThrowIfNull(points);
         if (points.Count <= 1)
@@ -15,7 +15,7 @@ public static partial class MathBlockGeometry
         // The pairs are not validated as a graph: a non-finite distance outside the forest leaves the result
         // finite, and one inside it is returned as a non-finite weight.
         var forest = MathBlockGraphMath.MinimumSpanningEdges(points.Count, edges);
-        var weights = new double[forest.Count];
+        var weights = new float[forest.Count];
         for (var index = 0; index < forest.Count; index++)
             weights[index] = forest[index].Weight;
         MathBlockCollectionPrimitives.StableMergeSort(

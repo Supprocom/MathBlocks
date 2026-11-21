@@ -3,11 +3,11 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockTransport
 {
     /// <summary>Computes the <c>transport.monotone-coupling@1</c> mathematical operation.</summary>
-    public static MathBlockMatrix MonotoneCoupling(IReadOnlyList<double> leftWeights, IReadOnlyList<double> rightWeights)
+    public static MathBlockMatrix MonotoneCoupling(IReadOnlyList<float> leftWeights, IReadOnlyList<float> rightWeights)
     {
         ArgumentNullException.ThrowIfNull(leftWeights);
         ArgumentNullException.ThrowIfNull(rightWeights);
-        var result = new double[leftWeights.Count * rightWeights.Count];
+        var result = new float[leftWeights.Count * rightWeights.Count];
         var leftIndex = 0;
         var rightIndex = 0;
         var leftRemaining = leftWeights[0];
@@ -18,9 +18,9 @@ public static partial class MathBlockTransport
             result[leftIndex * rightWeights.Count + rightIndex] += amount;
             leftRemaining -= amount;
             rightRemaining -= amount;
-            if (leftRemaining == 0d && ++leftIndex < leftWeights.Count)
+            if (leftRemaining == 0f && ++leftIndex < leftWeights.Count)
                 leftRemaining = leftWeights[leftIndex];
-            if (rightRemaining == 0d && ++rightIndex < rightWeights.Count)
+            if (rightRemaining == 0f && ++rightIndex < rightWeights.Count)
                 rightRemaining = rightWeights[rightIndex];
         }
 

@@ -21,10 +21,10 @@ internal static partial class GraphMathBlocks
             var graph = inputs[0].AsGraph();
             var damping = inputs[1].AsScalar();
             var iterations = inputs[2].AsScalar();
-            return MathBlockCollectionPrimitives.Any(graph, edge => edge.Weight < 0d) ||
-                   damping is < 0d or > 1d ||
+            return MathBlockCollectionPrimitives.Any(graph, edge => edge.Weight < 0f) ||
+                   damping is < 0f or > 1f ||
                    iterations != Math.Truncate(iterations) ||
-                   iterations < 1d ||
+                   iterations < 1f ||
                    iterations > domain.Options.MaximumIterationCount
                 ? MathBlockValue.Invalid(
                     MathBlockType.Vector(length: graph.VertexCount),
@@ -33,6 +33,6 @@ internal static partial class GraphMathBlocks
                     MathBlockGraphMath.PageRank(graph, damping, (int)iterations),
                     default,
                     true);
-        }, [MathBlockValue.Graph(new MathBlockGraph(2, [new(0, 1, 1d), new(1, 0, 1d)])), MathBlockValue.Scalar(0.85d), MathBlockValue.Scalar(20d)], MathBlockValue.Vector([0.5d, 0.5d]), 1e-9, 2);
+        }, [MathBlockValue.Graph(new MathBlockGraph(2, [new(0, 1, 1f), new(1, 0, 1f)])), MathBlockValue.Scalar(0.85f), MathBlockValue.Scalar(20f)], MathBlockValue.Vector([0.5f, 0.5f]), 1e-9f, 2);
     }
 }

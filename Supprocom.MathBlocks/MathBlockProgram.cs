@@ -294,7 +294,7 @@ public sealed class MathBlockProgram
         }
     }
 
-    private static void AppendDouble(StringBuilder builder, double value)
+    private static void AppendDouble(StringBuilder builder, float value)
     {
         var bits = Math.ToBits(value);
         for (var shift = 60; shift >= 0; shift -= 4)

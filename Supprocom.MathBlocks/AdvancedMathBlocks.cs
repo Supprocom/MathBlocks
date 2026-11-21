@@ -5,7 +5,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockAdvanced
 {
 
-    private static double[] ShapeEnvelope(IReadOnlyList<double> values, bool concave)
+    private static float[] ShapeEnvelope(IReadOnlyList<float> values, bool concave)
     {
         var hull = new List<int>();
         for (var index = 0; index < values.Count; index++)
@@ -23,15 +23,15 @@ public static partial class MathBlockAdvanced
                 hull.RemoveAt(hull.Count - 2);
             }
         }
-        var result = new double[values.Count];
+        var result = new float[values.Count];
         for (var segment = 1; segment < hull.Count; segment++)
         {
             var start = hull[segment - 1];
             var end = hull[segment];
             for (var index = start; index <= end; index++)
             {
-                var weight = (double)(index - start) / (end - start);
-                result[index] = values[start] * (1d - weight) + values[end] * weight;
+                var weight = (float)(index - start) / (end - start);
+                result[index] = values[start] * (1f - weight) + values[end] * weight;
             }
         }
         return result;
@@ -59,7 +59,7 @@ public static partial class MathBlockAdvanced
         int[] rows,
         int[] columns)
     {
-        var values = new double[rows.Length * columns.Length];
+        var values = new float[rows.Length * columns.Length];
         for (var row = 0; row < rows.Length; row++)
             for (var column = 0; column < columns.Length; column++)
                 values[row * columns.Length + column] = matrix[rows[row], columns[column]];

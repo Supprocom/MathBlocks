@@ -4,11 +4,11 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockAdvanced
 {
     /// <summary>Computes the <c>cooperative.shapley-values@1</c> mathematical operation.</summary>
-    public static double[] ShapleyValues(IReadOnlyList<double> coalitionValues)
+    public static float[] ShapleyValues(IReadOnlyList<float> coalitionValues)
     {
         ArgumentNullException.ThrowIfNull(coalitionValues);
         var playerCount = Math.FloorLog2((uint)coalitionValues.Count);
-        var result = new double[playerCount];
+        var result = new float[playerCount];
         var denominator = MathBlockProbability.Factorial(playerCount);
         for (var player = 0; player < playerCount; player++)
         {

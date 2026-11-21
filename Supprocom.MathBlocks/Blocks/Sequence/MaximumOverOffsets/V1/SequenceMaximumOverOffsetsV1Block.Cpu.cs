@@ -10,18 +10,18 @@ public static partial class MathBlockVectorMath
     // by scalar.maximum's rule (Math.Max), so the maximum of -0.0 and 0.0 is 0.0. The row is invalid when a row of the span is
     // unreachable or unavailable.
     internal static bool MaximumOverOffsetsRow(
-        ReadOnlySpan<double> x,
+        ReadOnlySpan<float> x,
         ReadOnlySpan<bool> xValid,
-        ReadOnlySpan<double> counts,
+        ReadOnlySpan<float> counts,
         int row,
         int start,
         int end,
-        out double value)
+        out float value)
     {
-        value = 0d;
+        value = 0f;
         if (!OffsetSpanIsReachable(counts, row, start, end))
             return false;
-        var maximum = double.NegativeInfinity;
+        var maximum = float.NegativeInfinity;
         for (long index = row + (long)start; index <= row + (long)end; index++)
         {
             if (!xValid[(int)index])
@@ -36,8 +36,8 @@ public static partial class MathBlockVectorMath
     // first NaN of a span is the row's value whatever follows it. Math.Max leaves the bits of the NaN it returns to the runtime, and they differ
     // between its compiled forms, so the rule is written out here.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static double LargerKeepingTheFirstNaN(double maximum, double value) =>
-        double.IsNaN(maximum) ? maximum : double.IsNaN(value) ? value : Math.Max(maximum, value);
+    internal static float LargerKeepingTheFirstNaN(float maximum, float value) =>
+        float.IsNaN(maximum) ? maximum : float.IsNaN(value) ? value : Math.Max(maximum, value);
 
     // The values of sequence.maximum-over-offsets@1: each invalid row holds fill. The rows that are valid (the reach and availability rules of
     // MaximumOverOffsetsRow, decided by OffsetValidityRows) take the maximum of their span from two block tables at a cost per row that does not
@@ -48,13 +48,13 @@ public static partial class MathBlockVectorMath
     // (a direct call) takes the scan of MaximumOverOffsetsRow, which decides which NaN payload the row keeps.
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     internal static void MaximumOverOffsetsValues(
-        ReadOnlySpan<double> x,
+        ReadOnlySpan<float> x,
         ReadOnlySpan<bool> xValid,
-        ReadOnlySpan<double> counts,
+        ReadOnlySpan<float> counts,
         int start,
         int end,
-        double fill,
-        Span<double> values,
+        float fill,
+        Span<float> values,
         Span<bool> rowValid)
     {
         var length = values.Length;
@@ -90,8 +90,8 @@ public static partial class MathBlockVectorMath
             return;
         }
 
-        var fromStart = ArrayPool<double>.Shared.Rent(length);
-        var toEnd = ArrayPool<double>.Shared.Rent(length);
+        var fromStart = ArrayPool<float>.Shared.Rent(length);
+        var toEnd = ArrayPool<float>.Shared.Rent(length);
         try
         {
             for (var block = 0; block < length; block += size)
@@ -120,19 +120,19 @@ public static partial class MathBlockVectorMath
         }
         finally
         {
-            ArrayPool<double>.Shared.Return(fromStart);
-            ArrayPool<double>.Shared.Return(toEnd);
+            ArrayPool<float>.Shared.Return(fromStart);
+            ArrayPool<float>.Shared.Return(toEnd);
         }
     }
 
-    private static bool ContainsNaN(ReadOnlySpan<double> values)
+    private static bool ContainsNaN(ReadOnlySpan<float> values)
     {
         var index = 0;
         if (MathBlockSimd.UseBlocks && values.Length >= MathBlockSimd.BlockWidth)
         {
             for (; index <= values.Length - MathBlockSimd.BlockWidth; index += MathBlockSimd.BlockWidth)
             {
-                var block = Vector256.Create<double>(values[index..]);
+                var block = Vector256.Create<float>(values[index..]);
                 if (!Vector256.EqualsAll(block, block))
                     return true;
             }
@@ -140,7 +140,7 @@ public static partial class MathBlockVectorMath
 
         for (; index < values.Length; index++)
         {
-            if (double.IsNaN(values[index]))
+            if (float.IsNaN(values[index]))
                 return true;
         }
 

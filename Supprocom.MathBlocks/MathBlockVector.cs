@@ -3,12 +3,12 @@ using System.Collections;
 namespace Supprocom.MathBlocks;
 
 /// <summary>Defines the Math Block Vector contract.</summary>
-public sealed class MathBlockVector : IReadOnlyList<double>
+public sealed class MathBlockVector : IReadOnlyList<float>
 {
-    private readonly double[] values;
+    private readonly float[] values;
 
     /// <summary>Copies finite elements into an immutable vector.</summary>
-    public MathBlockVector(IEnumerable<double> values)
+    public MathBlockVector(IEnumerable<float> values)
     {
         ArgumentNullException.ThrowIfNull(values);
         this.values = MathBlockCollectionPrimitives.CopyEnumerable(values);
@@ -17,7 +17,7 @@ public sealed class MathBlockVector : IReadOnlyList<double>
                 throw new ArgumentException("A valid vector must contain finite values.", nameof(values));
     }
 
-    internal MathBlockVector(double[] values, bool takeOwnership)
+    internal MathBlockVector(float[] values, bool takeOwnership)
     {
         this.values = takeOwnership ? values : MathBlockCollectionPrimitives.Copy(values);
     }
@@ -25,11 +25,11 @@ public sealed class MathBlockVector : IReadOnlyList<double>
     /// <summary>Gets the count value.</summary>
     public int Count => values.Length;
     /// <summary>Gets the value at the specified index.</summary>
-    public double this[int index] => values[index];
-    internal ReadOnlySpan<double> Span => values;
+    public float this[int index] => values[index];
+    internal ReadOnlySpan<float> Span => values;
     /// <summary>Returns a copy of the vector elements.</summary>
-    public double[] ToArray() => MathBlockCollectionPrimitives.Copy(values);
+    public float[] ToArray() => MathBlockCollectionPrimitives.Copy(values);
     /// <summary>Enumerates the contained values.</summary>
-    public IEnumerator<double> GetEnumerator() => ((IEnumerable<double>)values).GetEnumerator();
+    public IEnumerator<float> GetEnumerator() => ((IEnumerable<float>)values).GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => values.GetEnumerator();
 }

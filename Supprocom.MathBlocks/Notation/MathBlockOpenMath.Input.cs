@@ -1197,7 +1197,7 @@ public static partial class MathBlockOpenMath
         MathBlockOpenMathProfileDescriptor profile)
     {
         var children = ReadBufferedValueApplication(element, "vector", profile);
-        var values = new double[children.Length - 1];
+        var values = new float[children.Length - 1];
         for (var index = 0; index < values.Length; index++)
             values[index] = ParseDouble(children[index + 1]);
         return MathBlockValue.Vector(values, type.Unit);
@@ -1210,7 +1210,7 @@ public static partial class MathBlockOpenMath
     {
         var children = ReadBufferedValueApplication(element, "matrix", profile);
         var count = RequireMatrixElementCount(type, children.Length - 1);
-        var values = new double[count];
+        var values = new float[count];
         for (var index = 0; index < values.Length; index++)
             values[index] = ParseDouble(children[index + 1]);
         return MathBlockValue.Matrix(new MathBlockMatrix(type.Rows, type.Columns, values), type.Unit);
@@ -1339,7 +1339,7 @@ public static partial class MathBlockOpenMath
         return children;
     }
 
-    private static double ParseDouble(BufferedElement element)
+    private static float ParseDouble(BufferedElement element)
     {
         RequireBufferedElement(element, "OMF");
         RequireOnlyBufferedAttributes(element, "hex");
@@ -1354,8 +1354,8 @@ public static partial class MathBlockOpenMath
         {
             throw InvalidFormat("An OpenMath float has an invalid hexadecimal value.");
         }
-        var value = BitConverter.Int64BitsToDouble(unchecked((long)bits));
-        if (!double.IsFinite(value))
+        var value = BitConverter.Int32BitsToSingle(unchecked((long)bits));
+        if (!float.IsFinite(value))
             throw InvalidFormat("An OpenMath float must be finite.");
         return value;
     }

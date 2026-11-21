@@ -10,6 +10,6 @@ internal static partial class VectorMathBlocks
             var index = RequireNonnegativeInteger(inputs[1].AsScalar());
             var values = inputs[0].AsVector();
             return index < values.Count ? MathBlockValue.Scalar(values[index], inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Scalar(inputs[0].Type.Unit), "The index is outside the vector domain.");
-        }, [sampleVector, MathBlockValue.Scalar(2d)], MathBlockValue.Scalar(3d), performanceIterations: 128);
+        }, [sampleVector, MathBlockValue.Scalar(2f)], MathBlockValue.Scalar(3f), performanceIterations: 128);
     }
 }

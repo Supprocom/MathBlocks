@@ -9,6 +9,6 @@ internal static partial class ScalarMathBlocks
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Boolean);
             return MathBlockTypeRules.SameBinary([types[1], types[2]], MathBlockValueKind.Scalar);
-        }, inputs => inputs[0].AsBoolean() ? inputs[1] : inputs[2], [MathBlockValue.Boolean(true), MathBlockValue.Scalar(4d), MathBlockValue.Scalar(9d)], MathBlockValue.Scalar(4d), performanceIterations: 512);
+        }, inputs => inputs[0].AsBoolean() ? inputs[1] : inputs[2], [MathBlockValue.Boolean(true), MathBlockValue.Scalar(4f), MathBlockValue.Scalar(9f)], MathBlockValue.Scalar(4f), performanceIterations: 512);
     }
 }

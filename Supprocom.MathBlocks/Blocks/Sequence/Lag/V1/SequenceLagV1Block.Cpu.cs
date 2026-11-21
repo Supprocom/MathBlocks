@@ -6,12 +6,12 @@ public static partial class MathBlockVectorMath
     // (counts[t] >= distance) and x[t - distance] is available. Any other row holds the fill and is unavailable.
     // A distance equal to the series length leaves every row unavailable. An empty values span skips the values.
     internal static void SequenceLag(
-        ReadOnlySpan<double> x,
+        ReadOnlySpan<float> x,
         ReadOnlySpan<bool> available,
-        ReadOnlySpan<double> counts,
+        ReadOnlySpan<float> counts,
         int distance,
-        double fill,
-        Span<double> values,
+        float fill,
+        Span<float> values,
         Span<bool> valid)
     {
         for (var row = 0; row < x.Length; row++)

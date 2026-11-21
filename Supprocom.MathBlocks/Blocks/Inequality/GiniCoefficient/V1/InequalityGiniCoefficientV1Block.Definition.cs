@@ -6,6 +6,6 @@ internal static partial class AdvancedMathBlocks
     {
         internal const string Identity = "inequality.gini-coefficient@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.WholeSeries;
-        internal static MathBlockOperation Create() => CreateVectorScalar("inequality.gini-coefficient", MathBlockAdvanced.GiniCoefficient, MathBlockValue.Vector([1d, 3d]), 0.25d, DimensionlessScalar);
+        internal static MathBlockOperation Create() => CreateVectorScalar("inequality.gini-coefficient", MathBlockAdvanced.GiniCoefficient, MathBlockValue.Vector([1f, 3f]), 0.25f, DimensionlessScalar);
     }
 }

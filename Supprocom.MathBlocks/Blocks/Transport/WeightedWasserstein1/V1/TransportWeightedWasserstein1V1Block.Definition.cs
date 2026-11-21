@@ -13,6 +13,6 @@ internal static partial class TransportMathBlocks
             RequireWeights(types[1], types[0]);
             RequireWeights(types[3], types[2]);
             return MathBlockType.Scalar(types[0].Unit);
-        }, inputs => IsDistribution(inputs[1].AsVector()) && IsDistribution(inputs[3].AsVector()) ? MathBlockValue.Scalar(MathBlockTransport.WeightedWasserstein1(inputs[0].AsVector(), inputs[1].AsVector(), inputs[2].AsVector(), inputs[3].AsVector()), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Scalar(inputs[0].Type.Unit), "A weight vector is not a distribution."), [left, fair, right, fair], MathBlockValue.Scalar(1d), performanceIterations: 8);
+        }, inputs => IsDistribution(inputs[1].AsVector()) && IsDistribution(inputs[3].AsVector()) ? MathBlockValue.Scalar(MathBlockTransport.WeightedWasserstein1(inputs[0].AsVector(), inputs[1].AsVector(), inputs[2].AsVector(), inputs[3].AsVector()), inputs[0].Type.Unit) : MathBlockValue.Invalid(MathBlockType.Scalar(inputs[0].Type.Unit), "A weight vector is not a distribution."), [left, fair, right, fair], MathBlockValue.Scalar(1f), performanceIterations: 8);
     }
 }

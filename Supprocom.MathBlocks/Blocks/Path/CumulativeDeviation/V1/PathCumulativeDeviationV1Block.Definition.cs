@@ -14,6 +14,6 @@ internal static partial class PathMathBlocks
             if (types[0].Unit != types[1].Unit)
                 throw new InvalidOperationException("The input units must be equal.");
             return types[0];
-        }, inputs => MathBlockValue.Vector(MathBlockPath.CumulativeDeviation(inputs[0].AsVector(), inputs[1].AsScalar()), inputs[0].Type.Unit, true), [MathBlockValue.Vector([2d, 3d, 1d]), MathBlockValue.Scalar(2d)], MathBlockValue.Vector([0d, 1d, 0d]), performanceIterations: 16);
+        }, inputs => MathBlockValue.Vector(MathBlockPath.CumulativeDeviation(inputs[0].AsVector(), inputs[1].AsScalar()), inputs[0].Type.Unit, true), [MathBlockValue.Vector([2f, 3f, 1f]), MathBlockValue.Scalar(2f)], MathBlockValue.Vector([0f, 1f, 0f]), performanceIterations: 16);
     }
 }

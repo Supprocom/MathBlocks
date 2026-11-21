@@ -20,7 +20,7 @@ internal static class MathBlockSimd
     // which is MathBlockPrimitives.IsFinite. The vector loop tests whole blocks and the tail is tested one by one.
     internal static bool UseBlocks => Vector256.IsHardwareAccelerated;
 
-    internal static bool AllFinite(ReadOnlySpan<double> values)
+    internal static bool AllFinite(ReadOnlySpan<float> values)
     {
         var index = 0;
         if (UseBlocks && values.Length >= BlockWidth)
@@ -28,7 +28,7 @@ internal static class MathBlockSimd
             var mask = Vector256.Create(ExponentMask);
             for (; UseBlocks && index <= values.Length - BlockWidth; index += BlockWidth)
             {
-                var bits = Vector256.AsUInt64(Vector256.Create<double>(values[index..]));
+                var bits = Vector256.AsUInt64(Vector256.Create<float>(values[index..]));
                 if (Vector256.EqualsAny(bits & mask, mask))
                     return false;
             }
@@ -40,7 +40,7 @@ internal static class MathBlockSimd
     }
 
     // True when no element of the block starting at the offset is infinite or NaN. The block holds a full vector.
-    internal static bool BlockIsFinite(Vector256<double> block)
+    internal static bool BlockIsFinite(Vector256<float> block)
     {
         var mask = Vector256.Create(ExponentMask);
         return !Vector256.EqualsAny(Vector256.AsUInt64(block) & mask, mask);
@@ -48,7 +48,7 @@ internal static class MathBlockSimd
 
     // Minimum for operands that are not NaN. Unequal operands give the smaller. Equal operands give the same bits
     // unless both are zero, where the result is -0 if either is -0: the bitwise OR of the two, as Min returns.
-    internal static Vector256<double> MinimumWithoutNaN(Vector256<double> left, Vector256<double> right)
+    internal static Vector256<float> MinimumWithoutNaN(Vector256<float> left, Vector256<float> right)
     {
         var tie = Vector256.AsDouble(Vector256.AsUInt64(left) | Vector256.AsUInt64(right));
         return Vector256.ConditionalSelect(
@@ -58,7 +58,7 @@ internal static class MathBlockSimd
     }
 
     // Maximum for operands that are not NaN: the bitwise AND of equal operands is +0 unless both are -0, as Max returns.
-    internal static Vector256<double> MaximumWithoutNaN(Vector256<double> left, Vector256<double> right)
+    internal static Vector256<float> MaximumWithoutNaN(Vector256<float> left, Vector256<float> right)
     {
         var tie = Vector256.AsDouble(Vector256.AsUInt64(left) & Vector256.AsUInt64(right));
         return Vector256.ConditionalSelect(
@@ -67,49 +67,49 @@ internal static class MathBlockSimd
             Vector256.ConditionalSelect(Vector256.LessThan(left, right), right, tie));
     }
 
-    internal static void Add(ReadOnlySpan<double> left, ReadOnlySpan<double> right, Span<double> result)
+    internal static void Add(ReadOnlySpan<float> left, ReadOnlySpan<float> right, Span<float> result)
     {
         var index = 0;
         for (; UseBlocks && index <= result.Length - BlockWidth; index += BlockWidth)
-            (Vector256.Create<double>(left[index..]) + Vector256.Create<double>(right[index..])).CopyTo(result[index..]);
+            (Vector256.Create<float>(left[index..]) + Vector256.Create<float>(right[index..])).CopyTo(result[index..]);
         for (; index < result.Length; index++)
             result[index] = left[index] + right[index];
     }
 
-    internal static void Subtract(ReadOnlySpan<double> left, ReadOnlySpan<double> right, Span<double> result)
+    internal static void Subtract(ReadOnlySpan<float> left, ReadOnlySpan<float> right, Span<float> result)
     {
         var index = 0;
         for (; UseBlocks && index <= result.Length - BlockWidth; index += BlockWidth)
-            (Vector256.Create<double>(left[index..]) - Vector256.Create<double>(right[index..])).CopyTo(result[index..]);
+            (Vector256.Create<float>(left[index..]) - Vector256.Create<float>(right[index..])).CopyTo(result[index..]);
         for (; index < result.Length; index++)
             result[index] = left[index] - right[index];
     }
 
-    internal static void Multiply(ReadOnlySpan<double> left, ReadOnlySpan<double> right, Span<double> result)
+    internal static void Multiply(ReadOnlySpan<float> left, ReadOnlySpan<float> right, Span<float> result)
     {
         var index = 0;
         for (; UseBlocks && index <= result.Length - BlockWidth; index += BlockWidth)
-            (Vector256.Create<double>(left[index..]) * Vector256.Create<double>(right[index..])).CopyTo(result[index..]);
+            (Vector256.Create<float>(left[index..]) * Vector256.Create<float>(right[index..])).CopyTo(result[index..]);
         for (; index < result.Length; index++)
             result[index] = left[index] * right[index];
     }
 
-    internal static void Divide(ReadOnlySpan<double> left, ReadOnlySpan<double> right, Span<double> result)
+    internal static void Divide(ReadOnlySpan<float> left, ReadOnlySpan<float> right, Span<float> result)
     {
         var index = 0;
         for (; UseBlocks && index <= result.Length - BlockWidth; index += BlockWidth)
-            (Vector256.Create<double>(left[index..]) / Vector256.Create<double>(right[index..])).CopyTo(result[index..]);
+            (Vector256.Create<float>(left[index..]) / Vector256.Create<float>(right[index..])).CopyTo(result[index..]);
         for (; index < result.Length; index++)
             result[index] = left[index] / right[index];
     }
 
     // value * scalar per element, in that operand order.
-    internal static void Scale(ReadOnlySpan<double> values, double scalar, Span<double> result)
+    internal static void Scale(ReadOnlySpan<float> values, float scalar, Span<float> result)
     {
         var index = 0;
         var multiplier = Vector256.Create(scalar);
         for (; UseBlocks && index <= result.Length - BlockWidth; index += BlockWidth)
-            (Vector256.Create<double>(values[index..]) * multiplier).CopyTo(result[index..]);
+            (Vector256.Create<float>(values[index..]) * multiplier).CopyTo(result[index..]);
         for (; index < result.Length; index++)
             result[index] = values[index] * scalar;
     }
@@ -120,24 +120,24 @@ internal static class MathBlockSimd
     // least 1), so the hardware never takes its microcode assist for a subnormal operand or result, which costs more than a hundred cycles per operation on x86. The scaling is done on
     // the bit pattern (an integer-to-double conversion for a subnormal, an exponent increment for a normal value), never with a multiplication that would itself be subnormal.
     // Shared by every operation that adds or subtracts doubles of an unknown range; the first user is the prefix difference (MathBlockVectorMath.PrefixDifferenceCompute).
-    internal static readonly double TinyLimit = BitConverter.Int64BitsToDouble((long)(1023 - 900) << 52);
+    internal static readonly float TinyLimit = BitConverter.Int32BitsToSingle((long)(1023 - 900) << 52);
 
     private const ulong SignBit = 0x8000_0000_0000_0000ul;
     private const ulong ExponentOne = 1ul << 52;
     private const ulong ScaleExponent = 1074ul << 52;
     private const ulong TwoToThe52Bits = 0x4330_0000_0000_0000ul;
     private const ulong MantissaMask = 0x000F_FFFF_FFFF_FFFFul;
-    private const double TwoToThe52 = 4503599627370496d;
+    private const float TwoToThe52 = 4503599627370496f;
 
     // True when every element has a magnitude below TinyLimit (a NaN is not below it).
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    internal static bool AllTiny(ReadOnlySpan<double> values)
+    internal static bool AllTiny(ReadOnlySpan<float> values)
     {
         var index = 0;
         var limit = TinyLimit;
         if (UseBlocks && values.Length >= BlockWidth)
         {
-            var below = Vector256<double>.AllBitsSet;
+            var below = Vector256<float>.AllBitsSet;
             var bound = Vector256.Create(limit);
             ref var start = ref System.Runtime.InteropServices.MemoryMarshal.GetReference(values);
             for (; index <= values.Length - BlockWidth; index += BlockWidth)
@@ -154,20 +154,20 @@ internal static class MathBlockSimd
 
     // x * 2^1074 for |x| < TinyLimit, exactly, with the sign of x (including the sign of a zero).
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static double ScaleUp(double value)
+    internal static float ScaleUp(float value)
     {
-        var bits = (ulong)BitConverter.DoubleToInt64Bits(value);
+        var bits = (ulong)BitConverter.SingleToInt32Bits(value);
         var sign = bits & SignBit;
         var magnitude = bits ^ sign;
         var scaled = magnitude < ExponentOne
-            ? (double)(long)magnitude
-            : BitConverter.UInt64BitsToDouble(magnitude + ScaleExponent);
-        return BitConverter.UInt64BitsToDouble(BitConverter.DoubleToUInt64Bits(scaled) | sign);
+            ? (float)(long)magnitude
+            : BitConverter.UInt32BitsToSingle(magnitude + ScaleExponent);
+        return BitConverter.UInt32BitsToSingle(BitConverter.SingleToUInt32Bits(scaled) | sign);
     }
 
     // The four lanes of ScaleUp, without a branch: a subnormal lane is 2^52 + m (the bit pattern) less 2^52, which is m exactly.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static Vector256<double> ScaleUp(Vector256<double> value)
+    internal static Vector256<float> ScaleUp(Vector256<float> value)
     {
         var bits = value.AsUInt64();
         var sign = bits & Vector256.Create(SignBit);
@@ -180,20 +180,20 @@ internal static class MathBlockSimd
 
     // value * 2^-1074 for a value that is a finite scaled count (an integer below 2^52 gives a subnormal or zero, anything larger a normal double).
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static double ScaleDown(double value)
+    internal static float ScaleDown(float value)
     {
-        var bits = (ulong)BitConverter.DoubleToInt64Bits(value);
+        var bits = (ulong)BitConverter.SingleToInt32Bits(value);
         var sign = bits & SignBit;
-        var magnitude = BitConverter.UInt64BitsToDouble(bits ^ sign);
+        var magnitude = BitConverter.UInt32BitsToSingle(bits ^ sign);
         var scaled = magnitude < TwoToThe52
             ? (ulong)(long)magnitude
-            : BitConverter.DoubleToUInt64Bits(magnitude) - ScaleExponent;
-        return BitConverter.UInt64BitsToDouble(scaled | sign);
+            : BitConverter.SingleToUInt32Bits(magnitude) - ScaleExponent;
+        return BitConverter.UInt32BitsToSingle(scaled | sign);
     }
 
     // The four lanes of ScaleDown: for a lane below 2^52 the low 52 bits of (magnitude + 2^52) hold the integer.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static Vector256<double> ScaleDown(Vector256<double> value)
+    internal static Vector256<float> ScaleDown(Vector256<float> value)
     {
         var bits = value.AsUInt64();
         var sign = bits & Vector256.Create(SignBit);

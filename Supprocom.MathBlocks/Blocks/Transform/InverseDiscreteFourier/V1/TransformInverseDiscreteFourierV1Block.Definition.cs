@@ -11,6 +11,6 @@ internal static partial class PathMathBlocks
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.ComplexVector);
             return types[0];
-        }, inputs => inputs[0].AsComplexVector().Count > 0 ? MathBlockValue.ComplexVector(MathBlockPath.InverseDiscreteFourierTransform(inputs[0].AsComplexVector()), inputs[0].Type.Unit, true) : MathBlockValue.Invalid(MathBlockType.ComplexVector(inputs[0].Type.Unit), "The vector is empty."), [MathBlockValue.ComplexVector([new Complex(1d, 0d), new Complex(1d, 0d)])], MathBlockValue.ComplexVector([new Complex(1d, 0d), new Complex(0d, 0d)]), 1e-9, 8);
+        }, inputs => inputs[0].AsComplexVector().Count > 0 ? MathBlockValue.ComplexVector(MathBlockPath.InverseDiscreteFourierTransform(inputs[0].AsComplexVector()), inputs[0].Type.Unit, true) : MathBlockValue.Invalid(MathBlockType.ComplexVector(inputs[0].Type.Unit), "The vector is empty."), [MathBlockValue.ComplexVector([new Complex(1f, 0f), new Complex(1f, 0f)])], MathBlockValue.ComplexVector([new Complex(1f, 0f), new Complex(0f, 0f)]), 1e-9f, 8);
     }
 }

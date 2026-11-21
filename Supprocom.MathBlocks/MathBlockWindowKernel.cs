@@ -14,7 +14,7 @@ internal abstract class MathBlockWindowKernel
         IReadOnlyList<MathBlockValue> inputs,
         int count,
         int width,
-        double fill,
-        double[]? values,
+        float fill,
+        float[]? values,
         bool[]? valid);
 }

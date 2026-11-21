@@ -13,6 +13,6 @@ internal static partial class MatrixMathBlocks
             return eigenvalues is null
                 ? MathBlockOperationFactory.Invalid(EigenvaluesType, inputs, "The Jacobi iteration did not converge.")
                 : MathBlockValue.Vector(eigenvalues, inputs[0].Type.Unit, true);
-        }, [symmetric], MathBlockValue.Vector([1d, 3d]), 1e-9, 4);
+        }, [symmetric], MathBlockValue.Vector([1f, 3f]), 1e-9f, 4);
     }
 }

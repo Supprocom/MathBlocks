@@ -9,6 +9,6 @@ internal static partial class VectorMathBlocks
         {
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Vector);
             return MathBlockType.Scalar();
-        }, inputs => MathBlockValue.Scalar(inputs[0].AsVector().Count), [sampleVector], MathBlockValue.Scalar(4d), performanceIterations: 128);
+        }, inputs => MathBlockValue.Scalar(inputs[0].AsVector().Count), [sampleVector], MathBlockValue.Scalar(4f), performanceIterations: 128);
     }
 }

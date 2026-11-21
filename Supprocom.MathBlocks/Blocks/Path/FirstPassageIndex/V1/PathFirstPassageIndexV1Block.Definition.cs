@@ -15,6 +15,6 @@ internal static partial class PathMathBlocks
                 throw new InvalidOperationException("The path and threshold units must be equal.");
             MathBlockTypeRules.RequireKind(types[2], MathBlockValueKind.Boolean);
             return MathBlockType.Scalar();
-        }, inputs => MathBlockValue.Scalar(MathBlockPath.FirstPassageIndex(inputs[0].AsVector(), inputs[1].AsScalar(), inputs[2].AsBoolean())), [path, MathBlockValue.Scalar(4d), MathBlockValue.Boolean(true)], MathBlockValue.Scalar(3d), performanceIterations: 16);
+        }, inputs => MathBlockValue.Scalar(MathBlockPath.FirstPassageIndex(inputs[0].AsVector(), inputs[1].AsScalar(), inputs[2].AsBoolean())), [path, MathBlockValue.Scalar(4f), MathBlockValue.Boolean(true)], MathBlockValue.Scalar(3f), performanceIterations: 16);
     }
 }

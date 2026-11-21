@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockStatistics
 {
     /// <summary>Computes the <c>statistics.autocorrelation@1</c> mathematical operation.</summary>
-    public static double Autocorrelation(IReadOnlyList<double> values, int lag)
+    public static float Autocorrelation(IReadOnlyList<float> values, int lag)
     {
         ArgumentNullException.ThrowIfNull(values);
         var left = MathBlockVectorMath.Slice(values, 0, values.Count - lag);

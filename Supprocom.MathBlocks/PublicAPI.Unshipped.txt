@@ -82,11 +82,11 @@ Supprocom.MathBlocks.MathBlocksWindowBatch
 Supprocom.MathBlocks.MathBlockWindowBatchResult
 Supprocom.MathBlocks.MathBlockWindowBatchResult.Validity.get -> Supprocom.MathBlocks.MathBlockValue
 Supprocom.MathBlocks.MathBlockWindowBatchResult.Values.get -> Supprocom.MathBlocks.MathBlockValue
-static Supprocom.MathBlocks.MathBlocksWindowBatch.Evaluate(Supprocom.MathBlocks.MathBlockValue series, string! formIdentity, System.Collections.Generic.IReadOnlyList<int>! widths, double fill) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
-static Supprocom.MathBlocks.MathBlocksWindowBatch.Evaluate(Supprocom.MathBlocks.MathBlockValue series, string! formIdentity, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! parameters, System.Collections.Generic.IReadOnlyList<int>! widths, double fill) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
+static Supprocom.MathBlocks.MathBlocksWindowBatch.Evaluate(Supprocom.MathBlocks.MathBlockValue series, string! formIdentity, System.Collections.Generic.IReadOnlyList<int>! widths, float fill) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
+static Supprocom.MathBlocks.MathBlocksWindowBatch.Evaluate(Supprocom.MathBlocks.MathBlockValue series, string! formIdentity, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! parameters, System.Collections.Generic.IReadOnlyList<int>! widths, float fill) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
 static Supprocom.MathBlocks.MathBlocksWindowBatch.EvaluateWithValidity(string! formIdentity, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! inputs) -> Supprocom.MathBlocks.MathBlockWindowBatchResult!
-static Supprocom.MathBlocks.MathBlocksWindowBatch.EvaluateCUDA(Supprocom.MathBlocks.Cuda.MathBlocksCUDAWorker! worker, Supprocom.MathBlocks.MathBlockValue series, string! formIdentity, System.Collections.Generic.IReadOnlyList<int>! widths, double fill) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
-static Supprocom.MathBlocks.MathBlocksWindowBatch.EvaluateCUDA(Supprocom.MathBlocks.Cuda.MathBlocksCUDAWorker! worker, Supprocom.MathBlocks.MathBlockValue series, string! formIdentity, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! parameters, System.Collections.Generic.IReadOnlyList<int>! widths, double fill) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
+static Supprocom.MathBlocks.MathBlocksWindowBatch.EvaluateCUDA(Supprocom.MathBlocks.Cuda.MathBlocksCUDAWorker! worker, Supprocom.MathBlocks.MathBlockValue series, string! formIdentity, System.Collections.Generic.IReadOnlyList<int>! widths, float fill) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
+static Supprocom.MathBlocks.MathBlocksWindowBatch.EvaluateCUDA(Supprocom.MathBlocks.Cuda.MathBlocksCUDAWorker! worker, Supprocom.MathBlocks.MathBlockValue series, string! formIdentity, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! parameters, System.Collections.Generic.IReadOnlyList<int>! widths, float fill) -> System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>!
 static Supprocom.MathBlocks.MathBlocksWindowBatch.EvaluateWithValidityCUDA(Supprocom.MathBlocks.Cuda.MathBlocksCUDAWorker! worker, string! formIdentity, System.Collections.Generic.IReadOnlyList<Supprocom.MathBlocks.MathBlockValue>! inputs) -> Supprocom.MathBlocks.MathBlockWindowBatchResult!
 Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary
 Supprocom.MathBlocks.Cuda.MathBlockCudaNvrtcLibrary.Path.get -> string!
@@ -216,7 +216,7 @@ Supprocom.MathBlocks.MathBlockDomainOptions.IncompleteBetaMaximumIterations.get 
 Supprocom.MathBlocks.MathBlockDomainOptions.IncompleteBetaMaximumIterations.init -> void
 Supprocom.MathBlocks.MathBlockDomainOptions.IncompleteBetaNonConvergence.get -> Supprocom.MathBlocks.MathBlockNonConvergencePolicy
 Supprocom.MathBlocks.MathBlockDomainOptions.IncompleteBetaNonConvergence.init -> void
-Supprocom.MathBlocks.MathBlockDomainOptions.IncompleteBetaTolerance.get -> double
+Supprocom.MathBlocks.MathBlockDomainOptions.IncompleteBetaTolerance.get -> float
 Supprocom.MathBlocks.MathBlockDomainOptions.IncompleteBetaTolerance.init -> void
 Supprocom.MathBlocks.MathBlockDomainOptions.JacobiNonConvergence.get -> Supprocom.MathBlocks.MathBlockNonConvergencePolicy
 Supprocom.MathBlocks.MathBlockDomainOptions.JacobiNonConvergence.init -> void
@@ -292,7 +292,7 @@ Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.FusedRowBlock.get -> int
 Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions.FusedRowBlock.init -> void
 Supprocom.MathBlocks.MathBlockFusedResult.NonConvergedEvaluations.get -> System.Collections.Generic.IReadOnlyDictionary<string!, long>!
 Supprocom.MathBlocks.MathBlockFusedExpression.EvaluateCoreCLR(System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>? validity, Supprocom.MathBlocks.MathBlockDomainOptions? domainOptions, Supprocom.MathBlocks.Cuda.MathBlocksCudaOptions? options) -> Supprocom.MathBlocks.MathBlockFusedResult!
-Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.EvaluateCoreCLR(System.ReadOnlySpan<Supprocom.MathBlocks.MathBlockValue> inputs, System.Span<double> output, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> Supprocom.MathBlocks.MathBlockEvaluation
+Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.EvaluateCoreCLR(System.ReadOnlySpan<Supprocom.MathBlocks.MathBlockValue> inputs, System.Span<float> output, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> Supprocom.MathBlocks.MathBlockEvaluation
 Supprocom.MathBlocks.MathBlockEvaluation
 Supprocom.MathBlocks.MathBlockEvaluation.Deconstruct(out bool IsValid, out int Rows, out long NonConvergedCount) -> void
 Supprocom.MathBlocks.MathBlockEvaluation.Equals(Supprocom.MathBlocks.MathBlockEvaluation other) -> bool
@@ -310,7 +310,7 @@ static Supprocom.MathBlocks.MathBlockEvaluation.operator !=(Supprocom.MathBlocks
 static Supprocom.MathBlocks.MathBlockEvaluation.operator ==(Supprocom.MathBlocks.MathBlockEvaluation left, Supprocom.MathBlocks.MathBlockEvaluation right) -> bool
 ~override Supprocom.MathBlocks.MathBlockEvaluation.Equals(object obj) -> bool
 ~override Supprocom.MathBlocks.MathBlockEvaluation.ToString() -> string
-Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.EvaluateCoreCLR(System.ReadOnlySpan<Supprocom.MathBlocks.MathBlockValue> inputs, System.Span<double> output, System.Span<bool> rowValid, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> Supprocom.MathBlocks.MathBlockEvaluation
+Supprocom.MathBlocks.Cuda.MathBlockCudaOperationContract.EvaluateCoreCLR(System.ReadOnlySpan<Supprocom.MathBlocks.MathBlockValue> inputs, System.Span<float> output, System.Span<bool> rowValid, Supprocom.MathBlocks.MathBlockDomainOptions! domainOptions) -> Supprocom.MathBlocks.MathBlockEvaluation
 static Supprocom.MathBlocks.MathBlockCatalog.TryGetElementwiseTwin(string! scalarIdentity, out string! elementwiseIdentity) -> bool
 const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.ElementwiseValidityElementBytes = 4 -> int
 const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.ElementwiseValueElementBytes = 8 -> int
@@ -377,17 +377,17 @@ Supprocom.MathBlocks.MathBlockTypeSignature.RuleKind.get -> Supprocom.MathBlocks
 Supprocom.MathBlocks.MathBlockTypeSignature.ToRow() -> System.Collections.Generic.IReadOnlyList<int>!
 Supprocom.MathBlocks.MathBlockTypeSignatures
 Supprocom.MathBlocks.MathBlockFusedExpression.EvaluateCoreCLR(System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>! inputs, System.Collections.Generic.IReadOnlyDictionary<string!, Supprocom.MathBlocks.MathBlockValue>? validity = null) -> Supprocom.MathBlocks.MathBlockFusedResult!
-const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.ElementwiseRowSignature = "__device__ bool mathblocks_elementwise_row(int opcode, double a, double b, double c, double fill, double* result)" -> string!
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.ElementwiseRowSignature = "__device__ bool mathblocks_elementwise_row(int opcode, float a, float b, float c, float fill, float* result)" -> string!
 Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceAbi.ElementwiseRowSignature.get -> string!
 Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceAbi.ElementwiseRowSignature.init -> void
-const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowAddSignature = "static __device__ __forceinline__ bool mathblocks_row_add(double a, double b, double fill, double* result)" -> string!
-const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowSubtractSignature = "static __device__ __forceinline__ bool mathblocks_row_subtract(double a, double b, double fill, double* result)" -> string!
-const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowMultiplySignature = "static __device__ __forceinline__ bool mathblocks_row_multiply(double a, double b, double fill, double* result)" -> string!
-const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowDivideSignature = "static __device__ __forceinline__ bool mathblocks_row_divide(double a, double b, double fill, double* result)" -> string!
-const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowAbsoluteSignature = "static __device__ __forceinline__ bool mathblocks_row_absolute(double a, double fill, double* result)" -> string!
-const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowSquareRootSignature = "static __device__ __forceinline__ bool mathblocks_row_square_root(double a, double fill, double* result)" -> string!
-const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowSumSignature = "static __device__ __forceinline__ bool mathblocks_row_sum(const double* values, int count, double fill, double* result)" -> string!
-const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowFunctionSignatures = "static __device__ __forceinline__ bool mathblocks_row_add(double a, double b, double fill, double* result);static __device__ __forceinline__ bool mathblocks_row_subtract(double a, double b, double fill, double* result);static __device__ __forceinline__ bool mathblocks_row_multiply(double a, double b, double fill, double* result);static __device__ __forceinline__ bool mathblocks_row_divide(double a, double b, double fill, double* result);static __device__ __forceinline__ bool mathblocks_row_absolute(double a, double fill, double* result);static __device__ __forceinline__ bool mathblocks_row_square_root(double a, double fill, double* result);static __device__ __forceinline__ bool mathblocks_row_sum(const double* values, int count, double fill, double* result)" -> string!
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowAddSignature = "static __device__ __forceinline__ bool mathblocks_row_add(float a, float b, float fill, float* result)" -> string!
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowSubtractSignature = "static __device__ __forceinline__ bool mathblocks_row_subtract(float a, float b, float fill, float* result)" -> string!
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowMultiplySignature = "static __device__ __forceinline__ bool mathblocks_row_multiply(float a, float b, float fill, float* result)" -> string!
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowDivideSignature = "static __device__ __forceinline__ bool mathblocks_row_divide(float a, float b, float fill, float* result)" -> string!
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowAbsoluteSignature = "static __device__ __forceinline__ bool mathblocks_row_absolute(float a, float fill, float* result)" -> string!
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowSquareRootSignature = "static __device__ __forceinline__ bool mathblocks_row_square_root(float a, float fill, float* result)" -> string!
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowSumSignature = "static __device__ __forceinline__ bool mathblocks_row_sum(const float* values, int count, float fill, float* result)" -> string!
+const Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.RowFunctionSignatures = "static __device__ __forceinline__ bool mathblocks_row_add(float a, float b, float fill, float* result);static __device__ __forceinline__ bool mathblocks_row_subtract(float a, float b, float fill, float* result);static __device__ __forceinline__ bool mathblocks_row_multiply(float a, float b, float fill, float* result);static __device__ __forceinline__ bool mathblocks_row_divide(float a, float b, float fill, float* result);static __device__ __forceinline__ bool mathblocks_row_absolute(float a, float fill, float* result);static __device__ __forceinline__ bool mathblocks_row_square_root(float a, float fill, float* result);static __device__ __forceinline__ bool mathblocks_row_sum(const float* values, int count, float fill, float* result)" -> string!
 Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceAbi.RowFunctionSignatures.get -> string!
 Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceAbi.RowFunctionSignatures.init -> void
 static Supprocom.MathBlocks.Cuda.MathBlockCudaDeviceModule.ConsumerRowFunctionSource.get -> string!

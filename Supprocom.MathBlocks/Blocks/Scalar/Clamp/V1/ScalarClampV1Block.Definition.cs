@@ -21,6 +21,6 @@ internal static partial class ScalarMathBlocks
             if (types[0].Unit != types[1].Unit || types[0].Unit != types[2].Unit)
                 throw new InvalidOperationException("The input units must be equal.");
             return types[0];
-        }, EvaluateClamp, [MathBlockValue.Scalar(5d), MathBlockValue.Scalar(0d), MathBlockValue.Scalar(3d)], MathBlockValue.Scalar(3d), performanceIterations: 512);
+        }, EvaluateClamp, [MathBlockValue.Scalar(5f), MathBlockValue.Scalar(0f), MathBlockValue.Scalar(3f)], MathBlockValue.Scalar(3f), performanceIterations: 512);
     }
 }

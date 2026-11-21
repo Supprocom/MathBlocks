@@ -16,5 +16,5 @@ public struct MathBlockCudaRunDescriptor
 
     /// <summary>Gets the value value.</summary>
     [FieldOffset(MathBlockCudaRunLayout.ValueOffset)]
-    public double Value;
+    public float Value;
 }

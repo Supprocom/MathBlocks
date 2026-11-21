@@ -3,15 +3,15 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockProbability
 {
     /// <summary>Computes the <c>special.log-gamma@1</c> mathematical operation.</summary>
-    public static double LogGamma(double value)
+    public static float LogGamma(float value)
     {
-        if (value < 0.5d)
-            return Math.Log(Math.PI) - Math.Log(Math.Sin(Math.PI * value)) - LogGamma(1d - value);
-        value -= 1d;
-        var sum = 0.99999999999980993d;
+        if (value < 0.5f)
+            return Math.Log(Math.PI) - Math.Log(Math.Sin(Math.PI * value)) - LogGamma(1f - value);
+        value -= 1f;
+        var sum = 0.99999999999980993f;
         for (var index = 0; index < lanczosCoefficients.Length; index++)
-            sum += lanczosCoefficients[index] / (value + index + 1d);
-        var t = value + lanczosCoefficients.Length - 0.5d;
-        return 0.5d * Math.Log(2d * Math.PI) + (value + 0.5d) * Math.Log(t) - t + Math.Log(sum);
+            sum += lanczosCoefficients[index] / (value + index + 1f);
+        var t = value + lanczosCoefficients.Length - 0.5f;
+        return 0.5f * Math.Log(2f * Math.PI) + (value + 0.5f) * Math.Log(t) - t + Math.Log(sum);
     }
 }

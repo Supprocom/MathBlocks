@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockPath
 {
     /// <summary>Computes the <c>path.first-passage-index@1</c> mathematical operation.</summary>
-    public static int FirstPassageIndex(IReadOnlyList<double> values, double threshold, bool atOrAbove)
+    public static int FirstPassageIndex(IReadOnlyList<float> values, float threshold, bool atOrAbove)
     {
         ArgumentNullException.ThrowIfNull(values);
         for (var index = 0; index < values.Count; index++)

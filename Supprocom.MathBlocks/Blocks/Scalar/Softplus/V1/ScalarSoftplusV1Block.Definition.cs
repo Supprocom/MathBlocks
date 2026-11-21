@@ -9,7 +9,7 @@ internal static partial class ScalarMathBlocks
         internal static MathBlockOperation Create()
         {
             var operations = new List<MathBlockOperation>(1);
-            AddDimensionlessUnary(operations, "scalar.softplus", MathBlockScalar.Softplus, 0d, Math.Log(2d));
+            AddDimensionlessUnary(operations, "scalar.softplus", MathBlockScalar.Softplus, 0f, Math.Log(2f));
             return operations[0];
         }
     }

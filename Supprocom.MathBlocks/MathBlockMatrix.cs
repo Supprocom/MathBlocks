@@ -3,10 +3,10 @@ namespace Supprocom.MathBlocks;
 /// <summary>Defines the Math Block Matrix contract.</summary>
 public sealed class MathBlockMatrix
 {
-    private readonly double[] values;
+    private readonly float[] values;
 
     /// <summary>Copies row-major elements into an immutable matrix.</summary>
-    public MathBlockMatrix(int rows, int columns, IEnumerable<double> values)
+    public MathBlockMatrix(int rows, int columns, IEnumerable<float> values)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(rows);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(columns);
@@ -21,7 +21,7 @@ public sealed class MathBlockMatrix
         Columns = columns;
     }
 
-    internal MathBlockMatrix(int rows, int columns, double[] values, bool takeOwnership)
+    internal MathBlockMatrix(int rows, int columns, float[] values, bool takeOwnership)
     {
         Rows = rows;
         Columns = columns;
@@ -33,10 +33,10 @@ public sealed class MathBlockMatrix
     /// <summary>Gets the columns value.</summary>
     public int Columns { get; }
     /// <summary>Gets the value at the specified index.</summary>
-    public double this[int row, int column] => values[CheckedIndex(row, column)];
-    internal ReadOnlySpan<double> Span => values;
+    public float this[int row, int column] => values[CheckedIndex(row, column)];
+    internal ReadOnlySpan<float> Span => values;
     /// <summary>Returns a copy of the matrix elements in row-major order.</summary>
-    public double[] ToArray() => MathBlockCollectionPrimitives.Copy(values);
+    public float[] ToArray() => MathBlockCollectionPrimitives.Copy(values);
 
     private int CheckedIndex(int row, int column)
     {

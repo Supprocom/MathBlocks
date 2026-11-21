@@ -11,6 +11,6 @@ internal static partial class GeometryMathBlocks
         {
             PointPairLengthType(types);
             return MathBlockType.Vector(length: 3);
-        }, inputs => inputs[0].AsPointSet().Count == 1 && inputs[1].AsPointSet().Count == 3 ? MathBlockValue.Vector(MathBlockGeometry.BarycentricCoordinates(inputs[0].AsPointSet()[0], inputs[1].AsPointSet()[0], inputs[1].AsPointSet()[1], inputs[1].AsPointSet()[2]), default, true) : MathBlockValue.Invalid(MathBlockType.Vector(length: 3), "The operation requires one point and one triangle."), [Singleton(0.25d, 0.25d), MathBlockValue.PointSet(new MathBlockPointSet([new(0d, 0d), new(1d, 0d), new(0d, 1d)]))], MathBlockValue.Vector([0.5d, 0.25d, 0.25d]), performanceIterations: 8);
+        }, inputs => inputs[0].AsPointSet().Count == 1 && inputs[1].AsPointSet().Count == 3 ? MathBlockValue.Vector(MathBlockGeometry.BarycentricCoordinates(inputs[0].AsPointSet()[0], inputs[1].AsPointSet()[0], inputs[1].AsPointSet()[1], inputs[1].AsPointSet()[2]), default, true) : MathBlockValue.Invalid(MathBlockType.Vector(length: 3), "The operation requires one point and one triangle."), [Singleton(0.25f, 0.25f), MathBlockValue.PointSet(new MathBlockPointSet([new(0f, 0f), new(1f, 0f), new(0f, 1f)]))], MathBlockValue.Vector([0.5f, 0.25f, 0.25f]), performanceIterations: 8);
     }
 }

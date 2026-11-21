@@ -3,11 +3,11 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockProbability
 {
     /// <summary>Computes the <c>information.mutual-information@1</c> mathematical operation.</summary>
-    public static double MutualInformation(MathBlockMatrix jointProbabilities)
+    public static float MutualInformation(MathBlockMatrix jointProbabilities)
     {
         ArgumentNullException.ThrowIfNull(jointProbabilities);
-        var rowTotals = new double[jointProbabilities.Rows];
-        var columnTotals = new double[jointProbabilities.Columns];
+        var rowTotals = new float[jointProbabilities.Rows];
+        var columnTotals = new float[jointProbabilities.Columns];
         for (var row = 0; row < jointProbabilities.Rows; row++)
         {
             for (var column = 0; column < jointProbabilities.Columns; column++)
@@ -18,13 +18,13 @@ public static partial class MathBlockProbability
             }
         }
 
-        var information = 0d;
+        var information = 0f;
         for (var row = 0; row < jointProbabilities.Rows; row++)
         {
             for (var column = 0; column < jointProbabilities.Columns; column++)
             {
                 var probability = jointProbabilities[row, column];
-                if (probability > 0d)
+                if (probability > 0f)
                     information += probability * Math.Log(probability / (rowTotals[row] * columnTotals[column]));
             }
         }

@@ -6,6 +6,6 @@ internal static partial class VectorMathBlocks
     {
         internal const string Identity = "sequence.rolling-sum@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.Expanding;
-        internal static MathBlockOperation Create() => CreateRolling("sequence.rolling-sum", MathBlockVectorMath.RollingSum, [3d, 5d, 7d], squaredOutput: false);
+        internal static MathBlockOperation Create() => CreateRolling("sequence.rolling-sum", MathBlockVectorMath.RollingSum, [3f, 5f, 7f], squaredOutput: false);
     }
 }

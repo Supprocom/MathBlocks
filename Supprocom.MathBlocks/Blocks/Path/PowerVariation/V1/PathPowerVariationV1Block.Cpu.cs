@@ -12,6 +12,6 @@ internal static partial class PathMathBlocks
             MathBlockTypeRules.RequireDimensionless(types[1]);
             MathBlockTypeRules.RequireDimensionless(types[0]);
             return MathBlockType.Scalar();
-        }, inputs => inputs[0].AsVector().Count > 0 && inputs[1].AsScalar() > 0d ? MathBlockValue.Scalar(MathBlockPath.PowerVariation(inputs[0].AsVector(), inputs[1].AsScalar())) : MathBlockValue.Invalid(MathBlockType.Scalar(), "The inputs are outside the operation domain."), [path, MathBlockValue.Scalar(2d)], MathBlockValue.Scalar(14d), performanceIterations: 16);
+        }, inputs => inputs[0].AsVector().Count > 0 && inputs[1].AsScalar() > 0f ? MathBlockValue.Scalar(MathBlockPath.PowerVariation(inputs[0].AsVector(), inputs[1].AsScalar())) : MathBlockValue.Invalid(MathBlockType.Scalar(), "The inputs are outside the operation domain."), [path, MathBlockValue.Scalar(2f)], MathBlockValue.Scalar(14f), performanceIterations: 16);
     }
 }

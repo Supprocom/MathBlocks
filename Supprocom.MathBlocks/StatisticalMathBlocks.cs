@@ -3,11 +3,11 @@ namespace Supprocom.MathBlocks;
 public static partial class MathBlockStatistics
 {
 
-    private static void CenterDistanceMatrix(IReadOnlyList<double> values, double[] result)
+    private static void CenterDistanceMatrix(IReadOnlyList<float> values, float[] result)
     {
         var count = values.Count;
-        var rowMeans = new double[count];
-        var totalMean = 0d;
+        var rowMeans = new float[count];
+        var totalMean = 0f;
         for (var row = 0; row < count; row++)
         {
             for (var column = 0; column < count; column++)
@@ -28,21 +28,21 @@ public static partial class MathBlockStatistics
 
 internal static partial class StatisticalMathBlocks
 {
-    private static readonly MathBlockValue ascending = MathBlockValue.Vector([1d, 2d, 3d, 4d]);
-    private static readonly MathBlockValue linear = MathBlockValue.Vector([3d, 5d, 7d, 9d]);
+    private static readonly MathBlockValue ascending = MathBlockValue.Vector([1f, 2f, 3f, 4f]);
+    private static readonly MathBlockValue linear = MathBlockValue.Vector([3f, 5f, 7f, 9f]);
 
     private static MathBlockOperation CreateUnary(
         string identifier,
-        Func<IReadOnlyList<double>, double> function,
-        double expected,
+        Func<IReadOnlyList<float>, float> function,
+        float expected,
         MathBlockTypeResolver resolver) =>
         CreateUnaryWithSample(identifier, function, ascending, expected, resolver);
 
     private static MathBlockOperation CreateUnaryWithSample(
         string identifier,
-        Func<IReadOnlyList<double>, double> function,
+        Func<IReadOnlyList<float>, float> function,
         MathBlockValue sample,
-        double expected,
+        float expected,
         MathBlockTypeResolver resolver) => MathBlockOperationFactory.Create(
         identifier, 1, resolver,
         inputs =>
@@ -50,21 +50,21 @@ internal static partial class StatisticalMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Scalar(function(inputs[0].AsVector()), type.Unit);
         },
-        [sample], MathBlockValue.Scalar(expected), 1e-9, 32);
+        [sample], MathBlockValue.Scalar(expected), 1e-9f, 32);
 
     private static MathBlockOperation CreateBinary(
         string identifier,
-        Func<IReadOnlyList<double>, IReadOnlyList<double>, double> function,
-        double expected,
+        Func<IReadOnlyList<float>, IReadOnlyList<float>, float> function,
+        float expected,
         MathBlockTypeResolver resolver) =>
         CreateBinaryWithSamples(identifier, function, ascending, linear, expected, resolver);
 
     private static MathBlockOperation CreateBinaryWithSamples(
         string identifier,
-        Func<IReadOnlyList<double>, IReadOnlyList<double>, double> function,
+        Func<IReadOnlyList<float>, IReadOnlyList<float>, float> function,
         MathBlockValue left,
         MathBlockValue right,
-        double expected,
+        float expected,
         MathBlockTypeResolver resolver) => MathBlockOperationFactory.Create(
         identifier, 2, resolver,
         inputs =>
@@ -72,12 +72,12 @@ internal static partial class StatisticalMathBlocks
             var type = resolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
             return MathBlockValue.Scalar(function(inputs[0].AsVector(), inputs[1].AsVector()), type.Unit);
         },
-        [left, right], MathBlockValue.Scalar(expected), 1e-8, 16);
+        [left, right], MathBlockValue.Scalar(expected), 1e-8f, 16);
 
     private static MathBlockOperation CreateWeighted(
         string identifier,
-        Func<IReadOnlyList<double>, IReadOnlyList<double>, double> function,
-        double expected,
+        Func<IReadOnlyList<float>, IReadOnlyList<float>, float> function,
+        float expected,
         MathBlockTypeResolver outputResolver) => MathBlockOperationFactory.Create(
         identifier, 2, WeightedType(outputResolver),
         inputs =>
@@ -85,8 +85,8 @@ internal static partial class StatisticalMathBlocks
             var type = outputResolver([inputs[0].Type]);
             return MathBlockValue.Scalar(function(inputs[0].AsVector(), inputs[1].AsVector()), type.Unit);
         },
-        [MathBlockValue.Vector([2d, 4d]), MathBlockValue.Vector([1d, 1d])],
-        MathBlockValue.Scalar(expected), 1e-9, 32);
+        [MathBlockValue.Vector([2f, 4f]), MathBlockValue.Vector([1f, 1f])],
+        MathBlockValue.Scalar(expected), 1e-9f, 32);
 
     private static MathBlockType VarianceType(IReadOnlyList<MathBlockType> types)
     {

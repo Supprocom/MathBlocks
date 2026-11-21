@@ -12,6 +12,6 @@ internal static partial class MatrixMathBlocks
             MathBlockTypeRules.RequireKind(types[0], MathBlockValueKind.Vector);
             MathBlockTypeRules.RequireDimensionless(types[0]);
             return MathBlockType.Vector(length: types[0].Rows > 1 ? types[0].Rows - 1 : 1);
-        }, inputs => MathBlockValue.Vector(MathBlockPolynomial.Derivative(inputs[0].AsVector()), default, true), [MathBlockValue.Vector([1d, 2d, 3d])], MathBlockValue.Vector([2d, 6d]), performanceIterations: 32);
+        }, inputs => MathBlockValue.Vector(MathBlockPolynomial.Derivative(inputs[0].AsVector()), default, true), [MathBlockValue.Vector([1f, 2f, 3f])], MathBlockValue.Vector([2f, 6f]), performanceIterations: 32);
     }
 }

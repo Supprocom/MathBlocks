@@ -121,7 +121,7 @@ internal sealed class MathBlockWindowForm
         var type = FormTypeResolver(MathBlockCollectionPrimitives.Map(inputs, input => input.Type));
         if (!TryResolveExtent(inputs, type, out var count, out var width, out var invalid))
             return invalid;
-        var values = new double[count];
+        var values = new float[count];
         var valid = capture is null ? null : new bool[count];
         Run(inputs, count, width, inputs[source.Arity + 1].AsScalar(), values, valid, preparation);
         if (capture is not null)
@@ -137,7 +137,7 @@ internal sealed class MathBlockWindowForm
         if (!TryResolveExtent(inputs, type, out var count, out var width, out var invalid))
             return invalid;
         var valid = new bool[count];
-        Run(inputs, count, width, 0d, null, valid, preparation);
+        Run(inputs, count, width, 0f, null, valid, preparation);
         return MathBlockValue.BooleanVector(valid, true);
     }
 
@@ -229,8 +229,8 @@ internal sealed class MathBlockWindowForm
         IReadOnlyList<MathBlockValue> inputs,
         int count,
         int width,
-        double fill,
-        double[]? values,
+        float fill,
+        float[]? values,
         bool[]? valid,
         MathBlockWindowPreparation? preparation)
     {
@@ -247,7 +247,7 @@ internal sealed class MathBlockWindowForm
         var windowInputs = new MathBlockValue[source.Arity];
         var vectors = new MathBlockVector?[source.Arity];
         var booleanVectors = new MathBlockBooleanVector?[source.Arity];
-        var vectorBuffers = new double[]?[source.Arity];
+        var vectorBuffers = new float[]?[source.Arity];
         var booleanBuffers = new bool[]?[source.Arity];
         for (var index = 0; index < source.Arity; index++)
         {
@@ -258,7 +258,7 @@ internal sealed class MathBlockWindowForm
             else if (inputs[index].Type.Kind == MathBlockValueKind.Vector)
             {
                 vectors[index] = inputs[index].AsVector();
-                var buffer = new double[width];
+                var buffer = new float[width];
                 vectorBuffers[index] = buffer;
                 windowInputs[index] = MathBlockValue.Vector(buffer, inputs[index].Type.Unit, true);
             }
@@ -321,8 +321,8 @@ internal sealed class MathBlockWindowForm
         IReadOnlyList<MathBlockValue> inputs,
         int count,
         int width,
-        double fill,
-        double[]? values,
+        float fill,
+        float[]? values,
         bool[]? valid)
     {
         var input = inputs[0];
@@ -339,7 +339,7 @@ internal sealed class MathBlockWindowForm
         for (var end = width - 1; end < count; end++)
         {
             var start = end - width + 1;
-            var sum = 0d;
+            var sum = 0f;
             for (var index = start + 1; index <= end; index++)
                 sum += Math.Abs(path[index] - path[index - 1]);
             var computed = Math.IsFinite(sum);

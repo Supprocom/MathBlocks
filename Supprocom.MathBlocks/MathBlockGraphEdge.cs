@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks;
 
 /// <summary>Defines the Math Block Graph Edge contract.</summary>
 [StructLayout(LayoutKind.Sequential)]
-public readonly record struct MathBlockGraphEdge(int From, int To, double Weight)
+public readonly record struct MathBlockGraphEdge(int From, int To, float Weight)
 {
     /// <summary>Validates the supplied MathBlocks value or interchange document.</summary>
     public MathBlockGraphEdge Validate(int vertexCount)
