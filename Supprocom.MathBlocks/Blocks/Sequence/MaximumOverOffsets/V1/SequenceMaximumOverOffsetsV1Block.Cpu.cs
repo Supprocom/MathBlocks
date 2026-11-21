@@ -78,6 +78,18 @@ public static partial class MathBlockVectorMath
         }
 
         var size = (int)width;
+        if (size == 1)
+        {
+            // A span of one row: the maximum of negative infinity and a value that is not NaN is that value with its bits.
+            var first = (int)Math.Min(start < 0 ? -(long)start : 0L, length);
+            var last = (int)Math.Max(first, length - (start > 0 ? (long)start : 0L));
+            values[..first].Fill(fill);
+            for (var row = first; row < last; row++)
+                values[row] = rowValid[row] ? x[row + start] : fill;
+            values[last..].Fill(fill);
+            return;
+        }
+
         var fromStart = ArrayPool<double>.Shared.Rent(length);
         var toEnd = ArrayPool<double>.Shared.Rent(length);
         try
