@@ -4332,7 +4332,7 @@ __device__ bool mathblocks_probability_scalar_value(int opcode, float a, float b
 #line 439 "ProbabilityModule.cs"
                 int first = 0;
 #line 440 "ProbabilityModule.cs"
-                bool reached = ((__fsub_rn(__fadd_rn((-(rate)), __fmul_rn(((float)(peak)), log_rate)), mathblocks_probability_log_gamma(__fadd_rn(((float)(peak)), 1.0f)))) >= ((-(800.0f))));
+                bool reached = ((__fsub_rn(__fadd_rn((-(rate)), __fmul_rn(((float)(peak)), log_rate)), mathblocks_probability_log_gamma(__fadd_rn(((float)(peak)), 1.0f)))) >= ((-(104.0f))));
 #line 441 "ProbabilityModule.cs"
                 if (reached)
 #line 442 "ProbabilityModule.cs"
@@ -4351,7 +4351,7 @@ __device__ bool mathblocks_probability_scalar_value(int opcode, float a, float b
 #line 446 "ProbabilityModule.cs"
                             int middle = csharp2cuda_i32_add(first, csharp2cuda_temp_37);
 #line 447 "ProbabilityModule.cs"
-                            if (((__fsub_rn(__fadd_rn((-(rate)), __fmul_rn(((float)(middle)), log_rate)), mathblocks_probability_log_gamma(__fadd_rn(((float)(middle)), 1.0f)))) >= ((-(800.0f)))))
+                            if (((__fsub_rn(__fadd_rn((-(rate)), __fmul_rn(((float)(middle)), log_rate)), mathblocks_probability_log_gamma(__fadd_rn(((float)(middle)), 1.0f)))) >= ((-(104.0f)))))
                             {
 #line 448 "ProbabilityModule.cs"
 #line 448 "ProbabilityModule.cs"
@@ -4386,7 +4386,7 @@ __device__ bool mathblocks_probability_scalar_value(int opcode, float a, float b
                                 if (((((float)(index))) > (rate)))
                                 {
 #line 455 "ProbabilityModule.cs"
-                                    csharp2cuda_temp_41 = ((exponent) < ((-(800.0f))));
+                                    csharp2cuda_temp_41 = ((exponent) < ((-(104.0f))));
                                 }
                                 else
                                 {

@@ -137,7 +137,7 @@ public sealed class MathBlockWindowAccurateTests(ITestOutputHelper output)
     public void RowsOutsideTheDoubleDoubleRangeHoldTheFill()
     {
         var tiny = MathBlockValue.Vector([1.88e-20f, 2.05e-20f, 2.15e-20f, 2.23e-20f]);
-        var huge = MathBlockValue.Vector([1.63e19f, 1.63e19f, 1.63e19f, 1.63e19f]);
+        var huge = MathBlockValue.Vector([1.60e19f, 1.63e19f, 1.66e19f, 1.62e19f]);
         var large = MathBlockValue.Vector([5.62e18f, 5.69e18f, 5.62e18f, 5.69e18f]);
         var inside = MathBlockValue.Vector([4.69e-13f, 5.11e-13f, 1.0e17f, 1.1e17f]);
         var width = MathBlockValue.Scalar(2f);

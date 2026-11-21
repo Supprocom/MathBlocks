@@ -22,6 +22,16 @@ public sealed class MathBlockFusedExpressionSourceTests
         }
     }
 
+    /// <summary>The source of a program that uses every fused operation holds no double-precision type or intrinsic.</summary>
+    [Fact]
+    [Trait("Category", "CudaSourceContract")]
+    public void CUDASourceHoldsNoDoublePrecisionTypeOrIntrinsic()
+    {
+        var source = MathBlockFusedExpression.Create(CreateGoldenProgram()).CudaSource;
+        foreach (var token in new[] { "double", "__dadd_rn", "__dsub_rn", "__dmul_rn", "__ddiv_rn", "__dsqrt_rn" })
+            Assert.DoesNotContain(token, source, StringComparison.Ordinal);
+    }
+
     /// <summary>Inline arithmetic uses rounding intrinsics and each operation calls its dispatcher's device function.</summary>
     [Fact]
     [Trait("Category", "CudaSourceContract")]
@@ -51,12 +61,12 @@ public sealed class MathBlockFusedExpressionSourceTests
         foreach (var row in new[]
                  {
                      "const int k34 = isfinite(n32) && isfinite(n3) && mathblocks_elementwise_row_value(" +
-                     "mathblocks_elementwise_source_opcode(8), n32, n3, 0.0, &v34, &g34);",
+                     "mathblocks_elementwise_source_opcode(8), n32, n3, 0.0f, &v34, &g34);",
                      "bool g34 = true;",
                      "if (!g34) mathblocks_nonconvergence_record_elementwise(16);",
                      "const float n34 = k34 ? v34 : n33;",
                      "const int r34 = r32 & k34;",
-                     "mathblocks_elementwise_source_opcode(3), n34, 0.0, 0.0, &v35, &g35);",
+                     "mathblocks_elementwise_source_opcode(3), n34, 0.0f, 0.0f, &v35, &g35);",
                      "mathblocks_elementwise_source_opcode(12), n35, n4, n1, &v36, &g36);",
                      "const int r36 = r35 & r1 & k36;",
                      "const int b37 = k37;",

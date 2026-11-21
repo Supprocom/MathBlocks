@@ -128,10 +128,10 @@ public sealed class MathBlockLimitsTests(ITestOutputHelper output)
         Assert.All(widths, limit => Assert.Equal(limit.Maximum, limit.Value));
         Assert.All(widths.Where(limit => limit.Value != int.MaxValue), limit => Assert.Equal(MathBlockLimitKind.Derived, limit.Kind));
         Assert.All(widths.Where(limit => limit.Value == int.MaxValue), limit => Assert.Equal(MathBlockLimitKind.Fixed, limit.Kind));
-        Assert.Equal(1_448, Width(widths, "window.statistics.theil-sen-slope@1"));
-        Assert.Equal(1_447, Width(widths, "window.statistics.pseudomedian@1"));
-        Assert.Equal(1_048_575, Width(widths, "window.statistics.distance-correlation@1"));
-        Assert.Equal(1_048_575, Width(widths, "window-valid.statistics.distance-correlation@1"));
+        Assert.Equal(2_048, Width(widths, "window.statistics.theil-sen-slope@1"));
+        Assert.Equal(2_047, Width(widths, "window.statistics.pseudomedian@1"));
+        Assert.Equal(2_097_151, Width(widths, "window.statistics.distance-correlation@1"));
+        Assert.Equal(2_097_151, Width(widths, "window-valid.statistics.distance-correlation@1"));
         Assert.Equal(int.MaxValue, Width(widths, "window-accurate.sum@1"));
     }
 
@@ -150,7 +150,7 @@ public sealed class MathBlockLimitsTests(ITestOutputHelper output)
         Assert.Equal(["cuda.block-size"], derived.DrivenBy);
         Assert.Equal(256, wide.Single(limit => Named(limit, "cuda.block-size")).Value);
         Assert.Equal(256, wide.Single(limit => Named(limit, "cuda.device-module.dispatcher-block-size")).Value);
-        Assert.Equal(1_024, Width(wide.Where(limit => Named(limit, "cuda.window.maximum-width")).ToList(), "window.statistics.theil-sen-slope@1"));
+        Assert.Equal(1_448, Width(wide.Where(limit => Named(limit, "cuda.window.maximum-width")).ToList(), "window.statistics.theil-sen-slope@1"));
     }
 
     /// <summary>Verifies the records resolve against the given CUDA and domain options.</summary>

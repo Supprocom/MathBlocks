@@ -1047,8 +1047,9 @@ internal static class MathBlockCausalityChecks
             // Integers on both sides of zero, so an integer-only operation is valid on some rows and invalid on
             // others, and so is its validity sibling.
             Domain.Integer => random.Next(-2, 6),
-            Domain.LargeReal => Uniform(random, -1000f, 1000f),
-            Domain.LargePositive => Uniform(random, 100f, 10000f),
+            // The large rows stay below 8 so that a running product over the longest sweep series (40 rows) is finite.
+            Domain.LargeReal => Uniform(random, -8f, 8f),
+            Domain.LargePositive => Uniform(random, 4f, 8f),
             _ => throw new InvalidOperationException($"Domain '{domain}' has no independent rows.")
         };
 

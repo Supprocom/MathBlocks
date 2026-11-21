@@ -3372,7 +3372,7 @@ __device__ void mathblocks_matrix_dispatch(
 #line 921 "MatrixModule.cs"
 #line 921 "MatrixModule.cs"
         float csharp2cuda_temp_357 = __fdiv_rn(trace, ((float)(size)));
-        if (((csharp2cuda_temp_357) > (__fadd_rn(709.7827f, __fmul_rn(0.5f, __fmul_rn(mathblocks_binary_logarithm(((float)(size))), 0.6931472f))))))
+        if (((csharp2cuda_temp_357) > (__fadd_rn(88.72284f, __fmul_rn(0.5f, __fmul_rn(mathblocks_binary_logarithm(((float)(size))), 0.6931472f))))))
 #line 922 "MatrixModule.cs"
         {
 #line 923 "MatrixModule.cs"

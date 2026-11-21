@@ -55,7 +55,7 @@ public sealed class CombinatoricsBallotCountV1BlockTests
     {
         var operation = MathBlockCatalog.Standard.Get("combinatorics.ballot-count");
         int[] leadings = [int.MaxValue, int.MaxValue - 1, 2_000_000_000, 1_500_000_000, 1_073_741_825, 1_073_741_824];
-        int[] trailings = [0, 1, 2, 3, 10, 100, 599, 600, 601, 1000, 100_000, 147_483_648, 1_073_741_823];
+        int[] trailings = [0, 1, 2, 3, 4, 10, 100, 599, 600, 601, 1000, 100_000, 147_483_648, 1_073_741_823];
         var wrapped = 0;
         var finite = 0;
         for (var first = 0; first < leadings.Length; first++)

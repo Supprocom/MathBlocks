@@ -11,24 +11,22 @@ public sealed class ProbabilityPoissonCdfV1BlockTests
     public void ContractIsValid() => MathBlockFeatureContractAssertions.Verify("probability.poisson-cdf@1");
 
     /// <summary>
-    /// Checks that long counts finish quickly, with the bits the released 0.6.0 summed over every term. The terms the
-    /// sum skips are exactly 0.0 (their exponent is below -800), so the sum is unchanged.
+    /// Checks that long counts finish quickly, with the bits of the sum over every term. The terms the sum skips are
+    /// exactly 0.0 (their exponent is below -104), so the sum is unchanged.
     /// </summary>
     [Theory]
-    [InlineData(110f, 4194304, 0x3FF0000000000168L)]
-    [InlineData(1f, 100000, 0x3FF0000000000000L)]
-    [InlineData(110f, 8192, 0x3FF0000000000168L)]
-    [InlineData(110f, 0, 0x3603BF2CF6722E46L)]
-    [InlineData(110f, 109, 0x3FDF3040DFBCB7F4L)]
-    [InlineData(110f, 110, 0x3FE0CF7EC50DCF83L)]
-    [InlineData(110f, 111, 0x3FE2040EFDCBD349L)]
-    [InlineData(0.5f, 1, 0x3FED1D0C7AA76114L)]
-    [InlineData(1e6f, 999999, 0x3FDFFDD23D2DBB72L)]
-    [InlineData(1e6f, 1000000, 0x3FE0022DC313C605L)]
-    [InlineData(1e6f, 100000, 0L)]
-    [InlineData(3.16e37f, 4194304, 0L)]
-    [InlineData(0f, 4194304, 0x3FF0000000000000L)]
-    public void LongCountsMatchTheSumOverEveryTerm(float rate, int count, long expectedBits)
+    [InlineData(110f, 4194304, 0x3F80000A)]
+    [InlineData(1f, 100000, 0x3F7FFFF8)]
+    [InlineData(110f, 8192, 0x3F80000A)]
+    [InlineData(110f, 0, 0)]
+    [InlineData(110f, 109, 0x3EF981BC)]
+    [InlineData(110f, 110, 0x3F067BC2)]
+    [InlineData(110f, 111, 0x3F102067)]
+    [InlineData(0.5f, 1, 0x3F68E85C)]
+    [InlineData(1e6f, 100000, 0)]
+    [InlineData(3.16e37f, 4194304, 0)]
+    [InlineData(0f, 4194304, 0x3F800000)]
+    public void LongCountsMatchTheSumOverEveryTerm(float rate, int count, int expectedBits)
     {
         var watch = Stopwatch.StartNew();
         var actual = MathBlockAdvanced.PoissonCdf(rate, count);
@@ -37,14 +35,30 @@ public sealed class ProbabilityPoissonCdfV1BlockTests
     }
 
     /// <summary>
+    /// Checks that a count at the peak of a rate of one million finishes quickly with a finite sum. The exponent of a term there is the
+    /// difference of numbers near 1.4e7, which a single-precision value holds to about one unit, so the sum's value is not pinned.
+    /// </summary>
+    [Theory]
+    [InlineData(1e6f, 999999)]
+    [InlineData(1e6f, 1000000)]
+    public void CountsAtThePeakOfAVeryLargeRateFinishQuickly(float rate, int count)
+    {
+        var watch = Stopwatch.StartNew();
+        var actual = MathBlockAdvanced.PoissonCdf(rate, count);
+        Assert.True(watch.Elapsed < TimeSpan.FromSeconds(1), $"PoissonCdf({rate}, {count}) took {watch.Elapsed.TotalMilliseconds} ms.");
+        Assert.True(float.IsFinite(actual) && actual >= 0f);
+    }
+
+    /// <summary>
     /// Checks that stopping once a term past the peak leaves the sum unchanged gives the bits of the sum over every term down to the
-    /// exponent cut at -800, on rates from 0 to 1e7 including the values just below and above integers, with counts below, at and above the peak.
+    /// exponent cut at -104, on rates from 0 to 1e5 including the values just below and above integers, with counts below, at and above the peak. Above 1e5 the
+    /// rounding of a term's exponent is larger than the step between neighbouring terms, so the terms no longer fall steadily past the peak.
     /// </summary>
     [Fact]
     [Trait("Category", "CostGuard")]
     public void StoppingOnceTheSumIsUnchangedKeepsTheBits()
     {
-        float[] rates = [1.03e-37f, 1e-10f, 0.001f, 0.5f, 1f, 2.5f, 10f, 100.5f, 1e3f, 1e5f, 1e6f, 1e7f, float.BitDecrement(1e3f), float.BitIncrement(1e3f), float.BitDecrement(1e5f), float.BitIncrement(1e5f)];
+        float[] rates = [1.03e-37f, 1e-10f, 0.001f, 0.5f, 1f, 2.5f, 10f, 100.5f, 1e3f, 1e5f, float.BitDecrement(1e3f), float.BitIncrement(1e3f), float.BitDecrement(1e5f), float.BitIncrement(1e5f)];
         var mismatches = new List<string>();
         var compared = 0;
         for (var index = 0; index < rates.Length; index++)
@@ -63,20 +77,20 @@ public sealed class ProbabilityPoissonCdfV1BlockTests
         Assert.True(compared > 100);
     }
 
-    // The sum of the terms in index order with only the exponent cut at -800, as PoissonCdf summed them before it stopped on an unchanged sum.
+    // The sum of the terms in index order with only the exponent cut at -104, as PoissonCdf summed them before it stopped on an unchanged sum.
     private static float PoissonCdfOverEveryTerm(float rate, int count)
     {
         var logRate = MathBlockScalar.NaturalLogarithm(rate);
         float Exponent(int index) => -rate + index * logRate - MathBlockProbability.LogGamma(index + 1f);
         var peak = rate < count ? (int)rate : count;
-        if (Exponent(peak) < -800f)
+        if (Exponent(peak) < -104f)
             return 0f;
         var first = 0;
         var high = peak;
         while (first < high)
         {
             var middle = first + (high - first) / 2;
-            if (Exponent(middle) >= -800f)
+            if (Exponent(middle) >= -104f)
                 high = middle;
             else
                 first = middle + 1;
@@ -86,7 +100,7 @@ public sealed class ProbabilityPoissonCdfV1BlockTests
         for (var index = first; index <= count; index++)
         {
             var exponent = Exponent(index);
-            if (index > rate && exponent < -800f)
+            if (index > rate && exponent < -104f)
                 break;
             sum += MathBlockScalar.Exponential(exponent);
         }

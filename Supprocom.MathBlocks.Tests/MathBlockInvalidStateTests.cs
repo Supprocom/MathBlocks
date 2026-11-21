@@ -223,7 +223,7 @@ public sealed class MathBlockInvalidStateTests
     }
 
     /// <summary>
-    /// Verifies the trace bound of matrix.exponential: the result is invalid when trace / n exceeds ln(DBL_MAX) + ln(n) / 2 (the Hadamard form; the
+    /// Verifies the trace bound of matrix.exponential: the result is invalid when trace / n exceeds the logarithm of the largest finite value + ln(n) / 2 (the Hadamard form; the
     /// bound with ln(n) is also valid and stricter) and a trace below it still gives a valid result.
     /// </summary>
     [Fact]
@@ -231,9 +231,9 @@ public sealed class MathBlockInvalidStateTests
     public void MatrixExponentialIsInvalidAboveTheTraceBoundAndValidBelowIt()
     {
         var operation = MathBlockCatalog.Standard.Get("matrix.exponential");
-        Assert.True(operation.Evaluate(Matrix(2, 2, 700f, 0f, 0f, 0f)).IsValid);
+        Assert.True(operation.Evaluate(Matrix(2, 2, 80f, 0f, 0f, 0f)).IsValid);
         Assert.True(operation.Evaluate(Matrix(2, 2, 1.0f, 0f, 0f, 1f)).IsValid);
-        Assert.False(operation.Evaluate(Matrix(2, 2, 1500f, 0f, 0f, 0f)).IsValid);
+        Assert.False(operation.Evaluate(Matrix(2, 2, 200f, 0f, 0f, 0f)).IsValid);
         Assert.False(operation.Evaluate(Matrix(2, 2, 1.56e25f, -4.8e12f, 5.52e37f, -1.0737128770591469f)).IsValid);
     }
 

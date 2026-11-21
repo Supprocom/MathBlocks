@@ -23,6 +23,30 @@ public sealed class MathBlockCudaTranspilationTests
         "Elementwise"
     ];
 
+    /// <summary>
+    /// Verifies the device source computes in single precision only. The transpiler's own conversion helpers take a double-precision
+    /// parameter and its sign test converts its operand; those signatures and that conversion are the only places the type is named, and no
+    /// double-precision rounding intrinsic is called.
+    /// </summary>
+    [Fact]
+    public void CUDASourceNamesDoublePrecisionOnlyInTheTranspilerHelpers()
+    {
+        var source = MathBlockCudaDeviceModule.Source;
+        foreach (var intrinsic in new[] { "__dadd_rn", "__dsub_rn", "__dmul_rn", "__ddiv_rn", "__dsqrt_rn" })
+            Assert.DoesNotContain(intrinsic, source, StringComparison.Ordinal);
+        string[] helperParameterLines = ["double value)", "double value,", "double minimum,", "double maximum)"];
+        foreach (var line in source.Split('\n'))
+        {
+            if (!line.Contains("double", StringComparison.Ordinal))
+                continue;
+            var text = line.Trim();
+            var allowed = text.Contains("csharp2cuda_f64_", StringComparison.Ordinal) ||
+                          text.Contains("signbit(((double)(", StringComparison.Ordinal) ||
+                          Array.IndexOf(helperParameterLines, text) >= 0;
+            Assert.True(allowed, "The device source names double precision in: " + text);
+        }
+    }
+
     /// <summary>Verifies cudascalar unit matches the csharp 2 cuda 031 golden.</summary>
     [Fact]
     public void CUDAScalarUnitMatchesTheCSharp2CUDA031Golden()
@@ -33,7 +57,7 @@ public sealed class MathBlockCudaTranspilationTests
         Assert.Equal(MathBlockCudaDeviceModule.GetSource(MathBlockDomainOptions.Default), MathBlockCudaDeviceModule.Source);
         Assert.True(
             string.Equals(
-                "1580C0A0BFBA90F76D13724B76427AC180DDD7103026486EA79F0DE716131DE0",
+                "CDDED0CF50C352717CB5143C2526FDB9D26F2FAE5B2BE1AE59A36CC3CA2D7951",
                 MathBlockCudaDeviceModule.SourceFingerprint,
                 StringComparison.Ordinal),
             "The source fingerprint is " + MathBlockCudaDeviceModule.SourceFingerprint);
