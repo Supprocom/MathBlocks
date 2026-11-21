@@ -26,11 +26,18 @@ public static partial class MathBlockVectorMath
         {
             if (!xValid[(int)index])
                 return false;
-            maximum = Math.Max(maximum, x[(int)index]);
+            maximum = LargerKeepingTheFirstNaN(maximum, x[(int)index]);
         }
         value = maximum;
         return true;
     }
+
+    // The larger of the running maximum and a value by scalar.maximum's rule (Math.Max) when both are numbers. A NaN is kept with its bits: the
+    // first NaN of a span is the row's value whatever follows it. Math.Max leaves the bits of the NaN it returns to the runtime, and they differ
+    // between its compiled forms, so the rule is written out here.
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static double LargerKeepingTheFirstNaN(double maximum, double value) =>
+        double.IsNaN(maximum) ? maximum : double.IsNaN(value) ? value : Math.Max(maximum, value);
 
     // The values of sequence.maximum-over-offsets@1: each invalid row holds fill. The rows that are valid (the reach and availability rules of
     // MaximumOverOffsetsRow, decided by OffsetValidityRows) take the maximum of their span from two block tables at a cost per row that does not
