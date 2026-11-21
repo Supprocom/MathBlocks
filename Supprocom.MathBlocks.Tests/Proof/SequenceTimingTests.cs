@@ -5,7 +5,8 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 /// <summary>
 /// The speed proof of the six new sequence operations on CoreCLR over 100,000 rows: every input class (the real market columns when present) against three counts classes (all
 /// contiguous, a gap every 10 rows, series starts every 1000 rows) across PatternResearcher's parameter range, as the median of five evaluations after a warm-up, in nanoseconds
-/// per row. A -valid sibling is timed on the Typical, Mixed, Invalid and AllFalse classes only. The numbers go to l3-timing-&lt;group&gt;.tsv. Each cell is the median of 15 timed evaluations.
+/// per row. A -valid sibling is timed on the Typical, Mixed, Invalid and AllFalse classes only. The numbers go to l3-timing-&lt;group&gt;.tsv. Each cell is the median of 15 timed evaluations
+/// (see <see cref="ProofTiming"/> for the evaluations that count).
 /// </summary>
 public sealed class SequenceTimingTests
 {
@@ -66,7 +67,7 @@ public sealed class SequenceTimingTests
         [
             (ProofBar.WorstClassBar, ProofBar.CollectWorstClassWithinTwiceMedian(cells, cell => !cell.Operation.Contains(SequenceOps.FirstTrue, StringComparison.Ordinal) && !IsMixedSumValid(cell))),
             (ProofBar.GrowthBar, ProofBar.CollectLinearGrowth(cells)),
-            (ProofBar.ReferenceBar, ProofBar.CollectMedianClassWithinTwiceReference(cells, _ => true))
+            (ProofBar.ReferenceBar, ProofBar.CollectMedianClassWithinTwiceReference(cells, cell => !IsWideFixedOrderSum(cell)))
         ];
         if (cells.Exists(cell => cell.SameClassReferenceNanosecondsPerRow > 0d))
             bars.Add((ProofBar.SameClassBar, ProofBar.CollectWithinTwiceSameClassReference(cells)));
@@ -129,6 +130,11 @@ public sealed class SequenceTimingTests
     // part of bar (i); this is the one class and form that Overwatch ruled so (16 and 18 Nov).
     private static bool IsMixedSumValid(ProofCell cell) =>
         string.Equals(cell.ClassName, MixedClass, StringComparison.Ordinal) && cell.Operation.EndsWith(string.Concat(SumOverOffsets, "-valid"), StringComparison.Ordinal);
+
+    // sum-over-offsets on a span wider than SequenceOps.FixedOrderSumSpanLimit is timed and written to the table, and bar (iii) holds its growth to a line, but it is not held to
+    // twice the rolling sum: the order of its additions is its definition, and the rolling sum does not keep one. Its -valid sibling is held to the bar at every width.
+    private static bool IsWideFixedOrderSum(ProofCell cell) =>
+        cell.Width > SequenceOps.FixedOrderSumSpanLimit && cell.Operation.EndsWith(SumOverOffsets, StringComparison.Ordinal);
 
     private static double TimeOperation(MathBlockOperation operation, MathBlockValue[] inputs, string className, int kind, ProofParameter parameter)
     {

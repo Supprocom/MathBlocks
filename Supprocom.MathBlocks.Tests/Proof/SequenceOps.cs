@@ -17,6 +17,13 @@ internal static class SequenceOps
     /// <summary>The name of the lag operation, the only one that is labelled Expanding.</summary>
     internal const string Lag = "lag";
 
+    /// <summary>
+    /// The widest span, in rows, at which sum-over-offsets is held to the reference bar. The operation adds every row's span in a fixed order, so its cost per row grows with the
+    /// width of the span whatever the algorithm; a consumer with a wider span takes prefix-difference-over-offsets, whose cost does not depend on the width. The timing sweep
+    /// holds a span of exactly this width.
+    /// </summary>
+    internal const int FixedOrderSumSpanLimit = 16;
+
     /// <summary>The six operations, without the <c>sequence.</c> prefix.</summary>
     internal static readonly string[] Names =
     [
@@ -28,7 +35,7 @@ internal static class SequenceOps
     // the spans to 256 so that growth along the parameter can be fitted.
     internal static readonly ProofParameter[] ShiftTiming = Shifts([1, 2, 4, 8, 16, 20, 32, 64, 96]);
 
-    internal static readonly ProofParameter[] SpanTiming = Spans([(0, 0), (0, 2), (1, 4), (-5, 0), (-3, 3), (0, 11), (0, 63), (0, 255)]);
+    internal static readonly ProofParameter[] SpanTiming = Spans([(0, 0), (0, 2), (1, 4), (-5, 0), (-3, 3), (0, 11), (0, 15), (0, 63), (0, 255)]);
 
     internal static readonly ProofParameter[] ShiftSafety = Shifts([1, 2, 3, 5, 8, 16, 20, 64, 96, 700]);
 
