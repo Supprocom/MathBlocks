@@ -18,7 +18,7 @@ internal static unsafe class GraphModule
     [CudaExternal]
     public struct MathBlockSlot
     {
-        public double scalar_value;
+        public float scalar_value;
         public ulong data_pointer;
         public ulong scratch_pointer;
         public CudaInt32 boolean_value;
@@ -30,19 +30,19 @@ internal static unsafe class GraphModule
     }
 
     [CudaExternal]
-    private static bool mathblocks_matrix_symmetric_eigenvalues([CudaReadOnly] double* source, int size, double* work, double* eigenvalues, double* buffer) => throw new NotSupportedException();
+    private static bool mathblocks_matrix_symmetric_eigenvalues([CudaReadOnly] float* source, int size, float* work, float* eigenvalues, float* buffer) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static bool mathblocks_matrix_try_solve([CudaReadOnly] double* matrix, [CudaReadOnly] double* right, int size, double* augmented, double* solution) => throw new NotSupportedException();
+    private static bool mathblocks_matrix_try_solve([CudaReadOnly] float* matrix, [CudaReadOnly] float* right, int size, float* augmented, float* solution) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static bool mathblocks_nonnegative_integer(double value, int* result) => throw new NotSupportedException();
+    private static bool mathblocks_nonnegative_integer(float value, int* result) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_positive_infinity() => throw new NotSupportedException();
+    private static float mathblocks_positive_infinity() => throw new NotSupportedException();
 
     [CudaExternal]
-    private static bool mathblocks_sequence_positive_integer(double value, int* result) => throw new NotSupportedException();
+    private static bool mathblocks_sequence_positive_integer(float value, int* result) => throw new NotSupportedException();
 
     [CudaExternal]
     private static void mathblocks_sequence_set_matrix_shape(MathBlockSlot* output, int rows, int columns) => throw new NotSupportedException();
@@ -51,12 +51,12 @@ internal static unsafe class GraphModule
     private static void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+    private static float mathblocks_square_root(float value) => throw new NotSupportedException();
     public struct MathBlockGraphKernelEdge
     {
         public int from;
         public int to;
-        public double weight;
+        public float weight;
     }
 
     // The count edges in the stable order of mathblocks_graph_edge_less (a strict total order: weight, then from, then to),
@@ -176,7 +176,7 @@ internal static unsafe class GraphModule
         MathBlockSlot* third = Cuda.ReadOnly(input_count > 2 ? inputs[2] : null);
         if (thread == 0)
         {
-            output->scalar_value = 0.0;
+            output->scalar_value = 0.0f;
             output->boolean_value = 0;
             output->rows = 0;
             output->columns = 0;
@@ -193,11 +193,11 @@ internal static unsafe class GraphModule
 
         MathBlockGraphKernelEdge* edges =
             Cuda.ReadOnly(first == null ? null : (MathBlockGraphKernelEdge*)first->data_pointer);
-        double* matrix = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
+        float* matrix = Cuda.ReadOnly(first == null ? null : (float*)first->data_pointer);
         int* boolean_values = Cuda.ReadOnly(second == null ? null : (int*)second->data_pointer);
-        double* vector = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
-        double* result = (double*)output->data_pointer;
-        double* scratch = (double*)output->scratch_pointer;
+        float* vector = Cuda.ReadOnly(second == null ? null : (float*)second->data_pointer);
+        float* result = (float*)output->data_pointer;
+        float* scratch = (float*)output->scratch_pointer;
 
         if (thread == 0)
         {
@@ -207,7 +207,7 @@ internal static unsafe class GraphModule
                 case 0:
                     if (vertex_count <= 1)
                     {
-                        output->scalar_value = 0.0;
+                        output->scalar_value = 0.0f;
                         break;
                     }
                     if (scratch == null)
@@ -216,16 +216,16 @@ internal static unsafe class GraphModule
                         break;
                     }
                 {
-                    double* laplacian = scratch;
-                    double* work = laplacian + vertex_count * vertex_count;
-                    double* eigenvalues = work + vertex_count * vertex_count;
+                    float* laplacian = scratch;
+                    float* work = laplacian + vertex_count * vertex_count;
+                    float* eigenvalues = work + vertex_count * vertex_count;
                     for (int index = 0; index < vertex_count * vertex_count; index++)
-                        laplacian[index] = 0.0;
+                        laplacian[index] = 0.0f;
                     for (int index = 0; index < first->count; index++)
                     {
                         int from = edges[index].from;
                         int to = edges[index].to;
-                        double weight = edges[index].weight;
+                        float weight = edges[index].weight;
                         laplacian[from * vertex_count + from] += weight;
                         laplacian[to * vertex_count + to] += weight;
                         laplacian[from * vertex_count + to] -= weight;
@@ -263,12 +263,12 @@ internal static unsafe class GraphModule
                         all = all && boolean_values[index] != 0;
                         none = none && boolean_values[index] == 0;
                     }
-                    double cut = 0.0;
-                    double left_volume = 0.0;
-                    double right_volume = 0.0;
+                    float cut = 0.0f;
+                    float left_volume = 0.0f;
+                    float right_volume = 0.0f;
                     for (int index = 0; index < first->count; index++)
                     {
-                        if (edges[index].weight < 0.0)
+                        if (edges[index].weight < 0.0f)
                         {
                             output->valid = 0;
                             break;
@@ -308,7 +308,7 @@ internal static unsafe class GraphModule
                         visited,
                         queue);
                     if (opcode == 2)
-                        output->scalar_value = (double)components;
+                        output->scalar_value = (float)components;
                     else
                         output->boolean_value = components == 1 ? 1 : 0;
                     break;
@@ -317,10 +317,10 @@ internal static unsafe class GraphModule
                 case 15:
                     mathblocks_sequence_set_vector_shape(output, vertex_count);
                     for (int index = 0; index < vertex_count; index++)
-                        result[index] = 0.0;
+                        result[index] = 0.0f;
                     for (int index = 0; index < first->count; index++)
                     {
-                        double amount = opcode == 3 ? 1.0 : edges[index].weight;
+                        float amount = opcode == 3 ? 1.0f : edges[index].weight;
                         result[edges[index].from] += amount;
                         result[edges[index].to] += amount;
                     }
@@ -337,7 +337,7 @@ internal static unsafe class GraphModule
                     int edge_count = 0;
                     for (int row = 0; row < first->rows; row++)
                         for (int column = 0; column < first->columns; column++)
-                            if (row != column && matrix[row * first->columns + column] != 0.0)
+                            if (row != column && matrix[row * first->columns + column] != 0.0f)
                             {
                                 if (edge_count >= output->capacity)
                                 {
@@ -364,36 +364,36 @@ internal static unsafe class GraphModule
                         output->valid = 0;
                         break;
                     }
-                    result[0] = 0.0;
+                    result[0] = 0.0f;
                     if (vertex_count == 1)
                         break;
                 {
                     int size = vertex_count - 1;
-                    double* reduced_matrix = scratch;
-                    double* right = reduced_matrix + size * size;
-                    double* augmented = right + size;
+                    float* reduced_matrix = scratch;
+                    float* right = reduced_matrix + size * size;
+                    float* augmented = right + size;
                     for (int index = 0; index < size * size; index++)
-                        reduced_matrix[index] = 0.0;
+                        reduced_matrix[index] = 0.0f;
                     for (int index = 0; index < size; index++)
-                        right[index] = 0.0;
+                        right[index] = 0.0f;
                     for (int index = 0; index < first->count; index++)
                     {
                         int from = edges[index].from;
                         int to = edges[index].to;
                         if (from != 0)
                         {
-                            reduced_matrix[(from - 1) * size + from - 1] += 1.0;
+                            reduced_matrix[(from - 1) * size + from - 1] += 1.0f;
                             right[from - 1] -= edges[index].weight;
                         }
                         if (to != 0)
                         {
-                            reduced_matrix[(to - 1) * size + to - 1] += 1.0;
+                            reduced_matrix[(to - 1) * size + to - 1] += 1.0f;
                             right[to - 1] += edges[index].weight;
                         }
                         if (from != 0 && to != 0)
                         {
-                            reduced_matrix[(from - 1) * size + to - 1] -= 1.0;
-                            reduced_matrix[(to - 1) * size + from - 1] -= 1.0;
+                            reduced_matrix[(from - 1) * size + to - 1] -= 1.0f;
+                            reduced_matrix[(to - 1) * size + from - 1] -= 1.0f;
                         }
                     }
                     if (!mathblocks_matrix_try_solve(
@@ -414,10 +414,10 @@ internal static unsafe class GraphModule
                         break;
                     }
                 {
-                    double sum_squares = 0.0;
+                    float sum_squares = 0.0f;
                     for (int index = 0; index < first->count; index++)
                     {
-                        double residual = vector[edges[index].to] -
+                        float residual = vector[edges[index].to] -
                                           vector[edges[index].from] -
                                           edges[index].weight;
                         sum_squares += residual * residual;
@@ -475,25 +475,25 @@ internal static unsafe class GraphModule
                         break;
                     }
                 {
-                    double damping = second->scalar_value;
+                    float damping = second->scalar_value;
                     int iterations = 0;
-                    if (damping < 0.0 || damping > 1.0 ||
+                    if (damping < 0.0f || damping > 1.0f ||
                         !mathblocks_sequence_positive_integer(third->scalar_value, &iterations) ||
                         iterations > mathblocks_limit_iteration_count())
                     {
                         output->valid = 0;
                         break;
                     }
-                    double* outgoing = scratch;
-                    double* next = scratch + vertex_count;
+                    float* outgoing = scratch;
+                    float* next = scratch + vertex_count;
                     for (int vertex = 0; vertex < vertex_count; vertex++)
                     {
-                        result[vertex] = 1.0 / vertex_count;
-                        outgoing[vertex] = 0.0;
+                        result[vertex] = 1.0f / vertex_count;
+                        outgoing[vertex] = 0.0f;
                     }
                     for (int index = 0; index < first->count; index++)
                     {
-                        if (edges[index].weight < 0.0)
+                        if (edges[index].weight < 0.0f)
                         {
                             output->valid = 0;
                             break;
@@ -503,12 +503,12 @@ internal static unsafe class GraphModule
                     for (int iteration = 0; output->valid && iteration < iterations; iteration++)
                     {
                         for (int vertex = 0; vertex < vertex_count; vertex++)
-                            next[vertex] = (1.0 - damping) / vertex_count;
-                        double dangling = 0.0;
+                            next[vertex] = (1.0f - damping) / vertex_count;
+                        float dangling = 0.0f;
                         for (int vertex = 0; vertex < vertex_count; vertex++)
-                            if (outgoing[vertex] == 0.0)
+                            if (outgoing[vertex] == 0.0f)
                                 dangling += result[vertex];
-                        double dangling_share = damping * dangling / vertex_count;
+                        float dangling_share = damping * dangling / vertex_count;
                         for (int vertex = 0; vertex < vertex_count; vertex++)
                             next[vertex] += dangling_share;
                         for (int index = 0; index < first->count; index++)
@@ -524,12 +524,12 @@ internal static unsafe class GraphModule
                 case 13:
                     mathblocks_sequence_set_matrix_shape(output, vertex_count, vertex_count);
                     for (int index = 0; index < vertex_count * vertex_count; index++)
-                        result[index] = 0.0;
+                        result[index] = 0.0f;
                     for (int index = 0; index < first->count; index++)
                     {
                         int from = edges[index].from;
                         int to = edges[index].to;
-                        double weight = edges[index].weight;
+                        float weight = edges[index].weight;
                         if (opcode == 10)
                         {
                             result[from * vertex_count + to] += weight;
@@ -573,7 +573,7 @@ internal static unsafe class GraphModule
                                 {
                                     count++;
                                 }
-                    output->scalar_value = (double)count;
+                    output->scalar_value = (float)count;
                     break;
                 }
                 case 14:
@@ -596,11 +596,11 @@ internal static unsafe class GraphModule
                         result[vertex] = mathblocks_positive_infinity();
                         visited[vertex] = 0;
                     }
-                    result[source] = 0.0;
+                    result[source] = 0.0f;
                     for (int iteration = 0; iteration < vertex_count; iteration++)
                     {
                         int vertex = -1;
-                        double best = mathblocks_positive_infinity();
+                        float best = mathblocks_positive_infinity();
                         for (int candidate = 0; candidate < vertex_count; candidate++)
                             if (!Cuda.Bool(visited[candidate]) && result[candidate] < best)
                             {
@@ -612,7 +612,7 @@ internal static unsafe class GraphModule
                         visited[vertex] = 1;
                         for (int index = 0; index < first->count; index++)
                         {
-                            if (edges[index].weight < 0.0)
+                            if (edges[index].weight < 0.0f)
                             {
                                 output->valid = 0;
                                 break;
@@ -624,7 +624,7 @@ internal static unsafe class GraphModule
                                     : -1;
                             if (neighbor < 0)
                                 continue;
-                            double candidate = result[vertex] + edges[index].weight;
+                            float candidate = result[vertex] + edges[index].weight;
                             result[neighbor] = result[neighbor] < candidate
                                 ? result[neighbor]
                                 : candidate;
@@ -637,7 +637,7 @@ internal static unsafe class GraphModule
             if (output->valid &&
                 opcode != 3 && opcode != 4 && opcode != 5 && opcode != 7 && opcode != 8 &&
                 opcode != 9 && opcode != 10 && opcode != 12 && opcode != 13 && opcode != 14 &&
-                opcode != 15 && !double.IsFinite(output->scalar_value))
+                opcode != 15 && !float.IsFinite(output->scalar_value))
             {
                 output->valid = 0;
             }
@@ -646,7 +646,7 @@ internal static unsafe class GraphModule
                  opcode == 13 || opcode == 14 || opcode == 15))
             {
                 for (int index = 0; index < output->count; index++)
-                    if (!double.IsFinite(result[index])) output->valid = 0;
+                    if (!float.IsFinite(result[index])) output->valid = 0;
             }
         }
     }

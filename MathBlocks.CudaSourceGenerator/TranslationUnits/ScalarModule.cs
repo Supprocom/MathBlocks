@@ -12,23 +12,23 @@ internal static unsafe class ScalarModule
     // The value of each of these operations is defined once, in the device prelude's mathblocks_row_value_* functions (the mathblocks_row_* functions a
     // consumer calls wrap them), so the dispatch, the elementwise rows and a consumer's kernel give the same bits.
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_row_value_add(double a, double b) => throw new NotSupportedException();
+    private static float mathblocks_row_value_add(float a, float b) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_row_value_subtract(double a, double b) => throw new NotSupportedException();
+    private static float mathblocks_row_value_subtract(float a, float b) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_row_value_multiply(double a, double b) => throw new NotSupportedException();
+    private static float mathblocks_row_value_multiply(float a, float b) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_row_value_divide(double a, double b) => throw new NotSupportedException();
+    private static float mathblocks_row_value_divide(float a, float b) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_row_value_absolute(double a) => throw new NotSupportedException();
+    private static float mathblocks_row_value_absolute(float a) => throw new NotSupportedException();
 
     public struct MathBlockSlot
     {
-        public double scalar_value;
+        public float scalar_value;
         public ulong data_pointer;
         public ulong scratch_pointer;
         public CudaInt32 boolean_value;
@@ -40,118 +40,118 @@ internal static unsafe class ScalarModule
     }
 
     [CudaDevice]
-    private static double mathblocks_positive_infinity()
+    private static float mathblocks_positive_infinity()
     {
-        return BitConverter.Int64BitsToDouble((long)0x7ff0000000000000UL);
+        return BitConverter.Int32BitsToSingle(0x7f800000);
     }
 
     [CudaDevice]
-    private static double mathblocks_quiet_nan()
+    private static float mathblocks_quiet_nan()
     {
-        return BitConverter.Int64BitsToDouble((long)0x7ff8000000000000UL);
+        return BitConverter.Int32BitsToSingle(0x7fc00000);
     }
 
     [CudaDevice]
-    private static double mathblocks_square_root(double value)
+    private static float mathblocks_square_root(float value)
     {
-        if (value == 0.0 || (double.IsInfinity(value) && value > 0.0))
+        if (value == 0.0f || (float.IsInfinity(value) && value > 0.0f))
             return value;
-        if (value < 0.0 || double.IsNaN(value))
+        if (value < 0.0f || float.IsNaN(value))
             return mathblocks_quiet_nan();
         // CUDA's double sqrt is correctly rounded, as IEEE 754 requires, so it gives CoreCLR's System.Math.Sqrt bits.
-        return Math.Sqrt(value);
+        return MathF.Sqrt(value);
     }
 
     [CudaDevice]
-    private static double mathblocks_exponential(double value)
+    private static float mathblocks_exponential(float value)
     {
-        if (value > 709.782712893383973096)
+        if (value > 88.72283905206835f)
             return mathblocks_positive_infinity();
-        if (value < -745.13321910194110842)
-            return 0.0;
+        if (value < -103.97208065307015f)
+            return 0.0f;
 
-        double exponent_value = Math.Floor(1.44269504088896340736 * value + 0.5);
+        float exponent_value = MathF.Floor(1.44269504088896340736f * value + 0.5f);
         int exponent = (int)exponent_value;
-        double reduced = value - exponent_value * 0.693359375;
-        reduced -= exponent_value * -0.000212194440054690582768;
-        double square = reduced * reduced;
-        double numerator = reduced * ((
-            0.000126177193074810590878 * square + 0.03029944077074419613) * square + 1.0);
-        double denominator = (((
-            0.00000300198505138664455042 * square + 0.00252448340349684104192) * square +
-            0.227265548208155028766) * square + 2.0);
-        double result = 1.0 + 2.0 * numerator / (denominator - numerator);
-        return Math.ScaleB(result, exponent);
+        float reduced = value - exponent_value * 0.693359375f;
+        reduced -= exponent_value * -0.000212194440054690582768f;
+        float square = reduced * reduced;
+        float numerator = reduced * ((
+            0.000126177193074810590878f * square + 0.03029944077074419613f) * square + 1.0f);
+        float denominator = (((
+            0.00000300198505138664455042f * square + 0.00252448340349684104192f) * square +
+            0.227265548208155028766f) * square + 2.0f);
+        float result = 1.0f + 2.0f * numerator / (denominator - numerator);
+        return MathF.ScaleB(result, exponent);
     }
 
     [CudaDevice]
-    private static double mathblocks_natural_logarithm(double value)
+    private static float mathblocks_natural_logarithm(float value)
     {
-        if (value == 0.0)
+        if (value == 0.0f)
             return -mathblocks_positive_infinity();
-        if (value < 0.0 || double.IsNaN(value))
+        if (value < 0.0f || float.IsNaN(value))
             return mathblocks_quiet_nan();
-        if (double.IsInfinity(value))
+        if (float.IsInfinity(value))
             return mathblocks_positive_infinity();
 
-        int exponent = Math.ILogB(value) + 1;
-        double reduced = Math.ScaleB(value, -exponent);
-        if (reduced < 0.70710678118654752440)
+        int exponent = MathF.ILogB(value) + 1;
+        float reduced = MathF.ScaleB(value, -exponent);
+        if (reduced < 0.70710678118654752440f)
         {
             exponent--;
-            reduced = 2.0 * reduced - 1.0;
+            reduced = 2.0f * reduced - 1.0f;
         }
         else
         {
-            reduced -= 1.0;
+            reduced -= 1.0f;
         }
 
-        double square = reduced * reduced;
-        double numerator = (((((
-            0.000101875663804580931796 * reduced + 0.497494994976747001425) * reduced +
-            4.70579119878881725854) * reduced + 14.4989225341610930846) * reduced +
-            17.9368678507819816313) * reduced + 7.70838733755885391666);
-        double denominator = (((((
-            reduced + 11.2873587189167450590) * reduced + 45.2279145837532221105) * reduced +
-            82.9875266912776603211) * reduced + 71.1544750618563894466) * reduced +
-            23.1251620126765340583);
-        double correction = reduced * (square * numerator / denominator);
-        correction -= exponent * 0.000212194440054690582768;
-        correction -= 0.5 * square;
-        return reduced + correction + exponent * 0.693359375;
+        float square = reduced * reduced;
+        float numerator = (((((
+            0.000101875663804580931796f * reduced + 0.497494994976747001425f) * reduced +
+            4.70579119878881725854f) * reduced + 14.4989225341610930846f) * reduced +
+            17.9368678507819816313f) * reduced + 7.70838733755885391666f);
+        float denominator = (((((
+            reduced + 11.2873587189167450590f) * reduced + 45.2279145837532221105f) * reduced +
+            82.9875266912776603211f) * reduced + 71.1544750618563894466f) * reduced +
+            23.1251620126765340583f);
+        float correction = reduced * (square * numerator / denominator);
+        correction -= exponent * 0.000212194440054690582768f;
+        correction -= 0.5f * square;
+        return reduced + correction + exponent * 0.693359375f;
     }
 
     [CudaDevice]
-    private static double mathblocks_log_one_plus(double value)
+    private static float mathblocks_log_one_plus(float value)
     {
-        double sum = 1.0 + value;
-        return sum == 1.0
+        float sum = 1.0f + value;
+        return sum == 1.0f
             ? value
-            : mathblocks_natural_logarithm(sum) - ((sum - 1.0) - value) / sum;
+            : mathblocks_natural_logarithm(sum) - ((sum - 1.0f) - value) / sum;
     }
 
     [CudaDevice]
-    private static double mathblocks_binary_logarithm(double value)
+    private static float mathblocks_binary_logarithm(float value)
     {
-        ulong bits = Cuda.Unsigned(BitConverter.DoubleToInt64Bits(value));
-        int exponent = (int)((bits >> 52) & 0x7ffUL);
-        ulong fraction = bits & 0x000fffffffffffffUL;
-        if (exponent > 0 && exponent < 0x7ff && fraction == 0UL)
-            return (double)(exponent - 1023);
-        return mathblocks_natural_logarithm(value) / 0.69314718055994530942;
+        uint bits = (uint)BitConverter.SingleToInt32Bits(value);
+        int exponent = (int)((bits >> 23) & 0xffu);
+        uint fraction = bits & 0x007fffffu;
+        if (exponent > 0 && exponent < 0xff && fraction == 0u)
+            return (float)(exponent - 127);
+        return mathblocks_natural_logarithm(value) / 0.69314718055994530942f;
     }
 
     [CudaDevice]
-    private static double mathblocks_integer_power(double value, long exponent)
+    private static float mathblocks_integer_power(float value, long exponent)
     {
         if (exponent == 0)
-            return 1.0;
+            return 1.0f;
         bool negative = exponent < 0;
         ulong remaining = negative
             ? (ulong)(-(exponent + 1)) + 1UL
             : (ulong)exponent;
-        double power_base = value;
-        double result = 1.0;
+        float power_base = value;
+        float result = 1.0f;
         while (remaining != 0UL)
         {
             if ((remaining & 1UL) != 0UL)
@@ -160,52 +160,52 @@ internal static unsafe class ScalarModule
             if (remaining != 0UL)
                 power_base *= power_base;
         }
-        return negative ? 1.0 / result : result;
+        return negative ? 1.0f / result : result;
     }
 
     [CudaDevice]
-    private static double mathblocks_power(double value, double exponent)
+    private static float mathblocks_power(float value, float exponent)
     {
-        if (exponent == Math.Truncate(exponent) && Math.Abs(exponent) <= 9223372036854775807.0)
+        if (exponent == MathF.Truncate(exponent) && MathF.Abs(exponent) <= 9223372036854775807.0f)
             return mathblocks_integer_power(value, (long)exponent);
-        if (value < 0.0)
+        if (value < 0.0f)
             return mathblocks_quiet_nan();
-        if (value == 0.0)
-            return exponent > 0.0 ? 0.0 : mathblocks_positive_infinity();
+        if (value == 0.0f)
+            return exponent > 0.0f ? 0.0f : mathblocks_positive_infinity();
         return mathblocks_exponential(exponent * mathblocks_natural_logarithm(value));
     }
 
     // The cube root with the default three Newton steps, which the complex cube root of the probability family uses.
     [CudaDevice]
-    private static double mathblocks_cube_root(double value) => mathblocks_cube_root_steps(value, 3);
+    private static float mathblocks_cube_root(float value) => mathblocks_cube_root_steps(value, 3);
 
     [CudaDevice]
-    private static double mathblocks_cube_root_steps(double value, int newton_steps)
+    private static float mathblocks_cube_root_steps(float value, int newton_steps)
     {
-        if (value == 0.0)
+        if (value == 0.0f)
             return value;
-        double magnitude = Math.Abs(value);
-        double estimate = mathblocks_exponential(mathblocks_natural_logarithm(magnitude) / 3.0);
+        float magnitude = MathF.Abs(value);
+        float estimate = mathblocks_exponential(mathblocks_natural_logarithm(magnitude) / 3.0f);
         for (int iteration = 0; iteration < newton_steps; iteration++)
-            estimate = (2.0 * estimate + magnitude / (estimate * estimate)) / 3.0;
-        return Math.CopySign(estimate, value);
+            estimate = (2.0f * estimate + magnitude / (estimate * estimate)) / 3.0f;
+        return MathF.CopySign(estimate, value);
     }
 
     [CudaDevice]
-    private static double mathblocks_sine(double value)
+    private static float mathblocks_sine(float value)
     {
         // Odd function: f(-0) = -0 and f(+0) = +0, as IEEE 754 gives it.
-        if (value == 0.0)
+        if (value == 0.0f)
             return value;
-        double sign = 1.0;
-        double x = value;
-        if (x < 0.0)
+        float sign = 1.0f;
+        float x = value;
+        if (x < 0.0f)
         {
-            sign = -1.0;
+            sign = -1.0f;
             x = -x;
         }
-        double octant_value = Math.Floor(x / 0.78539816339744830962);
-        int octant = (int)(octant_value - Math.Floor(octant_value * 0.125) * 8.0);
+        float octant_value = MathF.Floor(x / 0.78539816339744830962f);
+        int octant = (int)(octant_value - MathF.Floor(octant_value * 0.125f) * 8.0f);
         if ((octant & 1) != 0)
         {
             octant++;
@@ -217,38 +217,38 @@ internal static unsafe class ScalarModule
             sign = -sign;
             octant -= 4;
         }
-        double reduced = ((x - octant_value * 0.785398125648498535156) -
-                          octant_value * 0.0000000377489470793079817668) -
-                         octant_value * 0.00000000000000269515142907905952645;
-        double square = reduced * reduced;
+        float reduced = ((x - octant_value * 0.78515625f) -
+                          octant_value * 0.00024187564849853515625f) -
+                         octant_value * 0.0000000377489497744594108f;
+        float square = reduced * reduced;
         if (octant == 1 || octant == 2)
         {
-            double polynomial = (((((
-                -0.0000000000113585365213876817300 * square +
-                0.00000000208757008419747316778) * square -
-                0.000000275573141792967388112) * square +
-                0.0000248015872888517045348) * square -
-                0.00138888888888730564116) * square +
-                0.0416666666666665929218);
-            return sign * (1.0 - 0.5 * square + square * square * polynomial);
+            float polynomial = (((((
+                -0.0000000000113585365213876817300f * square +
+                0.00000000208757008419747316778f) * square -
+                0.000000275573141792967388112f) * square +
+                0.0000248015872888517045348f) * square -
+                0.00138888888888730564116f) * square +
+                0.0416666666666665929218f);
+            return sign * (1.0f - 0.5f * square + square * square * polynomial);
         }
-        double sine_polynomial = (((((
-            0.000000000158962301576546568060 * square -
-            0.0000000250507477628578072866) * square +
-            0.00000275573136213857245213) * square -
-            0.000198412698295895385996) * square +
-            0.00833333333332211858878) * square -
-            0.166666666666666307295);
+        float sine_polynomial = (((((
+            0.000000000158962301576546568060f * square -
+            0.0000000250507477628578072866f) * square +
+            0.00000275573136213857245213f) * square -
+            0.000198412698295895385996f) * square +
+            0.00833333333332211858878f) * square -
+            0.166666666666666307295f);
         return sign * (reduced + reduced * square * sine_polynomial);
     }
 
     [CudaDevice]
-    private static double mathblocks_cosine(double value)
+    private static float mathblocks_cosine(float value)
     {
-        double x = Math.Abs(value);
-        double sign = 1.0;
-        double octant_value = Math.Floor(x / 0.78539816339744830962);
-        int octant = (int)(octant_value - Math.Floor(octant_value * 0.125) * 8.0);
+        float x = MathF.Abs(value);
+        float sign = 1.0f;
+        float octant_value = MathF.Floor(x / 0.78539816339744830962f);
+        int octant = (int)(octant_value - MathF.Floor(octant_value * 0.125f) * 8.0f);
         if ((octant & 1) != 0)
         {
             octant++;
@@ -262,129 +262,129 @@ internal static unsafe class ScalarModule
         }
         if (octant > 1)
             sign = -sign;
-        double reduced = ((x - octant_value * 0.785398125648498535156) -
-                          octant_value * 0.0000000377489470793079817668) -
-                         octant_value * 0.00000000000000269515142907905952645;
-        double square = reduced * reduced;
+        float reduced = ((x - octant_value * 0.78515625f) -
+                          octant_value * 0.00024187564849853515625f) -
+                         octant_value * 0.0000000377489497744594108f;
+        float square = reduced * reduced;
         if (octant == 1 || octant == 2)
         {
-            double sine_polynomial = (((((
-                0.000000000158962301576546568060 * square -
-                0.0000000250507477628578072866) * square +
-                0.00000275573136213857245213) * square -
-                0.000198412698295895385996) * square +
-                0.00833333333332211858878) * square -
-                0.166666666666666307295);
+            float sine_polynomial = (((((
+                0.000000000158962301576546568060f * square -
+                0.0000000250507477628578072866f) * square +
+                0.00000275573136213857245213f) * square -
+                0.000198412698295895385996f) * square +
+                0.00833333333332211858878f) * square -
+                0.166666666666666307295f);
             return sign * (reduced + reduced * square * sine_polynomial);
         }
-        double polynomial = (((((
-            -0.0000000000113585365213876817300 * square +
-            0.00000000208757008419747316778) * square -
-            0.000000275573141792967388112) * square +
-            0.0000248015872888517045348) * square -
-            0.00138888888888730564116) * square +
-            0.0416666666666665929218);
-        return sign * (1.0 - 0.5 * square + square * square * polynomial);
+        float polynomial = (((((
+            -0.0000000000113585365213876817300f * square +
+            0.00000000208757008419747316778f) * square -
+            0.000000275573141792967388112f) * square +
+            0.0000248015872888517045348f) * square -
+            0.00138888888888730564116f) * square +
+            0.0416666666666665929218f);
+        return sign * (1.0f - 0.5f * square + square * square * polynomial);
     }
 
     [CudaDevice]
-    private static double mathblocks_arc_tangent(double value)
+    private static float mathblocks_arc_tangent(float value)
     {
         // Odd function: f(-0) = -0 and f(+0) = +0, as IEEE 754 gives it.
-        if (value == 0.0)
+        if (value == 0.0f)
             return value;
-        double sign = value < 0.0 ? -1.0 : 1.0;
-        double x = Math.Abs(value);
-        double offset = 0.0;
-        if (x > 2.4142135623730950488)
+        float sign = value < 0.0f ? -1.0f : 1.0f;
+        float x = MathF.Abs(value);
+        float offset = 0.0f;
+        if (x > 2.4142135623730950488f)
         {
-            offset = 3.14159265358979323846 / 2.0;
-            x = -1.0 / x;
+            offset = 3.14159265358979323846f / 2.0f;
+            x = -1.0f / x;
         }
-        else if (x > 0.4142135623730950488)
+        else if (x > 0.4142135623730950488f)
         {
-            offset = 3.14159265358979323846 / 4.0;
-            x = (x - 1.0) / (x + 1.0);
+            offset = 3.14159265358979323846f / 4.0f;
+            x = (x - 1.0f) / (x + 1.0f);
         }
 
-        double z = x * x;
-        double numerator = ((((
-            -0.8750608600031904122785 * z - 16.15753718733365076637) * z -
-            75.00855792314704667340) * z - 122.8866684490136173410) * z -
-            64.85021904942025371773);
-        double denominator = (((((
-            z + 24.85846490142306297962) * z + 165.0270098316988542046) * z +
-            432.8810604912902668951) * z + 485.3903996359136964868) * z +
-            194.5506571482613964425);
+        float z = x * x;
+        float numerator = ((((
+            -0.8750608600031904122785f * z - 16.15753718733365076637f) * z -
+            75.00855792314704667340f) * z - 122.8866684490136173410f) * z -
+            64.85021904942025371773f);
+        float denominator = (((((
+            z + 24.85846490142306297962f) * z + 165.0270098316988542046f) * z +
+            432.8810604912902668951f) * z + 485.3903996359136964868f) * z +
+            194.5506571482613964425f);
         return sign * (offset + x + x * z * numerator / denominator);
     }
 
     [CudaDevice]
-    private static double mathblocks_arc_tangent_2(double y, double x)
+    private static float mathblocks_arc_tangent_2(float y, float x)
     {
-        const double pi = 3.14159265358979323846;
-        if (x > 0.0)
+        const float pi = 3.14159265358979323846f;
+        if (x > 0.0f)
             return mathblocks_arc_tangent(y / x);
-        if (x < 0.0)
+        if (x < 0.0f)
             return !Cuda.SignBit(y)
                 ? mathblocks_arc_tangent(y / x) + pi
                 : mathblocks_arc_tangent(y / x) - pi;
-        if (y > 0.0)
-            return pi / 2.0;
-        if (y < 0.0)
-            return -pi / 2.0;
+        if (y > 0.0f)
+            return pi / 2.0f;
+        if (y < 0.0f)
+            return -pi / 2.0f;
         // Both are zeros (IEEE 754, C99 Annex F): atan2(±0, +0) = ±0 and atan2(±0, -0) = ±pi.
-        return Cuda.SignBit(x) ? Math.CopySign(pi, y) : y;
+        return Cuda.SignBit(x) ? MathF.CopySign(pi, y) : y;
     }
 
     [CudaDevice]
-    private static double mathblocks_arc_cosine(double value)
+    private static float mathblocks_arc_cosine(float value)
     {
-        if (value < -1.0 || value > 1.0)
+        if (value < -1.0f || value > 1.0f)
             return mathblocks_quiet_nan();
         return mathblocks_arc_tangent_2(
-            mathblocks_square_root((1.0 - value) * (1.0 + value)),
+            mathblocks_square_root((1.0f - value) * (1.0f + value)),
             value);
     }
 
     [CudaDevice]
-    private static double mathblocks_inverse_hyperbolic_sine(double value)
+    private static float mathblocks_inverse_hyperbolic_sine(float value)
     {
-        if (value == 0.0)
+        if (value == 0.0f)
             return value;
-        double magnitude = Math.Abs(value);
-        return Math.CopySign(
-            mathblocks_natural_logarithm(magnitude + mathblocks_square_root(magnitude * magnitude + 1.0)),
+        float magnitude = MathF.Abs(value);
+        return MathF.CopySign(
+            mathblocks_natural_logarithm(magnitude + mathblocks_square_root(magnitude * magnitude + 1.0f)),
             value);
     }
 
     [CudaDevice]
-    private static double mathblocks_error_function(double value)
+    private static float mathblocks_error_function(float value)
     {
         // Odd function: f(-0) = -0 and f(+0) = +0, as IEEE 754 gives it.
-        if (value == 0.0)
+        if (value == 0.0f)
             return value;
-        double magnitude = Math.Abs(value);
-        double t = 1.0 / (1.0 + 0.5 * magnitude);
-        double tau = t * mathblocks_exponential(
-            -magnitude * magnitude - 1.26551223 +
-            t * (1.00002368 +
-            t * (0.37409196 +
-            t * (0.09678418 +
-            t * (-0.18628806 +
-            t * (0.27886807 +
-            t * (-1.13520398 +
-            t * (1.48851587 +
-            t * (-0.82215223 + t * 0.17087277)))))))));
-        return Math.CopySign(1.0 - tau, value);
+        float magnitude = MathF.Abs(value);
+        float t = 1.0f / (1.0f + 0.5f * magnitude);
+        float tau = t * mathblocks_exponential(
+            -magnitude * magnitude - 1.26551223f +
+            t * (1.00002368f +
+            t * (0.37409196f +
+            t * (0.09678418f +
+            t * (-0.18628806f +
+            t * (0.27886807f +
+            t * (-1.13520398f +
+            t * (1.48851587f +
+            t * (-0.82215223f + t * 0.17087277f)))))))));
+        return MathF.CopySign(1.0f - tau, value);
     }
 
     // The scalar-valued opcodes 0..43 on their arguments: writes the result to value and returns whether it is a
     // valid result (finite). The scalar dispatcher and the elementwise forms both evaluate their rows here.
     [CudaDevice]
-    private static bool mathblocks_scalar_value(int opcode, double a, double b, double c, double* value)
+    private static bool mathblocks_scalar_value(int opcode, float a, float b, float c, float* value)
     {
-        double result = 0.0;
+        float result = 0.0f;
         switch (opcode)
         {
             case 0: result = mathblocks_row_value_add(a, b); break;
@@ -393,21 +393,21 @@ internal static unsafe class ScalarModule
             case 3: result = mathblocks_row_value_divide(a, b); break;
             case 4: result = -a; break;
             case 5: result = mathblocks_row_value_absolute(a); break;
-            case 6: result = Cuda.Int(a > 0.0) - Cuda.Int(a < 0.0); break;
-            case 7: result = a > 0.0 ? a : 0.0; break;
-            case 8: result = Math.Min(a, b); break;
-            case 9: result = Math.Max(a, b); break;
+            case 6: result = Cuda.Int(a > 0.0f) - Cuda.Int(a < 0.0f); break;
+            case 7: result = a > 0.0f ? a : 0.0f; break;
+            case 8: result = MathF.Min(a, b); break;
+            case 9: result = MathF.Max(a, b); break;
             case 10:
                 // Math.Clamp's rule: a lower limit above the upper limit is invalid; otherwise the value unless it
                 // compares below the lower or above the upper limit, so a zero value keeps its sign at zero limits.
                 if (b > c)
                 {
-                    *value = 0.0;
+                    *value = 0.0f;
                     return false;
                 }
                 result = a < b ? b : a > c ? c : a;
                 break;
-            case 11: result = 1.0 / a; break;
+            case 11: result = 1.0f / a; break;
             case 12: result = a * a; break;
             case 13: result = a * a * a; break;
             case 14: result = mathblocks_square_root(a); break;
@@ -417,7 +417,7 @@ internal static unsafe class ScalarModule
             case 18: result = mathblocks_natural_logarithm(a); break;
             case 19: result = mathblocks_binary_logarithm(a); break;
             case 20:
-                result = mathblocks_natural_logarithm(a) / 2.30258509299404568402;
+                result = mathblocks_natural_logarithm(a) / 2.30258509299404568402f;
                 break;
             case 21: result = mathblocks_sine(a); break;
             case 22: result = mathblocks_cosine(a); break;
@@ -428,65 +428,65 @@ internal static unsafe class ScalarModule
             case 27: result = mathblocks_arc_tangent_2(a, b); break;
             case 28:
             {
-                if (a == 0.0)
+                if (a == 0.0f)
                 {
                     result = a;
                     break;
                 }
-                double positive = mathblocks_exponential(a);
-                double negative = mathblocks_exponential(-a);
-                result = (positive - negative) / 2.0;
+                float positive = mathblocks_exponential(a);
+                float negative = mathblocks_exponential(-a);
+                result = (positive - negative) / 2.0f;
                 break;
             }
             case 29:
             {
-                double positive = mathblocks_exponential(a);
-                double negative = mathblocks_exponential(-a);
-                result = (positive + negative) / 2.0;
+                float positive = mathblocks_exponential(a);
+                float negative = mathblocks_exponential(-a);
+                result = (positive + negative) / 2.0f;
                 break;
             }
             case 30:
             {
-                if (a == 0.0)
+                if (a == 0.0f)
                 {
                     result = a;
                     break;
                 }
-                double positive = mathblocks_exponential(a);
-                double negative = mathblocks_exponential(-a);
+                float positive = mathblocks_exponential(a);
+                float negative = mathblocks_exponential(-a);
                 result = (positive - negative) / (positive + negative);
                 break;
             }
             case 31: result = mathblocks_inverse_hyperbolic_sine(a); break;
             case 32:
                 result = mathblocks_natural_logarithm(
-                    a + mathblocks_square_root(a * a - 1.0));
+                    a + mathblocks_square_root(a * a - 1.0f));
                 break;
-            case 33: result = 0.5 * mathblocks_log_one_plus(2.0 * a / (1.0 - a)); break;
-            case 34: result = Math.Floor(a); break;
-            case 35: result = Math.Ceiling(a); break;
-            case 36: result = Cuda.NearbyInteger(a); break;
-            case 37: result = Math.Truncate(a); break;
-            case 38: result = Cuda.FloatingRemainder(a, b); break;
+            case 33: result = 0.5f * mathblocks_log_one_plus(2.0f * a / (1.0f - a)); break;
+            case 34: result = MathF.Floor(a); break;
+            case 35: result = MathF.Ceiling(a); break;
+            case 36: result = MathF.Round(a); break;
+            case 37: result = MathF.Truncate(a); break;
+            case 38: result = a % b; break;
             case 39:
-                result = a >= 0.0
-                    ? 1.0 / (1.0 + mathblocks_exponential(-a))
-                    : mathblocks_exponential(a) / (1.0 + mathblocks_exponential(a));
+                result = a >= 0.0f
+                    ? 1.0f / (1.0f + mathblocks_exponential(-a))
+                    : mathblocks_exponential(a) / (1.0f + mathblocks_exponential(a));
                 break;
             case 40:
-                result = mathblocks_natural_logarithm(a / (1.0 - a));
+                result = mathblocks_natural_logarithm(a / (1.0f - a));
                 break;
             case 41:
-                result = Math.Max(a, 0.0) +
-                    mathblocks_log_one_plus(mathblocks_exponential(-Math.Abs(a)));
+                result = MathF.Max(a, 0.0f) +
+                    mathblocks_log_one_plus(mathblocks_exponential(-MathF.Abs(a)));
                 break;
             case 42: result = mathblocks_log_one_plus(a); break;
             case 43: result = mathblocks_error_function(a); break;
-            default: *value = 0.0; return false;
+            default: *value = 0.0f; return false;
         }
 
         *value = result;
-        return double.IsFinite(result);
+        return float.IsFinite(result);
     }
 
     [CudaDevice(Name = "mathblocks_scalar_dispatch")]
@@ -503,7 +503,7 @@ internal static unsafe class ScalarModule
         MathBlockSlot* second = Cuda.ReadOnly(input_count > 1 ? inputs[1] : null);
         MathBlockSlot* third = Cuda.ReadOnly(input_count > 2 ? inputs[2] : null);
 
-        output->scalar_value = 0.0;
+        output->scalar_value = 0.0f;
         output->boolean_value = 0;
         output->valid = first == null || first->valid;
         if (second != null)
@@ -513,12 +513,12 @@ internal static unsafe class ScalarModule
         if (!output->valid)
             return;
 
-        double a = first == null ? 0.0 : first->scalar_value;
-        double b = second == null ? 0.0 : second->scalar_value;
-        double c = third == null ? 0.0 : third->scalar_value;
+        float a = first == null ? 0.0f : first->scalar_value;
+        float b = second == null ? 0.0f : second->scalar_value;
+        float c = third == null ? 0.0f : third->scalar_value;
         if (opcode >= 0 && opcode <= 43)
         {
-            double value = 0.0;
+            float value = 0.0f;
             output->valid = mathblocks_scalar_value(opcode, a, b, c, &value);
             output->scalar_value = value;
             return;
@@ -555,18 +555,18 @@ internal static unsafe class ScalarModule
             default: output->valid = 0; return;
         }
 
-        if (scalar_output && !double.IsFinite(output->scalar_value))
+        if (scalar_output && !float.IsFinite(output->scalar_value))
             output->valid = 0;
     }
 
     // Mirrors MathBlockPrimitives.Asin, so CoreCLR and CUDA use the same algorithm.
     [CudaDevice]
-    private static double mathblocks_arc_sine(double value)
+    private static float mathblocks_arc_sine(float value)
     {
-        if (value < -1.0 || value > 1.0 || double.IsNaN(value))
+        if (value < -1.0f || value > 1.0f || float.IsNaN(value))
             return mathblocks_quiet_nan();
         return mathblocks_arc_tangent_2(
             value,
-            mathblocks_square_root((1.0 - value) * (1.0 + value)));
+            mathblocks_square_root((1.0f - value) * (1.0f + value)));
     }
 }

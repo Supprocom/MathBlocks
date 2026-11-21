@@ -12,7 +12,7 @@ internal static unsafe class VectorModule
     [CudaExternal]
     public struct MathBlockSlot
     {
-        public double scalar_value;
+        public float scalar_value;
         public ulong data_pointer;
         public ulong scratch_pointer;
         public CudaInt32 boolean_value;
@@ -24,68 +24,68 @@ internal static unsafe class VectorModule
     }
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_exponential(double value) => throw new NotSupportedException();
+    private static float mathblocks_exponential(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_natural_logarithm(double value) => throw new NotSupportedException();
+    private static float mathblocks_natural_logarithm(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_power(double value, double exponent) => throw new NotSupportedException();
+    private static float mathblocks_power(float value, float exponent) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+    private static float mathblocks_square_root(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_quiet_nan() => throw new NotSupportedException();
+    private static float mathblocks_quiet_nan() => throw new NotSupportedException();
 
     // IEEE 754-2019 minimum and maximum, as MathBlockPrimitives.Min and Max: a NaN operand gives NaN, and -0 is less than +0.
     [CudaDevice]
-    private static double mathblocks_minimum(double first, double second)
+    private static float mathblocks_minimum(float first, float second)
     {
-        if (double.IsNaN(first) || double.IsNaN(second))
+        if (float.IsNaN(first) || float.IsNaN(second))
             return mathblocks_quiet_nan();
         if (first < second)
             return first;
         if (second < first)
             return second;
-        if (first == 0.0)
+        if (first == 0.0f)
             return Cuda.SignBit(first) ? first : second;
         return first;
     }
 
     [CudaDevice]
-    private static double mathblocks_maximum(double first, double second)
+    private static float mathblocks_maximum(float first, float second)
     {
-        if (double.IsNaN(first) || double.IsNaN(second))
+        if (float.IsNaN(first) || float.IsNaN(second))
             return mathblocks_quiet_nan();
         if (first > second)
             return first;
         if (second > first)
             return second;
-        if (first == 0.0)
+        if (first == 0.0f)
             return Cuda.SignBit(first) ? second : first;
         return first;
     }
 
     [CudaDevice]
-    private static bool mathblocks_nonnegative_integer(double value, int* result)
+    private static bool mathblocks_nonnegative_integer(float value, int* result)
     {
-        if (value < 0.0 || value > 2147483647.0 || value != Math.Truncate(value))
+        if (value < 0.0f || value > 2147483647.0f || value != MathF.Truncate(value))
             return false;
         *result = (int)value;
         return true;
     }
 
     [CudaDevice]
-    private static double mathblocks_compensated_sum([CudaReadOnly] double* values, int count)
+    private static float mathblocks_compensated_sum([CudaReadOnly] float* values, int count)
     {
-        double sum = 0.0;
-        double correction = 0.0;
+        float sum = 0.0f;
+        float correction = 0.0f;
         for (int index = 0; index < count; index++)
         {
-            double value = values[index];
-            double next = sum + value;
-            correction += Math.Abs(sum) >= Math.Abs(value)
+            float value = values[index];
+            float next = sum + value;
+            correction += MathF.Abs(sum) >= MathF.Abs(value)
                 ? sum - next + value
                 : value - next + sum;
             sum = next;
@@ -94,18 +94,18 @@ internal static unsafe class VectorModule
     }
 
     [CudaDevice]
-    private static double mathblocks_compensated_product_sum(
-        [CudaReadOnly] double* first,
-        [CudaReadOnly] double* second,
+    private static float mathblocks_compensated_product_sum(
+        [CudaReadOnly] float* first,
+        [CudaReadOnly] float* second,
         int count)
     {
-        double sum = 0.0;
-        double correction = 0.0;
+        float sum = 0.0f;
+        float correction = 0.0f;
         for (int index = 0; index < count; index++)
         {
-            double value = first[index] * second[index];
-            double next = sum + value;
-            correction += Math.Abs(sum) >= Math.Abs(value)
+            float value = first[index] * second[index];
+            float next = sum + value;
+            correction += MathF.Abs(sum) >= MathF.Abs(value)
                 ? sum - next + value
                 : value - next + sum;
             sum = next;
@@ -114,15 +114,15 @@ internal static unsafe class VectorModule
     }
 
     [CudaDevice]
-    private static double mathblocks_compensated_absolute_sum([CudaReadOnly] double* values, int count)
+    private static float mathblocks_compensated_absolute_sum([CudaReadOnly] float* values, int count)
     {
-        double sum = 0.0;
-        double correction = 0.0;
+        float sum = 0.0f;
+        float correction = 0.0f;
         for (int index = 0; index < count; index++)
         {
-            double value = Math.Abs(values[index]);
-            double next = sum + value;
-            correction += Math.Abs(sum) >= Math.Abs(value)
+            float value = MathF.Abs(values[index]);
+            float next = sum + value;
+            correction += MathF.Abs(sum) >= MathF.Abs(value)
                 ? sum - next + value
                 : value - next + sum;
             sum = next;
@@ -149,10 +149,10 @@ internal static unsafe class VectorModule
     // and keeps the input order of equal ones. This is the one sort helper of the device source; it sits in the
     // second translation unit so that every later unit can declare it external.
     [CudaDevice]
-    private static double* mathblocks_stable_merge_sort(double* values, double* buffer, int count, bool descending)
+    private static float* mathblocks_stable_merge_sort(float* values, float* buffer, int count, bool descending)
     {
-        double* source = values;
-        double* target = buffer;
+        float* source = values;
+        float* target = buffer;
         for (int width = 1; width < count; width += width)
         {
             for (int start = 0; start < count; start += width + width)
@@ -172,7 +172,7 @@ internal static unsafe class VectorModule
                 while (right < end)
                     target[position++] = source[right++];
             }
-            double* sorted = target;
+            float* sorted = target;
             target = source;
             source = sorted;
         }
@@ -183,15 +183,15 @@ internal static unsafe class VectorModule
     // other array.
     [CudaDevice]
     private static void mathblocks_stable_sort_into(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
-        double* result,
-        double* buffer,
+        float* result,
+        float* buffer,
         bool descending)
     {
         for (int index = 0; index < count; index++)
             result[index] = values[index];
-        double* sorted = mathblocks_stable_merge_sort(result, buffer, count, descending);
+        float* sorted = mathblocks_stable_merge_sort(result, buffer, count, descending);
         if (sorted != result)
             for (int index = 0; index < count; index++)
                 result[index] = sorted[index];
@@ -200,13 +200,13 @@ internal static unsafe class VectorModule
     // Stable insertion sort of count values into sorted.
     [CudaDevice]
     private static void mathblocks_sort_copy_values(
-        [CudaReadOnly] double* source,
+        [CudaReadOnly] float* source,
         int count,
-        double* sorted)
+        float* sorted)
     {
         for (int index = 0; index < count; index++)
         {
-            double value = source[index];
+            float value = source[index];
             int position = index;
             while (position > 0 && sorted[position - 1] > value)
             {
@@ -220,7 +220,7 @@ internal static unsafe class VectorModule
     // The indices 0 .. count - 1 in the stable ascending order of keys (equal keys keep the index order), the order of
     // SortedIndices; buffer holds count ints. The sorted order ends in order.
     [CudaDevice]
-    private static void mathblocks_stable_index_order([CudaReadOnly] double* keys, int count, int* order, int* buffer)
+    private static void mathblocks_stable_index_order([CudaReadOnly] float* keys, int count, int* order, int* buffer)
     {
         for (int index = 0; index < count; index++)
             order[index] = index;
@@ -261,59 +261,59 @@ internal static unsafe class VectorModule
         [CudaReadOnly] MathBlockSlot* input,
         MathBlockSlot* output)
     {
-        double* scratch = (double*)output->scratch_pointer;
-        double* source = Cuda.ReadOnly((double*)input->data_pointer);
+        float* scratch = (float*)output->scratch_pointer;
+        float* source = Cuda.ReadOnly((float*)input->data_pointer);
         if (output->data_pointer != 0)
-            mathblocks_stable_sort_into(source, input->count, (double*)output->data_pointer, scratch, false);
+            mathblocks_stable_sort_into(source, input->count, (float*)output->data_pointer, scratch, false);
         else
             mathblocks_stable_sort_into(source, input->count, scratch, scratch + input->count, false);
     }
 
     // Sorts count values into sorted and interpolates the quantile at probability.
     [CudaDevice]
-    private static double mathblocks_quantile_values(
-        [CudaReadOnly] double* values,
+    private static float mathblocks_quantile_values(
+        [CudaReadOnly] float* values,
         int count,
-        double* sorted,
-        double probability)
+        float* sorted,
+        float probability)
     {
         mathblocks_sort_copy_values(values, count, sorted);
         if (count == 1)
             return sorted[0];
-        double position = probability * (count - 1);
-        int lower = (int)Math.Floor(position);
-        int upper = (int)Math.Ceiling(position);
-        double weight = position - lower;
-        return sorted[lower] * (1.0 - weight) + sorted[upper] * weight;
+        float position = probability * (count - 1);
+        int lower = (int)MathF.Floor(position);
+        int upper = (int)MathF.Ceiling(position);
+        float weight = position - lower;
+        return sorted[lower] * (1.0f - weight) + sorted[upper] * weight;
     }
 
     // vector.median and vector.quantile: the quantile of the stable merge sort of the input, held in the scratch
     // (2 * count doubles).
     [CudaDevice]
-    private static double mathblocks_quantile(
+    private static float mathblocks_quantile(
         [CudaReadOnly] MathBlockSlot* input,
         MathBlockSlot* output,
-        double probability)
+        float probability)
     {
-        double* sorted = (double*)output->scratch_pointer;
-        double* source = Cuda.ReadOnly((double*)input->data_pointer);
+        float* sorted = (float*)output->scratch_pointer;
+        float* source = Cuda.ReadOnly((float*)input->data_pointer);
         int count = input->count;
         mathblocks_stable_sort_into(source, count, sorted, sorted + count, false);
         if (count == 1)
             return sorted[0];
-        double position = probability * (count - 1);
-        int lower = (int)Math.Floor(position);
-        int upper = (int)Math.Ceiling(position);
-        double weight = position - lower;
-        return sorted[lower] * (1.0 - weight) + sorted[upper] * weight;
+        float position = probability * (count - 1);
+        int lower = (int)MathF.Floor(position);
+        int upper = (int)MathF.Ceiling(position);
+        float weight = position - lower;
+        return sorted[lower] * (1.0f - weight) + sorted[upper] * weight;
     }
 
     [CudaDevice]
     private static bool mathblocks_vector_geometric_mean_value(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
-        double* logarithms,
-        double* value)
+        float* logarithms,
+        float* value)
     {
         if (count <= 0)
             return false;
@@ -321,36 +321,36 @@ internal static unsafe class VectorModule
         for (int index = 0; index < count; index++)
         {
             logarithms[index] = mathblocks_natural_logarithm(values[index]);
-            if (!double.IsFinite(logarithms[index]))
+            if (!float.IsFinite(logarithms[index]))
                 finite = false;
         }
         if (!finite)
             return false;
         *value = mathblocks_exponential(mathblocks_compensated_sum(logarithms, count) / count);
-        return double.IsFinite(*value);
+        return float.IsFinite(*value);
     }
 
     // The first position of the largest (maximum) or smallest value.
     [CudaDevice]
     private static bool mathblocks_vector_arg_extreme_value(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
         bool maximum,
-        double* value)
+        float* value)
     {
         if (count <= 0)
             return false;
         int selected = 0;
         for (int index = 1; index < count; index++)
             if (maximum ? values[index] > values[selected] : values[index] < values[selected]) selected = index;
-        *value = (double)selected;
+        *value = (float)selected;
         return true;
     }
 
     // The average rank of values[position]: smaller values, plus the mean position among equal values.
     [CudaDevice]
-    private static double mathblocks_vector_rank_at(
-        [CudaReadOnly] double* values,
+    private static float mathblocks_vector_rank_at(
+        [CudaReadOnly] float* values,
         int count,
         int position)
     {
@@ -361,27 +361,27 @@ internal static unsafe class VectorModule
             if (values[other] < values[position]) less++;
             else if (values[other] == values[position]) equal++;
         }
-        return less + (equal + 1.0) / 2.0;
+        return less + (equal + 1.0f) / 2.0f;
     }
 
     [CudaDevice]
     private static void mathblocks_vector_standardize_moments(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
-        double* mean,
-        double* deviation)
+        float* mean,
+        float* deviation)
     {
-        double average = mathblocks_compensated_sum(values, count) / count;
-        double variance = 0.0;
+        float average = mathblocks_compensated_sum(values, count) / count;
+        float variance = 0.0f;
         for (int index = 0; index < count; index++)
         {
-            double difference = values[index] - average;
+            float difference = values[index] - average;
             variance += difference * difference;
         }
         variance /= count;
         *mean = average;
         // A variance that overflowed would divide every difference by an infinity and give zeros; NaN (invalid) instead.
-        *deviation = double.IsFinite(variance) ? mathblocks_square_root(variance) : mathblocks_quiet_nan();
+        *deviation = float.IsFinite(variance) ? mathblocks_square_root(variance) : mathblocks_quiet_nan();
     }
 
     [CudaDevice(Name = "mathblocks_vector_dispatch")]
@@ -398,7 +398,7 @@ internal static unsafe class VectorModule
 
         if (thread == 0)
         {
-            output->scalar_value = 0.0;
+            output->scalar_value = 0.0f;
             output->boolean_value = 0;
             output->rows = 0;
             output->columns = 0;
@@ -413,12 +413,12 @@ internal static unsafe class VectorModule
         if (!output->valid)
             return;
 
-        double* a = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
-        double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
-        double* c = Cuda.ReadOnly(third == null ? null : (double*)third->data_pointer);
+        float* a = Cuda.ReadOnly(first == null ? null : (float*)first->data_pointer);
+        float* b = Cuda.ReadOnly(second == null ? null : (float*)second->data_pointer);
+        float* c = Cuda.ReadOnly(third == null ? null : (float*)third->data_pointer);
         CudaInt32* boolean_a = Cuda.ReadOnly(first == null ? null : (CudaInt32*)first->data_pointer);
         CudaInt32* boolean_b = Cuda.ReadOnly(second == null ? null : (CudaInt32*)second->data_pointer);
-        double* result = (double*)(output->data_pointer != 0
+        float* result = (float*)(output->data_pointer != 0
             ? output->data_pointer
             : output->scratch_pointer);
         CudaInt32* boolean_result = (CudaInt32*)output->data_pointer;
@@ -429,7 +429,7 @@ internal static unsafe class VectorModule
                 if (thread == 0) mathblocks_set_vector_shape(output, first->count);
                 Cuda.SyncThreads();
                 for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
-                    result[index] = Math.Abs(a[index]);
+                    result[index] = MathF.Abs(a[index]);
                 break;
             case 1:
                 if (thread == 0) mathblocks_set_vector_shape(output, first->count);
@@ -437,7 +437,7 @@ internal static unsafe class VectorModule
                 for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
                 {
                     result[index] = a[index] + second->scalar_value;
-                    if (!double.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
+                    if (!float.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 break;
             case 2:
@@ -452,12 +452,12 @@ internal static unsafe class VectorModule
                 Cuda.SyncThreads();
                 for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
                 {
-                    double value = opcode == 2 ? a[index] + b[index]
+                    float value = opcode == 2 ? a[index] + b[index]
                         : opcode == 9 ? a[index] / b[index]
                         : opcode == 26 ? a[index] * b[index]
                         : a[index] - b[index];
                     result[index] = value;
-                    if (!double.IsFinite(value)) Cuda.AtomicExchange(ref output->valid, 0);
+                    if (!float.IsFinite(value)) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 break;
             case 3:
@@ -485,12 +485,12 @@ internal static unsafe class VectorModule
                 if (thread == 0)
                 {
                     mathblocks_set_vector_shape(output, first->count);
-                    double product = 1.0;
+                    float product = 1.0f;
                     for (int index = 0; output->valid && index < first->count; index++)
                     {
                         product *= a[index];
                         result[index] = product;
-                        if (!double.IsFinite(product)) output->valid = 0;
+                        if (!float.IsFinite(product)) output->valid = 0;
                     }
                 }
                 break;
@@ -498,12 +498,12 @@ internal static unsafe class VectorModule
                 if (thread == 0)
                 {
                     mathblocks_set_vector_shape(output, first->count);
-                    double sum = 0.0;
+                    float sum = 0.0f;
                     for (int index = 0; output->valid && index < first->count; index++)
                     {
                         sum += a[index];
                         result[index] = sum;
-                        if (!double.IsFinite(sum)) output->valid = 0;
+                        if (!float.IsFinite(sum)) output->valid = 0;
                     }
                 }
                 break;
@@ -514,7 +514,7 @@ internal static unsafe class VectorModule
                     else
                     {
                         output->scalar_value = mathblocks_compensated_product_sum(a, b, first->count);
-                        if (!double.IsFinite(output->scalar_value)) output->valid = 0;
+                        if (!float.IsFinite(output->scalar_value)) output->valid = 0;
                     }
                 }
                 break;
@@ -539,11 +539,11 @@ internal static unsafe class VectorModule
                 Cuda.SyncThreads();
                 for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
                 {
-                    double value = opcode == 12 ? mathblocks_exponential(a[index])
+                    float value = opcode == 12 ? mathblocks_exponential(a[index])
                         : opcode == 27 ? mathblocks_natural_logarithm(a[index])
                         : mathblocks_square_root(a[index]);
                     result[index] = value;
-                    if (!double.IsFinite(value)) Cuda.AtomicExchange(ref output->valid, 0);
+                    if (!float.IsFinite(value)) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 break;
             case 13:
@@ -578,15 +578,15 @@ internal static unsafe class VectorModule
             case 18:
                 if (thread == 0)
                 {
-                    double norm = opcode == 17
+                    float norm = opcode == 17
                         ? mathblocks_compensated_absolute_sum(a, first->count)
                         : mathblocks_square_root(mathblocks_compensated_product_sum(a, a, first->count));
                     output->scalar_value = norm;
-                    if (!double.IsFinite(norm)) output->valid = 0;
+                    if (!float.IsFinite(norm)) output->valid = 0;
                 }
                 break;
             case 19:
-                if (thread == 0) output->scalar_value = (double)first->count;
+                if (thread == 0) output->scalar_value = (float)first->count;
                 break;
             case 21:
                 if (thread == 0)
@@ -600,13 +600,13 @@ internal static unsafe class VectorModule
                 Cuda.SyncThreads();
                 if (output->valid)
                 {
-                    double start = first->scalar_value;
-                    double end = second->scalar_value;
-                    double step = output->count == 1 ? 0.0 : (end - start) / (output->count - 1);
+                    float start = first->scalar_value;
+                    float end = second->scalar_value;
+                    float step = output->count == 1 ? 0.0f : (end - start) / (output->count - 1);
                     for (int index = thread; index < output->count; index += Cuda.BlockDim.X)
                     {
                         result[index] = index == output->count - 1 ? end : start + step * index;
-                        if (!double.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
+                        if (!float.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
                     }
                 }
                 break;
@@ -619,7 +619,7 @@ internal static unsafe class VectorModule
                         output->valid = 0;
                         break;
                     }
-                    double selected = a[0];
+                    float selected = a[0];
                     for (int index = 1; index < first->count; index++)
                         selected = opcode == 22
                             ? mathblocks_maximum(selected, a[index])
@@ -631,23 +631,23 @@ internal static unsafe class VectorModule
             case 48:
                 if (thread == 0)
                 {
-                    double sum = mathblocks_compensated_sum(a, first->count);
+                    float sum = mathblocks_compensated_sum(a, first->count);
                     output->scalar_value = opcode == 23 ? sum / first->count : sum;
-                    if (!double.IsFinite(output->scalar_value)) output->valid = 0;
+                    if (!float.IsFinite(output->scalar_value)) output->valid = 0;
                 }
                 break;
             case 24:
             case 35:
                 if (thread == 0)
                 {
-                    double probability = opcode == 24 ? 0.5 : second->scalar_value;
+                    float probability = opcode == 24 ? 0.5f : second->scalar_value;
                     if (first->count <= 0 || output->scratch_pointer == 0 ||
-                        probability < 0.0 || probability > 1.0)
+                        probability < 0.0f || probability > 1.0f)
                         output->valid = 0;
                     else
                     {
                         output->scalar_value = mathblocks_quantile(first, output, probability);
-                        if (!double.IsFinite(output->scalar_value)) output->valid = 0;
+                        if (!float.IsFinite(output->scalar_value)) output->valid = 0;
                     }
                 }
                 break;
@@ -659,13 +659,13 @@ internal static unsafe class VectorModule
                     output->scalar_value = opcode == 28
                         ? mathblocks_compensated_absolute_sum(a, first->count)
                         : mathblocks_square_root(mathblocks_compensated_product_sum(a, a, first->count));
-                    if (!double.IsFinite(output->scalar_value) || output->scalar_value == 0.0) output->valid = 0;
+                    if (!float.IsFinite(output->scalar_value) || output->scalar_value == 0.0f) output->valid = 0;
                 }
                 Cuda.SyncThreads();
                 for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
                 {
-                    result[index] = a[index] * (1.0 / output->scalar_value);
-                    if (!double.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
+                    result[index] = a[index] * (1.0f / output->scalar_value);
+                    if (!float.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 break;
             case 30:
@@ -686,11 +686,11 @@ internal static unsafe class VectorModule
                 Cuda.SyncThreads();
                 for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
                 {
-                    double value = opcode == 31 ? mathblocks_maximum(a[index], 0.0)
-                        : opcode == 41 ? (double)(Cuda.Int(a[index] > 0.0) - Cuda.Int(a[index] < 0.0))
+                    float value = opcode == 31 ? mathblocks_maximum(a[index], 0.0f)
+                        : opcode == 41 ? (float)(Cuda.Int(a[index] > 0.0f) - Cuda.Int(a[index] < 0.0f))
                         : a[index] * a[index];
                     result[index] = value;
-                    if (!double.IsFinite(value)) Cuda.AtomicExchange(ref output->valid, 0);
+                    if (!float.IsFinite(value)) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 break;
             case 32:
@@ -699,7 +699,7 @@ internal static unsafe class VectorModule
                 for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
                 {
                     result[index] = mathblocks_power(a[index], second->scalar_value);
-                    if (!double.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
+                    if (!float.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 break;
             case 33:
@@ -712,10 +712,10 @@ internal static unsafe class VectorModule
             case 34:
                 if (thread == 0)
                 {
-                    double product = 1.0;
+                    float product = 1.0f;
                     for (int index = 0; index < first->count; index++) product *= a[index];
                     output->scalar_value = product;
-                    if (!double.IsFinite(product)) output->valid = 0;
+                    if (!float.IsFinite(product)) output->valid = 0;
                 }
                 break;
             case 36:
@@ -749,7 +749,7 @@ internal static unsafe class VectorModule
                 for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
                 {
                     result[index] = a[index] * second->scalar_value;
-                    if (!double.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
+                    if (!float.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 break;
             case 40:
@@ -798,13 +798,13 @@ internal static unsafe class VectorModule
                         output->valid = 0;
                         break;
                     }
-                    double mean = 0.0;
-                    double deviation = 0.0;
+                    float mean = 0.0f;
+                    float deviation = 0.0f;
                     mathblocks_vector_standardize_moments(a, first->count, &mean, &deviation);
                     for (int index = 0; index < first->count; index++)
                     {
                         result[index] = (a[index] - mean) / deviation;
-                        if (!double.IsFinite(result[index])) output->valid = 0;
+                        if (!float.IsFinite(result[index])) output->valid = 0;
                     }
                 }
                 break;
@@ -829,7 +829,7 @@ internal static unsafe class VectorModule
                 if (thread == 0)
                 {
                     output->boolean_value = opcode == 50 ? 1 : 0;
-                    output->scalar_value = 0.0;
+                    output->scalar_value = 0.0f;
                 }
                 Cuda.SyncThreads();
                 int local_count = 0;
@@ -851,7 +851,7 @@ internal static unsafe class VectorModule
                 Cuda.SyncThreads();
                 if (thread == 0 && opcode == 55)
                 {
-                    output->scalar_value = (double)output->boolean_value;
+                    output->scalar_value = (float)output->boolean_value;
                     output->boolean_value = 0;
                 }
                 break;
@@ -881,7 +881,7 @@ internal static unsafe class VectorModule
                 {
                     int count = 0;
                     for (int index = 0; index < first->count; index++)
-                        if (boolean_a[index]) result[count++] = (double)index;
+                        if (boolean_a[index]) result[count++] = (float)index;
                     mathblocks_set_vector_shape(output, count);
                 }
                 break;

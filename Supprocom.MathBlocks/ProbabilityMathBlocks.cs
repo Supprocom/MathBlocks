@@ -24,7 +24,7 @@ public static partial class MathBlockProbability
         float tolerance,
         out bool converged)
     {
-        const float minimum = 1.03e-37f;
+        const float minimum = 1e-30f;
         converged = false;
         var qab = left + right;
         var qap = left + 1f;

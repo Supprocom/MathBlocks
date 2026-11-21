@@ -21,7 +21,7 @@ internal static unsafe class AdvancedModule
     [CudaExternal]
     public struct MathBlockSlot
     {
-        public double scalar_value;
+        public float scalar_value;
         public ulong data_pointer;
         public ulong scratch_pointer;
         public CudaInt32 boolean_value;
@@ -33,25 +33,25 @@ internal static unsafe class AdvancedModule
     }
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_compensated_sum([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
+    private static float mathblocks_compensated_sum([CudaReadOnly] float* values, int count) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_natural_logarithm(double value) => throw new NotSupportedException();
+    private static float mathblocks_natural_logarithm(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_positive_infinity() => throw new NotSupportedException();
+    private static float mathblocks_positive_infinity() => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_minimum(double first, double second) => throw new NotSupportedException();
+    private static float mathblocks_minimum(float first, float second) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_maximum(double first, double second) => throw new NotSupportedException();
+    private static float mathblocks_maximum(float first, float second) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static bool mathblocks_probability_distribution([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
+    private static bool mathblocks_probability_distribution([CudaReadOnly] float* values, int count) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static bool mathblocks_sequence_positive_integer(double value, int* result) => throw new NotSupportedException();
+    private static bool mathblocks_sequence_positive_integer(float value, int* result) => throw new NotSupportedException();
 
     [CudaExternal]
     private static void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
@@ -86,23 +86,23 @@ internal static unsafe class AdvancedModule
     }
 
     [CudaDevice]
-    private static double mathblocks_advanced_factorial(int value)
+    private static float mathblocks_advanced_factorial(int value)
     {
-        double result = 1.0;
+        float result = 1.0f;
         for (int index = 2; index <= value; index++)
             result *= index;
         return result;
     }
 
     [CudaDevice]
-    private static bool mathblocks_advanced_distribution([CudaReadOnly] double* values, int count)
+    private static bool mathblocks_advanced_distribution([CudaReadOnly] float* values, int count)
     {
         return mathblocks_probability_distribution(values, count);
     }
 
     [CudaDevice]
     private static bool mathblocks_advanced_transition(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int rows,
         int columns)
     {
@@ -110,25 +110,25 @@ internal static unsafe class AdvancedModule
             return false;
         for (int row = 0; row < rows; row++)
         {
-            double sum = 0.0;
+            float sum = 0.0f;
             for (int column = 0; column < columns; column++)
             {
-                double value = values[row * columns + column];
-                if (value < 0.0)
+                float value = values[row * columns + column];
+                if (value < 0.0f)
                     return false;
                 sum += value;
             }
-            if (Math.Abs(sum - 1.0) > 1e-10)
+            if (MathF.Abs(sum - 1.0f) > 1e-5f)
                 return false;
         }
         return true;
     }
 
     [CudaExternal]
-    private static double* mathblocks_stable_merge_sort(double* values, double* buffer, int count, bool descending) => throw new NotSupportedException();
+    private static float* mathblocks_stable_merge_sort(float* values, float* buffer, int count, bool descending) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static void mathblocks_statistics_sort_copy([CudaReadOnly] double* values, int count, double* result, bool descending) => throw new NotSupportedException();
+    private static void mathblocks_statistics_sort_copy([CudaReadOnly] float* values, int count, float* result, bool descending) => throw new NotSupportedException();
 
     [CudaDevice(Name = "mathblocks_advanced_dispatch")]
     private static void mathblocks_advanced(
@@ -144,7 +144,7 @@ internal static unsafe class AdvancedModule
         MathBlockSlot* fourth = Cuda.ReadOnly(input_count > 3 ? inputs[3] : null);
         if (thread == 0)
         {
-            output->scalar_value = 0.0;
+            output->scalar_value = 0.0f;
             output->boolean_value = 0;
             output->rows = 0;
             output->columns = 0;
@@ -157,11 +157,11 @@ internal static unsafe class AdvancedModule
         if (!output->valid)
             return;
 
-        double* a = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
-        double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
-        double* c = Cuda.ReadOnly(third == null ? null : (double*)third->data_pointer);
-        double* result = (double*)output->data_pointer;
-        double* scratch = (double*)output->scratch_pointer;
+        float* a = Cuda.ReadOnly(first == null ? null : (float*)first->data_pointer);
+        float* b = Cuda.ReadOnly(second == null ? null : (float*)second->data_pointer);
+        float* c = Cuda.ReadOnly(third == null ? null : (float*)third->data_pointer);
+        float* result = (float*)output->data_pointer;
+        float* scratch = (float*)output->scratch_pointer;
 
         // Lipschitz extensions (McShane, Whitney): every query is an independent output, each one computed by one thread with
         // the serial inner loop in index order (the order of CoreCLR); thread t takes the queries t, t + block size, ...
@@ -170,19 +170,19 @@ internal static unsafe class AdvancedModule
         // that makes the results visible to it for the finite check.
         if (opcode == 4 || opcode == 5)
         {
-            bool lipschitz_invalid = first->count <= 0 || first->count != second->count || fourth->scalar_value < 0.0;
+            bool lipschitz_invalid = first->count <= 0 || first->count != second->count || fourth->scalar_value < 0.0f;
             if (!lipschitz_invalid)
             {
                 for (int query = thread; query < third->count; query += (int)Cuda.BlockDim.X)
                 {
-                    double selected = opcode == 4
+                    float selected = opcode == 4
                         ? mathblocks_positive_infinity()
                         : -mathblocks_positive_infinity();
                     for (int index = 0; index < first->count; index++)
                     {
-                        double candidate = opcode == 4
-                            ? b[index] + fourth->scalar_value * Math.Abs(c[query] - a[index])
-                            : b[index] - fourth->scalar_value * Math.Abs(c[query] - a[index]);
+                        float candidate = opcode == 4
+                            ? b[index] + fourth->scalar_value * MathF.Abs(c[query] - a[index])
+                            : b[index] - fourth->scalar_value * MathF.Abs(c[query] - a[index]);
                         // The owned minimum and maximum, as CoreCLR: a NaN candidate (0 * infinity from a zero Lipschitz constant and an
                         // overflowing distance) makes the result NaN (invalid), and the sign of a zero is the same.
                         selected = opcode == 4
@@ -208,7 +208,7 @@ internal static unsafe class AdvancedModule
                     }
                     for (int index = 0; index < first->count; index++)
                     {
-                        if (a[index] < 0.0)
+                        if (a[index] < 0.0f)
                         {
                             output->valid = 0;
                             break;
@@ -219,12 +219,12 @@ internal static unsafe class AdvancedModule
                             scratch[position] = scratch[position - 1];
                             position--;
                         }
-                        scratch[position] = (double)index;
+                        scratch[position] = (float)index;
                     }
                     if (output->valid)
                     {
-                        double total = 0.0;
-                        double previous = 0.0;
+                        float total = 0.0f;
+                        float previous = 0.0f;
                         for (int position = 0; position < first->count; position++)
                         {
                             int coalition = 0;
@@ -275,16 +275,16 @@ internal static unsafe class AdvancedModule
                 {
                     int player_count = mathblocks_advanced_log_two(first->count);
                     mathblocks_sequence_set_vector_shape(output, player_count);
-                    double denominator = mathblocks_advanced_factorial(player_count);
+                    float denominator = mathblocks_advanced_factorial(player_count);
                     for (int player = 0; player < player_count; player++)
                     {
-                        result[player] = 0.0;
+                        result[player] = 0.0f;
                         for (int coalition = 0; coalition < first->count; coalition++)
                         {
                             if ((coalition & (1 << player)) != 0)
                                 continue;
                             int size = mathblocks_advanced_popcount(coalition);
-                            double weight = mathblocks_advanced_factorial(size) *
+                            float weight = mathblocks_advanced_factorial(size) *
                                 mathblocks_advanced_factorial(player_count - size - 1) /
                                 denominator;
                             result[player] += weight *
@@ -296,7 +296,7 @@ internal static unsafe class AdvancedModule
                 case 4:
                 case 5:
                     mathblocks_sequence_set_vector_shape(output, third->count);
-                    if (first->count <= 0 || first->count != second->count || fourth->scalar_value < 0.0)
+                    if (first->count <= 0 || first->count != second->count || fourth->scalar_value < 0.0f)
                     {
                         output->valid = 0;
                         break;
@@ -309,12 +309,12 @@ internal static unsafe class AdvancedModule
                         break;
                     }
                 {
-                    double sum = 0.0;
+                    float sum = 0.0f;
                     for (int left = 0; left < first->count; left++)
                         for (int right = 0; right < first->count; right++)
-                            sum += Math.Abs(a[left] - a[right]);
+                            sum += MathF.Abs(a[left] - a[right]);
                     output->scalar_value = sum /
-                        (2.0 * first->count * mathblocks_compensated_sum(a, first->count));
+                        (2.0f * first->count * mathblocks_compensated_sum(a, first->count));
                     break;
                 }
                 case 7:
@@ -324,17 +324,17 @@ internal static unsafe class AdvancedModule
                         output->valid = 0;
                         break;
                     }
-                    result[0] = 0.0;
+                    result[0] = 0.0f;
                     for (int index = 0; index < first->count; index++)
                         result[index + 1] = a[index];
                     {
-                        double* sorted = mathblocks_stable_merge_sort(result + 1, scratch, first->count, false);
+                        float* sorted = mathblocks_stable_merge_sort(result + 1, scratch, first->count, false);
                         if (sorted != result + 1)
                             for (int index = 0; index < first->count; index++)
                                 result[index + 1] = sorted[index];
                     }
                 {
-                    double total = mathblocks_compensated_sum(result + 1, first->count);
+                    float total = mathblocks_compensated_sum(result + 1, first->count);
                     for (int index = 0; index < first->count; index++)
                         result[index + 1] = result[index] + result[index + 1] / total;
                     break;
@@ -348,18 +348,18 @@ internal static unsafe class AdvancedModule
                         break;
                     }
                 {
-                    double total = 0.0;
+                    float total = 0.0f;
                     for (int row = 0; row < first->rows; row++)
                         for (int column = 0; column < first->columns; column++)
                         {
-                            double forward = b[row] * a[row * first->columns + column];
-                            double reverse = b[column] * a[column * first->columns + row];
-                            if (forward > 0.0 && reverse == 0.0)
+                            float forward = b[row] * a[row * first->columns + column];
+                            float reverse = b[column] * a[column * first->columns + row];
+                            if (forward > 0.0f && reverse == 0.0f)
                             {
                                 output->valid = 0;
                                 break;
                             }
-                            if (forward > 0.0 && reverse > 0.0)
+                            if (forward > 0.0f && reverse > 0.0f)
                                 total += forward * mathblocks_natural_logarithm(forward / reverse);
                         }
                     output->scalar_value = total;
@@ -380,11 +380,11 @@ internal static unsafe class AdvancedModule
                         break;
                     }
                     for (int index = 0; index < first->rows; index++)
-                        result[index] = 1.0 / first->rows;
+                        result[index] = 1.0f / first->rows;
                     for (int iteration = 0; iteration < iterations; iteration++)
                     {
                         for (int index = 0; index < first->rows; index++)
-                            scratch[index] = 0.0;
+                            scratch[index] = 0.0f;
                         for (int row = 0; row < first->rows; row++)
                             for (int column = 0; column < first->columns; column++)
                                 scratch[column] += result[row] * a[row * first->columns + column];
@@ -401,7 +401,7 @@ internal static unsafe class AdvancedModule
                         break;
                     }
                 {
-                    double* means = scratch;
+                    float* means = scratch;
                     int* weights = (int*)(means + first->count);
                     int* starts = weights + first->count;
                     int block_count = 0;
@@ -437,12 +437,12 @@ internal static unsafe class AdvancedModule
                         break;
                     }
                 {
-                    double* left_sorted = scratch;
-                    double* right_sorted = scratch + first->count;
+                    float* left_sorted = scratch;
+                    float* right_sorted = scratch + first->count;
                     mathblocks_statistics_sort_copy(a, first->count, left_sorted, true);
                     mathblocks_statistics_sort_copy(b, first->count, right_sorted, true);
-                    double left_sum = 0.0;
-                    double right_sum = 0.0;
+                    float left_sum = 0.0f;
+                    float right_sum = 0.0f;
                     bool majorizes = true;
                     for (int index = 0; index < first->count; index++)
                     {
@@ -461,16 +461,16 @@ internal static unsafe class AdvancedModule
                         break;
                     }
                 {
-                    double minimum = mathblocks_positive_infinity();
-                    double maximum = -mathblocks_positive_infinity();
+                    float minimum = mathblocks_positive_infinity();
+                    float maximum = -mathblocks_positive_infinity();
                     for (int index = 0; index < first->count; index++)
                     {
-                        if (a[index] <= 0.0 || b[index] <= 0.0)
+                        if (a[index] <= 0.0f || b[index] <= 0.0f)
                         {
                             output->valid = 0;
                             break;
                         }
-                        double ratio = a[index] / b[index];
+                        float ratio = a[index] / b[index];
                         minimum = minimum < ratio ? minimum : ratio;
                         maximum = maximum > ratio ? maximum : ratio;
                     }
@@ -497,8 +497,8 @@ internal static unsafe class AdvancedModule
                             int one = hull[hull_count - 3];
                             int middle = hull[hull_count - 2];
                             int last = hull[hull_count - 1];
-                            double first_slope = (a[middle] - a[one]) / (middle - one);
-                            double second_slope = (a[last] - a[middle]) / (last - middle);
+                            float first_slope = (a[middle] - a[one]) / (middle - one);
+                            float second_slope = (a[last] - a[middle]) / (last - middle);
                             if (concave ? first_slope >= second_slope : first_slope <= second_slope)
                                 break;
                             hull[hull_count - 2] = hull[hull_count - 1];
@@ -511,8 +511,8 @@ internal static unsafe class AdvancedModule
                         int end = hull[segment];
                         for (int index = start; index <= end; index++)
                         {
-                            double weight = (double)(index - start) / (end - start);
-                            result[index] = a[start] * (1.0 - weight) + a[end] * weight;
+                            float weight = (float)(index - start) / (end - start);
+                            result[index] = a[start] * (1.0f - weight) + a[end] * weight;
                         }
                     }
                     break;
@@ -530,9 +530,9 @@ internal static unsafe class AdvancedModule
                          order < first->count && output->boolean_value;
                          order++, length--)
                     {
-                        double sign = (order & 1) == 0 ? 1.0 : -1.0;
+                        float sign = (order & 1) == 0 ? 1.0f : -1.0f;
                         for (int index = 0; index < length; index++)
-                            if (sign * scratch[index] < 0.0)
+                            if (sign * scratch[index] < 0.0f)
                             {
                                 output->boolean_value = 0;
                                 break;
@@ -544,7 +544,7 @@ internal static unsafe class AdvancedModule
                 case 15:
                     output->boolean_value = 1;
                     for (int index = 0; index < first->count; index++)
-                        if (a[index] < 0.0) output->boolean_value = 0;
+                        if (a[index] < 0.0f) output->boolean_value = 0;
                     for (int index = 1; output->boolean_value && index < first->count - 1; index++)
                         if (a[index] * a[index] < a[index - 1] * a[index + 1])
                             output->boolean_value = 0;
@@ -557,7 +557,7 @@ internal static unsafe class AdvancedModule
                         break;
                     }
                 {
-                    double survival = 1.0;
+                    float survival = 1.0f;
                     for (int index = 0; index < first->count; index++)
                     {
                         result[index] = a[index] / survival;
@@ -573,15 +573,15 @@ internal static unsafe class AdvancedModule
                         break;
                     }
                 {
-                    double survival = 1.0;
+                    float survival = 1.0f;
                     for (int index = 0; index < first->count; index++)
                     {
-                        if (a[index] < 0.0 || b[index] <= 0.0 || a[index] > b[index])
+                        if (a[index] < 0.0f || b[index] <= 0.0f || a[index] > b[index])
                         {
                             output->valid = 0;
                             break;
                         }
-                        survival *= 1.0 - a[index] / b[index];
+                        survival *= 1.0f - a[index] / b[index];
                         result[index] = survival;
                     }
                     break;
@@ -592,7 +592,7 @@ internal static unsafe class AdvancedModule
                 opcode != 1 && opcode != 2 && opcode != 3 && opcode != 4 && opcode != 5 &&
                 opcode != 7 && opcode != 9 && opcode != 10 && opcode != 11 && opcode != 13 &&
                 opcode != 14 && opcode != 15 && opcode != 16 && opcode != 17 && opcode != 18 &&
-                !double.IsFinite(output->scalar_value))
+                !float.IsFinite(output->scalar_value))
             {
                 output->valid = 0;
             }
@@ -602,7 +602,7 @@ internal static unsafe class AdvancedModule
                  opcode == 18))
             {
                 for (int index = 0; index < output->count; index++)
-                    if (!double.IsFinite(result[index])) output->valid = 0;
+                    if (!float.IsFinite(result[index])) output->valid = 0;
             }
         }
     }

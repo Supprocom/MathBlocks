@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks.Cuda;
 public static class MathBlockCudaGraphEdgeLayout
 {
     /// <summary>Gets the size value.</summary>
-    public const int Size = 16;
+    public const int Size = 12;
     /// <summary>Gets the from offset value.</summary>
     public const int FromOffset = 0;
     /// <summary>Gets the to offset value.</summary>

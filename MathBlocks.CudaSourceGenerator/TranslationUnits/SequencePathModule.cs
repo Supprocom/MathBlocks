@@ -12,7 +12,7 @@ internal static unsafe class SequencePathModule
     [CudaExternal]
     public struct MathBlockSlot
     {
-        public double scalar_value;
+        public float scalar_value;
         public ulong data_pointer;
         public ulong scratch_pointer;
         public CudaInt32 boolean_value;
@@ -24,29 +24,29 @@ internal static unsafe class SequencePathModule
     }
 
     [CudaExternal]
-    private static bool mathblocks_nonnegative_integer(double value, int* result) => throw new NotSupportedException();
+    private static bool mathblocks_nonnegative_integer(float value, int* result) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_positive_infinity() => throw new NotSupportedException();
+    private static float mathblocks_positive_infinity() => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_power(double value, double exponent) => throw new NotSupportedException();
+    private static float mathblocks_power(float value, float exponent) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+    private static float mathblocks_square_root(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_maximum(double first, double second) => throw new NotSupportedException();
+    private static float mathblocks_maximum(float first, float second) => throw new NotSupportedException();
 
     public struct MathBlockSequencePathRun
     {
         public int start;
         public int length;
-        public double value;
+        public float value;
     }
 
     [CudaDevice]
-    private static bool mathblocks_sequence_positive_integer(double value, int* result)
+    private static bool mathblocks_sequence_positive_integer(float value, int* result)
     {
         return mathblocks_nonnegative_integer(value, result) && *result > 0;
     }
@@ -82,10 +82,10 @@ internal static unsafe class SequencePathModule
     }
 
     [CudaDevice]
-    private static ulong mathblocks_sequence_order_key(double value)
+    private static ulong mathblocks_sequence_order_key(float value)
     {
-        ulong bits = (ulong)BitConverter.DoubleToInt64Bits(value);
-        if (value == 0.0)
+        ulong bits = (ulong)BitConverter.SingleToInt32Bits(value);
+        if (value == 0.0f)
             bits = 0UL;
         return (bits & 0x8000000000000000UL) != 0UL
             ? ~bits
@@ -100,7 +100,7 @@ internal static unsafe class SequencePathModule
 
     [CudaDevice]
     private static void mathblocks_sequence_prepare_order_ranks(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
         byte* scratch,
         MathBlockSlot* output)
@@ -124,7 +124,7 @@ internal static unsafe class SequencePathModule
 
         for (int index = thread; index < count; index += Cuda.BlockDim.X)
         {
-            if (!double.IsFinite(values[index]))
+            if (!float.IsFinite(values[index]))
                 Cuda.AtomicExchange(ref output->valid, 0);
             first_keys[index] = mathblocks_sequence_order_key(values[index]);
             first_indexes[index] = index;
@@ -401,10 +401,10 @@ internal static unsafe class SequencePathModule
 
     [CudaDevice]
     private static void mathblocks_sequence_rolling_extreme(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
         int width,
-        double* result,
+        float* result,
         int* deque,
         bool minimum)
     {
@@ -428,12 +428,12 @@ internal static unsafe class SequencePathModule
 
     [CudaDevice]
     private static void mathblocks_sequence_rolling_sum(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
         int width,
-        double* result)
+        float* result)
     {
-        double sum = 0.0;
+        float sum = 0.0f;
         for (int index = 0; index < width; index++)
             sum += values[index];
         result[0] = sum;
@@ -445,10 +445,10 @@ internal static unsafe class SequencePathModule
     }
 
     [CudaDevice]
-    private static double mathblocks_sequence_first_passage_value(
-        [CudaReadOnly] double* values,
+    private static float mathblocks_sequence_first_passage_value(
+        [CudaReadOnly] float* values,
         int count,
-        double threshold,
+        float threshold,
         bool at_or_above)
     {
         int result_index = -1;
@@ -460,11 +460,11 @@ internal static unsafe class SequencePathModule
                 break;
             }
         }
-        return (double)result_index;
+        return (float)result_index;
     }
 
     [CudaDevice]
-    private static double mathblocks_sequence_longest_run_value(
+    private static float mathblocks_sequence_longest_run_value(
         [CudaReadOnly] CudaInt32* values,
         int count)
     {
@@ -475,79 +475,79 @@ internal static unsafe class SequencePathModule
             current = values[index] ? current + 1 : 0;
             maximum = maximum > current ? maximum : current;
         }
-        return (double)maximum;
+        return (float)maximum;
     }
 
     [CudaDevice]
     private static bool mathblocks_sequence_decline_value(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
         bool relative,
-        double* value)
+        float* value)
     {
         if (count <= 0)
             return false;
-        double maximum = values[0];
-        double decline = 0.0;
+        float maximum = values[0];
+        float decline = 0.0f;
         for (int index = 1; index < count; index++)
         {
             // The owned maximum, as CoreCLR: a NaN candidate (0 / 0 at a zero peak) makes the result NaN (invalid), and -0 is less than +0.
             maximum = mathblocks_maximum(maximum, values[index]);
-            double candidate = !relative
+            float candidate = !relative
                 ? maximum - values[index]
                 : (maximum - values[index]) / maximum;
             decline = mathblocks_maximum(decline, candidate);
         }
         *value = decline;
-        return double.IsFinite(decline);
+        return float.IsFinite(decline);
     }
 
     // Sums |x[i] - x[i - 1]| (absolute) or its power of the given order.
     [CudaDevice]
     private static bool mathblocks_sequence_variation_value(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
-        double order,
+        float order,
         bool absolute,
-        double* value)
+        float* value)
     {
         if (count <= 0)
             return false;
-        if (!(order > 0.0))
+        if (!(order > 0.0f))
             return false;
-        double total = 0.0;
+        float total = 0.0f;
         for (int index = 1; index < count; index++)
         {
-            double change = Math.Abs(values[index] - values[index - 1]);
+            float change = MathF.Abs(values[index] - values[index - 1]);
             total += absolute ? change : mathblocks_power(change, order);
         }
         *value = total;
-        return double.IsFinite(total);
+        return float.IsFinite(total);
     }
 
     [CudaDevice]
     private static bool mathblocks_sequence_recurrence_value(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
-        double threshold,
-        double* value)
+        float threshold,
+        float* value)
     {
-        if (count <= 0 || threshold < 0.0)
+        if (count <= 0 || threshold < 0.0f)
             return false;
         long recurrent = 0;
         long total = (long)count * count;
         for (int left = 0; left < count; left++)
             for (int right = 0; right < count; right++)
-                if (Math.Abs(values[left] - values[right]) <= threshold)
+                if (MathF.Abs(values[left] - values[right]) <= threshold)
                     recurrent++;
-        *value = (double)recurrent / total;
+        *value = (float)recurrent / total;
         return true;
     }
 
     // Counts sign changes of the values, or of their first differences, skipping zeros.
     [CudaDevice]
-    private static double mathblocks_sequence_sign_change_value(
-        [CudaReadOnly] double* values,
+    private static float mathblocks_sequence_sign_change_value(
+        [CudaReadOnly] float* values,
         int count,
         bool differenced)
     {
@@ -556,22 +556,22 @@ internal static unsafe class SequencePathModule
         int start = differenced ? 1 : 0;
         for (int index = start; index < count; index++)
         {
-            double difference = differenced ? values[index] - values[index - 1] : values[index];
-            int current = difference > 0.0 ? 1 : difference < 0.0 ? -1 : 0;
+            float difference = differenced ? values[index] - values[index - 1] : values[index];
+            int current = difference > 0.0f ? 1 : difference < 0.0f ? -1 : 0;
             if (current == 0)
                 continue;
             if (previous != 0 && current != previous)
                 changes++;
             previous = current;
         }
-        return (double)changes;
+        return (float)changes;
     }
 
     // An integer offset that fits int32 without its extreme negative value, as MathBlockVectorMath.TryReadOffset accepts.
     [CudaDevice]
-    private static bool mathblocks_sequence_offset(double value, int* result)
+    private static bool mathblocks_sequence_offset(float value, int* result)
     {
-        if (value != Math.Truncate(value) || value > 2147483647.0 || value < -2147483647.0)
+        if (value != MathF.Truncate(value) || value > 2147483647.0f || value < -2147483647.0f)
             return false;
         *result = (int)value;
         return true;
@@ -580,7 +580,7 @@ internal static unsafe class SequencePathModule
     // Row row + offset exists and is chained to row: a later row by the counts at that row, an earlier row by the counts at row.
     [CudaDevice]
     private static bool mathblocks_sequence_offset_reachable(
-        [CudaReadOnly] double* counts,
+        [CudaReadOnly] float* counts,
         int count,
         int row,
         long offset)
@@ -589,8 +589,8 @@ internal static unsafe class SequencePathModule
         if (target < 0 || target >= count)
             return false;
         if (offset < 0)
-            return counts[row] >= (double)(-offset);
-        return counts[(int)target] >= (double)offset;
+            return counts[row] >= (float)(-offset);
+        return counts[(int)target] >= (float)offset;
     }
 
     // One row of sequence.first-true-offset (kind 0), sequence.sum-over-offsets (kind 1) or sequence.maximum-over-offsets (kind 2),
@@ -599,17 +599,17 @@ internal static unsafe class SequencePathModule
     [CudaDevice]
     private static bool mathblocks_sequence_offset_row(
         int kind,
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         [CudaReadOnly] CudaInt32* values_valid,
-        [CudaReadOnly] double* counts,
+        [CudaReadOnly] float* counts,
         int count,
         int row,
         int start,
         int end,
-        double no_match,
-        double* result)
+        float no_match,
+        float* result)
     {
-        *result = 0.0;
+        *result = 0.0f;
         if (kind == 0)
         {
             for (long offset = start; offset <= end; offset++)
@@ -619,9 +619,9 @@ internal static unsafe class SequencePathModule
                 int target = (int)(row + offset);
                 if (!values_valid[target])
                     return false;
-                if (values[target] != 0.0)
+                if (values[target] != 0.0f)
                 {
-                    *result = (double)offset;
+                    *result = (float)offset;
                     return true;
                 }
             }
@@ -634,13 +634,13 @@ internal static unsafe class SequencePathModule
         long after = 0L;
         if (end > 0)
             after = (long)end;
-        if ((long)row + start < 0 || counts[row] < (double)before)
+        if ((long)row + start < 0 || counts[row] < (float)before)
             return false;
         long last = row + after;
-        if (last >= count || counts[(int)last] < (double)after)
+        if (last >= count || counts[(int)last] < (float)after)
             return false;
         long first = (long)row + start;
-        double accumulator = 0.0;
+        float accumulator = 0.0f;
         for (long index = first; index <= (long)row + end; index++)
         {
             if (!values_valid[(int)index])
@@ -648,7 +648,7 @@ internal static unsafe class SequencePathModule
             if (kind == 1)
             {
                 accumulator += values[(int)index];
-                if (!double.IsFinite(accumulator))
+                if (!float.IsFinite(accumulator))
                     return false;
             }
             else if (index == first)
@@ -657,7 +657,7 @@ internal static unsafe class SequencePathModule
             }
             else
             {
-                accumulator = Math.Max(accumulator, values[(int)index]);
+                accumulator = MathF.Max(accumulator, values[(int)index]);
             }
         }
         *result = accumulator;
@@ -704,20 +704,20 @@ internal static unsafe class SequencePathModule
                 output->valid = 0;
         }
         Cuda.SyncThreads();
-        double* values = Cuda.ReadOnly((double*)series->data_pointer);
+        float* values = Cuda.ReadOnly((float*)series->data_pointer);
         CudaInt32* values_valid = Cuda.ReadOnly((CudaInt32*)flags->data_pointer);
-        double* counts = Cuda.ReadOnly((double*)counts_slot->data_pointer);
+        float* counts = Cuda.ReadOnly((float*)counts_slot->data_pointer);
         for (int index = thread; output->valid && index < series->count; index += (int)Cuda.BlockDim.X)
         {
-            if (!(counts[index] >= 0.0) || counts[index] != Math.Truncate(counts[index]))
+            if (!(counts[index] >= 0.0f) || counts[index] != MathF.Truncate(counts[index]))
                 Cuda.AtomicExchange(ref output->valid, 0);
         }
         Cuda.SyncThreads();
         if (!output->valid)
             return;
 
-        double no_match = 0.0;
-        double fill = 0.0;
+        float no_match = 0.0f;
+        float fill = 0.0f;
         if (!validity)
         {
             MathBlockSlot* fill_slot = Cuda.ReadOnly(inputs[input_count - 1]);
@@ -728,11 +728,11 @@ internal static unsafe class SequencePathModule
                 no_match = no_match_slot->scalar_value;
             }
         }
-        double* result = (double*)output->data_pointer;
+        float* result = (float*)output->data_pointer;
         CudaInt32* boolean_result = (CudaInt32*)output->data_pointer;
         for (int row = thread; row < series->count; row += (int)Cuda.BlockDim.X)
         {
-            double value = 0.0;
+            float value = 0.0f;
             bool row_valid = mathblocks_sequence_offset_row(
                 kind, values, values_valid, counts, series->count, row, start, end, no_match, &value);
             if (validity)
@@ -755,7 +755,7 @@ internal static unsafe class SequencePathModule
         MathBlockSlot* third = Cuda.ReadOnly(input_count > 2 ? inputs[2] : null);
         if (thread == 0)
         {
-            output->scalar_value = 0.0;
+            output->scalar_value = 0.0f;
             output->boolean_value = 0;
             output->rows = 0;
             output->columns = 0;
@@ -770,11 +770,11 @@ internal static unsafe class SequencePathModule
         if (!output->valid)
             return;
 
-        double* a = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
-        double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
+        float* a = Cuda.ReadOnly(first == null ? null : (float*)first->data_pointer);
+        float* b = Cuda.ReadOnly(second == null ? null : (float*)second->data_pointer);
         CudaInt32* boolean_a = Cuda.ReadOnly(first == null ? null : (CudaInt32*)first->data_pointer);
-        double* result = (double*)output->data_pointer;
-        double* scratch = (double*)output->scratch_pointer;
+        float* result = (float*)output->data_pointer;
+        float* scratch = (float*)output->scratch_pointer;
 
         // Convolution: every output is an independent sum, formed by one thread over the left index in ascending order, which
         // is the order in which CoreCLR (and the serial loop below) adds to that output; thread t takes the outputs t, t + block
@@ -790,7 +790,7 @@ internal static unsafe class SequencePathModule
                     int low = output_index - (second->count - 1);
                     int left_start = low > 0 ? low : 0;
                     int left_end = output_index < first->count - 1 ? output_index : first->count - 1;
-                    double sum = 0.0;
+                    float sum = 0.0f;
                     for (int left = left_start; left <= left_end; left++)
                         sum += a[left] * b[output_index - left];
                     result[output_index] = sum;
@@ -813,18 +813,18 @@ internal static unsafe class SequencePathModule
                     // is the serial loop below run again, which leaves the partially filled data exactly as it did.
                     bool finite = true;
                     for (int index = 0; output->valid && index < count; index++)
-                        if (!double.IsFinite(result[index]))
+                        if (!float.IsFinite(result[index]))
                             finite = false;
                     if (finite)
                         break;
                     for (int index = 0; output->valid && index < count; index++)
-                        result[index] = 0.0;
+                        result[index] = 0.0f;
                     for (int left = 0; output->valid && left < first->count; left++)
                     {
                         for (int right = 0; right < second->count; right++)
                         {
                             result[left + right] += a[left] * b[right];
-                            if (!double.IsFinite(result[left + right]))
+                            if (!float.IsFinite(result[left + right]))
                                 output->valid = 0;
                         }
                     }
@@ -839,31 +839,31 @@ internal static unsafe class SequencePathModule
                         output->valid = 0;
                     else
                         mathblocks_sequence_set_vector_shape(output, first->count - lag);
-                    output->scalar_value = (double)lag;
+                    output->scalar_value = (float)lag;
                 }
                 Cuda.SyncThreads();
                 lag = (int)output->scalar_value;
                 for (int index = thread; output->valid && index < output->count; index += Cuda.BlockDim.X)
                 {
                     result[index] = a[index + lag] - a[index];
-                    if (!double.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
+                    if (!float.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 break;
             }
             case 2:
                 if (thread == 0)
                 {
-                    double alpha = second->scalar_value;
+                    float alpha = second->scalar_value;
                     mathblocks_sequence_set_vector_shape(output, first->count);
-                    if (first->count <= 0 || !(alpha > 0.0 && alpha <= 1.0))
+                    if (first->count <= 0 || !(alpha > 0.0f && alpha <= 1.0f))
                         output->valid = 0;
                     if (output->valid)
                     {
                         result[0] = a[0];
                         for (int index = 1; index < first->count; index++)
                         {
-                            result[index] = alpha * a[index] + (1.0 - alpha) * result[index - 1];
-                            if (!double.IsFinite(result[index]))
+                            result[index] = alpha * a[index] + (1.0f - alpha) * result[index - 1];
+                            if (!float.IsFinite(result[index]))
                                 output->valid = 0;
                         }
                     }
@@ -917,12 +917,12 @@ internal static unsafe class SequencePathModule
                         mathblocks_sequence_rolling_sum(a, first->count, width, result);
                         if (opcode == 4)
                         {
-                            double scale = 1.0 / width;
+                            float scale = 1.0f / width;
                             for (int index = 0; index < output->count; index++)
                                 result[index] *= scale;
                         }
                         for (int index = 0; index < output->count; index++)
-                            if (!double.IsFinite(result[index])) output->valid = 0;
+                            if (!float.IsFinite(result[index])) output->valid = 0;
                     }
                 }
                 break;
@@ -930,12 +930,12 @@ internal static unsafe class SequencePathModule
             case 7:
             {
                 int width = 0;
-                double probability = 0.0;
+                float probability = 0.0f;
                 if (thread == 0)
                 {
-                    probability = opcode == 5 ? 0.5 : third->scalar_value;
+                    probability = opcode == 5 ? 0.5f : third->scalar_value;
                     if (!mathblocks_sequence_positive_integer(second->scalar_value, &width) ||
-                        width > first->count || !(probability >= 0.0 && probability <= 1.0) ||
+                        width > first->count || !(probability >= 0.0f && probability <= 1.0f) ||
                         (width > 1 && scratch == null))
                     {
                         output->valid = 0;
@@ -961,12 +961,12 @@ internal static unsafe class SequencePathModule
                     Cuda.SyncThreads();
                     if (thread == 0)
                     {
-                        output->scalar_value = (double)first->count;
+                        output->scalar_value = (float)first->count;
                         output->boolean_value = 0;
                     }
                     break;
                 }
-                if (probability == 0.0 || probability == 1.0)
+                if (probability == 0.0f || probability == 1.0f)
                 {
                     if (thread == 0)
                     {
@@ -976,8 +976,8 @@ internal static unsafe class SequencePathModule
                             width,
                             result,
                             (int*)scratch,
-                            probability == 0.0);
-                        output->scalar_value = (double)(
+                            probability == 0.0f);
+                        output->scalar_value = (float)(
                             (long)first->count * 3 + output->count);
                         output->boolean_value = 0;
                     }
@@ -1002,20 +1002,20 @@ internal static unsafe class SequencePathModule
                 int* upper_heap = lower_heap + width;
                 int* positions = upper_heap + width;
                 int* kinds = positions + first->count;
-                double quantile_position = probability * (width - 1);
-                int lower_index = (int)Math.Floor(quantile_position);
-                int upper_index = (int)Math.Ceiling(quantile_position);
-                double weight = quantile_position - lower_index;
+                float quantile_position = probability * (width - 1);
+                int lower_index = (int)MathF.Floor(quantile_position);
+                int upper_index = (int)MathF.Ceiling(quantile_position);
+                float weight = quantile_position - lower_index;
 
                 if (output->count == 1)
                 {
                     if (thread == 0)
                     {
-                        double lower_value = a[first_indexes[lower_index]];
-                        double upper_value = a[first_indexes[upper_index]];
-                        result[0] = lower_value * (1.0 - weight) + upper_value * weight;
-                        output->valid = double.IsFinite(result[0]);
-                        output->scalar_value = (double)((long)first->count * 64 + 2);
+                        float lower_value = a[first_indexes[lower_index]];
+                        float upper_value = a[first_indexes[upper_index]];
+                        result[0] = lower_value * (1.0f - weight) + upper_value * weight;
+                        output->valid = float.IsFinite(result[0]);
+                        output->scalar_value = (float)((long)first->count * 64 + 2);
                         output->boolean_value = 64;
                     }
                     Cuda.SyncThreads();
@@ -1098,12 +1098,12 @@ internal static unsafe class SequencePathModule
                     }
                     for (int start = 0; start < output->count; start++)
                     {
-                        double lower_value = a[lower_heap[0]];
-                        double upper_value = lower_index == upper_index
+                        float lower_value = a[lower_heap[0]];
+                        float upper_value = lower_index == upper_index
                             ? lower_value
                             : a[upper_heap[0]];
-                        result[start] = lower_value * (1.0 - weight) + upper_value * weight;
-                        if (!double.IsFinite(result[start]))
+                        result[start] = lower_value * (1.0f - weight) + upper_value * weight;
+                        if (!float.IsFinite(result[start]))
                         {
                             output->valid = 0;
                             break;
@@ -1186,7 +1186,7 @@ internal static unsafe class SequencePathModule
                     long heap_bound = ((long)width +
                         2l * (first->count - width)) * heap_height;
                     long selection_bound = (long)output->count * 2;
-                    output->scalar_value = (double)(
+                    output->scalar_value = (float)(
                         (long)first->count * 64 + heap_bound + selection_bound);
                     output->boolean_value = 64;
                 }
@@ -1207,19 +1207,19 @@ internal static unsafe class SequencePathModule
                         mathblocks_sequence_set_vector_shape(output, first->count - width + 1);
                         for (int start = 0; start < output->count; start++)
                         {
-                            double mean = 0.0;
+                            float mean = 0.0f;
                             for (int index = 0; index < width; index++)
                                 mean += a[start + index];
                             mean /= width;
-                            double sum_squares = 0.0;
+                            float sum_squares = 0.0f;
                             for (int index = 0; index < width; index++)
                             {
-                                double difference = a[start + index] - mean;
+                                float difference = a[start + index] - mean;
                                 sum_squares += difference * difference;
                             }
-                            double deviation = mathblocks_square_root(sum_squares / width);
+                            float deviation = mathblocks_square_root(sum_squares / width);
                             result[start] = opcode == 8 ? deviation : deviation * deviation;
-                            if (!double.IsFinite(result[start]))
+                            if (!float.IsFinite(result[start]))
                                 output->valid = 0;
                         }
                     }
@@ -1238,7 +1238,7 @@ internal static unsafe class SequencePathModule
                         for (int index = 0; index < first->count; index++)
                             result[index] = a[index];
                         int length = first->count;
-                        double scale = 1.0 / mathblocks_square_root(2.0);
+                        float scale = 1.0f / mathblocks_square_root(2.0f);
                         while (length > 1)
                         {
                             int half = length / 2;
@@ -1252,7 +1252,7 @@ internal static unsafe class SequencePathModule
                             length = half;
                         }
                         for (int index = 0; index < first->count; index++)
-                            if (!double.IsFinite(result[index])) output->valid = 0;
+                            if (!float.IsFinite(result[index])) output->valid = 0;
                     }
                 }
                 break;
@@ -1274,18 +1274,18 @@ internal static unsafe class SequencePathModule
                             {
                                 for (int offset = 0; offset < width; offset++)
                                 {
-                                    double left = result[start + offset];
-                                    double right = result[start + width + offset];
+                                    float left = result[start + offset];
+                                    float right = result[start + width + offset];
                                     result[start + offset] = left + right;
                                     result[start + width + offset] = left - right;
                                 }
                             }
                         }
-                        double scale = 1.0 / mathblocks_square_root((double)first->count);
+                        float scale = 1.0f / mathblocks_square_root((float)first->count);
                         for (int index = 0; index < first->count; index++)
                         {
                             result[index] *= scale;
-                            if (!double.IsFinite(result[index])) output->valid = 0;
+                            if (!float.IsFinite(result[index])) output->valid = 0;
                         }
                     }
                 }
@@ -1294,12 +1294,12 @@ internal static unsafe class SequencePathModule
                 if (thread == 0)
                 {
                     mathblocks_sequence_set_vector_shape(output, first->count);
-                    double sum = 0.0;
+                    float sum = 0.0f;
                     for (int index = 0; index < first->count; index++)
                     {
                         sum += a[index] - second->scalar_value;
                         result[index] = sum;
-                        if (!double.IsFinite(sum))
+                        if (!float.IsFinite(sum))
                             output->valid = 0;
                     }
                 }
@@ -1316,30 +1316,30 @@ internal static unsafe class SequencePathModule
                         break;
                     }
 
-                    double* diagonal_even = scratch;
-                    double* diagonal_odd = scratch + (columns_count + 1);
+                    float* diagonal_even = scratch;
+                    float* diagonal_odd = scratch + (columns_count + 1);
                     for (int diagonal = 2; diagonal <= rows_count + columns_count; diagonal++)
                     {
-                        double* older = (diagonal & 1) == 0 ? diagonal_even : diagonal_odd;
-                        double* newer = (diagonal & 1) == 0 ? diagonal_odd : diagonal_even;
+                        float* older = (diagonal & 1) == 0 ? diagonal_even : diagonal_odd;
+                        float* newer = (diagonal & 1) == 0 ? diagonal_odd : diagonal_even;
                         int low = diagonal - rows_count > 1 ? diagonal - rows_count : 1;
                         int high = columns_count < diagonal - 1 ? columns_count : diagonal - 1;
                         for (int top = high; top >= low; top -= Cuda.BlockDim.X)
                         {
                             int right = top - thread;
                             bool active = right >= low;
-                            double value = 0.0;
+                            float value = 0.0f;
                             if (active)
                             {
                                 int left = diagonal - right;
-                                double above = left == 1 ? mathblocks_positive_infinity() : newer[right];
-                                double before = right == 1 ? mathblocks_positive_infinity() : newer[right - 1];
-                                double corner = left == 1 || right == 1
-                                    ? (left == 1 && right == 1 ? 0.0 : mathblocks_positive_infinity())
+                                float above = left == 1 ? mathblocks_positive_infinity() : newer[right];
+                                float before = right == 1 ? mathblocks_positive_infinity() : newer[right - 1];
+                                float corner = left == 1 || right == 1
+                                    ? (left == 1 && right == 1 ? 0.0f : mathblocks_positive_infinity())
                                     : older[right - 1];
-                                double minimum = above < before ? above : before;
+                                float minimum = above < before ? above : before;
                                 minimum = minimum < corner ? minimum : corner;
-                                value = Math.Abs(a[left - 1] - b[right - 1]) + minimum;
+                                value = MathF.Abs(a[left - 1] - b[right - 1]) + minimum;
                             }
                             Cuda.SyncThreads();
                             if (active)
@@ -1350,9 +1350,9 @@ internal static unsafe class SequencePathModule
 
                     if (thread == 0)
                     {
-                        double* last = ((rows_count + columns_count) & 1) == 0 ? diagonal_even : diagonal_odd;
+                        float* last = ((rows_count + columns_count) & 1) == 0 ? diagonal_even : diagonal_odd;
                         output->scalar_value = last[columns_count];
-                        if (!double.IsFinite(output->scalar_value))
+                        if (!float.IsFinite(output->scalar_value))
                             output->valid = 0;
                     }
                 }
@@ -1370,8 +1370,8 @@ internal static unsafe class SequencePathModule
             case 16:
                 if (thread == 0)
                 {
-                    double lower = second->scalar_value;
-                    double upper = third->scalar_value;
+                    float lower = second->scalar_value;
+                    float upper = third->scalar_value;
                     mathblocks_sequence_set_vector_shape(output, first->count);
                     if (!(lower < upper))
                     {
@@ -1379,13 +1379,13 @@ internal static unsafe class SequencePathModule
                     }
                     else
                     {
-                        double state = 0.0;
+                        float state = 0.0f;
                         for (int index = 0; index < first->count; index++)
                         {
                             if (a[index] >= upper)
-                                state = 1.0;
+                                state = 1.0f;
                             else if (a[index] <= lower)
-                                state = -1.0;
+                                state = -1.0f;
                             result[index] = state;
                         }
                     }
@@ -1434,7 +1434,7 @@ internal static unsafe class SequencePathModule
                     !mathblocks_sequence_variation_value(
                         a,
                         first->count,
-                        opcode == 22 ? 2.0 : second == null ? 1.0 : second->scalar_value,
+                        opcode == 22 ? 2.0f : second == null ? 1.0f : second->scalar_value,
                         opcode == 29,
                         &output->scalar_value))
                     output->valid = 0;
@@ -1458,14 +1458,14 @@ internal static unsafe class SequencePathModule
                     }
                     else
                     {
-                        double cumulative = 0.0;
-                        double minimum = 0.0;
+                        float cumulative = 0.0f;
+                        float minimum = 0.0f;
                         for (int index = 0; index < first->count; index++)
                         {
                             cumulative += a[index];
                             minimum = minimum < cumulative ? minimum : cumulative;
                             result[index] = cumulative - minimum;
-                            if (!double.IsFinite(result[index]))
+                            if (!float.IsFinite(result[index]))
                                 output->valid = 0;
                         }
                     }
@@ -1524,7 +1524,7 @@ internal static unsafe class SequencePathModule
                         for (int column = 0; column < first->columns; column++)
                         {
                             result[column] = a[(first->rows - 1) * first->columns + column] - a[column];
-                            if (!double.IsFinite(result[column])) output->valid = 0;
+                            if (!float.IsFinite(result[column])) output->valid = 0;
                         }
                     }
                 }
@@ -1541,15 +1541,15 @@ internal static unsafe class SequencePathModule
                     }
                     else
                     {
-                        double* level_one = scratch;
-                        double* level_two = scratch + dimension;
-                        double* increment = level_two + dimension * dimension;
+                        float* level_one = scratch;
+                        float* level_two = scratch + dimension;
+                        float* increment = level_two + dimension * dimension;
                         for (int index = 0; index < dimension; index++)
-                            level_one[index] = 0.0;
+                            level_one[index] = 0.0f;
                         for (int index = 0; index < dimension * dimension; index++)
-                            level_two[index] = 0.0;
+                            level_two[index] = 0.0f;
                         for (int index = 0; index < count; index++)
-                            result[index] = 0.0;
+                            result[index] = 0.0f;
                         for (int row = 1; row < first->rows; row++)
                         {
                             for (int index = 0; index < dimension; index++)
@@ -1563,18 +1563,18 @@ internal static unsafe class SequencePathModule
                                         int target = (left * dimension + middle) * dimension + right;
                                         result[target] +=
                                             level_two[left * dimension + middle] * increment[right] +
-                                            level_one[left] * increment[middle] * increment[right] / 2.0 +
-                                            increment[left] * increment[middle] * increment[right] / 6.0;
+                                            level_one[left] * increment[middle] * increment[right] / 2.0f +
+                                            increment[left] * increment[middle] * increment[right] / 6.0f;
                                     }
                                     level_two[left * dimension + middle] +=
                                         level_one[left] * increment[middle] +
-                                        increment[left] * increment[middle] / 2.0;
+                                        increment[left] * increment[middle] / 2.0f;
                                 }
                                 level_one[left] += increment[left];
                             }
                         }
                         for (int index = 0; index < count; index++)
-                            if (!double.IsFinite(result[index])) output->valid = 0;
+                            if (!float.IsFinite(result[index])) output->valid = 0;
                     }
                 }
                 break;
@@ -1589,12 +1589,12 @@ internal static unsafe class SequencePathModule
                     }
                     else
                     {
-                        double* cumulative = scratch;
-                        double* increment = scratch + dimension;
+                        float* cumulative = scratch;
+                        float* increment = scratch + dimension;
                         for (int index = 0; index < dimension; index++)
-                            cumulative[index] = 0.0;
+                            cumulative[index] = 0.0f;
                         for (int index = 0; index < dimension * dimension; index++)
-                            result[index] = 0.0;
+                            result[index] = 0.0f;
                         for (int row = 1; row < first->rows; row++)
                         {
                             for (int column = 0; column < dimension; column++)
@@ -1605,14 +1605,14 @@ internal static unsafe class SequencePathModule
                                 {
                                     result[left * dimension + right] +=
                                         cumulative[left] * increment[right] +
-                                        0.5 * increment[left] * increment[right];
+                                        0.5f * increment[left] * increment[right];
                                 }
                             }
                             for (int column = 0; column < dimension; column++)
                                 cumulative[column] += increment[column];
                         }
                         for (int index = 0; index < dimension * dimension; index++)
-                            if (!double.IsFinite(result[index])) output->valid = 0;
+                            if (!float.IsFinite(result[index])) output->valid = 0;
                     }
                 }
                 break;
@@ -1633,7 +1633,7 @@ internal static unsafe class SequencePathModule
                     {
                         mathblocks_sequence_set_matrix_shape(output, state_count, state_count);
                         for (int index = 0; output->valid && index < output->count; index++)
-                            result[index] = 0.0;
+                            result[index] = 0.0f;
                         for (int index = 0; output->valid && index < first->count; index++)
                         {
                             int state = 0;
@@ -1641,7 +1641,7 @@ internal static unsafe class SequencePathModule
                                 output->valid = 0;
                         }
                         for (int index = 1; output->valid && index < first->count; index++)
-                            result[(int)a[index - 1] * state_count + (int)a[index]] += 1.0;
+                            result[(int)a[index - 1] * state_count + (int)a[index]] += 1.0f;
                     }
                 }
                 break;
@@ -1661,29 +1661,29 @@ internal static unsafe class SequencePathModule
                 MathBlockSlot* shift_offset_input = Cuda.ReadOnly(input_count > 3 ? inputs[3] : null);
                 MathBlockSlot* shift_fill_input = Cuda.ReadOnly(input_count > 4 ? inputs[4] : null);
                 CudaInt32* shift_flags = Cuda.ReadOnly((CudaInt32*)second->data_pointer);
-                double* shift_counts = Cuda.ReadOnly((double*)third->data_pointer);
+                float* shift_counts = Cuda.ReadOnly((float*)third->data_pointer);
                 CudaInt32* shift_boolean = (CudaInt32*)output->data_pointer;
                 int shift_rows = first->count;
                 if (thread == 0)
                 {
                     mathblocks_sequence_set_vector_shape(output, shift_rows);
-                    double shift_offset_value = shift_offset_input == null ? 0.0 : shift_offset_input->scalar_value;
+                    float shift_offset_value = shift_offset_input == null ? 0.0f : shift_offset_input->scalar_value;
                     if (input_count != (shift_sibling ? 4 : 5) || !shift_offset_input->valid || (!shift_sibling && !shift_fill_input->valid) ||
                         second->count != shift_rows || third->count != shift_rows ||
-                        !(shift_offset_value >= 1.0) || shift_offset_value != Math.Truncate(shift_offset_value))
+                        !(shift_offset_value >= 1.0f) || shift_offset_value != MathF.Truncate(shift_offset_value))
                         output->valid = 0;
-                    output->scalar_value = shift_offset_value < (double)shift_rows ? shift_offset_value : (double)shift_rows;
+                    output->scalar_value = shift_offset_value < (float)shift_rows ? shift_offset_value : (float)shift_rows;
                 }
                 Cuda.SyncThreads();
                 for (int shift_index = thread; output->valid && shift_index < shift_rows; shift_index += Cuda.BlockDim.X)
                 {
-                    double shift_count_value = shift_counts[shift_index];
-                    if (!(shift_count_value >= 0.0) || shift_count_value != Math.Truncate(shift_count_value) || !double.IsFinite(shift_count_value))
+                    float shift_count_value = shift_counts[shift_index];
+                    if (!(shift_count_value >= 0.0f) || shift_count_value != MathF.Truncate(shift_count_value) || !float.IsFinite(shift_count_value))
                         Cuda.AtomicExchange(ref output->valid, 0);
                 }
                 Cuda.SyncThreads();
                 int shift_offset = (int)output->scalar_value;
-                double shift_fill = 0.0;
+                float shift_fill = 0.0f;
                 if (output->valid && !shift_sibling)
                     shift_fill = shift_fill_input->scalar_value;
                 for (int shift_index = thread; output->valid && shift_index < shift_rows; shift_index += Cuda.BlockDim.X)
@@ -1695,13 +1695,13 @@ internal static unsafe class SequencePathModule
                         if (shift_index < shift_rows - shift_offset)
                         {
                             shift_source = shift_index + shift_offset;
-                            shift_available = shift_counts[shift_source] >= (double)shift_offset && shift_flags[shift_source];
+                            shift_available = shift_counts[shift_source] >= (float)shift_offset && shift_flags[shift_source];
                         }
                     }
                     else if (shift_index >= shift_offset)
                     {
                         shift_source = shift_index - shift_offset;
-                        shift_available = shift_counts[shift_index] >= (double)shift_offset && shift_flags[shift_source];
+                        shift_available = shift_counts[shift_index] >= (float)shift_offset && shift_flags[shift_source];
                     }
                     if (shift_sibling)
                         shift_boolean[shift_index] = shift_available;
@@ -1732,14 +1732,14 @@ internal static unsafe class SequencePathModule
                 MathBlockSlot* end_slot = Cuda.ReadOnly(input_count > 4 ? inputs[4] : null);
                 MathBlockSlot* fill_slot = Cuda.ReadOnly(input_count > 5 ? inputs[5] : null);
                 CudaInt32* available = Cuda.ReadOnly(second == null ? null : (CudaInt32*)second->data_pointer);
-                double* counts = Cuda.ReadOnly(third == null ? null : (double*)third->data_pointer);
+                float* counts = Cuda.ReadOnly(third == null ? null : (float*)third->data_pointer);
                 CudaInt32* flags = (CudaInt32*)output->data_pointer;
                 if (thread == 0)
                 {
                     int count = first->count;
-                    double start = start_slot->scalar_value;
-                    double end = end_slot->scalar_value;
-                    double fill = 0.0;
+                    float start = start_slot->scalar_value;
+                    float end = end_slot->scalar_value;
+                    float fill = 0.0f;
                     if (opcode == 43)
                         fill = fill_slot->scalar_value;
                     mathblocks_sequence_set_vector_shape(output, count);
@@ -1748,33 +1748,33 @@ internal static unsafe class SequencePathModule
                     {
                         output->valid = 0;
                     }
-                    if (!double.IsFinite(start) || !double.IsFinite(end) || start != Math.Floor(start) ||
-                        end != Math.Floor(end) || start > end)
+                    if (!float.IsFinite(start) || !float.IsFinite(end) || start != MathF.Floor(start) ||
+                        end != MathF.Floor(end) || start > end)
                     {
                         output->valid = 0;
                     }
                     for (int row = 0; output->valid && row < count; row++)
-                        if (!double.IsFinite(counts[row]) || counts[row] < 0.0 || counts[row] != Math.Floor(counts[row]))
+                        if (!float.IsFinite(counts[row]) || counts[row] < 0.0f || counts[row] != MathF.Floor(counts[row]))
                             output->valid = 0;
                     int segment_start = 0;
                     while (output->valid && segment_start < count)
                     {
                         int segment_end = segment_start + 1;
-                        while (segment_end < count && counts[segment_end] != 0.0)
+                        while (segment_end < count && counts[segment_end] != 0.0f)
                             segment_end++;
                         int low_position = segment_start;
-                        double low_sum = 0.0;
+                        float low_sum = 0.0f;
                         int low_missing = 0;
                         int high_position = segment_start;
-                        double high_sum = 0.0;
+                        float high_sum = 0.0f;
                         int high_missing = 0;
                         for (int row = segment_start; row < segment_end; row++)
                         {
-                            double low = (double)row + start;
-                            double high = (double)row + end;
+                            float low = (float)row + start;
+                            float high = (float)row + end;
                             bool row_valid = false;
-                            double difference = 0.0;
-                            if (low >= (double)segment_start && high < (double)segment_end)
+                            float difference = 0.0f;
+                            if (low >= (float)segment_start && high < (float)segment_end)
                             {
                                 int low_target = (int)low;
                                 int high_target = (int)high + 1;
@@ -1795,7 +1795,7 @@ internal static unsafe class SequencePathModule
                                     high_position++;
                                 }
                                 difference = high_sum - low_sum;
-                                row_valid = low_missing == high_missing && double.IsFinite(difference);
+                                row_valid = low_missing == high_missing && float.IsFinite(difference);
                             }
                             if (opcode == 44)
                                 flags[row] = row_valid ? 1 : 0;

@@ -15,7 +15,7 @@ internal static unsafe class TransportModule
     [CudaExternal]
     public struct MathBlockSlot
     {
-        public double scalar_value;
+        public float scalar_value;
         public ulong data_pointer;
         public ulong scratch_pointer;
         public CudaInt32 boolean_value;
@@ -27,25 +27,25 @@ internal static unsafe class TransportModule
     }
 
     [CudaExternal(IsPure = true)]
-    private static bool mathblocks_advanced_distribution([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
+    private static bool mathblocks_advanced_distribution([CudaReadOnly] float* values, int count) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
     private static int mathblocks_advanced_popcount(int value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_exponential(double value) => throw new NotSupportedException();
+    private static float mathblocks_exponential(float value) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static bool mathblocks_nonnegative_integer(double value, int* result) => throw new NotSupportedException();
+    private static bool mathblocks_nonnegative_integer(float value, int* result) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_positive_infinity() => throw new NotSupportedException();
+    private static float mathblocks_positive_infinity() => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_power(double value, double exponent) => throw new NotSupportedException();
+    private static float mathblocks_power(float value, float exponent) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static bool mathblocks_sequence_positive_integer(double value, int* result) => throw new NotSupportedException();
+    private static bool mathblocks_sequence_positive_integer(float value, int* result) => throw new NotSupportedException();
 
     [CudaExternal]
     private static void mathblocks_sequence_set_matrix_shape(MathBlockSlot* output, int rows, int columns) => throw new NotSupportedException();
@@ -54,30 +54,30 @@ internal static unsafe class TransportModule
     private static void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+    private static float mathblocks_square_root(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_maximum(double first, double second) => throw new NotSupportedException();
+    private static float mathblocks_maximum(float first, float second) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_minimum(double first, double second) => throw new NotSupportedException();
+    private static float mathblocks_minimum(float first, float second) => throw new NotSupportedException();
     [CudaExternal]
-    private static void mathblocks_statistics_sort_copy([CudaReadOnly] double* values, int count, double* result, bool descending) => throw new NotSupportedException();
+    private static void mathblocks_statistics_sort_copy([CudaReadOnly] float* values, int count, float* result, bool descending) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static void mathblocks_stable_index_order([CudaReadOnly] double* keys, int count, int* order, int* buffer) => throw new NotSupportedException();
+    private static void mathblocks_stable_index_order([CudaReadOnly] float* keys, int count, int* order, int* buffer) => throw new NotSupportedException();
 
     [CudaDevice]
-    private static double mathblocks_transport_mean_pairwise(
-        [CudaReadOnly] double* left,
+    private static float mathblocks_transport_mean_pairwise(
+        [CudaReadOnly] float* left,
         int left_count,
-        [CudaReadOnly] double* right,
+        [CudaReadOnly] float* right,
         int right_count)
     {
-        double sum = 0.0;
+        float sum = 0.0f;
         for (int left_index = 0; left_index < left_count; left_index++)
             for (int right_index = 0; right_index < right_count; right_index++)
-                sum += Math.Abs(left[left_index] - right[right_index]);
+                sum += MathF.Abs(left[left_index] - right[right_index]);
         return sum / (left_count * right_count);
     }
 
@@ -96,7 +96,7 @@ internal static unsafe class TransportModule
         MathBlockSlot* fifth = Cuda.ReadOnly(input_count > 4 ? inputs[4] : null);
         if (thread == 0)
         {
-            output->scalar_value = 0.0;
+            output->scalar_value = 0.0f;
             output->boolean_value = 0;
             output->rows = 0;
             output->columns = 0;
@@ -109,12 +109,12 @@ internal static unsafe class TransportModule
         if (!output->valid)
             return;
 
-        double* a = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
-        double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
-        double* c = Cuda.ReadOnly(third == null ? null : (double*)third->data_pointer);
-        double* d = Cuda.ReadOnly(fourth == null ? null : (double*)fourth->data_pointer);
-        double* result = (double*)output->data_pointer;
-        double* scratch = (double*)output->scratch_pointer;
+        float* a = Cuda.ReadOnly(first == null ? null : (float*)first->data_pointer);
+        float* b = Cuda.ReadOnly(second == null ? null : (float*)second->data_pointer);
+        float* c = Cuda.ReadOnly(third == null ? null : (float*)third->data_pointer);
+        float* d = Cuda.ReadOnly(fourth == null ? null : (float*)fourth->data_pointer);
+        float* result = (float*)output->data_pointer;
+        float* scratch = (float*)output->scratch_pointer;
 
         if (thread == 0)
         {
@@ -127,7 +127,7 @@ internal static unsafe class TransportModule
                         break;
                     }
                 {
-                    double total = 0.0;
+                    float total = 0.0f;
                     for (int row = 0; row < first->rows; row++)
                     {
                         int column = 0;
@@ -148,7 +148,7 @@ internal static unsafe class TransportModule
                         break;
                     }
                 {
-                    double total = 0.0;
+                    float total = 0.0f;
                     for (int row = 0; row < first->rows; row++)
                         for (int column = 0; column < first->columns; column++)
                             total += a[row * first->columns + column] *
@@ -163,15 +163,15 @@ internal static unsafe class TransportModule
                         break;
                     }
                 {
-                    double cross = mathblocks_transport_mean_pairwise(
+                    float cross = mathblocks_transport_mean_pairwise(
                         a, first->count, b, second->count);
-                    double left_within = mathblocks_transport_mean_pairwise(
+                    float left_within = mathblocks_transport_mean_pairwise(
                         a, first->count, a, first->count);
-                    double right_within = mathblocks_transport_mean_pairwise(
+                    float right_within = mathblocks_transport_mean_pairwise(
                         b, second->count, b, second->count);
-                    double squared = 2.0 * cross - left_within - right_within;
+                    float squared = 2.0f * cross - left_within - right_within;
                     // The owned maximum, as CoreCLR: a NaN (inf - inf from overflowing pairwise means) stays NaN and the result is invalid.
-                    output->scalar_value = mathblocks_square_root(mathblocks_maximum(squared, 0.0));
+                    output->scalar_value = mathblocks_square_root(mathblocks_maximum(squared, 0.0f));
                     break;
                 }
                 case 3:
@@ -184,7 +184,7 @@ internal static unsafe class TransportModule
                     int size = first->rows;
                     int state_count = 1 << size;
                     mathblocks_sequence_set_vector_shape(output, size);
-                    double* values = scratch;
+                    float* values = scratch;
                     int* previous_mask = (int*)(values + state_count);
                     int* chosen_column = previous_mask + state_count;
                     for (int index = 0; index < state_count; index++)
@@ -193,18 +193,18 @@ internal static unsafe class TransportModule
                         previous_mask[index] = 0;
                         chosen_column[index] = 0;
                     }
-                    values[0] = 0.0;
+                    values[0] = 0.0f;
                     for (int mask = 0; mask < state_count; mask++)
                     {
                         int row = mathblocks_advanced_popcount(mask);
-                        if (row >= size || !double.IsFinite(values[mask]))
+                        if (row >= size || !float.IsFinite(values[mask]))
                             continue;
                         for (int column = 0; column < size; column++)
                         {
                             if ((mask & (1 << column)) != 0)
                                 continue;
                             int next = mask | (1 << column);
-                            double candidate = values[mask] + a[row * size + column];
+                            float candidate = values[mask] + a[row * size + column];
                             if (candidate >= values[next])
                                 continue;
                             values[next] = candidate;
@@ -215,7 +215,7 @@ internal static unsafe class TransportModule
                     int current = state_count - 1;
                     for (int row = size - 1; row >= 0; row--)
                     {
-                        result[row] = (double)chosen_column[current];
+                        result[row] = (float)chosen_column[current];
                         current = previous_mask[current];
                     }
                     break;
@@ -229,23 +229,23 @@ internal static unsafe class TransportModule
                         break;
                     }
                     for (int index = 0; index < output->count; index++)
-                        result[index] = 0.0;
+                        result[index] = 0.0f;
                 {
                     int left_index = 0;
                     int right_index = 0;
-                    double left_remaining = a[0];
-                    double right_remaining = b[0];
+                    float left_remaining = a[0];
+                    float right_remaining = b[0];
                     while (left_index < first->count && right_index < second->count)
                     {
-                        double amount = left_remaining < right_remaining
+                        float amount = left_remaining < right_remaining
                             ? left_remaining
                             : right_remaining;
                         result[left_index * second->count + right_index] += amount;
                         left_remaining -= amount;
                         right_remaining -= amount;
-                        if (left_remaining == 0.0 && ++left_index < first->count)
+                        if (left_remaining == 0.0f && ++left_index < first->count)
                             left_remaining = a[left_index];
-                        if (right_remaining == 0.0 && ++right_index < second->count)
+                        if (right_remaining == 0.0f && ++right_index < second->count)
                             right_remaining = b[right_index];
                     }
                     break;
@@ -259,12 +259,12 @@ internal static unsafe class TransportModule
                         break;
                     }
                 {
-                    double cumulative = 0.0;
-                    double total = 0.0;
+                    float cumulative = 0.0f;
+                    float total = 0.0f;
                     for (int index = 0; index < first->count - 1; index++)
                     {
                         cumulative += a[index] - b[index];
-                        total += Math.Abs(cumulative);
+                        total += MathF.Abs(cumulative);
                     }
                     output->scalar_value = total;
                     break;
@@ -274,7 +274,7 @@ internal static unsafe class TransportModule
                     if (first->rows != second->count || first->columns != third->count ||
                         !mathblocks_advanced_distribution(b, second->count) ||
                         !mathblocks_advanced_distribution(c, third->count) ||
-                        fourth->scalar_value <= 0.0 || scratch == null)
+                        fourth->scalar_value <= 0.0f || scratch == null)
                     {
                         output->valid = 0;
                         break;
@@ -286,30 +286,30 @@ internal static unsafe class TransportModule
                         output->valid = 0;
                         break;
                     }
-                    double* kernel = scratch;
-                    double* left_scale = kernel + first->count;
-                    double* right_scale = left_scale + first->rows;
+                    float* kernel = scratch;
+                    float* left_scale = kernel + first->count;
+                    float* right_scale = left_scale + first->rows;
                     for (int row = 0; row < first->rows; row++)
                         for (int column = 0; column < first->columns; column++)
                             kernel[row * first->columns + column] =
                                 mathblocks_exponential(-a[row * first->columns + column] /
                                                        fourth->scalar_value);
                     for (int row = 0; row < first->rows; row++)
-                        left_scale[row] = 1.0;
+                        left_scale[row] = 1.0f;
                     for (int column = 0; column < first->columns; column++)
-                        right_scale[column] = 1.0;
+                        right_scale[column] = 1.0f;
                     for (int iteration = 0; iteration < iterations; iteration++)
                     {
                         for (int row = 0; row < first->rows; row++)
                         {
-                            double sum = 0.0;
+                            float sum = 0.0f;
                             for (int column = 0; column < first->columns; column++)
                                 sum += kernel[row * first->columns + column] * right_scale[column];
                             left_scale[row] = b[row] / sum;
                         }
                         for (int column = 0; column < first->columns; column++)
                         {
-                            double sum = 0.0;
+                            float sum = 0.0f;
                             for (int row = 0; row < first->rows; row++)
                                 sum += kernel[row * first->columns + column] * left_scale[row];
                             right_scale[column] = c[column] / sum;
@@ -324,24 +324,24 @@ internal static unsafe class TransportModule
                 }
                 case 7:
                     if (first->count <= 0 || first->count != second->count ||
-                        third->scalar_value < 1.0 || scratch == null)
+                        third->scalar_value < 1.0f || scratch == null)
                     {
                         output->valid = 0;
                         break;
                     }
                 {
-                    double* left_sorted = scratch;
-                    double* right_sorted = scratch + first->count;
+                    float* left_sorted = scratch;
+                    float* right_sorted = scratch + first->count;
                     mathblocks_statistics_sort_copy(a, first->count, left_sorted, false);
                     mathblocks_statistics_sort_copy(b, second->count, right_sorted, false);
-                    double sum = 0.0;
+                    float sum = 0.0f;
                     for (int index = 0; index < first->count; index++)
                         sum += mathblocks_power(
-                            Math.Abs(left_sorted[index] - right_sorted[index]),
+                            MathF.Abs(left_sorted[index] - right_sorted[index]),
                             third->scalar_value);
                     output->scalar_value = mathblocks_power(
                         sum / first->count,
-                        1.0 / third->scalar_value);
+                        1.0f / third->scalar_value);
                     break;
                 }
                 case 8:
@@ -362,21 +362,21 @@ internal static unsafe class TransportModule
                     mathblocks_stable_index_order(c, third->count, right_order, right_buffer);
                     int left_index = 0;
                     int right_index = 0;
-                    double left_remaining = b[left_order[0]];
-                    double right_remaining = d[right_order[0]];
-                    double total = 0.0;
+                    float left_remaining = b[left_order[0]];
+                    float right_remaining = d[right_order[0]];
+                    float total = 0.0f;
                     while (left_index < first->count && right_index < third->count)
                     {
-                        double amount = left_remaining < right_remaining
+                        float amount = left_remaining < right_remaining
                             ? left_remaining
                             : right_remaining;
-                        total += amount * Math.Abs(
+                        total += amount * MathF.Abs(
                             a[left_order[left_index]] - c[right_order[right_index]]);
                         left_remaining -= amount;
                         right_remaining -= amount;
-                        if (left_remaining == 0.0 && ++left_index < first->count)
+                        if (left_remaining == 0.0f && ++left_index < first->count)
                             left_remaining = b[left_order[left_index]];
-                        if (right_remaining == 0.0 && ++right_index < third->count)
+                        if (right_remaining == 0.0f && ++right_index < third->count)
                             right_remaining = d[right_order[right_index]];
                     }
                     output->scalar_value = total;
@@ -393,12 +393,12 @@ internal static unsafe class TransportModule
                     for (int row = 0; row < first->rows; row++)
                         for (int column = 0; column < second->columns; column++)
                         {
-                            double selected = opcode == 9
+                            float selected = opcode == 9
                                 ? -mathblocks_positive_infinity()
                                 : mathblocks_positive_infinity();
                             for (int inner = 0; inner < first->columns; inner++)
                             {
-                                double candidate = a[row * first->columns + inner] +
+                                float candidate = a[row * first->columns + inner] +
                                     b[inner * second->columns + column];
                                 // The owned maximum and minimum, as CoreCLR (the sign of a zero tie).
                                 selected = opcode == 9
@@ -412,13 +412,13 @@ internal static unsafe class TransportModule
 
             if (output->valid &&
                 opcode != 3 && opcode != 4 && opcode != 6 && opcode != 9 && opcode != 10 &&
-                !double.IsFinite(output->scalar_value))
+                !float.IsFinite(output->scalar_value))
             {
                 output->valid = 0;
             }
             if (output->valid && (opcode == 3 || opcode == 4 || opcode == 6 || opcode == 9 || opcode == 10))
                 for (int index = 0; index < output->count; index++)
-                    if (!double.IsFinite(result[index])) output->valid = 0;
+                    if (!float.IsFinite(result[index])) output->valid = 0;
         }
     }
 }

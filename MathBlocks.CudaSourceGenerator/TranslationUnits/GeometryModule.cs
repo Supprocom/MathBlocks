@@ -9,7 +9,7 @@ internal static unsafe class GeometryModule
     [CudaExternal]
     public struct MathBlockSlot
     {
-        public double scalar_value;
+        public float scalar_value;
         public ulong data_pointer;
         public ulong scratch_pointer;
         public CudaInt32 boolean_value;
@@ -21,13 +21,13 @@ internal static unsafe class GeometryModule
     }
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_arc_cosine(double value) => throw new NotSupportedException();
+    private static float mathblocks_arc_cosine(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_positive_infinity() => throw new NotSupportedException();
+    private static float mathblocks_positive_infinity() => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_quiet_nan() => throw new NotSupportedException();
+    private static float mathblocks_quiet_nan() => throw new NotSupportedException();
 
     [CudaExternal]
     private static void mathblocks_sequence_set_matrix_shape(MathBlockSlot* output, int rows, int columns) => throw new NotSupportedException();
@@ -36,34 +36,34 @@ internal static unsafe class GeometryModule
     private static void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+    private static float mathblocks_square_root(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static bool mathblocks_probability_distribution([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
+    private static bool mathblocks_probability_distribution([CudaReadOnly] float* values, int count) => throw new NotSupportedException();
     public struct MathBlockGeometryEdge
     {
         public int from;
         public int to;
-        public double weight;
+        public float weight;
     }
 
     [CudaDevice]
-    private static double mathblocks_geometry_distance_coordinates(
-        double left_x,
-        double left_y,
-        double right_x,
-        double right_y)
+    private static float mathblocks_geometry_distance_coordinates(
+        float left_x,
+        float left_y,
+        float right_x,
+        float right_y)
     {
-        double x = left_x - right_x;
-        double y = left_y - right_y;
+        float x = left_x - right_x;
+        float y = left_y - right_y;
         return mathblocks_square_root(x * x + y * y);
     }
 
     [CudaDevice]
-    private static double mathblocks_geometry_distance(
-        [CudaReadOnly] double* left,
+    private static float mathblocks_geometry_distance(
+        [CudaReadOnly] float* left,
         int left_index,
-        [CudaReadOnly] double* right,
+        [CudaReadOnly] float* right,
         int right_index)
     {
         return mathblocks_geometry_distance_coordinates(
@@ -77,49 +77,49 @@ internal static unsafe class GeometryModule
     [CudaDevice]
     private static bool mathblocks_geometry_not_left_turn(
         int* overflow,
-        double origin_x,
-        double origin_y,
-        double left_x,
-        double left_y,
-        double right_x,
-        double right_y)
+        float origin_x,
+        float origin_y,
+        float left_x,
+        float left_y,
+        float right_x,
+        float right_y)
     {
-        double cross = mathblocks_geometry_cross(origin_x, origin_y, left_x, left_y, right_x, right_y);
-        if (double.IsNaN(cross))
+        float cross = mathblocks_geometry_cross(origin_x, origin_y, left_x, left_y, right_x, right_y);
+        if (float.IsNaN(cross))
             *overflow = 1;
-        return cross <= 0.0;
+        return cross <= 0.0f;
     }
 
     [CudaDevice]
-    private static double mathblocks_geometry_cross(
-        double origin_x,
-        double origin_y,
-        double left_x,
-        double left_y,
-        double right_x,
-        double right_y)
+    private static float mathblocks_geometry_cross(
+        float origin_x,
+        float origin_y,
+        float left_x,
+        float left_y,
+        float right_x,
+        float right_y)
     {
         return (left_x - origin_x) * (right_y - origin_y) -
                (left_y - origin_y) * (right_x - origin_x);
     }
 
     [CudaDevice]
-    private static double mathblocks_geometry_point_to_segment(
-        double point_x,
-        double point_y,
-        double start_x,
-        double start_y,
-        double end_x,
-        double end_y)
+    private static float mathblocks_geometry_point_to_segment(
+        float point_x,
+        float point_y,
+        float start_x,
+        float start_y,
+        float end_x,
+        float end_y)
     {
-        double x = end_x - start_x;
-        double y = end_y - start_y;
-        double length_square = x * x + y * y;
-        if (length_square == 0.0)
+        float x = end_x - start_x;
+        float y = end_y - start_y;
+        float length_square = x * x + y * y;
+        if (length_square == 0.0f)
             return mathblocks_geometry_distance_coordinates(point_x, point_y, start_x, start_y);
-        double projection = ((point_x - start_x) * x + (point_y - start_y) * y) /
+        float projection = ((point_x - start_x) * x + (point_y - start_y) * y) /
             length_square;
-        projection = projection < 0.0 ? 0.0 : projection > 1.0 ? 1.0 : projection;
+        projection = projection < 0.0f ? 0.0f : projection > 1.0f ? 1.0f : projection;
         return mathblocks_geometry_distance_coordinates(
             point_x,
             point_y,
@@ -128,13 +128,13 @@ internal static unsafe class GeometryModule
     }
 
     [CudaDevice]
-    private static double mathblocks_geometry_barycentric_denominator(
-        double first_x,
-        double first_y,
-        double second_x,
-        double second_y,
-        double third_x,
-        double third_y)
+    private static float mathblocks_geometry_barycentric_denominator(
+        float first_x,
+        float first_y,
+        float second_x,
+        float second_y,
+        float third_x,
+        float third_y)
     {
         return (second_y - third_y) * (first_x - third_x) +
                (third_x - second_x) * (first_y - third_y);
@@ -142,90 +142,90 @@ internal static unsafe class GeometryModule
 
     [CudaDevice]
     private static void mathblocks_geometry_barycentric(
-        double point_x,
-        double point_y,
-        double first_x,
-        double first_y,
-        double second_x,
-        double second_y,
-        double third_x,
-        double third_y,
-        double* result)
+        float point_x,
+        float point_y,
+        float first_x,
+        float first_y,
+        float second_x,
+        float second_y,
+        float third_x,
+        float third_y,
+        float* result)
     {
-        double denominator = mathblocks_geometry_barycentric_denominator(
+        float denominator = mathblocks_geometry_barycentric_denominator(
             first_x, first_y, second_x, second_y, third_x, third_y);
         // A denominator that overflowed would divide the numerators by an infinity and give finite weights near zero.
-        if (!double.IsFinite(denominator))
+        if (!float.IsFinite(denominator))
         {
             result[0] = mathblocks_quiet_nan();
             result[1] = mathblocks_quiet_nan();
             result[2] = mathblocks_quiet_nan();
             return;
         }
-        double first_weight = ((second_y - third_y) * (point_x - third_x) +
+        float first_weight = ((second_y - third_y) * (point_x - third_x) +
                                (third_x - second_x) * (point_y - third_y)) / denominator;
-        double second_weight = ((third_y - first_y) * (point_x - third_x) +
+        float second_weight = ((third_y - first_y) * (point_x - third_x) +
                                 (first_x - third_x) * (point_y - third_y)) / denominator;
         result[0] = first_weight;
         result[1] = second_weight;
-        result[2] = 1.0 - first_weight - second_weight;
+        result[2] = 1.0f - first_weight - second_weight;
     }
 
     [CudaDevice]
     private static bool mathblocks_geometry_try_circumcircle(
-        [CudaReadOnly] double* points,
+        [CudaReadOnly] float* points,
         int first,
         int second,
         int third,
-        double* center_x,
-        double* center_y,
-        double* radius_square)
+        float* center_x,
+        float* center_y,
+        float* radius_square)
     {
-        double first_x = points[2 * first];
-        double first_y = points[2 * first + 1];
-        double second_x = points[2 * second];
-        double second_y = points[2 * second + 1];
-        double third_x = points[2 * third];
-        double third_y = points[2 * third + 1];
-        double denominator = 2.0 * (first_x * (second_y - third_y) +
+        float first_x = points[2 * first];
+        float first_y = points[2 * first + 1];
+        float second_x = points[2 * second];
+        float second_y = points[2 * second + 1];
+        float third_x = points[2 * third];
+        float third_y = points[2 * third + 1];
+        float denominator = 2.0f * (first_x * (second_y - third_y) +
                                     second_x * (third_y - first_y) +
                                     third_x * (first_y - second_y));
-        if (denominator == 0.0)
+        if (denominator == 0.0f)
         {
-            *center_x = 0.0;
-            *center_y = 0.0;
-            *radius_square = 0.0;
+            *center_x = 0.0f;
+            *center_y = 0.0f;
+            *radius_square = 0.0f;
             return false;
         }
-        double first_square = first_x * first_x + first_y * first_y;
-        double second_square = second_x * second_x + second_y * second_y;
-        double third_square = third_x * third_x + third_y * third_y;
+        float first_square = first_x * first_x + first_y * first_y;
+        float second_square = second_x * second_x + second_y * second_y;
+        float third_square = third_x * third_x + third_y * third_y;
         *center_x = (first_square * (second_y - third_y) +
                      second_square * (third_y - first_y) +
                      third_square * (first_y - second_y)) / denominator;
         *center_y = (first_square * (third_x - second_x) +
                      second_square * (first_x - third_x) +
                      third_square * (second_x - first_x)) / denominator;
-        double x = first_x - *center_x;
-        double y = first_y - *center_y;
+        float x = first_x - *center_x;
+        float y = first_y - *center_y;
         *radius_square = x * x + y * y;
         return true;
     }
 
     [CudaDevice]
     private static bool mathblocks_geometry_point_less(
-        [CudaReadOnly] double* points,
+        [CudaReadOnly] float* points,
         int left,
         int right)
     {
-        double left_x = points[2 * left];
-        double right_x = points[2 * right];
+        float left_x = points[2 * left];
+        float right_x = points[2 * right];
         if (left_x < right_x)
             return true;
         if (right_x < left_x)
             return false;
-        double left_y = points[2 * left + 1];
-        double right_y = points[2 * right + 1];
+        float left_y = points[2 * left + 1];
+        float right_y = points[2 * right + 1];
         if (left_y < right_y)
             return true;
         if (right_y < left_y)
@@ -236,7 +236,7 @@ internal static unsafe class GeometryModule
     // The point indices 0 .. count - 1 in the stable order of mathblocks_geometry_point_less; buffer holds count ints.
     [CudaDevice]
     private static void mathblocks_geometry_index_order(
-        [CudaReadOnly] double* points,
+        [CudaReadOnly] float* points,
         int count,
         int* order,
         int* buffer)
@@ -277,10 +277,10 @@ internal static unsafe class GeometryModule
     // -0.0 and +0.0 compare equal and keep their input order), merged between points and buffer (2 * count doubles each).
     // The sorted pairs end in points.
     [CudaDevice]
-    private static void mathblocks_geometry_sort_points(double* points, double* buffer, int count)
+    private static void mathblocks_geometry_sort_points(float* points, float* buffer, int count)
     {
-        double* source = points;
-        double* target = buffer;
+        float* source = points;
+        float* target = buffer;
         for (int width = 1; width < count; width += width)
         {
             for (int start = 0; start < count; start += width + width)
@@ -314,7 +314,7 @@ internal static unsafe class GeometryModule
                     right++;
                 }
             }
-            double* sorted = target;
+            float* sorted = target;
             target = source;
             source = sorted;
         }
@@ -399,7 +399,7 @@ internal static unsafe class GeometryModule
         MathBlockSlot* second = Cuda.ReadOnly(input_count > 1 ? inputs[1] : null);
         if (thread == 0)
         {
-            output->scalar_value = 0.0;
+            output->scalar_value = 0.0f;
             output->boolean_value = 0;
             output->rows = 0;
             output->columns = 0;
@@ -412,10 +412,10 @@ internal static unsafe class GeometryModule
         if (!output->valid)
             return;
 
-        double* a = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
-        double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
-        double* result = (double*)output->data_pointer;
-        double* scratch = (double*)output->scratch_pointer;
+        float* a = Cuda.ReadOnly(first == null ? null : (float*)first->data_pointer);
+        float* b = Cuda.ReadOnly(second == null ? null : (float*)second->data_pointer);
+        float* result = (float*)output->data_pointer;
+        float* scratch = (float*)output->scratch_pointer;
 
         if (thread == 0)
         {
@@ -431,7 +431,7 @@ internal static unsafe class GeometryModule
                     mathblocks_geometry_barycentric(
                         a[0], a[1], b[0], b[1], b[2], b[3], b[4], b[5], result);
                     for (int index = 0; index < 3; index++)
-                        if (!double.IsFinite(result[index])) output->valid = 0;
+                        if (!float.IsFinite(result[index])) output->valid = 0;
                     break;
                 case 1:
                     output->rows = 1;
@@ -441,8 +441,8 @@ internal static unsafe class GeometryModule
                         output->valid = 0;
                         break;
                     }
-                    result[0] = 0.0;
-                    result[1] = 0.0;
+                    result[0] = 0.0f;
+                    result[1] = 0.0f;
                     for (int index = 0; index < first->count; index++)
                     {
                         result[0] += a[2 * index];
@@ -450,7 +450,7 @@ internal static unsafe class GeometryModule
                     }
                     result[0] /= first->count;
                     result[1] /= first->count;
-                    if (!double.IsFinite(result[0]) || !double.IsFinite(result[1])) output->valid = 0;
+                    if (!float.IsFinite(result[0]) || !float.IsFinite(result[1])) output->valid = 0;
                     break;
                 case 2:
                     if (first->count != 3)
@@ -459,13 +459,13 @@ internal static unsafe class GeometryModule
                         break;
                     }
                 {
-                    double first_length = mathblocks_geometry_distance(a, 1, a, 2);
-                    double second_length = mathblocks_geometry_distance(a, 0, a, 2);
-                    double third_length = mathblocks_geometry_distance(a, 0, a, 1);
-                    double cross = mathblocks_geometry_cross(
+                    float first_length = mathblocks_geometry_distance(a, 1, a, 2);
+                    float second_length = mathblocks_geometry_distance(a, 0, a, 2);
+                    float third_length = mathblocks_geometry_distance(a, 0, a, 1);
+                    float cross = mathblocks_geometry_cross(
                         a[0], a[1], a[2], a[3], a[4], a[5]);
                     output->scalar_value = first_length * second_length * third_length /
-                        (2.0 * Math.Abs(cross));
+                        (2.0f * MathF.Abs(cross));
                     break;
                 }
                 case 3:
@@ -476,17 +476,17 @@ internal static unsafe class GeometryModule
                     }
                 {
                     bool inside = false;
-                    double point_x = b[0];
-                    double point_y = b[1];
+                    float point_x = b[0];
+                    float point_y = b[1];
                     for (int current = 0; current < first->count; current++)
                     {
                         int previous = current == 0 ? first->count - 1 : current - 1;
-                        double left_x = a[2 * current];
-                        double left_y = a[2 * current + 1];
-                        double right_x = a[2 * previous];
-                        double right_y = a[2 * previous + 1];
+                        float left_x = a[2 * current];
+                        float left_y = a[2 * current + 1];
+                        float right_x = a[2 * previous];
+                        float right_y = a[2 * previous + 1];
                         if (mathblocks_geometry_point_to_segment(
-                            point_x, point_y, left_x, left_y, right_x, right_y) == 0.0)
+                            point_x, point_y, left_x, left_y, right_x, right_y) == 0.0f)
                         {
                             inside = true;
                             break;
@@ -494,9 +494,9 @@ internal static unsafe class GeometryModule
                         if ((left_y > point_y) != (right_y > point_y))
                         {
                             // The crossing lies between the edge's end points, so it is finite unless a product overflowed.
-                            double crossing = (right_x - left_x) * (point_y - left_y) /
+                            float crossing = (right_x - left_x) * (point_y - left_y) /
                                               (right_y - left_y) + left_x;
-                            if (!double.IsFinite(crossing))
+                            if (!float.IsFinite(crossing))
                                 output->valid = 0;
                             if (point_x < crossing)
                                 inside = !inside;
@@ -512,16 +512,16 @@ internal static unsafe class GeometryModule
                         break;
                     }
                 {
-                    double* sorted = scratch;
-                    double* hull = scratch + first->count * 4;
+                    float* sorted = scratch;
+                    float* hull = scratch + first->count * 4;
                     for (int index = 0; index < first->count * 2; index++)
                         sorted[index] = a[index];
                     mathblocks_geometry_sort_points(sorted, scratch + first->count * 2, first->count);
                     int unique_count = 0;
                     for (int index = 0; index < first->count; index++)
                     {
-                        double x = sorted[2 * index];
-                        double y = sorted[2 * index + 1];
+                        float x = sorted[2 * index];
+                        float y = sorted[2 * index + 1];
                         if (unique_count > 0 && sorted[2 * (unique_count - 1)] == x && sorted[2 * (unique_count - 1) + 1] == y)
                             continue;
                         sorted[2 * unique_count] = x;
@@ -603,9 +603,9 @@ internal static unsafe class GeometryModule
                         {
                             for (int third_index = second_index + 1; third_index < count; third_index++)
                             {
-                                double center_x;
-                                double center_y;
-                                double radius_square;
+                                float center_x;
+                                float center_y;
+                                float radius_square;
                                 if (!mathblocks_geometry_try_circumcircle(
                                     a, first_index, second_index, third_index,
                                     &center_x, &center_y, &radius_square))
@@ -617,8 +617,8 @@ internal static unsafe class GeometryModule
                                 {
                                     if (index == first_index || index == second_index || index == third_index)
                                         continue;
-                                    double x = a[2 * index] - center_x;
-                                    double y = a[2 * index + 1] - center_y;
+                                    float x = a[2 * index] - center_x;
+                                    float y = a[2 * index + 1] - center_y;
                                     if (x * x + y * y < radius_square)
                                     {
                                         empty = false;
@@ -670,7 +670,7 @@ internal static unsafe class GeometryModule
                             edges[edge_count].from = left;
                             edges[edge_count].to = right;
                             edges[edge_count].weight = mathblocks_geometry_distance(a, left, a, right);
-                            if (!double.IsFinite(edges[edge_count].weight)) output->valid = 0;
+                            if (!float.IsFinite(edges[edge_count].weight)) output->valid = 0;
                             edge_count++;
                         }
                     }
@@ -686,11 +686,11 @@ internal static unsafe class GeometryModule
                         break;
                     }
                 {
-                    double maximum = 0.0;
+                    float maximum = 0.0f;
                     for (int left = 0; left < first->count; left++)
                         for (int right = left + 1; right < first->count; right++)
                         {
-                            double distance = mathblocks_geometry_distance(a, left, a, right);
+                            float distance = mathblocks_geometry_distance(a, left, a, right);
                             maximum = maximum > distance ? maximum : distance;
                         }
                     output->scalar_value = maximum;
@@ -707,7 +707,7 @@ internal static unsafe class GeometryModule
                     {
                         for (int right = 0; right < second->count; right++)
                         {
-                            double distance = mathblocks_geometry_distance(a, left, b, right);
+                            float distance = mathblocks_geometry_distance(a, left, b, right);
                             int target = left * second->count + right;
                             if (left == 0 && right == 0)
                                 scratch[0] = distance;
@@ -721,8 +721,8 @@ internal static unsafe class GeometryModule
                                     : distance;
                             else
                             {
-                                double preceding = scratch[(left - 1) * second->count + right];
-                                double candidate = scratch[(left - 1) * second->count + right - 1];
+                                float preceding = scratch[(left - 1) * second->count + right];
+                                float candidate = scratch[(left - 1) * second->count + right - 1];
                                 preceding = preceding < candidate ? preceding : candidate;
                                 candidate = scratch[left * second->count + right - 1];
                                 preceding = preceding < candidate ? preceding : candidate;
@@ -748,11 +748,11 @@ internal static unsafe class GeometryModule
                         break;
                     }
                 {
-                    double affinity = 0.0;
+                    float affinity = 0.0f;
                     for (int index = 0; index < first->count; index++)
                         affinity += mathblocks_square_root(a[index] * b[index]);
-                    affinity = affinity < -1.0 ? -1.0 : affinity > 1.0 ? 1.0 : affinity;
-                    output->scalar_value = 2.0 * mathblocks_arc_cosine(affinity);
+                    affinity = affinity < -1.0f ? -1.0f : affinity > 1.0f ? 1.0f : affinity;
+                    output->scalar_value = 2.0f * mathblocks_arc_cosine(affinity);
                     break;
                 }
                 case 10:
@@ -768,9 +768,9 @@ internal static unsafe class GeometryModule
                     {
                         for (int right = left + 1; right < first->count; right++)
                         {
-                            double center_x = (a[2 * left] + a[2 * right]) / 2.0;
-                            double center_y = (a[2 * left + 1] + a[2 * right + 1]) / 2.0;
-                            double radius = mathblocks_geometry_distance(a, left, a, right) / 2.0;
+                            float center_x = (a[2 * left] + a[2 * right]) / 2.0f;
+                            float center_y = (a[2 * left + 1] + a[2 * right + 1]) / 2.0f;
+                            float radius = mathblocks_geometry_distance(a, left, a, right) / 2.0f;
                             bool empty = true;
                             for (int index = 0; index < first->count; index++)
                             {
@@ -794,8 +794,8 @@ internal static unsafe class GeometryModule
                             }
                             edges[edge_count].from = left;
                             edges[edge_count].to = right;
-                            edges[edge_count].weight = 2.0 * radius;
-                            if (!double.IsFinite(edges[edge_count].weight)) output->valid = 0;
+                            edges[edge_count].weight = 2.0f * radius;
+                            if (!float.IsFinite(edges[edge_count].weight)) output->valid = 0;
                             edge_count++;
                         }
                     }
@@ -811,49 +811,49 @@ internal static unsafe class GeometryModule
                         break;
                     }
                 {
-                    double point_x = b[0];
-                    double point_y = b[1];
+                    float point_x = b[0];
+                    float point_y = b[1];
                     int coincident = 0;
                     int vector_count = 0;
                     for (int index = 0; index < first->count; index++)
                     {
-                        double x = a[2 * index] - point_x;
-                        double y = a[2 * index + 1] - point_y;
-                        if (x == 0.0 && y == 0.0)
+                        float x = a[2 * index] - point_x;
+                        float y = a[2 * index + 1] - point_y;
+                        if (x == 0.0f && y == 0.0f)
                             coincident++;
                         else
                             vector_count++;
                     }
                     if (vector_count == 0)
                     {
-                        output->scalar_value = 1.0;
+                        output->scalar_value = 1.0f;
                         break;
                     }
                     int maximum = 0;
                     for (int pivot = 0; pivot < first->count; pivot++)
                     {
-                        double pivot_x = a[2 * pivot] - point_x;
-                        double pivot_y = a[2 * pivot + 1] - point_y;
-                        if (pivot_x == 0.0 && pivot_y == 0.0)
+                        float pivot_x = a[2 * pivot] - point_x;
+                        float pivot_y = a[2 * pivot + 1] - point_y;
+                        if (pivot_x == 0.0f && pivot_y == 0.0f)
                             continue;
                         int count = 0;
                         for (int index = 0; index < first->count; index++)
                         {
-                            double x = a[2 * index] - point_x;
-                            double y = a[2 * index + 1] - point_y;
-                            if (x == 0.0 && y == 0.0)
+                            float x = a[2 * index] - point_x;
+                            float y = a[2 * index + 1] - point_y;
+                            if (x == 0.0f && y == 0.0f)
                                 continue;
-                            double cross = pivot_x * y - pivot_y * x;
-                            double dot = pivot_x * x + pivot_y * y;
+                            float cross = pivot_x * y - pivot_y * x;
+                            float dot = pivot_x * x + pivot_y * y;
                             // A NaN (inf - inf, 0 * inf from an overflowing product) fails both tests and would count the point as outside.
-                            if (double.IsNaN(cross) || double.IsNaN(dot))
+                            if (float.IsNaN(cross) || float.IsNaN(dot))
                                 output->valid = 0;
-                            if (cross > 0.0 || (cross == 0.0 && dot > 0.0))
+                            if (cross > 0.0f || (cross == 0.0f && dot > 0.0f))
                                 count++;
                         }
                         maximum = maximum > count ? maximum : count;
                     }
-                    output->scalar_value = (double)(coincident + vector_count - maximum) /
+                    output->scalar_value = (float)(coincident + vector_count - maximum) /
                         first->count;
                     break;
                 }
@@ -864,24 +864,24 @@ internal static unsafe class GeometryModule
                         break;
                     }
                 {
-                    double directed_left = 0.0;
+                    float directed_left = 0.0f;
                     for (int left = 0; left < first->count; left++)
                     {
-                        double minimum = mathblocks_positive_infinity();
+                        float minimum = mathblocks_positive_infinity();
                         for (int right = 0; right < second->count; right++)
                         {
-                            double distance = mathblocks_geometry_distance(a, left, b, right);
+                            float distance = mathblocks_geometry_distance(a, left, b, right);
                             minimum = minimum < distance ? minimum : distance;
                         }
                         directed_left = directed_left > minimum ? directed_left : minimum;
                     }
-                    double directed_right = 0.0;
+                    float directed_right = 0.0f;
                     for (int right = 0; right < second->count; right++)
                     {
-                        double minimum = mathblocks_positive_infinity();
+                        float minimum = mathblocks_positive_infinity();
                         for (int left = 0; left < first->count; left++)
                         {
-                            double distance = mathblocks_geometry_distance(b, right, a, left);
+                            float distance = mathblocks_geometry_distance(b, right, a, left);
                             minimum = minimum < distance ? minimum : distance;
                         }
                         directed_right = directed_right > minimum ? directed_right : minimum;
@@ -899,7 +899,7 @@ internal static unsafe class GeometryModule
                         break;
                     }
                 {
-                    double total = 0.0;
+                    float total = 0.0f;
                     int start = opcode == 13 ? 1 : 0;
                     for (int index = start; index < first->count; index++)
                     {
@@ -927,14 +927,14 @@ internal static unsafe class GeometryModule
                         break;
                     }
                 {
-                    double twice_area = 0.0;
+                    float twice_area = 0.0f;
                     for (int index = 0; index < first->count; index++)
                     {
                         int next = (index + 1) % first->count;
                         twice_area += a[2 * index] * a[2 * next + 1] -
                                       a[2 * next] * a[2 * index + 1];
                     }
-                    output->scalar_value = opcode == 16 ? Math.Abs(twice_area / 2.0) : twice_area / 2.0;
+                    output->scalar_value = opcode == 16 ? MathF.Abs(twice_area / 2.0f) : twice_area / 2.0f;
                     break;
                 }
                 case 18:
@@ -946,7 +946,7 @@ internal static unsafe class GeometryModule
                 {
                     int containing = 0;
                     int total = 0;
-                    double* coordinates = stackalloc double[3];
+                    float* coordinates = stackalloc float[3];
                     for (int one = 0; one < first->count; one++)
                         for (int two = one + 1; two < first->count; two++)
                             for (int three = two + 1; three < first->count; three++)
@@ -956,7 +956,7 @@ internal static unsafe class GeometryModule
                                 if (mathblocks_geometry_barycentric_denominator(
                                         a[2 * one], a[2 * one + 1],
                                         a[2 * two], a[2 * two + 1],
-                                        a[2 * three], a[2 * three + 1]) == 0.0)
+                                        a[2 * three], a[2 * three + 1]) == 0.0f)
                                     continue;
                                 mathblocks_geometry_barycentric(
                                     b[0], b[1],
@@ -964,17 +964,17 @@ internal static unsafe class GeometryModule
                                     a[2 * two], a[2 * two + 1],
                                     a[2 * three], a[2 * three + 1],
                                     coordinates);
-                                if (!double.IsFinite(coordinates[0]) || !double.IsFinite(coordinates[1]) ||
-                                    !double.IsFinite(coordinates[2]))
+                                if (!float.IsFinite(coordinates[0]) || !float.IsFinite(coordinates[1]) ||
+                                    !float.IsFinite(coordinates[2]))
                                     output->valid = 0;
-                                if (coordinates[0] >= 0.0 && coordinates[0] <= 1.0 &&
-                                    coordinates[1] >= 0.0 && coordinates[1] <= 1.0 &&
-                                    coordinates[2] >= 0.0 && coordinates[2] <= 1.0)
+                                if (coordinates[0] >= 0.0f && coordinates[0] <= 1.0f &&
+                                    coordinates[1] >= 0.0f && coordinates[1] <= 1.0f &&
+                                    coordinates[2] >= 0.0f && coordinates[2] <= 1.0f)
                                 {
                                     containing++;
                                 }
                             }
-                    output->scalar_value = (double)containing / total;
+                    output->scalar_value = (float)containing / total;
                     break;
                 }
                 case 19:
@@ -1050,14 +1050,14 @@ internal static unsafe class GeometryModule
                     }
                     mathblocks_sequence_set_vector_shape(output, selected);
                     for (int index = 0; index < selected; index++)
-                        if (!double.IsFinite(result[index])) output->valid = 0;
+                        if (!float.IsFinite(result[index])) output->valid = 0;
                     break;
                 }
             }
             if (output->valid &&
                 opcode != 0 && opcode != 1 && opcode != 3 && opcode != 4 && opcode != 5 &&
                 opcode != 10 && opcode != 19 && opcode != 20 && opcode != 21 &&
-                !double.IsFinite(output->scalar_value))
+                !float.IsFinite(output->scalar_value))
             {
                 output->valid = 0;
             }

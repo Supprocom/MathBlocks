@@ -9,7 +9,7 @@ internal static unsafe class StatisticsModule
     [CudaExternal]
     public struct MathBlockSlot
     {
-        public double scalar_value;
+        public float scalar_value;
         public ulong data_pointer;
         public ulong scratch_pointer;
         public CudaInt32 boolean_value;
@@ -21,19 +21,19 @@ internal static unsafe class StatisticsModule
     }
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_compensated_product_sum([CudaReadOnly] double* first, [CudaReadOnly] double* second, int count) => throw new NotSupportedException();
+    private static float mathblocks_compensated_product_sum([CudaReadOnly] float* first, [CudaReadOnly] float* second, int count) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_compensated_sum([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
+    private static float mathblocks_compensated_sum([CudaReadOnly] float* values, int count) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static bool mathblocks_nonnegative_integer(double value, int* result) => throw new NotSupportedException();
+    private static bool mathblocks_nonnegative_integer(float value, int* result) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_power(double value, double exponent) => throw new NotSupportedException();
+    private static float mathblocks_power(float value, float exponent) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static bool mathblocks_sequence_positive_integer(double value, int* result) => throw new NotSupportedException();
+    private static bool mathblocks_sequence_positive_integer(float value, int* result) => throw new NotSupportedException();
 
     [CudaExternal]
     private static void mathblocks_sequence_set_matrix_shape(MathBlockSlot* output, int rows, int columns) => throw new NotSupportedException();
@@ -42,40 +42,40 @@ internal static unsafe class StatisticsModule
     private static void mathblocks_sequence_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+    private static float mathblocks_square_root(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_quiet_nan() => throw new NotSupportedException();
+    private static float mathblocks_quiet_nan() => throw new NotSupportedException();
     [CudaDevice]
-    private static double mathblocks_statistics_mean([CudaReadOnly] double* values, int count)
+    private static float mathblocks_statistics_mean([CudaReadOnly] float* values, int count)
     {
         return mathblocks_compensated_sum(values, count) / count;
     }
 
     [CudaDevice]
-    private static double mathblocks_statistics_population_variance(
-        [CudaReadOnly] double* values,
+    private static float mathblocks_statistics_population_variance(
+        [CudaReadOnly] float* values,
         int count)
     {
-        double mean = mathblocks_statistics_mean(values, count);
-        double sum = 0.0;
+        float mean = mathblocks_statistics_mean(values, count);
+        float sum = 0.0f;
         for (int index = 0; index < count; index++)
         {
-            double difference = values[index] - mean;
+            float difference = values[index] - mean;
             sum += difference * difference;
         }
         return sum / count;
     }
 
     [CudaDevice]
-    private static double mathblocks_statistics_population_covariance(
-        [CudaReadOnly] double* left,
-        [CudaReadOnly] double* right,
+    private static float mathblocks_statistics_population_covariance(
+        [CudaReadOnly] float* left,
+        [CudaReadOnly] float* right,
         int count)
     {
-        double left_mean = mathblocks_statistics_mean(left, count);
-        double right_mean = mathblocks_statistics_mean(right, count);
-        double sum = 0.0;
+        float left_mean = mathblocks_statistics_mean(left, count);
+        float right_mean = mathblocks_statistics_mean(right, count);
+        float sum = 0.0f;
         for (int index = 0; index < count; index++)
             sum += (left[index] - left_mean) * (right[index] - right_mean);
         return sum / count;
@@ -83,43 +83,43 @@ internal static unsafe class StatisticsModule
 
     // covariance / variance, or NaN (invalid) when the variance overflowed: dividing by an infinity would give a finite zero.
     [CudaDevice]
-    private static double mathblocks_statistics_quotient_by_variance(double covariance, double variance)
+    private static float mathblocks_statistics_quotient_by_variance(float covariance, float variance)
     {
-        if (!double.IsFinite(variance))
+        if (!float.IsFinite(variance))
             return mathblocks_quiet_nan();
         return covariance / variance;
     }
 
     // covariance / (sd(left) * sd(right)), or NaN (invalid) when a variance or the product of the two standard deviations overflowed.
     [CudaDevice]
-    private static double mathblocks_statistics_correlation_value(double covariance, double left_variance, double right_variance)
+    private static float mathblocks_statistics_correlation_value(float covariance, float left_variance, float right_variance)
     {
-        if (!double.IsFinite(left_variance) || !double.IsFinite(right_variance))
+        if (!float.IsFinite(left_variance) || !float.IsFinite(right_variance))
             return mathblocks_quiet_nan();
-        double denominator = mathblocks_square_root(left_variance) * mathblocks_square_root(right_variance);
-        if (!double.IsFinite(denominator))
+        float denominator = mathblocks_square_root(left_variance) * mathblocks_square_root(right_variance);
+        if (!float.IsFinite(denominator))
             return mathblocks_quiet_nan();
         return covariance / denominator;
     }
 
     // The distance correlation from the three moments, or NaN (invalid) when a moment or the product of the two variances overflowed.
     [CudaDevice]
-    private static double mathblocks_statistics_distance_correlation_value(
-        double covariance_square,
-        double left_variance_square,
-        double right_variance_square)
+    private static float mathblocks_statistics_distance_correlation_value(
+        float covariance_square,
+        float left_variance_square,
+        float right_variance_square)
     {
-        double denominator = mathblocks_square_root(left_variance_square * right_variance_square);
-        if (!double.IsFinite(covariance_square) || !double.IsFinite(left_variance_square) ||
-            !double.IsFinite(right_variance_square) || !double.IsFinite(denominator))
+        float denominator = mathblocks_square_root(left_variance_square * right_variance_square);
+        if (!float.IsFinite(covariance_square) || !float.IsFinite(left_variance_square) ||
+            !float.IsFinite(right_variance_square) || !float.IsFinite(denominator))
             return mathblocks_quiet_nan();
         return mathblocks_square_root(covariance_square / denominator);
     }
 
     [CudaDevice]
-    private static double mathblocks_statistics_pearson(
-        [CudaReadOnly] double* left,
-        [CudaReadOnly] double* right,
+    private static float mathblocks_statistics_pearson(
+        [CudaReadOnly] float* left,
+        [CudaReadOnly] float* right,
         int count)
     {
         return mathblocks_statistics_correlation_value(
@@ -129,49 +129,49 @@ internal static unsafe class StatisticsModule
     }
 
     [CudaExternal]
-    private static double* mathblocks_stable_merge_sort(double* values, double* buffer, int count, bool descending) => throw new NotSupportedException();
+    private static float* mathblocks_stable_merge_sort(float* values, float* buffer, int count, bool descending) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static void mathblocks_stable_sort_into([CudaReadOnly] double* values, int count, double* result, double* buffer, bool descending) => throw new NotSupportedException();
+    private static void mathblocks_stable_sort_into([CudaReadOnly] float* values, int count, float* result, float* buffer, bool descending) => throw new NotSupportedException();
 
     // The same with the buffer in the count doubles after result: result needs 2 * count doubles.
     [CudaDevice]
     private static void mathblocks_statistics_sort_copy(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
-        double* result,
+        float* result,
         bool descending)
     {
         mathblocks_stable_sort_into(values, count, result, result + count, descending);
     }
 
     [CudaDevice]
-    private static double mathblocks_statistics_sorted_quantile(
-        [CudaReadOnly] double* sorted,
+    private static float mathblocks_statistics_sorted_quantile(
+        [CudaReadOnly] float* sorted,
         int count,
-        double probability)
+        float probability)
     {
         if (count == 1)
             return sorted[0];
-        double position = probability * (count - 1);
-        int lower = (int)Math.Floor(position);
-        int upper = (int)Math.Ceiling(position);
-        double weight = position - lower;
-        return sorted[lower] * (1.0 - weight) + sorted[upper] * weight;
+        float position = probability * (count - 1);
+        int lower = (int)MathF.Floor(position);
+        int upper = (int)MathF.Ceiling(position);
+        float weight = position - lower;
+        return sorted[lower] * (1.0f - weight) + sorted[upper] * weight;
     }
 
     [CudaDevice]
-    private static double mathblocks_statistics_median(double* values, int count)
+    private static float mathblocks_statistics_median(float* values, int count)
     {
-        double* sorted = mathblocks_stable_merge_sort(values, values + count, count, false);
-        return mathblocks_statistics_sorted_quantile(sorted, count, 0.5);
+        float* sorted = mathblocks_stable_merge_sort(values, values + count, count, false);
+        return mathblocks_statistics_sorted_quantile(sorted, count, 0.5f);
     }
 
     // The average rank of values[index]: the values below it plus half of the equal ones (itself included) plus a half.
     // Both counts are exact integers; a NaN value counts nothing, so its rank is 0.5.
     [CudaDevice]
-    private static double mathblocks_statistics_rank_at(
-        [CudaReadOnly] double* values,
+    private static float mathblocks_statistics_rank_at(
+        [CudaReadOnly] float* values,
         int count,
         int index)
     {
@@ -184,14 +184,14 @@ internal static unsafe class StatisticsModule
             else if (values[candidate] == values[index])
                 equal++;
         }
-        return lower + (equal + 1.0) / 2.0;
+        return lower + (equal + 1.0f) / 2.0f;
     }
 
     [CudaDevice]
     private static void mathblocks_statistics_rank(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
-        double* result)
+        float* result)
     {
         for (int index = 0; index < count; index++)
             result[index] = mathblocks_statistics_rank_at(values, count, index);
@@ -199,18 +199,18 @@ internal static unsafe class StatisticsModule
 
     [CudaDevice]
     private static void mathblocks_statistics_center_distance(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
-        double* result,
-        double* row_means)
+        float* result,
+        float* row_means)
     {
-        double total_mean = 0.0;
+        float total_mean = 0.0f;
         for (int row = 0; row < count; row++)
         {
-            row_means[row] = 0.0;
+            row_means[row] = 0.0f;
             for (int column = 0; column < count; column++)
             {
-                double distance = Math.Abs(values[row] - values[column]);
+                float distance = MathF.Abs(values[row] - values[column]);
                 result[row * count + column] = distance;
                 row_means[row] += distance;
                 total_mean += distance;
@@ -226,30 +226,30 @@ internal static unsafe class StatisticsModule
 
     [CudaDevice]
     private static bool mathblocks_statistics_moment_value(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
-        double order_value,
+        float order_value,
         bool central,
-        double* value)
+        float* value)
     {
         int order = 0;
         if (count <= 0 ||
             !mathblocks_nonnegative_integer(order_value, &order))
             return false;
-        double mean = central ? mathblocks_statistics_mean(values, count) : 0.0;
-        double sum = 0.0;
+        float mean = central ? mathblocks_statistics_mean(values, count) : 0.0f;
+        float sum = 0.0f;
         for (int index = 0; index < count; index++)
-            sum += mathblocks_power(values[index] - mean, (double)order);
+            sum += mathblocks_power(values[index] - mean, (float)order);
         *value = sum / count;
-        return double.IsFinite(*value);
+        return float.IsFinite(*value);
     }
 
     [CudaDevice]
     private static bool mathblocks_statistics_kendall_value(
-        [CudaReadOnly] double* left_values,
-        [CudaReadOnly] double* right_values,
+        [CudaReadOnly] float* left_values,
+        [CudaReadOnly] float* right_values,
         int count,
-        double* value)
+        float* value)
     {
         long concordant = 0;
         long discordant = 0;
@@ -259,10 +259,10 @@ internal static unsafe class StatisticsModule
         {
             for (int right = left + 1; right < count; right++)
             {
-                double left_difference = left_values[left] - left_values[right];
-                double right_difference = right_values[left] - right_values[right];
-                int left_sign = left_difference > 0.0 ? 1 : left_difference < 0.0 ? -1 : 0;
-                int right_sign = right_difference > 0.0 ? 1 : right_difference < 0.0 ? -1 : 0;
+                float left_difference = left_values[left] - left_values[right];
+                float right_difference = right_values[left] - right_values[right];
+                int left_sign = left_difference > 0.0f ? 1 : left_difference < 0.0f ? -1 : 0;
+                int right_sign = right_difference > 0.0f ? 1 : right_difference < 0.0f ? -1 : 0;
                 if (left_sign == 0 && right_sign == 0)
                     continue;
                 if (left_sign == 0)
@@ -275,81 +275,81 @@ internal static unsafe class StatisticsModule
                     discordant++;
             }
         }
-        *value = (double)(concordant - discordant) /
+        *value = (float)(concordant - discordant) /
             mathblocks_square_root(
-                (double)(concordant + discordant + left_ties) *
+                (float)(concordant + discordant + left_ties) *
                 (concordant + discordant + right_ties));
-        return double.IsFinite(*value);
+        return float.IsFinite(*value);
     }
 
     [CudaDevice]
     private static bool mathblocks_statistics_shape_moment_value(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
         bool kurtosis,
-        double* value)
+        float* value)
     {
         if (count <= 0)
             return false;
-        double mean = mathblocks_statistics_mean(values, count);
-        double second_moment = 0.0;
-        double higher_moment = 0.0;
+        float mean = mathblocks_statistics_mean(values, count);
+        float second_moment = 0.0f;
+        float higher_moment = 0.0f;
         for (int index = 0; index < count; index++)
         {
-            double difference = values[index] - mean;
-            double square = difference * difference;
+            float difference = values[index] - mean;
+            float square = difference * difference;
             second_moment += square;
             higher_moment += kurtosis ? square * square : square * difference;
         }
         second_moment /= count;
         higher_moment /= count;
         *value = kurtosis
-            ? higher_moment / (second_moment * second_moment) - 3.0
-            : higher_moment / mathblocks_power(second_moment, 1.5);
-        return double.IsFinite(*value);
+            ? higher_moment / (second_moment * second_moment) - 3.0f
+            : higher_moment / mathblocks_power(second_moment, 1.5f);
+        return float.IsFinite(*value);
     }
 
     [CudaDevice]
     private static bool mathblocks_statistics_weighted_value(
-        [CudaReadOnly] double* values,
-        [CudaReadOnly] double* weights,
+        [CudaReadOnly] float* values,
+        [CudaReadOnly] float* weights,
         int count,
         bool variance,
-        double* value)
+        float* value)
     {
         if (count <= 0)
             return false;
-        double weight_sum = mathblocks_compensated_sum(weights, count);
-        double mean = mathblocks_compensated_product_sum(values, weights, count) / weight_sum;
+        float weight_sum = mathblocks_compensated_sum(weights, count);
+        float mean = mathblocks_compensated_product_sum(values, weights, count) / weight_sum;
         if (!variance)
         {
             *value = mean;
         }
         else
         {
-            double numerator = 0.0;
+            float numerator = 0.0f;
             for (int index = 0; index < count; index++)
             {
-                double difference = values[index] - mean;
+                float difference = values[index] - mean;
                 numerator += weights[index] * difference * difference;
             }
             *value = numerator / weight_sum;
         }
-        return double.IsFinite(*value);
+        return float.IsFinite(*value);
     }
 
     // Writes the pair averages (values[left] + values[right]) / 2 for left <= right in row order and returns
     // their count.
     [CudaDevice]
     private static int mathblocks_statistics_pair_averages(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
-        double* averages)
+        float* averages)
     {
         int average_count = 0;
         for (int left = 0; left < count; left++)
             for (int right = left; right < count; right++)
-                averages[average_count++] = (values[left] + values[right]) / 2.0;
+                averages[average_count++] = (values[left] + values[right]) / 2.0f;
         return average_count;
     }
 
@@ -357,25 +357,25 @@ internal static unsafe class StatisticsModule
     // returns their count, or -1 when a difference, rise or slope overflows.
     [CudaDevice]
     private static int mathblocks_statistics_pair_slopes(
-        [CudaReadOnly] double* x,
-        [CudaReadOnly] double* y,
+        [CudaReadOnly] float* x,
+        [CudaReadOnly] float* y,
         int count,
-        double* slopes)
+        float* slopes)
     {
         int slope_count = 0;
         for (int left = 0; left < count; left++)
         {
             for (int right = left + 1; right < count; right++)
             {
-                double difference = x[right] - x[left];
+                float difference = x[right] - x[left];
                 // An overflowing difference, rise or slope would divide by an infinity or put an infinity in the median: -1.
-                if (!double.IsFinite(difference))
+                if (!float.IsFinite(difference))
                     return -1;
-                if (difference != 0.0)
+                if (difference != 0.0f)
                 {
-                    double rise = y[right] - y[left];
-                    double slope = rise / difference;
-                    if (!double.IsFinite(rise) || !double.IsFinite(slope))
+                    float rise = y[right] - y[left];
+                    float slope = rise / difference;
+                    if (!float.IsFinite(rise) || !float.IsFinite(slope))
                         return -1;
                     slopes[slope_count++] = slope;
                 }
@@ -396,7 +396,7 @@ internal static unsafe class StatisticsModule
         MathBlockSlot* second = Cuda.ReadOnly(input_count > 1 ? inputs[1] : null);
         if (thread == 0)
         {
-            output->scalar_value = 0.0;
+            output->scalar_value = 0.0f;
             output->boolean_value = 0;
             output->rows = 0;
             output->columns = 0;
@@ -409,10 +409,10 @@ internal static unsafe class StatisticsModule
         if (!output->valid)
             return;
 
-        double* a = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
-        double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
-        double* result = (double*)output->data_pointer;
-        double* scratch = (double*)output->scratch_pointer;
+        float* a = Cuda.ReadOnly(first == null ? null : (float*)first->data_pointer);
+        float* b = Cuda.ReadOnly(second == null ? null : (float*)second->data_pointer);
+        float* result = (float*)output->data_pointer;
+        float* scratch = (float*)output->scratch_pointer;
 
         // Spearman: the threads of the block count the ranks by index; each rank is an exact integer count, so the
         // values are those of one thread counting them all. The condition is the one of the case below.
@@ -436,26 +436,26 @@ internal static unsafe class StatisticsModule
         {
             int distance_count = first->count;
             int distance_cells = distance_count * distance_count;
-            double* left_distances = scratch;
-            double* right_distances = scratch + distance_cells;
-            double* row_means = right_distances + distance_cells;
+            float* left_distances = scratch;
+            float* right_distances = scratch + distance_cells;
+            float* row_means = right_distances + distance_cells;
             int second_owner = 1 % Cuda.BlockDim.X;
             int third_owner = 2 % Cuda.BlockDim.X;
             for (int row = thread; row < distance_count; row += Cuda.BlockDim.X)
             {
-                row_means[row] = 0.0;
+                row_means[row] = 0.0f;
                 for (int column = 0; column < distance_count; column++)
                 {
-                    double distance = Math.Abs(a[row] - a[column]);
+                    float distance = MathF.Abs(a[row] - a[column]);
                     left_distances[row * distance_count + column] = distance;
                     row_means[row] += distance;
-                    right_distances[row * distance_count + column] = Math.Abs(b[row] - b[column]);
+                    right_distances[row * distance_count + column] = MathF.Abs(b[row] - b[column]);
                 }
                 row_means[row] /= distance_count;
             }
             Cuda.SyncThreads();
-            double left_total = 0.0;
-            double right_total = 0.0;
+            float left_total = 0.0f;
+            float right_total = 0.0f;
             if (thread == 0)
             {
                 for (int index = 0; index < distance_cells; index++)
@@ -470,7 +470,7 @@ internal static unsafe class StatisticsModule
                 right_total /= distance_count * distance_count;
             }
             Cuda.SyncThreads();
-            double left_mean = output->scalar_value;
+            float left_mean = output->scalar_value;
             for (int row = thread; row < distance_count; row += Cuda.BlockDim.X)
                 for (int column = 0; column < distance_count; column++)
                     left_distances[row * distance_count + column] -=
@@ -480,21 +480,21 @@ internal static unsafe class StatisticsModule
                 output->scalar_value = right_total;
             for (int row = thread; row < distance_count; row += Cuda.BlockDim.X)
             {
-                row_means[row] = 0.0;
+                row_means[row] = 0.0f;
                 for (int column = 0; column < distance_count; column++)
                     row_means[row] += right_distances[row * distance_count + column];
                 row_means[row] /= distance_count;
             }
             Cuda.SyncThreads();
-            double right_mean = output->scalar_value;
+            float right_mean = output->scalar_value;
             for (int row = thread; row < distance_count; row += Cuda.BlockDim.X)
                 for (int column = 0; column < distance_count; column++)
                     right_distances[row * distance_count + column] -=
                         row_means[row] + row_means[column] - right_mean;
             Cuda.SyncThreads();
-            double covariance_moment = 0.0;
-            double left_moment = 0.0;
-            double right_moment = 0.0;
+            float covariance_moment = 0.0f;
+            float left_moment = 0.0f;
+            float right_moment = 0.0f;
             if (thread == 0)
                 for (int index = 0; index < distance_cells; index++)
                     covariance_moment += left_distances[index] * right_distances[index];
@@ -552,7 +552,7 @@ internal static unsafe class StatisticsModule
                     }
                     for (int column = 0; column < columns; column++)
                     {
-                        scratch[column] = 0.0;
+                        scratch[column] = 0.0f;
                         for (int row = 0; row < rows; row++)
                             scratch[column] += a[row * columns + column] / rows;
                     }
@@ -560,16 +560,16 @@ internal static unsafe class StatisticsModule
                     {
                         for (int right = left; right < columns; right++)
                         {
-                            double sum = 0.0;
+                            float sum = 0.0f;
                             for (int row = 0; row < rows; row++)
                             {
                                 sum += (a[row * columns + left] - scratch[left]) *
                                        (a[row * columns + right] - scratch[right]);
                             }
-                            double covariance = sum / rows;
+                            float covariance = sum / rows;
                             result[left * columns + right] = covariance;
                             result[right * columns + left] = covariance;
-                            if (!double.IsFinite(covariance)) output->valid = 0;
+                            if (!float.IsFinite(covariance)) output->valid = 0;
                         }
                     }
                     break;
@@ -582,9 +582,9 @@ internal static unsafe class StatisticsModule
                         output->valid = 0;
                         break;
                     }
-                    double covariance_square = scratch[0];
-                    double left_variance_square = scratch[1];
-                    double right_variance_square = scratch[2];
+                    float covariance_square = scratch[0];
+                    float left_variance_square = scratch[1];
+                    float right_variance_square = scratch[2];
                     covariance_square /= count * count;
                     left_variance_square /= count * count;
                     right_variance_square /= count * count;
@@ -604,7 +604,7 @@ internal static unsafe class StatisticsModule
                         }
                     }
                     for (int index = 0; output->valid && index < output->count; index++)
-                        result[index] = 0.0;
+                        result[index] = 0.0f;
                     for (int value_index = 0; output->valid && value_index < first->count; value_index++)
                     {
                         int lower = 0;
@@ -617,7 +617,7 @@ internal static unsafe class StatisticsModule
                             else
                                 lower = middle + 1;
                         }
-                        result[lower] += 1.0;
+                        result[lower] += 1.0f;
                     }
                     break;
                 }
@@ -630,8 +630,8 @@ internal static unsafe class StatisticsModule
                     }
                     mathblocks_statistics_sort_copy(a, first->count, scratch, false);
                     output->scalar_value =
-                        mathblocks_statistics_sorted_quantile(scratch, first->count, 0.75) -
-                        mathblocks_statistics_sorted_quantile(scratch, first->count, 0.25);
+                        mathblocks_statistics_sorted_quantile(scratch, first->count, 0.75f) -
+                        mathblocks_statistics_sorted_quantile(scratch, first->count, 0.25f);
                     break;
                 }
                 case 6:
@@ -651,12 +651,12 @@ internal static unsafe class StatisticsModule
                         output->valid = 0;
                         break;
                     }
-                    double covariance = mathblocks_statistics_population_covariance(a, b, first->count);
+                    float covariance = mathblocks_statistics_population_covariance(a, b, first->count);
                     if (opcode == 12 || opcode == 20)
                     {
                         output->scalar_value = opcode == 12
                             ? covariance
-                            : covariance * first->count / (first->count - 1.0);
+                            : covariance * first->count / (first->count - 1.0f);
                     }
                     else if (opcode == 9)
                     {
@@ -665,14 +665,14 @@ internal static unsafe class StatisticsModule
                     }
                     else if (opcode == 7)
                     {
-                        double slope = mathblocks_statistics_quotient_by_variance(
+                        float slope = mathblocks_statistics_quotient_by_variance(
                             covariance, mathblocks_statistics_population_variance(a, first->count));
                         output->scalar_value = mathblocks_statistics_mean(b, first->count) -
                             slope * mathblocks_statistics_mean(a, first->count);
                     }
                     else
                     {
-                        double correlation = mathblocks_statistics_correlation_value(
+                        float correlation = mathblocks_statistics_correlation_value(
                             covariance,
                             mathblocks_statistics_population_variance(a, first->count),
                             mathblocks_statistics_population_variance(b, first->count));
@@ -687,14 +687,14 @@ internal static unsafe class StatisticsModule
                         output->valid = 0;
                         break;
                     }
-                    double* sorted = scratch;
-                    double* deviations = scratch + first->count;
+                    float* sorted = scratch;
+                    float* deviations = scratch + first->count;
                     mathblocks_statistics_sort_copy(a, first->count, sorted, false);
-                    double median = mathblocks_statistics_sorted_quantile(sorted, first->count, 0.5);
+                    float median = mathblocks_statistics_sorted_quantile(sorted, first->count, 0.5f);
                     for (int index = 0; index < first->count; index++)
-                        deviations[index] = Math.Abs(a[index] - median);
+                        deviations[index] = MathF.Abs(a[index] - median);
                     mathblocks_statistics_sort_copy(deviations, first->count, sorted, false);
-                    output->scalar_value = mathblocks_statistics_sorted_quantile(sorted, first->count, 0.5);
+                    output->scalar_value = mathblocks_statistics_sorted_quantile(sorted, first->count, 0.5f);
                     break;
                 }
                 case 13:
@@ -716,9 +716,9 @@ internal static unsafe class StatisticsModule
                         output->valid = 0;
                         break;
                     }
-                    double variance = mathblocks_statistics_population_variance(a, first->count);
+                    float variance = mathblocks_statistics_population_variance(a, first->count);
                     if (opcode == 21 || opcode == 22)
-                        variance = variance * first->count / (first->count - 1.0);
+                        variance = variance * first->count / (first->count - 1.0f);
                     output->scalar_value = opcode == 15 || opcode == 21
                         ? mathblocks_square_root(variance)
                         : variance;
@@ -747,8 +747,8 @@ internal static unsafe class StatisticsModule
                         break;
                     }
                     // The ranks were counted by the whole block before this switch.
-                    double* left_ranks = scratch;
-                    double* right_ranks = scratch + first->count;
+                    float* left_ranks = scratch;
+                    float* right_ranks = scratch + first->count;
                     output->scalar_value = mathblocks_statistics_pearson(
                         left_ranks,
                         right_ranks,
@@ -781,7 +781,7 @@ internal static unsafe class StatisticsModule
                         output->valid = 0;
                     break;
             }
-            if (output->valid && opcode != 2 && opcode != 4 && !double.IsFinite(output->scalar_value))
+            if (output->valid && opcode != 2 && opcode != 4 && !float.IsFinite(output->scalar_value))
                 output->valid = 0;
         }
     }

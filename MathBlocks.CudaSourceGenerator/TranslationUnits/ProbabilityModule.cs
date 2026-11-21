@@ -13,7 +13,7 @@ internal static unsafe class ProbabilityModule
     private static int mathblocks_limit_incomplete_beta_maximum_iterations() => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_limit_incomplete_beta_tolerance() => throw new NotSupportedException();
+    private static float mathblocks_limit_incomplete_beta_tolerance() => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
     private static int mathblocks_limit_incomplete_beta_policy() => throw new NotSupportedException();
@@ -24,15 +24,15 @@ internal static unsafe class ProbabilityModule
     // The accessors of the binomial table, which the device prelude defines: the library's prelude reads and writes the module-global table,
     // the generator's default prelude has a load that returns 0 and a store that does nothing.
     [CudaExternal]
-    private static double mathblocks_binomial_table_load(int index) => throw new NotSupportedException();
+    private static float mathblocks_binomial_table_load(int index) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static void mathblocks_binomial_table_store(int index, double value) => throw new NotSupportedException();
+    private static void mathblocks_binomial_table_store(int index, float value) => throw new NotSupportedException();
 
     [CudaExternal]
     public struct MathBlockSlot
     {
-        public double scalar_value;
+        public float scalar_value;
         public ulong data_pointer;
         public ulong scratch_pointer;
         public CudaInt32 boolean_value;
@@ -46,15 +46,15 @@ internal static unsafe class ProbabilityModule
     [CudaExternal]
     public struct MathBlockComplexValue
     {
-        public double real;
-        public double imaginary;
+        public float real;
+        public float imaginary;
     }
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_compensated_product_sum([CudaReadOnly] double* first, [CudaReadOnly] double* second, int count) => throw new NotSupportedException();
+    private static float mathblocks_compensated_product_sum([CudaReadOnly] float* first, [CudaReadOnly] float* second, int count) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_compensated_sum([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
+    private static float mathblocks_compensated_sum([CudaReadOnly] float* values, int count) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
     private static MathBlockComplexValue mathblocks_complex_add(MathBlockComplexValue left, MathBlockComplexValue right) => throw new NotSupportedException();
@@ -69,19 +69,19 @@ internal static unsafe class ProbabilityModule
     private static bool mathblocks_complex_finite(MathBlockComplexValue value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static MathBlockComplexValue mathblocks_complex_from_polar(double magnitude, double phase) => throw new NotSupportedException();
+    private static MathBlockComplexValue mathblocks_complex_from_polar(float magnitude, float phase) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_complex_magnitude(MathBlockComplexValue value) => throw new NotSupportedException();
+    private static float mathblocks_complex_magnitude(MathBlockComplexValue value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static MathBlockComplexValue mathblocks_complex_make(double real, double imaginary) => throw new NotSupportedException();
+    private static MathBlockComplexValue mathblocks_complex_make(float real, float imaginary) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
     private static MathBlockComplexValue mathblocks_complex_multiply(MathBlockComplexValue left, MathBlockComplexValue right) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_complex_phase(MathBlockComplexValue value) => throw new NotSupportedException();
+    private static float mathblocks_complex_phase(MathBlockComplexValue value) => throw new NotSupportedException();
 
     [CudaExternal]
     private static void mathblocks_complex_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
@@ -93,38 +93,38 @@ internal static unsafe class ProbabilityModule
     private static MathBlockComplexValue mathblocks_complex_subtract(MathBlockComplexValue left, MathBlockComplexValue right) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_cube_root(double value) => throw new NotSupportedException();
+    private static float mathblocks_cube_root(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_error_function(double value) => throw new NotSupportedException();
+    private static float mathblocks_error_function(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_exponential(double value) => throw new NotSupportedException();
+    private static float mathblocks_exponential(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_log_one_plus(double value) => throw new NotSupportedException();
+    private static float mathblocks_log_one_plus(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_maximum(double first, double second) => throw new NotSupportedException();
+    private static float mathblocks_maximum(float first, float second) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_natural_logarithm(double value) => throw new NotSupportedException();
+    private static float mathblocks_natural_logarithm(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_power(double value, double exponent) => throw new NotSupportedException();
+    private static float mathblocks_power(float value, float exponent) => throw new NotSupportedException();
 
     [CudaExternal]
     private static void mathblocks_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_sine(double value) => throw new NotSupportedException();
+    private static float mathblocks_sine(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+    private static float mathblocks_square_root(float value) => throw new NotSupportedException();
     [CudaDevice]
-    private static bool mathblocks_probability_integer(double value, int* result)
+    private static bool mathblocks_probability_integer(float value, int* result)
     {
-        if (value < -2147483648.0 || value > 2147483647.0 || value != Math.Truncate(value))
+        if (value < -2147483648.0f || value > 2147483647.0f || value != MathF.Truncate(value))
             return false;
         *result = (int)value;
         return true;
@@ -135,24 +135,24 @@ internal static unsafe class ProbabilityModule
     // exceeds 1e359 and the loop ends at +Infinity; that value is returned without running it. A smaller k that overflows
     // part way stops at the first +Infinity as well.
     [CudaDevice]
-    private static double mathblocks_probability_binomial(long n, int k)
+    private static float mathblocks_probability_binomial(long n, int k)
     {
         if (k < 0 || k > n)
-            return 0.0;
+            return 0.0f;
         if (k > n - k)
             k = (int)(n - k);
         if (k >= 600)
-            return BitConverter.Int64BitsToDouble((long)0x7ff0000000000000UL);
-        double result = 1.0;
+            return BitConverter.Int32BitsToSingle(0x7f800000);
+        float result = 1.0f;
         for (int index = 1; index <= k; index++)
         {
-            result = result * (double)(n - k + index) / index;
+            result = result * (float)(n - k + index) / index;
             // Every factor and divisor from here on is at least 1, so +Infinity stays +Infinity.
-            if (double.IsInfinity(result))
+            if (float.IsInfinity(result))
                 break;
         }
 
-        if (double.IsInfinity(result))
+        if (float.IsInfinity(result))
             return mathblocks_probability_binomial_ordered(n, k);
         return result;
     }
@@ -161,11 +161,11 @@ internal static unsafe class ProbabilityModule
     // (n - k + index) / index, so the running value after step i is about C(n - k + i, i), never above the final value; the result is +infinity
     // only when C(n, k) itself exceeds the largest double.
     [CudaDevice]
-    private static double mathblocks_probability_binomial_ordered(long n, int k)
+    private static float mathblocks_probability_binomial_ordered(long n, int k)
     {
-        double result = 1.0;
+        float result = 1.0f;
         for (int index = 1; index <= k; index++)
-            result = result * ((double)(n - k + index) / index);
+            result = result * ((float)(n - k + index) / index);
         return result;
     }
 
@@ -175,15 +175,15 @@ internal static unsafe class ProbabilityModule
     // helper's own result, so a later load returns the same bits; the stores are aligned 64-bit writes, so two threads that fill one entry
     // write the same bits, and a thread that reads a zero evaluates the helper itself. A pair outside the range goes straight to the helper.
     [CudaDevice]
-    private static double mathblocks_probability_binomial_memo(long n, int k)
+    private static float mathblocks_probability_binomial_memo(long n, int k)
     {
         if (k < 0 || k > n || n > 1023)
             return mathblocks_probability_binomial(n, k);
         int row = (int)n;
         int half = k > row - k ? row - k : k;
         int index = (row / 2) * ((row - 1) / 2) + row + half;
-        double entry = mathblocks_binomial_table_load(index);
-        if (entry != 0.0)
+        float entry = mathblocks_binomial_table_load(index);
+        if (entry != 0.0f)
             return entry;
         entry = mathblocks_probability_binomial(n, k);
         mathblocks_binomial_table_store(index, entry);
@@ -191,115 +191,115 @@ internal static unsafe class ProbabilityModule
     }
 
     [CudaDevice]
-    private static bool mathblocks_probability_distribution([CudaReadOnly] double* values, int count)
+    private static bool mathblocks_probability_distribution([CudaReadOnly] float* values, int count)
     {
         if (count <= 0)
             return false;
         for (int index = 0; index < count; index++)
-            if (values[index] < 0.0) return false;
-        return Math.Abs(mathblocks_compensated_sum(values, count) - 1.0) <= 1e-10;
+            if (values[index] < 0.0f) return false;
+        return MathF.Abs(mathblocks_compensated_sum(values, count) - 1.0f) <= 1e-5f;
     }
 
     [CudaDevice]
-    private static double mathblocks_probability_entropy([CudaReadOnly] double* values, int count)
+    private static float mathblocks_probability_entropy([CudaReadOnly] float* values, int count)
     {
-        double entropy = 0.0;
+        float entropy = 0.0f;
         for (int index = 0; index < count; index++)
-            if (values[index] > 0.0)
+            if (values[index] > 0.0f)
                 entropy -= values[index] * mathblocks_natural_logarithm(values[index]);
         return entropy;
     }
 
     [CudaDevice]
-    private static double mathblocks_probability_kl(
-        [CudaReadOnly] double* probabilities,
-        [CudaReadOnly] double* reference,
+    private static float mathblocks_probability_kl(
+        [CudaReadOnly] float* probabilities,
+        [CudaReadOnly] float* reference,
         int count)
     {
-        double result = 0.0;
+        float result = 0.0f;
         for (int index = 0; index < count; index++)
-            if (probabilities[index] > 0.0)
+            if (probabilities[index] > 0.0f)
                 result += probabilities[index] *
                     mathblocks_natural_logarithm(probabilities[index] / reference[index]);
         return result;
     }
 
     [CudaDevice]
-    private static double mathblocks_probability_log_gamma_core(double value)
+    private static float mathblocks_probability_log_gamma_core(float value)
     {
-        ReadOnlySpan<double> coefficients = stackalloc double[8]
+        ReadOnlySpan<float> coefficients = stackalloc float[8]
         {
-            676.5203681218851,
-            -1259.1392167224028,
-            771.32342877765313,
-            -176.61502916214059,
-            12.507343278686905,
-            -0.13857109526572012,
-            9.9843695780195716e-6,
-            1.5056327351493116e-7
+            676.5203681218851f,
+            -1259.1392167224028f,
+            771.32342877765313f,
+            -176.61502916214059f,
+            12.507343278686905f,
+            -0.13857109526572012f,
+            9.9843695780195716e-6f,
+            1.5056327351493116e-7f
         };
-        value -= 1.0;
-        double sum = 0.99999999999980993;
+        value -= 1.0f;
+        float sum = 0.99999999999980993f;
         for (int index = 0; index < 8; index++)
-            sum += coefficients[index] / (value + index + 1.0);
+            sum += coefficients[index] / (value + index + 1.0f);
         // CoreCLR computes value + lanczosCoefficients.Length - 0.5: (value + 8) - 0.5, two roundings.
-        double shifted = value + 8.0;
-        double t = shifted - 0.5;
-        return 0.5 * mathblocks_natural_logarithm(
-                   2.0 * 3.141592653589793238462643383279502884) +
-               (value + 0.5) * mathblocks_natural_logarithm(t) - t +
+        float shifted = value + 8.0f;
+        float t = shifted - 0.5f;
+        return 0.5f * mathblocks_natural_logarithm(
+                   2.0f * 3.141592653589793238462643383279502884f) +
+               (value + 0.5f) * mathblocks_natural_logarithm(t) - t +
                mathblocks_natural_logarithm(sum);
     }
 
     [CudaDevice]
-    private static double mathblocks_probability_log_gamma(double value)
+    private static float mathblocks_probability_log_gamma(float value)
     {
-        if (value < 0.5)
+        if (value < 0.5f)
         {
-            return mathblocks_natural_logarithm(3.141592653589793238462643383279502884) -
+            return mathblocks_natural_logarithm(3.141592653589793238462643383279502884f) -
                 mathblocks_natural_logarithm(
-                    mathblocks_sine(3.141592653589793238462643383279502884 * value)) -
-                mathblocks_probability_log_gamma_core(1.0 - value);
+                    mathblocks_sine(3.141592653589793238462643383279502884f * value)) -
+                mathblocks_probability_log_gamma_core(1.0f - value);
         }
         return mathblocks_probability_log_gamma_core(value);
     }
 
     [CudaDevice]
-    private static double mathblocks_probability_beta_fraction(double x, double left, double right, bool* converged)
+    private static float mathblocks_probability_beta_fraction(float x, float left, float right, bool* converged)
     {
         int maximum_iterations = mathblocks_limit_incomplete_beta_maximum_iterations();
-        double tolerance = mathblocks_limit_incomplete_beta_tolerance();
-        const double minimum = 1e-300;
+        float tolerance = mathblocks_limit_incomplete_beta_tolerance();
+        const float minimum = 1e-30f;
         *converged = false;
-        double qab = left + right;
-        double qap = left + 1.0;
-        double qam = left - 1.0;
-        double c = 1.0;
-        double d = 1.0 - qab * x / qap;
-        if (Math.Abs(d) < minimum) d = minimum;
-        d = 1.0 / d;
-        double result = d;
+        float qab = left + right;
+        float qap = left + 1.0f;
+        float qam = left - 1.0f;
+        float c = 1.0f;
+        float d = 1.0f - qab * x / qap;
+        if (MathF.Abs(d) < minimum) d = minimum;
+        d = 1.0f / d;
+        float result = d;
         for (int iteration = 1; iteration <= maximum_iterations; iteration++)
         {
-            double doubled = 2.0 * iteration;
-            double coefficient = iteration * (right - iteration) * x /
+            float doubled = 2.0f * iteration;
+            float coefficient = iteration * (right - iteration) * x /
                 ((qam + doubled) * (left + doubled));
-            d = 1.0 + coefficient * d;
-            if (Math.Abs(d) < minimum) d = minimum;
-            c = 1.0 + coefficient / c;
-            if (Math.Abs(c) < minimum) c = minimum;
-            d = 1.0 / d;
+            d = 1.0f + coefficient * d;
+            if (MathF.Abs(d) < minimum) d = minimum;
+            c = 1.0f + coefficient / c;
+            if (MathF.Abs(c) < minimum) c = minimum;
+            d = 1.0f / d;
             result *= d * c;
             coefficient = -(left + iteration) * (qab + iteration) * x /
                 ((left + doubled) * (qap + doubled));
-            d = 1.0 + coefficient * d;
-            if (Math.Abs(d) < minimum) d = minimum;
-            c = 1.0 + coefficient / c;
-            if (Math.Abs(c) < minimum) c = minimum;
-            d = 1.0 / d;
-            double delta = d * c;
+            d = 1.0f + coefficient * d;
+            if (MathF.Abs(d) < minimum) d = minimum;
+            c = 1.0f + coefficient / c;
+            if (MathF.Abs(c) < minimum) c = minimum;
+            d = 1.0f / d;
+            float delta = d * c;
             result *= delta;
-            if (Math.Abs(delta - 1.0) <= tolerance)
+            if (MathF.Abs(delta - 1.0f) <= tolerance)
             {
                 *converged = true;
                 break;
@@ -309,61 +309,61 @@ internal static unsafe class ProbabilityModule
     }
 
     [CudaDevice]
-    private static double mathblocks_probability_incomplete_beta(
-        double x,
-        double left,
-        double right,
+    private static float mathblocks_probability_incomplete_beta(
+        float x,
+        float left,
+        float right,
         bool* converged)
     {
         *converged = true;
-        if (x == 0.0) return 0.0;
-        if (x == 1.0) return 1.0;
-        double front = mathblocks_exponential(
+        if (x == 0.0f) return 0.0f;
+        if (x == 1.0f) return 1.0f;
+        float front = mathblocks_exponential(
             mathblocks_probability_log_gamma(left + right) -
             mathblocks_probability_log_gamma(left) -
             mathblocks_probability_log_gamma(right) +
             left * mathblocks_natural_logarithm(x) +
             right * mathblocks_log_one_plus(-x));
-        return x < (left + 1.0) / (left + right + 2.0)
+        return x < (left + 1.0f) / (left + right + 2.0f)
             ? front * mathblocks_probability_beta_fraction(x, left, right, converged) / left
-            : 1.0 - front * mathblocks_probability_beta_fraction(1.0 - x, right, left, converged) / right;
+            : 1.0f - front * mathblocks_probability_beta_fraction(1.0f - x, right, left, converged) / right;
     }
 
     [CudaDevice]
     private static MathBlockComplexValue mathblocks_probability_complex_cube_root(
         MathBlockComplexValue value)
     {
-        if (value.real == 0.0 && value.imaginary == 0.0)
-            return mathblocks_complex_make(0.0, 0.0);
+        if (value.real == 0.0f && value.imaginary == 0.0f)
+            return mathblocks_complex_make(0.0f, 0.0f);
         return mathblocks_complex_from_polar(
             mathblocks_cube_root(mathblocks_complex_magnitude(value)),
-            mathblocks_complex_phase(value) / 3.0);
+            mathblocks_complex_phase(value) / 3.0f);
     }
 
     // Renyi (renyi) or Tsallis entropy of a distribution. Returns false for a nonpositive order; the caller checks
     // that the value is finite.
     [CudaDevice]
     private static bool mathblocks_probability_ordered_entropy_value(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int count,
-        double order,
+        float order,
         bool renyi,
-        double* value)
+        float* value)
     {
-        if (order <= 0.0)
+        if (order <= 0.0f)
             return false;
-        if (order == 1.0)
+        if (order == 1.0f)
         {
             *value = mathblocks_probability_entropy(values, count);
         }
         else
         {
-            double sum = 0.0;
+            float sum = 0.0f;
             for (int index = 0; index < count; index++)
                 sum += mathblocks_power(values[index], order);
             *value = renyi
-                ? mathblocks_natural_logarithm(sum) / (1.0 - order)
-                : (1.0 - sum) / (order - 1.0);
+                ? mathblocks_natural_logarithm(sum) / (1.0f - order)
+                : (1.0f - sum) / (order - 1.0f);
         }
         return true;
     }
@@ -373,9 +373,9 @@ internal static unsafe class ProbabilityModule
     // (30). Writes the result to value and returns whether it is valid: in the source's domain and finite. The
     // probability dispatcher and the elementwise forms both evaluate their rows here.
     [CudaDevice]
-    private static bool mathblocks_probability_scalar_value(int opcode, double a, double b, double c, double* value, bool* converged)
+    private static bool mathblocks_probability_scalar_value(int opcode, float a, float b, float c, float* value, bool* converged)
     {
-        *value = 0.0;
+        *value = 0.0f;
         *converged = true;
         if (opcode == 0 || opcode == 1 || opcode == 2)
         {
@@ -391,8 +391,8 @@ internal static unsafe class ProbabilityModule
             if (opcode == 0)
             {
                 long total = (long)first_integer + second_integer;
-                *value = (double)(first_integer - second_integer) /
-                    (double)total *
+                *value = (float)(first_integer - second_integer) /
+                    (float)total *
                     mathblocks_probability_binomial_memo(total, second_integer);
             }
             else if (opcode == 1)
@@ -401,58 +401,58 @@ internal static unsafe class ProbabilityModule
             }
             else
             {
-                double factorial = 1.0;
+                float factorial = 1.0f;
                 for (int index = 2; index <= first_integer; index++) factorial *= index;
                 *value = factorial;
             }
-            return double.IsFinite(*value);
+            return float.IsFinite(*value);
         }
 
         if (opcode == 23)
         {
-            *value = 0.5 * (1.0 + mathblocks_error_function(a / mathblocks_square_root(2.0)));
-            return double.IsFinite(*value);
+            *value = 0.5f * (1.0f + mathblocks_error_function(a / mathblocks_square_root(2.0f)));
+            return float.IsFinite(*value);
         }
 
         if (opcode == 25 || opcode == 26)
         {
             int count = 0;
-            double rate = a;
-            if (!mathblocks_probability_integer(b, &count) || count < 0 || rate < 0.0)
+            float rate = a;
+            if (!mathblocks_probability_integer(b, &count) || count < 0 || rate < 0.0f)
                 return false;
-            double sum = 0.0;
-            if (opcode == 25 && rate == 0.0)
+            float sum = 0.0f;
+            if (opcode == 25 && rate == 0.0f)
             {
                 // Index 0 contributes 1.0 and every later term is +0.0, so the sum is exactly 1.0.
-                sum = 1.0;
+                sum = 1.0f;
             }
             else if (opcode == 25)
             {
                 // The sum of terms 0..count in index order. A term whose exponent is below -800 is exactly +0.0
                 // (the exponential returns 0.0 below -745.13), and adding +0.0 leaves the sum unchanged, so those
                 // terms are skipped: the exponent rises with the index up to the rate and falls after it.
-                double log_rate = mathblocks_natural_logarithm(rate);
+                float log_rate = mathblocks_natural_logarithm(rate);
                 int peak = rate < count ? (int)rate : count;
                 int first = 0;
-                bool reached = -rate + peak * log_rate - mathblocks_probability_log_gamma(peak + 1.0) >= -800.0;
+                bool reached = -rate + peak * log_rate - mathblocks_probability_log_gamma(peak + 1.0f) >= -800.0f;
                 if (reached)
                 {
                     int high = peak;
                     while (first < high)
                     {
                         int middle = first + (high - first) / 2;
-                        if (-rate + middle * log_rate - mathblocks_probability_log_gamma(middle + 1.0) >= -800.0)
+                        if (-rate + middle * log_rate - mathblocks_probability_log_gamma(middle + 1.0f) >= -800.0f)
                             high = middle;
                         else
                             first = middle + 1;
                     }
                     for (int index = first; index <= count; index++)
                     {
-                        double exponent = -rate + index * log_rate - mathblocks_probability_log_gamma(index + 1.0);
-                        if (index > rate && exponent < -800.0)
+                        float exponent = -rate + index * log_rate - mathblocks_probability_log_gamma(index + 1.0f);
+                        if (index > rate && exponent < -800.0f)
                             break;
                         // Past the peak the terms only fall, so once one leaves the sum unchanged every later one does too.
-                        double next_sum = sum + mathblocks_exponential(exponent);
+                        float next_sum = sum + mathblocks_exponential(exponent);
                         if (index > rate && next_sum == sum)
                             break;
                         sum = next_sum;
@@ -463,16 +463,16 @@ internal static unsafe class ProbabilityModule
             {
                 for (int index = count; index <= count; index++)
                 {
-                    double probability = rate == 0.0
-                        ? (index == 0 ? 1.0 : 0.0)
+                    float probability = rate == 0.0f
+                        ? (index == 0 ? 1.0f : 0.0f)
                         : mathblocks_exponential(
                             -rate + index * mathblocks_natural_logarithm(rate) -
-                            mathblocks_probability_log_gamma(index + 1.0));
+                            mathblocks_probability_log_gamma(index + 1.0f));
                     sum += probability;
                 }
             }
             *value = sum;
-            return double.IsFinite(sum);
+            return float.IsFinite(sum);
         }
 
         if (opcode == 28)
@@ -488,7 +488,7 @@ internal static unsafe class ProbabilityModule
         }
         else if (opcode == 30)
         {
-            if (a < 0.0 || a > 1.0 || b <= 0.0 || c <= 0.0)
+            if (a < 0.0f || a > 1.0f || b <= 0.0f || c <= 0.0f)
                 return false;
             *value = mathblocks_probability_incomplete_beta(a, b, c, converged);
             // The Invalid policy makes a non-converged row invalid; the caller counts the row from converged.
@@ -499,7 +499,7 @@ internal static unsafe class ProbabilityModule
         {
             return false;
         }
-        return double.IsFinite(*value);
+        return float.IsFinite(*value);
     }
 
     [CudaDevice(Name = "mathblocks_probability_dispatch")]
@@ -516,7 +516,7 @@ internal static unsafe class ProbabilityModule
         MathBlockSlot* fourth = Cuda.ReadOnly(input_count > 3 ? inputs[3] : null);
         if (thread == 0)
         {
-            output->scalar_value = 0.0;
+            output->scalar_value = 0.0f;
             output->boolean_value = 0;
             output->rows = 0;
             output->columns = 0;
@@ -529,10 +529,10 @@ internal static unsafe class ProbabilityModule
         if (!output->valid)
             return;
 
-        double* a = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
-        double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
-        double* result = (double*)output->data_pointer;
-        double* scratch = (double*)output->scratch_pointer;
+        float* a = Cuda.ReadOnly(first == null ? null : (float*)first->data_pointer);
+        float* b = Cuda.ReadOnly(second == null ? null : (float*)second->data_pointer);
+        float* result = (float*)output->data_pointer;
+        float* scratch = (float*)output->scratch_pointer;
 
         if (opcode == 3)
         {
@@ -548,11 +548,11 @@ internal static unsafe class ProbabilityModule
             Cuda.SyncThreads();
             for (int mask = thread + 1; output->valid && mask <= output->count; mask += Cuda.BlockDim.X)
             {
-                double sum = 0.0;
+                float sum = 0.0f;
                 for (int index = 0; index < first->count; index++)
                     if ((mask & (1 << index)) != 0) sum += a[index];
                 result[mask - 1] = sum;
-                if (!double.IsFinite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
+                if (!float.IsFinite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
             }
             return;
         }
@@ -564,14 +564,14 @@ internal static unsafe class ProbabilityModule
             Cuda.SyncThreads();
             if (first->count <= 1)
             {
-                if (thread == 0) result[0] = 0.0;
+                if (thread == 0) result[0] = 0.0f;
             }
             else
             {
                 for (int index = thread + 1; index < first->count; index += Cuda.BlockDim.X)
                 {
                     result[index - 1] = index * a[index];
-                    if (!double.IsFinite(result[index - 1])) Cuda.AtomicExchange(ref output->valid, 0);
+                    if (!float.IsFinite(result[index - 1])) Cuda.AtomicExchange(ref output->valid, 0);
                 }
             }
             return;
@@ -587,28 +587,28 @@ internal static unsafe class ProbabilityModule
                     return;
                 }
                 for (int index = 0; index < first->count; index++)
-                    if (a[index] < 0.0) output->valid = 0;
+                    if (a[index] < 0.0f) output->valid = 0;
                 mathblocks_set_vector_shape(output, first->count);
                 if (opcode == 24)
                 {
-                    double total = mathblocks_compensated_sum(a, first->count);
+                    float total = mathblocks_compensated_sum(a, first->count);
                     for (int index = 0; output->valid && index < first->count; index++)
-                        result[index] = a[index] * (1.0 / total);
+                        result[index] = a[index] * (1.0f / total);
                 }
                 else
                 {
-                    double maximum = a[0];
+                    float maximum = a[0];
                     for (int index = 1; index < first->count; index++)
                         maximum = mathblocks_maximum(maximum, a[index]);
                     for (int index = 0; index < first->count; index++)
                         result[index] = mathblocks_exponential(a[index] - maximum);
-                    double total = mathblocks_compensated_sum(result, first->count);
-                    double scale = 1.0 / total;
+                    float total = mathblocks_compensated_sum(result, first->count);
+                    float scale = 1.0f / total;
                     for (int index = 0; index < first->count; index++)
                         result[index] *= scale;
                 }
                 for (int index = 0; index < first->count; index++)
-                    if (!double.IsFinite(result[index])) output->valid = 0;
+                    if (!float.IsFinite(result[index])) output->valid = 0;
             }
             return;
         }
@@ -619,13 +619,13 @@ internal static unsafe class ProbabilityModule
         if (opcode == 0 || opcode == 1 || opcode == 2 || opcode == 23 || opcode == 25 || opcode == 26 ||
             opcode == 28 || opcode == 29 || opcode == 30)
         {
-            double value = 0.0;
+            float value = 0.0f;
             bool converged = true;
             bool valid = mathblocks_probability_scalar_value(
                 opcode,
-                first == null ? 0.0 : first->scalar_value,
-                second == null ? 0.0 : second->scalar_value,
-                third == null ? 0.0 : third->scalar_value,
+                first == null ? 0.0f : first->scalar_value,
+                second == null ? 0.0f : second->scalar_value,
+                third == null ? 0.0f : third->scalar_value,
                 &value,
                 &converged);
             if (!converged) mathblocks_nonconvergence_record_probability(opcode);
@@ -647,7 +647,7 @@ internal static unsafe class ProbabilityModule
                 output->valid = 0;
                 return;
             }
-            double value = 0.0;
+            float value = 0.0f;
             if (opcode == 4)
             {
                 for (int index = 0; index < first->count; index++)
@@ -656,7 +656,7 @@ internal static unsafe class ProbabilityModule
             else if (opcode == 5)
             {
                 value = mathblocks_probability_entropy(a, first->count) /
-                    mathblocks_natural_logarithm(2.0);
+                    mathblocks_natural_logarithm(2.0f);
             }
             else if (opcode == 6)
             {
@@ -673,16 +673,16 @@ internal static unsafe class ProbabilityModule
                 }
                 int first_condition_count = first_count * condition_count;
                 int second_condition_count = second_count * condition_count;
-                double* first_condition = scratch;
-                double* second_condition = first_condition + first_condition_count;
-                double* condition = second_condition + second_condition_count;
+                float* first_condition = scratch;
+                float* second_condition = first_condition + first_condition_count;
+                float* condition = second_condition + second_condition_count;
                 for (int index = 0; index < first_condition_count + second_condition_count + condition_count; index++)
-                    scratch[index] = 0.0;
+                    scratch[index] = 0.0f;
                 for (int first_index = 0; first_index < first_count; first_index++)
                     for (int second_index = 0; second_index < second_count; second_index++)
                         for (int state = 0; state < condition_count; state++)
                         {
-                            double probability = a[(first_index * second_count + second_index) *
+                            float probability = a[(first_index * second_count + second_index) *
                                 condition_count + state];
                             first_condition[first_index * condition_count + state] += probability;
                             second_condition[second_index * condition_count + state] += probability;
@@ -692,9 +692,9 @@ internal static unsafe class ProbabilityModule
                     for (int second_index = 0; second_index < second_count; second_index++)
                         for (int state = 0; state < condition_count; state++)
                         {
-                            double probability = a[(first_index * second_count + second_index) *
+                            float probability = a[(first_index * second_count + second_index) *
                                 condition_count + state];
-                            if (probability == 0.0) continue;
+                            if (probability == 0.0f) continue;
                             value += probability * mathblocks_natural_logarithm(
                                 probability * condition[state] /
                                 (first_condition[first_index * condition_count + state] *
@@ -705,27 +705,27 @@ internal static unsafe class ProbabilityModule
             {
                 for (int index = 0; index < first->count; index++)
                 {
-                    if (a[index] > 0.0 && b[index] == 0.0)
+                    if (a[index] > 0.0f && b[index] == 0.0f)
                     {
                         output->valid = 0;
                         return;
                     }
-                    if (a[index] > 0.0)
+                    if (a[index] > 0.0f)
                         value -= a[index] * mathblocks_natural_logarithm(b[index]);
                 }
             }
             else if (opcode == 8)
             {
-                value = 1.0 - mathblocks_compensated_product_sum(a, a, first->count);
+                value = 1.0f - mathblocks_compensated_product_sum(a, a, first->count);
             }
             else if (opcode == 9)
             {
                 for (int index = 0; index < first->count; index++)
                 {
-                    double difference = mathblocks_square_root(a[index]) - mathblocks_square_root(b[index]);
+                    float difference = mathblocks_square_root(a[index]) - mathblocks_square_root(b[index]);
                     value += difference * difference;
                 }
-                value = mathblocks_square_root(value / 2.0);
+                value = mathblocks_square_root(value / 2.0f);
             }
             else if (opcode == 10)
             {
@@ -735,14 +735,14 @@ internal static unsafe class ProbabilityModule
                     return;
                 }
                 for (int index = 0; index < first->count; index++)
-                    scratch[index] = (a[index] + b[index]) / 2.0;
-                value = 0.5 * (mathblocks_probability_kl(a, scratch, first->count) +
+                    scratch[index] = (a[index] + b[index]) / 2.0f;
+                value = 0.5f * (mathblocks_probability_kl(a, scratch, first->count) +
                                mathblocks_probability_kl(b, scratch, first->count));
             }
             else if (opcode == 11)
             {
                 for (int index = 0; index < first->count; index++)
-                    if (a[index] > 0.0 && b[index] == 0.0)
+                    if (a[index] > 0.0f && b[index] == 0.0f)
                     {
                         output->valid = 0;
                         return;
@@ -758,21 +758,21 @@ internal static unsafe class ProbabilityModule
                     output->valid = 0;
                     return;
                 }
-                double* row_totals = scratch;
-                double* column_totals = scratch + rows;
-                for (int index = 0; index < rows + columns; index++) scratch[index] = 0.0;
+                float* row_totals = scratch;
+                float* column_totals = scratch + rows;
+                for (int index = 0; index < rows + columns; index++) scratch[index] = 0.0f;
                 for (int row = 0; row < rows; row++)
                     for (int column = 0; column < columns; column++)
                     {
-                        double probability = a[row * columns + column];
+                        float probability = a[row * columns + column];
                         row_totals[row] += probability;
                         column_totals[column] += probability;
                     }
                 for (int row = 0; row < rows; row++)
                     for (int column = 0; column < columns; column++)
                     {
-                        double probability = a[row * columns + column];
-                        if (probability > 0.0)
+                        float probability = a[row * columns + column];
+                        if (probability > 0.0f)
                             value += probability * mathblocks_natural_logarithm(
                                 probability / (row_totals[row] * column_totals[column]));
                     }
@@ -797,30 +797,30 @@ internal static unsafe class ProbabilityModule
             else if (opcode == 15)
             {
                 for (int index = 0; index < first->count; index++)
-                    value += Math.Abs(a[index] - b[index]);
-                value /= 2.0;
+                    value += MathF.Abs(a[index] - b[index]);
+                value /= 2.0f;
             }
             output->scalar_value = value;
-            if (!double.IsFinite(value)) output->valid = 0;
+            if (!float.IsFinite(value)) output->valid = 0;
             return;
         }
 
         if (opcode == 17)
         {
-            double parameter = second->scalar_value;
-            if (first->count <= 0 || parameter < 0.0 || parameter > 1.0)
+            float parameter = second->scalar_value;
+            if (first->count <= 0 || parameter < 0.0f || parameter > 1.0f)
             {
                 output->valid = 0;
                 return;
             }
             int degree = first->count - 1;
-            double value = 0.0;
+            float value = 0.0f;
             for (int index = 0; index <= degree; index++)
                 value += a[index] * mathblocks_probability_binomial(degree, index) *
-                    mathblocks_power(parameter, (double)index) *
-                    mathblocks_power(1.0 - parameter, (double)(degree - index));
+                    mathblocks_power(parameter, (float)index) *
+                    mathblocks_power(1.0f - parameter, (float)(degree - index));
             output->scalar_value = value;
-            if (!double.IsFinite(value)) output->valid = 0;
+            if (!float.IsFinite(value)) output->valid = 0;
             return;
         }
 
@@ -833,47 +833,47 @@ internal static unsafe class ProbabilityModule
             }
             MathBlockComplexValue* roots = (MathBlockComplexValue*)output->data_pointer;
             mathblocks_complex_shape(output, 3);
-            double constant = a[0];
-            double linear = a[1];
-            double quadratic = a[2];
-            double leading = a[3];
-            if (leading == 0.0)
+            float constant = a[0];
+            float linear = a[1];
+            float quadratic = a[2];
+            float leading = a[3];
+            if (leading == 0.0f)
             {
                 output->valid = 0;
                 return;
             }
-            double normalized_a = quadratic / leading;
-            double normalized_b = linear / leading;
-            double normalized_c = constant / leading;
-            double p = normalized_b - normalized_a * normalized_a / 3.0;
-            double q = 2.0 * normalized_a * normalized_a * normalized_a / 27.0 -
-                normalized_a * normalized_b / 3.0 + normalized_c;
+            float normalized_a = quadratic / leading;
+            float normalized_b = linear / leading;
+            float normalized_c = constant / leading;
+            float p = normalized_b - normalized_a * normalized_a / 3.0f;
+            float q = 2.0f * normalized_a * normalized_a * normalized_a / 27.0f -
+                normalized_a * normalized_b / 3.0f + normalized_c;
             MathBlockComplexValue square_root = mathblocks_complex_square_root(
-                mathblocks_complex_make(q * q / 4.0 + p * p * p / 27.0, 0.0));
+                mathblocks_complex_make(q * q / 4.0f + p * p * p / 27.0f, 0.0f));
             MathBlockComplexValue u = mathblocks_probability_complex_cube_root(
-                mathblocks_complex_add(mathblocks_complex_make(-q / 2.0, 0.0), square_root));
-            MathBlockComplexValue v = u.real == 0.0 && u.imaginary == 0.0
+                mathblocks_complex_add(mathblocks_complex_make(-q / 2.0f, 0.0f), square_root));
+            MathBlockComplexValue v = u.real == 0.0f && u.imaginary == 0.0f
                 ? mathblocks_probability_complex_cube_root(
-                    mathblocks_complex_subtract(mathblocks_complex_make(-q / 2.0, 0.0), square_root))
+                    mathblocks_complex_subtract(mathblocks_complex_make(-q / 2.0f, 0.0f), square_root))
                 : mathblocks_complex_divide(
-                    mathblocks_complex_make(-p, 0.0),
-                    mathblocks_complex_multiply(mathblocks_complex_make(3.0, 0.0), u));
+                    mathblocks_complex_make(-p, 0.0f),
+                    mathblocks_complex_multiply(mathblocks_complex_make(3.0f, 0.0f), u));
             MathBlockComplexValue omega = mathblocks_complex_make(
-                -0.5,
-                mathblocks_square_root(3.0) / 2.0);
+                -0.5f,
+                mathblocks_square_root(3.0f) / 2.0f);
             roots[0] = mathblocks_complex_subtract(
                 mathblocks_complex_add(u, v),
-                mathblocks_complex_make(normalized_a / 3.0, 0.0));
+                mathblocks_complex_make(normalized_a / 3.0f, 0.0f));
             roots[1] = mathblocks_complex_subtract(
                 mathblocks_complex_add(
                     mathblocks_complex_multiply(omega, u),
                     mathblocks_complex_multiply(mathblocks_complex_conjugate(omega), v)),
-                mathblocks_complex_make(normalized_a / 3.0, 0.0));
+                mathblocks_complex_make(normalized_a / 3.0f, 0.0f));
             roots[2] = mathblocks_complex_subtract(
                 mathblocks_complex_add(
                     mathblocks_complex_multiply(mathblocks_complex_conjugate(omega), u),
                     mathblocks_complex_multiply(omega, v)),
-                mathblocks_complex_make(normalized_a / 3.0, 0.0));
+                mathblocks_complex_make(normalized_a / 3.0f, 0.0f));
             for (int index = 0; index < 3; index++)
                 if (!mathblocks_complex_finite(roots[index])) output->valid = 0;
             return;
@@ -888,8 +888,8 @@ internal static unsafe class ProbabilityModule
                 output->valid = 0;
                 return;
             }
-            for (int index = 0; index <= order; index++) scratch[index] = 0.0;
-            scratch[0] = 1.0;
+            for (int index = 0; index <= order; index++) scratch[index] = 0.0f;
+            scratch[0] = 1.0f;
             for (int value_index = 0; value_index < first->count; value_index++)
             {
                 int maximum = order < value_index + 1 ? order : value_index + 1;
@@ -897,17 +897,17 @@ internal static unsafe class ProbabilityModule
                     scratch[degree] += a[value_index] * scratch[degree - 1];
             }
             output->scalar_value = scratch[order];
-            if (!double.IsFinite(output->scalar_value)) output->valid = 0;
+            if (!float.IsFinite(output->scalar_value)) output->valid = 0;
             return;
         }
 
         if (opcode == 21)
         {
-            double value = 0.0;
+            float value = 0.0f;
             for (int index = first->count - 1; index >= 0; index--)
                 value = value * second->scalar_value + a[index];
             output->scalar_value = value;
-            if (!double.IsFinite(value)) output->valid = 0;
+            if (!float.IsFinite(value)) output->valid = 0;
             return;
         }
 
@@ -918,14 +918,14 @@ internal static unsafe class ProbabilityModule
                 output->valid = 0;
                 return;
             }
-            double maximum = a[0];
+            float maximum = a[0];
             for (int index = 1; index < first->count; index++)
                 maximum = mathblocks_maximum(maximum, a[index]);
-            double sum = 0.0;
+            float sum = 0.0f;
             for (int index = 0; index < first->count; index++)
                 sum += mathblocks_exponential(a[index] - maximum);
             output->scalar_value = maximum + mathblocks_natural_logarithm(sum);
-            if (!double.IsFinite(output->scalar_value)) output->valid = 0;
+            if (!float.IsFinite(output->scalar_value)) output->valid = 0;
             return;
         }
 

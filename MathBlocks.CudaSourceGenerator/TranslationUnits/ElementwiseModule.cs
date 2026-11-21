@@ -19,7 +19,7 @@ internal static unsafe class ElementwiseModule
     [CudaExternal]
     public struct MathBlockSlot
     {
-        public double scalar_value;
+        public float scalar_value;
         public ulong data_pointer;
         public ulong scratch_pointer;
         public CudaInt32 boolean_value;
@@ -31,10 +31,10 @@ internal static unsafe class ElementwiseModule
     }
 
     [CudaExternal]
-    private static bool mathblocks_scalar_value(int opcode, double a, double b, double c, double* value) => throw new NotSupportedException();
+    private static bool mathblocks_scalar_value(int opcode, float a, float b, float c, float* value) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static bool mathblocks_probability_scalar_value(int opcode, double a, double b, double c, double* value, bool* converged) => throw new NotSupportedException();
+    private static bool mathblocks_probability_scalar_value(int opcode, float a, float b, float c, float* value, bool* converged) => throw new NotSupportedException();
 
     [CudaExternal]
     private static void mathblocks_nonconvergence_record_elementwise(int opcode) => throw new NotSupportedException();
@@ -132,7 +132,7 @@ internal static unsafe class ElementwiseModule
     }
 
     [CudaDevice]
-    private static bool mathblocks_elementwise_row_value(int source_opcode, double a, double b, double c, double* value, bool* converged)
+    private static bool mathblocks_elementwise_row_value(int source_opcode, float a, float b, float c, float* value, bool* converged)
     {
         *converged = true;
         return source_opcode >= 64
@@ -142,11 +142,11 @@ internal static unsafe class ElementwiseModule
 
     // Argument row: the vector's row, or the broadcast scalar; an absent argument reads 0.
     [CudaDevice]
-    private static double mathblocks_elementwise_argument([CudaReadOnly] MathBlockSlot* slot, bool vector, int row)
+    private static float mathblocks_elementwise_argument([CudaReadOnly] MathBlockSlot* slot, bool vector, int row)
     {
         if (slot == null)
-            return 0.0;
-        return vector ? ((double*)slot->data_pointer)[row] : slot->scalar_value;
+            return 0.0f;
+        return vector ? ((float*)slot->data_pointer)[row] : slot->scalar_value;
     }
 
     [CudaDevice]
@@ -154,7 +154,7 @@ internal static unsafe class ElementwiseModule
     {
         if (thread != 0)
             return;
-        output->scalar_value = 0.0;
+        output->scalar_value = 0.0f;
         output->boolean_value = 0;
         output->columns = 0;
         output->rows = valid ? count : 0;
@@ -190,17 +190,17 @@ internal static unsafe class ElementwiseModule
         int form,
         int source_opcode,
         int arity,
-        double a,
-        double b,
-        double c,
-        double fill,
-        double* result)
+        float a,
+        float b,
+        float c,
+        float fill,
+        float* result)
     {
-        double value = 0.0;
+        float value = 0.0f;
         bool converged = true;
-        bool row_valid = double.IsFinite(a) &&
-            (arity < 2 || double.IsFinite(b)) &&
-            (arity < 3 || double.IsFinite(c));
+        bool row_valid = float.IsFinite(a) &&
+            (arity < 2 || float.IsFinite(b)) &&
+            (arity < 3 || float.IsFinite(c));
         if (row_valid)
             row_valid = mathblocks_elementwise_row_value(
                 source_opcode,
@@ -265,16 +265,16 @@ internal static unsafe class ElementwiseModule
         bool first_vector = (mask & 1) != 0;
         bool second_vector = (mask & 2) != 0;
         bool third_vector = (mask & 4) != 0;
-        double fill = sibling ? 0.0 : inputs[arity]->scalar_value;
+        float fill = sibling ? 0.0f : inputs[arity]->scalar_value;
         int source_opcode = mathblocks_elementwise_source_opcode(source);
-        double* result = (double*)output->data_pointer;
+        float* result = (float*)output->data_pointer;
         CudaInt32* boolean_result = (CudaInt32*)output->data_pointer;
         for (int row = thread; row < count; row += threads)
         {
-            double value = 0.0;
-            double argument_a = mathblocks_elementwise_argument(first, first_vector, row);
-            double argument_b = mathblocks_elementwise_argument(second, second_vector, row);
-            double argument_c = mathblocks_elementwise_argument(third, third_vector, row);
+            float value = 0.0f;
+            float argument_a = mathblocks_elementwise_argument(first, first_vector, row);
+            float argument_b = mathblocks_elementwise_argument(second, second_vector, row);
+            float argument_c = mathblocks_elementwise_argument(third, third_vector, row);
             bool row_valid = mathblocks_elementwise_row_core(
                 form,
                 source_opcode,
@@ -297,7 +297,7 @@ internal static unsafe class ElementwiseModule
     // count gives the fill and false without evaluating. Arguments beyond the source's arity read 0, as the dispatch's absent slots do.
     // Both forms compute the same way: *result is the value, or the fill for an invalid row, and the return value is the row's validity.
     [CudaDevice(Name = "mathblocks_elementwise_row")]
-    private static bool mathblocks_elementwise_row_entry(int opcode, double a, double b, double c, double fill, double* result)
+    private static bool mathblocks_elementwise_row_entry(int opcode, float a, float b, float c, float fill, float* result)
     {
         int passed_mask = 0;
         int source = 0;
@@ -309,8 +309,8 @@ internal static unsafe class ElementwiseModule
             return false;
         }
         int arity = mathblocks_elementwise_source_arity(source);
-        double argument_b = arity > 1 ? b : 0.0;
-        double argument_c = arity > 2 ? c : 0.0;
+        float argument_b = arity > 1 ? b : 0.0f;
+        float argument_c = arity > 2 ? c : 0.0f;
         return mathblocks_elementwise_row_core(form, mathblocks_elementwise_source_opcode(source), arity, a, argument_b, argument_c, fill, result);
     }
 

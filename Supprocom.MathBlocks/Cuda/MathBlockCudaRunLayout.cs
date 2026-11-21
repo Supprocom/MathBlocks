@@ -4,7 +4,7 @@ namespace Supprocom.MathBlocks.Cuda;
 public static class MathBlockCudaRunLayout
 {
     /// <summary>Gets the size value.</summary>
-    public const int Size = 16;
+    public const int Size = 12;
     /// <summary>Gets the start offset value.</summary>
     public const int StartOffset = 0;
     /// <summary>Gets the length offset value.</summary>

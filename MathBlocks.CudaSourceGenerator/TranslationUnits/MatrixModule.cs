@@ -36,7 +36,7 @@ internal static unsafe class MatrixModule
     [CudaExternal]
     public struct MathBlockSlot
     {
-        public double scalar_value;
+        public float scalar_value;
         public ulong data_pointer;
         public ulong scratch_pointer;
         public CudaInt32 boolean_value;
@@ -48,37 +48,37 @@ internal static unsafe class MatrixModule
     }
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_arc_tangent_2(double left, double right) => throw new NotSupportedException();
+    private static float mathblocks_arc_tangent_2(float left, float right) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_binary_logarithm(double value) => throw new NotSupportedException();
+    private static float mathblocks_binary_logarithm(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_compensated_product_sum([CudaReadOnly] double* first, [CudaReadOnly] double* second, int count) => throw new NotSupportedException();
+    private static float mathblocks_compensated_product_sum([CudaReadOnly] float* first, [CudaReadOnly] float* second, int count) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_compensated_sum([CudaReadOnly] double* values, int count) => throw new NotSupportedException();
+    private static float mathblocks_compensated_sum([CudaReadOnly] float* values, int count) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_cosine(double value) => throw new NotSupportedException();
+    private static float mathblocks_cosine(float value) => throw new NotSupportedException();
 
     [CudaExternal]
-    private static bool mathblocks_nonnegative_integer(double value, int* result) => throw new NotSupportedException();
+    private static bool mathblocks_nonnegative_integer(float value, int* result) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_power(double value, double exponent) => throw new NotSupportedException();
+    private static float mathblocks_power(float value, float exponent) => throw new NotSupportedException();
 
     [CudaExternal]
     private static void mathblocks_set_vector_shape(MathBlockSlot* output, int count) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_sine(double value) => throw new NotSupportedException();
+    private static float mathblocks_sine(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_square_root(double value) => throw new NotSupportedException();
+    private static float mathblocks_square_root(float value) => throw new NotSupportedException();
 
     [CudaExternal(IsPure = true)]
-    private static double mathblocks_maximum(double first, double second) => throw new NotSupportedException();
+    private static float mathblocks_maximum(float first, float second) => throw new NotSupportedException();
 
     [CudaDevice]
     private static void mathblocks_matrix_shape(MathBlockSlot* output, int rows, int columns)
@@ -100,7 +100,7 @@ internal static unsafe class MatrixModule
     }
 
     [CudaDevice]
-    private static void mathblocks_matrix_copy([CudaReadOnly] double* source, double* destination, int count)
+    private static void mathblocks_matrix_copy([CudaReadOnly] float* source, float* destination, int count)
     {
         for (int index = 0; index < count; index++)
             destination[index] = source[index];
@@ -108,7 +108,7 @@ internal static unsafe class MatrixModule
 
     [CudaDevice]
     private static void mathblocks_matrix_swap_rows(
-        double* values,
+        float* values,
         int columns,
         int left,
         int right)
@@ -117,38 +117,38 @@ internal static unsafe class MatrixModule
             return;
         for (int column = 0; column < columns; column++)
         {
-            double temporary = values[left * columns + column];
+            float temporary = values[left * columns + column];
             values[left * columns + column] = values[right * columns + column];
             values[right * columns + column] = temporary;
         }
     }
 
     [CudaDevice]
-    private static double mathblocks_matrix_determinant(
-        [CudaReadOnly] double* source,
+    private static float mathblocks_matrix_determinant(
+        [CudaReadOnly] float* source,
         int size,
-        double* work)
+        float* work)
     {
         mathblocks_matrix_copy(source, work, size * size);
-        double determinant = 1.0;
+        float determinant = 1.0f;
         for (int pivot = 0; pivot < size; pivot++)
         {
             int pivot_row = pivot;
             for (int row = pivot + 1; row < size; row++)
-                if (Math.Abs(work[row * size + pivot]) > Math.Abs(work[pivot_row * size + pivot]))
+                if (MathF.Abs(work[row * size + pivot]) > MathF.Abs(work[pivot_row * size + pivot]))
                     pivot_row = row;
-            if (work[pivot_row * size + pivot] == 0.0)
-                return 0.0;
+            if (work[pivot_row * size + pivot] == 0.0f)
+                return 0.0f;
             if (pivot_row != pivot)
             {
                 mathblocks_matrix_swap_rows(work, size, pivot, pivot_row);
                 determinant = -determinant;
             }
-            double diagonal = work[pivot * size + pivot];
+            float diagonal = work[pivot * size + pivot];
             determinant *= diagonal;
             for (int row = pivot + 1; row < size; row++)
             {
-                double scale = work[row * size + pivot] / diagonal;
+                float scale = work[row * size + pivot] / diagonal;
                 for (int column = pivot + 1; column < size; column++)
                     work[row * size + column] -= scale * work[pivot * size + column];
             }
@@ -158,11 +158,11 @@ internal static unsafe class MatrixModule
 
     [CudaDevice]
     private static bool mathblocks_matrix_try_solve(
-        [CudaReadOnly] double* matrix,
-        [CudaReadOnly] double* right,
+        [CudaReadOnly] float* matrix,
+        [CudaReadOnly] float* right,
         int size,
-        double* augmented,
-        double* solution)
+        float* augmented,
+        float* solution)
     {
         int columns = size + 1;
         for (int row = 0; row < size; row++)
@@ -175,23 +175,23 @@ internal static unsafe class MatrixModule
         {
             int pivot_row = pivot;
             for (int row = pivot + 1; row < size; row++)
-                if (Math.Abs(augmented[row * columns + pivot]) >
-                    Math.Abs(augmented[pivot_row * columns + pivot]))
+                if (MathF.Abs(augmented[row * columns + pivot]) >
+                    MathF.Abs(augmented[pivot_row * columns + pivot]))
                 {
                     pivot_row = row;
                 }
-            if (augmented[pivot_row * columns + pivot] == 0.0)
+            if (augmented[pivot_row * columns + pivot] == 0.0f)
                 return false;
             if (pivot_row != pivot)
                 mathblocks_matrix_swap_rows(augmented, columns, pivot, pivot_row);
-            double diagonal = augmented[pivot * columns + pivot];
+            float diagonal = augmented[pivot * columns + pivot];
             for (int column = pivot; column <= size; column++)
                 augmented[pivot * columns + column] /= diagonal;
             for (int row = 0; row < size; row++)
             {
                 if (row == pivot)
                     continue;
-                double scale = augmented[row * columns + pivot];
+                float scale = augmented[row * columns + pivot];
                 for (int column = pivot; column <= size; column++)
                     augmented[row * columns + column] -=
                         scale * augmented[pivot * columns + column];
@@ -200,7 +200,7 @@ internal static unsafe class MatrixModule
         for (int row = 0; row < size; row++)
         {
             solution[row] = augmented[row * columns + size];
-            if (!double.IsFinite(solution[row]))
+            if (!float.IsFinite(solution[row]))
                 return false;
         }
         return true;
@@ -208,40 +208,40 @@ internal static unsafe class MatrixModule
 
     [CudaDevice]
     private static bool mathblocks_matrix_try_solve_basis(
-        [CudaReadOnly] double* matrix,
+        [CudaReadOnly] float* matrix,
         int size,
         int basis,
-        double* augmented,
-        double* solution)
+        float* augmented,
+        float* solution)
     {
         int columns = size + 1;
         for (int row = 0; row < size; row++)
         {
             for (int column = 0; column < size; column++)
                 augmented[row * columns + column] = matrix[row * size + column];
-            augmented[row * columns + size] = row == basis ? 1.0 : 0.0;
+            augmented[row * columns + size] = row == basis ? 1.0f : 0.0f;
         }
         for (int pivot = 0; pivot < size; pivot++)
         {
             int pivot_row = pivot;
             for (int row = pivot + 1; row < size; row++)
-                if (Math.Abs(augmented[row * columns + pivot]) >
-                    Math.Abs(augmented[pivot_row * columns + pivot]))
+                if (MathF.Abs(augmented[row * columns + pivot]) >
+                    MathF.Abs(augmented[pivot_row * columns + pivot]))
                 {
                     pivot_row = row;
                 }
-            if (augmented[pivot_row * columns + pivot] == 0.0)
+            if (augmented[pivot_row * columns + pivot] == 0.0f)
                 return false;
             if (pivot_row != pivot)
                 mathblocks_matrix_swap_rows(augmented, columns, pivot, pivot_row);
-            double diagonal = augmented[pivot * columns + pivot];
+            float diagonal = augmented[pivot * columns + pivot];
             for (int column = pivot; column <= size; column++)
                 augmented[pivot * columns + column] /= diagonal;
             for (int row = 0; row < size; row++)
             {
                 if (row == pivot)
                     continue;
-                double scale = augmented[row * columns + pivot];
+                float scale = augmented[row * columns + pivot];
                 for (int column = pivot; column <= size; column++)
                     augmented[row * columns + column] -=
                         scale * augmented[pivot * columns + column];
@@ -250,14 +250,14 @@ internal static unsafe class MatrixModule
         for (int row = 0; row < size; row++)
         {
             solution[row] = augmented[row * columns + size];
-            if (!double.IsFinite(solution[row]))
+            if (!float.IsFinite(solution[row]))
                 return false;
         }
         return true;
     }
 
     [CudaDevice]
-    private static bool mathblocks_matrix_is_symmetric([CudaReadOnly] double* values, int rows, int columns)
+    private static bool mathblocks_matrix_is_symmetric([CudaReadOnly] float* values, int rows, int columns)
     {
         if (rows != columns)
             return false;
@@ -270,24 +270,24 @@ internal static unsafe class MatrixModule
 
     [CudaDevice]
     private static bool mathblocks_matrix_is_positive_definite(
-        [CudaReadOnly] double* values,
+        [CudaReadOnly] float* values,
         int size,
-        double* lower)
+        float* lower)
     {
         if (!mathblocks_matrix_is_symmetric(values, size, size))
             return false;
         for (int index = 0; index < size * size; index++)
-            lower[index] = 0.0;
+            lower[index] = 0.0f;
         for (int row = 0; row < size; row++)
         {
             for (int column = 0; column <= row; column++)
             {
-                double sum = values[row * size + column];
+                float sum = values[row * size + column];
                 for (int inner = 0; inner < column; inner++)
                     sum -= lower[row * size + inner] * lower[column * size + inner];
                 if (row == column)
                 {
-                    if (sum <= 0.0)
+                    if (sum <= 0.0f)
                         return false;
                     lower[row * size + column] = mathblocks_square_root(sum);
                 }
@@ -301,15 +301,15 @@ internal static unsafe class MatrixModule
     }
 
     [CudaExternal]
-    private static double* mathblocks_stable_merge_sort(double* values, double* buffer, int count, bool descending) => throw new NotSupportedException();
+    private static float* mathblocks_stable_merge_sort(float* values, float* buffer, int count, bool descending) => throw new NotSupportedException();
 
     [CudaDevice]
     private static bool mathblocks_matrix_symmetric_eigenvalues(
-        [CudaReadOnly] double* source,
+        [CudaReadOnly] float* source,
         int size,
-        double* work,
-        double* eigenvalues,
-        double* buffer)
+        float* work,
+        float* eigenvalues,
+        float* buffer)
     {
         mathblocks_matrix_copy(source, work, size * size);
         long budget = mathblocks_limit_jacobi_rotation_budget(size);
@@ -320,12 +320,12 @@ internal static unsafe class MatrixModule
         {
             int pivot_row = 0;
             int pivot_column = 0;
-            double largest = 0.0;
+            float largest = 0.0f;
             for (int row = 0; row < size; row++)
             {
                 for (int column = row + 1; column < size; column++)
                 {
-                    double magnitude = Math.Abs(work[row * size + column]);
+                    float magnitude = MathF.Abs(work[row * size + column]);
                     if (magnitude <= largest)
                         continue;
                     largest = magnitude;
@@ -333,36 +333,36 @@ internal static unsafe class MatrixModule
                     pivot_column = column;
                 }
             }
-            if (largest == 0.0)
+            if (largest == 0.0f)
             {
                 converged = true;
                 break;
             }
             if (iteration >= budget)
                 break;
-            double angle = 0.5 * mathblocks_arc_tangent_2(
-                2.0 * work[pivot_row * size + pivot_column],
+            float angle = 0.5f * mathblocks_arc_tangent_2(
+                2.0f * work[pivot_row * size + pivot_column],
                 work[pivot_column * size + pivot_column] -
                     work[pivot_row * size + pivot_row]);
-            double cosine = mathblocks_cosine(angle);
-            double sine = mathblocks_sine(angle);
-            double aa = work[pivot_row * size + pivot_row];
-            double bb = work[pivot_column * size + pivot_column];
-            double ab = work[pivot_row * size + pivot_column];
+            float cosine = mathblocks_cosine(angle);
+            float sine = mathblocks_sine(angle);
+            float aa = work[pivot_row * size + pivot_row];
+            float bb = work[pivot_column * size + pivot_column];
+            float ab = work[pivot_row * size + pivot_column];
             work[pivot_row * size + pivot_row] =
-                cosine * cosine * aa - 2.0 * sine * cosine * ab + sine * sine * bb;
+                cosine * cosine * aa - 2.0f * sine * cosine * ab + sine * sine * bb;
             work[pivot_column * size + pivot_column] =
-                sine * sine * aa + 2.0 * sine * cosine * ab + cosine * cosine * bb;
-            work[pivot_row * size + pivot_column] = 0.0;
-            work[pivot_column * size + pivot_row] = 0.0;
+                sine * sine * aa + 2.0f * sine * cosine * ab + cosine * cosine * bb;
+            work[pivot_row * size + pivot_column] = 0.0f;
+            work[pivot_column * size + pivot_row] = 0.0f;
             for (int other = 0; other < size; other++)
             {
                 if (other == pivot_row || other == pivot_column)
                     continue;
-                double first = work[other * size + pivot_row];
-                double second = work[other * size + pivot_column];
-                double first_value = cosine * first - sine * second;
-                double second_value = sine * first + cosine * second;
+                float first = work[other * size + pivot_row];
+                float second = work[other * size + pivot_column];
+                float first_value = cosine * first - sine * second;
+                float second_value = sine * first + cosine * second;
                 work[other * size + pivot_row] = first_value;
                 work[pivot_row * size + other] = first_value;
                 work[other * size + pivot_column] = second_value;
@@ -372,7 +372,7 @@ internal static unsafe class MatrixModule
         for (int index = 0; index < size; index++)
             eigenvalues[index] = work[index * size + index];
         // Ascending, as the source's StableMergeSort; buffer holds size doubles.
-        double* sorted = mathblocks_stable_merge_sort(eigenvalues, buffer, size, false);
+        float* sorted = mathblocks_stable_merge_sort(eigenvalues, buffer, size, false);
         if (sorted != eigenvalues)
             for (int index = 0; index < size; index++)
                 eigenvalues[index] = sorted[index];
@@ -380,7 +380,7 @@ internal static unsafe class MatrixModule
     }
 
     [CudaDevice]
-    private static int mathblocks_matrix_rank([CudaReadOnly] double* source, int rows, int columns, double* work)
+    private static int mathblocks_matrix_rank([CudaReadOnly] float* source, int rows, int columns, float* work)
     {
         mathblocks_matrix_copy(source, work, rows * columns);
         int rank = 0;
@@ -389,21 +389,21 @@ internal static unsafe class MatrixModule
         {
             int pivot_row = rank;
             for (int row = rank + 1; row < rows; row++)
-                if (Math.Abs(work[row * columns + pivot_column]) >
-                    Math.Abs(work[pivot_row * columns + pivot_column]))
+                if (MathF.Abs(work[row * columns + pivot_column]) >
+                    MathF.Abs(work[pivot_row * columns + pivot_column]))
                 {
                     pivot_row = row;
                 }
-            if (work[pivot_row * columns + pivot_column] == 0.0)
+            if (work[pivot_row * columns + pivot_column] == 0.0f)
             {
                 pivot_column++;
                 continue;
             }
             mathblocks_matrix_swap_rows(work, columns, rank, pivot_row);
-            double pivot = work[rank * columns + pivot_column];
+            float pivot = work[rank * columns + pivot_column];
             for (int row = rank + 1; row < rows; row++)
             {
-                double scale = work[row * columns + pivot_column] / pivot;
+                float scale = work[row * columns + pivot_column] / pivot;
                 for (int column = pivot_column; column < columns; column++)
                     work[row * columns + column] -= scale * work[rank * columns + column];
             }
@@ -415,16 +415,16 @@ internal static unsafe class MatrixModule
 
     [CudaDevice]
     private static void mathblocks_matrix_multiply_square(
-        [CudaReadOnly] double* left,
-        [CudaReadOnly] double* right,
+        [CudaReadOnly] float* left,
+        [CudaReadOnly] float* right,
         int size,
-        double* destination)
+        float* destination)
     {
         for (int row = 0; row < size; row++)
         {
             for (int column = 0; column < size; column++)
             {
-                double sum = 0.0;
+                float sum = 0.0f;
                 for (int inner = 0; inner < size; inner++)
                     sum += left[row * size + inner] * right[inner * size + column];
                 destination[row * size + column] = sum;
@@ -446,12 +446,12 @@ internal static unsafe class MatrixModule
 
     [CudaDevice]
     private static void mathblocks_matrix_submatrix_from_masks(
-        [CudaReadOnly] double* source,
+        [CudaReadOnly] float* source,
         int source_columns,
         int row_mask,
         int column_mask,
         int order,
-        double* destination)
+        float* destination)
     {
         int output_row = 0;
         for (int row = 0; row < 31; row++)
@@ -484,7 +484,7 @@ internal static unsafe class MatrixModule
         MathBlockSlot* third = Cuda.ReadOnly(input_count > 2 ? inputs[2] : null);
         if (thread == 0)
         {
-            output->scalar_value = 0.0;
+            output->scalar_value = 0.0f;
             output->boolean_value = 0;
             output->rows = 0;
             output->columns = 0;
@@ -497,10 +497,10 @@ internal static unsafe class MatrixModule
         if (!output->valid)
             return;
 
-        double* a = Cuda.ReadOnly(first == null ? null : (double*)first->data_pointer);
-        double* b = Cuda.ReadOnly(second == null ? null : (double*)second->data_pointer);
-        double* result = (double*)output->data_pointer;
-        double* scratch = (double*)output->scratch_pointer;
+        float* a = Cuda.ReadOnly(first == null ? null : (float*)first->data_pointer);
+        float* b = Cuda.ReadOnly(second == null ? null : (float*)second->data_pointer);
+        float* result = (float*)output->data_pointer;
+        float* scratch = (float*)output->scratch_pointer;
 
         if (opcode == 0 || opcode == 10 || opcode == 22)
         {
@@ -512,11 +512,11 @@ internal static unsafe class MatrixModule
             Cuda.SyncThreads();
             for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
             {
-                double value = opcode == 0 ? a[index] + b[index]
+                float value = opcode == 0 ? a[index] + b[index]
                     : opcode == 10 ? a[index] * b[index]
                     : a[index] - b[index];
                 result[index] = value;
-                if (!double.IsFinite(value)) Cuda.AtomicExchange(ref output->valid, 0);
+                if (!float.IsFinite(value)) Cuda.AtomicExchange(ref output->valid, 0);
             }
             return;
         }
@@ -541,7 +541,7 @@ internal static unsafe class MatrixModule
             Cuda.SyncThreads();
             for (int index = thread; output->valid && index < count; index += Cuda.BlockDim.X)
             {
-                double sum = 0.0;
+                float sum = 0.0f;
                 if (opcode == 2)
                 {
                     for (int row = 0; row < first->rows; row++)
@@ -553,7 +553,7 @@ internal static unsafe class MatrixModule
                         sum += a[index * first->columns + column];
                 }
                 result[index] = sum;
-                if (!double.IsFinite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
+                if (!float.IsFinite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
             }
             return;
         }
@@ -590,8 +590,8 @@ internal static unsafe class MatrixModule
             {
                 int row = flat / first->columns;
                 int column = flat - row * first->columns;
-                double left_product = 0.0;
-                double right_product = 0.0;
+                float left_product = 0.0f;
+                float right_product = 0.0f;
                 for (int inner = 0; inner < first->columns; inner++)
                 {
                     left_product += a[row * first->columns + inner] *
@@ -600,7 +600,7 @@ internal static unsafe class MatrixModule
                         a[inner * first->columns + column];
                 }
                 result[flat] = left_product - right_product;
-                if (!double.IsFinite(result[flat])) Cuda.AtomicExchange(ref output->valid, 0);
+                if (!float.IsFinite(result[flat])) Cuda.AtomicExchange(ref output->valid, 0);
             }
             return;
         }
@@ -618,7 +618,7 @@ internal static unsafe class MatrixModule
             {
                 int row = flat / size;
                 int column = flat - row * size;
-                result[flat] = row == column ? a[row] : 0.0;
+                result[flat] = row == column ? a[row] : 0.0f;
             }
             return;
         }
@@ -648,7 +648,7 @@ internal static unsafe class MatrixModule
             {
                 output->scalar_value = mathblocks_square_root(
                     mathblocks_compensated_product_sum(a, a, first->count));
-                if (!double.IsFinite(output->scalar_value)) output->valid = 0;
+                if (!float.IsFinite(output->scalar_value)) output->valid = 0;
             }
             return;
         }
@@ -662,11 +662,11 @@ internal static unsafe class MatrixModule
             {
                 int row = flat / size;
                 int column = flat - row * size;
-                double sum = 0.0;
+                float sum = 0.0f;
                 for (int inner = 0; inner < first->rows; inner++)
                     sum += a[inner * first->columns + row] * a[inner * first->columns + column];
                 result[flat] = sum;
-                if (!double.IsFinite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
+                if (!float.IsFinite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
             }
             return;
         }
@@ -714,7 +714,7 @@ internal static unsafe class MatrixModule
             {
                 int row = flat / size;
                 int column = flat - row * size;
-                result[flat] = row == column ? 1.0 : 0.0;
+                result[flat] = row == column ? 1.0f : 0.0f;
             }
             return;
         }
@@ -735,7 +735,7 @@ internal static unsafe class MatrixModule
                 int right_column = column - left_column * second->columns;
                 result[flat] = a[left_row * first->columns + left_column] *
                     b[right_row * second->columns + right_column];
-                if (!double.IsFinite(result[flat])) Cuda.AtomicExchange(ref output->valid, 0);
+                if (!float.IsFinite(result[flat])) Cuda.AtomicExchange(ref output->valid, 0);
             }
             return;
         }
@@ -750,11 +750,11 @@ internal static unsafe class MatrixModule
             Cuda.SyncThreads();
             for (int row = thread; output->valid && row < first->rows; row += Cuda.BlockDim.X)
             {
-                double sum = 0.0;
+                float sum = 0.0f;
                 for (int column = 0; column < first->columns; column++)
                     sum += a[row * first->columns + column] * b[column];
                 result[row] = sum;
-                if (!double.IsFinite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
+                if (!float.IsFinite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
             }
             return;
         }
@@ -771,11 +771,11 @@ internal static unsafe class MatrixModule
             {
                 int row = flat / second->columns;
                 int column = flat - row * second->columns;
-                double sum = 0.0;
+                float sum = 0.0f;
                 for (int inner = 0; inner < first->columns; inner++)
                     sum += a[row * first->columns + inner] * b[inner * second->columns + column];
                 result[flat] = sum;
-                if (!double.IsFinite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
+                if (!float.IsFinite(sum)) Cuda.AtomicExchange(ref output->valid, 0);
             }
             return;
         }
@@ -789,7 +789,7 @@ internal static unsafe class MatrixModule
                 int row = flat / second->count;
                 int column = flat - row * second->count;
                 result[flat] = a[row] * b[column];
-                if (!double.IsFinite(result[flat])) Cuda.AtomicExchange(ref output->valid, 0);
+                if (!float.IsFinite(result[flat])) Cuda.AtomicExchange(ref output->valid, 0);
             }
             return;
         }
@@ -822,7 +822,7 @@ internal static unsafe class MatrixModule
             for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
             {
                 result[index] = a[index] * second->scalar_value;
-                if (!double.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
+                if (!float.IsFinite(result[index])) Cuda.AtomicExchange(ref output->valid, 0);
             }
             return;
         }
@@ -852,11 +852,11 @@ internal static unsafe class MatrixModule
                     output->valid = 0;
                     return;
                 }
-                double trace = 0.0;
+                float trace = 0.0f;
                 for (int index = 0; index < first->rows; index++)
                     trace += a[index * first->columns + index];
                 output->scalar_value = trace;
-                if (!double.IsFinite(trace)) output->valid = 0;
+                if (!float.IsFinite(trace)) output->valid = 0;
             }
             return;
         }
@@ -885,7 +885,7 @@ internal static unsafe class MatrixModule
                 return;
             }
             output->scalar_value = mathblocks_matrix_determinant(a, first->rows, scratch);
-            if (!double.IsFinite(output->scalar_value)) output->valid = 0;
+            if (!float.IsFinite(output->scalar_value)) output->valid = 0;
             return;
         }
 
@@ -899,51 +899,51 @@ internal static unsafe class MatrixModule
                 return;
             }
             mathblocks_matrix_shape(output, size, size);
-            double norm = 0.0;
+            float norm = 0.0f;
             for (int row = 0; row < size; row++)
             {
-                double row_sum = 0.0;
+                float row_sum = 0.0f;
                 for (int column = 0; column < size; column++)
-                    row_sum += Math.Abs(a[row * size + column]);
+                    row_sum += MathF.Abs(a[row * size + column]);
                 if (row_sum > norm) norm = row_sum;
             }
             // An overflowing norm would ask for int.MaxValue squarings; the result is not finite.
-            if (!double.IsFinite(norm))
+            if (!float.IsFinite(norm))
             {
                 output->valid = 0;
                 return;
             }
             // exp(A) overflows when trace(A) / n > ln(DBL_MAX) + ln(n) / 2 (Hadamard: det(exp A) = exp(trace A) and |det M| <= (sqrt(n) * max|m_ij|)^n), a
             // result the scaling and squaring below can lose to zeros without a non-finite value.
-            double trace = 0.0;
+            float trace = 0.0f;
             for (int index = 0; index < size; index++)
                 trace += a[index * size + index];
-            if (trace / size > 709.782712893383973096 + 0.5 * (mathblocks_binary_logarithm((double)size) * 0.693147180559945309417))
+            if (trace / size > 709.782712893383973096f + 0.5f * (mathblocks_binary_logarithm((float)size) * 0.693147180559945309417f))
             {
                 output->valid = 0;
                 return;
             }
-            int scaling = norm > 1.0 ? (int)Math.Ceiling(mathblocks_binary_logarithm(norm)) : 0;
+            int scaling = norm > 1.0f ? (int)MathF.Ceiling(mathblocks_binary_logarithm(norm)) : 0;
             if (scaling < 0) scaling = 0;
-            double scale = mathblocks_power(2.0, (double)-scaling);
-            double* scaled = scratch;
-            double* term = scratch + count;
-            double* temporary = scratch + count * 2;
+            float scale = mathblocks_power(2.0f, (float)-scaling);
+            float* scaled = scratch;
+            float* term = scratch + count;
+            float* temporary = scratch + count * 2;
             for (int index = 0; index < count; index++)
             {
                 scaled[index] = a[index] * scale;
-                result[index] = 0.0;
-                term[index] = 0.0;
+                result[index] = 0.0f;
+                term[index] = 0.0f;
             }
             for (int index = 0; index < size; index++)
             {
-                result[index * size + index] = 1.0;
-                term[index * size + index] = 1.0;
+                result[index * size + index] = 1.0f;
+                term[index * size + index] = 1.0f;
             }
             for (int order = 1; order <= mathblocks_limit_matrix_exponential_taylor_terms(); order++)
             {
                 mathblocks_matrix_multiply_square(term, scaled, size, temporary);
-                double order_scale = 1.0 / order;
+                float order_scale = 1.0f / order;
                 for (int index = 0; index < count; index++)
                 {
                     term[index] = temporary[index] * order_scale;
@@ -956,7 +956,7 @@ internal static unsafe class MatrixModule
                 mathblocks_matrix_copy(temporary, result, count);
             }
             for (int index = 0; index < count; index++)
-                if (!double.IsFinite(result[index])) output->valid = 0;
+                if (!float.IsFinite(result[index])) output->valid = 0;
             return;
         }
 
@@ -973,13 +973,13 @@ internal static unsafe class MatrixModule
             int size = first->rows;
             int count = first->count;
             mathblocks_matrix_shape(output, size, size);
-            double* power = scratch;
-            double* temporary = scratch + count;
+            float* power = scratch;
+            float* temporary = scratch + count;
             mathblocks_matrix_copy(a, power, count);
             for (int index = 0; index < count; index++)
-                result[index] = 0.0;
+                result[index] = 0.0f;
             for (int index = 0; index < size; index++)
-                result[index * size + index] = 1.0;
+                result[index * size + index] = 1.0f;
             while (exponent > 0)
             {
                 if ((exponent & 1) != 0)
@@ -995,7 +995,7 @@ internal static unsafe class MatrixModule
                 }
             }
             for (int index = 0; index < count; index++)
-                if (!double.IsFinite(result[index])) output->valid = 0;
+                if (!float.IsFinite(result[index])) output->valid = 0;
             return;
         }
 
@@ -1008,8 +1008,8 @@ internal static unsafe class MatrixModule
                 return;
             }
             mathblocks_matrix_shape(output, size, size);
-            double* augmented = scratch;
-            double* solution = scratch + size * (size + 1);
+            float* augmented = scratch;
+            float* solution = scratch + size * (size + 1);
             for (int column = 0; column < size; column++)
             {
                 if (!mathblocks_matrix_try_solve_basis(a, size, column, augmented, solution))
@@ -1043,8 +1043,8 @@ internal static unsafe class MatrixModule
                 output->valid = 0;
                 return;
             }
-            double* submatrix = scratch;
-            double* work = scratch + first->count;
+            float* submatrix = scratch;
+            float* work = scratch + first->count;
             output->boolean_value = 1;
             for (int order = 1; output->boolean_value && order <=
                 (first->rows < first->columns ? first->rows : first->columns); order++)
@@ -1066,7 +1066,7 @@ internal static unsafe class MatrixModule
                             column_mask,
                             order,
                             submatrix);
-                        if (mathblocks_matrix_determinant(submatrix, order, work) < 0.0)
+                        if (mathblocks_matrix_determinant(submatrix, order, work) < 0.0f)
                         {
                             output->boolean_value = 0;
                             break;
@@ -1085,7 +1085,7 @@ internal static unsafe class MatrixModule
                 output->valid = 0;
                 return;
             }
-            double* eigenvalues = opcode == 43 ? result : scratch + first->count;
+            float* eigenvalues = opcode == 43 ? result : scratch + first->count;
             if (opcode == 43 && !mathblocks_matrix_is_symmetric(a, size, size))
             {
                 output->valid = 0;
@@ -1105,7 +1105,7 @@ internal static unsafe class MatrixModule
             if (opcode == 33) output->scalar_value = eigenvalues[size - 1];
             else if (opcode == 40) output->scalar_value = eigenvalues[0];
             for (int index = 0; index < size; index++)
-                if (!double.IsFinite(eigenvalues[index])) output->valid = 0;
+                if (!float.IsFinite(eigenvalues[index])) output->valid = 0;
             return;
         }
 
@@ -1116,8 +1116,8 @@ internal static unsafe class MatrixModule
                 output->valid = 0;
                 return;
             }
-            double* submatrix = scratch;
-            double* work = scratch + first->count;
+            float* submatrix = scratch;
+            float* work = scratch + first->count;
             int row_mask = (1 << first->rows) - 1;
             int limit = 1 << first->columns;
             int output_index = 0;
@@ -1139,7 +1139,7 @@ internal static unsafe class MatrixModule
             }
             mathblocks_set_vector_shape(output, output_index);
             for (int index = 0; index < output_index; index++)
-                if (!double.IsFinite(result[index])) output->valid = 0;
+                if (!float.IsFinite(result[index])) output->valid = 0;
             return;
         }
 
@@ -1155,24 +1155,24 @@ internal static unsafe class MatrixModule
                 return;
             }
             for (int index = 0; index < first->count; index++)
-                if (a[index] < 0.0) output->valid = 0;
+                if (a[index] < 0.0f) output->valid = 0;
             if (!output->valid)
                 return;
-            double* vector = opcode == 36 ? result : scratch;
-            double* next = opcode == 36 ? scratch : scratch + size;
-            double* products = opcode == 36 ? scratch + size : scratch + size * 2;
+            float* vector = opcode == 36 ? result : scratch;
+            float* next = opcode == 36 ? scratch : scratch + size;
+            float* products = opcode == 36 ? scratch + size : scratch + size * 2;
             for (int index = 0; index < size; index++)
-                vector[index] = 1.0 / size;
+                vector[index] = 1.0f / size;
             for (int iteration = 0; iteration < iterations; iteration++)
             {
                 for (int row = 0; row < size; row++)
                 {
-                    double sum = 0.0;
+                    float sum = 0.0f;
                     for (int column = 0; column < size; column++)
                         sum += a[row * size + column] * vector[column];
                     next[row] = sum + vector[row];
                 }
-                double norm = mathblocks_compensated_sum(next, size);
+                float norm = mathblocks_compensated_sum(next, size);
                 for (int index = 0; index < size; index++)
                     vector[index] = next[index] / norm;
             }
@@ -1180,24 +1180,24 @@ internal static unsafe class MatrixModule
             {
                 mathblocks_set_vector_shape(output, size);
                 for (int index = 0; index < size; index++)
-                    if (!double.IsFinite(result[index])) output->valid = 0;
+                    if (!float.IsFinite(result[index])) output->valid = 0;
                 return;
             }
             for (int row = 0; row < size; row++)
             {
-                double sum = 0.0;
+                float sum = 0.0f;
                 for (int column = 0; column < size; column++)
                     sum += a[row * size + column] * vector[column];
                 next[row] = sum;
             }
             for (int index = 0; index < size; index++)
                 products[index] = vector[index] * next[index];
-            double numerator = mathblocks_compensated_sum(products, size);
+            float numerator = mathblocks_compensated_sum(products, size);
             for (int index = 0; index < size; index++)
                 products[index] = vector[index] * vector[index];
-            double denominator = mathblocks_compensated_sum(products, size);
+            float denominator = mathblocks_compensated_sum(products, size);
             output->scalar_value = numerator / denominator;
-            if (!double.IsFinite(output->scalar_value)) output->valid = 0;
+            if (!float.IsFinite(output->scalar_value)) output->valid = 0;
             return;
         }
 
@@ -1211,8 +1211,8 @@ internal static unsafe class MatrixModule
             }
             int limit = 1 << size;
             mathblocks_set_vector_shape(output, limit - 1);
-            double* submatrix = scratch;
-            double* work = scratch + first->count;
+            float* submatrix = scratch;
+            float* work = scratch + first->count;
             for (int mask = 1; mask < limit; mask++)
             {
                 int order = mathblocks_pop_count(mask);
@@ -1224,7 +1224,7 @@ internal static unsafe class MatrixModule
                     order,
                     submatrix);
                 result[mask - 1] = mathblocks_matrix_determinant(submatrix, order, work);
-                if (!double.IsFinite(result[mask - 1])) output->valid = 0;
+                if (!float.IsFinite(result[mask - 1])) output->valid = 0;
             }
             return;
         }
@@ -1236,7 +1236,7 @@ internal static unsafe class MatrixModule
                 output->valid = 0;
                 return;
             }
-            output->scalar_value = (double)mathblocks_matrix_rank(
+            output->scalar_value = (float)mathblocks_matrix_rank(
                 a,
                 first->rows,
                 first->columns,
@@ -1256,20 +1256,20 @@ internal static unsafe class MatrixModule
                 return;
             }
             int eliminated = size - retained;
-            double* leading = scratch;
-            double* upper = leading + retained * retained;
-            double* lower = upper + retained * eliminated;
-            double* trailing = lower + eliminated * retained;
-            double* inverse = trailing + eliminated * eliminated;
-            double* augmented = inverse + eliminated * eliminated;
-            double* solution = augmented + eliminated * (eliminated + 1);
-            double* upper_inverse = solution + eliminated;
-            double* product = upper_inverse + retained * eliminated;
+            float* leading = scratch;
+            float* upper = leading + retained * retained;
+            float* lower = upper + retained * eliminated;
+            float* trailing = lower + eliminated * retained;
+            float* inverse = trailing + eliminated * eliminated;
+            float* augmented = inverse + eliminated * eliminated;
+            float* solution = augmented + eliminated * (eliminated + 1);
+            float* upper_inverse = solution + eliminated;
+            float* product = upper_inverse + retained * eliminated;
             for (int row = 0; row < size; row++)
             {
                 for (int column = 0; column < size; column++)
                 {
-                    double value = a[row * size + column];
+                    float value = a[row * size + column];
                     if (row < retained && column < retained)
                         leading[row * retained + column] = value;
                     else if (row < retained)
@@ -1299,7 +1299,7 @@ internal static unsafe class MatrixModule
             {
                 for (int column = 0; column < eliminated; column++)
                 {
-                    double sum = 0.0;
+                    float sum = 0.0f;
                     for (int inner = 0; inner < eliminated; inner++)
                         sum += upper[row * eliminated + inner] *
                             inverse[inner * eliminated + column];
@@ -1310,7 +1310,7 @@ internal static unsafe class MatrixModule
             {
                 for (int column = 0; column < retained; column++)
                 {
-                    double sum = 0.0;
+                    float sum = 0.0f;
                     for (int inner = 0; inner < eliminated; inner++)
                         sum += upper_inverse[row * eliminated + inner] *
                             lower[inner * retained + column];
@@ -1321,7 +1321,7 @@ internal static unsafe class MatrixModule
             for (int index = 0; index < retained * retained; index++)
             {
                 result[index] = leading[index] - product[index];
-                if (!double.IsFinite(result[index])) output->valid = 0;
+                if (!float.IsFinite(result[index])) output->valid = 0;
             }
             return;
         }
@@ -1350,19 +1350,19 @@ internal static unsafe class MatrixModule
                 return;
             }
             int size = first->columns;
-            double* gram = scratch;
-            double* work = gram + size * size;
-            double* eigenvalues = work + size * size;
+            float* gram = scratch;
+            float* work = gram + size * size;
+            float* eigenvalues = work + size * size;
             for (int row = 0; row < size; row++)
             {
                 for (int column = 0; column < size; column++)
                 {
-                    double sum = 0.0;
+                    float sum = 0.0f;
                     for (int inner = 0; inner < first->rows; inner++)
                         sum += a[inner * first->columns + row] *
                             a[inner * first->columns + column];
                     // A square that overflowed gives an invalid result before the eigenvalue step, as on CoreCLR.
-                    if (!double.IsFinite(sum))
+                    if (!float.IsFinite(sum))
                     {
                         output->valid = 0;
                         return;
@@ -1380,11 +1380,11 @@ internal static unsafe class MatrixModule
                     return;
                 }
             }
-            double largest = eigenvalues[size - 1];
-            // The owned maximum, as CoreCLR's Math.Max(0, largest): NaN propagates and a negative zero becomes +0.
-            largest = mathblocks_maximum(0.0, largest);
+            float largest = eigenvalues[size - 1];
+            // The owned maximum, as CoreCLR's MathF.Max(0, largest): NaN propagates and a negative zero becomes +0.
+            largest = mathblocks_maximum(0.0f, largest);
             output->scalar_value = mathblocks_square_root(largest);
-            if (!double.IsFinite(output->scalar_value)) output->valid = 0;
+            if (!float.IsFinite(output->scalar_value)) output->valid = 0;
         }
     }
 }
