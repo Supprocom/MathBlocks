@@ -55,8 +55,8 @@ parallel by graph level while preserving the program's dependency order.
 ```csharp
 var outputs = program.Evaluate(new Dictionary<string, MathBlockValue>
 {
-    ["width"] = MathBlockValue.Scalar(6d),
-    ["height"] = MathBlockValue.Scalar(4d)
+    ["width"] = MathBlockValue.Scalar(6f),
+    ["height"] = MathBlockValue.Scalar(4f)
 });
 
 Console.WriteLine(outputs["area"].AsScalar());

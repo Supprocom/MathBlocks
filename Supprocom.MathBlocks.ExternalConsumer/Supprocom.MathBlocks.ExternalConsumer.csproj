@@ -9,7 +9,7 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <MathBlocksVersion Condition="'$(MathBlocksVersion)' == ''">0.7.0</MathBlocksVersion>
+    <MathBlocksVersion Condition="'$(MathBlocksVersion)' == ''">0.8.0</MathBlocksVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -141,7 +141,7 @@ program for the selected reachable graph. This annotation is authoritative for
 MathBlocks-specific details that abstract mathematical notation cannot safely
 imply:
 
-- binary64 execution and negative zero;
+- binary32 execution and negative zero;
 - exact operation versions and operand order;
 - value types, units, and shapes;
 - structured constants;
