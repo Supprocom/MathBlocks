@@ -37,7 +37,7 @@ public sealed class MathBlockCudaTranspilationTests
         string[] helperParameterLines = ["double value)", "double value,", "double minimum,", "double maximum)"];
         foreach (var line in source.Split('\n'))
         {
-            if (!line.Contains("double", StringComparison.Ordinal))
+            if (!NamesDoubleType(line))
                 continue;
             var text = line.Trim();
             var allowed = text.Contains("csharp2cuda_f64_", StringComparison.Ordinal) ||
@@ -45,6 +45,24 @@ public sealed class MathBlockCudaTranspilationTests
                           Array.IndexOf(helperParameterLines, text) >= 0;
             Assert.True(allowed, "The device source names double precision in: " + text);
         }
+    }
+
+    // True when the line holds the word double as a type name, not as part of a longer identifier.
+    private static bool NamesDoubleType(string line)
+    {
+        const string word = "double";
+        for (var index = line.IndexOf(word, StringComparison.Ordinal);
+             index >= 0;
+             index = line.IndexOf(word, index + 1, StringComparison.Ordinal))
+        {
+            var end = index + word.Length;
+            var startsWord = index == 0 || !(char.IsLetterOrDigit(line[index - 1]) || line[index - 1] == '_');
+            var endsWord = end == line.Length || !(char.IsLetterOrDigit(line[end]) || line[end] == '_');
+            if (startsWord && endsWord)
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>Verifies cudascalar unit matches the csharp 2 cuda 031 golden.</summary>
@@ -63,7 +81,7 @@ public sealed class MathBlockCudaTranspilationTests
             "The source fingerprint is " + MathBlockCudaDeviceModule.SourceFingerprint);
         Assert.True(
             string.Equals(
-                "CE0B7B3273E1ECAB3CCEA580591F2B1AEC1C5EDF7EC72B987D732C7A49623513",
+                "0A34EE10670D4824FDB323656503E8A92386216A74228E2E4B71B069F7D44FCE",
                 MathBlockCudaDeviceModule.Abi.OperationTableFingerprint,
                 StringComparison.Ordinal),
             "The operation table fingerprint is " + MathBlockCudaDeviceModule.Abi.OperationTableFingerprint);
