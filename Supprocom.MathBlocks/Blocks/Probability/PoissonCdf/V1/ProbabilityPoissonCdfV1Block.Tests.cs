@@ -26,7 +26,7 @@ public sealed class ProbabilityPoissonCdfV1BlockTests
     [InlineData(1e6f, 999999, 0x3FDFFDD23D2DBB72L)]
     [InlineData(1e6f, 1000000, 0x3FE0022DC313C605L)]
     [InlineData(1e6f, 100000, 0L)]
-    [InlineData(1e300f, 4194304, 0L)]
+    [InlineData(3.16e37f, 4194304, 0L)]
     [InlineData(0f, 4194304, 0x3FF0000000000000L)]
     public void LongCountsMatchTheSumOverEveryTerm(float rate, int count, long expectedBits)
     {
@@ -44,7 +44,7 @@ public sealed class ProbabilityPoissonCdfV1BlockTests
     [Trait("Category", "CostGuard")]
     public void StoppingOnceTheSumIsUnchangedKeepsTheBits()
     {
-        float[] rates = [1e-300f, 1e-10f, 0.001f, 0.5f, 1f, 2.5f, 10f, 100.5f, 1e3f, 1e5f, 1e6f, 1e7f, float.BitDecrement(1e3f), float.BitIncrement(1e3f), float.BitDecrement(1e5f), float.BitIncrement(1e5f)];
+        float[] rates = [1.03e-37f, 1e-10f, 0.001f, 0.5f, 1f, 2.5f, 10f, 100.5f, 1e3f, 1e5f, 1e6f, 1e7f, float.BitDecrement(1e3f), float.BitIncrement(1e3f), float.BitDecrement(1e5f), float.BitIncrement(1e5f)];
         var mismatches = new List<string>();
         var compared = 0;
         for (var index = 0; index < rates.Length; index++)

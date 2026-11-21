@@ -9,14 +9,14 @@ namespace Supprocom.MathBlocks;
 // available; for the sum also when no running sum is infinite. The reach is two comparisons of the counts. The availability is one lookup:
 // lastUnavailable[i] is the last row at or before i that is unavailable, so a span holds none exactly when lastUnavailable at its end is
 // before its start. A running sum, added left to right from 0.0, is finite at every step whenever the sum of the magnitudes of all the
-// values is below 2^1021: no partial sum can exceed that bound, also after rounding. A series whose magnitudes add up to more than that
-// (values near the largest double) decides each valid row's overflow exactly: the sequential sum is finite exactly when no running sum
+// values is below 2^125: no partial sum can exceed that bound, also after rounding. A series whose magnitudes add up to more than that
+// (values near the largest single) decides each valid row's overflow exactly: the sequential sum is finite exactly when no running sum
 // overflowed, so spans up to LaneWidthLimit wide are added left to right in vector lanes (four rows per vector), and wider ones from
 // scaled prefix sums over each run of valid rows, with the rows in a thin band added in order.
 public static partial class MathBlockVectorMath
 {
-    // Every sum of magnitudes up to this bound keeps every running sum finite (the largest double is 2^1024).
-    private const float FiniteSumBound = 2.2e307f;
+    // Every sum of magnitudes up to this bound keeps every running sum finite (the largest single is just below 2^128; the bound is below 2^125).
+    private const float FiniteSumBound = 4.2e37f;
 
     // The validity of sequence.sum-over-offsets@1 (sum is true) or sequence.maximum-over-offsets@1 (sum is false), row by row.
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
@@ -74,10 +74,10 @@ public static partial class MathBlockVectorMath
     // Runs of valid rows up to this long are added row by row; longer runs of a wider span are decided from prefix sums.
     private const int ShortRun = 8;
 
-    // The scale of the prefix sums: every value times 2^-1000, so that values near the largest double and their sums stay far from overflow.
-    private const float PrefixScale = 9.332636185032189e-302f;
+    // The scale of the prefix sums: every value times 2^-104, so that values near the largest single and their sums stay far from overflow.
+    private const float PrefixScale = 4.930380657631324e-32f;
 
-    // The largest double at that scale: 2^1024 * 2^-1000 = 2^24 (a sum rounds to infinity from just above the largest double).
+    // The largest single at that scale: 2^128 * 2^-104 = 2^24 (a sum rounds to infinity from just above the largest single).
     private const float ScaledLimit = 16777216f;
 
     // For the rows that are valid so far, decides whether a running sum, added left to right from 0.0, overflows. For values that are not infinite the sequential sum is not finite
@@ -117,7 +117,7 @@ public static partial class MathBlockVectorMath
         var width = end - start + 1;
         var first = start < 0 ? -(long)start : 0L;
         var lastBlock = length - (long)MathBlockSimd.BlockWidth - (end > 0 ? end : 0L);
-        var limit = Vector256.Create(float.MaxValue);
+        var limit = Vector128.Create(float.MaxValue);
         ref var origin = ref MemoryMarshal.GetReference(x);
         ref var flags = ref Unsafe.As<bool, byte>(ref MemoryMarshal.GetReference(rowValid));
         uint decided = 0;
@@ -133,17 +133,17 @@ public static partial class MathBlockVectorMath
             }
 
             var at = (nuint)(row + (long)start);
-            Vector256<float> s0 = default, s1 = default, s2 = default, s3 = default, s4 = default, s5 = default, s6 = default, s7 = default;
+            Vector128<float> s0 = default, s1 = default, s2 = default, s3 = default, s4 = default, s5 = default, s6 = default, s7 = default;
             for (var step = 0; step < width; step++, at++)
             {
-                s0 += Vector256.LoadUnsafe(ref origin, at);
-                s1 += Vector256.LoadUnsafe(ref origin, at + 4);
-                s2 += Vector256.LoadUnsafe(ref origin, at + 8);
-                s3 += Vector256.LoadUnsafe(ref origin, at + 12);
-                s4 += Vector256.LoadUnsafe(ref origin, at + 16);
-                s5 += Vector256.LoadUnsafe(ref origin, at + 20);
-                s6 += Vector256.LoadUnsafe(ref origin, at + 24);
-                s7 += Vector256.LoadUnsafe(ref origin, at + 28);
+                s0 += Vector128.LoadUnsafe(ref origin, at);
+                s1 += Vector128.LoadUnsafe(ref origin, at + 4);
+                s2 += Vector128.LoadUnsafe(ref origin, at + 8);
+                s3 += Vector128.LoadUnsafe(ref origin, at + 12);
+                s4 += Vector128.LoadUnsafe(ref origin, at + 16);
+                s5 += Vector128.LoadUnsafe(ref origin, at + 20);
+                s6 += Vector128.LoadUnsafe(ref origin, at + 24);
+                s7 += Vector128.LoadUnsafe(ref origin, at + 28);
             }
 
             decided += KeepFinite(ref flags, row, s0, limit) + KeepFinite(ref flags, row + 4, s1, limit) + KeepFinite(ref flags, row + 8, s2, limit) + KeepFinite(ref flags, row + 12, s3, limit)
@@ -153,9 +153,9 @@ public static partial class MathBlockVectorMath
         for (; row <= lastBlock; row += MathBlockSimd.BlockWidth)
         {
             var at = (nuint)(row + (long)start);
-            var sum = Vector256<float>.Zero;
+            var sum = Vector128<float>.Zero;
             for (var step = 0; step < width; step++)
-                sum += Vector256.LoadUnsafe(ref origin, at + (nuint)step);
+                sum += Vector128.LoadUnsafe(ref origin, at + (nuint)step);
             decided += KeepFinite(ref flags, row, sum, limit);
         }
 
@@ -174,9 +174,9 @@ public static partial class MathBlockVectorMath
 
     // Clears the rows of four whose sum is not finite (a NaN fails the comparison too) and returns how many of them were valid before.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static uint KeepFinite(ref byte flags, int row, Vector256<float> sum, Vector256<float> limit)
+    private static uint KeepFinite(ref byte flags, int row, Vector128<float> sum, Vector128<float> limit)
     {
-        var finite = Vector256.LessThanOrEqual(Vector256.Abs(sum), limit).ExtractMostSignificantBits();
+        var finite = Vector128.LessThanOrEqual(Vector128.Abs(sum), limit).ExtractMostSignificantBits();
         ref var cell = ref Unsafe.Add(ref flags, row);
         var before = Unsafe.ReadUnaligned<uint>(ref cell);
         // Four mask bits to the four bytes of a flag word (bit i to byte i; the products of distinct bits fall on distinct places).
@@ -261,11 +261,11 @@ public static partial class MathBlockVectorMath
             }
 
             // The margin, at scale: the rounding of the prefix sums and of the running sums, and the values too small to keep at scale.
-            const float Epsilon = 2.220446049250313e-16f;
+            const float Epsilon = 1.1920929e-7f;
             var margin = 2f * (count + 2f) * Epsilon * largestPrefix
                 + (width + 2f) * Epsilon * width * largestValue
-                + count * 2.2250738585072014e-308f
-                + ScaledLimit * 4.5e-16f;
+                + count * 1.1754943e-38f
+                + ScaledLimit * 2.4e-7f;
             var headMaximum = 0;
             var tailMaximum = 0;
             var headMinimum = 0;
@@ -320,10 +320,10 @@ public static partial class MathBlockVectorMath
         var total = 0f;
         if (MathBlockSimd.UseBlocks)
         {
-            var sums = Vector256<float>.Zero;
+            var sums = Vector128<float>.Zero;
             for (; index <= x.Length - MathBlockSimd.BlockWidth; index += MathBlockSimd.BlockWidth)
-                sums += Vector256.Abs(Vector256.Create<float>(x[index..]));
-            total = Vector256.Sum(sums);
+                sums += Vector128.Abs(Vector128.Create<float>(x[index..]));
+            total = Vector128.Sum(sums);
         }
 
         for (; index < x.Length; index++)
@@ -395,18 +395,18 @@ public static partial class MathBlockVectorMath
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private static int ValidityBlocks(ReadOnlySpan<float> counts, int[] lastUnavailable, int start, int end, int row, long lastRow, Span<bool> rowValid)
     {
-        var beforeVector = Vector256.Create(start < 0 ? -(float)start : 0f);
+        var beforeVector = Vector128.Create(start < 0 ? -(float)start : 0f);
         var after = end > 0 ? end : 0;
-        var afterVector = Vector256.Create((float)after);
+        var afterVector = Vector128.Create((float)after);
         var lanes = Vector128.Create(0, 1, 2, 3);
         for (; row <= lastRow; row += MathBlockSimd.BlockWidth)
         {
-            var reachable = Vector256.GreaterThanOrEqual(Vector256.Create<float>(counts[row..]), beforeVector)
-                & Vector256.GreaterThanOrEqual(Vector256.Create<float>(counts[(row + after)..]), afterVector);
+            var reachable = Vector128.GreaterThanOrEqual(Vector128.Create<float>(counts[row..]), beforeVector)
+                & Vector128.GreaterThanOrEqual(Vector128.Create<float>(counts[(row + after)..]), afterVector);
             var unavailable = Vector128.Create<int>(lastUnavailable.AsSpan(row + end));
             var spanStarts = Vector128.Create(row + start) + lanes;
             var free = Vector128.LessThan(unavailable, spanStarts);
-            var valid = reachable & Vector256.Create(Vector128.WidenLower(free), Vector128.WidenUpper(free)).AsDouble();
+            var valid = reachable & free.AsSingle();
             var flags = valid.ExtractMostSignificantBits();
             rowValid[row] = (flags & 1u) != 0u;
             rowValid[row + 1] = (flags & 2u) != 0u;

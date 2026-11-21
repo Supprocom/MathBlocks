@@ -130,9 +130,9 @@ public static partial class MathBlockVectorMath
             }
 
             // +0 for an unavailable row, the value for an available one (the flag is 0 or 1).
-            long keep = -(long)Unsafe.Add(ref flags, row);
+            int keep = -(int)Unsafe.Add(ref flags, row);
             sum += BitConverter.Int32BitsToSingle(BitConverter.SingleToInt32Bits(Unsafe.Add(ref input, row)) & keep);
-            gap = keep != 0L ? gap : row;
+            gap = keep != 0 ? gap : row;
             Unsafe.Add(ref prefixRef, row + 1) = sum;
             Unsafe.Add(ref segmentRef, row + 1) = number;
             Unsafe.Add(ref gapRef, row) = gap;
@@ -147,7 +147,7 @@ public static partial class MathBlockVectorMath
             ref var input = ref MemoryMarshal.GetReference(values);
             ref var output = ref MemoryMarshal.GetReference(scaled);
             for (; row <= values.Length - MathBlockSimd.BlockWidth; row += MathBlockSimd.BlockWidth)
-                MathBlockSimd.ScaleUp(Vector256.LoadUnsafe(ref input, (nuint)row)).StoreUnsafe(ref output, (nuint)row);
+                MathBlockSimd.ScaleUp(Vector128.LoadUnsafe(ref input, (nuint)row)).StoreUnsafe(ref output, (nuint)row);
         }
 
         for (; row < values.Length; row++)
@@ -195,16 +195,16 @@ public static partial class MathBlockVectorMath
             ref var resultRef = ref MemoryMarshal.GetArrayDataReference(result);
             ref var validRef = ref Unsafe.As<bool, byte>(ref MemoryMarshal.GetArrayDataReference(valid));
             ref var patterns = ref MemoryMarshal.GetArrayDataReference(PrefixValidityPatterns);
-            var fillBlock = Vector256.Create(fill);
-            var exponent = Vector256.Create(0x7ff0_0000_0000_0000ul);
+            var fillBlock = Vector128.Create(fill);
+            var exponent = Vector128.Create(0x7f80_0000u);
             var lanes = Vector128.Create(0, 1, 2, 3);
             var lastBlock = last - MathBlockSimd.BlockWidth + 1;
             // The final block starts at lastBlock and may overlap the one before it: a row's result does not depend on the others, so computing it twice stores the same row twice.
             while (true)
             {
                 var low = row + start;
-                var after = Vector256.LoadUnsafe(ref prefixRef, (nuint)(row + end + 1));
-                var beforeRaw = Vector256.LoadUnsafe(ref prefixRef, (nuint)low);
+                var after = Vector128.LoadUnsafe(ref prefixRef, (nuint)(row + end + 1));
+                var beforeRaw = Vector128.LoadUnsafe(ref prefixRef, (nuint)low);
                 var numberLowPrevious = Vector128.LoadUnsafe(ref segmentRef, (nuint)low);
                 var numberLow = Vector128.LoadUnsafe(ref segmentRef, (nuint)(low + 1));
                 var numberFrom = Vector128.LoadUnsafe(ref segmentRef, (nuint)(row + lowReach + 1));
@@ -213,14 +213,14 @@ public static partial class MathBlockVectorMath
 
                 var sameSegment = Vector128.Equals(numberFrom, numberTo);
                 var noGap = Vector128.LessThan(gapTo, Vector128.Create(low) + lanes);
-                var inRange = Widen(sameSegment & noGap);
-                var continues = Widen(Vector128.Equals(numberLowPrevious, numberLow));
-                var before = (beforeRaw.AsUInt64() & continues.AsUInt64()).AsDouble();
+                var inRange = sameSegment & noGap;
+                var continues = Vector128.Equals(numberLowPrevious, numberLow);
+                var before = (beforeRaw.AsInt32() & continues).AsSingle();
                 var difference = after - before;
-                var finite = ~Vector256.Equals(difference.AsUInt64() & exponent, exponent);
-                var ok = (inRange.AsUInt64() & finite).AsDouble();
+                var finite = ~Vector128.Equals(difference.AsUInt32() & exponent, exponent);
+                var ok = (inRange.AsUInt32() & finite).AsSingle();
                 var rows = tiny ? MathBlockSimd.ScaleDown(difference) : difference;
-                Vector256.ConditionalSelect(ok, rows, fillBlock).StoreUnsafe(ref resultRef, (nuint)row);
+                Vector128.ConditionalSelect(ok, rows, fillBlock).StoreUnsafe(ref resultRef, (nuint)row);
                 Unsafe.WriteUnaligned(ref Unsafe.Add(ref validRef, row), Unsafe.Add(ref patterns, (int)ok.ExtractMostSignificantBits()));
                 if (row == lastBlock)
                     break;
@@ -249,9 +249,4 @@ public static partial class MathBlockVectorMath
             }
         }
     }
-
-    // The four int lane masks as the four 64-bit lane masks of a vector of doubles (all ones where the int lane is all ones).
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static Vector256<long> Widen(Vector128<int> mask) =>
-        Vector256.Create(Vector128.WidenLower(mask), Vector128.WidenUpper(mask));
 }

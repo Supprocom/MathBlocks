@@ -127,15 +127,15 @@ public static partial class MathBlockVectorMath
     private static bool CountsFormSegments(ReadOnlySpan<float> counts)
     {
         var index = 1;
-        var broken = Vector256<float>.Zero;
+        var broken = Vector128<float>.Zero;
         if (MathBlockSimd.UseBlocks)
         {
-            var one = Vector256.Create(1f);
+            var one = Vector128.Create(1f);
             for (; index <= counts.Length - MathBlockSimd.BlockWidth; index += MathBlockSimd.BlockWidth)
             {
-                var block = Vector256.Create<float>(counts[index..]);
-                var previous = Vector256.Create<float>(counts[(index - 1)..]);
-                broken |= ~(Vector256.Equals(block, Vector256<float>.Zero) | Vector256.Equals(block, previous + one));
+                var block = Vector128.Create<float>(counts[index..]);
+                var previous = Vector128.Create<float>(counts[(index - 1)..]);
+                broken |= ~(Vector128.Equals(block, Vector128<float>.Zero) | Vector128.Equals(block, previous + one));
             }
         }
 
@@ -179,13 +179,13 @@ public static partial class MathBlockVectorMath
         var carryVector = Vector128.Create(carry);
         for (var row = scalarFrom - MathBlockSimd.BlockWidth; row >= 0; row -= MathBlockSimd.BlockWidth)
         {
-            var nonzero = ~Vector256.Equals(Vector256.Create<float>(predicate[row..]), Vector256<float>.Zero);
+            var nonzero = ~Vector128.Equals(Vector128.Create<float>(predicate[row..]), Vector128<float>.Zero);
             var flagBytes = Vector128.CreateScalar(Unsafe.ReadUnaligned<uint>(ref Unsafe.As<bool, byte>(ref Unsafe.AsRef(in predicateValid[row])))).AsByte();
             var flags = Vector128.WidenLower(Vector128.WidenLower(flagBytes)).AsInt32();
             var unavailable = Vector128.Equals(flags, Vector128<int>.Zero);
-            var stops = Vector128.Narrow(nonzero.GetLower().AsInt64(), nonzero.GetUpper().AsInt64()) | unavailable;
-            var segmentEnds = Vector256.Equals(Vector256.Create<float>(counts[(row + 1)..]), Vector256<float>.Zero);
-            var ends = Vector128.Narrow(segmentEnds.GetLower().AsInt64(), segmentEnds.GetUpper().AsInt64());
+            var stops = nonzero.AsInt32() | unavailable;
+            var segmentEnds = Vector128.Equals(Vector128.Create<float>(counts[(row + 1)..]), Vector128<float>.Zero);
+            var ends = segmentEnds.AsInt32();
             var indices = Vector128.Create(row) + lanes;
             var tag = Vector128.ConditionalSelect(
                 stops,
@@ -259,10 +259,10 @@ public static partial class MathBlockVectorMath
         int row,
         long lastRow)
     {
-        var startVector = Vector256.Create((float)start);
-        var neededVector = Vector256.Create((float)(start < 0 ? -(long)start : 0L));
-        var noMatchVector = Vector256.Create(noMatch);
-        var fillVector = Vector256.Create(fill);
+        var startVector = Vector128.Create((float)start);
+        var neededVector = Vector128.Create((float)(start < 0 ? -(long)start : 0L));
+        var noMatchVector = Vector128.Create(noMatch);
+        var fillVector = Vector128.Create(fill);
         var lanes = Vector128.Create(0, 1, 2, 3);
         var endVector = Vector128.Create(end);
         var kindMask = Vector128.Create(3);
@@ -270,20 +270,19 @@ public static partial class MathBlockVectorMath
         for (; row <= lastRow; row += MathBlockSimd.BlockWidth)
         {
             var index = row + start;
-            var counted = Vector256.Create<float>(counts[(start < 0 ? row : index)..]);
-            var reachable = Vector256.GreaterThanOrEqual(counted, start < 0 ? neededVector : startVector);
+            var counted = Vector128.Create<float>(counts[(start < 0 ? row : index)..]);
+            var reachable = Vector128.GreaterThanOrEqual(counted, start < 0 ? neededVector : startVector);
             var stops = Vector128.Create<int>(next.AsSpan(index));
             var found = Vector128.ShiftRightArithmetic(stops, 2);
             var rows = Vector128.Create(row) + lanes;
             var within = Vector128.LessThanOrEqual(found, rows + endVector);
             var matched = within & Vector128.Equals(stops & kindMask, trueKind);
-            var valid = reachable & AsDoubleMask(~within | matched);
+            var valid = reachable & (~within | matched).AsSingle();
             if (writeValues)
             {
-                var offsets = Vector128.ConvertToDouble(Vector128.WidenLower(found - rows));
-                var offsetsUpper = Vector128.ConvertToDouble(Vector128.WidenUpper(found - rows));
-                var resolved = Vector256.ConditionalSelect(AsDoubleMask(matched), Vector256.Create(offsets, offsetsUpper), noMatchVector);
-                Vector256.ConditionalSelect(valid, resolved, fillVector).CopyTo(values[row..]);
+                var offsets = Vector128.ConvertToSingle(found - rows);
+                var resolved = Vector128.ConditionalSelect(matched.AsSingle(), offsets, noMatchVector);
+                Vector128.ConditionalSelect(valid, resolved, fillVector).CopyTo(values[row..]);
             }
 
             var flags = valid.ExtractMostSignificantBits();
@@ -295,9 +294,4 @@ public static partial class MathBlockVectorMath
 
         return row;
     }
-
-    // The four 32-bit lane masks as four 64-bit lane masks (each lane's all-ones or zero is kept).
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static Vector256<float> AsDoubleMask(Vector128<int> mask) =>
-        Vector256.Create(Vector128.WidenLower(mask), Vector128.WidenUpper(mask)).AsDouble();
 }

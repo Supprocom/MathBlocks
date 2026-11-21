@@ -16,11 +16,11 @@ public static partial class MathBlockVectorMath
         if (MathBlockSimd.UseBlocks)
         {
             // Four counts at a time, with the same test as the loop below: negative, or not equal to its own truncation (which a NaN is not).
-            var broken = Vector256<float>.Zero;
+            var broken = Vector128<float>.Zero;
             for (; index <= counts.Length - MathBlockSimd.BlockWidth; index += MathBlockSimd.BlockWidth)
             {
-                var block = Vector256.Create<float>(counts[index..]);
-                broken |= Vector256.LessThan(block, Vector256<float>.Zero) | ~Vector256.Equals(block, Vector256.Truncate(block));
+                var block = Vector128.Create<float>(counts[index..]);
+                broken |= Vector128.LessThan(block, Vector128<float>.Zero) | ~Vector128.Equals(block, Vector128.Truncate(block));
             }
 
             if (broken.ExtractMostSignificantBits() != 0u)

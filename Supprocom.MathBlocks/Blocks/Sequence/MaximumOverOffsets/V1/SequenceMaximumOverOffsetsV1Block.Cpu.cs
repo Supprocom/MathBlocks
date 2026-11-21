@@ -132,8 +132,8 @@ public static partial class MathBlockVectorMath
         {
             for (; index <= values.Length - MathBlockSimd.BlockWidth; index += MathBlockSimd.BlockWidth)
             {
-                var block = Vector256.Create<float>(values[index..]);
-                if (!Vector256.EqualsAll(block, block))
+                var block = Vector128.Create<float>(values[index..]);
+                if (!Vector128.EqualsAll(block, block))
                     return true;
             }
         }

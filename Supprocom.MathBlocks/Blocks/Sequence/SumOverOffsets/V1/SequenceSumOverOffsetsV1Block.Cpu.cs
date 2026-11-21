@@ -84,25 +84,25 @@ public static partial class MathBlockVectorMath
             return row;
         // A span that lies in the series is not wider than it.
         var width = end - start + 1;
-        var limit = Vector256.Create(float.MaxValue);
-        var fillBlock = Vector256.Create(fill);
+        var limit = Vector128.Create(float.MaxValue);
+        var fillBlock = Vector128.Create(fill);
         ref var origin = ref MemoryMarshal.GetReference(x);
         ref var output = ref MemoryMarshal.GetReference(values);
         ref var flags = ref Unsafe.As<bool, byte>(ref MemoryMarshal.GetReference(rowValid));
         for (; row + 28L <= lastBlock; row += 32)
         {
             var at = (nuint)(row + (long)start);
-            Vector256<float> s0 = default, s1 = default, s2 = default, s3 = default, s4 = default, s5 = default, s6 = default, s7 = default;
+            Vector128<float> s0 = default, s1 = default, s2 = default, s3 = default, s4 = default, s5 = default, s6 = default, s7 = default;
             for (var step = 0; step < width; step++, at++)
             {
-                s0 += Vector256.LoadUnsafe(ref origin, at);
-                s1 += Vector256.LoadUnsafe(ref origin, at + 4);
-                s2 += Vector256.LoadUnsafe(ref origin, at + 8);
-                s3 += Vector256.LoadUnsafe(ref origin, at + 12);
-                s4 += Vector256.LoadUnsafe(ref origin, at + 16);
-                s5 += Vector256.LoadUnsafe(ref origin, at + 20);
-                s6 += Vector256.LoadUnsafe(ref origin, at + 24);
-                s7 += Vector256.LoadUnsafe(ref origin, at + 28);
+                s0 += Vector128.LoadUnsafe(ref origin, at);
+                s1 += Vector128.LoadUnsafe(ref origin, at + 4);
+                s2 += Vector128.LoadUnsafe(ref origin, at + 8);
+                s3 += Vector128.LoadUnsafe(ref origin, at + 12);
+                s4 += Vector128.LoadUnsafe(ref origin, at + 16);
+                s5 += Vector128.LoadUnsafe(ref origin, at + 20);
+                s6 += Vector128.LoadUnsafe(ref origin, at + 24);
+                s7 += Vector128.LoadUnsafe(ref origin, at + 28);
             }
 
             StoreFiniteSums(ref flags, ref output, row, s0, limit, fillBlock);
@@ -118,9 +118,9 @@ public static partial class MathBlockVectorMath
         for (; row <= lastBlock; row += MathBlockSimd.BlockWidth)
         {
             var at = (nuint)(row + (long)start);
-            var sum = Vector256<float>.Zero;
+            var sum = Vector128<float>.Zero;
             for (var step = 0; step < width; step++)
-                sum += Vector256.LoadUnsafe(ref origin, at + (nuint)step);
+                sum += Vector128.LoadUnsafe(ref origin, at + (nuint)step);
             StoreFiniteSums(ref flags, ref output, row, sum, limit, fillBlock);
         }
 
@@ -129,12 +129,12 @@ public static partial class MathBlockVectorMath
 
     // Four rows: a row that was valid and whose sum is finite keeps the sum and stays valid (a NaN fails the comparison too); every other row takes the fill and is invalid.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void StoreFiniteSums(ref byte flags, ref float output, int row, Vector256<float> sum, Vector256<float> limit, Vector256<float> fill)
+    private static void StoreFiniteSums(ref byte flags, ref float output, int row, Vector128<float> sum, Vector128<float> limit, Vector128<float> fill)
     {
         ref var cell = ref Unsafe.Add(ref flags, row);
         var valid = Vector128.WidenLower(Vector128.WidenLower(Vector128.CreateScalar(Unsafe.ReadUnaligned<uint>(ref cell)).AsByte())).AsInt32();
-        var keep = Widen(Vector128.GreaterThan(valid, Vector128<int>.Zero)).AsDouble() & Vector256.LessThanOrEqual(Vector256.Abs(sum), limit);
-        Vector256.ConditionalSelect(keep, sum, fill).StoreUnsafe(ref output, (nuint)row);
+        var keep = Vector128.GreaterThan(valid, Vector128<int>.Zero).AsSingle() & Vector128.LessThanOrEqual(Vector128.Abs(sum), limit);
+        Vector128.ConditionalSelect(keep, sum, fill).StoreUnsafe(ref output, (nuint)row);
         Unsafe.WriteUnaligned(ref cell, Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(PrefixValidityPatterns), (int)keep.ExtractMostSignificantBits()));
     }
 }
