@@ -98,6 +98,48 @@ internal static unsafe class ScalarModule
         return scaled * BitConverter.Int32BitsToSingle((remaining + 127) << 23);
     }
 
+    // The remainder of value / modulus with the sign of value (C's fmod, the CoreCLR % operator), exact: the two significands are reduced as
+    // integers, at most 40 bits of the quotient at a time, and the remainder is below 2^24, so scaling it back only moves its exponent. The
+    // device's own fmodf is not used: it compiles to an approximate instruction.
+    [CudaDevice]
+    private static float mathblocks_modulo(float value, float modulus)
+    {
+        uint valueBits = (uint)BitConverter.SingleToInt32Bits(value);
+        uint modulusBits = (uint)BitConverter.SingleToInt32Bits(modulus);
+        uint sign = valueBits & 0x80000000u;
+        uint magnitude = valueBits & 0x7fffffffu;
+        uint divisor = modulusBits & 0x7fffffffu;
+        if (divisor == 0u || magnitude >= 0x7f800000u || divisor > 0x7f800000u)
+            return mathblocks_quiet_nan();
+        if (magnitude < divisor)
+            return value;
+
+        int valueExponent = (int)(magnitude >> 23);
+        int modulusExponent = (int)(divisor >> 23);
+        ulong remainder = magnitude & 0x007fffffu;
+        ulong step = divisor & 0x007fffffu;
+        if (valueExponent == 0)
+            valueExponent = 1;
+        else
+            remainder |= 0x00800000u;
+        if (modulusExponent == 0)
+            modulusExponent = 1;
+        else
+            step |= 0x00800000u;
+
+        int shift = valueExponent - modulusExponent;
+        remainder %= step;
+        while (shift > 0)
+        {
+            int count = shift < 40 ? shift : 40;
+            remainder = (remainder << count) % step;
+            shift -= count;
+        }
+
+        float scaled = mathblocks_scale_binary((float)remainder, modulusExponent - 150);
+        return BitConverter.Int32BitsToSingle((int)((uint)BitConverter.SingleToInt32Bits(scaled) | sign));
+    }
+
     [CudaDevice]
     private static float mathblocks_exponential(float value)
     {
@@ -503,7 +545,7 @@ internal static unsafe class ScalarModule
             case 35: result = MathF.Ceiling(a); break;
             case 36: result = MathF.Round(a); break;
             case 37: result = MathF.Truncate(a); break;
-            case 38: result = a % b; break;
+            case 38: result = mathblocks_modulo(a, b); break;
             case 39:
                 result = a >= 0.0f
                     ? 1.0f / (1.0f + mathblocks_exponential(-a))
