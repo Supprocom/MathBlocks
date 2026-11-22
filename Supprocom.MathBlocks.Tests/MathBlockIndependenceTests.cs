@@ -161,7 +161,7 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Contains("formula/v1/* text eol=lf", attributes, StringComparison.Ordinal);
     }
 
-    /// <summary>Verifies public release metadata declares the 0.6.2 contract.</summary>
+    /// <summary>Verifies public release metadata declares the 0.6.3 contract.</summary>
     [Fact]
     public void PublicReleaseMetadataDeclaresThe060Contract()
     {
@@ -179,7 +179,7 @@ public sealed partial class MathBlockIndependenceTests
         var developmentGuide = File.ReadAllText(
             Path.Combine(root, "docs", "development.md"));
 
-        Assert.Equal("0.6.2", document.Descendants("Version").Single().Value);
+        Assert.Equal("0.6.3", document.Descendants("Version").Single().Value);
         Assert.Equal("PACKAGE-LICENSE.txt", document.Descendants("PackageLicenseFile").Single().Value);
         Assert.Equal("true", document.Descendants("PublishRepositoryUrl").Single().Value);
         Assert.Contains(
@@ -197,7 +197,7 @@ public sealed partial class MathBlockIndependenceTests
         Assert.Contains("## Documentation", readme, StringComparison.Ordinal);
         Assert.Contains("## Build from source", readme, StringComparison.Ordinal);
         Assert.Contains(
-            "dotnet add package Supprocom.MathBlocks --version 0.6.2",
+            "dotnet add package Supprocom.MathBlocks --version 0.6.3",
             readme,
             StringComparison.Ordinal);
         AssertReadmeUsesOneParagraphAndOneSupplementPerSection(readme);
