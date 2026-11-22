@@ -190,7 +190,7 @@ public sealed partial class MathBlockIndependenceTests
             "Dual-licensed: Commercial or AGPL-3.0.",
             document.Descendants("PackageReleaseNotes").Single().Value,
             StringComparison.Ordinal);
-        Assert.Equal(new Version(0, 6, 2, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
+        Assert.Equal(new Version(0, 6, 3, 0), typeof(MathBlockCatalog).Assembly.GetName().Version);
         Assert.Contains("## Build a program", readme, StringComparison.Ordinal);
         Assert.Contains("## Exchange formulas", readme, StringComparison.Ordinal);
         Assert.Contains("## Choose an API", readme, StringComparison.Ordinal);
