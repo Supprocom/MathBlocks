@@ -545,10 +545,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # The package is looked for under the version the project declares, so a release does not leave this step looking for the last one.
+          version="$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' Supprocom.MathBlocks/Supprocom.MathBlocks.csproj)"
+          test -n "$version"
           mapfile -t nupkgs < <(find "$PACKAGE_EVIDENCE" -maxdepth 1 -type f \
-            -name 'Supprocom.MathBlocks.0.6.1.nupkg' -print)
+            -name "Supprocom.MathBlocks.$version.nupkg" -print)
           mapfile -t snupkgs < <(find "$PACKAGE_EVIDENCE" -maxdepth 1 -type f \
-            -name 'Supprocom.MathBlocks.0.6.1.snupkg' -print)
+            -name "Supprocom.MathBlocks.$version.snupkg" -print)
           test "${#nupkgs[@]}" -eq 1
           test "${#snupkgs[@]}" -eq 1
           nupkg="${nupkgs[0]}"
