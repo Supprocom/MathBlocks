@@ -637,7 +637,7 @@ jobs:
           dotnet restore
           Supprocom.MathBlocks.ExternalConsumer/Supprocom.MathBlocks.ExternalConsumer.csproj
           --configfile Supprocom.MathBlocks.ExternalConsumer/NuGet.config
-          --force-evaluate -p:NuGetAuditMode=all -p:MathBlocksVersion=0.6.1
+          --force-evaluate -p:NuGetAuditMode=all -p:MathBlocksVersion=0.6.2
           --artifacts-path "$ARTIFACT_ROOT/package-consumer"
 
       - name: Build and run the exact-package formula consumer
@@ -645,7 +645,7 @@ jobs:
           dotnet build \
             Supprocom.MathBlocks.ExternalConsumer/Supprocom.MathBlocks.ExternalConsumer.csproj \
             -c Release --no-restore --no-incremental --warnaserror \
-            -p:MathBlocksVersion=0.6.1 \
+            -p:MathBlocksVersion=0.6.2 \
             -p:MathBlocksAnalyzerEvidence="$ANALYZER_EVIDENCE" \
             -p:CopyLocalLockFileAssemblies=false \
             --artifacts-path "$ARTIFACT_ROOT/package-consumer"

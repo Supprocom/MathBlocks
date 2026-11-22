@@ -6,20 +6,21 @@
     <RootNamespace>Supprocom.MathBlocks</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>Supprocom.MathBlocks</PackageId>
-    <Version>0.6.1</Version>
-    <AssemblyVersion>0.6.1.0</AssemblyVersion>
+    <Version>0.6.2</Version>
+    <AssemblyVersion>0.6.2.0</AssemblyVersion>
     <Authors>Supprocom</Authors>
     <Company>Supprocom</Company>
     <Copyright>Copyright (C) 2026 mkn8rn</Copyright>
-    <Description>Typed mathematical-operation contracts with exhaustive OpenMath and Content MathML formula interchange, deterministic CoreCLR execution, and CUDA composition. CUDA execution uses the installed NVIDIA driver and CUDA Toolkit 12.0 or later; the package ships no native binaries.</Description>
-    <PackageDescription>Typed mathematical-operation contracts with exhaustive OpenMath and Content MathML formula interchange, deterministic CoreCLR execution, and CUDA composition. CUDA execution uses the installed NVIDIA driver and CUDA Toolkit 12.0 or later; the package ships no native binaries.</PackageDescription>
-    <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
+    <PackageLicenseFile>PACKAGE-LICENSE.txt</PackageLicenseFile>
+    <Description>Commercial or AGPL-3.0. Typed mathematical-operation contracts with exhaustive OpenMath and Content MathML formula interchange, deterministic CoreCLR execution, and CUDA composition. CUDA execution uses the installed NVIDIA driver and CUDA Toolkit 12.0 or later; the package ships no native binaries.</Description>
+    <PackageDescription>Commercial or AGPL-3.0. Typed mathematical-operation contracts with exhaustive OpenMath and Content MathML formula interchange, deterministic CoreCLR execution, and CUDA composition. CUDA execution uses the installed NVIDIA driver and CUDA Toolkit 12.0 or later; the package ships no native binaries.</PackageDescription>
     <PackageProjectUrl>https://github.com/Supprocom/MathBlocks</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Supprocom/MathBlocks</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>mathematics;openmath;mathml;content-mathml;operation-contract;computation-graph;coreclr;cuda;deterministic;numerics</PackageTags>
-    <PackageReleaseNotes>Patch release. Results are bit-identical to 0.6.0 on CoreCLR and CUDA, except one fix: sequence.convolution@1 with exactly one empty operand is now invalid on CoreCLR, as it already was on CUDA. Faster on CoreCLR: elementwise forms, especially minimum and maximum; vector arithmetic and finiteness checks; and window.path.total-variation@1. Faster on CUDA: Spearman rank counts, Poisson CDF, distance correlation, Whitney and McShane extensions, dynamic time warping, and convolution. Adopt 0.6.1 at a run boundary: the CUDA device source, the operation table, the value codec implementation, and the device ABI fingerprint pins differ from 0.6.0, so a consumer that compares contract pins cannot resume or replay runs recorded on 0.6.0. The value codec schema and the causality pins are unchanged. CUDA execution uses the installed NVIDIA driver and CUDA Toolkit 12.0 or later; the package ships no native binaries.</PackageReleaseNotes>
+    <PackageReleaseNotes>Dual-licensed: Commercial or AGPL-3.0. Adds the Supprocom Commercial License as an alternative to the AGPL-3.0.
+Security support until November 2031</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <DebugType>portable</DebugType>
@@ -110,4 +111,31 @@
           Command="dotnet run --project &quot;$(MSBuildProjectDirectory)/../MathBlocks.CudaSourceGenerator/MathBlocks.CudaSourceGenerator.csproj&quot; --configuration $(Configuration) --no-launch-profile -- --translation-root &quot;$(MSBuildProjectDirectory)/../MathBlocks.CudaSourceGenerator/TranslationUnits&quot; --golden-root &quot;$(MSBuildProjectDirectory)/../Supprocom.MathBlocks.Tests/Golden&quot; --generated-source &quot;$(IntermediateOutputPath)MathBlockCudaGeneratedSource.g.cs&quot; --generated-cuda &quot;$(IntermediateOutputPath)MathBlockCudaGeneratedSource.cu&quot;" />
   </Target>
 
+  <!-- The package license file is generated from the repository's COMMERCIAL-LICENSE and LICENSE files. -->
+  <PropertyGroup>
+    <SupprocomPackageLicensePath>$(BaseIntermediateOutputPath)PACKAGE-LICENSE.txt</SupprocomPackageLicensePath>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="$(SupprocomPackageLicensePath)" Pack="true" PackagePath="PACKAGE-LICENSE.txt" Visible="false" />
+  </ItemGroup>
+  <Target Name="WriteSupprocomPackageLicense" BeforeTargets="_GetPackageFiles;GenerateNuspec">
+    <PropertyGroup>
+      <_SupprocomCommercialText>$([MSBuild]::Escape($([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)/../COMMERCIAL-LICENSE').TrimEnd())))</_SupprocomCommercialText>
+      <_SupprocomAgplText>$([MSBuild]::Escape($([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)/../LICENSE').TrimEnd())))</_SupprocomAgplText>
+      <_SupprocomPackageLicenseText>Commercial or AGPL-3.0
+
+This package is available under your choice of two licenses:
+- the Supprocom Commercial License 1.0, for businesses with a registered Supprocom sponsorship (https://github.com/sponsors/Supprocom)%3B or
+- the GNU Affero General Public License, version 3 (AGPL-3.0).
+
+Both texts follow. For each version, the COMMERCIAL-LICENSE file in the project's GitHub repository at the commit this package was built from prevails over this copy.
+
+==============================================================================
+$(_SupprocomCommercialText)
+
+==============================================================================
+$(_SupprocomAgplText)</_SupprocomPackageLicenseText>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(SupprocomPackageLicensePath)" Lines="$(_SupprocomPackageLicenseText)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
 </Project>
