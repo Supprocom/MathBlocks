@@ -34,6 +34,43 @@ public static partial class MathBlockScalar
         return sign * (offset + x + x * z * numerator / denominator);
     }
 
+    // Sine and cosine reduce the argument by quarter turns. pi/2 is split into seven pieces of at most 12 significant bits each (84 bits;
+    // the pieces are 3217/2^11, -2391/2^29, -3829/2^42, 1121/2^54, 3377/2^69, 1587/2^82 and 1303/2^96, the signed remainders of rounding each
+    // step to 12 bits, so the last piece leaves 8.5e-32 of pi/2 out), and the quarter-turn count n < 2^24 is split into two 12-bit halves,
+    // n = high + low. Every product of a half with a piece has at most 24 significant bits, so it is exact. The first three subtractions
+    // (high and low times the first piece, high times the second) are exact too: the result is a multiple of the smaller quantum and below 2^13.
+    // The remaining products are at most 0.02; they are summed from the smallest to the largest and subtracted once, so the reduced argument
+    // has the error of one rounding, at most 3.1e-8 over every float tried. The count comes from a single-precision product, which can be off
+    // by one above 2^23; a second pass with the count corrected by the sign test of the first pass's reduced argument (selects, no loop)
+    // restores |reduced| <= 0.82, so the cost is the same for every argument. The pieces are derived in the tests (TrigonometricReductionTests).
+    private static int DeterministicQuarterTurns(float x)
+    {
+        var count = (int)(x * 0.63661975f + 0.5f);
+        var high = (float)((count >> 12) << 12);
+        var low = (float)(count & 4095);
+        var leading = ((x - high * 1.5708008f) - low * 1.5708008f) - high * -4.4535846e-06f;
+        var correction = (leading > 0.78539816339744830962f ? 1 : 0) - (leading < -0.78539816339744830962f ? 1 : 0);
+        return count + correction;
+    }
+
+    private static float DeterministicReduceByQuarterTurns(float x, int count)
+    {
+        var high = (float)((count >> 12) << 12);
+        var low = (float)(count & 4095);
+        var leading = ((x - high * 1.5708008f) - low * 1.5708008f) - high * -4.4535846e-06f;
+        var trailing = low * 1.6446172e-26f + high * 1.6446172e-26f;
+        trailing = trailing + low * 3.281839e-22f;
+        trailing = trailing + high * 3.281839e-22f;
+        trailing = trailing + low * 5.7208605e-18f;
+        trailing = trailing + high * 5.7208605e-18f;
+        trailing = trailing + low * 6.2228e-14f;
+        trailing = trailing + high * 6.2228e-14f;
+        trailing = trailing + low * -8.706138e-10f;
+        trailing = trailing + high * -8.706138e-10f;
+        trailing = trailing + low * -4.4535846e-06f;
+        return leading - trailing;
+    }
+
     private static float DeterministicSine(float value)
     {
         // Odd function: f(-0) = -0 and f(+0) = +0, as IEEE 754 gives it.
@@ -46,25 +83,16 @@ public static partial class MathBlockScalar
             sign = -1f;
             x = -x;
         }
-        var octantValue = Math.Floor(x / 0.78539816339744830962f);
-        var octant = (int)(octantValue - Math.Floor(octantValue * 0.125f) * 8f);
-        if ((octant & 1) != 0)
-        {
-            octant++;
-            octantValue++;
-        }
-        octant &= 7;
-        if (octant > 3)
-        {
+        // Beyond the domain, and for NaN and the infinities, there is no value.
+        if (!(x <= Math.TrigonometricArgumentLimit))
+            return Math.NaN;
+        var count = DeterministicQuarterTurns(x);
+        var reduced = DeterministicReduceByQuarterTurns(x, count);
+        var quadrant = count & 3;
+        if ((quadrant & 2) != 0)
             sign = -sign;
-            octant -= 4;
-        }
-        // A quarter of pi in three parts for single precision: the first has eight bits, so its product with the octant is exact.
-        var reduced = ((x - octantValue * 0.78515625f) -
-                       octantValue * 0.00024187564849853515625f) -
-                      octantValue * 0.0000000377489497744594108f;
         var square = reduced * reduced;
-        if (octant is 1 or 2)
+        if ((quadrant & 1) != 0)
         {
             var polynomial = (((((
                 -0.0000000000113585365213876817300f * square +
@@ -88,28 +116,17 @@ public static partial class MathBlockScalar
     private static float DeterministicCosine(float value)
     {
         var x = Math.Abs(value);
+        // Beyond the domain, and for NaN and the infinities, there is no value.
+        if (!(x <= Math.TrigonometricArgumentLimit))
+            return Math.NaN;
+        var count = DeterministicQuarterTurns(x);
+        var reduced = DeterministicReduceByQuarterTurns(x, count);
+        var quadrant = count & 3;
         var sign = 1f;
-        var octantValue = Math.Floor(x / 0.78539816339744830962f);
-        var octant = (int)(octantValue - Math.Floor(octantValue * 0.125f) * 8f);
-        if ((octant & 1) != 0)
-        {
-            octant++;
-            octantValue++;
-        }
-        octant &= 7;
-        if (octant > 3)
-        {
-            octant -= 4;
+        if (((quadrant + 1) & 2) != 0)
             sign = -sign;
-        }
-        if (octant > 1)
-            sign = -sign;
-        // A quarter of pi in three parts for single precision: the first has eight bits, so its product with the octant is exact.
-        var reduced = ((x - octantValue * 0.78515625f) -
-                       octantValue * 0.00024187564849853515625f) -
-                      octantValue * 0.0000000377489497744594108f;
         var square = reduced * reduced;
-        if (octant is 1 or 2)
+        if ((quadrant & 1) != 0)
         {
             var sinePolynomial = (((((
                 0.000000000158962301576546568060f * square -

@@ -3,6 +3,8 @@ namespace Supprocom.MathBlocks;
 internal static class MathBlockPrimitives
 {
     public const float PI = 3.141592653589793238462643383279502884f;
+    /// <summary>The largest magnitude for which sine, cosine and tangent have a value (2^24); beyond it, and for NaN and the infinities, the row is invalid.</summary>
+    public const float TrigonometricArgumentLimit = 16777216f;
     public const float E = 2.718281828459045235360287471352662498f;
 
     public static float PositiveInfinity => FromBits(0x7f80_0000u);
