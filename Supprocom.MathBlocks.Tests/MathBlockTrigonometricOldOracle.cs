@@ -111,4 +111,22 @@ internal static class MathBlockTrigonometricOldOracle
         var negative = MathBlockScalar.Exponential(-value);
         return (positive - negative) / (positive + negative);
     }
+
+    /// <summary>The hyperbolic sine as it was: the difference of the exponentials halved, infinite above 88.72.</summary>
+    internal static float HyperbolicSine(float value)
+    {
+        if (value == 0f)
+            return value;
+        var positive = MathBlockScalar.Exponential(value);
+        var negative = MathBlockScalar.Exponential(-value);
+        return (positive - negative) / 2f;
+    }
+
+    /// <summary>The hyperbolic cosine as it was: the sum of the exponentials halved, infinite above 88.72.</summary>
+    internal static float HyperbolicCosine(float value)
+    {
+        var positive = MathBlockScalar.Exponential(value);
+        var negative = MathBlockScalar.Exponential(-value);
+        return (positive + negative) / 2f;
+    }
 }

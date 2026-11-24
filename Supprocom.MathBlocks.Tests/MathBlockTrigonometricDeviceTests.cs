@@ -3,7 +3,7 @@ using Supprocom.MathBlocks.Cuda;
 namespace Supprocom.MathBlocks.Tests;
 
 /// <summary>
-/// Contains the CUDA device tests of the sine, cosine, tangent, hyperbolic tangent and log-gamma that 0.8.0 changes: the device gives the CoreCLR bits,
+/// Contains the CUDA device tests of the sine, cosine, tangent, hyperbolic sine, cosine and tangent and log-gamma that 0.8.0 changes: the device gives the CoreCLR bits,
 /// and the CoreCLR validity, over the class matrix (typical, huge, around the bound 2^24, edges, subnormal, the largest floats, a mixed warp) and
 /// a dense sample of the domain. They need a CUDA device and are excluded from the device-free runs.
 /// </summary>
@@ -14,7 +14,7 @@ public sealed class MathBlockTrigonometricDeviceTests
     /// <summary>
     /// Verifies the elementwise form (rows outside the domain take the fill) and its validity sibling give the CoreCLR bits and flags on the class matrix
     /// followed by a dense sample of about 2^22 values: for the trigonometric functions an even grid and random floats over [-2^24, 2^24]; for the
-    /// hyperbolic tangent a grid over [-110, 110]; for the log-gamma a grid over [-1000, 1000] and random floats of every exponent.
+    /// hyperbolic tangent a grid over [-110, 110]; for the hyperbolic sine and cosine a grid over [-90, 90] and random floats of +-[80, 90]; for the log-gamma a grid over [-1000, 1000] and random floats of every exponent.
     /// </summary>
     [Theory]
     [Trait("Category", "CudaDevice")]
@@ -22,6 +22,8 @@ public sealed class MathBlockTrigonometricDeviceTests
     [InlineData("scalar.cosine")]
     [InlineData("scalar.tangent")]
     [InlineData("scalar.hyperbolic-tangent")]
+    [InlineData("scalar.hyperbolic-sine")]
+    [InlineData("scalar.hyperbolic-cosine")]
     [InlineData("special.log-gamma")]
     public void CUDAMatchesCoreCLROnTheClassMatrixAndADenseSample(string source)
     {
@@ -49,7 +51,7 @@ public sealed class MathBlockTrigonometricDeviceTests
         for (var index = 0; index < 4_096; index++)
             rows.Add((float)(Math.Pow(10, 7 + random.NextDouble() * 31) * (random.Next(2) == 0 ? 1 : -1)));
         // Around the bound 2^24, 64 floats each way, both signs, and around 2^23 and 20, 88.72, -103.97.
-        foreach (var centre in new[] { Limit, 8_388_608f, 20f, 88.72284f, 103.97208f })
+        foreach (var centre in new[] { Limit, 8_388_608f, 20f, 88.72284f, 89.415f, 103.97208f })
         {
             var up = centre;
             var down = centre;
@@ -100,6 +102,14 @@ public sealed class MathBlockTrigonometricDeviceTests
                     rows.Add(-110f + index * (220f / (count / 2)));
                 for (var index = 0; index < count / 2; index++)
                     rows.Add((float)(random.NextDouble() * 220 - 110));
+                break;
+            case "scalar.hyperbolic-sine":
+            case "scalar.hyperbolic-cosine":
+                // A grid over [-90, 90] and random floats of [-90, -80] and [80, 90], across the old overflow at 88.72 and the new one at 89.415.
+                for (var index = 0; index < count / 2; index++)
+                    rows.Add(-90f + index * (180f / (count / 2)));
+                for (var index = 0; index < count / 2; index++)
+                    rows.Add((float)((80 + random.NextDouble() * 10) * (random.Next(2) == 0 ? 1 : -1)));
                 break;
             case "special.log-gamma":
                 for (var index = 0; index < count / 2; index++)
