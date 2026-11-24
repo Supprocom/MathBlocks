@@ -75,13 +75,13 @@ public sealed class MathBlockCudaTranspilationTests
         Assert.Equal(MathBlockCudaDeviceModule.GetSource(MathBlockDomainOptions.Default), MathBlockCudaDeviceModule.Source);
         Assert.True(
             string.Equals(
-                "3EC1D97B919142F05EA54383B07E905548DA118B6D4F82588466E16786B9F41E",
+                "79C84B430A5D73BCC97990EA7550B9EB14B4E0E6C972A3EAFE16A991F6C5C29C",
                 MathBlockCudaDeviceModule.SourceFingerprint,
                 StringComparison.Ordinal),
             "The source fingerprint is " + MathBlockCudaDeviceModule.SourceFingerprint);
         Assert.True(
             string.Equals(
-                "AF0012FF7AA863D2E7C2544E8947201583BF231C752ABCDCCC9B9FB11D22349D",
+                "6661B3842C92CD9B716DC07B8A135A3764792D5E0E7847EE44E83D54F0952044",
                 MathBlockCudaDeviceModule.Abi.OperationTableFingerprint,
                 StringComparison.Ordinal),
             "The operation table fingerprint is " + MathBlockCudaDeviceModule.Abi.OperationTableFingerprint);

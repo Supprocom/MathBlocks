@@ -127,7 +127,7 @@ static __device__ __forceinline__ bool mathblocks_row_sum(const float* values, i
         var fullBytes = Encoding.UTF8.GetBytes(fullSource);
         var fullHash = Convert.ToHexString(SHA256.HashData(fullBytes));
         const string expectedFullHash =
-            "1A44E28E566F860CE6A71CDD3DE606B8FF3A6BCCD82955DD4F271672FB79FE58";
+            "767968EFCC25954E9B0FE82A446536665DA7C793B97D428C2EADF8F6340F01B1";
         if (!string.Equals(fullHash, expectedFullHash, StringComparison.Ordinal))
             throw new InvalidOperationException(
                 $"Full CUDA source hash mismatch. Expected {expectedFullHash}, actual {fullHash}.");
