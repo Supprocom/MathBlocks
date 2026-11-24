@@ -534,14 +534,22 @@ internal static unsafe class ScalarModule
                 }
                 float positive = mathblocks_exponential(a);
                 float negative = mathblocks_exponential(-a);
-                result = (positive - negative) / 2.0f;
+                float quotient = (positive - negative) / 2.0f;
+                // See MathBlockScalar.HyperbolicSine: select (h / 2) * h where the formula overflowed.
+                float halfExponential = mathblocks_exponential(MathF.Abs(a) * 0.5f);
+                float alternative = (halfExponential * 0.5f) * halfExponential;
+                result = float.IsInfinity(quotient) ? MathF.CopySign(alternative, a) : quotient;
                 break;
             }
             case 29:
             {
                 float positive = mathblocks_exponential(a);
                 float negative = mathblocks_exponential(-a);
-                result = (positive + negative) / 2.0f;
+                float quotient = (positive + negative) / 2.0f;
+                // See MathBlockScalar.HyperbolicCosine: select (h / 2) * h where the formula overflowed.
+                float halfExponential = mathblocks_exponential(MathF.Abs(a) * 0.5f);
+                float alternative = (halfExponential * 0.5f) * halfExponential;
+                result = float.IsInfinity(quotient) ? alternative : quotient;
                 break;
             }
             case 30:
