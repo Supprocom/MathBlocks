@@ -551,6 +551,12 @@ internal static unsafe class ScalarModule
                     result = a;
                     break;
                 }
+                // Beyond 20 the result is +-1; see MathBlockScalar.HyperbolicTangent.
+                if (MathF.Abs(a) > 20.0f)
+                {
+                    result = MathF.CopySign(1.0f, a);
+                    break;
+                }
                 float positive = mathblocks_exponential(a);
                 float negative = mathblocks_exponential(-a);
                 result = (positive - negative) / (positive + negative);
