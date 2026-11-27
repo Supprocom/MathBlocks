@@ -1,5 +1,4 @@
 using System.Globalization;
-using Supprocom.MathBlocks.Cuda;
 
 namespace Supprocom.MathBlocks.Tests.Proof;
 
