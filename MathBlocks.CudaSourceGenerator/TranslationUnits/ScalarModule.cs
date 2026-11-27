@@ -269,6 +269,45 @@ internal static unsafe class ScalarModule
         return MathF.CopySign(estimate, value);
     }
 
+    // The largest magnitude for which sine, cosine and tangent have a value (2^24); the same bound as MathBlockPrimitives.TrigonometricArgumentLimit.
+    [CudaDevice]
+    private static float mathblocks_trigonometric_argument_limit()
+    {
+        return 16777216.0f;
+    }
+
+    // The quarter-turn count of x, the same operations in the same order as DeterministicQuarterTurns (ScalarMathBlocks.cs), where the
+    // reduction is described.
+    [CudaDevice]
+    private static int mathblocks_quarter_turns(float x)
+    {
+        int count = (int)(x * 0.63661975f + 0.5f);
+        float high = (float)((count >> 12) << 12);
+        float low = (float)(count & 4095);
+        float leading = ((x - high * 1.5708008f) - low * 1.5708008f) - high * -4.4535846e-06f;
+        int correction = (leading > 0.78539816339744830962f ? 1 : 0) - (leading < -0.78539816339744830962f ? 1 : 0);
+        return count + correction;
+    }
+
+    [CudaDevice]
+    private static float mathblocks_reduce_by_quarter_turns(float x, int count)
+    {
+        float high = (float)((count >> 12) << 12);
+        float low = (float)(count & 4095);
+        float leading = ((x - high * 1.5708008f) - low * 1.5708008f) - high * -4.4535846e-06f;
+        float trailing = low * 1.6446172e-26f + high * 1.6446172e-26f;
+        trailing = trailing + low * 3.281839e-22f;
+        trailing = trailing + high * 3.281839e-22f;
+        trailing = trailing + low * 5.7208605e-18f;
+        trailing = trailing + high * 5.7208605e-18f;
+        trailing = trailing + low * 6.2228e-14f;
+        trailing = trailing + high * 6.2228e-14f;
+        trailing = trailing + low * -8.706138e-10f;
+        trailing = trailing + high * -8.706138e-10f;
+        trailing = trailing + low * -4.4535846e-06f;
+        return leading - trailing;
+    }
+
     [CudaDevice]
     private static float mathblocks_sine(float value)
     {
@@ -282,24 +321,16 @@ internal static unsafe class ScalarModule
             sign = -1.0f;
             x = -x;
         }
-        float octant_value = MathF.Floor(x / 0.78539816339744830962f);
-        int octant = (int)(octant_value - MathF.Floor(octant_value * 0.125f) * 8.0f);
-        if ((octant & 1) != 0)
-        {
-            octant++;
-            octant_value++;
-        }
-        octant &= 7;
-        if (octant > 3)
-        {
+        // Beyond the domain, and for NaN and the infinities, there is no value.
+        if (!(x <= mathblocks_trigonometric_argument_limit()))
+            return mathblocks_quiet_nan();
+        int count = mathblocks_quarter_turns(x);
+        float reduced = mathblocks_reduce_by_quarter_turns(x, count);
+        int quadrant = count & 3;
+        if ((quadrant & 2) != 0)
             sign = -sign;
-            octant -= 4;
-        }
-        float reduced = ((x - octant_value * 0.78515625f) -
-                          octant_value * 0.00024187564849853515625f) -
-                         octant_value * 0.0000000377489497744594108f;
         float square = reduced * reduced;
-        if (octant == 1 || octant == 2)
+        if ((quadrant & 1) != 0)
         {
             float polynomial = (((((
                 -0.0000000000113585365213876817300f * square +
@@ -324,27 +355,17 @@ internal static unsafe class ScalarModule
     private static float mathblocks_cosine(float value)
     {
         float x = MathF.Abs(value);
+        // Beyond the domain, and for NaN and the infinities, there is no value.
+        if (!(x <= mathblocks_trigonometric_argument_limit()))
+            return mathblocks_quiet_nan();
+        int count = mathblocks_quarter_turns(x);
+        float reduced = mathblocks_reduce_by_quarter_turns(x, count);
+        int quadrant = count & 3;
         float sign = 1.0f;
-        float octant_value = MathF.Floor(x / 0.78539816339744830962f);
-        int octant = (int)(octant_value - MathF.Floor(octant_value * 0.125f) * 8.0f);
-        if ((octant & 1) != 0)
-        {
-            octant++;
-            octant_value++;
-        }
-        octant &= 7;
-        if (octant > 3)
-        {
-            octant -= 4;
+        if (((quadrant + 1) & 2) != 0)
             sign = -sign;
-        }
-        if (octant > 1)
-            sign = -sign;
-        float reduced = ((x - octant_value * 0.78515625f) -
-                          octant_value * 0.00024187564849853515625f) -
-                         octant_value * 0.0000000377489497744594108f;
         float square = reduced * reduced;
-        if (octant == 1 || octant == 2)
+        if ((quadrant & 1) != 0)
         {
             float sine_polynomial = (((((
                 0.000000000158962301576546568060f * square -
@@ -513,14 +534,22 @@ internal static unsafe class ScalarModule
                 }
                 float positive = mathblocks_exponential(a);
                 float negative = mathblocks_exponential(-a);
-                result = (positive - negative) / 2.0f;
+                float quotient = (positive - negative) / 2.0f;
+                // See MathBlockScalar.HyperbolicSine: select (h / 2) * h where the formula overflowed.
+                float halfExponential = mathblocks_exponential(MathF.Abs(a) * 0.5f);
+                float alternative = (halfExponential * 0.5f) * halfExponential;
+                result = float.IsInfinity(quotient) ? MathF.CopySign(alternative, a) : quotient;
                 break;
             }
             case 29:
             {
                 float positive = mathblocks_exponential(a);
                 float negative = mathblocks_exponential(-a);
-                result = (positive + negative) / 2.0f;
+                float quotient = (positive + negative) / 2.0f;
+                // See MathBlockScalar.HyperbolicCosine: select (h / 2) * h where the formula overflowed.
+                float halfExponential = mathblocks_exponential(MathF.Abs(a) * 0.5f);
+                float alternative = (halfExponential * 0.5f) * halfExponential;
+                result = float.IsInfinity(quotient) ? alternative : quotient;
                 break;
             }
             case 30:
@@ -528,6 +557,12 @@ internal static unsafe class ScalarModule
                 if (a == 0.0f)
                 {
                     result = a;
+                    break;
+                }
+                // Beyond 20 the result is +-1; see MathBlockScalar.HyperbolicTangent.
+                if (MathF.Abs(a) > 20.0f)
+                {
+                    result = MathF.CopySign(1.0f, a);
                     break;
                 }
                 float positive = mathblocks_exponential(a);

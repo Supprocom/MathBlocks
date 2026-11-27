@@ -6,6 +6,7 @@ internal static partial class ScalarMathBlocks
     {
         internal const string Identity = "scalar.cosine@1";
         internal static readonly MathBlockCausalityInfo Causality = MathBlockCausalityInfo.NotSeries;
+        // The domain is |x| <= 2^24 (MathBlockPrimitives.TrigonometricArgumentLimit); beyond it, and for NaN and the infinities, the result is NaN and the row is invalid.
         internal static MathBlockOperation Create()
         {
             var operations = new List<MathBlockOperation>(1);

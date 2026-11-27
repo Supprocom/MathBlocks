@@ -10,7 +10,7 @@ public static partial class MathBlockProbability
         if (value <= 0f && value == Math.Floor(value))
             return Math.NaN;
         if (value < 0.5f)
-            return Math.Log(Math.PI) - Math.Log(Math.Sin(Math.PI * value)) - LogGamma(1f - value);
+            return Math.Log(Math.PI) - Math.Log(Math.Abs(Math.Sin(Math.PI * value))) - LogGamma(1f - value);
         value -= 1f;
         var sum = 0.99999999999980993f;
         for (var index = 0; index < lanczosCoefficients.Length; index++)

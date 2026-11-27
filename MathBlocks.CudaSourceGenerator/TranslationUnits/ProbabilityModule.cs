@@ -261,7 +261,7 @@ internal static unsafe class ProbabilityModule
         {
             return mathblocks_natural_logarithm(3.141592653589793238462643383279502884f) -
                 mathblocks_natural_logarithm(
-                    mathblocks_sine(3.141592653589793238462643383279502884f * value)) -
+                    MathF.Abs(mathblocks_sine(3.141592653589793238462643383279502884f * value))) -
                 mathblocks_probability_log_gamma_core(1.0f - value);
         }
         return mathblocks_probability_log_gamma_core(value);

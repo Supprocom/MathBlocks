@@ -3856,7 +3856,7 @@ __device__ float mathblocks_probability_log_gamma(float value)
 #line 261 "ProbabilityModule.cs"
     {
 #line 262 "ProbabilityModule.cs"
-        return __fsub_rn(__fsub_rn(mathblocks_natural_logarithm(3.1415927f), mathblocks_natural_logarithm(mathblocks_sine(__fmul_rn(3.1415927f, value)))), mathblocks_probability_log_gamma_core(__fsub_rn(1.0f, value)));
+        return __fsub_rn(__fsub_rn(mathblocks_natural_logarithm(3.1415927f), mathblocks_natural_logarithm(fabsf(mathblocks_sine(__fmul_rn(3.1415927f, value))))), mathblocks_probability_log_gamma_core(__fsub_rn(1.0f, value)));
     }
 #line 267 "ProbabilityModule.cs"
     return mathblocks_probability_log_gamma_core(value);
