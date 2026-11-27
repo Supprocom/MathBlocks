@@ -17,6 +17,7 @@ internal sealed class VectorBlockRun : IDisposable
     private readonly MathBlockCudaOperationPlan[] plans;
     private readonly int[] outputSlotOffsets;
     private readonly int[] outputPayloadOffsets;
+    private readonly int[][] inputPayloadOffsets;
     private readonly int arenaBytes;
     private readonly IntPtr hostArena;
     private readonly ulong deviceArena;
@@ -49,6 +50,7 @@ internal sealed class VectorBlockRun : IDisposable
         var slotBase = Align(steps * StepBytes);
         var cursor = slotBase + slotCount * MathBlockCudaSlotLayout.Size;
         var inputOffsets = new int[steps][];
+        inputPayloadOffsets = inputOffsets;
         var scratchOffsets = new int[steps];
         outputPayloadOffsets = new int[steps];
         outputSlotOffsets = new int[steps];
@@ -111,6 +113,15 @@ internal sealed class VectorBlockRun : IDisposable
     {
         Marshal.WriteInt32(argumentBoxes[1], steps);
         launch(argumentBlock);
+    }
+
+    /// <summary>
+    /// Overwrites one row of a float operand's payload with a raw value and uploads the arena again, so a slot that is marked valid holds a row that is not finite, as a consumer's own slot can.
+    /// </summary>
+    internal void SetInputRow(int step, int input, int row, float value)
+    {
+        Marshal.WriteInt32(hostArena, inputPayloadOffsets[step][input] + row * sizeof(float), BitConverter.SingleToInt32Bits(value));
+        VectorBlockDriver.Require(VectorBlockDriver.cuMemcpyHtoD(deviceArena, hostArena, new UIntPtr((ulong)arenaBytes)), "cuMemcpyHtoD");
     }
 
     /// <summary>Runs every dispatch once and returns each output as a MathBlocks value; an invalid slot is an invalid value. The kernel marks each output valid and empty before its dispatch, as InitializeOutput does.</summary>
