@@ -528,9 +528,13 @@ internal static unsafe class VectorModule
                 }
                 Cuda.SyncThreads();
                 for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
+                {
+                    // A vector never holds a value that is not finite: a row of NaN or an infinity makes the whole result invalid, as on CoreCLR.
+                    if (!float.IsFinite(a[index]) || !float.IsFinite(b[index])) Cuda.AtomicExchange(ref output->valid, 0);
                     boolean_result[index] = opcode == 11 ? a[index] == b[index]
                         : opcode == 15 ? a[index] > b[index]
                         : a[index] < b[index];
+                }
                 break;
             case 12:
             case 27:
@@ -760,7 +764,11 @@ internal static unsafe class VectorModule
                 }
                 Cuda.SyncThreads();
                 for (int index = thread; output->valid && index < first->count; index += Cuda.BlockDim.X)
+                {
+                    // Both branches are checked: an operand vector with a non-finite row is invalid on CoreCLR whichever branch the row takes.
+                    if (!float.IsFinite(b[index]) || !float.IsFinite(c[index])) Cuda.AtomicExchange(ref output->valid, 0);
                     result[index] = boolean_a[index] ? b[index] : c[index];
+                }
                 break;
             case 42:
                 if (thread == 0)
