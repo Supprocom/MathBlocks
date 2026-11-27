@@ -234,11 +234,15 @@ static __device__ __forceinline__ bool mathblocks_row_sum(const float* values, i
         builder.AppendLine();
         builder.Append("internal static class ").AppendLine(className);
         builder.AppendLine("{");
-        builder.AppendLine("    public const string Source =");
-
+        // The source is split into constants of at most LinesPerPart lines: one chain of thousands of concatenations nests so deeply that the compiler's analyzers run out of stack.
+        const int LinesPerPart = 500;
+        var partCount = 0;
+        var linesInPart = 0;
         var lineStart = 0;
         while (lineStart < text.Length)
         {
+            if (linesInPart == 0)
+                builder.Append("    private const string Part").Append(partCount.ToString(CultureInfo.InvariantCulture)).AppendLine(" =");
             var lineEnd = lineStart;
             while (lineEnd < text.Length && text[lineEnd] is not ('\r' or '\n'))
                 lineEnd++;
@@ -263,10 +267,29 @@ static __device__ __forceinline__ bool mathblocks_row_sum(const float* values, i
             }
 
             builder.Append('"');
-            builder.AppendLine(lineEnd < text.Length ? " +" : ";");
+            linesInPart++;
+            var last = lineEnd >= text.Length;
+            if (last || linesInPart == LinesPerPart)
+            {
+                builder.AppendLine(";");
+                partCount++;
+                linesInPart = 0;
+            }
+            else
+            {
+                builder.AppendLine(" +");
+            }
+
             lineStart = lineEnd;
         }
 
+        builder.AppendLine();
+        builder.Append("    public const string Source =");
+        if (partCount == 0)
+            builder.Append(" \"\"");
+        for (var part = 0; part < partCount; part++)
+            builder.Append(part == 0 ? " " : " + ").Append("Part").Append(part.ToString(CultureInfo.InvariantCulture));
+        builder.AppendLine(";");
         builder.AppendLine("}");
         return builder.ToString();
     }
