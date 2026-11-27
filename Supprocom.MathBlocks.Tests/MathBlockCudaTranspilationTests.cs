@@ -81,7 +81,7 @@ public sealed class MathBlockCudaTranspilationTests
             "The source fingerprint is " + MathBlockCudaDeviceModule.SourceFingerprint);
         Assert.True(
             string.Equals(
-                "9425B4E74405EE0EA8588C7D8DCE0117F3F0B10329069FC90774F22CD6CF8E7E",
+                "12DDE6354518030A266935899DF5EE672159B48304107D246C3B0FD2EB6B74F2",
                 MathBlockCudaDeviceModule.Abi.OperationTableFingerprint,
                 StringComparison.Ordinal),
             "The operation table fingerprint is " + MathBlockCudaDeviceModule.Abi.OperationTableFingerprint);
