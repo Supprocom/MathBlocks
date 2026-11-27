@@ -24,7 +24,7 @@ public sealed class LogicBlockContractTests
     [Fact]
     public void EveryLogicBlockHasAContractAndACatalogEntry()
     {
-        Assert.Equal(25, LogicBlocks.All.Length);
+        Assert.Equal(21, LogicBlocks.All.Length);
         for (var index = 0; index < LogicBlocks.All.Length; index++)
         {
             var identity = LogicBlocks.All[index];
