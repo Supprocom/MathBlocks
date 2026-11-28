@@ -88,7 +88,7 @@ internal sealed class VectorBlockRun : IDisposable
             {
                 var offset = inputOffsets[step][index];
                 var pointer = offset < 0 ? 0UL : deviceArena + (ulong)offset;
-                MathBlockCudaValueCodec.WriteValue(hostArena, slotBase + nextSlot * MathBlockCudaSlotLayout.Size, offset, pointer, 0UL, MathBlockCudaValueCodec.GetElementCount(inputs[step][index]), inputs[step][index]);
+                MathBlockCudaValueCodec.WriteValue(hostArena, slotBase + nextSlot * MathBlockCudaSlotLayout.Size, offset, pointer, 0UL, MathBlockCudaValueCodec.GetElementCount(prototypes?[step][index] ?? inputs[step][index]), inputs[step][index]);
                 nextSlot++;
             }
 

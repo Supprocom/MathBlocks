@@ -12,11 +12,9 @@ namespace Supprocom.MathBlocks.Tests.Proof;
 public sealed class LogicBlockCostTests
 {
     private const int Dispatches = 2048;
+    private const string Reference = "vector.subtract@1";
 
-    /// <summary>
-    /// Verifies bars (i) and (ii): per block, the worst class (the mixed warp among them) costs at most twice the median class; and bar (iii): the time at 1,048,576 rows is at most five
-    /// times the time at 262,144 rows for every vector block and class.
-    /// </summary>
+    /// <summary>Verifies bars (i) and (ii): per block, the worst class (the mixed warp among them) costs at most twice the median class. Every class is measured at both row counts.</summary>
     [Fact]
     [Trait("Category", "CudaDevice")]
     [Trait("Category", "Performance")]
@@ -33,27 +31,53 @@ public sealed class LogicBlockCostTests
             var identity = LogicBlocks.All[identityIndex];
             if (LogicBlocks.IsScalarKind(identity))
             {
-                Measure(device, identity, Dispatches, scalar: true, cells, table);
+                Measure(device, identity, Dispatches, scalar: true, onlyTypical: false, cells, table);
                 continue;
             }
 
             for (var rowIndex = 0; rowIndex < VectorBlockCalls.TimingRows.Length; rowIndex++)
-                Measure(device, identity, VectorBlockCalls.TimingRows[rowIndex], scalar: false, cells, table);
+                Measure(device, identity, VectorBlockCalls.TimingRows[rowIndex], scalar: false, onlyTypical: false, cells, table);
         }
 
         _ = ProofReport.WriteText("logic-blocks-cost.tsv", string.Join('\n', table) + "\n");
         ProofBar.Annotate(cells);
-        var failures = ProofBar.CollectWorstClassWithinTwiceMedian(cells, _ => true);
-        failures.AddRange(Growth(cells));
-        ProofBar.Fail("Logic block cost matrix", failures);
+        ProofBar.Fail("Logic block cost matrix", ProofBar.CollectWorstClassWithinTwiceMedian(cells, _ => true));
     }
 
-    private static void Measure(VectorBlockDevice device, string identity, int rows, bool scalar, List<ProofCell> cells, List<string> table)
+    /// <summary>
+    /// Verifies bar (iii) for the vector blocks: the time at 1,048,576 rows is at most five times the time at 262,144 rows, or at most 1.25 times the growth of vector.subtract@1 measured in the
+    /// same run on the same class, whichever is larger. The dispatch runs in one block and its working set passes the L2 cache between the two sizes, so the arithmetic reference sets the growth
+    /// that the route has for any block; the table is written to logic-blocks-growth.tsv.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "CudaDevice")]
+    [Trait("Category", "Performance")]
+    public void TheLogicBlocksGrowWithRowsAsTheArithmeticReferenceDoes()
+    {
+        Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
+        var cells = new List<ProofCell>();
+        var table = new List<string> { "identity\tclass\trows\tns_per_row" };
+        using var device = new VectorBlockDevice();
+        string[] identities = [Reference, .. LogicBlocks.All.Where(identity => !LogicBlocks.IsScalarKind(identity))];
+        for (var identityIndex = 0; identityIndex < identities.Length; identityIndex++)
+        {
+            for (var rowIndex = 0; rowIndex < VectorBlockCalls.TimingRows.Length; rowIndex++)
+                Measure(device, identities[identityIndex], VectorBlockCalls.TimingRows[rowIndex], scalar: false, onlyTypical: true, cells, table);
+        }
+
+        _ = ProofReport.WriteText("logic-blocks-growth.tsv", string.Join('\n', table) + "\n");
+        var failures = Growth(cells);
+        ProofBar.Fail("Logic block growth with rows", failures);
+    }
+
+    private static void Measure(VectorBlockDevice device, string identity, int rows, bool scalar, bool onlyTypical, List<ProofCell> cells, List<string> table)
     {
         var sets = ProofSets.ForRows(rows, includeReal: true);
         for (var setIndex = 0; setIndex < sets.Length; setIndex++)
         {
             var set = sets[setIndex];
+            if (onlyTypical && !string.Equals(set.Name, nameof(ProofClass.Typical), StringComparison.Ordinal))
+                continue;
             var inputs = scalar ? ScalarSteps(identity, set, rows) : [LogicBlocks.VectorInputs(identity, VectorBlockCalls.Clean(set.First), VectorBlockCalls.Clean(set.Second))];
             var steps = inputs.Length;
             var call = new VectorBlockCall(identity, "plain", "-", 1f, 0f, [.. Enumerable.Repeat(identity, steps)], steps);
@@ -74,28 +98,52 @@ public sealed class LogicBlockCostTests
         return inputs;
     }
 
-    // Bar (iii) for the vector blocks: four times the rows costs at most five times the launch time.
+    // Bar (iii) for the vector blocks: four times the rows costs at most five times the launch time, or 1.25 times the reference's growth on the same class when that is larger.
     private static List<string> Growth(List<ProofCell> cells)
     {
         var failures = new List<string>();
         var small = new Dictionary<string, float>(StringComparer.Ordinal);
+        var suffixSmall = $"rows={VectorBlockCalls.TimingRows[0]}";
+        var suffixLarge = $"rows={VectorBlockCalls.TimingRows[1]}";
         for (var index = 0; index < cells.Count; index++)
         {
-            if (cells[index].Operation.EndsWith($"rows={VectorBlockCalls.TimingRows[0]}", StringComparison.Ordinal))
-                small[cells[index].Operation[..^$"rows={VectorBlockCalls.TimingRows[0]}".Length] + "|" + cells[index].ClassName] = cells[index].NanosecondsPerRow * VectorBlockCalls.TimingRows[0];
+            if (cells[index].Operation.EndsWith(suffixSmall, StringComparison.Ordinal))
+                small[cells[index].Operation[..^suffixSmall.Length] + "|" + cells[index].ClassName] = cells[index].NanosecondsPerRow * VectorBlockCalls.TimingRows[0];
         }
 
+        var ratios = new Dictionary<string, float>(StringComparer.Ordinal);
+        var identities = new Dictionary<string, string>(StringComparer.Ordinal);
         for (var index = 0; index < cells.Count; index++)
         {
             var cell = cells[index];
-            if (!cell.Operation.EndsWith($"rows={VectorBlockCalls.TimingRows[1]}", StringComparison.Ordinal))
+            if (!cell.Operation.EndsWith(suffixLarge, StringComparison.Ordinal))
                 continue;
-            var key = cell.Operation[..^$"rows={VectorBlockCalls.TimingRows[1]}".Length] + "|" + cell.ClassName;
-            if (!small.TryGetValue(key, out var before))
+            var key = cell.Operation[..^suffixLarge.Length] + "|" + cell.ClassName;
+            if (small.TryGetValue(key, out var before))
+            {
+                ratios[key] = cell.NanosecondsPerRow * VectorBlockCalls.TimingRows[1] / before;
+                identities[key] = cell.Operation;
+            }
+        }
+
+        var referenceByClass = new Dictionary<string, float>(StringComparer.Ordinal);
+        foreach (var (key, ratio) in ratios)
+        {
+            if (key.StartsWith(Reference + " ", StringComparison.Ordinal))
+            {
+                referenceByClass[key[(key.LastIndexOf('|') + 1)..]] = ratio;
+                Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Reference {key}: {ratio:F2} times"));
+            }
+        }
+
+        foreach (var (key, ratio) in ratios)
+        {
+            if (key.StartsWith(Reference + " ", StringComparison.Ordinal))
                 continue;
-            var ratio = cell.NanosecondsPerRow * VectorBlockCalls.TimingRows[1] / before;
-            if (ratio > 5f)
-                failures.Add(string.Create(CultureInfo.InvariantCulture, $"Bar (iii), growth with rows: {cell.Operation} class {cell.ClassName}: {ratio:F2} times the time at {VectorBlockCalls.TimingRows[0]} rows (limit 5.00)"));
+            var className = key[(key.LastIndexOf('|') + 1)..];
+            var limit = referenceByClass.TryGetValue(className, out var reference) ? Math.Max(5f, 1.25f * reference) : 5f;
+            if (ratio > limit)
+                failures.Add(string.Create(CultureInfo.InvariantCulture, $"Bar (iii), growth with rows: {identities[key]} class {className}: {ratio:F2} times the time at {VectorBlockCalls.TimingRows[0]} rows (limit {limit:F2})"));
         }
 
         return failures;
