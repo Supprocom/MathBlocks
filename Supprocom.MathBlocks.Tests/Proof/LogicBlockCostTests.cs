@@ -57,7 +57,7 @@ public sealed class LogicBlockCostTests
             var inputs = scalar ? ScalarSteps(identity, set, rows) : [LogicBlocks.VectorInputs(identity, VectorBlockCalls.Clean(set.First), VectorBlockCalls.Clean(set.Second))];
             var steps = inputs.Length;
             var call = new VectorBlockCall(identity, "plain", "-", 1f, 0f, [.. Enumerable.Repeat(identity, steps)], steps);
-            using var run = new VectorBlockRun(device, call, inputs);
+            using var run = new VectorBlockRun(device, call, inputs, LogicBlocks.Prototypes(inputs));
             var nanoseconds = run.NanosecondsPerRow(rows);
             var operation = string.Create(CultureInfo.InvariantCulture, $"{identity} rows={rows}");
             cells.Add(new ProofCell(operation, set.Name, "-", "-", rows, nanoseconds, 0f, 0f));

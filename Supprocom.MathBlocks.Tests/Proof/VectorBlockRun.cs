@@ -29,6 +29,15 @@ internal sealed class VectorBlockRun : IDisposable
 
 #pragma warning disable MA0051
     internal VectorBlockRun(VectorBlockDevice device, VectorBlockCall call, MathBlockValue[][] inputs)
+        : this(device, call, inputs, null)
+    {
+    }
+
+    /// <summary>
+    /// Builds the run; a plan needs valid inputs, so a dispatch whose operands include an invalid value is planned and sized from <paramref name="prototypes"/> (valid operands of the same types and
+    /// lengths) while the slots are written from <paramref name="inputs"/>.
+    /// </summary>
+    internal VectorBlockRun(VectorBlockDevice device, VectorBlockCall call, MathBlockValue[][] inputs, MathBlockValue[][]? prototypes)
     {
         launch = device.Launch;
         begin = device.Begin;
@@ -42,7 +51,7 @@ internal sealed class VectorBlockRun : IDisposable
         for (var step = 0; step < steps; step++)
         {
             contracts[step] = MathBlockCudaDeviceModule.GetOperation(call.Contracts[step]);
-            plans[step] = contracts[step].PlanCUDA(inputs[step]);
+            plans[step] = contracts[step].PlanCUDA(prototypes?[step] ?? inputs[step]);
             ScratchBytes[step] = plans[step].ScratchBytes;
             slotCount += inputs[step].Length + 1;
         }
@@ -59,7 +68,7 @@ internal sealed class VectorBlockRun : IDisposable
             inputOffsets[step] = new int[inputs[step].Length];
             for (var index = 0; index < inputs[step].Length; index++)
             {
-                var value = inputs[step][index];
+                var value = prototypes?[step][index] ?? inputs[step][index];
                 inputOffsets[step][index] = Allocate(ref cursor, MathBlockCudaValueCodec.GetPayloadByteCount(value.Type.Kind, MathBlockCudaValueCodec.GetElementCount(value)));
             }
 

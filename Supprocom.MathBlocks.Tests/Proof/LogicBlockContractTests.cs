@@ -52,6 +52,28 @@ public sealed class LogicBlockContractTests
         Assert.True(greater.EvaluateCoreCLR(MathBlockValue.Scalar(1f), MathBlockValue.Scalar(-1f)).AsBoolean());
     }
 
+    /// <summary>
+    /// Verifies the device parity cases can be planned: a plan needs valid inputs, so every dispatch, invalid operands included, has a valid prototype of its types, and the plan of that prototype
+    /// gives the output type that the CoreCLR result has when it is valid.
+    /// </summary>
+    [Fact]
+    public void EveryParityCaseHasAValidPrototypeThatPlans()
+    {
+        for (var index = 0; index < LogicBlocks.All.Length; index++)
+        {
+            var identity = LogicBlocks.All[index];
+            var contract = MathBlockCudaDeviceModule.GetOperation(identity);
+            var cases = LogicBlocks.ParityCases(identity);
+            var prototypes = LogicBlocks.Prototypes(cases);
+            for (var item = 0; item < cases.Count; item++)
+            {
+                var plan = contract.PlanCUDA(prototypes[item]);
+                var expected = contract.EvaluateCoreCLR(cases[item]);
+                Assert.Equal(expected.Type.Kind, plan.OutputType.Kind);
+            }
+        }
+    }
+
     /// <summary>Verifies a kernel that dispatches every logic block by its family and opcode compiles with NVRTC after the device source, without a CUDA device.</summary>
     [Fact]
     [Trait("Category", "NvrtcInteropContract")]

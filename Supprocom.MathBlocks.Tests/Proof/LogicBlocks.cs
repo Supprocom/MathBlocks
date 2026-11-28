@@ -87,6 +87,31 @@ internal static class LogicBlocks
         return cases;
     }
 
+    /// <summary>
+    /// Gives each dispatch a valid prototype for planning: the first dispatch whose operands are all valid and have the same types (a vector type holds its length). A dispatch that is
+    /// already valid is its own prototype.
+    /// </summary>
+    internal static MathBlockValue[][] Prototypes(IReadOnlyList<MathBlockValue[]> cases)
+    {
+        var prototypes = new MathBlockValue[cases.Count][];
+        for (var index = 0; index < cases.Count; index++)
+        {
+            var found = cases[index].All(operand => operand.IsValid) ? cases[index] : null;
+            for (var other = 0; found is null && other < cases.Count; other++)
+            {
+                if (cases[other].All(operand => operand.IsValid) && cases[other].Length == cases[index].Length
+                    && Enumerable.Range(0, cases[index].Length).All(operand => cases[other][operand].Type == cases[index][operand].Type))
+                {
+                    found = cases[other];
+                }
+            }
+
+            prototypes[index] = found ?? throw new InvalidOperationException("A dispatch has no valid prototype of its types.");
+        }
+
+        return prototypes;
+    }
+
     /// <summary>Gets the number of operands of a block.</summary>
     internal static int Arity(string identity) => MathBlockCatalog.Standard.Get(identity[..^2]).Arity;
 

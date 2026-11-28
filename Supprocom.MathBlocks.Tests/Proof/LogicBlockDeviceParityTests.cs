@@ -54,7 +54,7 @@ public sealed class LogicBlockDeviceParityTests
             var contract = MathBlockCudaDeviceModule.GetOperation(identity);
             var cases = LogicBlocks.ParityCases(identity);
             var call = new VectorBlockCall(identity, "plain", "-", 1f, 0f, [.. Enumerable.Repeat(identity, cases.Count)], cases.Count);
-            using var run = new VectorBlockRun(device, call, [.. cases]);
+            using var run = new VectorBlockRun(device, call, [.. cases], LogicBlocks.Prototypes(cases));
             var actual = run.Execute();
             var invalid = 0;
             var valid = 0;
