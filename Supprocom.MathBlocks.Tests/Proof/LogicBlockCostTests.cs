@@ -45,14 +45,13 @@ public sealed class LogicBlockCostTests
     }
 
     /// <summary>
-    /// Verifies bar (iii) for the vector blocks: the time at 1,048,576 rows is at most five times the time at 262,144 rows, or at most 1.25 times the growth of vector.subtract@1 measured in the
-    /// same run on the same class, whichever is larger. The dispatch runs in one block and its working set passes the L2 cache between the two sizes, so the arithmetic reference sets the growth
-    /// that the route has for any block; the table is written to logic-blocks-growth.tsv.
+    /// Verifies bar (iii) for the vector blocks: the time at 1,048,576 rows is at most five times the time at 262,144 rows. The growth of vector.subtract@1 is measured in the same run on the same
+    /// class and is reported only (console and logic-blocks-growth.tsv); it is not part of the bar.
     /// </summary>
     [Fact]
     [Trait("Category", "CudaDevice")]
     [Trait("Category", "Performance")]
-    public void TheLogicBlocksGrowWithRowsAsTheArithmeticReferenceDoes()
+    public void TheLogicBlocksGrowAtMostFiveTimesWithFourTimesTheRows()
     {
         Assert.True(CudaTestDevice.Available, "A CUDA device is required.");
         var cells = new List<ProofCell>();
@@ -65,8 +64,8 @@ public sealed class LogicBlockCostTests
                 Measure(device, identities[identityIndex], VectorBlockCalls.TimingRows[rowIndex], scalar: false, onlyTypical: true, cells, table);
         }
 
+        var failures = Growth(cells, table);
         _ = ProofReport.WriteText("logic-blocks-growth.tsv", string.Join('\n', table) + "\n");
-        var failures = Growth(cells);
         ProofBar.Fail("Logic block growth with rows", failures);
     }
 
@@ -98,8 +97,8 @@ public sealed class LogicBlockCostTests
         return inputs;
     }
 
-    // Bar (iii) for the vector blocks: four times the rows costs at most five times the launch time, or 1.25 times the reference's growth on the same class when that is larger.
-    private static List<string> Growth(List<ProofCell> cells)
+    // Bar (iii) for the vector blocks: four times the rows costs at most five times the launch time. The reference's growth is written to the report only.
+    private static List<string> Growth(List<ProofCell> cells, List<string> report)
     {
         var failures = new List<string>();
         var small = new Dictionary<string, float>(StringComparer.Ordinal);
@@ -126,24 +125,14 @@ public sealed class LogicBlockCostTests
             }
         }
 
-        var referenceByClass = new Dictionary<string, float>(StringComparer.Ordinal);
         foreach (var (key, ratio) in ratios)
         {
-            if (key.StartsWith(Reference + " ", StringComparison.Ordinal))
-            {
-                referenceByClass[key[(key.LastIndexOf('|') + 1)..]] = ratio;
-                Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"Reference {key}: {ratio:F2} times"));
-            }
-        }
-
-        foreach (var (key, ratio) in ratios)
-        {
-            if (key.StartsWith(Reference + " ", StringComparison.Ordinal))
-                continue;
-            var className = key[(key.LastIndexOf('|') + 1)..];
-            var limit = referenceByClass.TryGetValue(className, out var reference) ? Math.Max(5f, 1.25f * reference) : 5f;
-            if (ratio > limit)
-                failures.Add(string.Create(CultureInfo.InvariantCulture, $"Bar (iii), growth with rows: {identities[key]} class {className}: {ratio:F2} times the time at {VectorBlockCalls.TimingRows[0]} rows (limit {limit:F2})"));
+            var isReference = key.StartsWith(Reference + " ", StringComparison.Ordinal);
+            var line = string.Create(CultureInfo.InvariantCulture, $"growth\t{key}\t{ratio:F2}");
+            Console.WriteLine(line);
+            report.Add(line);
+            if (!isReference && ratio > 5f)
+                failures.Add(string.Create(CultureInfo.InvariantCulture, $"Bar (iii), growth with rows: {identities[key]} class {key[(key.LastIndexOf('|') + 1)..]}: {ratio:F2} times the time at {VectorBlockCalls.TimingRows[0]} rows (limit 5.00)"));
         }
 
         return failures;
